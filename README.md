@@ -27,3 +27,9 @@ For example:
 - Unit testing, even at baremetal level, using stubs and mocks. This will use an alternative to gtest / gmock, as this relies on the STD C++ library
 - Debugging on platform (with the addition of HW), as well as in QEMU, even directly from Visual Studio
 
+For now, we will focus on Raspberry Pi, as the information is more readily available than for Odroid.
+
+## Contents
+
+- [Hardware overview](doc/hardware-overview.md)
+- [System startup](doc/system-startup.md)

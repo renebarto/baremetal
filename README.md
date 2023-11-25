@@ -32,4 +32,15 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 ## Contents
 
 - [Hardware overview](doc/hardware-overview.md)
+- [Setting up for development](doc/setting-up-for-development.md)
+- [Setting up a first project](doc/setting-up-a-project.md)
 - [System startup](doc/system-startup.md)
+
+## Todo
+- Explain how to create the correct setup for Visual Studio 2019
+- Check if bug in Visual Studio 2022 is fixed
+- Try out Raspberry Pi 4 emulation in QEMU
+- Add boot process for Odroid system
+- Add description of Odroid platform support in QEMU
+- Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
+- Add more description of how to create and SD card with CircleNetboot

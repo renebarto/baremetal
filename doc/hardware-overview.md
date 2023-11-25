@@ -4,7 +4,7 @@ So let's start with the description of the boards we're targeting. I currently o
 
 ## Rasperry Pi 3B
 
-Raspberry Pi 3 was introduced in 2016. It was the first board to have a almost fully functional 1Gb network connection, ARM v8 OS, 64-bit OS, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up to now.
+Raspberry Pi 3 was introduced in 2016. It was the first board to have a quad core ARM v8, 64-bit OS, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up to now.
 
 ![Top view](images/RPI3B-top.jpg)
 __Raspberry Pi 3B top view__

@@ -112,7 +112,7 @@ For baremetal, the defaults are as follows:
 | RPI 3  | 64 bit (AArch64) | kernel8.img      |
 | RPI 4  | 32 bit (Arm)     | kernel7l.img     |
 | RPI 4  | 64 bit (AArch64) | kernel8-rpi4.img |
-| RPI 5  | 64 bit (AArch64) | ?                |
+| RPI 5  | 64 bit (AArch64) | kernel_2712.img  |
 
 Once the image is loaded, the GPU resets the ARM, which then starts executing. The start address depends on the architecture:
 
@@ -124,3 +124,10 @@ Once the image is loaded, the GPU resets the ARM, which then starts executing. T
 | 64 bit (AArch64) | 0x80000       |
 
 This is due to the GPU placing a jump opcode at address 0x0000, which is the initial starting point.
+
+| Core | Start address location |
+|------|------------------------|
+| 0    | 000000D8               |
+| 1    | 000080E0               |
+| 2    | 000080E8               |
+| 3    | 000080F0               |

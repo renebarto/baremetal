@@ -2,12 +2,11 @@
 
 If we want to do development for an embedded board, a number of things need to be set up:
 
-- compiler toolchain
-- build environment
-- development environment (could be a simple text editor up to a full IDE)
-- deployment mechanism
-- possibility to debug (inside an enumulator or directly on the target)
-- configure project for building and debugging
+- [compiler toolchain](##Compiler-toolchain)
+- [build environment](##Build-environment)
+- [development environment](##Development-environment)
+- [deployment mechanism](##Deployment-mechanism)
+- [debugging](##Debugging)
 
 ## Compiler toolchain
 
@@ -223,12 +222,48 @@ In order to deploy a baremetal application, we will need to follow a couple of s
 
 - Compile sources and create an application (just a single one, as this is a baremetal system) as a .elf application
 - Convert the application into a kernel image
-- Place the image onto the target
-  - Copy the image onto an SD card and start the system
+- Place the image onto the target using one of
+  - Copy the image onto an SD card and start the system (see [Directly running on the target](###Directly-running-on-the-target))
   - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system. Then go to the website created by the netboot, select an image and upload it. This will reboot the system with your image. __This is my personal preference, as we don't need to rewrite the SD card every time__
   - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4). __It is also possible to use QEMU with Odroid boards, this will be described later__ [Debugging](##Debugging).
 
 Converting the application into an image will be described later. It uses `aarch64-none-elf-objcopy` to convert the .elf file into a .img file.
+
+For testing, I've added a pre-built demo application, which we'll get to later. The pre-built image is locate in `tutorial/demo/kernel8.img`.
+
+### Directly running on the target
+
+The SD card needs certain other files as well, so it's best to unzip the file `tutorial/demo/Netboot.zip`, copy the contents to the SD card, then copy `tutorial/demo/kernel8.img` over the existing one.
+Please make sure to eject / sync your SD card first before removing it from the reader.
+
+Put the SD card in your board, and attach a serial to USB device to the board. Beware of the following!
+
+- make __very sure__ to use a 3.3V serial to USB converter. Using the 5V version is likely to damage your board, for example see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more. Be careful about the pinning.
+- attach the USB to serial device before powering on the board
+- make sure to connect the serial to USB device to the __correct pins__ (normally GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1, UART 1 in this case)
+- make sure you have the drivers for the serial to USB device (USB side of course) correctly installed
+  - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well
+- make sure you have a terminal application to communicate with the serial to USB device
+  - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
+  - One Linux there are quite a few applications available, e.g. minicom
+- make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81)
+
+![USB-to-serial example](images/USB-RS232.jpg)
+
+Copy this to your Linux system, e.g. in your home directory, and in a terminal type:
+
+#### Pinning for serial to USB
+
+Please refer to the image below (the wiring color is common for most Prolific 2303 devices:
+![GPIO pinout for UART1](images/GPIO-Pinout-Diagram-UART1.png)
+
+Do not connect the red wire.
+
+When starting up with e.g. Putty attached to the correct COM device, this is what youll see
+
+![Console output for demo application](images/demo-output-putty.png)
+
+The data may be different depending on the board you have, the serial number will always be different, but you can see certain board information is shown, in color.
 
 ## Debugging
 
@@ -274,33 +309,15 @@ Click Finish
 
 QEMU is now installed in `C:\Program Files\qemu
 
-For testing, I've added a pre-built demo application, which we'll get to later. Copy this to your Linux system, e.g. in your home directory, and in a terminal type:
+Copy the demo image (`tutorial/demo/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) this to your Linux system, e.g. in your home directory, and in a terminal type:
 
 ```bash
-"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s -S
+"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s
 ```
 
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
-In the window menu, click on Machine -> Pause to unpause the application (it normally waits for a debugger to attach)
-
-```
-Info   00:00:00.000 Baremetal 1.0.0 started on Raspberry Pi 3 Model B (AArch64) (Logger:74)
-Info   00:00:00.000 Raspberry Pi 3 Model B (64 bits) 1024 Mb RAM (Main:59)
-Info   00:00:00.010 Serial:              0000000000000000 (Main:60)
-Info   00:00:00.010 FW revision:         000548E1 (Main:61)
-Info   00:00:00.010 Board MAC address:   52:54:00:12:34:57 (Main:65)
-Info   00:00:00.020 ARM memory base:     00000000 (Main:66)
-Info   00:00:00.020 ARM memory size:     3C000000 (Main:67)
-Info   00:00:00.020 VC memory base:      3C000000 (Main:68)
-Info   00:00:00.020 VC memory size:      04000000 (Main:69)
-Info   00:00:00.030 SoC temperature:     25.000000 (Main:77)
-Info   00:00:00.030 Done (Main:84)
-Presse r to reboot, h to halt
-hHalting...
-Debug  00:00:20.050 CPU core 0 halt (System:102)
-Debug  00:00:20.050 HaltSystem (System:176)
-```
+For now, we have left out the -S option, which makes QEMU wait for a debugger to attach.
 
 ```text
 (qemu:20420): Gtk-WARNING **: 17:43:56.753: Could not load a pixbuf from icon theme.
@@ -350,12 +367,12 @@ Do you want to continue? [Y/n] y
 For testing, I've added a pre-built demo application, which we'll get to later. Copy this to your Linux system, e.g. in your home directory, and in a terminal type:
 
 ```bash
-qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s
 ```
 
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
-In the window menu, click on Machine -> Pause to unpause the application (it normally waits for a debugger to attach)
+For now, we have left out the -S option, which makes QEMU wait for a debugger to attach.
 
 ```
 Info   00:00:00.000 Baremetal 1.0.0 started on Raspberry Pi 3 Model B (AArch64) (Logger:74)

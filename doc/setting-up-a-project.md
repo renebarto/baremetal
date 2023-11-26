@@ -38,6 +38,28 @@ int main()
 
 For now the application does nothing. Notice that we have created a main function that returns and `int` and takes no parameters. As we are running a baremetal application, there is no way to specify parameters, except through the kernel parameters file.
 
+We will add the source file to the project by defining an executable target:
+
+```cmake
+cmake_minimum_required(VERSION 3.18)
+
+message(STATUS "CMake ${CMAKE_VERSION}")
+
+project(demo
+    DESCRIPTION "Demo application for tutorial"
+    LANGUAGES CXX ASM)
+
+set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    )
+set(PROJECT_INCLUDES_PUBLIC)
+set(PROJECT_INCLUDES_PRIVATE
+    )
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+```
+
+You will now be able to build the project, however this will be targeting the platform you are running on. So it will build a Windows application `demo.exe` for Windows, and a Linux application `demo` on Linux.
 
 ### Windows
 

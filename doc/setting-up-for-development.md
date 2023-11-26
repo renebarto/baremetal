@@ -92,6 +92,8 @@ In order to build, we will be using CMake.
 
 ### Windows
 
+#### CMake
+
 When using Visual Studio 2019 or later, there will be a CMake version installed for you. For VS 2019, the location will normally be `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`.
 
 To test, open a command line prompt, and execute:
@@ -188,6 +190,42 @@ The command should execute without error, and print the version of the CMake:
 cmake version 3.25.1
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
+
+## Ninja
+
+To speed up building, often the Ninja build tool is used. This tool is also used by default by Visual Studio when performing CMake builds.
+
+### Windows
+
+If Visual Studio 2019 is installed, you can find Ninja in `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja`.
+
+To install Ninja build on your system separately, download it from [here](https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip), and unpack the ZIP file. It will contain only one file, `ninja.exe`.
+For example you can place this file in `C:\Program Files\Ninja` make sure to add it to your PATH environment variable.
+
+### Linux
+
+On Linux, your can install ninja by installing the `ninja-build` package:
+
+```bash
+sudo apt install ninja-build
+```
+
+```text
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  ninja-build
+0 upgraded, 1 newly installed, 0 to remove and 3 not upgraded.
+Need to get 0 B/136 kB of archives.
+After this operation, 427 kB of additional disk space will be used.
+Selecting previously unselected package ninja-build.
+(Reading database ... 207877 files and directories currently installed.)
+Preparing to unpack .../ninja-build_1.11.1-1_amd64.deb ...
+Unpacking ninja-build (1.11.1-1) ...
+Setting up ninja-build (1.11.1-1) ...
+Processing triggers for man-db (2.11.2-2) ...
 ```
 
 ## Development environment

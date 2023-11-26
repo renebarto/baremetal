@@ -32,4 +32,4 @@
 *.app
 
 .vs/
-tutorial/out/
+tutorial/01-building/out/

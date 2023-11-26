@@ -42,5 +42,6 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - Try out Raspberry Pi 4 emulation in QEMU
 - Add boot process for Odroid system
 - Add description of Odroid platform support in QEMU
+- Add list of Linux terminal applications
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
 - Add more description of how to create and SD card with CircleNetboot

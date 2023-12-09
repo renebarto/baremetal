@@ -4,7 +4,7 @@ So let's start with the description of the boards we're targeting. I currently o
 
 ## Rasperry Pi 3B
 
-Raspberry Pi 3 was introduced in 2016. It was the first board to have a quad core ARM v8, 64-bit OS, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up to now.
+Raspberry Pi 3 was introduced in 2016. It was the first board to have a quad core ARM v8, 64-bit OS support, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up until now.
 
 ![Top view](images/RPI3B-top.jpg)
 __Raspberry Pi 3B top view__
@@ -14,7 +14,11 @@ __Raspberry Pi 3B bottom view__
 
 ## Raspberry Pi 4B
 
-After the success of Raspberry Pi 3, the waiting for its follow up took long. Raspberry Pi 4B was finally introduced in 2019. The differences were a Cortex A72 quad core Arm V8 instead of Cortex A53, which ran at a slightly higher clock rate. But the major difference was in USB3 support, and finally a full speed network socket at 1 Gbps. This board also has a USB-C power socket.
+After the success of Raspberry Pi 3, the waiting for its follow up took long.
+Raspberry Pi 4B was finally introduced in 2019.
+The differences were a Cortex A72 quad core Arm V8 instead of Cortex A53, which ran at a slightly higher clock rate.
+But the major difference was in USB3 support, and finally a full speed network socket at 1 Gbps.
+This board also has a USB-C power socket.
 ![Top view](images/RPI4B-box.jpg)
 __Raspberry Pi 4B box__
 
@@ -26,7 +30,8 @@ __Raspberry Pi 4B bottom view__
 
 ## Raspberry Pi 5
 
-Again after quite some time, Raspberry Pi 5 was introduced October 2023. It has quite some feature improvements, amongst which are a reset switch and of course an improved SoC.
+Again after quite some time, Raspberry Pi 5 was introduced October 2023.
+It has quite some feature improvements, amongst which are a power / reset switch and of course an improved SoC.
 ![Top view](images/RPI5-box.jpg)
 __Raspberry Pi 5 box__
 
@@ -38,7 +43,9 @@ __Raspberry Pi 5 bottom view__
 
 ## Odroid N2+
 
-Due the the shortage of Raspberry Pi during the Covid period, most enthusiasts were looking for good alternatives. One of these is made by Odroid. The Odroid N2+ features a 4 + 2 Core Arm processor, and RTC (which was missing on Raspberry Pi until version 5), IR received, power switch, but is lacking Wifi and Bluetooth capabilities. In constrast with Raspberry Pi, Odroid is larger, but has a heat sink.
+Due to the shortage of Raspberry Pi during the Covid period, most enthusiasts were looking for good alternatives.
+One of these is made by Odroid. The Odroid N2+ features a 4 + 2 Core Arm processor, and RTC (which was missing on Raspberry Pi until version 5), IR received, power switch, but is lacking Wifi and Bluetooth capabilities.
+In constrast with Raspberry Pi, Odroid is larger, but has a very good heat sink.
 
 ![Top view](images/Odroid-N2+-top.jpg)
 __Raspberry Odroid N2+ top view__
@@ -61,7 +68,7 @@ The table below shows the different hardware specifications for the boards menti
 | Ethernet  | 100 Mbit                                                   | 1 Gbps with PoE                                             | 1 Gbps with PoE+                                              | 1 Gbps RTL8211F                                                                            |
 | USB       | 4 x USB 2.0                                                | 2 x USB2.0, 2 x USB 3.0                                     | 2 x USB2.0, 2 x USB 3.0                                       | 4 x USB 3.0, 1 x USB 2.0 OTG                                                               |
 | Audio     | 3.5 mm stereo out, mono in, with CVBS out, 1 x HDMI        | 3.5 mm stereo out, mono in, with CVBS out, 2 x HDMI         | 2 x HDMI                                                      | 3.5 mm stereo out, with CVBS out, 1 x HDMI 2.0, SPDIF via GPIO                             |
-| Video     | 3.5 mm CVBS, 1 x HDMI (HD)                                 | 2 x micro HDMI (4Kp60)                                      | 2 x micro HDMI (4K) with HDR                                  | 3.5 mm CVBS, 1 x HDMI (4Kp60) with HDR                                                     |
+| Video     | 3.5 mm CVBS, 1 x HDMI (HD)                                 | 3.5 mm CVBS, 2 x micro HDMI (4Kp60)                         | 2 x micro HDMI (4K) with HDR                                  | 3.5 mm CVBS, 1 x HDMI (4Kp60) with HDR                                                     |
 | Camera    | 1 x CSI                                                    | 1 x CSI                                                     | 2 x MIPI                                                      | ?                                                                                          |
 | Display   | 1 x DSI                                                    | 1 x DSI                                                     | 2 x MIPI                                                      | ?                                                                                          |
 | IR        | No                                                         | No                                                          | No                                                            | Yes                                                                                        |

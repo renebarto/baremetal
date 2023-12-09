@@ -23,14 +23,14 @@ message(STATUS "CMake ${CMAKE_VERSION}")
 
 project(01-building
     DESCRIPTION "Application to demonstrate building using CMake"
-    LANGUAGES CXX ASM)
+    LANGUAGES CXX)
 
 ```
 
 Short explanation:
 - We require a minimum version of 3.18 for CMake. There should always be a similar line in the main CMake scripts
 - We echo the current version of CMake
-- We define a project named `01-building`, give it a short description, and specify that it will use C++ and assembly code as languages
+- We define a project named `01-building`, give it a short description, and specify that it will use C++ code as language
 
 ## Create source file
 
@@ -56,7 +56,7 @@ message(STATUS "CMake ${CMAKE_VERSION}")
 
 project(01-building
     DESCRIPTION "Application to demonstrate building using CMake"
-    LANGUAGES CXX ASM)
+    LANGUAGES CXX)
 
 set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp

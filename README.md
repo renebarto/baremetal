@@ -49,4 +49,4 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - Add list of Linux terminal applications
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
 - Add more description of how to create and SD card with CircleNetboot
-- Build demo from Linux and debug there
+- Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"

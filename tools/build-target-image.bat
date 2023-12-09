@@ -1,1 +1,7 @@
-cmake --build "cmake-BareMetal-Debug" --target %1-image
+set ROOT=%CD%
+
+pushd tutorial/01-building
+
+cmake --build %ROOT%/cmake-build --target %1-image
+
+popd

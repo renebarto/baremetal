@@ -2,6 +2,6 @@ rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
 
-cmake .. -G Ninja
+cmake ../tutorial/01-building -G Ninja
 
 popd

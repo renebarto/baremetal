@@ -33,3 +33,6 @@
 
 .vs/
 tutorial/01-building/out/
+cmake-build/
+output/
+deploy/

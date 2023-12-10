@@ -333,7 +333,73 @@ tools/configure.sh
 ```
 
 ```text
-TODO
+~/repo/baremetal.github/cmake-build ~/repo/baremetal.github
+-- CMake 3.25.1
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- Processor                aarch64
+-- Platform tuple           aarch64-none-elf
+-- Assembler
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- CMAKE_EXE_LINKER_FLAGS=
+-- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- Processor                aarch64
+-- Platform tuple           aarch64-none-elf
+-- Assembler
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+-- The C compiler identification is GNU 13.2.1
+-- The CXX compiler identification is GNU 13.2.1
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal.github/code
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal.github/code/applications
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal.github/code/applications/demo
+
+** Setting up demo **
+
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal.github/code/applications/demo/create-image
+
+** Setting up demo-image **
+
+-- create_image demo-image kernel8.img demo
+-- TARGET_NAME demo.elf
+-- generate /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img from /home/rene/repo/baremetal.github/output/Debug/bin/demo
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal.github/code/libraries
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/rene/repo/baremetal.github/cmake-build
+~/repo/baremetal.github
 ```
 
 #### Building a specific target
@@ -399,8 +465,168 @@ tools/build-all.sh
 ```
 
 ```text
-TODO
+[3/3] Generating /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img
 ```
 
+#### Starting QEMU
+
+##### Windows
+
+Start QEMU listening to UART0
+
+tools/startQEMU-image-uart0.bat
+```bat
+call build-target %1
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %CD%\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
+```
+
+Start QEMU listening to UART1
+
+tools/startQEMU-image-uart1.bat
+```bat
+call build-target %1
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %CD%\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
+```
+
+Explanation:
+- We start QEMU here to emulate Raspberry Pi 3B
+- We use the specified image for the kernel. 
+- We either listen to the first serial or the second (the first is then set to null).
+- We start a gdb server at port 1234
+- We do not start the system immediately, but let it wait for gdb.
+
+When starting QEMU on UART0:
+```bat
+tools\startQEMU-image-uart0.bat demo
+```
+
+```text
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\deploy\Debug\demo-image\kernel8.img -serial stdio -s -S
+
+(qemu:9828): Gtk-WARNING **: 22:22:56.966: Could not load a pixbuf from icon theme.
+This may indicate that pixbuf loaders or the mime database could not be found.
+```
+
+##### Linux
+
+Start QEMU listening to UART0
+
+tools/startQEMU-image-uart0.sh
+```bash
+rootdir=`pwd`
+echo rootdir=$rootdir
+$rootdir/tools/build-target.sh $1
+qemu-system-aarch64 -M raspi3b -kernel $rootdir/deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
+```
+
+Start QEMU listening to UART1
+
+tools/startQEMU-image-uart1.sh
+```bash
+rootdir=`pwd`
+echo rootdir=$rootdir
+$rootdir/tools/build-target.sh $1
+qemu-system-aarch64 -M raspi3b -kernel $rootdir/deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
+```
+
+Explanation:
+- We start QEMU here to emulate Raspberry Pi 3B
+- We use the specified image for the kernel. 
+- We either listen to the first serial or the second (the first is then set to null).
+- We start a gdb server at port 1234
+- We do not start the system immediately, but let it wait for gdb.
+
+When starting QEMU on UART0:
+```bash
+tools/startQEMU-image-uart0.sh
+```
+
+```text
+rootdir=/home/rene/repo/baremetal.github
+```
+
+#### Starting GDB
+
+When starting GDB, we need a way to specify GDB to connect to our QEMU gdb server. We do that using a command file:
+
+tools/gdb-commands.txt
+```text
+target remote localhost:1234
+```
+
+##### Windows
+
+tools/startgdb.bat
+```bat
+D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe -x %CD%\tools\gdb-commands.txt -symbols=%CD%\output\Debug\bin\%1.elf
+```
+
+We specify the command file, and also the symbol file to load
+
+Starting GDB:
+```bat
+tools\startgdb.bat demo
+```
+
+```text
+D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe -x D:\Projects\baremetal.github\tools\commands.txt -symbols=D:\Projects\baremetal.github\output\Debug\bin\demo.elf
+GNU gdb (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.90.20231008-git
+Copyright (C) 2023 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=i686-w64-mingw32 --target=aarch64-none-elf".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://bugs.linaro.org/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from D:\Projects\baremetal.github\output\Debug\bin\demo.elf...
+warning: No executable has been specified and target does not support
+determining executable automatically.  Try using the "file" command.
+0x0000000000000000 in ?? ()
+```
+
+##### Linux
+
+tools/startgdb.sh
+```bash
+rootdir=`pwd`
+gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/Debug/bin/$1.elf
+```
+
+We specify the command file, and also the symbol file to load
+
+Starting GDB:
+```bat
+tools/startgdb.sh demo
+```
+
+```text
+GNU gdb (Debian 13.1-3) 13.1
+Copyright (C) 2023 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/rene/repo/baremetal.github/output/Debug/bin/demo.elf...
+warning: No executable has been specified and target does not support
+determining executable automatically.  Try using the "file" command.
+0x0000000000000000 in ?? ()
+```
 
 ## Visual Studio CMake integration
+

@@ -7,7 +7,7 @@ For now, let's set up a project that simply prints something to the console (UAR
 This will be quite an extensive chapter, so bare with me. As soon as we have configured the basic project, adding new code and applications should become easier.
 Also, the way we configure the project is very verbose and direct, which we will improve later on.
 
-First, we create a folder for the project. Let's say `D:\Projects\tutorial\01-building` on Windows and `~/tutorial/01-building` on Linux.
+First, we create a folder for the project. Let's say `D:\Projects\tutorial\00-build` on Windows and `~/tutorial/00-build` on Linux.
 
 In this directory, we first need to create a CMake file, which is named `CMakeLists.txt`. Be careful about the 's' in Lists, and also make sure you have the correct casing, especially in Linux.
 As soon as you add this file in Visual Studio, it may detect this is a CMake project and try to configure it. This will fail as we don't have the correct contents yet. Don't worry about this for now.
@@ -21,7 +21,7 @@ cmake_minimum_required(VERSION 3.18)
 
 message(STATUS "CMake ${CMAKE_VERSION}")
 
-project(01-building
+project(00-build
     DESCRIPTION "Application to demonstrate building using CMake"
     LANGUAGES CXX)
 
@@ -30,7 +30,7 @@ project(01-building
 Short explanation:
 - We require a minimum version of 3.18 for CMake. There should always be a similar line in the main CMake scripts
 - We echo the current version of CMake
-- We define a project named `01-building`, give it a short description, and specify that it will use C++ code as language
+- We define a project named `00-build`, give it a short description, and specify that it will use C++ code as language
 
 ## Create source file
 
@@ -54,7 +54,7 @@ cmake_minimum_required(VERSION 3.18)
 
 message(STATUS "CMake ${CMAKE_VERSION}")
 
-project(01-building
+project(00-build
     DESCRIPTION "Application to demonstrate building using CMake"
     LANGUAGES CXX)
 
@@ -71,11 +71,11 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${P
 Short explanation:
 - We define a variable named `PROJECT_SOURCES` that contains the path to our source file (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
 - We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
-- We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project were in, so in this case `01-building`)
+- We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project were in, so in this case `00-build`)
   - This target will build from the source files and headers just specified.
 
 You will now be able to build the project, however this will be targeting the platform you are running on.
-So it will build a Windows application `01-building.exe` for Windows, and a Linux application `01-building` on Linux.
+So it will build a Windows application `00-build.exe` for Windows, and a Linux application `00-build` on Linux.
 We'll get to building once we can target the correct platform.
 
 ## Build for target
@@ -321,7 +321,7 @@ del /s /f /q cmake-build/*.*
 rmdir cmake-build
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/01-building -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/01-building/baremetal.toolchain
+cmake ../tutorial/00-build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
 popd
 ```
 
@@ -364,15 +364,15 @@ Next perform the actual build
 
 ```bat
 set ROOT=%CD%
-pushd tutorial/01-building
-cmake --build %ROOT%/cmake-build --target 01-building
+pushd tutorial/00-build
+cmake --build %ROOT%/cmake-build --target 00-build
 popd
 ```
 
 ```output
-[2/2] Linking CXX executable 01-building
-FAILED: 01-building
-cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/01-building.dir/main.cpp.obj -o 01-building   && cd ."
+[2/2] Linking CXX executable 00-build
+FAILED: 00-build
+cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/00-build.dir/main.cpp.obj -o 00-build   && cd ."
 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-closer.o): in function `_close_r':
@@ -403,7 +403,7 @@ cd <project_dir>
 rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/01-building -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/01-building/baremetal.toolchain
+cmake ../tutorial/00-build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
 popd
 ```
 
@@ -447,14 +447,14 @@ There may be warnings about unused variables, you can ignore these.
 Next perform the actual build
 
 ```bat
-cd ../tutorial/01-building
+cd ../tutorial/00-build
 cmake --build ../../cmake-build
 ```
 
 ```output
-[2/2] Linking CXX executable 01-building
-FAILED: 01-building
-: && /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/01-building.dir/main.cpp.obj -o 01-building   && :
+[2/2] Linking CXX executable 00-build
+FAILED: 00-build
+: && /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/00-build.dir/main.cpp.obj -o 00-build   && :
 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-writer.o): in function `_write_r':
@@ -481,7 +481,7 @@ We therefore need to set compiler options the correct way to really build a bare
 We need to add a few lines to our CMakeLists file, to add definitions, compiler settings, linker options, and link libraries
 
 ```cmake
-project(01-building
+project(00-build
     DESCRIPTION "Application to demonstrate building using CMake"
     LANGUAGES CXX)
 
@@ -519,7 +519,7 @@ endif()
 ```
 
 So, after the project is defined, we add the following lines:
-- We define the variable `PROJECT_TARGET_NAME`, which set the file for our executable to `01-building.elf`
+- We define the variable `PROJECT_TARGET_NAME`, which set the file for our executable to `00-build.elf`
 - We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions. For now these are empty. There are two, as we can have definitions only for this executable (private) and possibly exported to other targets (public). As an executabel file normally does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on.
 - We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options. Here we set the compiler options to be:
   - -Wall: Set warning level to the highest possible level
@@ -679,13 +679,13 @@ So in this case, we only use the sections .text, and and .text.boot sections, th
 
 ### Creating an image
 
-Now we can build the code to generate output/Debug/bin/01-building.elf, however that application cannot simply be run in e.g. QEMU. We need to create an image for that. This is a fairly simple step, adding a new target for the image.
+Now we can build the code to generate output/Debug/bin/00-build.elf, however that application cannot simply be run in e.g. QEMU. We need to create an image for that. This is a fairly simple step, adding a new target for the image.
 
 We will create a subdirectory `create-image` underneath our current project, and add a `CMakeLists.txt` file there:
 
 ```cmake
-project(01-building-image
-    DESCRIPTION "Kernel image for 01-building RPI 64 bit bare metal")
+project(00-build-image
+    DESCRIPTION "Kernel image for 00-build RPI 64 bit bare metal")
 
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -693,13 +693,13 @@ message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 message("\n** Setting up ${PROJECT_NAME} **\n")
 
 set(BAREMETAL_TARGET_KERNEL kernel8)
-set(DEPENDENCY 01-building)
+set(DEPENDENCY 00-build)
 set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
 
 create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
-This defines a new project `01-building-image` with creates some variables, and the calls another custom function:
+This defines a new project `00-build-image` with creates some variables, and the calls another custom function:
 
 - We create the variable `BAREMETAL_TARGET_KERNEL` to specify the kernel image to create. This depends on the target platform. Here we create kernel8.img for Raspberry Pi 3 (see [System startup](system-startup#config.txt)).
 - We create the variable `DEPENDENCY` to specify the project we are going to create the image for.
@@ -744,27 +744,27 @@ endfunction()
 ```
 
 The function `create_image` takes three parameters:
-- The target to be created, in this case `01-building-image`
+- The target to be created, in this case `00-build-image`
 - The image filename, in this case `kernel8.img`
-- The target that creates the application to be added to the image, in this case `01-building.elf`
+- The target that creates the application to be added to the image, in this case `00-build.elf`
 
 Explanation:
 - The function first shows how it was called, and then checks whether the application target exists, and prints an error if not
-- The `OUTPUT_NAME` property from the application target is retrieved, so in this case `01-building.elf` and stored in variable `TARGET_NAME`
+- The `OUTPUT_NAME` property from the application target is retrieved, so in this case `00-build.elf` and stored in variable `TARGET_NAME`
 - The property value is printed
 - The action to be taken is printed
 - A custom CMake command is created
   - Its output is `${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}`. This uses the variables `DEPLOYMENT_DIR` and `CONFIG_DIR` defined before, and then adds the name of the application project as a directory, and then the image name.
-So the final path will be `deploy/Debug/01-building/kernel8.img`
+So the final path will be `deploy/Debug/00-build/kernel8.img`
   - The command to be performed used the `CMAKE_OBJCOPY` tool specified in the toolchain file.
-The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/01-building.elf -O binary deploy/Debug/01-building/kernel8.img`
-- A custom CMake target `01-building-image` is created, that depends on the output of the command just created.
+The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/00-build.elf -O binary deploy/Debug/00-build/kernel8.img`
+- A custom CMake target `00-build-image` is created, that depends on the output of the command just created.
 
 This may all seem complex, but this functionality can be used again later on by simply changing the parameters.
 
 Now we still need to use the new target. We simply do this by referring to the subdirectory containing the new `CMakeLists.txt`.
 
-Remembed that our current project folder, `tutorial/01-building` contains a `CMakeLists.txt` file, we add the following line to this file to include its `create-image` subdirectory. This instructs CMake to also use the `CMakeLists.txt` file in this directory:
+Remembed that our current project folder, `tutorial/00-build` contains a `CMakeLists.txt` file, we add the following line to this file to include its `create-image` subdirectory. This instructs CMake to also use the `CMakeLists.txt` file in this directory:
 
 ```cmake
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
@@ -787,7 +787,7 @@ del /S /f /q cmake-build\*.*
 rmdir cmake-build
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/01-building -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/01-building/baremetal.toolchain
+cmake ../tutorial/00-build -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
 popd
 ```
 
@@ -797,11 +797,11 @@ popd
 rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/01-building -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/01-building/baremetal.toolchain
+cmake ../tutorial/00-build -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
 popd
 ```
 
-In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use tutorial/01-building as the root CMake directory, and use the toolchain file. We are building for Debug.
+In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use tutorial/00-build as the root CMake directory, and use the toolchain file. We are building for Debug.
 
 Then we can build the targets:
 
@@ -809,8 +809,8 @@ Then we can build the targets:
 
 ```bat
 set ROOT=%CD%
-pushd tutorial/01-building
-cmake --build %ROOT%/cmake-build --target 01-building-image
+pushd tutorial/00-build
+cmake --build %ROOT%/cmake-build --target 00-build-image
 popd
 ```
 
@@ -818,15 +818,15 @@ popd
 
 ```bash
 rootdir=`pwd`
-pushd tutorial/01-building
-cmake --build $rootdir/cmake-build --target 01-building-image
+pushd tutorial/00-build
+cmake --build $rootdir/cmake-build --target 00-build-image
 popd
 ```
 
 We save the root directory to be able to reference it, and step into the project directory. There we run cmake with the --build parameter to specify the build directory.
-The target we're going to build is the image, so `01-building-image`. This will automaticall build all its dependencies, so `01-building.elf` will also be built
+The target we're going to build is the image, so `00-build-image`. This will automaticall build all its dependencies, so `00-build.elf` will also be built
 
-After this step, we will have built the application in output/Debug/bin/01-building.elf, and the image in deploy/Debug/01-building-image/kernel8.img
+After this step, we will have built the application in output/Debug/bin/00-build.elf, and the image in deploy/Debug/00-build-image/kernel8.img
 
 The image is very small, as the application basically does nothing, but you have built your first baremetal application!
 
@@ -839,7 +839,7 @@ To show that the application actually works, let's run it in QEMU and debug it.
 To run QEMU:
 
 ```bat
-"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\deploy\Debug\01-building-image\kernel8.img -serial stdio -s -S
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\deploy\Debug\00-build-image\kernel8.img -serial stdio -s -S
 ```
 
 To run GDB:
@@ -905,14 +905,14 @@ Remote debugging using localhost:1234
 warning: No executable has been specified and target does not support
 determining executable automatically.  Try using the "file" command.
 0x0000000000000000 in ?? ()
-(gdb) symbol-file 01-building.elf
-Reading symbols from 01-building.elf...
+(gdb) symbol-file 00-build.elf
+Reading symbols from 00-build.elf...
 (gdb) b main.cpp:1
-Breakpoint 1 at 0x80000: file D:/Projects/baremetal.github/tutorial/01-building/main.cpp, line 2.
+Breakpoint 1 at 0x80000: file D:/Projects/baremetal.github/tutorial/00-build/main.cpp, line 2.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/01-building/main.cpp:3
+Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/00-build/main.cpp:3
 3           return 0;
 ```
 

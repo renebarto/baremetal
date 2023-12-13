@@ -1,1 +1,1 @@
-cmake --build cmake-build --target $1
+cmake --build cmake-Baremetal-Debug --target $1

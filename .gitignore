@@ -33,7 +33,7 @@
 
 .vs/
 tutorial/00-build/out/
-cmake-build/
+cmake-*/
 deploy/
 out/
 output/

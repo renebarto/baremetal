@@ -261,7 +261,7 @@ The current choice for Visual Studio 2019 has to do with the fact that debugging
 
 When installing Visual Studio 2019, at least make sure `Desktop development with C++` is checked as a feature. The feature `Linux development with C++` is not necessary.
 
-Configuration of the project for Visual Studio is described later in [Setting up a project for building and debugging](setting-up-a-project.md).
+Configuration of the project for Visual Studio is described later in [Setting up project structure](setting-up-project-structure.md).
 
 Of course, a project can also be set up, and code written, using one of the many text editors available for Windows:
 
@@ -300,7 +300,9 @@ In order to deploy a baremetal application, we will need to follow a couple of s
 - Place the image onto the target using one of the following methods:
   - Copy the image onto an SD card and start the system (see [Directly running on the target](###Directly-running-on-the-target)). The SD card will need to contain some other files for the system to start.
   - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system. Then go to the website created by the netboot, select an image and upload it. This will reboot the system with your image. __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again.
-  - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4). __It is also possible to use QEMU with Odroid boards, this will be described later__ [Debugging](##Debugging). QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
+  - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4).
+  __It is also possible to use QEMU with Odroid boards, this will be described later__ [Debugging](##Debugging). 
+QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
 
 Converting the application into an image will be described later. It uses `aarch64-none-elf-objcopy` to convert the .elf file into a .img file.
 

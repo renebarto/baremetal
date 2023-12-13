@@ -34,9 +34,13 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Contents
 
-- [Hardware overview](doc/hardware-overview.md)
 - [Setting up for development](doc/setting-up-for-development.md)
 - [Setting up a first project](doc/setting-up-a-project.md)
+- [Setting up project structure](doc/setting-up-project-structure.md)
+
+## Additional information
+
+- [Hardware overview](doc/hardware-overview.md)
 - [System startup](doc/system-startup.md)
 
 ## Todo

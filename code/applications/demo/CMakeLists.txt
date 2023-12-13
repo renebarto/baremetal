@@ -1,23 +1,13 @@
-cmake_minimum_required(VERSION 3.18)
+project(demo
+    DESCRIPTION "Demo application"
+    LANGUAGES CXX ASM)
 
-message(STATUS "CMake ${CMAKE_VERSION}")
+message(STATUS "\n**********************************************************************************\n")
+message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(SCRIPTS_DIR "" CACHE STRING "CMake scripts path")
-set(CONFIG_DIR Debug)
-set(DEPLOYMENT_DIR ${CMAKE_SOURCE_DIR}/../../deploy)
-set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/../../output" CACHE STRING "Output directory")
-
-if ("${SCRIPTS_DIR}" STREQUAL "")
-    set(SCRIPTS_DIR "${CMAKE_SOURCE_DIR}/cmake" CACHE STRING "CMake scripts path" FORCE)
-endif()
-
-list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
+message("\n** Setting up ${PROJECT_NAME} **\n")
 
 include(functions)
-
-project(01-building
-    DESCRIPTION "Application to demonstrate building using CMake"
-    LANGUAGES CXX)
 
 set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 
@@ -32,7 +22,6 @@ set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
 set(PROJECT_INCLUDE_DIRS_PRIVATE )
 set(PROJECT_INCLUDE_DIRS_PUBLIC )
 
-message(STATUS "CMAKE_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}")
 set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
 
 set(PROJECT_DEPENDENCIES )
@@ -41,7 +30,7 @@ set(PROJECT_LIBS
     ${PROJECT_DEPENDENCIES}
     )
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC )
@@ -63,12 +52,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_OPTIONS_CXX_PRI
 target_compile_options(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC})
 
 list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
 if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 add_subdirectory(create-image)

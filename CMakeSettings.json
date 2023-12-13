@@ -1,0 +1,17 @@
+﻿{
+  "environments": [ {} ],
+  "configurations": [
+    {
+      "name": "BareMetal-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\cmake-${name}",
+      "installRoot": "${projectDir}\\output\\install\\${name}",
+      "cmakeCommandArgs": "-DVERSION_NUMBER=\"1.0.0\" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DBAREMETAL_CONSOLE_UART0=ON",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+      "inheritEnvironments": [ "gcc-arm" ]
+    }
+  ]
+}

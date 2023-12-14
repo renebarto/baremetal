@@ -19,12 +19,13 @@ For our specific case, we wish to create kernel images from executables, so we w
 We will slightly change this structure, to allow for more projects to be built, and also to enable easy integration with Visual Studio.
 
 - First of all, we'll create multiple build directories, e.g. one for debug builds, one for release builds.
-- We will move the custom scripting folder to the project root directory
-- We will move the toolchain file to the root directory
-- We will create a new directory `code` at root level, with subdirectories `applications` and `libraries` underneath which we will add our applications and libraries.
+- We will copy the custom scripting folder to the project root directory (`<root>/cmake`)
+- We will copy the toolchain file to the root directory (`<root>/baremetal.toolchain`)
+- We will copy the linker definition file to the root directory, and rename it (`<root>/baremetal.ld`)
+- We will create a new directory `<root>/code` at root level, with subdirectories `applications` and `libraries` underneath which we will add our applications and libraries.
 For now, there will be no subdirectories, but we will add `CMakeLists.txt` files in each directory for preparation.
 - We will leave the tutorial directory in place, and leave the 00-build directory as is (to ensure we can still build our previous project as before), but will also populate the tutorial directory with `CMakeLists.txt` to prepare for new tutorial projects.
-- We will also add a CMakeLists.txt in the root directory
+- We will also add a CMakeLists.txt in the root directory (`<root>/CMakeLists.txt`)
 
 ![Initial project structure](images/project-structure-target.png)
 
@@ -36,7 +37,7 @@ In order to explain how to populate the new structure, let's start setting up a 
 
 The root `CMakeLists.txt` is the starting point for CMake. 
 It contains all global definitions and settings, such as the path to the custom CMake scripts, definition of base output directory, and later on also general compiler settings etc.
-It is common practice to create a main project in this file, in order for the toolchain to be processed.
+It is common practice to create a main project in this file, in order for the toolchain to be processed. We will name it baremetal-main.
 
 For now, we'll start with the following contents:
 
@@ -72,7 +73,7 @@ set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/output" CACHE STRING "Output directory"
 set(OUTPUT_BIN_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin")
 set(OUTPUT_LIB_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib")
 
-project(baremetal
+project(baremetal-main
     DESCRIPTION "Baremetal overall project")
 
 add_subdirectory(code)
@@ -650,9 +651,9 @@ When using Visual Studio, there are two methods to integrate CMake projects.
 For Visual Studio 2019, getting things to work for baremetal development did not go well using `CMakePresets.json`, so we will focus on using `CMakeSettings.json` here.
 Maybe later I will give the first option another go.
 
-`CMakeSettings.json` is aa JSON file, containing a section for every platform / build you wish to use. For now, let's just add a baremetal Debug build target:
+`CMakeSettings.json` is a JSON file, containing a section for every platform / build you wish to use. For now, let's just add a baremetal Debug build target:
 
-```cmake
+```json
 {
   "environments": [ {} ],
   "configurations": [
@@ -662,7 +663,7 @@ Maybe later I will give the first option another go.
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\cmake-${name}",
       "installRoot": "${projectDir}\\output\\install\\${name}",
-      "cmakeCommandArgs": "-DVERSION_NUMBER=\"1.0.0\" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DBAREMETAL_CONSOLE_UART0=ON",
+      "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
@@ -680,7 +681,7 @@ The configurations section will contain an array of build configurations, here c
 - `configurationType` specifies what kind of build we're going to perform. This is one of the CMake build types (Debug, Release, RelWithDebInfo, MinSizeRel).
 - `buildRoot` setting is the cmake build directory to be using. Until now, we've been using `cmake-build`, we'll use `cmake-${name}` here, where `${name}` is the `name` of the configuration, resulting in `cmake-Baremetal-Debug`.
 - `installRoot` is not so relevant now, but is the directory root used when executing an install target. We set it to `${projectDir}\\output\\install\\${name}`, in other words it will be in the ouput\install directory, under a subdirectory named after the CMake project we're building.
-- `cmakeCommandArgs` will specify the CMake definitions we wish to pass. These variable will be defned in our CMake scrips. We specify the variables as "-DVERSION_NUMBER=\"1.0.0\" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DBAREMETAL_CONSOLE_UART0=ON", all of which we are not used yet, but will later on.
+- `cmakeCommandArgs` will specify the CMake definitions we wish to pass. These variable will be defned in our CMake scrips. We leave this empty for now, but will revisit this later.
 - `buildCommandArgs` specifies additional parameters to pass on to CMake for building. We are not using any.
 - `ctestCommandArgs` specifies additional parameters when running CMake in test mode. As we will not be using CMake for testing, this is empty.
 - `cmakeToolchain` specifies the toolchain file to be using. This is important for us, as we use the toolchain file to select our build toolchain for baremetal building. We've places the file in the root directory, so the location is `${projectDir}\\baremetal.toolchain`

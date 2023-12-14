@@ -30,6 +30,11 @@ For example:
 - Unit testing, even at baremetal level, using stubs and mocks. This will use an alternative to gtest / gmock, as this relies on the standard C++ library
 - Debugging on platform (with the addition of HW), as well as in QEMU, even directly from Visual Studio
 
+## License
+
+Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE)).
+This means that code will contain a copyright, but you are free to use it in whichever way you see fit. I would appreciate at least a reference to this GitHub project though.
+
 For now, we will focus on Raspberry Pi, as the information is more readily available than for Odroid.
 
 ## Contents
@@ -37,6 +42,7 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [Setting up for development](doc/setting-up-for-development.md)
 - [Setting up a first project](doc/setting-up-a-project.md)
 - [Setting up project structure](doc/setting-up-project-structure.md)
+- [First application - Using the console - UART1](doc/01-console-uart1.md)
 
 ## Additional information
 

@@ -36,9 +36,14 @@ if (PLATFORM_BAREMETAL)
 endif()
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
     )

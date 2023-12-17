@@ -4,8 +4,9 @@
 
 See also [Boot sequence](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#boot-sequence)
 
-![Boot sequence](images/boot-rpi3.png)</br>
-Raspberry Pi 3 boot sequence
+<img src="images/boot-rpi3.png" alt="Boot sequence" width="500"/>
+
+__Raspberry Pi 3 boot sequence__
 
 1. Raspberry Pi starts up in the GPU. At this point, RAM is disabled, and the CPU is off
 2. The GPU runs startup code from ROM (inside SoC) and executes first stage bootloader
@@ -29,11 +30,13 @@ Be aware that a large part of the bootup is performed by the GPU (bootcode.bin, 
 
 See also [Boot flow](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-4-boot-flow)
 
-![Boot sequence](images/boot-rpi4.png)</br>
-Raspberry Pi 4 boot sequence
+<img src="images/boot-rpi4.png" alt="Raspberry Pi 4 boot sequence" width="500"/>
 
-![Boot sequence](images/boot-rpi5.png)</br>
-Raspberry Pi 5 boot sequence
+__Raspberry Pi 4 boot sequence__
+
+<img src="images/boot-rpi5.png" alt="Raspberry Pi 5 boot sequence" width="500"/>
+
+__Raspberry Pi 5 boot sequence__
 
 1. Raspberry Pi starts up in the GPU. At this point, RAM is disabled, and the CPU is off
 2. The GPU runs startup code from ROM (inside SoC) and executes first stage bootloader

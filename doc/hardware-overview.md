@@ -6,10 +6,12 @@ So let's start with the description of the boards we're targeting. I currently o
 
 Raspberry Pi 3 was introduced in 2016. It was the first board to have a quad core ARM v8, 64-bit OS support, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up until now.
 
-![Top view](images/RPI3B-top.jpg)
+<img src="images/RPI3B-top.jpg" alt="Top view" width="500"/>
+
 __Raspberry Pi 3B top view__
 
-![Bottom view](images/RPI3B-bottom.jpg)
+<img src="images/RPI3B-bottom.jpg" alt="Bottom view" width="500"/>
+
 __Raspberry Pi 3B bottom view__
 
 ## Raspberry Pi 4B
@@ -19,26 +21,34 @@ Raspberry Pi 4B was finally introduced in 2019.
 The differences were a Cortex A72 quad core Arm V8 instead of Cortex A53, which ran at a slightly higher clock rate.
 But the major difference was in USB3 support, and finally a full speed network socket at 1 Gbps.
 This board also has a USB-C power socket.
-![Top view](images/RPI4B-box.jpg)
+
+<img src="images/RPI4B-box.jpg" alt="Box" width="500"/>
+
 __Raspberry Pi 4B box__
 
-![Top view](images/RPI4B-top.jpg)
+<img src="images/RPI4B-top.jpg" alt="Top view" width="500"/>
+
 __Raspberry Pi 4B top view__
 
-![Bottom view](images/RPI4B-bottom.jpg)
+<img src="images/RPI4B-bottom.jpg" alt="Bottom view" width="500"/>
+
 __Raspberry Pi 4B bottom view__
 
 ## Raspberry Pi 5
 
 Again after quite some time, Raspberry Pi 5 was introduced October 2023.
 It has quite some feature improvements, amongst which are a power / reset switch and of course an improved SoC.
-![Top view](images/RPI5-box.jpg)
+
+<img src="images/RPI5-box.jpg" alt="Box" width="500"/>
+
 __Raspberry Pi 5 box__
 
-![Top view](images/RPI5-top.jpg)
+<img src="images/RPI5-top.jpg" alt="Top view" width="500"/>
+
 __Raspberry Pi 5 top view__
 
-![Bottom view](images/RPI5-bottom.jpg)
+<img src="images/RPI5-bottom.jpg" alt="Bottom view" width="500"/>
+
 __Raspberry Pi 5 bottom view__
 
 ## Odroid N2+
@@ -47,7 +57,8 @@ Due to the shortage of Raspberry Pi during the Covid period, most enthusiasts we
 One of these is made by Odroid. The Odroid N2+ features a 4 + 2 Core Arm processor, and RTC (which was missing on Raspberry Pi until version 5), IR received, power switch, but is lacking Wifi and Bluetooth capabilities.
 In constrast with Raspberry Pi, Odroid is larger, but has a very good heat sink.
 
-![Top view](images/Odroid-N2+-top.jpg)
+<img src="images/Odroid-N2+-top.jpg" alt="Top view" width="500"/>
+
 __Raspberry Odroid N2+ top view__
 
 ## Hardware specifications

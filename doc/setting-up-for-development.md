@@ -25,14 +25,15 @@ The current version as of writing this document is 13.2 rel 1.
 
 For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf.zip?rev=01c03590412e49d495c78b9f979fd21c&hash=BC02BCAA3B72FF2472AAB83ECBE4F27C).
 Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
-Best way to do install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
+
+The best way to do install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
 Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`:
 
-![Environment edit](images/env-before.png)
+<img src="images/env-before.png" alt="Environment edit" width="500"/>
 
 In the lower pane, select Path and click Edit...
 
-![Environment add](images/env-add.png)
+<img src="images/env-add.png" alt="Environment add" width="500"/>
 
 Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK
 
@@ -109,32 +110,32 @@ cmake version 3.20.21032501-MSVC_2
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
 
-When not using Visual Studio, install CMake by downloading [here](https://cmake.org/download/#latest), by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
+When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest), by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
 The latest stable release at the moment of writing this document is [3.27.8](https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-windows-x86_64.msi).
 
-![CMake installation step 1](images/CMake-install-1.png)
+<img src="images/CMake-install-1.png" alt="CMake installation step 1" width="400"/>
 
 Click Next
 
-![CMake installation step 1](images/CMake-install-2.png)
+<img src="images/CMake-install-2.png" alt="CMake installation step 2" width="400"/>
 
 Check "I accept the terms in the License Agreement", and click Next
 
-![CMake installation step 1](images/CMake-install-3.png)
+<img src="images/CMake-install-3.png" alt="CMake installation step 3" width="400"/>
 
 Select "Add CMake to the system PATH for all users" or "Add CMake to the system PATH for the current user"
 
 Click Next
 
-![CMake installation step 1](images/CMake-install-4.png)
+<img src="images/CMake-install-4.png" alt="CMake installation step 4" width="400"/>
 
 Leave the installation path as is. Click Next
 
-![CMake installation step 1](images/CMake-install-5.png)
+<img src="images/CMake-install-5.png" alt="CMake installation step 5" width="400"/>
 
 Click Install and approve installation
 
-![CMake installation step 1](images/CMake-install-6.png)
+<img src="images/CMake-install-6.png" alt="CMake installation step 6" width="400"/>
 
 Click Finish
 
@@ -201,7 +202,7 @@ To speed up building, often the Ninja build tool is used. This tool is also used
 If Visual Studio 2019 is installed, you can find Ninja in `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja`.
 
 To install Ninja build on your system separately, download it from [here](https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip), and unpack the ZIP file. It will contain only one file, `ninja.exe`.
-For example you can place this file in `C:\Program Files\Ninja` make sure to add it to your PATH environment variable.
+For example you can place this file in `C:\Program Files\Ninja`. Make sure to add it to your PATH environment variable.
 
 To test, open a command line prompt, and execute:
 ```bat
@@ -252,12 +253,12 @@ The command should execute without error, and print the version of the Ninja:
 
 ## Development environment
 
-As said, the development environment can be as simple as a text editor and running commands on the command prompt.
+The development environment can be as simple as a text editor and running commands on the command prompt.
 For Linux, we will use this approach. For Windows, we will be using Visual Studio, however we will also start with the command line, as using Visual Studio requires a bit more configuration. 
 
 ### Windows
 
-The current choice for Visual Studio 2019 has to do with the fact that debugging on a remote target (Linux or baremetal) with Visual Studio 2022 does not work from within VS, due to a bug.
+The current choice for Visual Studio 2019 has to do with the fact that debugging on a remote target (Linux or baremetal) with Visual Studio 2022 does not work from within VS, due to a bug. As the debugging part is partly shared between Visual Studio 2019 and Visual Studio 2022, my advice is to only have Visual Studio 2019 installed.
 
 When installing Visual Studio 2019, at least make sure `Desktop development with C++` is checked as a feature. The feature `Linux development with C++` is not necessary.
 
@@ -276,7 +277,7 @@ Of course, a project can also be set up, and code written, using one of the many
 ### Linux
 
 For Linux, the easiest way to build is on the command line. It is possible to use e.g. Visual Studio Code for this as well, but configuration for building and debugging is quite cumbersome, so will not be described here.
-Make sure that you editor of choice is installed. Some logical choices may be:
+Make sure that your editor of choice is installed. Some logical choices may be:
 
 - vi
 - vim
@@ -289,49 +290,51 @@ Make sure that you editor of choice is installed. Some logical choices may be:
 - Visual Studio Code
 - ...
 
-Configuration of the project is described later in [Setting up a project for building and debugging](setting-up-a-project.md).
+Configuration of the project is described later in [Setting up a project](setting-up-a-project.md).
 
 ## Deployment mechanism
 
 In order to deploy a baremetal application, we will need to follow a couple of steps:
 
-- Compile sources and create an application (just a single one, as this is a baremetal system) as a .elf application
-- Convert the application into a kernel image
+- Compile sources and create an application (just a single one, as this is a baremetal system) as a ELF application (.elf)
+- Convert the application into a kernel image (.img)
 - Place the image onto the target using one of the following methods:
-  - Copy the image onto an SD card and start the system (see [Directly running on the target](###Directly-running-on-the-target)). The SD card will need to contain some other files for the system to start.
-  - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system. Then go to the website created by the netboot, select an image and upload it. This will reboot the system with your image. __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again.
+  - Copy the image onto an SD card and start the system (see [Running from SD card](###Running-from-SD-card)). The SD card will need to contain some other files in order for the system to start.
+  - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system. Then go to the website created by netboot, select an image and upload it. This will reboot the system with your image. __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again. See [Running using netboot](###Running-using-netboot).
   - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4).
-  __It is also possible to use QEMU with Odroid boards, this will be described later__ [Debugging](##Debugging). 
-QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
+  __It is also possible to use QEMU with Odroid boards, this will be described later__. 
+QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board. For running inside QEMU, see [Running in QEMU](###Running-in-QEMU).
 
 Converting the application into an image will be described later. It uses `aarch64-none-elf-objcopy` to convert the .elf file into a .img file.
 
-For testing, I've added a pre-built demo application, which we'll get to later. The pre-built image is located in `tutorial/demo/windows/kernel8.img` and `tutorial/demo/linux/kernel8.img`. The difference is that one was built on Windows, the other on Linux.
+For testing, I've added a pre-built demo application, which we'll get to later. The pre-built image is located in `tutorial/demo/windows/kernel8.img` (built from `tutorial/demo/windows/demo.elf`) and `tutorial/demo/linux/kernel8.img` (built from `tutorial/demo/linux/demo.elf`). The difference is that one was built on Windows, the other on Linux.
 
 ### Attaching a serial console
 
 For the demo you will need to attach a serial console
 
-__Beware of the following!__
+<u>__Beware of the following!__</u>
 
-- make __VERY SURE__ to use a 3.3V serial to USB converter. Using the 5V version is likely to damage your board. For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more. Be careful about the pinning.
-- attach the USB to serial device before powering on the board
-- make sure to connect the serial to USB device to the __correct pins__ (normally, and in this case also, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1, UART 1 in this case)
-- make sure you have the drivers for the serial to USB device (USB side of course) correctly installed on your host system
-  - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well
-- make sure you have a terminal application to communicate with the serial to USB device
+- Make __VERY SURE__ to use a 3.3V serial to USB converter. Using the 5V version is likely to damage your board. For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more. Be careful about the pinning.
+- Attach the USB to serial device before powering on the board
+- Make sure to connect the serial to USB device to the <u>__correct pins__</u> (normally, and in this case as well, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1. In our examples we will be using UART 1 in most cases)
+- Make sure you have the drivers for the serial to USB device (USB side of course) correctly installed on your host system
+  - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well. Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://embetronicx.com/uncategorized/fixed-prolific-pl2303ta-usb-to-serial-and-windows-11/)
+- Make sure you have a terminal application to communicate with the serial to USB device
   - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
+  - [Teraterm](https://tera-term.en.lo4d.com/download) is my personal favorite, but the download sites seem a bit less trustworthy nowadays
   - One Linux there are quite a few applications available, e.g. minicom
-- make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
+- Make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
-![USB-to-serial example](images/USB-RS232.jpg)
+<img src="images/USB-RS232.jpg" alt="USB-to-serial example" width="400"/>
 
 #### Pinning for serial to USB
 
-Please refer to the image below (the wiring color is common for most Prolific 2303 devices:
-![GPIO pinout for UART1](images/GPIO-Pinout-Diagram-UART1.png)
+Please refer to the image below (the wiring color is common for most Prolific 2303 devices):
 
-Do __NOT__ connect the red wire (+3.3V).
+<img src="images/GPIO-Pinout-Diagram-UART1.png" alt="GPIO pinout for UART1" width="400"/>
+
+Do <u>__NOT__</u> connect the red wire (+3.3V).
 
 ### Running from SD card
 
@@ -346,9 +349,9 @@ The SD card will be created from by unzipping the file `tutorial/demo/Netboot.zi
 Please make sure to eject / sync your SD card first before removing it from the reader.
 
 Put the SD card in your board, and attach a serial to USB device to the board. Also make sure the board is attached to the network. Then power on the board.
-Then find out the IP address of the board, and navigate using a browser to http://\<IP address\>:8080/index.html
+Then find out the IP address of the board, and navigate using a browser to `http://<IP address>:8080/index.html`
 
-![Netboot screen](images/Netboot.png)
+<img src="images/Netboot.png" alt="Netboot screen" width="500"/>
 
 Click on `Choose File`, select the correct image (either version of kernel8.img), and click on `Boot now!`. The board will now restart and start your application.
 
@@ -361,31 +364,31 @@ Using QEMU is quite straightforward. You will need to install QEMU however.
 ##### Windows
 
 There are specific builds of QEMU provided by Stephan Weil, which can be downloaded [here](https://qemu.weilnetz.de/w64/)
-The latest version at the moment of writing this document is 8.1.90 (<https://qemu.weilnetz.de/w64/qemu-w64-setup-20231125.exe>).
+The latest version at the moment of writing this document is [8.1.90](https://qemu.weilnetz.de/w64/qemu-w64-setup-20231125.exe).
 
 Simply run the executable, which will install QEMU.
 
-![QEMU installation 1](images/QEMU-install-1.png)
+<img src="images/QEMU-install-1.png" alt="QEMU installation 1" width="500"/>
 
 Click OK
 
-![QEMU installation 1](images/QEMU-install-2.png)
+<img src="images/QEMU-install-2.png" alt="QEMU installation 2" width="500"/>
 
 Click Next
 
-![QEMU installation 1](images/QEMU-install-3.png)
+<img src="images/QEMU-install-3.png" alt="QEMU installation 3" width="500"/>
 
 Click I Agree
 
-![QEMU installation 1](images/QEMU-install-4.png)
+<img src="images/QEMU-install-4.png" alt="QEMU installation 4" width="500"/>
 
 Click Next
 
-![QEMU installation 1](images/QEMU-install-5.png)
+<img src="images/QEMU-install-5.png" alt="QEMU installation 5" width="500"/>
 
 Leave the installation path as is, click Install
 
-![QEMU installation 1](images/QEMU-install-6.png)
+<img src="images/QEMU-install-6.png" alt="QEMU installation 6" width="500"/>
 
 Click Finish
 
@@ -428,9 +431,9 @@ Copy the demo image (`tutorial/demo/windows/kernel8.img`) (see [Deployment mecha
 "C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s
 ```
 
-The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
-
 For now, we have left out the `-S` option, which makes QEMU wait for a debugger to attach.
+
+The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
 ```text
 (qemu:20420): Gtk-WARNING **: 17:43:56.753: Could not load a pixbuf from icon theme.
@@ -460,9 +463,9 @@ Copy the demo image (`tutorial/demo/linux/kernel8.img`) (see [Deployment mechani
 qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s
 ```
 
-The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
-
 For now, we have left out the -S option, which makes QEMU wait for a debugger to attach.
+
+The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
 ```
 Info   00:00:00.000 Baremetal 1.0.0 started on Raspberry Pi 3 Model B (AArch64) (Logger:74)
@@ -484,9 +487,11 @@ Debug  00:00:20.050 HaltSystem (System:176)
 
 ### Run output
 
-When starting up with e.g. Putty attached to the correct COM device, this is what youll see
+When starting up with e.g. Putty attached to the correct COM device, this is what you'll see
 
-![Console output for demo application](images/demo-output-putty.png)
+<img src="images/demo-output-putty.png" alt="Console output for demo application" width="600"/>
+
+__Output for demo application__
 
 The data may be different depending on the board you have, the serial number will always be different, but you can see certain board information is shown, in color.
 
@@ -511,9 +516,11 @@ Copy the demo image (`tutorial/demo/kernel8.img`) (see [Deployment mechanism](##
 "C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s -S
 ```
 
+Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
+
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
-Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
+<img src="images/QEMU-wait-Windows.png" alt="QEMU waiting for debugger" width="500"/>
 
 ##### Linux
 
@@ -523,15 +530,13 @@ Copy the demo image (`tutorial/demo/kernel8.img`) (see [Deployment mechanism](##
 qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
 ```
 
-The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
-
 Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
+
+The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be similar to Windows.
 
 #### Starting the debugger
 
 QEMU qill be waiting for the debugger to attach, with a screen similar to the one below.
-
-![QEMU waiting for debugger](images/QEMU-wait-Windows.png)
 
 ##### Windows
 

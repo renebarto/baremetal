@@ -47,7 +47,7 @@ set(PROJECT_SOURCES
 set(PROJECT_INCLUDES_PUBLIC )
 set(PROJECT_INCLUDES_PRIVATE )
 
-if (CMAKE_HOST_UNIX)
+if (PLATFORM_BAREMETAL)
     set(START_GROUP -Wl,--start-group)
     set(END_GROUP -Wl,--end-group)
 endif()

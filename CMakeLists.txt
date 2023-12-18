@@ -13,16 +13,7 @@ list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE Debug)
 endif()
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(CONFIG_DIR Debug)
-elseif(
-    ${CMAKE_BUILD_TYPE} STREQUAL "Release" OR
-    ${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel" OR 
-    ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-        set(CONFIG_DIR Release)
-else()
-    message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
-endif()
+set(CONFIG_DIR ${CMAKE_BUILD_TYPE})
 
 set(DEPLOYMENT_DIR "${CMAKE_SOURCE_DIR}/deploy" CACHE STRING "Deployment directory")
 set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/output" CACHE STRING "Output directory")
@@ -89,10 +80,14 @@ set(FLAGS_C
     -nostdinc 
     -nostdlib 
 )
-set(FLAGS_C_DEBUG -O0 -g -Wno-unused-variable -Wno-unused-parameter)
-set(FLAGS_C_RELEASE -O2 -D__USE_STRING_INLINES)
+# -g is added by CMake
+set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+# -O3 is added by CMake
+set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
+# -Os is added by CMake
 set(FLAGS_C_MINSIZEREL -O3)
-set(FLAGS_C_RELWITHDEBINFO -O2 -g)
+# -O2 -g is added by CMake
+set(FLAGS_C_RELWITHDEBINFO )
 
 set(FLAGS_CXX
     ${BAREMETAL_ARCH_CPU_OPTIONS}
@@ -113,10 +108,14 @@ set(FLAGS_CXX
     -fno-rtti
     )
 
-set(FLAGS_CXX_DEBUG -O0 -g -Wno-unused-variable -Wno-unused-parameter)
-set(FLAGS_CXX_RELEASE -O2 -D__USE_STRING_INLINES)
+# -g is added by CMake
+set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+# -O3 is added by CMake
+set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+# -Os is added by CMake
 set(FLAGS_CXX_MINSIZEREL -O3)
-set(FLAGS_CXX_RELWITHDEBINFO -O2 -g)
+# -O2 -g is added by CMake
+set(FLAGS_CXX_RELWITHDEBINFO )
 
 set(LINK_FLAGS
     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}

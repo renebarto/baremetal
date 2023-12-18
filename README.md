@@ -3,12 +3,13 @@ A project to develop baremetal applications for Raspberry Pi and Odroid
 
 This project is based on / inspired by the work of many others:
 - Circle by Rene Stange, a great piece of work covering almost all peripherals and devices on Raspberry Pi ([link](https://github.com/rsta2/circle)), with help of circle stdlib ([link](https://github.com/smuehlst/circle-stdlib)) and newlib ([link](https://github.com/smuehlst/circle-newlib)) by Stephan Muehlstrasser.
-- Tutotials by Zoltan Baldaszti ([link](https://github.com/bztsrc/raspi3-tutorial)), Daniels Umanovskis ([link](https://github.com/umanovskis/baremetal-arm)), Leon de Boer ([link](https://github.com/LdB-ECM/Raspberry-Pi)), azo ([link](https://github.com/AZO234/RaspberryPi_BareMetal))
+- Tutotials by Zoltan Baldaszti ([link](https://github.com/bztsrc/raspi3-tutorial)), Daniels Umanovskis ([link](https://github.com/umanovskis/baremetal-arm)), Leon de Boer ([link](https://github.com/LdB-ECM/Raspberry-Pi))
 
 I decided to give it my own turn, for a number of reasons:
 - Most code is in C, not C++
 - Most code is not very well documented, and is missing pointers to the correct information sources
 - If the source is written in C++, the code is mostly C-ish
+- Most of the projects use Make scripts, or even worse automake, which to me seem archaic, as there are more recent tools available such as CMake for build configuration
 - The information is spread into bits and pieces
 - Circle is pretty complete, but is covering only Raspberry Pi, and includes all models (starting from RPI1), and also running 32 bit code.
 I prefer to focus on RPI3B and later, including Odroid boards, and only on 64 bit application development
@@ -16,6 +17,8 @@ I prefer to focus on RPI3B and later, including Odroid boards, and only on 64 bi
 - I prefer my code to be readable. Therefore I strive to use clear class, method and variable names, and lay the code out such that it can be easily understood.
 
 In other words, I'll try to slowly build up a framework, much like Circle, while adding explanation and pointer to information, and do it in a proper C++ way.
+
+The projects will be set up using CMake, and with that will allow working from within IDE's such as Visual Studio.
 
 Code will be C++, but will for now not be using any STL classes, as using the STL library implies using the standard C library, which needs to be ported over, much like what Stephan Muehlstrasser did.
 This is not trivial, so will have to wait a bit. I hope I'll get around to it eventually, as the being able to use the full power of C++ on a baremetal board is something I'm striving for.

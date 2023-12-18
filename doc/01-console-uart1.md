@@ -45,7 +45,7 @@ add_subdirectory(baremetal)
 
 The resulting structure will look like this:
 
-![tree view](images/TreeViewBaremetalLibrary.png)
+<img src="images/TreeViewBaremetalLibrary.png" alt="Tree view" width="500"/>
 
 The reason for adding an extra directory with the same name as the library underneath `code/libraries/baremetal/include` is the following.
 It is common practice to export the directory containing the header files to applications, so they can include the header files.
@@ -202,219 +202,973 @@ Just before `add_subdirectory(code)` in the main CMake file, insert the followin
 #### Common definitions and options
 
 ```cmake
-    if (BAREMETAL_RPI_TARGET EQUAL 3)
-        set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
-        set(BAREMETAL_TARGET_KERNEL kernel8)
-    elseif (BAREMETAL_RPI_TARGET EQUAL 4)
-        set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
-        set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
-    else()
-        message(FATAL_ERROR "Incorrect RPI target ${BAREMETAL_RPI_TARGET} specified, must be 3 or 4")
-    endif()
-    set(BAREMETAL_LOAD_ADDRESS 0x80000)
-
-    set(DEFINES_C 
-        PLATFORM_BAREMETAL
-        RPI_TARGET=${BAREMETAL_RPI_TARGET}
-        )
-    set(DEFINES_C_DEBUG _DEBUG)
-    set(DEFINES_C_RELEASE NDEBUG)
-    set(DEFINES_C_MINSIZEREL NDEBUG)
-    set(DEFINES_C_RELWITHDEBINFO NDEBUG)
-    set(DEFINES_ASM
-        PLATFORM_BAREMETAL
-        RPI_TARGET=${BAREMETAL_RPI_TARGET}
-        )
-
-    set(FLAGS_C
-        ${BAREMETAL_ARCH_CPU_OPTIONS}
-        -Wall 
-        -Wextra
-        -Werror
-        -Wno-parentheses
-        -ffreestanding
-        -fsigned-char
-        -nostartfiles 
-        -std=gnu99 
-        -mno-outline-atomics
-        -nostdinc 
-        -nostdlib 
-    )
-    set(FLAGS_C_DEBUG -O0 -g -Wno-unused-variable -Wno-unused-parameter)
-    set(FLAGS_C_RELEASE -O2 -D__USE_STRING_INLINES)
-    set(FLAGS_C_MINSIZEREL -O3)
-    set(FLAGS_C_RELWITHDEBINFO -O2 -g)
-
-    set(FLAGS_CXX
-        ${BAREMETAL_ARCH_CPU_OPTIONS}
-        -Wall
-        -Wextra
-        -Werror
-        -Wno-missing-field-initializers
-        -Wno-unused-value
-        -Wno-aligned-new
-        -ffreestanding 
-        -fsigned-char 
-        -nostartfiles
-        -mno-outline-atomics
-        -nostdinc
-        -nostdlib
-        -nostdinc++
-        -fno-exceptions
-        -fno-rtti
-        )
-
-    set(FLAGS_CXX_DEBUG -O0 -g -Wno-unused-variable -Wno-unused-parameter)
-    set(FLAGS_CXX_RELEASE -O2 -D__USE_STRING_INLINES)
-    set(FLAGS_CXX_MINSIZEREL -O3)
-    set(FLAGS_CXX_RELWITHDEBINFO -O2 -g)
-
-    set(LINK_FLAGS
-        -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
-        -T ${CMAKE_SOURCE_DIR}/baremetal.ld
-        -nostdlib
-        -nostartfiles 
-        )
-
-    set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
-    set(FLAGS_ASM_DEBUG -O2)
-    set(FLAGS_ASM_RELEASE -O2)
-    set(FLAGS_ASM_MINSIZEREL -O2)
-    set(FLAGS_ASM_RELWITHDEBINFO -O2)
-
-    list(APPEND LINK_LIBRARIES )
-    list(APPEND LINK_DIRECTORIES )
-
-```
-
-#### Compiler versions and standard supported
-
-```cmake
-    set(SUPPORTED_CPP_STANDARD 17)
-
-    message(STATUS "C++ compiler version:    ${CMAKE_CXX_COMPILER_VERSION}")
-    message(STATUS "C compiler version:      ${CMAKE_C_COMPILER_VERSION}")
-    message(STATUS "C++ supported standard:  ${SUPPORTED_CPP_STANDARD}")
-```
-
-#### Mapping options for each build type
-
-```cmake
-    set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
-    set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
-    set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
-    set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
-
-    set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
-    set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
-    set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
-
-    set(COMPILE_OPTIONS_C_DEBUG ${FLAGS_C} ${FLAGS_C_DEBUG})
-    set(COMPILE_OPTIONS_C_RELEASE ${FLAGS_C} ${FLAGS_C_RELEASE})
-    set(COMPILE_OPTIONS_C_MINSIZEREL ${FLAGS_C} ${FLAGS_C_MINSIZEREL})
-    set(COMPILE_OPTIONS_C_RELWITHDEBINFO ${FLAGS_C} ${FLAGS_C_RELWITHDEBINFO})
-
-    set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
-    set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
-    set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
-
-    set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
-    set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
-    set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
-
-    set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
-    set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
-    set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
-    set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
-
-    set(LINKER_LIBRARIES ${LINK_LIBRARIES})
-```
-
-#### Mapping options to the selected build type
-
-```cmake
-    if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-        set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-        set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-        set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-        set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-        set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-        set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
-    elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-        set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELEASE})
-        set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELEASE})
-        set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELEASE})
-        set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELEASE})
-        set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELEASE})
-        set(LINKER_OPTIONS ${LINKER_OPTIONS_RELEASE})
-    elseif(${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
-        set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_MINSIZEREL})
-        set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_MINSIZEREL})
-        set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_MINSIZEREL})
-        set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_MINSIZEREL})
-        set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_MINSIZEREL})
-        set(LINKER_OPTIONS ${LINKER_OPTIONS_MINSIZEREL})
-    elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-        set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELWITHDEBINFO})
-        set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO})
-        set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELWITHDEBINFO})
-        set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELWITHDEBINFO})
-        set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELWITHDEBINFO})
-        set(LINKER_OPTIONS ${LINKER_OPTIONS_RELWITHDEBINFO})
-    else()
-        message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
-    endif()
-```
-
-### Setting additional CMake variables
-
-We will be adding some new variables for convenience:
-
-- In order to enable setting verbose output, which will print more information on the CMake configuration, we will need to set `CMAKE_VERBOSE_MAKEFILE`.
-We use another variable, `VERBOSE_BUILD` which can be set in `CMakeSettings.json` to set this variable.
-- We will need to set the target system we're building for, which was using the variable `BAREMETAL_RPI_TARGET`.
-- We will add a standard CMake variable `CMAKE_EXPORT_COMPILE_COMMANDS`, which makes CMake generate a JSON file with settings for each source file it compiles, which can be used by Visual Studio for inspection.
-- We will also add a variable `CMAKE_COLOR_MAKEFILE` which can be used for color output when configuring and building with CMake.
-
-In the main CMake file, just before defining the main project, inser the following:
-
-```cmake
-...
-set(DEPLOYMENT_DIR "${CMAKE_SOURCE_DIR}/deploy" CACHE STRING "Deployment directory")
-set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/output" CACHE STRING "Output directory")
-set(OUTPUT_BIN_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin")
-set(OUTPUT_LIB_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib")
-
-option(VERBOSE_BUILD "Verbose build" ON)
-
-if (VERBOSE_BUILD)
-    set(CMAKE_VERBOSE_MAKEFILE ON CACHE STRING "Verbose build" FORCE)
+if (BAREMETAL_RPI_TARGET EQUAL 3)
+    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
+    set(BAREMETAL_TARGET_KERNEL kernel8)
+elseif (BAREMETAL_RPI_TARGET EQUAL 4)
+    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
+    set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
 else()
-    set(CMAKE_VERBOSE_MAKEFILE OFF CACHE STRING "Verbose build" FORCE)
+    message(FATAL_ERROR "Incorrect RPI target ${BAREMETAL_RPI_TARGET} specified, must be 3 or 4")
 endif()
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_COLOR_MAKEFILE ON)
+set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
-if("${BAREMETAL_RPI_TARGET}" STREQUAL "")
-    set(BAREMETAL_RPI_TARGET 3) # RPI board type (3/4)
-endif()
+set(DEFINES_C 
+    PLATFORM_BAREMETAL
+    RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    )
+set(DEFINES_C_DEBUG _DEBUG)
+set(DEFINES_C_RELEASE NDEBUG)
+set(DEFINES_C_MINSIZEREL NDEBUG)
+set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+set(DEFINES_ASM
+    PLATFORM_BAREMETAL
+    RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    )
 
-message(STATUS "\n** Setting up project **\n--")
+set(FLAGS_C
+    ${BAREMETAL_ARCH_CPU_OPTIONS}
+    -Wall 
+    -Wextra
+    -Werror
+    -Wno-parentheses
+    -ffreestanding
+    -fsigned-char
+    -nostartfiles 
+    -std=gnu99 
+    -mno-outline-atomics
+    -nostdinc 
+    -nostdlib 
+)
+# -g is added by CMake
+set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+# -O3 is added by CMake
+set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
+# -Os is added by CMake
+set(FLAGS_C_MINSIZEREL -O3)
+# -O2 -g is added by CMake
+set(FLAGS_C_RELWITHDEBINFO )
 
-message(STATUS "\n##################################################################################")
-message(STATUS "\n** Setting up toolchain **\n--")
+set(FLAGS_CXX
+    ${BAREMETAL_ARCH_CPU_OPTIONS}
+    -Wall
+    -Wextra
+    -Werror
+    -Wno-missing-field-initializers
+    -Wno-unused-value
+    -Wno-aligned-new
+    -ffreestanding 
+    -fsigned-char 
+    -nostartfiles
+    -mno-outline-atomics
+    -nostdinc
+    -nostdlib
+    -nostdinc++
+    -fno-exceptions
+    -fno-rtti
+    )
 
-project(baremetal-main
-    DESCRIPTION "Baremetal overall project")
-...
-```
+# -g is added by CMake
+set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+# -O3 is added by CMake
+set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+# -Os is added by CMake
+set(FLAGS_CXX_MINSIZEREL -O3)
+# -O2 -g is added by CMake
+set(FLAGS_CXX_RELWITHDEBINFO )
 
-## Creating the library code
+set(LINK_FLAGS
+    -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+    -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+    -nostdlib
+    -nostartfiles 
+    )
+
+## Creating the library code - step 1
 
 So let's start adding some code for the library, and set up the project for this library.
+
+As we will need to add quite some code, let's do it in small steps.
+
+The first step we'll take is including a header to contain standard ARM instructions, starting with the NOP (No operation) instructions. We will then use this in a loop to wait for a while.
+
+### ARMInstructions.h
+
+We add ARM instructions.
+
+`code/libraries/baremetal/include/baremetal/ARMInstructions.h`
+```cpp
+//------------------------------------------------------------------------------
+// Copyright   : Copyright(c) 2023 Rene Barto
+//
+// File        : ArmInstructions.h
+//
+// Namespace   : -
+//
+// Class       : -
+//
+// Description : Common instructions for ARM for e.g. synchronization
+//
+//------------------------------------------------------------------------------
+
+#pragma once
+
+#include <baremetal/Macros.h>
+
+/// @file
+/// ARM instructions represented as macros for ease of use.
+///
+/// For specific registers, we also define the fields and their possible values.
+
+/// @brief NOP instruction
+#define NOP()                           asm volatile("nop")
+```
+
+This header declares a number of standard ARM instructions. More will be added later.
+
+### Dummy.cpp
+
+As the baremetal currently has no source files, only a header file, we will create a dummy C++ file to allow for building the library:
+
+`code/libraries/baremetal/src/Dummy.cpp`
+```cpp
+// This is just a dummy file to allow creating the baremetal project
+
+```
+
+### Project setup for baremetal
+
+First let's set up the project for the library:
+
+`code/libraries/baremetal/CMakeLists.txt`
+```cmake
+message(STATUS "\n**********************************************************************************\n")
+message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+project(baremetal
+	DESCRIPTION "Bare metal library"
+	LANGUAGES CXX ASM)
+
+set(PROJECT_TARGET_NAME ${PROJECT_NAME})
+
+set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+set(PROJECT_INCLUDE_DIRS_PRIVATE )
+set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+
+set(PROJECT_DEPENDENCIES
+    )
+
+set(PROJECT_LIBS
+    ${LINKER_LIBRARIES}
+    ${PROJECT_DEPENDENCIES}
+    )
+
+set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Dummy.cpp
+    )
+
+set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+    )
+set(PROJECT_INCLUDES_PRIVATE )
+
+if (CMAKE_VERBOSE_MAKEFILE)
+    display_list("Package                           : " ${PROJECT_NAME} )
+    display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+    display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+    display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+    display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+    display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+    display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+    display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+    display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+    display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+    display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+    display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+    display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+    display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+    display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+    display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+    display_list("Link libs                         : " ${PROJECT_LIBS} )
+    display_list("Source files                      : " ${PROJECT_SOURCES} )
+    display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+    display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+endif()
+
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+    )
+target_compile_definitions(${PROJECT_NAME} PUBLIC 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+    )
+target_compile_options(${PROJECT_NAME} PRIVATE 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+    )
+target_compile_options(${PROJECT_NAME} PUBLIC 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+    )
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+
+list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+endif()
+
+link_directories(${LINK_DIRECTORIES})
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+
+show_target_properties(${PROJECT_NAME})
+```
+
+You will recognize the structure used in the previous demo project, with a few additions:
+
+- There is a section `if (CMAKE_VERBOSE_MAKEFILE)` ... `endif()` that uses the custom CMake function `display_list` which was defined [before](###CMake-function-display_list) a number of times.
+This simply prints out information on the project, in case we request verbose output.
+- The last line uses the custom CMake function `show_target_properties`, which was also defined [before](###CMake-function-show_target_properties)
+This prints out various properties attached to the target (in this case the library), in case we request verbose output.
+- The `target_compile_definitions` and `target_compile_options` (both PRIVATE and PUBLIC) are set in a slightly different way, using variable such as:
+  - `PROJECT_COMPILE_DEFINITIONS_C_PRIVATE`
+  - `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE`
+  - `PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE`
+  
+  These variables are used to e.g. define compiler definitions for a specific language, in this case C, C++ or assembly.
+  These variables are set in the beginning of the file, and are based on the common variables defined in the main CMake file [here](###Common-compiler-directives).
+
+### Change default variables in CMakeSettings.json
+
+In order to get more verbose output from CMake, and to set the correct target platform (we will select RaspBerry Pi 3 here), we will need to update `CMakeSettings.json`.
+
+```json
+{
+  "environments": [ {} ],
+  "configurations": [
+    {
+      "name": "BareMetal-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\cmake-${name}",
+      "installRoot": "${projectDir}\\output\\install\\${name}",
+      "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+      "inheritEnvironments": [ "gcc-arm" ]
+    }
+  ]
+}
+```
+
+### Update application code
+
+We will use the NOP instruction (which is part of the baremetal library) in a simple loop:
+
+code/applications/demo/src/main.cpp
+```cpp
+#include "baremetal/ARMInstructions.h"
+
+int main()
+{
+    for (int i = 0; i < 1000000; ++i)
+    {
+        NOP();
+    }
+    return 0;
+}
+```
+
+### Update project setup for demo application
+
+We will update the demo application CMakeLists.txt in a similar way:
+
+`code/applications/demo/CMakeLists.txt`
+```cmake
+project(demo
+    DESCRIPTION "Demo application"
+    LANGUAGES CXX ASM)
+
+message(STATUS "\n**********************************************************************************\n")
+message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+message("\n** Setting up ${PROJECT_NAME} **\n")
+
+include(functions)
+
+set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+
+set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+set(PROJECT_INCLUDE_DIRS_PRIVATE )
+set(PROJECT_INCLUDE_DIRS_PUBLIC )
+
+set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+
+set(PROJECT_DEPENDENCIES
+    baremetal
+    )
+
+set(PROJECT_LIBS
+    ${LINKER_LIBRARIES}
+    ${PROJECT_DEPENDENCIES}
+    )
+
+set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    )
+
+set(PROJECT_INCLUDES_PUBLIC )
+set(PROJECT_INCLUDES_PRIVATE )
+
+if (CMAKE_VERBOSE_MAKEFILE)
+    display_list("Package                           : " ${PROJECT_NAME} )
+    display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+    display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+    display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+    display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+    display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+    display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+    display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+    display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+    display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+    display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+    display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+    display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+    display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+    display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+    display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+    display_list("Link libs                         : " ${PROJECT_LIBS} )
+    display_list("Source files                      : " ${PROJECT_SOURCES} )
+    display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+    display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+endif()
+
+if (PLATFORM_BAREMETAL)
+    set(START_GROUP -Wl,--start-group)
+    set(END_GROUP -Wl,--end-group)
+endif()
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+
+target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+    )
+target_compile_definitions(${PROJECT_NAME} PUBLIC 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+    )
+target_compile_options(${PROJECT_NAME} PRIVATE 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+    )
+target_compile_options(${PROJECT_NAME} PUBLIC 
+    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+    )
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+
+list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+endif()
+
+link_directories(${LINK_DIRECTORIES})
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+
+add_subdirectory(create-image)
+```
+
+So, we re-use the compiler definitions and compiler and linker options from the main `CMakeLists.txt` file.
+We also add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
+
+### Update project setup for demo-image project
+
+We will also update the project for the demo image creation, as the `BAREMETAL_TARGET_KERNEL` variable is also defined in the top level CMake file (and is now dependent on the target system we build for).
+In the We will update the demo application CMakeLists.txt in a similar way:
+
+`code/applications/demo/create-image/CMakeLists.txt`
+```cmake
+project(demo-image
+    DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+
+message(STATUS "\n**********************************************************************************\n")
+message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+message("\n** Setting up ${PROJECT_NAME} **\n")
+
+set(DEPENDENCY demo)
+set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+
+create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+```
+
+So we simply remove the setting of the `BAREMETAL_TARGET_KERNEL` variable.
+
+### Configure and build
+
+We are now able to configure the project again, and build it.
+
+The output for the configure step should be similar to:
+
+```text
+1> CMake generation started for configuration: 'BareMetal-Debug'.
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
+1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
+1> [CMake] -- CMake 3.20.21032501-MSVC_2
+1> [CMake] -- 
+1> [CMake] ** Setting up project **
+1> [CMake] --
+1> [CMake] -- 
+1> [CMake] ##################################################################################
+1> [CMake] -- 
+1> [CMake] ** Setting up toolchain **
+1> [CMake] --
+1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- Processor                aarch64
+1> [CMake] -- Platform tuple           aarch64-none-elf
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+1> [CMake] -- C++ compiler version:    13.2.1
+1> [CMake] -- C compiler version:      13.2.1
+1> [CMake] -- C++ supported standard:  17
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
+1> [CMake] 
+1> [CMake] ** Setting up demo **
+1> [CMake] 
+1> [CMake] -- Package                           :  demo
+1> [CMake] -- Package description               :  Demo application
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
+1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
+1> [CMake] -- Include dirs - public             : 
+1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Dependencies                      :  baremetal
+1> [CMake] -- Link libs                         :  baremetal
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/applications/demo/src/main.cpp
+1> [CMake] -- Include files - public            : 
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
+1> [CMake] 
+1> [CMake] ** Setting up demo-image **
+1> [CMake] 
+1> [CMake] -- create_image demo-image kernel8.img demo
+1> [CMake] -- TARGET_NAME demo.elf
+1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries/baremetal
+1> [CMake] -- Package                           :  baremetal
+1> [CMake] -- Package description               :  Bare metal library
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
+1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
+1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Dependencies                      : 
+1> [CMake] -- Link libs                         : 
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/libraries/baremetal/src/Dummy.cpp
+1> [CMake] -- Include files - public            :  D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/ARMInstructions.h
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
+1> [CMake] -- Properties for baremetal
+1> [CMake] -- Target type                       :  STATIC_LIBRARY
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
+1> [CMake] -- Target imported dependencies      : 
+1> [CMake] -- Target imported link libraries    : 
+1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
+1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
+1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
+1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
+1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
+1> [CMake] -- Target output name                :  baremetal
+1> [CMake] -- Configuring done
+1> [CMake] -- Generating done
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
+1> Extracted CMake variables.
+1> Extracted source files and headers.
+1> Extracted code model.
+1> Extracted toolchain configurations.
+1> Extracted includes paths.
+1> CMake generation finished.
+```
+
+As you can see, all configured projects are shown, with their settings. This is very helpful in finding configuration problems.
+
+We can then build:
+
+```text
+>------ Rebuild All started: Project: baremetal, Configuration: BareMetal-Debug ------
+  [1/1] "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"  -t clean 
+  Cleaning... 5 files.
+  [1/5] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\Dummy.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj -c ../code/libraries/baremetal/src/Dummy.cpp
+  [2/5] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [3/5] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
+  [4/5] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  ../output/Debug/lib/libbaremetal.a && cd ."
+  [5/5] cmd.exe /C "cd /D D:\Projects\baremetal.github\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
+
+Rebuild All succeeded.
+```
+
+You can see that the demo application's main.cpp is compiled (step 2), as well as the baremetal library's Dummy.cpp (step 1).
+Then the baremetal library is removed and re-created (step 3).
+The demo application is linked, using the baremetal library (step 4), and finally the image is created (step 5).
+It takes a while to start understanding what the compiler and linker actually do, so we'll dive a bit deeper here:
+
+#### Compiling sources (step 1 and 2):
+
+```text
+D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
+  -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG
+  -I../code/libraries/baremetal/include
+  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small
+  -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new
+  -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib
+  -nostdinc++ -fno-exceptions -fno-rtti
+  -O0 -Wno-unused-variable -Wno-unused-parameter
+  -std=gnu++17
+  -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d
+  -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+  -c ../code/applications/demo/src/main.cpp
+```
+
+##### Compiler
+
+The first part is the compiler call, the rest are command line parameters for the compiler.
+
+##### Compiler definitions
+
+The -D options specify all compiler definitions. You will recognize the options specified in CMakeSettings.json: `"cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3"`.
+- The first option triggers setting the `CMAKE_VERBOSE_MAKEFILE` setting, that shows the configuration output.
+- The second trigger setting the `RPI_TARGET=3` definition.
+- The `PLATFORM_BAREMETAL` definition is triggered by the main CMake file:
+```cmake
+set(DEFINES_C 
+    PLATFORM_BAREMETAL
+    RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    )
+```
+- The \_DEBUG definition is caused by the `CMAKE_BUILD_TYPE` variable, which is set to `Debug` as we are building a Debug application. This is also done in the main CMake file:
+```cmake
+set(DEFINES_C_DEBUG _DEBUG)
+set(DEFINES_C_RELEASE NDEBUG)
+set(DEFINES_C_MINSIZEREL NDEBUG)
+set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+```
+- The generic and the build configuration specific definitions are later combined:
+```cmake
+set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
+set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
+set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
+set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
+```
+- And then later variable for the specific build configuration are set:
+```cmake
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+...
+```
+
+##### Compiler include paths
+
+The parameter `-I../code/libraries/baremetal/include` specifies the directory to use for include files when building main.cpp. This is a results of the added dependency in the `code/applicationd/demo` CMake file:
+
+```cmake
+set(PROJECT_DEPENDENCIES
+    baremetal
+    )
+```
+
+While is added to the libraries to be linked:
+
+```cmake
+set(PROJECT_LIBS
+    ${LINKER_LIBRARIES}
+    ${PROJECT_DEPENDENCIES}
+    )
+```
+
+Which is then used to set the libraries to be linked:
+
+```cmake
+target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+```
+
+##### Compiler options
+
+The complete list below are all compiler options:
+
+```text
+-g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small
+-Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char
+-nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -g -Wno-unused-variable -Wno-unused-parameter
+-std=gnu++17
+-MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d
+```
+
+- The first -g is automatically added by CMake as we are building for a debug configuration
+- The `-mcpu=cortex-a53 -mlittle-endian -mcmodel=small` options are set due to the fact that we are building for Raspberry Pi 3:
+```cmake
+if (BAREMETAL_RPI_TARGET EQUAL 3)
+    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
+    set(BAREMETAL_TARGET_KERNEL kernel8)
+...
+```
+- The `-Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char
+-nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti` options all are defined later on in the main CMake file, where they are combinex with `BAREMETAL_ARCH_CPU_OPTIONS`:
+```cmake
+set(FLAGS_CXX
+    ${BAREMETAL_ARCH_CPU_OPTIONS}
+    -Wall
+    -Wextra
+    -Werror
+    -Wno-missing-field-initializers
+    -Wno-unused-value
+    -Wno-aligned-new
+    -ffreestanding 
+    -fsigned-char 
+    -nostartfiles
+    -mno-outline-atomics
+    -nostdinc
+    -nostdlib
+    -nostdinc++
+    -fno-exceptions
+    -fno-rtti
+    )
+```
+- The `-O0 -g -Wno-unused-variable -Wno-unused-parameter` options are set for the specific Debug build configuration:
+```cmake
+set(FLAGS_CXX_DEBUG -O0 -g -Wno-unused-variable -Wno-unused-parameter)
+```
+- The generic and the build configuration specific definitions are later combined:
+```cmake
+set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
+set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
+set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
+set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
+```
+- And then later variable for the specific build configuration are set:
+```cmake
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+...
+```
+- The option `-std=gnu++17` is automatically added by CMake due to setting the variable `SUPPORTED_CPP_STANDARD` in the main CMake file:
+```cmake
+set(SUPPORTED_CPP_STANDARD 17)
+```
+- Which is then later used when defining the target properties in the `code/application/demo` and `code/libraries/baremetal` CMake files:
+```cmake
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+```
+- Finally, the options `-MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d` are added automatically by CMake, to generate a dependency file.
+
+##### Actual compilation
+
+The final parameters determine the source files compiled, and the resulting object file:
+
+```text
+-o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+-c ../code/applications/demo/src/main.cpp
+```
+
+The -c option tells the compiler to compile the specified file, the -o option tells it to generate the specified object file. Notice that the paths are relative to the CMake build directory, in this case `cmake-BareMetal-Debug`.
+
+#### Creating the baremetal library (step 3)
+
+```text
+cmd.exe /C 
+ "cd . && 
+  "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a &&
+  D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe
+    qc
+    ..\output\Debug\lib\libbaremetal.a
+    code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj && 
+  D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe
+    ..\output\Debug\lib\libbaremetal.a && 
+  cd ."
+```
+
+Here we see a total of 5 commands being performed inside a command shell:
+
+- The first is just a cd command (actually moving to the same directory)
+- The second is a cmake call to remove the baremetal library
+- The third creates the baremetal library (the options qc mean _quick append_ and _create_)
+- The fourth adds a symbol to the baremetal library
+- The fifth is again a cd command to the same directory
+
+#### Linking the demo application (step 4)
+
+```text
+cmd.exe /C
+  "cd . &&
+  D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
+    -g
+    -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+    -Wl,--section-start=.init=0x80000
+    -T D:/Projects/baremetal.github/baremetal.ld
+    -nostdlib -nostartfiles
+    code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+    -o ..\output\Debug\bin\demo.elf
+    -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group &&
+  cd ."
+```
+
+Here we see a total of 3 commands being performed inside a command shell:
+
+- The first is just a cd command (actually moving to the same directory)
+- The second links the exeutable file
+- The third is again a cd command to the same directory
+
+Options used when linking are:
+```text
+-g
+-LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+-Wl,--section-start=.init=0x80000
+-T D:/Projects/baremetal.github/baremetal.ld
+-nostdlib -nostartfiles
+code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+-o ..\output\Debug\bin\demo.elf
+-Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group
+```
+
+- The first -g is automatically added by CMake as we are building for a debug configuration
+- The `-LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1` option is added by the toolchain:
+```cmake
+set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
+
+...
+
+if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "")
+	set(HAVE_AUX_PATH false)
+else()
+	list(FIND ${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH} HAVE_AUX_PATH)
+endif()
+message(STATUS "CMAKE_EXE_LINKER_FLAGS=  ${CMAKE_EXE_LINKER_FLAGS}")
+if (NOT HAVE_AUX_PATH)
+	message(STATUS "Adding to CMAKE_EXE_LINKER_FLAGS -L${TOOLCHAIN_AUXILIARY_PATH}")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH}" CACHE INTERNAL "" FORCE)
+endif()
+```
+- So the `TOOLCHAIN_AUXILIARY_PATH` is set, and then appended to `CMAKE_EXE_LINKER_FLAGS` if not already there. This option specifies a directory searched for object and library files when linking the target.
+The `CMAKE_EXE_LINKER_FLAGS` are automatically added to the linker flags for a target by CMake.
+- The options `-Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles` are set in the main CMake file:
+```cmake
+set(LINK_FLAGS
+    -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+    -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+    -nostdlib
+    -nostartfiles 
+    )
+```
+- This is then combined later on with the build configuration specific linker flags:
+```cmake
+set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
+set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
+set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
+set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
+```
+- Subsequently, the linker flags for the selected build configuration is set:
+```cmake
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+...
+```
+- The `LINKER_OPTIONS` variable is then used in the project CMake file (`code/applications/demo/CMakeLists.txt` and `code/libraries/baremetal/CMakeLists.txt`):
+```cmake
+set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+```
+- Then the target linker options are set using this veriable:
+```cmake
+list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+endif()
+```
+- What follows is a list of object files to be linked, in this case just one:
+```text
+code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+```
+- This list is determined by the source files specified for the target:
+```cmake
+set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    )
+
+set(PROJECT_INCLUDES_PUBLIC )
+set(PROJECT_INCLUDES_PRIVATE )
+
+...
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+```
+- Next is the option `-o ..\output\Debug\bin\demo.elf`, which specifies the output of the linker, the application.
+This is determined by the specification of the name and location of the target file in the project CMake file:
+```cmake
+set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+
+...
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+```
+- As we are building an executable, the location will be the `OUTPUT_BIN_DIR`, the file name will be `PROJECT_TARGET_NAME`.
+- Finally, the list of libraries to link to is specified: `-Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group`. This is determined by the list of libraries to link to in the project CMake file:
+```cmake
+set(PROJECT_DEPENDENCIES
+    baremetal
+    )
+
+set(PROJECT_LIBS
+    ${LINKER_LIBRARIES}
+    ${PROJECT_DEPENDENCIES}
+    )
+
+...
+
+target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+```
+- The reason libraries linked to is placed in a group (`-Wl,--start-group <libraries> -Wl,--end-group`) is that the GCC linker expects the lowest level symbols to be added last, and we cannot always guarantee the correct order of libraires.
+By putting them in a group, the linker will iterate as many times as needed to resolve all symbols.
+
+#### Creating the kernel image (step 5)
+
+```text
+cmd.exe /C 
+ "cd /D D:\Projects\baremetal.github\cmake-BareMetal-Debug\code\applications\demo\create-image && 
+  D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe 
+    D:/Projects/baremetal.github/output/Debug/bin/demo.elf 
+    -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
+```
+
+Here we see a 2 commands being performed inside a command shell:
+
+- The first is just a cd command (moving into the create-image directory)
+- The second creates the image file
+  - This runs the objcopy tool
+  - Its first parameter is the executable file to be placed in the image
+  - The second parameter (specified with option `-O`) specifies the image file to be created.
+
+### Running the application
+
+Start QEMU listening to UART1 for the demo project:
+
+```bat
+tools\startQEMU-image-uart1.bat demo
+```
+
+Start debugging as shown in [Building](setting-up-project-structure.md###Building) and [Debugging](setting-up-project-structure.md###Debugging). Make sure the demo applications is selected as startup project.
+
+
+# ==========================
 
 The code beneath is clearly also in this repository, and will look slightly different, for copyright / licensing reasons. Please refer to [readme](../README.md##License).
 This code contains documentation in Doxygen format. Later on we'll add scripting to generate Doxygen documentation from this code. The examples below leave this out for reasons of brevity.
@@ -637,39 +1391,6 @@ This header declares a class `UART1`, in the `baremetal` namespace, which implem
 Then we add the implementation of the classes just declared.
 The `Types.h` header does not need implementation as it just declares some types.
 The classes `CharDevice` and `IMemoryAccess` are abstract interfaces, so do not need implementation.
-
-### ARMInstructions.h
-
-We add ARM instructions. Add the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`:
-
-```cpp
-//------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
-//
-// File        : ArmInstructions.h
-//
-// Namespace   : -
-//
-// Class       : -
-//
-// Description : Common instructions for ARM for e.g. synchronization
-//
-//------------------------------------------------------------------------------
-
-#pragma once
-
-#include <baremetal/Macros.h>
-
-/// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
-
-/// @brief NOP instruction
-#define NOP()                           asm volatile("nop")
-```
-
-This header declares a number of standard ARM instructions. More will be added later.
 
 ### BCMRegisters.h
 
@@ -1331,282 +2052,3 @@ void UART1::WriteString(const char *str)
 ```
 
 You will notice that we did not actually implement the UART1 functionality yet. For that we will need some more code, we will get to that shortly.
-
-## Project setup for baremetal
-
-First let's set up the project for the library:
-
-`code/libraries/baremetal/CMakeLists.txt`
-```cmake
-message(STATUS "\n**********************************************************************************\n")
-message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-
-project(baremetal
-	DESCRIPTION "Bare metal library"
-	LANGUAGES CXX ASM)
-
-set(PROJECT_TARGET_NAME ${PROJECT_NAME})
-
-set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
-set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
-set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
-set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
-set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
-set(PROJECT_INCLUDE_DIRS_PRIVATE )
-set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-
-set(PROJECT_DEPENDENCIES
-    )
-
-set(PROJECT_LIBS
-    ${LINKER_LIBRARIES}
-    ${PROJECT_DEPENDENCIES}
-    )
-
-set(PROJECT_SOURCES
-    )
-if (PLATFORM_BAREMETAL)
-    LIST(APPEND PROJECT_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-        )
-endif()
-
-set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-    )
-set(PROJECT_INCLUDES_PRIVATE )
-
-if (CMAKE_VERBOSE_MAKEFILE)
-    display_list("Package                           : " ${PROJECT_NAME} )
-    display_list("Package description               : " ${PROJECT_DESCRIPTION} )
-    display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
-    display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
-    display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
-    display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
-    display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
-    display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
-    display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
-    display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
-    display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
-    display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
-    display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
-    display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
-    display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
-    display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
-    display_list("Link libs                         : " ${PROJECT_LIBS} )
-    display_list("Source files                      : " ${PROJECT_SOURCES} )
-    display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
-    display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
-endif()
-
-add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
-target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-target_compile_definitions(${PROJECT_NAME} PRIVATE 
-    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
-    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
-    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
-    )
-target_compile_definitions(${PROJECT_NAME} PUBLIC 
-    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
-    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
-    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
-    )
-target_compile_options(${PROJECT_NAME} PRIVATE 
-    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
-    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
-    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
-    )
-target_compile_options(${PROJECT_NAME} PUBLIC 
-    $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
-    $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
-    $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
-    )
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-
-list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-endif()
-
-link_directories(${LINK_DIRECTORIES})
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
-
-show_target_properties(${PROJECT_NAME})
-```
-
-You will recognize the structure used in the previous demo project, with a few additions:
-
-- There is a section `if (CMAKE_VERBOSE_MAKEFILE)` ... `endif()` that uses the custom CMake function `display_list` which was defined [before](###CMake-function-display_list) a number of times.
-This simply prints out information on the project, in case we request verbose output.
-- The last line uses the custom CMake function `show_target_properties`, which was also defined [before](###CMake-function-show_target_properties)
-This prints out various properties attached to the target (in this case the library), in case we request verbose output.
-- The `target_compile_definitions` and `target_compile_options` (both PRIVATE and PUBLIC) are set in a slightly different way, using variable such as:
-  - `PROJECT_COMPILE_DEFINITIONS_C_PRIVATE`
-  - `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE`
-  - `PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE`
-  
-  These variables are used to e.g. define compiler definitions for a specific language, in this case C, C++ or assembly.
-  These variables are set in the beginning of the file, and are based on the common variables defined in the main CMake file [here](###Common-compiler-directives).
-
-## Change default variables in CMakeSettings.json
-
-In order to get more verbose output from CMake, and to set the correct target platform (we will select RaspBerry Pi 3 here), we will need to update `CMakeSettings.json`.
-
-```json
-{
-  "environments": [ {} ],
-  "configurations": [
-    {
-      "name": "BareMetal-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\cmake-${name}",
-      "installRoot": "${projectDir}\\output\\install\\${name}",
-      "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-      "inheritEnvironments": [ "gcc-arm" ]
-    }
-  ]
-}
-```
-
-## Configure and build
-
-We are now able to configure the project again, and build it.
-
-The output for the configure step should be similar to:
-
-```text
-1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERSION_NUMBER="1.0.0" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DBAREMETAL_CONSOLE_UART0=ON -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
-1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
-1> [CMake] -- CMake 3.20.21032501-MSVC_2
-1> [CMake] -- 
-1> [CMake] ** Setting up project **
-1> [CMake] --
-1> [CMake] -- 
-1> [CMake] ##################################################################################
-1> [CMake] -- 
-1> [CMake] ** Setting up toolchain **
-1> [CMake] --
-1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
-1> [CMake] -- Processor                aarch64
-1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] -- C++ compiler version:    13.2.1
-1> [CMake] -- C compiler version:      13.2.1
-1> [CMake] -- C++ supported standard:  17
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
-1> [CMake] 
-1> [CMake] ** Setting up demo **
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
-1> [CMake] 
-1> [CMake] ** Setting up demo-image **
-1> [CMake] 
-1> [CMake] -- create_image demo-image kernel8.img demo
-1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
-1> [CMake] -- 
-1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries/baremetal
-1> [CMake] -- Package                           :  baremetal
-1> [CMake] -- Package description               :  Bare metal library
-1> [CMake] -- Defines C - public                : 
-1> [CMake] -- Defines C - private               : 
-1> [CMake] -- Defines C++ - public              : 
-1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
-1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       : 
-1> [CMake] -- Compiler options C - private      : 
-1> [CMake] -- Compiler options C++ - public     : 
-1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -g -Wno-unused-variable -Wno-unused-parameter
-1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
-1> [CMake] -- Dependencies                      : 
-1> [CMake] -- Link libs                         : 
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/libraries/baremetal/src/MemoryAccess.cpp D:/Projects/baremetal.github/code/libraries/baremetal/src/UART1.cpp
-1> [CMake] -- Include files - public            :  D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/CharDevice.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/IMemoryAccess.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/MemoryAccess.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/Types.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/UART1.h
-1> [CMake] -- Include files - private           : 
-1> [CMake] -- 
-1> [CMake] -- Properties for baremetal
-1> [CMake] -- Target type                       :  STATIC_LIBRARY
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -g -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
-1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
-1> [CMake] -- Target imported dependencies      : 
-1> [CMake] -- Target imported link libraries    : 
-1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
-1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
-1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
-1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
-1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
-1> [CMake] -- Target output name                :  baremetal
-1> [CMake] -- Configuring done
-1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
-1> Extracted CMake variables.
-1> Extracted source files and headers.
-1> Extracted code model.
-1> Extracted toolchain configurations.
-1> Extracted includes paths.
-1> CMake generation finished.
-```

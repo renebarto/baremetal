@@ -14,10 +14,11 @@ Contents:
   - [Adding project variables](###Adding-project-variables)
   - [Setting up the target](###Setting-up-the-target)
   - [Adding custom CMake module](###Adding-custom-CMake-module)
-  - [Adding the linker definition file](###Adding-the-linker-definition-file)
-  - [Startup assembly code](###Startup-assembly-code)
-  - [Configuring](###Configuring)
-  - [Building](###Building)
+- [Adding the linker definition file](###Adding-the-linker-definition-file)
+- [Startup assembly code](###Startup-assembly-code)
+- [Configuring](###Configuring)
+- [Building](###Building)
+- [Debugging](###Debugging)
 
 Configuration for a project is largely similar for Windows and Linux, however the way we build and debug is slightly different.
 
@@ -572,7 +573,7 @@ File: tutorial/00-build/CMakeLists.txt
 44: set(PROJECT_INCLUDES_PUBLIC )
 45: set(PROJECT_INCLUDES_PRIVATE )
 46: 
-47: if (CMAKE_HOST_UNIX)
+47: if (PLATFORM_BAREMETAL)
 48:     set(START_GROUP -Wl,--start-group)
 49:     set(END_GROUP -Wl,--end-group)
 50: endif()
@@ -704,7 +705,7 @@ File: tutorial/00-build/CMakeLists.txt
 
 As you can see, we just name the script (line 16), without path or extension. This is possible, because we already added the path to the standard CMake module paths `CMAKE_MODULE_PATH`, and because we're using the stanrd CMake module extension `.cmake`
 
-### Adding the linker definition file
+## Adding the linker definition file
 
 The we need to set up the linker definitions file as pointed to by the [linker options](#Setting-up-target).
 
@@ -835,7 +836,7 @@ The linker definition file defines the different sections in the executable file
 - line 96-103: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
 - line 106: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
 
-### Startup assembly code
+## Startup assembly code
 
 The final step is adding startup code.
 
@@ -958,7 +959,7 @@ File: tutorial/00-build/CMakeLists.txt
 46: 
 ```
 
-### Creating an image
+## Creating an image
 
 Now we can build the code to generate `output/Debug/bin/00-build.elf`, however that application cannot simply be run in e.g. QEMU.
 We need to create an image for that. This is a fairly simple step, adding a new target for the image.
@@ -1061,11 +1062,11 @@ File: tutorial/00-build/CMakeLists.txt
 
 We can now start to build the application and image.
 
-### Configuring
+## Configuring
 
 We first need to configure the build for CMake:
 
-#### Windows
+### Windows
 
 ```bat
 del /S /f /q cmake-build\*.*
@@ -1076,7 +1077,7 @@ cmake ../tutorial/00-build -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TO
 popd
 ```
 
-#### Linux
+### Linux
 
 ```bash
 rm -rf cmake-build/
@@ -1089,11 +1090,11 @@ popd
 In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use `tutorial/00-build` as the root CMake directory, and use the toolchain file.
 We are building for Debug.
 
-### Building
+## Building
 
 Then we can build the targets:
 
-#### Windows
+### Windows
 
 ```bat
 set ROOT=%CD%
@@ -1102,7 +1103,7 @@ cmake --build %ROOT%/cmake-build --target 00-build-image
 popd
 ```
 
-#### Linux
+### Linux
 
 ```bash
 rootdir=`pwd`
@@ -1118,11 +1119,11 @@ After this step, we will have built the application in `output/Debug/bin/00-buil
 
 The image is very small, as the application basically does nothing, but you have built your first baremetal application!
 
-### Debugging
+## Debugging
 
 To show that the application actually works, let's run it in QEMU and debug it.
 
-#### Windows
+### Windows
 
 To run QEMU:
 
@@ -1154,7 +1155,7 @@ For help, type "help".
 Type "apropos word" to search for commands related to "word".
 ```
 
-#### Linux
+### Linux
 
 To run QEMU:
 

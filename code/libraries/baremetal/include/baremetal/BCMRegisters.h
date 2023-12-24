@@ -40,32 +40,17 @@
 #pragma once
 
 #include <baremetal/Macros.h>
+#include <baremetal/Types.h>
 
 #if RPI_TARGET == 3
 /// @brief Base address for Raspberry PI BCM I/O
-#define RPI_BCM_IO_BASE 0x3F000000
+#define RPI_BCM_IO_BASE                 0x3F000000
 #else
 /// @brief Base address for Raspberry PI BCM I/O
-#define RPI_BCM_IO_BASE 0xFE000000
+#define RPI_BCM_IO_BASE                 0xFE000000
 #endif
 /// @brief End address for Raspberry PI BCM I/O
 #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
-
-/// @brief Base address for Raspberry PI GPU I/O
-#define RPI_GPU_IO_BASE                 0x7E000000
-
-/// @brief Base address for Raspberry PI GPU memory (cached)
-#define RPI_GPU_CACHED_BASE             0x40000000
-/// @brief Base address for Raspberry PI GPU memory (uncached)
-#define RPI_GPU_UNCACHED_BASE           0xC0000000
-
-/// @brief Base address for Raspberry PI GPU memory
-#define RPI_GPU_MEM_BASE                RPI_GPU_UNCACHED_BASE
-
-/// Convert ARM I/O address to GPU bus address (also works for aliases)
-#define RPI_ARM_TO_GPU(addr)            (((addr) & ~0xC0000000) | GPU_MEM_BASE)
-/// Convert GPU bus address to ARM I/O address (also works for aliases)
-#define RPI_GPU_TO_ARM(addr)            ((addr) & ~0xC0000000)
 
 // Raspberry Pi GPIO
 
@@ -227,4 +212,3 @@
 #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT(1)
 /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive
 #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT(0)
-

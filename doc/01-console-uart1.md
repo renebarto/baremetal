@@ -1,10 +1,21 @@
 # First application - using the console - UART1
 
+Contents:
+- [Creating the baremetal library structure](##Creating-the-baremetal-library-structure)
+- [Some groundwork](##Some-groundwork)
+  - [CMake function display_list](###CMake-function-display_list)
+  - [CMake function show_target_properties](###CMake-function-show_target_properties)
+  - [Common compiler directives](###Common-compiler-directives)
+  - [Update default variables in CMakeSettings.json](###Update-default-variables-in-CMakeSettings.json)
+  - [Update demo CMake file](###Update-demo-CMake-file)
+  - [Update demo-image CMake file](###Updatedemo-image-CMake-file) 
+
 Now that we have set up our project structure, integrated with Visual Studio, and are able to configure, build, run and debug our projects, let's start some actual development.
 
 This will again be a length story, as we will have to lay quite some groundwork.
 
-One of the simplest things to start with is the serial console. This is also practical, as using the serial console enables us to write output from the application, and also get input.
+One of the simplest things to start with is the serial console.
+This is also practical, as using the serial console enables us to write output from the application, and also get input.
 
 There are two serial consoles possible, UART0 and UART1, which can be used in parallel, however it is most common to use one of the two, as they normally use the same GPIO pins (14 and 15).
 See also [here](setting-up-for-development.md###Attaching-a-serial-console). For this application, we will use UART1, which is the easiest to set up. It has less functionality, but for a simple serial console both are equally suitable.
@@ -13,12 +24,13 @@ See also [here](setting-up-for-development.md###Attaching-a-serial-console). For
 
 We will first start to create a library named baremetal, which will contain all our basic functionality.
 
-In `code/libraries`, there is a `CMakeLists.txt` file, that currently only holds the following contents:
+In `code/libraries`, there is a CMake file, that currently only holds the following contents:
 
 ```cmake
-message(STATUS "\n**********************************************************************************\n")
-message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-
+File: code/libraries/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
 ```
 
 - We will create a new folder underneath `code/libraries` named baremetal. 
@@ -27,9 +39,10 @@ message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 - We will create a new `CMakeLists.txt` file in `code/libraries/baremetal` with the following contents:
 
 ```cmake
-message(STATUS "\n**********************************************************************************\n")
-message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-
+File: code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
 ```
 
 Note that all this can be done from within Visual Studio, of if desired directly on the command line, whatever you prefer.
@@ -37,34 +50,35 @@ Note that all this can be done from within Visual Studio, of if desired directly
 The file `code/libraries/CMakeLists.txt` will be extended to include our new folder `code/libraries/baremetal`:
 
 ```cmake
-message(STATUS "\n**********************************************************************************\n")
-message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-
-add_subdirectory(baremetal)
+File: code/libraries/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: add_subdirectory(baremetal)
 ```
 
 The resulting structure will look like this:
 
-<img src="images/TreeViewBaremetalLibrary.png" alt="Tree view" width="500"/>
+<img src="images/TreeViewBaremetalLibrary.png" alt="Tree view" width="600"/>
 
-The reason for adding an extra directory with the same name as the library underneath `code/libraries/baremetal/include` is the following.
-It is common practice to export the directory containing the header files to applications, so they can include the header files.
-If we would have two libraries, let's say `lib-one` and `lib-two`, which both define a header file `inc.h`, and we export `lib-one/include` as well as `lib-two/include` as directories, if the the application wanted to include `inc.h`:
+The reason for adding an extra directory with the same name as the library underneath `code/libraries/baremetal/include` is the following:
+
+- It is common practice to export the directory containing the header files to applications, so they can include the header files.
+- If we would have two libraries, let's say `lib-one` and `lib-two`, which both contain a header file `inc.h`, and we export `lib-one/include` as well as `lib-two/include` as directories, if the the application wanted to include `inc.h`:
 
 ```cpp
 #include "inc.h"
 ```
 
-Which one would it include? The answer is, it's undefined.
-
-By adding an extra directory underneath, so `lib-one/include/lib-one`, and `lib-two/include/lib-two`, the application could include either:
+- Which one would it include? The answer is, it's undefined.
+- By adding an extra directory underneath, so `lib-one/include/lib-one`, and `lib-two/include/lib-two`, the application could include either:
 
 ```cpp
 #include "lib-one/inc.h"
 #include "lib-two/inc.h"
 ```
 
-The name of the subirectory does not matter much, but clearly it is more readable in code to use the name of the library.
+The name of the subdirectory does not matter much, but clearly it is more readable in code to use the name of the library.
 
 ## Some groundwork
 
@@ -75,214 +89,617 @@ In order for CMake projects to work smoothly, it is convenient to do some ground
 We will add a function to the `cmake/functions.cmake` file:
 
 ```cmake
-# Converts a CMake list to a CMake string and displays this in a status message along with the text specified.
-function(display_list text)
-    set(list_str "")
-    foreach(item ${ARGN})
-        string(CONCAT list_str "${list_str} ${item}")
-    endforeach()
-    message(STATUS ${text} ${list_str})
-endfunction()
+File: cmake/functions.cmake
+9: # Converts a CMake list to a CMake string and displays this in a status message along with the text specified.
+10: function(display_list text)
+11:     set(list_str "")
+12:     foreach(item ${ARGN})
+13:         string(CONCAT list_str "${list_str} ${item}")
+14:     endforeach()
+15:     message(STATUS ${text} ${list_str})
+16: endfunction()
 ```
 
-This function prints a text followed by a list of values, separated by spaces. This can be used for single values, but also for a list of compiler definitions.
+This function prints a text followed by a list of values, separated by spaces.
+This can be used for single values, but also for a list of compiler definitions.
 
 ### CMake function show_target_properties
 
 We will add a another function to the `cmake/functions.cmake` file:
 
 ```cmake
-function(show_target_properties target)
-    if (CMAKE_VERBOSE_MAKEFILE)
-        message(STATUS "")
-        message(STATUS "Properties for ${target}")
-
-        get_target_property(TARGET_TYPE ${target} TYPE)
-        display_list("Target type                       : " ${TARGET_TYPE})
-        if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-            get_target_property(DEFINES ${target} COMPILE_DEFINITIONS)
-            display_list("Target defines                    : " ${DEFINES})
-            get_target_property(OPTIONS ${target} COMPILE_OPTIONS)
-            display_list("Target options                    : " ${OPTIONS})
-        endif ()
-
-        get_target_property(INCLUDES ${target} INTERFACE_INCLUDE_DIRECTORIES)
-        display_list("Target include dirs public        : " ${INCLUDES})
-
-        if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-            get_target_property(INCLUDES ${target} INCLUDE_DIRECTORIES)
-            display_list("Target include dirs private       : " ${INCLUDES})
-
-            get_target_property(LIBRARIES ${target} LINK_LIBRARIES)
-            display_list("Target link libraries             : " ${LIBRARIES})
-
-            get_target_property(LINK_OPTIONS ${target} LINK_FLAGS)
-            display_list("Target link options               : " ${LINK_OPTIONS})
-        endif ()
-
-        get_target_property(DEFINES_EXPORTS ${target} INTERFACE_COMPILE_DEFINITIONS)
-        display_list("Target exported defines           : " ${DEFINES_EXPORTS})
-
-        get_target_property(OPTIONS_EXPORTS ${target} INTERFACE_COMPILE_OPTIONS)
-        display_list("Target exported options           : " ${OPTIONS_EXPORTS})
-
-        get_target_property(INCLUDE_DIRS_EXPORTS ${target} INTERFACE_INCLUDE_DIRECTORIES)
-        display_list("Target exported include dirs      : " ${INCLUDE_DIRS_EXPORTS})
-
-        get_target_property(LIBRARIES_EXPORTS ${target} INTERFACE_LINK_LIBRARIES)
-        display_list("Target exported link libraries    : " ${LIBRARIES_EXPORTS})
-
-        get_test_property(IMPORT_DEPENDENCIES ${target} IMPORTED_LINK_DEPENDENT_LIBRARIES)
-        display_list("Target imported dependencies      : " ${IMPORT_DEPENDENCIES})
-
-        get_test_property(IMPORT_LIBRARIES ${target} IMPORTED_LINK_INTERFACE_LIBRARIES)
-        display_list("Target imported link libraries    : " ${IMPORT_LIBRARIES})
-
-        if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-            get_target_property(LINK_DEPENDENCIES ${target} LINK_DEPENDS)
-            display_list("Target link dependencies          : " ${LINK_DEPENDENCIES})
-
-            get_target_property(EXPLICIT_DEPENDENCIES ${target} MANUALLY_ADDED_DEPENDENCIES)
-            display_list("Target manual dependencies        : " ${EXPLICIT_DEPENDENCIES})
-        endif ()
-
-        if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-            get_target_property(ARCHIVE_LOCATION ${target} ARCHIVE_OUTPUT_DIRECTORY)
-            display_list("Target static library location    : " ${ARCHIVE_LOCATION})
-
-            get_target_property(LIBRARY_LOCATION ${target} LIBRARY_OUTPUT_DIRECTORY)
-            display_list("Target dynamic library location   : " ${LIBRARY_LOCATION})
-
-            get_target_property(RUNTIME_LOCATION ${target} RUNTIME_OUTPUT_DIRECTORY)
-            display_list("Target binary location            : " ${RUNTIME_LOCATION})
-
-            get_target_property(TARGET_LINK_FLAGS ${target} LINK_FLAGS)
-            display_list("Target link flags                 : " ${TARGET_LINK_FLAGS})
-
-            get_target_property(TARGET_VERSION ${target} VERSION)
-            display_list("Target version                    : " ${TARGET_VERSION})
-
-            get_target_property(TARGET_SOVERSION ${target} SOVERSION)
-            display_list("Target so-version                 : " ${TARGET_SOVERSION})
-
-            get_target_property(TARGET_OUTPUT_NAME ${target} OUTPUT_NAME)
-            display_list("Target output name                : " ${TARGET_OUTPUT_NAME})
-        endif ()
-    endif()
-endfunction()
+File: cmake/functions.cmake
+18: function(show_target_properties target)
+19:     if (CMAKE_VERBOSE_MAKEFILE)
+20:         message(STATUS "")
+21:         message(STATUS "Properties for ${target}")
+22: 
+23:         get_target_property(TARGET_TYPE ${target} TYPE)
+24:         display_list("Target type                       : " ${TARGET_TYPE})
+25:         if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+26:             get_target_property(DEFINES ${target} COMPILE_DEFINITIONS)
+27:             display_list("Target defines                    : " ${DEFINES})
+28:             get_target_property(OPTIONS ${target} COMPILE_OPTIONS)
+29:             display_list("Target options                    : " ${OPTIONS})
+30:         endif ()
+31: 
+32:         get_target_property(INCLUDES ${target} INTERFACE_INCLUDE_DIRECTORIES)
+33:         display_list("Target include dirs public        : " ${INCLUDES})
+34: 
+35:         if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+36:             get_target_property(INCLUDES ${target} INCLUDE_DIRECTORIES)
+37:             display_list("Target include dirs private       : " ${INCLUDES})
+38: 
+39:             get_target_property(LIBRARIES ${target} LINK_LIBRARIES)
+40:             display_list("Target link libraries             : " ${LIBRARIES})
+41: 
+42:             get_target_property(LINK_OPTIONS ${target} LINK_FLAGS)
+43:             display_list("Target link options               : " ${LINK_OPTIONS})
+44:         endif ()
+45: 
+46:         get_target_property(DEFINES_EXPORTS ${target} INTERFACE_COMPILE_DEFINITIONS)
+47:         display_list("Target exported defines           : " ${DEFINES_EXPORTS})
+48: 
+49:         get_target_property(OPTIONS_EXPORTS ${target} INTERFACE_COMPILE_OPTIONS)
+50:         display_list("Target exported options           : " ${OPTIONS_EXPORTS})
+51: 
+52:         get_target_property(INCLUDE_DIRS_EXPORTS ${target} INTERFACE_INCLUDE_DIRECTORIES)
+53:         display_list("Target exported include dirs      : " ${INCLUDE_DIRS_EXPORTS})
+54: 
+55:         get_target_property(LIBRARIES_EXPORTS ${target} INTERFACE_LINK_LIBRARIES)
+56:         display_list("Target exported link libraries    : " ${LIBRARIES_EXPORTS})
+57: 
+58:         get_test_property(IMPORT_DEPENDENCIES ${target} IMPORTED_LINK_DEPENDENT_LIBRARIES)
+59:         display_list("Target imported dependencies      : " ${IMPORT_DEPENDENCIES})
+60: 
+61:         get_test_property(IMPORT_LIBRARIES ${target} IMPORTED_LINK_INTERFACE_LIBRARIES)
+62:         display_list("Target imported link libraries    : " ${IMPORT_LIBRARIES})
+63: 
+64:         if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+65:             get_target_property(LINK_DEPENDENCIES ${target} LINK_DEPENDS)
+66:             display_list("Target link dependencies          : " ${LINK_DEPENDENCIES})
+67: 
+68:             get_target_property(EXPLICIT_DEPENDENCIES ${target} MANUALLY_ADDED_DEPENDENCIES)
+69:             display_list("Target manual dependencies        : " ${EXPLICIT_DEPENDENCIES})
+70:         endif ()
+71: 
+72:         if (NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+73:             get_target_property(ARCHIVE_LOCATION ${target} ARCHIVE_OUTPUT_DIRECTORY)
+74:             display_list("Target static library location    : " ${ARCHIVE_LOCATION})
+75: 
+76:             get_target_property(LIBRARY_LOCATION ${target} LIBRARY_OUTPUT_DIRECTORY)
+77:             display_list("Target dynamic library location   : " ${LIBRARY_LOCATION})
+78: 
+79:             get_target_property(RUNTIME_LOCATION ${target} RUNTIME_OUTPUT_DIRECTORY)
+80:             display_list("Target binary location            : " ${RUNTIME_LOCATION})
+81: 
+82:             get_target_property(TARGET_LINK_FLAGS ${target} LINK_FLAGS)
+83:             display_list("Target link flags                 : " ${TARGET_LINK_FLAGS})
+84: 
+85:             get_target_property(TARGET_VERSION ${target} VERSION)
+86:             display_list("Target version                    : " ${TARGET_VERSION})
+87: 
+88:             get_target_property(TARGET_SOVERSION ${target} SOVERSION)
+89:             display_list("Target so-version                 : " ${TARGET_SOVERSION})
+90: 
+91:             get_target_property(TARGET_OUTPUT_NAME ${target} OUTPUT_NAME)
+92:             display_list("Target output name                : " ${TARGET_OUTPUT_NAME})
+93:         endif ()
+94:     endif()
+95: endfunction()
 ```
 
 Without going into too much detail, this function prints for a specific target:
 
-- the type of target (executable, library, interface library)
-- compiler definitions and options
-- include directories
-- standard libraries to be linked to
-- linker options
-- interface library compiler definitions and options
-- interface library include directories
-- interface library standard libraries to be linked to
-- imported dependencies
-- imported libraries to be linked to
-- dependencies
-- output directories for static libraries, shared libraries, and executables
-- linker options
-- the target version
-- the target so version in case of a shared library
-- the target output name
+- line 23-24: the type of target (executable, library, interface library)
+- line 26-27: compiler definitions
+- line 28-29: compiler options
+- line 32-33: interface include directories
+- line 36-37: include directories
+- line 39-40: standard libraries to be linked to
+- line 42-43: linker options
+- line 46-47: interface library compiler definitions
+- line 49-50: interface library compiler options
+- line 52-53: interface library include directories
+- line 55-56: interface library standard libraries to be linked to
+- line 58-59: imported dependencies
+- line 61-62: imported libraries to be linked to
+- line 65-69: dependencies
+- line 73-80: output directories for static libraries, shared libraries, and executables
+- line 82-83: linker options
+- line 85-86: the target version
+- line 88-89: the target so version in case of a shared library
+- line 91-92: the target output name
 
 ### Common compiler directives
 
-As most compiler definitions and compiler options will have some commonality, it is convenient to define these common parts in variables, and use them in out project configuration.
+As most compiler definitions and compiler options will have some commonality, it is convenient to define these common parts in variables, and use them in our project configuration.
 
-So we will update the main `CMakeLists.txt` file to set these variables. We will revisit this part a number of times.
+So we will update the main CMake file to set these variables. We will revisit this part a number of times.
 
 Just before `add_subdirectory(code)` in the main CMake file, insert the following:
 
 #### Common definitions and options
 
 ```cmake
-if (BAREMETAL_RPI_TARGET EQUAL 3)
-    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
-    set(BAREMETAL_TARGET_KERNEL kernel8)
-elseif (BAREMETAL_RPI_TARGET EQUAL 4)
-    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
-    set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
-else()
-    message(FATAL_ERROR "Incorrect RPI target ${BAREMETAL_RPI_TARGET} specified, must be 3 or 4")
-endif()
-set(BAREMETAL_LOAD_ADDRESS 0x80000)
+File: CMakeLists.txt
+31: if (BAREMETAL_RPI_TARGET EQUAL 3)
+32:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
+33:     set(BAREMETAL_TARGET_KERNEL kernel8)
+34: elseif (BAREMETAL_RPI_TARGET EQUAL 4)
+35:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
+36:     set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
+37: else()
+38:     message(FATAL_ERROR "Incorrect RPI target ${BAREMETAL_RPI_TARGET} specified, must be 3 or 4")
+39: endif()
+40: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+41: 
+42: set(DEFINES_C 
+43:     PLATFORM_BAREMETAL
+44:     RPI_TARGET=${BAREMETAL_RPI_TARGET}
+45:     )
+46: set(DEFINES_C_DEBUG _DEBUG)
+47: set(DEFINES_C_RELEASE NDEBUG)
+48: set(DEFINES_C_MINSIZEREL NDEBUG)
+49: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+50: set(DEFINES_ASM
+51:     PLATFORM_BAREMETAL
+52:     RPI_TARGET=${BAREMETAL_RPI_TARGET}
+53:     )
+54: 
+55: set(FLAGS_C
+56:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+57:     -Wall 
+58:     -Wextra
+59:     -Werror
+60:     -Wno-parentheses
+61:     -ffreestanding
+62:     -fsigned-char
+63:     -nostartfiles 
+64:     -std=gnu99 
+65:     -mno-outline-atomics
+66:     -nostdinc 
+67:     -nostdlib 
+68: )
+69: # -g is added by CMake
+70: set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+71: # -O3 is added by CMake
+72: set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
+73: # -Os is added by CMake
+74: set(FLAGS_C_MINSIZEREL -O3)
+75: # -O2 -g is added by CMake
+76: set(FLAGS_C_RELWITHDEBINFO )
+77: 
+78: set(FLAGS_CXX
+79:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+80:     -Wall
+81:     -Wextra
+82:     -Werror
+83:     -Wno-missing-field-initializers
+84:     -Wno-unused-value
+85:     -Wno-aligned-new
+86:     -ffreestanding 
+87:     -fsigned-char 
+88:     -nostartfiles
+89:     -mno-outline-atomics
+90:     -nostdinc
+91:     -nostdlib
+92:     -nostdinc++
+93:     -fno-exceptions
+94:     -fno-rtti
+95:     )
+96: 
+97: # -g is added by CMake
+98: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+99: # -O3 is added by CMake
+100: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+101: # -Os is added by CMake
+102: set(FLAGS_CXX_MINSIZEREL -O3)
+103: # -O2 -g is added by CMake
+104: set(FLAGS_CXX_RELWITHDEBINFO )
+105: 
+106: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
+107: set(FLAGS_ASM_DEBUG -O2)
+108: set(FLAGS_ASM_RELEASE -O2)
+109: set(FLAGS_ASM_MINSIZEREL -O2)
+110: set(FLAGS_ASM_RELWITHDEBINFO -O2)
+111: 
+112: set(LINK_FLAGS
+113:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+114:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+115:     -nostdlib
+116:     -nostartfiles 
+117:     )
+118: set(LINK_FLAGS_DEBUG )
+119: set(LINK_FLAGS_RELEASE )
+120: set(LINK_FLAGS_MINSIZEREL )
+121: set(LINK_FLAGS_RELWITHDEBINFO )
+122: 
+123: list(APPEND LINK_LIBRARIES )
+124: list(APPEND LINK_DIRECTORIES )
+125: 
+126: set(SUPPORTED_CPP_STANDARD 17)
+127: 
+128: message(STATUS "C++ compiler version:    ${CMAKE_CXX_COMPILER_VERSION}")
+129: message(STATUS "C compiler version:      ${CMAKE_C_COMPILER_VERSION}")
+130: message(STATUS "C++ supported standard:  ${SUPPORTED_CPP_STANDARD}")
+131: 
+132: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
+133: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
+134: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
+135: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
+136: 
+137: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
+138: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
+139: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
+140: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
+141: 
+142: set(COMPILE_OPTIONS_C_DEBUG ${FLAGS_C} ${FLAGS_C_DEBUG})
+143: set(COMPILE_OPTIONS_C_RELEASE ${FLAGS_C} ${FLAGS_C_RELEASE})
+144: set(COMPILE_OPTIONS_C_MINSIZEREL ${FLAGS_C} ${FLAGS_C_MINSIZEREL})
+145: set(COMPILE_OPTIONS_C_RELWITHDEBINFO ${FLAGS_C} ${FLAGS_C_RELWITHDEBINFO})
+146: 
+147: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
+148: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
+149: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
+150: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
+151: 
+152: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
+153: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
+154: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
+155: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
+156: 
+157: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
+158: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
+159: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
+160: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
+161: 
+162: set(LINKER_LIBRARIES ${LINK_LIBRARIES})
+163: 
+164: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+165:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+166:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+167:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+168:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+169:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+170:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+171: elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+172:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELEASE})
+173:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELEASE})
+174:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELEASE})
+175:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELEASE})
+176:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELEASE})
+177:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELEASE})
+178: elseif(${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
+179:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_MINSIZEREL})
+180:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_MINSIZEREL})
+181:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_MINSIZEREL})
+182:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_MINSIZEREL})
+183:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_MINSIZEREL})
+184:     set(LINKER_OPTIONS ${LINKER_OPTIONS_MINSIZEREL})
+185: elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+186:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELWITHDEBINFO})
+187:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO})
+188:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELWITHDEBINFO})
+189:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELWITHDEBINFO})
+190:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELWITHDEBINFO})
+191:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELWITHDEBINFO})
+192: else()
+193:     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
+194: endif()
+195: 
+```
 
-set(DEFINES_C 
-    PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
-    )
-set(DEFINES_C_DEBUG _DEBUG)
-set(DEFINES_C_RELEASE NDEBUG)
-set(DEFINES_C_MINSIZEREL NDEBUG)
-set(DEFINES_C_RELWITHDEBINFO NDEBUG)
-set(DEFINES_ASM
-    PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
-    )
+Explanation:
+- line 31-39: Depending on the variable `BAREMETAL_RPI_TARGET` which we will define later on, we define the variables `BAREMETAL_ARCH_CPU_OPTIONS` and `BAREMETAL_TARGET_KERNEL`, which define specific compiler options for the platform we're building fir (for now Raspberry Pi 3 or 4), and the base name of the kernel image file
+- line 40: We define the variable `BAREMETAL_LOAD_ADDRESS` to hold the start address for the baremetal application
+- line 42-45: We define the variable `DEFINES_C` to hold the generic compiler definitions for C and C++, independent of the build configuration
+- line 46-49: We define the variables `DEFINES_C_DEBUG`, `DEFINES_C_RELEASE`, `DEFINES_C_MINSIZEREL` and `DEFINES_C_RELWITHDEBINFO` to hold specific compiler definitions for C and C++ per build configuration
+- line 50-53: We define the variable `DEFINES_ASM` to hold the generic compiler definitions for assembly, independent of the build configuration
+- line 55-68: We define the variable `FLAGS_C` to hold the generic compiler options for C, independent of the build configuration
+- line 70-76: We define the variables `FLAGS_C_DEBUG`, `FLAGS_C_RELEASE`, `FLAGS_C_MINSIZEREL` and `FLAGS_C_RELWITHDEBINFO` to hold specific compiler options for C per build configuration
+- line 78-95: We define the variable `FLAGS_CXX` to hold the generic compiler options for C++, independent of the build configuration
+- line 98-104: We define the variables `FLAGS_CXX_DEBUG`, `FLAGS_CXX_RELEASE`, `FLAGS_CXX_MINSIZEREL` and `FLAGS_CXX_RELWITHDEBINFO` to hold specific compiler options for C++ per build configuration
+- line 106: We define the variable `FLAGS_ASM` to hold the generic compiler options for assembly, independent of the build configuration
+- line 107-110: We define the variables `FLAGS_ASM_DEBUG`, `FLAGS_ASM_RELEASE`, `FLAGS_ASM_MINSIZEREL` and `FLAGS_ASM_RELWITHDEBINFO` to hold specific compiler options for assembly per build configuration
+- line 112-117: We define the variable `LINK_FLAGS` to hold the linker options
+- line 118-121: We define the variables `LINK_FLAGS_DEBUG`, `LINK_FLAGS_RELEASE`, `LINK_FLAGS_MINSIZEREL` and `LINK_FLAGS_RELWITHDEBINFO` to hold specific linker options per build configuration
+- line 123: We add to variable `LINK_LIBRARIES` holding the generic list of libraries to link to (empty for now)
+- line 124: We add to variable `LINK_DIRECTORIES` holding the generic list of directories to search for linking (empty for now)
+- line 126: We define the variable `SUPPORTED_CPP_STANDARD` to holding the C++ standard used
+- line 128-130: We print the current C++ and C compiler versions, as well as the C++ standard version just defined
+- line 132-135: We combine the generic compiler definitions for C and C++ with the configuration specific ones in variables:
+  - `COMPILE_DEFINITIONS_C_DEBUG`
+  - `COMPILE_DEFINITIONS_C_RELEASE`
+  - `COMPILE_DEFINITIONS_C_MINSIZEREL`
+  - `COMPILE_DEFINITIONS_C_RELWITHDEBINFO`
+- line 137-140: We combine the generic compiler definitions for assembly with the configuration specific ones in variables:
+  - `COMPILE_DEFINITIONS_ASM_DEBUG`
+  - `COMPILE_DEFINITIONS_ASM_RELEASE`
+  - `COMPILE_DEFINITIONS_ASM_MINSIZEREL`
+  - `COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO`
+- line 142-145: We combine the generic compiler options for C with the configuration specific ones in variables:
+  - `COMPILE_OPTIONS_C_DEBUG`
+  - `COMPILE_OPTIONS_C_RELEASE`
+  - `COMPILE_OPTIONS_C_MINSIZEREL`
+  - `COMPILE_OPTIONS_C_RELWITHDEBINFO`
+- line 147-150: We combine the generic compiler options for C++ with the configuration specific ones in variables:
+  - `COMPILE_OPTIONS_CXX_DEBUG`
+  - `COMPILE_OPTIONS_CXX_RELEASE`
+  - `COMPILE_OPTIONS_CXX_MINSIZEREL`
+  - `COMPILE_OPTIONS_CXX_RELWITHDEBINFO`
+- line 152-155: We combine the generic compiler options for assembly with the configuration specific ones in variables:
+  - `COMPILE_OPTIONS_ASM_DEBUG`
+  - `COMPILE_OPTIONS_ASM_RELEASE`
+  - `COMPILE_OPTIONS_ASM_MINSIZEREL`
+  - `COMPILE_OPTIONS_ASM_RELWITHDEBINFO`
+- line 157-160: We combine the generic linker options with the configuration specific ones in variables:
+  - `LINKER_OPTIONS_DEBUG`
+  - `LINKER_OPTIONS_RELEASE`
+  - `LINKER_OPTIONS_MINSIZEREL`
+  - `LINKER_OPTIONS_RELWITHDEBINFO`
+- line 162: We set the variable `LINKER_LIBRARIES` to hold the general libraries to link to
+- line 164-194: Depending on the current build configuration, we define the following variables to the correct ones for the build configuration set:
+  - `COMPILE_DEFINITIONS_C`
+  - `COMPILE_DEFINITIONS_ASM`
+  - `COMPILE_OPTIONS_C`
+  - `COMPILE_OPTIONS_CXX`
+  - `COMPILE_OPTIONS_ASM`
+  - `LINKER_OPTIONS`
 
-set(FLAGS_C
-    ${BAREMETAL_ARCH_CPU_OPTIONS}
-    -Wall 
-    -Wextra
-    -Werror
-    -Wno-parentheses
-    -ffreestanding
-    -fsigned-char
-    -nostartfiles 
-    -std=gnu99 
-    -mno-outline-atomics
-    -nostdinc 
-    -nostdlib 
-)
-# -g is added by CMake
-set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
-# -O3 is added by CMake
-set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
-# -Os is added by CMake
-set(FLAGS_C_MINSIZEREL -O3)
-# -O2 -g is added by CMake
-set(FLAGS_C_RELWITHDEBINFO )
+We need to set a default value for the platform, and we add a variable to be used to set verbose build output.
+Just before the main project definition insert the following:
 
-set(FLAGS_CXX
-    ${BAREMETAL_ARCH_CPU_OPTIONS}
-    -Wall
-    -Wextra
-    -Werror
-    -Wno-missing-field-initializers
-    -Wno-unused-value
-    -Wno-aligned-new
-    -ffreestanding 
-    -fsigned-char 
-    -nostartfiles
-    -mno-outline-atomics
-    -nostdinc
-    -nostdlib
-    -nostdinc++
-    -fno-exceptions
-    -fno-rtti
-    )
+#### Adding some variables
 
-# -g is added by CMake
-set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
-# -O3 is added by CMake
-set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
-# -Os is added by CMake
-set(FLAGS_CXX_MINSIZEREL -O3)
-# -O2 -g is added by CMake
-set(FLAGS_CXX_RELWITHDEBINFO )
+```cmake
+File: CMakeLists.txt
+23: option(VERBOSE_BUILD "Verbose build" ON)
+24: 
+25: if (VERBOSE_BUILD)
+26:     set(CMAKE_VERBOSE_MAKEFILE ON CACHE STRING "Verbose build" FORCE)
+27: else()
+28:     set(CMAKE_VERBOSE_MAKEFILE OFF CACHE STRING "Verbose build" FORCE)
+29: endif()
+30: set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+31: set(CMAKE_COLOR_MAKEFILE   ON)
+32: 
+33: if("${BAREMETAL_RPI_TARGET}" STREQUAL "")
+34:     set(BAREMETAL_RPI_TARGET 3) # RPI board type (3/4)
+35: endif()
+36: 
+37: message(STATUS "\n** Setting up project **\n--")
+38: 
+39: message(STATUS "\n##################################################################################")
+40: message(STATUS "\n** Setting up toolchain **\n--")
+41: 
+42: project(baremetal-main
+43:     DESCRIPTION "Baremetal overall project")
+44: 
+```
 
-set(LINK_FLAGS
-    -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
-    -T ${CMAKE_SOURCE_DIR}/baremetal.ld
-    -nostdlib
-    -nostartfiles 
-    )
+Explanation:
+- line 23: We define a variable `VERBOSE_BUILD` to enable or disable verbose build output. The default is ON
+- line 25-29: Depending on the value of `VERBOSE_BUILD`, we set the standard CMake variable `CMAKE_VERBOSE_MAKEFILE` to ON or OFF. This is placed in the CMake cache
+- line 30: We set the standard CMake variable `CMAKE_EXPORT_COMPILE_COMMANDS` to ON. This will make CMake generate a JSON file `compile_commands.json` in the CMake build directory, that can be used by Visual Studio and other tools.
+This can come in handy when trying to figure out which source is compiler with which options
+- line 31: We set the standard CMake variable `CMAKE_COLOR_MAKEFILE` to ON. This will generate CMake configuration and build output with ANSI color output. This will not work inside Visual Studio , but it will output in color on the command line
+- line 33-35: Finally, we se the variable `BAREMETAL_RPI_TARGET`, if not set already, to 3, to make it default to Raspberry Pi 3.
+
+### Update default variables in CMakeSettings.json
+
+In order to get more verbose output from CMake, and to set the correct target platform (we will select RaspBerry Pi 3 here), we will need to update `CMakeSettings.json`.
+We will set the variable `VERBOSE_BUILD` to ON, and `BAREMETAL_RPI_TARGET` to 3.
+
+```json
+File: CMakeSettings.json
+1: {
+2:   "environments": [ {} ],
+3:   "configurations": [
+4:     {
+5:       "name": "BareMetal-Debug",
+6:       "generator": "Ninja",
+7:       "configurationType": "Debug",
+8:       "buildRoot": "${projectDir}\\cmake-${name}",
+9:       "installRoot": "${projectDir}\\output\\install\\${name}",
+10:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+11:       "buildCommandArgs": "",
+12:       "ctestCommandArgs": "",
+13:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+14:       "inheritEnvironments": [ "gcc-arm" ]
+15:     },
+16:     {
+17:       "name": "BareMetal-Release",
+18:       "generator": "Ninja",
+19:       "configurationType": "Release",
+20:       "buildRoot": "${projectDir}\\cmake-${name}",
+21:       "installRoot": "${projectDir}\\output\\install\\${name}",
+22:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+23:       "buildCommandArgs": "",
+24:       "ctestCommandArgs": "",
+25:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+26:       "inheritEnvironments": [ "gcc-arm" ]
+27:     },
+28:     {
+29:       "name": "BareMetal-RelWithDebInfo",
+30:       "generator": "Ninja",
+31:       "configurationType": "RelWithDebInfo",
+32:       "buildRoot": "${projectDir}\\cmake-${name}",
+33:       "installRoot": "${projectDir}\\output\\install\\${name}",
+34:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+35:       "buildCommandArgs": "",
+36:       "ctestCommandArgs": "",
+37:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+38:       "inheritEnvironments": [ "gcc-arm" ]
+39:     },
+40:     {
+41:       "name": "BareMetal-MinSizeRel",
+42:       "generator": "Ninja",
+43:       "configurationType": "MinSizeRel",
+44:       "buildRoot": "${projectDir}\\cmake-${name}",
+45:       "installRoot": "${projectDir}\\output\\install\\${name}",
+46:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+47:       "buildCommandArgs": "",
+48:       "ctestCommandArgs": "",
+49:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+50:       "inheritEnvironments": [ "gcc-arm" ]
+51:     }
+52:   ]
+53: }
+```
+
+### Update demo CMake file
+
+With the addition of the set of variables we just defined, we can simplify the demo application CMake file a bit:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+1: project(demo
+2:     DESCRIPTION "Demo application"
+3:     LANGUAGES CXX ASM)
+4: 
+5: message(STATUS "\n**********************************************************************************\n")
+6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+7: 
+8: message("\n** Setting up ${PROJECT_NAME} **\n")
+9: 
+10: include(functions)
+11: 
+12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+13: 
+14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+17: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+18: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+19: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+20: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+21: set(PROJECT_INCLUDE_DIRS_PUBLIC )
+22: 
+23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+24: 
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal
+27:     )
+28: 
+29: set(PROJECT_LIBS
+30:     ${LINKER_LIBRARIES}
+31:     ${PROJECT_DEPENDENCIES}
+32:     )
+33: 
+34: set(PROJECT_SOURCES
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/start.S
+37:     )
+38: 
+39: set(PROJECT_INCLUDES_PUBLIC )
+40: set(PROJECT_INCLUDES_PRIVATE )
+41: 
+42: if (CMAKE_VERBOSE_MAKEFILE)
+43:     display_list("Package                           : " ${PROJECT_NAME} )
+44:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+45:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+46:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+47:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+48:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+49:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+50:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+51:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+52:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+53:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+54:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+55:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+56:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+57:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+58:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+59:     display_list("Link libs                         : " ${PROJECT_LIBS} )
+60:     display_list("Source files                      : " ${PROJECT_SOURCES} )
+61:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+62:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+63: endif()
+64: 
+65: if (PLATFORM_BAREMETAL)
+66:     set(START_GROUP -Wl,--start-group)
+67:     set(END_GROUP -Wl,--end-group)
+68: endif()
+69: 
+70: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+71: 
+72: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+73: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+74: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+75: target_compile_definitions(${PROJECT_NAME} PRIVATE 
+76:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+77:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+78:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+79:     )
+80: target_compile_definitions(${PROJECT_NAME} PUBLIC 
+81:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+82:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+83:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+84:     )
+85: target_compile_options(${PROJECT_NAME} PRIVATE 
+86:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+87:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+88:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+89:     )
+90: target_compile_options(${PROJECT_NAME} PUBLIC 
+91:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+92:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+93:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+94:     )
+95: 
+96: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+97: 
+98: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+99: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+100:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+101: endif()
+102: 
+103: link_directories(${LINK_DIRECTORIES})
+104: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+105: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+106: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+107: 
+108: add_subdirectory(create-image)
+109: 
+```
+
+- line 14: We can now define the compiler definitions for C++ using the variables set up for C/C++ compiler definitions
+- line 16: Similarly for the compiler definitions for assembly using the variables set up for assembly compiler definitions
+- line 17: Similarly for the compiler options for C++ using the variables set up for C/C++ compiler options
+- line 19: Similarly for the compiler options for assembly using the variables set up for assembly compiler options
+- line 23: Similar for linker options using the variables set up for linker options
+- line 25-27: We now add the baremetal library to our dependencies. This means its public include directories are now used, and the library is linked to
+- line 29-32: We can now link to all standard libraries by adding `LINKER_LIBRARIES` to `PROJECT_LIBS`
+- line 42-63: Using the custom CMake function `display_list` we can now print all settings for the project. This is only done if verbose output is requested
+- line 96: We can now use the `SUPPORTED_CPP_STANDARD` to set the C++ standard property on the target
+- line 103: We set the serach path for standard libraries using `LINK_DIRECTORIES`
+
+### Update demo-image CMake file
+
+The same way, we can update the demo-image CMake file:
+
+```cmake
+File: code/applications/demo/create-image/CMakeLists.txt
+1: project(demo-image
+2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+3: 
+4: message(STATUS "\n**********************************************************************************\n")
+5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+6: 
+7: message("\n** Setting up ${PROJECT_NAME} **\n")
+8: 
+9: set(DEPENDENCY demo)
+10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+11: 
+12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+13: 
+```
+
+The only difference here is that the `BAREMETAL_TARGET_KERNEL` is defined in the main CMake file, so we can remove the definition here.
+
+# ======================================
 
 ## Creating the library code - step 1
 
@@ -454,30 +871,6 @@ This prints out various properties attached to the target (in this case the libr
   
   These variables are used to e.g. define compiler definitions for a specific language, in this case C, C++ or assembly.
   These variables are set in the beginning of the file, and are based on the common variables defined in the main CMake file [here](###Common-compiler-directives).
-
-### Change default variables in CMakeSettings.json
-
-In order to get more verbose output from CMake, and to set the correct target platform (we will select RaspBerry Pi 3 here), we will need to update `CMakeSettings.json`.
-
-```json
-{
-  "environments": [ {} ],
-  "configurations": [
-    {
-      "name": "BareMetal-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\cmake-${name}",
-      "installRoot": "${projectDir}\\output\\install\\${name}",
-      "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-      "inheritEnvironments": [ "gcc-arm" ]
-    }
-  ]
-}
-```
 
 ### Update application code
 

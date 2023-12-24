@@ -11,8 +11,8 @@
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
-//
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
@@ -38,8 +38,6 @@
 //------------------------------------------------------------------------------
 
 #pragma once
-
-#include <baremetal/Macros.h>
 
 /// @file
 /// ARM instructions represented as macros for ease of use.

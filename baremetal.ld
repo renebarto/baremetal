@@ -1,13 +1,13 @@
 /*------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : MemoryAccess.cpp
+// File        : baremetal.ld
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Linker definition file
 //
 //------------------------------------------------------------------------------
 //
@@ -37,11 +37,14 @@
 //
 //------------------------------------------------------------------------------*/
 
+/* Executable entry point (defined in start.S) */
 ENTRY(_start)
 
+/* Executable headers */
 PHDRS
 {
     init PT_LOAD FILEHDR PHDRS FLAGS(RE);
+    fini PT_LOAD FILEHDR PHDRS FLAGS(RE);
     text PT_LOAD FILEHDR PHDRS FLAGS(RE);
     rodata PT_LOAD FLAGS(RE);
     data PT_LOAD FLAGS(RWE);
@@ -49,27 +52,30 @@ PHDRS
 
 SECTIONS
 {
-    . = 0x80000;
-    .text : {
-        KEEP(*(.text.boot))
-        *(.text* .text.* .gnu.linkonce.t*)
-
-        _etext = .;
-    } : text
-
     . = SIZEOF_HEADERS;
+    /* Executable initialization section */
     .init : {
         *(.init)
     } : init
 
+    /* Executable cleanup section */
     .fini : {
         *(.fini)
     } : fini
 
+    /* Code section */
+    .text : {
+        *(.text*)
+
+        _etext = .;
+    } : text
+
+    /* Executable read only data section */
     .rodata : {
         *(.rodata*)
     } : rodata
 
+    /* Executable static initialization section */
     .init_array : {
         __init_start = .;
 
@@ -78,10 +84,12 @@ SECTIONS
         __init_end = .;
     }
 
+    /* Executable read/write data section */
     .data : {
         *(.data*)
     } : data
 
+    /* Executable uninitialized data section */
     .bss : {
         __bss_start = .;
 

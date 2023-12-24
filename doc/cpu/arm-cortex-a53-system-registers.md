@@ -1,5 +1,3 @@
-\page ARM_CORTEXA53_REGISTERS ARM Cortex-A53 System Registers
-
 # ARM Cortex-A53 System Registers
 
 ## Register overview 

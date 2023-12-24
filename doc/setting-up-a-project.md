@@ -344,7 +344,7 @@ We now need to use this toolchain file.
 On the command line, first configure the build:
 
 ```bat
-cd <project_dir>
+cd <project_root_dir>
 del /s /f /q cmake-build/*.*
 rmdir cmake-build
 mkdir cmake-build
@@ -427,7 +427,7 @@ We therefore need to set compiler options the correct way to really build a bare
 On the command line, first configure the build:
 
 ```bat
-cd <project_dir>
+cd <project_root_dir>
 rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
@@ -510,7 +510,7 @@ We need to define two variables `OUTPUT_BASE_DIR` and `CONFIG_DIR`, which are la
 Next to that, we will need some CMake custom functions, for which we need to prepare.
 
 ```cmake
-File: d:\Projects\baremetal.github\tutorial\00-build\CMakeLists.txt
+File: tutorial/00-build/CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
@@ -525,6 +525,11 @@ File: d:\Projects\baremetal.github\tutorial\00-build\CMakeLists.txt
 12: endif()
 13: 
 14: list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
+15: 
+16: project(00-build
+17:     DESCRIPTION "Application to demonstrate building using CMake"
+18:     LANGUAGES CXX ASM)
+19: 
 ```
 
 Explanation:
@@ -544,62 +549,79 @@ We need to add a few lines to our CMakeLists file, to add definitions, compiler 
 File: tutorial/00-build/CMakeLists.txt
 16: project(00-build
 17:     DESCRIPTION "Application to demonstrate building using CMake"
-18:     LANGUAGES CXX)
+18:     LANGUAGES CXX ASM)
 19: 
 20: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 21: 
 22: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE )
 23: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 24: 
-25: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE
-26:     -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles
-27:     )
-28: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-29: 
-30: set(PROJECT_INCLUDE_DIRS_PRIVATE )
-31: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-32: 
-33: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
-34: 
-35: set(PROJECT_DEPENDENCIES )
+25: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE 
+26:     -mcpu=cortex-a53 -mlittle-endian -mcmodel=small 
+27:     -Wall -Wextra -Werror 
+28:     -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -Wno-unused-variable -Wno-unused-parameter
+29:     -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++
+30:     -fno-exceptions -fno-rtti -O0 -std=gnu++17
+31:     )
+32: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+33: 
+34: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+35: set(PROJECT_INCLUDE_DIRS_PUBLIC )
 36: 
-37: set(PROJECT_LIBS
-38:     ${PROJECT_DEPENDENCIES}
-39:     )
-40: set(PROJECT_SOURCES
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-42:     )
-43: 
-44: set(PROJECT_INCLUDES_PUBLIC )
-45: set(PROJECT_INCLUDES_PRIVATE )
-46: 
-47: if (PLATFORM_BAREMETAL)
-48:     set(START_GROUP -Wl,--start-group)
-49:     set(END_GROUP -Wl,--end-group)
-50: endif()
-51: 
-52: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+37: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
+38: 
+39: set(PROJECT_DEPENDENCIES )
+40: 
+41: set(PROJECT_LIBS
+42:     ${PROJECT_DEPENDENCIES}
+43:     )
+44: set(PROJECT_SOURCES
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+46:     )
+47: 
+48: set(PROJECT_INCLUDES_PUBLIC )
+49: set(PROJECT_INCLUDES_PRIVATE )
+50: 
+51: if (PLATFORM_BAREMETAL)
+52:     set(START_GROUP -Wl,--start-group)
+53:     set(END_GROUP -Wl,--end-group)
+54: endif()
+55: 
+56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
 
 So, after the project is defined, we add the following lines:
 - line 20: We define the variable `PROJECT_TARGET_NAME`, which set the file for our executable to `00-build.elf`
 - line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions. For now these are empty. There are two, as we can have definitions only for this executable (private) and possibly exported to other targets (public). As an executabel file normally does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on.
-- line 25-28: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options. Here we set the compiler options to be:
+- line 25-31: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options. Here we set the compiler options to be:
+  - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture)
   - -Wall: Set warning level to the highest possible level
-  - -O2: Optimize to almost maximum level
+  - -Wextra: Set warning level to even higher level
+  - -Werror: Treat warnings as errors
+  - -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -Wno-unused-variable -Wno-unused-parameter: Switch off some specific warnings for Debug configuration
   - -ffreestanding: A very important option, meaning we are building a standalone (baremetal) application
+  - -fsigned-char: Use signed characters
+  - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
+  - -mno-outline-atomics: Needed to make sure we can build with ARMv8.0 and atomics
   - -nostdinc: Do not use the standard C library includes
   - -nostdlib: Do not use the standard C libraries
-  - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
-- line 30-31: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories
-- line 33: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
+  - -nostdinc++: Do not use the standard C++ library includes
+  - -fno-exceptions: Do not enable exceptions
+  - -fno-rtti: Do not use Run Time Type Information
+  - -O0: Do not optimize
+  - -std=gnu++17: Support C++17 language
+- line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories
+- line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
   - ${CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#Toolchain-file))
   - -nostdlib: Do not use the standard C libraries
   - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
+  - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000
   - -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](###Adding-linker-definition-file))
-- line 35: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty.
-- line 37-39: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries..
-- line 47-50: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`.
+- line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty.
+- line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries..
+- line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
+- line 48-49: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
+- line 51-54: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`.
 
 ### Setting up the target
 
@@ -607,54 +629,55 @@ We then need to link these variables to the target we're building:
 
 ```cmake
 File: tutorial/00-build/CMakeLists.txt
-52: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-53: 
-54: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
-55: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-56: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-57: target_compile_definitions(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE})
-58: target_compile_definitions(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC})
-59: target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE})
-60: target_compile_options(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC})
-61: 
+56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+57: 
+58: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+59: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+60: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+61: target_compile_definitions(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE})
+62: target_compile_definitions(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC})
+63: target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE})
+64: target_compile_options(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC})
+65: 
 ```
 
 Explanation:
-- line 54: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
-- line 56-57: We specify include directories for both private and public use
-- line 57-58: We specify compiler definitions for both private and public use
-- line 59-60: We specify compiler options for both private and public use
+- line 58: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
+- line 59-60: We specify include directories for both private and public use
+- line 61-62: We specify compiler definitions for both private and public use
+- line 63-64: We specify compiler options for both private and public use
 
 Next we specify the linker options. As the options are specified as a list separated by semicolons, and we need to create a string of values separated by spaces, we need to use a custom function:
 
 ```cmake
 File: tutorial/00-build/CMakeLists.txt
-62: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-63: message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
-64: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-65:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-66: endif()
+66: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+67: message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
+68: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+69:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+70: endif()
+71: 
 ```
 
 Explanation:
-- line 62: Converts the list to a string with spaces are delimiter using the custom functions `list_to_string`. We will need to define this custom function later on
-- line 63: prints the string
-- line 64-66: sets the linker flags, only if the string is not empty
+- line 66: Converts the list to a string with spaces are delimiter using the custom functions `list_to_string`. We will need to define this custom function later on
+- line 67: prints the string
+- line 68-70: sets the linker flags, only if the string is not empty
 
 Lastly, we set the executable file name, and the location of executable files and libraries:
 
 ```cmake
 File: tutorial/00-build/CMakeLists.txt
-67: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-68: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
-69: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
-70: 
+71: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+72: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
+73: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
+74: 
 ```
 
 Explanation:
-- line 67: sets the executable name `OUTPUT_NAME`, a standard property
-- line 68: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
-- line 69: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
+- line 71: sets the executable name `OUTPUT_NAME`, a standard property
+- line 72: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
+- line 73: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
 
 The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](###Setting-up-for-custom-CMake-modules-and-binary-tree).
 It is common practice to collect output files together in a binaries tree.
@@ -699,11 +722,11 @@ File: tutorial/00-build/CMakeLists.txt
 17: 
 18: project(00-build
 19:     DESCRIPTION "Application to demonstrate building using CMake"
-20:     LANGUAGES CXX)
+20:     LANGUAGES CXX ASM)
 21: 
 ```
 
-As you can see, we just name the script (line 16), without path or extension. This is possible, because we already added the path to the standard CMake module paths `CMAKE_MODULE_PATH`, and because we're using the stanrd CMake module extension `.cmake`
+As you can see, we just name the script (line 16), without path or extension. This is possible, because we already added the path to the standard CMake module paths `CMAKE_MODULE_PATH`, and because we're using the standard CMake module extension `.cmake`
 
 ## Adding the linker definition file
 
@@ -948,15 +971,18 @@ Without going into too much detail, the code performs the following steps:
 - line 82: call to the main() function in `tutorial/00-build/main.cpp`
 - line 84: when main() returns, also halt core 0
 
+For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](cpu/getting-started-with-ARM-assembly-language.pdf).
+For more information on the `MPIDR_EL1` register see also [ARM Cortex-A53 System Registers](cpu/arm-cortex-a53-system-registers.md) and [Arm® Architecture Registers](cpu/ARM-architecture-registers.pdf) page 1390.
+
 We need to add the startup code to the project:
 
 ```cmake
 File: tutorial/00-build/CMakeLists.txt
-42: set(PROJECT_SOURCES
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-44:     ${CMAKE_CURRENT_SOURCE_DIR}/start.S
-45:     )
-46: 
+46: set(PROJECT_SOURCES
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/start.S
+49:     )
+50: 
 ```
 
 ## Creating an image
@@ -1128,13 +1154,14 @@ To show that the application actually works, let's run it in QEMU and debug it.
 To run QEMU:
 
 ```bat
-"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\deploy\Debug\00-build-image\kernel8.img -serial stdio -s -S
+cd <project_root_dir>
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel deploy\Debug\00-build-image\kernel8.img -serial stdio -s -S
 ```
 
 To run GDB:
 ```bat
 cd output\Debug\bin
-D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe
+D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args 00-build.elf
 ```
 
 ```text
@@ -1152,7 +1179,8 @@ Find the GDB manual and other documentation resources online at:
     <http://www.gnu.org/software/gdb/documentation/>.
 
 For help, type "help".
-Type "apropos word" to search for commands related to "word".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from 00-build.elf...
 ```
 
 ### Linux
@@ -1166,7 +1194,7 @@ qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
 To run GDB:
 ```bash
 cd output/Debug/bin
-gdb-multiarch
+gdb-multiarch --args 00-build.elf
 ```
 
 ```text
@@ -1184,13 +1212,12 @@ Find the GDB manual and other documentation resources online at:
     <http://www.gnu.org/software/gdb/documentation/>.
 
 For help, type "help".
-Type "apropos word" to search for commands related to "word".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from 00-build.elf...
 ```
 
 In GDB:
 ```gdb
-(gdb) file 00-build.elf
-Reading symbols from 00-build.elf...
 (gdb) target remote localhost:1234
 Remote debugging using localhost:1234
 0x0000000000000000 in ?? ()
@@ -1198,18 +1225,14 @@ Remote debugging using localhost:1234
 Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
 Start address 0x0000000000080000, load size 128
-Transfer rate: 17 KB/sec, 64 bytes/write.
+Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file D:/Projects/baremetal.github/tutorial/00-build/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/tutorial/00-build/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/00-build/main.cpp:3
-3           return 0;
-(gdb) n
-empty_bss () at D:/Projects/baremetal.github/tutorial/00-build\start.S:84
-84          b       waitevent
-(gdb)
+Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/tutorial/00-build/main.cpp:3
+3	    return 0;
 ```
 
 So we ended up in line 3 of the main() function:
@@ -1221,9 +1244,12 @@ int main()
 }
 ```
 
-Next, we close down debugging again, as our application would otherwise keep looping:
+Next, we step one further, ending up in start.S, and then close down debugging again:
 
 ```gdb
+(gdb) n
+empty_bss () at /home/rene/repo/baremetal.github/tutorial/00-build/start.S:84
+84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y
 [Inferior 1 (process 1) killed]

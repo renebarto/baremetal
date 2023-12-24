@@ -149,7 +149,8 @@ File: code/libraries/CMakeLists.txt
 The CMake file in `code/applications/demo` defines our application:
 
 ```cmake
-File: code/applications/demo/CmakeLists.txt
+File: code/applications/demo/CMakeLists.txt
+File: d:\Projects\baremetal.test\code\applications\demo\CMakeLists.txt
 1: project(demo
 2:     DESCRIPTION "Demo application"
 3:     LANGUAGES CXX ASM)
@@ -169,71 +170,76 @@ File: code/applications/demo/CmakeLists.txt
 17: 
 18: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE 
 19:     -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles
-20:     )
-21: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-22: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE )
-23: 
-24: set(PROJECT_INCLUDE_DIRS_PRIVATE )
-25: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-26: 
-27: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -T ${CMAKE_CURRENT_SOURCE_DIR}/baremetal.ld)
+20:     -mcpu=cortex-a53 -mlittle-endian -mcmodel=small 
+21:     -Wall -Wextra -Werror 
+22:     -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -Wno-unused-variable -Wno-unused-parameter
+23:     -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++
+24:     -fno-exceptions -fno-rtti -O0 -std=gnu++17
+25:     )
+26: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+27: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE )
 28: 
-29: set(PROJECT_DEPENDENCIES
-30:     )
+29: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+30: set(PROJECT_INCLUDE_DIRS_PUBLIC )
 31: 
-32: set(PROJECT_LIBS
-33:     ${PROJECT_DEPENDENCIES}
-34:     )
-35: 
-36: set(PROJECT_SOURCES
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/start.S
+32: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T ${CMAKE_SOURCE_DIR}/baremetal.ld)
+33: 
+34: set(PROJECT_DEPENDENCIES
+35:     )
+36: 
+37: set(PROJECT_LIBS
+38:     ${PROJECT_DEPENDENCIES}
 39:     )
 40: 
-41: set(PROJECT_INCLUDES_PUBLIC )
-42: set(PROJECT_INCLUDES_PRIVATE )
-43: 
-44: if (PLATFORM_BAREMETAL)
-45:     set(START_GROUP -Wl,--start-group)
-46:     set(END_GROUP -Wl,--end-group)
-47: endif()
+41: set(PROJECT_SOURCES
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/start.S
+44:     )
+45: 
+46: set(PROJECT_INCLUDES_PUBLIC )
+47: set(PROJECT_INCLUDES_PRIVATE )
 48: 
-49: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-50: 
-51: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
-52: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-53: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-54: target_compile_definitions(${PROJECT_NAME} PRIVATE 
-55:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
-56:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
-57:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
-58:     )
-59: target_compile_definitions(${PROJECT_NAME} PUBLIC 
-60:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
-61:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
-62:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+49: if (PLATFORM_BAREMETAL)
+50:     set(START_GROUP -Wl,--start-group)
+51:     set(END_GROUP -Wl,--end-group)
+52: endif()
+53: 
+54: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+55: 
+56: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+57: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+58: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+59: target_compile_definitions(${PROJECT_NAME} PRIVATE 
+60:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+61:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+62:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
 63:     )
-64: target_compile_options(${PROJECT_NAME} PRIVATE 
-65:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
-66:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
-67:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+64: target_compile_definitions(${PROJECT_NAME} PUBLIC 
+65:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+66:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+67:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
 68:     )
-69: target_compile_options(${PROJECT_NAME} PUBLIC 
-70:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
-71:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
-72:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+69: target_compile_options(${PROJECT_NAME} PRIVATE 
+70:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+71:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+72:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
 73:     )
-74: 
-75: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-76: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-77:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-78: endif()
+74: target_compile_options(${PROJECT_NAME} PUBLIC 
+75:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+76:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+77:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+78:     )
 79: 
-80: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-81: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-82: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
-83: 
-84: add_subdirectory(create-image)
+80: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+81: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+82:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+83: endif()
+84: 
+85: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+86: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+87: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+88: 
+89: add_subdirectory(create-image)
 ```
 
 As you can see, it does pretty much the same as the second part in our 00-build project. However, some things are slightly different.
@@ -241,20 +247,20 @@ As you can see, it does pretty much the same as the second part in our 00-build 
 - line 1-3: It defines the project, in this case `demo`. Notice that here we specify both C++ and assembly as source languages.
 - line 5-8: We print the current directory, and also which project we're going to configure.
 - line 10: We include the functions.cmake custom CMake script
-- line 12-27: We specify the project target file name, the compiler definitions, compiler options, include directories, and linker options.
-- line 29-34: We specify which libraries we depend upon, and which libraries we link to. For now this is empty.
-- line 36-42: We then specify which source and header files are used for this application.
+- line 12-32: We specify the project target file name, the compiler definitions, compiler options, include directories, and linker options.
+- line 34-39: We specify which libraries we depend upon, and which libraries we link to. For now this is empty.
+- line 41-47: We then specify which source and header files are used for this application.
 Notice that the main.cpp and start.S are now in the src subdirectory. This keeps project files and source files separated.
-- line 44-47: We define the variables `START_GROUP` and `END_GROUP` as before.
-- line 49-82: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
+- line 49-52: We define the variables `START_GROUP` and `END_GROUP` as before.
+- line 54-87: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
 Different is the way we pass compiler definitions and options. We use a more generic approach here, where we set the definitions and options per language using generator expressions.
-- line 81-82: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
-- line 84: Finally we include the `CMakeLists.txt` for the image creation project.
+- line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
+- line 89: Finally we include the `CMakeLists.txt` for the image creation project.
 
-The CMake file in `code/applications/demo/createimage` defines the project to create the image:
+The CMake file in `code/applications/demo/create-image` defines the project to create the image:
 
 ```cmake
-File: code/applications/demo/createimage/CMakeLists.txt
+File: code/applications/demo/create-image/CMakeLists.txt
 1: project(demo-image
 2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
 3: 
@@ -391,9 +397,9 @@ We will create a script for Windows and for Linux to configure the build. They w
 ```bat
 File: tools/configure.bat
 1: @echo off
-2: rmdir /s /q cmake-Baremetal-Debug
-3: mkdir cmake-Baremetal-Debug
-4: pushd cmake-Baremetal-Debug
+2: rmdir /s /q cmake-build
+3: mkdir cmake-build
+4: pushd cmake-build
 5: 
 6: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 7: 
@@ -476,19 +482,19 @@ tools\configure.bat
 
 --
 ## In directory: D:/Projects/baremetal.github/code/libraries
--- Configuring done (0.9s)
+-- Configuring done (1.0s)
 -- Generating done (0.0s)
--- Build files have been written to: D:/Projects/baremetal.github/cmake-Baremetal-Debug
+-- Build files have been written to: D:/Projects/baremetal.github/cmake-build
 ```
 
 #### Linux
 
 tools/configure.sh:
 ```bash
-File: d:\Projects\baremetal.github\tools\configure.sh
-1: rm -rf cmake-Baremetal-Debug/
-2: mkdir cmake-Baremetal-Debug
-3: pushd cmake-Baremetal-Debug
+File: tools/configure.sh
+1: rm -rf cmake-build/
+2: mkdir cmake-build
+3: pushd cmake-build
 4: 
 5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 6: 
@@ -503,22 +509,30 @@ tools/configure.sh
 ```text
 ~/repo/baremetal.github/cmake-build ~/repo/baremetal.github
 -- CMake 3.25.1
+-- 
+** Setting up project **
+--
+-- 
+##################################################################################
+-- 
+** Setting up toolchain **
+--
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
--- Assembler
+-- Assembler                
 -- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 -- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
 -- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
 -- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
 -- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
 -- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=
+-- CMAKE_EXE_LINKER_FLAGS=  
 -- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
--- Assembler
+-- Assembler                
 -- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 -- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
 -- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
@@ -528,30 +542,30 @@ tools/configure.sh
 -- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 -- The C compiler identification is GNU 13.2.1
 -- The CXX compiler identification is GNU 13.2.1
---
+-- 
 **********************************************************************************
 
---
+-- 
 ## In directory: /home/rene/repo/baremetal.github/code
---
+-- 
 **********************************************************************************
 
---
+-- 
 ## In directory: /home/rene/repo/baremetal.github/code/applications
 -- The ASM compiler identification is GNU
 -- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
---
+-- 
 **********************************************************************************
 
---
+-- 
 ## In directory: /home/rene/repo/baremetal.github/code/applications/demo
 
 ** Setting up demo **
 
---
+-- 
 **********************************************************************************
 
---
+-- 
 ## In directory: /home/rene/repo/baremetal.github/code/applications/demo/create-image
 
 ** Setting up demo-image **
@@ -559,10 +573,10 @@ tools/configure.sh
 -- create_image demo-image kernel8.img demo
 -- TARGET_NAME demo.elf
 -- generate /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img from /home/rene/repo/baremetal.github/output/Debug/bin/demo
---
+-- 
 **********************************************************************************
 
---
+-- 
 ## In directory: /home/rene/repo/baremetal.github/code/libraries
 -- Configuring done
 -- Generating done
@@ -576,7 +590,7 @@ tools/configure.sh
 
 ```bat
 File: tools/build-target.bat
-1: cmake --build cmake-Baremetal-Debug --target %1
+1: cmake --build cmake-build --target %1
 ```
 
 #### Linux
@@ -592,7 +606,7 @@ File: tools/build-target.sh
 
 ```bat
 File: tools/build-image.bat
-1: cmake --build cmake-Baremetal-Debug --target %1-image
+1: cmake --build cmake-build --target %1-image
 ```
 
 #### Linux
@@ -608,7 +622,7 @@ File: tools/build-image.sh
 
 ```bat
 File: tools/build-all.bat
-1: cmake --build cmake-Baremetal-Debug
+1: cmake --build cmake-build
 ```
 
 Running the build:
@@ -617,7 +631,7 @@ tools\build-all.bat
 ```
 
 ```text
-[3/3] Generating D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img
+[4/4] Generating D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img
 ```
 
 #### Linux
@@ -625,7 +639,6 @@ tools\build-all.bat
 ```bash
 File: tools/build-all.sh
 1: cmake --build cmake-build
-2: 
 ```
 
 Running the build:
@@ -634,7 +647,7 @@ tools/build-all.sh
 ```
 
 ```text
-[3/3] Generating /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img
+[4/4] Generating /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img
 ```
 
 ### Starting QEMU
@@ -678,18 +691,12 @@ set thisdir=D:\Projects\baremetal.github\tools\
 
 call D:\Projects\baremetal.github\tools\\build-target demo
 
-cmake --build cmake-Baremetal-Debug --target demo
-Change Dir: 'D:/Projects/baremetal.github/cmake-Baremetal-Debug'
+cmake --build cmake-build --target demo
+ninja: no work to do.
 
-Run Build Command(s): C:/PROGRA~1/Ninja/ninja.exe -v demo
-[1/3] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG  -g -std=gnu++17 -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c D:/Projects/baremetal.github/code/applications/demo/src/main.cpp
-[2/3] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c D:/Projects/baremetal.github/code/applications/demo/src/start.S
-[3/3] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o D:\Projects\baremetal.github\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\tools\\..\deploy\Debug\demo-image\kernel8.img -serial stdio -s -S
 
-
-D:\Projects\baremetal.github>"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel D:\Projects\baremetal.github\tools\\..\deploy\Debug\demo-image\kernel8.img -serial stdio -s -S
-
-(qemu:14508): Gtk-WARNING **: 14:29:12.354: Could not load a pixbuf from icon theme.
+(qemu:23216): Gtk-WARNING **: 23:23:39.716: Could not load a pixbuf from icon theme.
 This may indicate that pixbuf loaders or the mime database could not be found.
 ```
 
@@ -734,11 +741,14 @@ Explanation:
 
 When starting QEMU on UART0:
 ```bash
-tools/startQEMU-image-uart0.sh
+tools/startQEMU-image-uart0.sh demo
 ```
 
 ```text
-rootdir=/home/rene/repo/baremetal.github
+thisdir=tools
+tools/build-target.sh demo
+ninja: no work to do.
+qemu-system-aarch64 -M raspi3b -kernel tools/../deploy/Debug/demo-image/kernel8.img -serial stdio -s -S
 ```
 
 ### Starting GDB
@@ -784,9 +794,10 @@ For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from D:\Projects\baremetal.github\output\Debug\bin\demo.elf...
 0x0000000000000000 in ?? ()
+Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080000, load size 88
-Transfer rate: 42 KB/sec, 88 bytes/write.
+Start address 0x0000000000080000, load size 128
+Transfer rate: 31 KB/sec, 64 bytes/write.
 (gdb)
 ```
 
@@ -796,7 +807,6 @@ Transfer rate: 42 KB/sec, 88 bytes/write.
 File: tools/startgdb.sh
 1: rootdir=`pwd`
 2: gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/Debug/bin/$1.elf --args $rootdir/output/Debug/bin/$1.elf
-3: 
 ```
 
 We specify the command file, and also the symbol file to load
@@ -824,10 +834,11 @@ For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from /home/rene/repo/baremetal.github/output/Debug/bin/demo.elf...
 0x0000000000000000 in ?? ()
+Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080000, load size 88
-Transfer rate: 704 bits in <1 sec, 88 bytes/write.
-(gdb)
+Start address 0x0000000000080000, load size 128
+Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
+(gdb) 
 ```
 
 ## Visual Studio CMake integration
@@ -853,7 +864,7 @@ File: CMakeSettings.json
 7:       "configurationType": "Debug",
 8:       "buildRoot": "${projectDir}\\cmake-${name}",
 9:       "installRoot": "${projectDir}\\output\\install\\${name}",
-10:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+10:       "cmakeCommandArgs": "",
 11:       "buildCommandArgs": "",
 12:       "ctestCommandArgs": "",
 13:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
@@ -865,7 +876,7 @@ File: CMakeSettings.json
 19:       "configurationType": "Release",
 20:       "buildRoot": "${projectDir}\\cmake-${name}",
 21:       "installRoot": "${projectDir}\\output\\install\\${name}",
-22:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+22:       "cmakeCommandArgs": "",
 23:       "buildCommandArgs": "",
 24:       "ctestCommandArgs": "",
 25:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
@@ -877,7 +888,7 @@ File: CMakeSettings.json
 31:       "configurationType": "RelWithDebInfo",
 32:       "buildRoot": "${projectDir}\\cmake-${name}",
 33:       "installRoot": "${projectDir}\\output\\install\\${name}",
-34:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+34:       "cmakeCommandArgs": "",
 35:       "buildCommandArgs": "",
 36:       "ctestCommandArgs": "",
 37:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
@@ -889,7 +900,7 @@ File: CMakeSettings.json
 43:       "configurationType": "MinSizeRel",
 44:       "buildRoot": "${projectDir}\\cmake-${name}",
 45:       "installRoot": "${projectDir}\\output\\install\\${name}",
-46:       "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3",
+46:       "cmakeCommandArgs": "",
 47:       "buildCommandArgs": "",
 48:       "ctestCommandArgs": "",
 49:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
@@ -945,7 +956,7 @@ After automatically or manually configuring CMake, the Output panel at the botto
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain"  -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
 1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- 
@@ -959,19 +970,18 @@ After automatically or manually configuring CMake, the Output panel at the botto
 1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
 1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
 1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
 1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
 1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=  
-1> [CMake] -- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
 1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
@@ -981,9 +991,6 @@ After automatically or manually configuring CMake, the Output panel at the botto
 1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 1> [CMake] -- The C compiler identification is GNU 13.2.1
 1> [CMake] -- The CXX compiler identification is GNU 13.2.1
-1> [CMake] -- C++ compiler version:    13.2.1
-1> [CMake] -- C compiler version:      13.2.1
-1> [CMake] -- C++ supported standard:  17
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
@@ -1067,10 +1074,10 @@ Running "Build All" or "Rebuild All" however does build all projects, including 
 
 ```text
 >------ Build All started: Project: baremetal, Configuration: BareMetal-Debug ------
-  [1/4] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [2/4] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal.github\cmake-Baremetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
+  [1/4] Building ASM object code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
+  [2/4] Building CXX object code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+  [3/4] Linking CXX executable ..\output\Debug\bin\demo.elf
+  [4/4] Generating ../../../../../deploy/Debug/demo-image/kernel8.img
 
 Build All succeeded.
 ```

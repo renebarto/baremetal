@@ -6,7 +6,6 @@ message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 message("\n** Setting up ${PROJECT_NAME} **\n")
 
-set(BAREMETAL_TARGET_KERNEL kernel8)
 set(DEPENDENCY demo)
 set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
 

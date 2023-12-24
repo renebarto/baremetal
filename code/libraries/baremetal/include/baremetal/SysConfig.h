@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : CharDevice.h
+// File        : SysConfig.h
 //
 // Namespace   : baremetal
 //
-// Class       : CharDevice
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
 //
@@ -40,25 +40,26 @@
 #pragma once
 
 /// @file
-/// Abstract character device
+/// System definitions
 
-namespace baremetal {
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
 
-/// @brief Abstract character device
-///
-/// Abstraction of a device that can read and write characters
-class CharDevice
-{
-public:
-    /// @brief Virtual destructor. Always needs to be defined for abstract classes
-    virtual ~CharDevice() = default;
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
 
-    /// @brief Read a character
-    /// @return Character read
-    virtual char Read() = 0;
-    /// @brief Write a character
-    /// @param c Character to be written
-    virtual void Write(char c) = 0;
-};
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
+#endif
 
-} // namespace baremetal
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
+#endif
+
+#include <baremetal/MemoryMap.h>

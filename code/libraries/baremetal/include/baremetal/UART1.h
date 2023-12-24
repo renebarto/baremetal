@@ -7,7 +7,7 @@
 //
 // Class       : UART1
 //
-// Description : UART1 class
+// Description : RPI UART1 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,41 +39,106 @@
 
 #pragma once
 
-#include <baremetal/CharDevice.h>
-
-/// @file
-/// UART1 serial console device
+#include <baremetal/Types.h>
 
 namespace baremetal {
 
-class IMemoryAccess;
+/// @brief GPIO mode
+enum class GPIOMode
+{
+    /// @brief GPIO used as input
+    Input,
+    /// @brief GPIO used as output
+    Output,
+    /// @brief GPIO used as input, using pull-up
+    InputPullUp,
+    /// @brief GPIO used as input, using pull-down
+    InputPullDown,
+    /// @brief GPIO used as Alternate Function 0.
+    AlternateFunction0,
+    /// @brief GPIO used as Alternate Function 1.
+    AlternateFunction1,
+    /// @brief GPIO used as Alternate Function 2.
+    AlternateFunction2,
+    /// @brief GPIO used as Alternate Function 3.
+    AlternateFunction3,
+    /// @brief GPIO used as Alternate Function 4.
+    AlternateFunction4,
+    /// @brief GPIO used as Alternate Function 5.
+    AlternateFunction5,
+    Unknown,
+};
+
+/// @brief GPIO function
+enum class GPIOFunction
+{
+    /// @brief GPIO used as input
+    Input,
+    /// @brief GPIO used as output
+    Output,
+    /// @brief GPIO used as Alternate Function 0.
+    AlternateFunction0,
+    /// @brief GPIO used as Alternate Function 1.
+    AlternateFunction1,
+    /// @brief GPIO used as Alternate Function 2.
+    AlternateFunction2,
+    /// @brief GPIO used as Alternate Function 3.
+    AlternateFunction3,
+    /// @brief GPIO used as Alternate Function 4.
+    AlternateFunction4,
+    /// @brief GPIO used as Alternate Function 5.
+    AlternateFunction5,
+    Unknown,
+};
+
+/// @brief GPIO pull mode
+enum class GPIOPullMode
+{
+    /// @brief GPIO pull mode off (no pull-up or pull-down)
+    Off,
+    /// @brief GPIO pull mode pull-down
+    PullDown,
+    /// @brief GPIO pull mode pull-up
+    PullUp,
+    Unknown,
+};
 
 /// @brief Encapsulation for the UART1 device.
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-class UART1 : public CharDevice
+class UART1
 {
 private:
-    bool           m_initialized;
-    IMemoryAccess &m_memoryAccess;
+    bool            m_initialized;
 
 public:
-    /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
-    UART1(IMemoryAccess &memoryAccess);
+    /// @brief Constructs a default UART1 instance.
+    UART1();
     /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
     ///
     ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
     void Initialize();
     /// @brief Read a character
     /// @return Character read
-    char Read() override;
+    char Read();
     /// @brief Write a character
     /// @param c Character to be written
-    void Write(char c) override;
+    void Write(char c);
     /// @brief Write a string
     /// @param str String to be written
     void WriteString(const char *str);
+
+private:
+    /// @param mode GPIO mode to be selected.
+    /// @return true if successful, false otherwise
+    bool SetMode(uint8 pinNumber, GPIOMode mode);
+    /// @brief Set GPIO pin function
+    /// @param function GPIO function to be selected.
+    bool SetFunction(uint8 pinNumber, GPIOFunction function);
+    /// @brief Set GPIO pin pull mode
+    /// @param pullMode GPIO pull mode to be used.
+    bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
+    /// @brief Switch GPIO off
+    bool Off(uint8 pinNumber, GPIOMode mode);
 };
 
 } // namespace baremetal

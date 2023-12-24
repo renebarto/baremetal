@@ -42,6 +42,14 @@ message(STATUS "\n** Setting up toolchain **\n--")
 project(baremetal-main
     DESCRIPTION "Baremetal overall project")
 
+message(STATUS "\n** Setting up project **\n--")
+
+message(STATUS "\n##################################################################################")
+message(STATUS "\n** Setting up toolchain **\n--")
+
+project(baremetal-main
+    DESCRIPTION "Baremetal overall project")
+
 if (BAREMETAL_RPI_TARGET EQUAL 3)
     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
     set(BAREMETAL_TARGET_KERNEL kernel8)
@@ -117,18 +125,22 @@ set(FLAGS_CXX_MINSIZEREL -O3)
 # -O2 -g is added by CMake
 set(FLAGS_CXX_RELWITHDEBINFO )
 
+set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
+set(FLAGS_ASM_DEBUG -O2)
+set(FLAGS_ASM_RELEASE -O2)
+set(FLAGS_ASM_MINSIZEREL -O2)
+set(FLAGS_ASM_RELWITHDEBINFO -O2)
+
 set(LINK_FLAGS
     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
     -nostdlib
     -nostartfiles 
     )
-
-set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
-set(FLAGS_ASM_DEBUG -O2)
-set(FLAGS_ASM_RELEASE -O2)
-set(FLAGS_ASM_MINSIZEREL -O2)
-set(FLAGS_ASM_RELWITHDEBINFO -O2)
+set(LINK_FLAGS_DEBUG )
+set(LINK_FLAGS_RELEASE )
+set(LINK_FLAGS_MINSIZEREL )
+set(LINK_FLAGS_RELWITHDEBINFO )
 
 list(APPEND LINK_LIBRARIES )
 list(APPEND LINK_DIRECTORIES )

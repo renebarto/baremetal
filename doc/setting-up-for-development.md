@@ -543,7 +543,7 @@ QEMU qill be waiting for the debugger to attach, with a screen similar to the on
 Start gdb:
 
 ```bat
-D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe
+D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args demo.elf
 ```
 
 ```text
@@ -561,7 +561,8 @@ Find the GDB manual and other documentation resources online at:
     <http://www.gnu.org/software/gdb/documentation/>.
 
 For help, type "help".
-Type "apropos word" to search for commands related to "word".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from demo.elf...
 ```
 
 Connect to QEMU and load the symbols (make sure the path to the symbol file is correct, use forward slashes for path delimiter):
@@ -569,18 +570,22 @@ Connect to QEMU and load the symbols (make sure the path to the symbol file is c
 ```bat
 (gdb) target remote localhost:1234
 Remote debugging using localhost:1234
-warning: No executable has been specified and target does not support
-determining executable automatically.  Try using the "file" command.
 0x0000000000000000 in ?? ()
-(gdb) demo.elf
-Reading demo.elf...
+(gdb) load
+Loading section .init, size 0x148 lma 0x80000
+Loading section .text, size 0x14728 lma 0x80800
+Loading section .rodata, size 0x1dd7 lma 0x94f30
+Loading section .init_array, size 0x20 lma 0x96d08
+Loading section .data, size 0x294 lma 0x96d28
+Start address 0x0000000000080000, load size 92411
+Transfer rate: 2911 KB/sec, 1885 bytes/write.
 ```
 
 Now you can use the normal GDB commands to debug the application:
 
 ```bat
 (gdb) b main.cpp:55
-Breakpoint 1 at 0x8080c: file demo/src/main.cpp, line 55.
+Breakpoint 1 at 0x8080c: file ../code/applications/demo/src/main.cpp, line 55.
 (gdb) l
 41      #include "baremetal/MachineInfo.h"
 42      #include "baremetal/Random.h"
@@ -606,12 +611,14 @@ Breakpoint 1 at 0x8080c: file demo/src/main.cpp, line 55.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal/code/applications/demo/src/main.cpp:55
+Thread 1 hit Breakpoint 1, main () at ../code/applications/demo/src/main.cpp:55
 55          uart.Initialize();
 (gdb) n
 57          auto &machineInfo = GetMachineInfo();
 (gdb) n
 59          LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
+(gdb) n
+60          LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
 (gdb) kill
 Kill the program being debugged? (y or n) y
 [Inferior 1 (process 1) killed]
@@ -629,7 +636,7 @@ sudo apt install gdb-multiarch
 Start gdb:
 
 ```bash
-gdb-multiarch
+gdb-multiarch --xargs demo.elf
 ```
 
 ```text
@@ -647,25 +654,24 @@ Find the GDB manual and other documentation resources online at:
     <http://www.gnu.org/software/gdb/documentation/>.
 
 For help, type "help".
-Type "apropos word" to search for commands related to "word".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from demo.elf...
 (gdb) target remote localhost:1234
 Remote debugging using localhost:1234
-warning: No executable has been specified and target does not support
-determining executable automatically.  Try using the "file" command.
 0x0000000000000000 in ?? ()
-
 ```
 
 Connect to QEMU and load the symbols (make sure the path to the symbol file is correct):
 
 ```bash
-(gdb) target remote localhost:1234
-Remote debugging using localhost:1234
-warning: No executable has been specified and target does not support
-determining executable automatically.  Try using the "file" command.
-0x0000000000000000 in ?? ()
-(gdb) symbol-file demo.elf
-Reading symbols from demo.elf...
+(gdb) load
+Loading section .init, size 0x148 lma 0x80000
+Loading section .text, size 0x14728 lma 0x80800
+Loading section .rodata, size 0x1f47 lma 0x94f30
+Loading section .init_array, size 0x20 lma 0x96e78
+Loading section .data, size 0x294 lma 0x96e98
+Start address 0x0000000000080000, load size 92779
+Transfer rate: 6471 KB/sec, 1893 bytes/write.
 ```
 
 Now you can use the normal GDB commands to debug the application:
@@ -674,36 +680,38 @@ Now you can use the normal GDB commands to debug the application:
 (gdb) b main
 Breakpoint 1 at 0x8080c: file /home/rene/repo/baremetal/code/applications/demo/src/main.cpp, line 55.
 (gdb) l
-41      #include "baremetal/MachineInfo.h"
-42      #include "baremetal/Random.h"
-43      #include "baremetal/Serialization.h"
-44      #include "baremetal/Timer.h"
-45      #include "baremetal/UART0.h"
-46
-47      using namespace baremetal;
-48
-49      static UART0 &uart = GetUART0();
-50
+41	#include "baremetal/MachineInfo.h"
+42	#include "baremetal/Random.h"
+43	#include "baremetal/Serialization.h"
+44	#include "baremetal/Timer.h"
+45	#include "baremetal/UART0.h"
+46	
+47	using namespace baremetal;
+48	
+49	static UART0 &uart = GetUART0();
+50	
 (gdb) l
-51      LOG_MODULE("Main");
-52
-53      int main()
-54      {
-55          uart.Initialize();
-56
-57          auto &machineInfo = GetMachineInfo();
-58
-59          LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
-60          LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
+51	LOG_MODULE("Main");
+52	
+53	int main()
+54	{
+55	    uart.Initialize();
+56	
+57	    auto &machineInfo = GetMachineInfo();
+58	
+59	    LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
+60	    LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
 (gdb) c
 Continuing.
 
 Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal/code/applications/demo/src/main.cpp:55
-55          uart.Initialize();
+55	    uart.Initialize();
 (gdb) n
-57          auto &machineInfo = GetMachineInfo();
+57	    auto &machineInfo = GetMachineInfo();
 (gdb) n
-59          LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
+59	    LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
+(gdb) n
+60	    LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
 (gdb) kill
 Kill the program being debugged? (y or n) y
 [Inferior 1 (process 1) killed]

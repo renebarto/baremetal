@@ -27,23 +27,16 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
     )
-if (PLATFORM_BAREMETAL)
-    LIST(APPEND PROJECT_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-        )
-endif()
 
 set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
     )
@@ -106,7 +99,6 @@ endif()
 
 link_directories(${LINK_DIRECTORIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
+set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
 
 show_target_properties(${PROJECT_NAME})
-

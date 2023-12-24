@@ -42,10 +42,11 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Contents
 
-- [Setting up for development](doc/setting-up-for-development.md)
-- [Setting up a first project](doc/setting-up-a-project.md)
-- [Setting up project structure](doc/setting-up-project-structure.md)
-- [First application - Using the console - UART1](doc/01-console-uart1.md)
+- [Setting up for development](doc/01-setting-up-for-development.md)
+- [Setting up a first project](doc/02-setting-up-a-project.md)
+- [Setting up project structure](doc/03-setting-up-project-structure.md)
+- [Setting up common options](doc/04-setting-up-common-options.md)
+- [First application - Using the console - UART1](doc/05-console-uart1.md)
 
 ## Additional information
 

@@ -2,11 +2,17 @@
 
 If we want to do development for an embedded board, a number of things need to be set up:
 
-- [compiler toolchain](##Compiler-toolchain)
-- [build environment](##Build-environment)
-- [development environment](##Development-environment)
-- [deployment mechanism](##Deployment-mechanism)
-- [debugging](##Debugging)
+- [Compiler toolchain](##Compiler-toolchain)
+- [Build environment](##Build-environment)
+- [Development environment](##Development-environment)
+- [Deployment mechanism](##Deployment-mechanism)
+  - [Attaching a serial console](###Attaching-a-serial-console)
+  - [Running from SD card](###Running-from-SD-card)
+  - [Running using netboot](###Running-using-netboot)
+  - [Running in QEMU](###Running-in-QEMU)
+  - [Run output](###Run-output)
+- [Debugging](##Debugging)
+  - [Debugging in QEMU](###Debugging-in-QEMU)
 
 ## Compiler toolchain
 

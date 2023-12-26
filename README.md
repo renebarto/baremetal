@@ -47,6 +47,7 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [Setting up project structure](doc/03-setting-up-project-structure.md)
 - [Setting up common options](doc/04-setting-up-common-options.md)
 - [First application - Using the console - UART1](doc/05-console-uart1.md)
+- [Improving startup and static initialization](doc/06-improving-startup-static-initialization.md)
 
 ## Additional information
 

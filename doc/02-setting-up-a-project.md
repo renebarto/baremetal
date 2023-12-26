@@ -26,26 +26,26 @@ For now, let's set up a simple project that simply returns (i.e. does nothing bu
 
 This will be quite an extensive chapter, so bare with me. This chapter will include lots of explanation on how to work with CMake, how code is started on the platform, etc.
 
-The way we configure the project is very specific, verbose and direct, which we will improve later on in [Setting up project structure](setting-up-project-structure.md).
+The way we configure the project is very specific, verbose and direct, which we will improve later on in [Setting up project structure](03-setting-up-project-structure.md).
 
-First, we create a folder for the project. Let's say `D:\Projects\tutorial\00-build` on Windows and `~/tutorial/00-build` on Linux.
+First, we create a folder for the project. Let's say `D:\Projects\tutorial\02-setting-up-a-project` on Windows and `~/tutorial/02-setting-up-a-project` on Linux.
 The project and code are already in this location for the GitHub project, so you can either replicate the steps, or read along.
 
 In this directory, we first need to create a CMake file, which is named `CMakeLists.txt`. Be careful about the 's' in Lists, and also make sure you have the correct casing, especially in Linux.
 As soon as you add this file in Visual Studio, it may detect this is a CMake project and try to configure it. This will fail as we don't have the correct contents yet. Don't worry about this.
-We'll get to Visual Studio in [Setting up project structure](setting-up-project-structure.md).
+We'll get to Visual Studio in [Setting up project structure](03-setting-up-project-structure.md).
 
 ## Create project
 
 In this file we will first create a project:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
 4: 
-5: project(00-build
+5: project(02-setting-up-a-project
 6:     DESCRIPTION "Application to demonstrate building using CMake"
 7:     LANGUAGES CXX ASM)
 8: 
@@ -54,14 +54,14 @@ File: tutorial/00-build/CMakeLists.txt
 Short explanation:
 - Line 1: We require a minimum version of 3.18 for CMake. There should always be a similar line in the main CMake file
 - Line 3: We print the current version of CMake
-- Line 5-7: We define a project named `00-build`, give it a short description, and specify that it will use C++ and assembly code as language
+- Line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as language
 
 ## Create source file
 
 We'll now add a source file to the project, so let's create a source file first, and simply call it `main.cpp`. The contents will be:
 
 ```cpp
-File: tutorial/00-build/main.cpp
+File: tutorial/02-setting-up-a-project/main.cpp
 1: int main()
 2: {
 3:     return 0;
@@ -79,12 +79,12 @@ We will also need some assembly code to correctly initialize the CPU. This will 
 We will add the source file to the project by defining an executable target:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
 4: 
-5: project(00-build
+5: project(02-setting-up-a-project
 6:     DESCRIPTION "Application to demonstrate building using CMake"
 7:     LANGUAGES CXX ASM)
 8: 
@@ -101,11 +101,11 @@ File: tutorial/00-build/CMakeLists.txt
 Short explanation:
 - Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source file (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
 - Line 12-13: We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
-- Line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project were in, so in this case `00-build`)
+- Line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project were in, so in this case `02-setting-up-a-project`)
   - This target will build from the source files and headers just specified.
 
 You will now be able to build the project, however this will be targeting the platform you are running on.
-So it will build a Windows application `00-build.exe` for Windows, and a Linux application `00-build` on Linux.
+So it will build a Windows application `02-setting-up-a-project.exe` for Windows, and a Linux application `02-setting-up-a-project` on Linux.
 We'll get to building once we can target the correct platform.
 
 ## Build for target
@@ -116,7 +116,7 @@ In order to target the correct platform, we will need to use the toolchain we do
 This file will be named `baremetal.toolchain` and have the following contents:
 
 ```cmake
-File: tutorial/00-build/baremetal.toolchain
+File: tutorial/02-setting-up-a-project/baremetal.toolchain
 1: include(CMakeForceCompiler)
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
@@ -201,7 +201,7 @@ A bit of explanation is in order.
 #### Part 1
 
 ```cmake
-File: tutorial/00-build/baremetal.toolchain
+File: tutorial/02-setting-up-a-project/baremetal.toolchain
 1: include(CMakeForceCompiler)
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
@@ -231,8 +231,10 @@ and otherwise fall back to a default, different for Windows and Linux of course 
 We also set a number of variables:
 - line 13: `PLATFORM_BAREMETAL` for convenience later on
 - line 14: `CMAKE_SYSTEM_NAME` which is a standard variable to denote the system we're going to build. For baremetal projects this must be set to `Generic`
-- line 15: `CMAKE_SYSTEM_PROCESSOR` which is a standard variable to define the processor architecture we're going to build for. In all cases this will be a 64 bit ARM processor, for which the architecture name is `aarch64`
-- lLine 16: `TOOL_DESTINATION_PLATFORM` is the so called target triplet / quadruplet. It defines the combination of target architecture, vendor if needed, the operating system, and the build type.
+- line 15: `CMAKE_SYSTEM_PROCESSOR` which is a standard variable to define the processor architecture we're going to build for.
+In all cases this will be a 64 bit ARM processor, for which the architecture name is `aarch64`
+- lLine 16: `TOOL_DESTINATION_PLATFORM` is the so called target triplet / quadruplet.
+It defines the combination of target architecture, vendor if needed, the operating system, and the build type.
 In our case this is `aarch64-none-elf` meaning a 64 bit ARM architecture, with no OS, and with elf output files
 
 We also print the used toolchain root (line 18), and set CMAKE build output to be more verbose (line 20).
@@ -242,7 +244,7 @@ We also print the used toolchain root (line 18), and set CMAKE build output to b
 The next part defines the tools to be used, such as the compiler, linker, etc.:
 
 ```cmake
-File: tutorial/00-build/baremetal.toolchain
+File: tutorial/02-setting-up-a-project/baremetal.toolchain
 22: set(TOOLCHAIN_PATH ${TOOLCHAIN_ROOT}/bin)
 23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
 24: 
@@ -309,7 +311,7 @@ Next we print all the variables just defined (lines 53-61).
 #### Part 3
 
 ```cmake
-File: tutorial/00-build/baremetal.toolchain
+File: tutorial/02-setting-up-a-project/baremetal.toolchain
 63: if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "")
 64: 	set(HAVE_AUX_PATH false)
 65: else()
@@ -327,7 +329,8 @@ File: tutorial/00-build/baremetal.toolchain
 77: set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 ```
 
-The variable `CMAKE_EXE_LINKER_FLAGS` which is a standard CMake variable to hold the linker flags, is extended, if not already done, with the auxiliary libary directory (lines 63-72).
+The variable `CMAKE_EXE_LINKER_FLAGS` which is a standard CMake variable to hold the linker flags, is extended,
+if not already done, with the auxiliary libary directory (lines 63-72).
 This contains a bit of CMake trickery, don't worry about the details.
 
 Lastly, we need to set some more standard CMake variable:
@@ -349,7 +352,7 @@ del /s /f /q cmake-build/*.*
 rmdir cmake-build
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/00-build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
+cmake ../tutorial/02-setting-up-a-project -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/02-setting-up-a-project/baremetal.toolchain
 popd
 ```
 
@@ -392,15 +395,15 @@ Next perform the actual build
 
 ```bat
 set ROOT=%CD%
-pushd tutorial/00-build
-cmake --build %ROOT%/cmake-build --target 00-build
+pushd tutorial/02-setting-up-a-project
+cmake --build %ROOT%/cmake-build --target 02-setting-up-a-project
 popd
 ```
 
 ```output
-[2/2] Linking CXX executable 00-build
-FAILED: 00-build
-cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/00-build.dir/main.cpp.obj -o 00-build   && cd ."
+[2/2] Linking CXX executable 02-setting-up-a-project
+FAILED: 02-setting-up-a-project
+cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && cd ."
 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-closer.o): in function `_close_r':
@@ -431,7 +434,7 @@ cd <project_root_dir>
 rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/00-build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
+cmake ../tutorial/02-setting-up-a-project -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/02-setting-up-a-project/baremetal.toolchain
 popd
 ```
 
@@ -475,14 +478,14 @@ There may be warnings about unused variables, you can ignore these.
 Next perform the actual build
 
 ```bat
-cd ../tutorial/00-build
+cd ../tutorial/02-setting-up-a-project
 cmake --build ../../cmake-build
 ```
 
 ```output
-[2/2] Linking CXX executable 00-build
-FAILED: 00-build
-: && /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/00-build.dir/main.cpp.obj -o 00-build   && :
+[2/2] Linking CXX executable 02-setting-up-a-project
+FAILED: 02-setting-up-a-project
+: && /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && :
 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-writer.o): in function `_write_r':
@@ -510,7 +513,7 @@ We need to define two variables `OUTPUT_BASE_DIR` and `CONFIG_DIR`, which are la
 Next to that, we will need some CMake custom functions, for which we need to prepare.
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
@@ -526,7 +529,7 @@ File: tutorial/00-build/CMakeLists.txt
 13: 
 14: list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 15: 
-16: project(00-build
+16: project(02-setting-up-a-project
 17:     DESCRIPTION "Application to demonstrate building using CMake"
 18:     LANGUAGES CXX ASM)
 19: 
@@ -546,8 +549,8 @@ This could be the same path as the output directory, however it makes sense to s
 We need to add a few lines to our CMakeLists file, to add definitions, compiler settings, linker options, and link libraries
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
-16: project(00-build
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
+16: project(02-setting-up-a-project
 17:     DESCRIPTION "Application to demonstrate building using CMake"
 18:     LANGUAGES CXX ASM)
 19: 
@@ -591,7 +594,7 @@ File: tutorial/00-build/CMakeLists.txt
 ```
 
 So, after the project is defined, we add the following lines:
-- line 20: We define the variable `PROJECT_TARGET_NAME`, which set the file for our executable to `00-build.elf`
+- line 20: We define the variable `PROJECT_TARGET_NAME`, which set the file for our executable to `02-setting-up-a-project.elf`
 - line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions. For now these are empty. There are two, as we can have definitions only for this executable (private) and possibly exported to other targets (public). As an executabel file normally does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on.
 - line 25-31: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options. Here we set the compiler options to be:
   - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture)
@@ -628,7 +631,7 @@ So, after the project is defined, we add the following lines:
 We then need to link these variables to the target we're building:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 57: 
 58: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
@@ -650,7 +653,7 @@ Explanation:
 Next we specify the linker options. As the options are specified as a list separated by semicolons, and we need to create a string of values separated by spaces, we need to use a custom function:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 66: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
 67: message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
 68: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
@@ -667,7 +670,7 @@ Explanation:
 Lastly, we set the executable file name, and the location of executable files and libraries:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 71: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 72: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
 73: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
@@ -698,7 +701,7 @@ It is standard practice to name CMake scripts with extension `.cmake`.
 The contents of the file are:
 
 ```cmake
-File: tutorial/00-build/cmake/functions.cmake
+File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 1: function(list_to_string in out)
 2:     set(tmp "")
 3:     foreach(VAL ${${in}})
@@ -715,12 +718,12 @@ Finally it sets the output variable. The `PARENT_SCOPE` is needed to convert the
 Finally we need to be able to use the function. For this, we need to include the module:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 14: list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 15: 
 16: include(functions)
 17: 
-18: project(00-build
+18: project(02-setting-up-a-project
 19:     DESCRIPTION "Application to demonstrate building using CMake"
 20:     LANGUAGES CXX ASM)
 21: 
@@ -735,7 +738,7 @@ The we need to set up the linker definitions file as pointed to by the [linker o
 This file is named `link.ld` and contains the following:
 
 ```text
-File: tutorial/00-build/link.ld
+File: tutorial/02-setting-up-a-project/link.ld
 1: /*------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //
@@ -872,7 +875,7 @@ In order for the CPU to be correctly initialized, and the cores handled correctl
 The startup code will be stored in the `start.S` assembly file:
 
 ```assembly
-File: tutorial/00-build/start.S
+File: tutorial/02-setting-up-a-project/start.S
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //
@@ -968,7 +971,7 @@ Without going into too much detail, the code performs the following steps:
 - line 61-62: the stack pointer is set just below the code
 - line 64-70: information on the `.bss` section is retrieved. If the .bss section is empty, we jump to `empty_bss`
 - line 74-78: write 0 to the next 8 bytes of the .bss section, and while not at the end, repeat
-- line 82: call to the main() function in `tutorial/00-build/main.cpp`
+- line 82: call to the main() function in `tutorial/02-setting-up-a-project/main.cpp`
 - line 84: when main() returns, also halt core 0
 
 For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](cpu/getting-started-with-ARM-assembly-language.pdf).
@@ -977,7 +980,7 @@ For more information on the `MPIDR_EL1` register see also [ARM Cortex-A53 System
 We need to add the startup code to the project:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 46: set(PROJECT_SOURCES
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/start.S
@@ -987,15 +990,15 @@ File: tutorial/00-build/CMakeLists.txt
 
 ## Creating an image
 
-Now we can build the code to generate `output/Debug/bin/00-build.elf`, however that application cannot simply be run in e.g. QEMU.
+Now we can build the code to generate `output/Debug/bin/02-setting-up-a-project.elf`, however that application cannot simply be run in e.g. QEMU.
 We need to create an image for that. This is a fairly simple step, adding a new target for the image.
 
 We will create a subdirectory `create-image` underneath our current project, and add a `CMakeLists.txt` file there:
 
 ```cmake
-File: tutorial/00-build/create-image/CMakeLists.txt
-1: project(00-build-image
-2:     DESCRIPTION "Kernel image for 00-build RPI 64 bit bare metal")
+File: tutorial/02-setting-up-a-project/create-image/CMakeLists.txt
+1: project(02-setting-up-a-project-image
+2:     DESCRIPTION "Kernel image for 02-setting-up-a-project RPI 64 bit bare metal")
 3: 
 4: message(STATUS "\n**********************************************************************************\n")
 5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -1003,13 +1006,13 @@ File: tutorial/00-build/create-image/CMakeLists.txt
 7: message("\n** Setting up ${PROJECT_NAME} **\n")
 8: 
 9: set(BAREMETAL_TARGET_KERNEL kernel8)
-10: set(DEPENDENCY 00-build)
+10: set(DEPENDENCY 02-setting-up-a-project)
 11: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
 12: 
 13: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
-This defines a new project `00-build-image` (line 1-2) which creates some variables, and the calls another custom function:
+This defines a new project `02-setting-up-a-project-image` (line 1-2) which creates some variables, and the calls another custom function:
 
 - line 9: We create the variable `BAREMETAL_TARGET_KERNEL` to specify the kernel image to create. This depends on the target platform. Here we create kernel8.img for Raspberry Pi 3 (see [System startup](system-startup#config.txt)).
 - line 10: We create the variable `DEPENDENCY` to specify the project we are going to create the image for.
@@ -1020,7 +1023,7 @@ We then call the custom function `create_image` to create a target for the image
 The customer function is added to the `functions.cmake` module:
 
 ```cmake
-File: tutorial/00-build/cmake/functions.cmake
+File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 1: function(list_to_string in out)
 2:     set(tmp "")
 3:     foreach(VAL ${${in}})
@@ -1055,21 +1058,21 @@ File: tutorial/00-build/cmake/functions.cmake
 ```
 
 The function `create_image` takes three parameters:
-- The target to be created (`target`), in this case `00-build-image`
+- The target to be created (`target`), in this case `02-setting-up-a-project-image`
 - The image filename (`image`), in this case `kernel8.img`
-- The target (`project`) that creates the application to be added to the image, in this case `00-build.elf`
+- The target (`project`) that creates the application to be added to the image, in this case `02-setting-up-a-project.elf`
 
 Explanation:
 - line 10-15: The function first shows how it was called, and then checks whether the application target exists, and prints an error if not
-- line 17: The `OUTPUT_NAME` property from the application target is retrieved, so in this case `00-build.elf` and stored in variable `TARGET_NAME`
+- line 17: The `OUTPUT_NAME` property from the application target is retrieved, so in this case `02-setting-up-a-project.elf` and stored in variable `TARGET_NAME`
 - line 18: The property value is printed
 - line 20: The action to be taken is printed
 - line 21-26: A custom CMake command is created
   - Its output is `${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}`. This uses the variables `DEPLOYMENT_DIR` and `CONFIG_DIR` defined before, and then adds the name of the application project as a directory, and then the image name.
-So the final path will be `deploy/Debug/00-build/kernel8.img`
+So the final path will be `deploy/Debug/02-setting-up-a-project/kernel8.img`
   - The command to be performed used the `CMAKE_OBJCOPY` tool specified in the toolchain file.
-The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/00-build.elf -O binary deploy/Debug/00-build/kernel8.img`
-- line 28-30: A custom CMake target `00-build-image` is created, that depends on the output of the command just created.
+The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/02-setting-up-a-project.elf -O binary deploy/Debug/02-setting-up-a-project/kernel8.img`
+- line 28-30: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
 
 This may all seem complex, but this functionality can be used again later on by simply changing the parameters.
 
@@ -1078,7 +1081,7 @@ Now we still need to use the new target. We simply do this by referring to the s
 We add the following line to this file to include its `create-image` subdirectory. This instructs CMake to also use the `CMakeLists.txt` file in the project directory:
 
 ```cmake
-File: tutorial/00-build/CMakeLists.txt
+File: tutorial/02-setting-up-a-project/CMakeLists.txt
 69: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 70: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
 71: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
@@ -1099,7 +1102,7 @@ del /S /f /q cmake-build\*.*
 rmdir cmake-build
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/00-build -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
+cmake ../tutorial/02-setting-up-a-project -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/02-setting-up-a-project/baremetal.toolchain
 popd
 ```
 
@@ -1109,11 +1112,11 @@ popd
 rm -rf cmake-build/
 mkdir cmake-build
 pushd cmake-build
-cmake ../tutorial/00-build -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/00-build/baremetal.toolchain
+cmake ../tutorial/02-setting-up-a-project -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/02-setting-up-a-project/baremetal.toolchain
 popd
 ```
 
-In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use `tutorial/00-build` as the root CMake directory, and use the toolchain file.
+In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use `tutorial/02-setting-up-a-project` as the root CMake directory, and use the toolchain file.
 We are building for Debug.
 
 ## Building
@@ -1124,8 +1127,8 @@ Then we can build the targets:
 
 ```bat
 set ROOT=%CD%
-pushd tutorial\00-build
-cmake --build %ROOT%/cmake-build --target 00-build-image
+pushd tutorial\02-setting-up-a-project
+cmake --build %ROOT%/cmake-build --target 02-setting-up-a-project-image
 popd
 ```
 
@@ -1133,15 +1136,15 @@ popd
 
 ```bash
 rootdir=`pwd`
-pushd tutorial/00-build
-cmake --build $rootdir/cmake-build --target 00-build-image
+pushd tutorial/02-setting-up-a-project
+cmake --build $rootdir/cmake-build --target 02-setting-up-a-project-image
 popd
 ```
 
 We save the root directory to be able to reference it, and step into the project directory. There we run cmake with the `--build` parameter to specify the build directory.
-The target we're going to build is the image, so `00-build-image`. This will automaticall build all its dependencies, so `00-build.elf` will also be built
+The target we're going to build is the image, so `02-setting-up-a-project-image`. This will automaticall build all its dependencies, so `02-setting-up-a-project.elf` will also be built
 
-After this step, we will have built the application in `output/Debug/bin/00-build.elf`, and the image in `deploy/Debug/00-build-image/kernel8.img`.
+After this step, we will have built the application in `output/Debug/bin/02-setting-up-a-project.elf`, and the image in `deploy/Debug/02-setting-up-a-project-image/kernel8.img`.
 
 The image is very small, as the application basically does nothing, but you have built your first baremetal application!
 
@@ -1155,13 +1158,13 @@ To run QEMU:
 
 ```bat
 cd <project_root_dir>
-"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel deploy\Debug\00-build-image\kernel8.img -serial stdio -s -S
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel deploy\Debug\02-setting-up-a-project-image\kernel8.img -serial stdio -s -S
 ```
 
 To run GDB:
 ```bat
 cd output\Debug\bin
-D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args 00-build.elf
+D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args 02-setting-up-a-project.elf
 ```
 
 ```text
@@ -1180,7 +1183,7 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from 00-build.elf...
+Reading symbols from 02-setting-up-a-project.elf...
 ```
 
 ### Linux
@@ -1194,7 +1197,7 @@ qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
 To run GDB:
 ```bash
 cd output/Debug/bin
-gdb-multiarch --args 00-build.elf
+gdb-multiarch --args 02-setting-up-a-project.elf
 ```
 
 ```text
@@ -1213,7 +1216,7 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from 00-build.elf...
+Reading symbols from 02-setting-up-a-project.elf...
 ```
 
 In GDB:
@@ -1227,11 +1230,11 @@ Loading section .text, size 0x58 lma 0x80000
 Start address 0x0000000000080000, load size 128
 Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/tutorial/00-build/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/tutorial/00-build/main.cpp:3
+Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
 3	    return 0;
 ```
 
@@ -1248,7 +1251,7 @@ Next, we step one further, ending up in start.S, and then close down debugging a
 
 ```gdb
 (gdb) n
-empty_bss () at /home/rene/repo/baremetal.github/tutorial/00-build/start.S:84
+empty_bss () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S:84
 84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y

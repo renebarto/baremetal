@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 
 include(functions)
 
-project(00-build
+project(02-setting-up-a-project
     DESCRIPTION "Application to demonstrate building using CMake"
     LANGUAGES CXX ASM)
 

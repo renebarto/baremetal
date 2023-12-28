@@ -32,7 +32,7 @@ The current version as of writing this document is 13.2 rel 1.
 For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf.zip?rev=01c03590412e49d495c78b9f979fd21c&hash=BC02BCAA3B72FF2472AAB83ECBE4F27C).
 Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
-The best way to do install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
+The best way to install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
 Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`:
 
 <img src="images/env-before.png" alt="Environment edit" width="500"/>
@@ -41,7 +41,7 @@ In the lower pane, select Path and click Edit...
 
 <img src="images/env-add.png" alt="Environment add" width="500"/>
 
-Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK
+Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK.
 
 Click OK again to finalize changing the environment.
 
@@ -73,7 +73,7 @@ tar xvf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
 sudo mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/ /opt/toolchains/
 ```
 
-In order to add the path to your environment, edit `.bashrc`, and add the following line, for example at the end:
+In order to add the path to your environment, edit `.bashrc` in your home directory, and add the following line, for example at the end:
 
 ```text
 export PATH=/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin:$PATH
@@ -116,7 +116,8 @@ cmake version 3.20.21032501-MSVC_2
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
 
-When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest), by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
+When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest), 
+by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
 The latest stable release at the moment of writing this document is [3.27.8](https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-windows-x86_64.msi).
 
 <img src="images/CMake-install-1.png" alt="CMake installation step 1" width="400"/>
@@ -205,7 +206,18 @@ To speed up building, often the Ninja build tool is used. This tool is also used
 
 #### Windows
 
-If Visual Studio 2019 is installed, you can find Ninja in `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja`.
+If Visual Studio 2019 is installed, you can find Ninja in `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja`:
+
+To test, open a command line prompt, and execute:
+```bat
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe" --version
+```
+
+The command should execute without error, and print the version of the Ninja:
+
+```text
+1.10.2
+```
 
 To install Ninja build on your system separately, download it from [here](https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip), and unpack the ZIP file. It will contain only one file, `ninja.exe`.
 For example you can place this file in `C:\Program Files\Ninja`. Make sure to add it to your PATH environment variable.
@@ -268,7 +280,7 @@ The current choice for Visual Studio 2019 has to do with the fact that debugging
 
 When installing Visual Studio 2019, at least make sure `Desktop development with C++` is checked as a feature. The feature `Linux development with C++` is not necessary.
 
-Configuration of the project for Visual Studio is described later in [Setting up project structure](setting-up-project-structure.md).
+Configuration of the project for Visual Studio is described later in [Setting up project structure](03-setting-up-project-structure.md).
 
 Of course, a project can also be set up, and code written, using one of the many text editors available for Windows:
 
@@ -296,7 +308,7 @@ Make sure that your editor of choice is installed. Some logical choices may be:
 - Visual Studio Code
 - ...
 
-Configuration of the project is described later in [Setting up a project](setting-up-a-project.md).
+Configuration of the project is described later in [Setting up a project](02-setting-up-a-project.md).
 
 ## Deployment mechanism
 
@@ -305,15 +317,22 @@ In order to deploy a baremetal application, we will need to follow a couple of s
 - Compile sources and create an application (just a single one, as this is a baremetal system) as a ELF application (.elf)
 - Convert the application into a kernel image (.img)
 - Place the image onto the target using one of the following methods:
-  - Copy the image onto an SD card and start the system (see [Running from SD card](###Running-from-SD-card)). The SD card will need to contain some other files in order for the system to start.
-  - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system. Then go to the website created by netboot, select an image and upload it. This will reboot the system with your image. __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again. See [Running using netboot](###Running-using-netboot).
+  - Copy the image onto an SD card and start the system (see [Running from SD card](###Running-from-SD-card)).
+The SD card will need to contain some other files in order for the system to start.
+  - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
+Then go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
+__This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again.
+See [Running using netboot](###Running-using-netboot).
   - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4).
-  __It is also possible to use QEMU with Odroid boards, this will be described later__. 
-QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board. For running inside QEMU, see [Running in QEMU](###Running-in-QEMU).
+__It is also possible to use QEMU with Odroid boards, this will be described later__.
+QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
+For running inside QEMU, see [Running in QEMU](###Running-in-QEMU).
 
-Converting the application into an image will be described later. It uses `aarch64-none-elf-objcopy` to convert the .elf file into a .img file.
+Converting the application into an image will be described later. It uses `aarch64-none-elf-objcopy` (also part of the toolchain) to convert the .elf file into a .img file.
 
-For testing, I've added a pre-built demo application, which we'll get to later. The pre-built image is located in `tutorial/demo/windows/kernel8.img` (built from `tutorial/demo/windows/demo.elf`) and `tutorial/demo/linux/kernel8.img` (built from `tutorial/demo/linux/demo.elf`). The difference is that one was built on Windows, the other on Linux.
+For testing, I've added a pre-built demo application, which we will slowly try to build over the coming tutorials.
+The pre-built image is located in `tutorial/01-demo/windows/kernel8.img` (built from `tutorial/01-demo/windows/demo.elf`) and `tutorial/01-demo/linux/kernel8.img` (built from `tutorial/01-demo/linux/demo.elf`).
+The only difference is that one was built on Windows, the other on Linux. The console used in this case is UART0.
 
 ### Attaching a serial console
 
@@ -321,9 +340,12 @@ For the demo you will need to attach a serial console
 
 <u>__Beware of the following!__</u>
 
-- Make __VERY SURE__ to use a 3.3V serial to USB converter. Using the 5V version is likely to damage your board. For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more. Be careful about the pinning.
-- Attach the USB to serial device before powering on the board
-- Make sure to connect the serial to USB device to the <u>__correct pins__</u> (normally, and in this case as well, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1. In our examples we will be using UART 1 in most cases)
+- Make __VERY SURE__ to use a 3.3V serial to USB converter. Using the 5V version is likely to damage your board.
+For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more.
+<u>__Be careful about the pinning__</u>.
+- Attach the USB to serial device <u>__before__</u> powering on the board
+- Make sure to connect the serial to USB device to the <u>__correct pins__</u> (normally, and in this case as well, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1.
+In our examples we will be using UART 1 in most cases)
 - Make sure you have the drivers for the serial to USB device (USB side of course) correctly installed on your host system
   - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well. Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://embetronicx.com/uncategorized/fixed-prolific-pl2303ta-usb-to-serial-and-windows-11/)
 - Make sure you have a terminal application to communicate with the serial to USB device
@@ -344,14 +366,15 @@ Do <u>__NOT__</u> connect the red wire (+3.3V).
 
 ### Running from SD card
 
-The SD card needs certain other files as well, so it's best to unzip the file `tutorial/demo/Netboot.zip`, copy the contents to the SD card, then copy `tutorial/demo/windows/kernel8.img` or `tutorial/demo/linux/kernel8.img` (the functionality is the same) over the existing one.
+The SD card needs certain other files as well, so it's best to unzip the file `tutorial/01-demo/Netboot.zip`, copy the contents to the SD card, 
+then copy `tutorial/01-demo/windows/kernel8.img` or `tutorial/01-demo/linux/kernel8.img` (the functionality is the same) over the existing one.
 Please make sure to eject / sync your SD card first before removing it from the reader.
 
 Put the SD card in your board, and attach a serial to USB device to the board. Then power on the board.
 
 ### Running using netboot
 
-The SD card will be created from by unzipping the file `tutorial/demo/Netboot.zip`, and copying the contents to the SD card.
+The SD card will be created by unzipping the file `tutorial/01-demo/Netboot.zip`, and copying the contents to the SD card.
 Please make sure to eject / sync your SD card first before removing it from the reader.
 
 Put the SD card in your board, and attach a serial to USB device to the board. Also make sure the board is attached to the network. Then power on the board.
@@ -370,7 +393,7 @@ Using QEMU is quite straightforward. You will need to install QEMU however.
 ##### Windows
 
 There are specific builds of QEMU provided by Stephan Weil, which can be downloaded [here](https://qemu.weilnetz.de/w64/)
-The latest version at the moment of writing this document is [8.1.90](https://qemu.weilnetz.de/w64/qemu-w64-setup-20231125.exe).
+The latest version at the moment of writing this document is [8.2.0](https://qemu.weilnetz.de/w64/qemu-w64-setup-20231224.exe).
 
 Simply run the executable, which will install QEMU.
 
@@ -400,6 +423,15 @@ Click Finish
 
 QEMU is now installed in `C:\Program Files\qemu`
 
+```bat
+"c:\Program Files\qemu\qemu-system-aarch64.exe" --version
+```
+
+```text
+QEMU emulator version 8.2.0 (v8.2.0-12045-g3d58f9b5c5)
+Copyright (c) 2003-2023 Fabrice Bellard and the QEMU Project developers
+```
+
 ##### Linux
 
 To install QEMU:
@@ -427,11 +459,20 @@ Do you want to continue? [Y/n] y
 ...
 ```
 
+```bash
+qemu-system-aarch64 --version
+```
+
+```text
+QEMU emulator version 7.2.7 (Debian 1:7.2+dfsg-7+deb12u3)
+Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
+```
+
 #### Running the application in QEMU
 
 ##### Windows
 
-Copy the demo image (`tutorial/demo/windows/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to your working location, and in a terminal type:
+Copy the demo image (`tutorial/01-demo/windows/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to your working location, and in a terminal type:
 
 ```bat
 "C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s
@@ -463,7 +504,7 @@ Debug  00:01:53.000 HaltSystem (System:176)
 
 ##### Linux
 
-Copy the demo image (`tutorial/demo/linux/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to e.g. your home directory, and in a terminal type:
+Copy the demo image (`tutorial/01-demo/linux/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to e.g. your home directory, and in a terminal type:
 
 ```bash
 qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s
@@ -508,7 +549,7 @@ Debugging is possible in one of two different ways:
 - Using QEMU
 - Using a FTDI JTAG adapter
 
-Using the JTAG adapter is quite tricky, and currently only supported on Linux. If I find the time, I will add a decsription later.
+Using the JTAG adapter is quite tricky, and currently only supported on Linux. If I find the time, I will add a description later.
 
 ### Debugging in QEMU
 
@@ -516,7 +557,7 @@ Using the JTAG adapter is quite tricky, and currently only supported on Linux. I
 
 ##### Windows
 
-Copy the demo image (`tutorial/demo/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to your working location, and in a terminal type:
+Copy the demo image (`tutorial/01-demo/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to your working location, and in a terminal type:
 
 ```bat
 "C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s -S
@@ -530,7 +571,7 @@ The kernel8.img file needs to be in the current location, otherwise point to the
 
 ##### Linux
 
-Copy the demo image (`tutorial/demo/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to e.g. your home directory, and in a terminal type:
+Copy the demo image (`tutorial/01-demo/kernel8.img`) (see [Deployment mechanism](##Deployment-mechanism)) to e.g. your home directory, and in a terminal type:
 
 ```bash
 qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
@@ -539,6 +580,8 @@ qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
 Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
 
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be similar to Windows.
+
+<img src="images/QEMU-wait-Linux.png" alt="QEMU waiting for debugger" width="500"/>
 
 #### Starting the debugger
 
@@ -662,14 +705,14 @@ Find the GDB manual and other documentation resources online at:
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from demo.elf...
-(gdb) target remote localhost:1234
-Remote debugging using localhost:1234
-0x0000000000000000 in ?? ()
 ```
 
 Connect to QEMU and load the symbols (make sure the path to the symbol file is correct):
 
 ```bash
+(gdb) target remote localhost:1234
+Remote debugging using localhost:1234
+0x0000000000000000 in ?? ()
 (gdb) load
 Loading section .init, size 0x148 lma 0x80000
 Loading section .text, size 0x14728 lma 0x80800
@@ -723,3 +766,5 @@ Kill the program being debugged? (y or n) y
 [Inferior 1 (process 1) killed]
 (gdb) quit
 ```
+
+Next: [02-setting-up-a-project](02-setting-up-a-project.md)

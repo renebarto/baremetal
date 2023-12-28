@@ -1,18 +1,18 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : ArmInstructions.h
+// File        : Util.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common instructions for ARM for e.g. synchronization
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
@@ -37,27 +37,15 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/Util.h>
 
-/// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+void* memset(void* buffer, int value, size_t length)
+{
+    uint8* ptr = reinterpret_cast<uint8*>(buffer);
 
-/// @brief NOP instruction
-#define NOP()                           asm volatile("nop")
-
-/// @brief Data sync barrier
-#define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
-
-/// @brief Wait for interrupt
-#define WaitForInterrupt()              asm volatile ("wfi")
-
-/// @brief Enable IRQss. Clear bit 1 of DAIF register. See \ref DAIF_REGISTER
-#define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See \ref DAIF_REGISTER
-#define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See \ref DAIF_REGISTER
-#define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See \ref DAIF_REGISTER
-#define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}

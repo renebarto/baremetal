@@ -130,7 +130,7 @@
 /// @brief Raspberry Pi Auxiliary IRQ register
 #define RPI_AUX_IRQ                   static_cast<uintptr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
 /// @brief Raspberry Pi Auxiliary Enable register
-#define RPI_AUX_ENABLE                static_cast<uintptr>(RPI_AUX_BASE + 0x00000004) // AUXENB
+#define RPI_AUX_ENABLES               static_cast<uintptr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
 // Raspberry Pi auxilary mini UART registers (UART1)
 
@@ -159,11 +159,11 @@
 
 /// @brief Raspberry Pi Auxiliary Enable register values
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2
-#define RPI_AUX_ENABLE_SPI2           BIT(2)
+#define RPI_AUX_ENABLES_SPI2           BIT(2)
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1
-#define RPI_AUX_ENABLE_SPI1           BIT(1)
+#define RPI_AUX_ENABLES_SPI1           BIT(1)
 /// @brief Raspberry Pi Auxiliary Enable register Enable UART1
-#define RPI_AUX_ENABLE_UART1          BIT(0)
+#define RPI_AUX_ENABLES_UART1          BIT(0)
 
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts

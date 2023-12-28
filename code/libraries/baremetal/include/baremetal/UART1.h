@@ -107,6 +107,8 @@ enum class GPIOPullMode
 ///
 class UART1
 {
+    friend UART1& GetUART();
+
 private:
     bool            m_initialized;
 
@@ -140,5 +142,7 @@ private:
     /// @brief Switch GPIO off
     bool Off(uint8 pinNumber, GPIOMode mode);
 };
+
+UART1& GetUART1();
 
 } // namespace baremetal

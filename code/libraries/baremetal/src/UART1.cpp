@@ -72,8 +72,14 @@ void UART1::Initialize()
         return;
 
     // initialize UART
-    auto value = *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLE);
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLE) = value | RPI_AUX_ENABLE_UART1;    // enable UART1, AUX mini uart
+    auto value = *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES);
+    *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
+
+    SetMode(14, GPIOMode::AlternateFunction5);
+
+    SetMode(15, GPIOMode::AlternateFunction5);
+
+    *reinterpret_cast<uint32 volatile*>(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
@@ -82,9 +88,6 @@ void UART1::Initialize()
                                                                                             // Clear FIFO
     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
 
-    SetMode(14, GPIOMode::AlternateFunction5);
-
-    SetMode(15, GPIOMode::AlternateFunction5);
     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
                                                                                             // Enable Tx, Rx
     m_initialized = true;
@@ -235,6 +238,14 @@ bool UART1::Off(uint8 pinNumber, GPIOMode mode)
     *reinterpret_cast<uint32 volatile *>(setClrReg) = regMask;
 
     return true;
+}
+
+UART1& GetUART1()
+{
+    static UART1 value;
+    value.Initialize();
+
+    return value;
 }
 
 } // namespace baremetal

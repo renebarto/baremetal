@@ -21,6 +21,9 @@ Contents:
     - [Startup.S](####Startup.S)
     - [SysConfig.h](####SysConfig.h)
     - [MemoryMap.h](####MemoryMap.h)
+  - [Update CMake file for baremetal](###Update-CMake-file-for-baremetal)
+  - [Update application](###Update-application)
+  - [Update CMake file for applcation](###Update-CMake-file-for-applcation)
   - [Configure and build](###Configure-and-build-step-2)
   - [Running the application](###Running-the-application-step-2)
 
@@ -31,6 +34,10 @@ This is also practical, as using the serial console enables us to write output f
 
 There are two serial consoles possible, UART0 and UART1, which can be used in parallel, however it is most common to use one of the two, as they normally use the same GPIO pins (14 and 15).
 See also [here](01-setting-up-for-development.md###Attaching-a-serial-console). For this application, we will use UART1, which is the easiest to set up. It has less functionality, but for a simple serial console both are equally suitable.
+
+If you're curious to see how this works, or just want to dive directly into the code,
+in `tutorials/05-console-uart1` there is a complete copy of what we work towards in this section.
+Its root will clearly be `tutorial/05-console-uart1`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
 ## Creating the baremetal library structure
 
@@ -295,7 +302,6 @@ File: code/applications/demo/src/main.cpp
 8:     }
 9:     return 0;
 10: }
-11: 
 ```
 
 ### Update project setup for demo application
@@ -608,12 +614,13 @@ The other cores will not run, as we did not allow them to yet.
 
 One important remark however:
 - The code that sets the stack pointer tends to throw the debugger off balance. So in this case it is better to also set a breakpoint on line 82 of start.S, and simply continue once you get to line 62.
+- Next to this, you might notice a bit of unstable behaviour which we will come to next. This has to do with the startup code.
 
 <img src="images/VisualStudioDebugAssembly2.png" alt="Debugging assembly code before jumping into main()" width="600"/>
 
 ## Creating the library code - step 2
 
-Let's try and write something functional. We'll write code to set up UART1 on the GPIO pins, and write a string to the console.
+Let's try and write something functional. We'll write code to set up UART1 and the GPIO pins, and write a string to the console.
 
 In order to set up the console, we will need access to two devices:
 - GPIO to set up the connections for UART1 to GPIO pins 14 and 15
@@ -682,7 +689,6 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 50: #define BIT(n)              (1U << (n))
 51: 
 52: /// @}
-53: 
 ```
 
 For now, we'll define the macro BIT to define the value of a bit index index n, which is used to identify values of field in registers.
@@ -1001,7 +1007,7 @@ We will not go into details here, we'll cover this when we use the registers.
 More information on the GPIO registers can be found [here](boards/RaspberryPi/RaspberryPi-GPIO-registers.md) and [here](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 89).
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
-More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md),  as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10).
+More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md), as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10).
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 
 ### UART1.h
@@ -1444,6 +1450,7 @@ As shown in the comments, the documentation specifies how to set the value. The 
   - This simply iterates through the string and writes the character using the `Write()` method.
   - The only specialty is that a line feed ('\n') in the string is written as a line feed plus carriage return character ('\n' followed by '\r')
 
+As we now have the first functional source file in the project, we can remove the previous `Dummy.cpp` file
 #### SetMode
 
 The `SetMode()` method used in line 78 and 80 is implemented as:
@@ -1627,7 +1634,6 @@ File: code/libraries/baremetal/src/UART1.cpp
 239: 
 240:     return true;
 241: }
-242: 
 ```
 
 - Line 224-229: Some sanity checks are performed. If these fail, false is returned
@@ -1759,10 +1765,14 @@ File: baremetal.ld
 
 #### Startup.S
 
-In order to prepare for running code which used stack and heap, we will change the startup code.
+As we are going to write to registers, we first need to set up the system such that this is allowed. By default, all access to registers on Exception Level 1 (EL1) and below will be trapped, leading to an exception at El2.
+So we will need to do some programming in assembly to make sure the SoC is set up correctly.
+Also, in order to prepare for running code which used stack and heap, we will change the startup code.
 This code will use a memory map, which will be loaded through two additional headers, which will be covered soon.
 Also, as all applications will be using the same startup code, it is more logical to move this code to the baremetal library.
 We therefore remove `code/applications/demo/src/start.S`, and add a new file `code/libraries/baremetal/src/Startup.S`
+
+This also means we can remove `code/applications/demo/src/start.S`.
 
 ```asm
 File: code/libraries/baremetal/src/Startup.S
@@ -2291,6 +2301,118 @@ Then end (top) of the exception stack for core 0 is `MEM_EXCEPTION_STACK`. This 
 Finally the end of the exception stacks is `MEM_EXCEPTION_STACK_END`.
 As you can see in the tables, there is also heap space, page space, etc. We'll get around to that later.
 
+### Update CMake file for baremetal
+
+As we've added some files to the baremetal library, and removed Dummy.cpp, we will update the CMake file.
+
+```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: project(baremetal
+5: 	DESCRIPTION "Bare metal library"
+6: 	LANGUAGES CXX ASM)
+7: 
+8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
+9: 
+10: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+11: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+12: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+13: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+14: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+15: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+16: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+17: set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+18: 
+19: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+20: 
+21: set(PROJECT_DEPENDENCIES
+22:     )
+23: 
+24: set(PROJECT_LIBS
+25:     ${LINKER_LIBRARIES}
+26:     ${PROJECT_DEPENDENCIES}
+27:     )
+28: 
+29: set(PROJECT_SOURCES
+30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+32:     )
+33: 
+34: set(PROJECT_INCLUDES_PUBLIC
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+42:     )
+43: set(PROJECT_INCLUDES_PRIVATE )
+44: 
+45: if (CMAKE_VERBOSE_MAKEFILE)
+46:     display_list("Package                           : " ${PROJECT_NAME} )
+47:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+48:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+49:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+50:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+51:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+52:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+53:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+54:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+55:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+56:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+57:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+58:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+59:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+60:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+61:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+62:     display_list("Link libs                         : " ${PROJECT_LIBS} )
+63:     display_list("Source files                      : " ${PROJECT_SOURCES} )
+64:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+65:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+66: endif()
+67: 
+68: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+69: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+70: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+71: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+72: target_compile_definitions(${PROJECT_NAME} PRIVATE
+73:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+74:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+75:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+76:     )
+77: target_compile_definitions(${PROJECT_NAME} PUBLIC
+78:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+79:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+80:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+81:     )
+82: target_compile_options(${PROJECT_NAME} PRIVATE
+83:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+84:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+85:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+86:     )
+87: target_compile_options(${PROJECT_NAME} PUBLIC
+88:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+89:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+90:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+91:     )
+92: 
+93: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+94: 
+95: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+96: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+97:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+98: endif()
+99: 
+100: link_directories(${LINK_DIRECTORIES})
+101: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+102: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+103: 
+104: show_target_properties(${PROJECT_NAME})
+```
+
 ### Update application
 
 The last thing we need to do is update the application code to actually make use of the functionality we just created.
@@ -2309,10 +2431,126 @@ File: code/applications/demo/src/main.cpp
 9:     uart.WriteString("Hello World!\n");
 10:     return 0;
 11: }
-12: 
 ```
 
 In the main() function, we first create an instance of the UART, then initialize it with a call to `Initialize()`, and finally we write the string "Hello World!\n" to the console. Notice the `\n` character, and remember that we will write the sequency `\r\n` instead of the simple line feed.
+
+### Update CMake file for applcation
+
+As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
+
+```cmake
+File: d:\Projects\baremetal.test\code\applications\demo\CMakeLists.txt
+1: project(demo
+2:     DESCRIPTION "Demo application"
+3:     LANGUAGES CXX ASM)
+4: 
+5: message(STATUS "\n**********************************************************************************\n")
+6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+7: 
+8: message("\n** Setting up ${PROJECT_NAME} **\n")
+9: 
+10: include(functions)
+11: 
+12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+13: 
+14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+17: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+18: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+19: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+20: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+21: set(PROJECT_INCLUDE_DIRS_PUBLIC )
+22: 
+23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+24: 
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal
+27:     )
+28: 
+29: set(PROJECT_LIBS
+30:     ${LINKER_LIBRARIES}
+31:     ${PROJECT_DEPENDENCIES}
+32:     )
+33: 
+34: set(PROJECT_SOURCES
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+36:     )
+37: 
+38: set(PROJECT_INCLUDES_PUBLIC )
+39: set(PROJECT_INCLUDES_PRIVATE )
+40: 
+41: if (CMAKE_VERBOSE_MAKEFILE)
+42:     display_list("Package                           : " ${PROJECT_NAME} )
+43:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+44:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+45:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+46:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+47:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+48:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+49:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+50:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+51:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+52:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+53:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+54:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+55:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+56:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+57:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+58:     display_list("Link libs                         : " ${PROJECT_LIBS} )
+59:     display_list("Source files                      : " ${PROJECT_SOURCES} )
+60:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+61:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+62: endif()
+63: 
+64: if (PLATFORM_BAREMETAL)
+65:     set(START_GROUP -Wl,--start-group)
+66:     set(END_GROUP -Wl,--end-group)
+67: endif()
+68: 
+69: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+70: 
+71: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+72: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+73: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+74: target_compile_definitions(${PROJECT_NAME} PRIVATE 
+75:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+76:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+77:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+78:     )
+79: target_compile_definitions(${PROJECT_NAME} PUBLIC 
+80:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+81:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+82:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+83:     )
+84: target_compile_options(${PROJECT_NAME} PRIVATE 
+85:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+86:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+87:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+88:     )
+89: target_compile_options(${PROJECT_NAME} PUBLIC 
+90:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+91:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+92:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+93:     )
+94: 
+95: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+96: 
+97: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+98: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+99:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+100: endif()
+101: 
+102: link_directories(${LINK_DIRECTORIES})
+103: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+104: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+105: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+106: 
+107: show_target_properties(${PROJECT_NAME})
+108: 
+109: add_subdirectory(create-image)
+```
 
 ### Configure and build - Step 2
 

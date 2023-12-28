@@ -22,9 +22,9 @@ Contents:
 In order to start larger scale development, as well as to use Visual Studio for CMake project development for baremetal platforms,
 it is wise to set up your project in a certain way.
 
-IF you're curious to see how this works, or just want to dive directly into the code,
+If you're curious to see how this works, or just want to dive directly into the code,
 in `tutorials/03-setting-up-project-structure` there is a complete copy of what we work towards in this section.
-Its root will clearly be `tutorial/03-setting-up-project-structure`.
+Its root will clearly be `tutorial/03-setting-up-project-structure`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
 To understand how to approach this, first a bit of information on how CMake projects are structured, and how Visual Studio integrates CMake projects.
 

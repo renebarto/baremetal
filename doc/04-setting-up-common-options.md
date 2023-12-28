@@ -20,6 +20,10 @@ In order for CMake projects to work smoothly, it is convenient to do some ground
 
 This will again be a length story, as we will set up how we handle setting of compiler definitions and options, linker options, etc.
 
+If you're curious to see how this works, or just want to dive directly into the code,
+in `tutorials/04-setting-up-common-options` there is a complete copy of what we work towards in this section.
+Its root will clearly be `tutorial/04-setting-up-common-options`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
+
 ## CMake function display_list
 
 We will add a function to the `cmake/functions.cmake` file:
@@ -621,7 +625,7 @@ File: code/applications/demo/CMakeLists.txt
 - line 16: Similarly for the compiler definitions for assembly using the variables set up for assembly compiler definitions
 - line 17: Similarly for the compiler options for C++ using the variables set up for C++ compiler options
 - line 19: Similarly for the compiler options for assembly using the variables set up for assembly compiler options
-- line 23: Similar for linker options using the variables set up for linker options
+- line 23: Similarly for linker options using the variables set up for linker options
 - line 28-31: We can now link to all standard libraries by adding `LINKER_LIBRARIES` to `PROJECT_LIBS`
 - line 41-62: Using the custom CMake function `display_list` we can now print all settings for the project.
 This is only done if verbose output is requested
@@ -651,7 +655,6 @@ File: code/applications/demo/create-image/CMakeLists.txt
 10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
 11: 
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
-13: 
 ```
 
 The only difference here is that the `BAREMETAL_TARGET_KERNEL` is defined in the main CMake file, so we can remove the definition here.
@@ -940,6 +943,8 @@ The final parameters determine the source files compiled, and the resulting obje
 
 The -c option tells the compiler to compile the specified file, the -o option tells it to generate the specified object file. Notice that the path for the object file is relative to the CMake build directory, in this case `cmake-BareMetal-Debug`.
 
+### Compiling source code
+
 ```text
 D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
   -DRPI_TARGET=3 -D_DEBUG
@@ -953,8 +958,6 @@ D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aa
   -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d
   -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
 ```
-
-### Compiling source code
 
 #### Compiler
 

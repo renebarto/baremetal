@@ -1,3 +1,4 @@
+@echo off
 set thisdir=%~dp0
 
 call %thisdir%\build-target %1

@@ -22,7 +22,8 @@ This will again be a length story, as we will set up how we handle setting of co
 
 If you're curious to see how this works, or just want to dive directly into the code,
 in `tutorials/04-setting-up-common-options` there is a complete copy of what we work towards in this section.
-Its root will clearly be `tutorial/04-setting-up-common-options`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
+Its root will clearly be `tutorial/04-setting-up-common-options`.
+Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
 ## CMake function display_list
 
@@ -30,6 +31,8 @@ We will add a function to the `cmake/functions.cmake` file:
 
 ```cmake
 File: cmake/functions.cmake
+...
+
 9: # Converts a CMake list to a CMake string and displays this in a status message along with the text specified.
 10: function(display_list text)
 11:     set(list_str "")
@@ -39,10 +42,12 @@ File: cmake/functions.cmake
 15:     message(STATUS ${text} ${list_str})
 16: endfunction()
 17: 
+
+...
 ```
 
 This function prints a text followed by a list of values, separated by spaces.
-This can be used for single values, but also for a list of compiler definitions.
+This can be used for single values, but also for a list of e.g. compiler definitions.
 
 ## CMake function show_target_properties
 
@@ -50,6 +55,8 @@ We will add a another function to the `cmake/functions.cmake` file:
 
 ```cmake
 File: cmake/functions.cmake
+...
+
 18: function(show_target_properties target)
 19:     if (CMAKE_VERBOSE_MAKEFILE)
 20:         message(STATUS "")
@@ -129,6 +136,8 @@ File: cmake/functions.cmake
 94:     endif()
 95: endfunction()
 96: 
+
+...
 ```
 
 Without going into too much detail, this function prints for a specific target:
@@ -155,7 +164,8 @@ Without going into too much detail, this function prints for a specific target:
 
 ## Common compiler directives
 
-As most compiler definitions and compiler options will have some commonality, it is convenient to define these common parts in variables, and use them in our project configuration.
+As most compiler definitions and compiler options will have some commonality, it is convenient to define these common parts in variables,
+and use them in our project configuration.
 
 So we will update the main CMake file to set these variables. We will revisit this part a number of times.
 
@@ -165,6 +175,8 @@ Just before `add_subdirectory(code)` in the main CMake file, insert the followin
 
 ```cmake
 File: CMakeLists.txt
+...
+
 31: if (BAREMETAL_RPI_TARGET EQUAL 3)
 32:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
 33:     set(BAREMETAL_TARGET_KERNEL kernel8)
@@ -266,6 +278,8 @@ File: CMakeLists.txt
 129: message(STATUS "C compiler version:      ${CMAKE_C_COMPILER_VERSION}")
 130: message(STATUS "C++ supported standard:  ${SUPPORTED_CPP_STANDARD}")
 131: 
+
+...
 ```
 
 Explanation:
@@ -297,6 +311,8 @@ For this we add another section just before `add_subdirectory(code)` in the main
 
 ```cmake
 File: CMakeLists.txt
+...
+
 132: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
 133: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
 134: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
@@ -361,6 +377,8 @@ File: CMakeLists.txt
 193:     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
 194: endif()
 195: 
+
+...
 ```
 
 Explanation:
@@ -431,7 +449,8 @@ File: CMakeLists.txt
 41: 
 42: project(baremetal-main
 43:     DESCRIPTION "Baremetal overall project")
-44: 
+
+...
 ```
 
 Explanation:
@@ -629,7 +648,7 @@ File: code/applications/demo/CMakeLists.txt
 - line 28-31: We can now link to all standard libraries by adding `LINKER_LIBRARIES` to `PROJECT_LIBS`
 - line 41-62: Using the custom CMake function `display_list` we can now print all settings for the project.
 This is only done if verbose output is requested
-- line 74-78: These variables `PROJECT_COMPILE_DEFINITIONS_C_PRIVATE`, `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE` are used to set private compiler definitions for a specific language, in this case C, C++ or assembly. We use a so-called generator expression for this
+- line 74-78: The variables `PROJECT_COMPILE_DEFINITIONS_C_PRIVATE`, `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE` are used to set private compiler definitions for a specific language, in this case C, C++ or assembly. We use a so-called generator expression for this
 - line 79-83: Similarly for setting public compiler definitions for a specific language
 - line 84-88: Similarly for setting private compiler options for a specific language
 - line 89-93: Similarly for setting public compiler options for a specific language
@@ -826,7 +845,7 @@ We can then build:
 Rebuild All succeeded.
 ```
 
-You can see that the demo application's main.cpp is compiled (step 3), as well as the startup code (step 2).
+You can see that the startup code is compiled (step 1), as well as the demo application's main.cpp (step 2).
 The demo application is linked (step 3), and finally the image is created (step 4).
 It takes a while to start understanding, even with the description of [Common compiler directives](##Common-compiler-directives),  what the compiler and linker actually do, so we'll dive a bit deeper here.
 For this we'll have a look at the build output shown above:
@@ -856,28 +875,33 @@ The -D options specify all compiler definitions. You will recognize the options 
 - The `PLATFORM_BAREMETAL` definition is triggered by the main CMake file:
 
 ```cmake
-set(DEFINES_ASM
-    PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
-    )
+File: CMakeLists.txt
+72: set(DEFINES_ASM
+73:     PLATFORM_BAREMETAL
+74:     RPI_TARGET=${BAREMETAL_RPI_TARGET}
+75:     )
 ```
+
 - The generic and the build configuration specific definitions are later combined:
 ```cmake
-set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
-set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
-set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
-set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
+File: CMakeLists.txt
+159: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
+160: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
+161: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
+162: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
 ```
+
 - However we don't set any build configuration specific assembly definitions
 - And then later variable for the specific build configuration are set:
 ```cmake
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+File: CMakeLists.txt
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -893,39 +917,57 @@ The complete list below are all compiler options:
 
 - The first -g is automatically added by CMake as we are building for a debug configuration
 - The `-mcpu=cortex-a53 -mlittle-endian -mcmodel=small` options are set due to the fact that we are building for Raspberry Pi 3:
+- 
 ```cmake
-if (BAREMETAL_RPI_TARGET EQUAL 3)
-    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
-    set(BAREMETAL_TARGET_KERNEL kernel8)
+File: CMakeLists.txt
+53: if (BAREMETAL_RPI_TARGET EQUAL 3)
+54:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
+55:     set(BAREMETAL_TARGET_KERNEL kernel8)
 ...
 ```
 - The options all are defined later on in the main CMake file, where they are combinex with `BAREMETAL_ARCH_CPU_OPTIONS`:
+
 ```cmake
-set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
+File: CMakeLists.txt
+128: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
 ```
+
 - The `-O2` option is set for the specific Debug build configuration:
+
 ```cmake
-set(FLAGS_ASM_DEBUG -O2)
+File: CMakeLists.txt
+129: set(FLAGS_ASM_DEBUG -O2)
+130: set(FLAGS_ASM_RELEASE -O2)
+131: set(FLAGS_ASM_MINSIZEREL -O2)
+132: set(FLAGS_ASM_RELWITHDEBINFO -O2)
 ```
+
 - The generic and the build configuration specific definitions are later combined:
+
 ```cmake
-set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
-set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
-set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
-set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
+File: CMakeLists.txt
+174: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
+175: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
+176: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
+177: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
 ```
+
 - And then later variable for the specific build configuration are set:
+
 ```cmake
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+File: CMakeLists.txt
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
+
 - Finally, the following options are added automatically by CMake, to generate a dependency file.
+
 ```
 -MD
 -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
@@ -972,34 +1014,44 @@ The -D options specify all compiler definitions. You will recognize the options 
 - The `PLATFORM_BAREMETAL` definition is triggered by the main CMake file:
 
 ```cmake
-set(DEFINES_C 
-    PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
-    )
+File: CMakeLists.txt
+64: set(DEFINES_C 
+65:     PLATFORM_BAREMETAL
+66:     RPI_TARGET=${BAREMETAL_RPI_TARGET}
+67:     )
 ```
+
 - The \_DEBUG definition is caused by the `CMAKE_BUILD_TYPE` variable, which is set to `Debug` as we are building a Debug application. This is also done in the main CMake file:
+- 
 ```cmake
-set(DEFINES_C_DEBUG _DEBUG)
-set(DEFINES_C_RELEASE NDEBUG)
-set(DEFINES_C_MINSIZEREL NDEBUG)
-set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+File: CMakeLists.txt
+68: set(DEFINES_C_DEBUG _DEBUG)
+69: set(DEFINES_C_RELEASE NDEBUG)
+70: set(DEFINES_C_MINSIZEREL NDEBUG)
+71: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
 ```
+
 - The generic and the build configuration specific definitions are later combined:
+
 ```cmake
-set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
-set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
-set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
-set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
+File: CMakeLists.txt
+154: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
+155: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
+156: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
+157: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
 ```
+
 - And then later variable for the specific build configuration are set:
+
 ```cmake
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+File: CMakeLists.txt
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -1017,63 +1069,91 @@ The complete list below are all compiler options:
 
 - The first -g is automatically added by CMake as we are building for a debug configuration
 - The `-mcpu=cortex-a53 -mlittle-endian -mcmodel=small` options are set due to the fact that we are building for Raspberry Pi 3:
+
 ```cmake
-if (BAREMETAL_RPI_TARGET EQUAL 3)
-    set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
-    set(BAREMETAL_TARGET_KERNEL kernel8)
+File: CMakeLists.txt
+53: if (BAREMETAL_RPI_TARGET EQUAL 3)
+54:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
+55:     set(BAREMETAL_TARGET_KERNEL kernel8)
 ...
 ```
+
 - The `-Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti` options all are defined later on in the main CMake file, where they are combinex with `BAREMETAL_ARCH_CPU_OPTIONS`:
+
 ```cmake
-set(FLAGS_CXX
-    ${BAREMETAL_ARCH_CPU_OPTIONS}
-    -Wall
-    -Wextra
-    -Werror
-    -Wno-missing-field-initializers
-    -Wno-unused-value
-    -Wno-aligned-new
-    -ffreestanding 
-    -fsigned-char 
-    -nostartfiles
-    -mno-outline-atomics
-    -nostdinc
-    -nostdlib
-    -nostdinc++
-    -fno-exceptions
-    -fno-rtti
-    )
+File: CMakeLists.txt
+100: set(FLAGS_CXX
+101:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+102:     -Wall
+103:     -Wextra
+104:     -Werror
+105:     -Wno-missing-field-initializers
+106:     -Wno-unused-value
+107:     -Wno-aligned-new
+108:     -ffreestanding 
+109:     -fsigned-char 
+110:     -nostartfiles
+111:     -mno-outline-atomics
+112:     -nostdinc
+113:     -nostdlib
+114:     -nostdinc++
+115:     -fno-exceptions
+116:     -fno-rtti
+117:     )
 ```
+
 - The `-O0 -Wno-unused-variable -Wno-unused-parameter` options are set for the specific Debug build configuration:
+
 ```cmake
-set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+File: CMakeLists.txt
+119: # -g is added by CMake
+120: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+121: # -O3 is added by CMake
+122: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+123: # -Os is added by CMake
+124: set(FLAGS_CXX_MINSIZEREL -O3)
+125: # -O2 -g is added by CMake
+126: set(FLAGS_CXX_RELWITHDEBINFO )
 ```
+
 - The generic and the build configuration specific definitions are later combined:
+
 ```cmake
-set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
-set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
-set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
-set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
+File: CMakeLists.txt
+169: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
+170: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
+171: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
+172: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
 ```
+
 - And then later variable for the specific build configuration are set:
+
 ```cmake
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+File: CMakeLists.txt
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
+
 - The option `-std=gnu++17` is automatically added by CMake due to setting the variable `SUPPORTED_CPP_STANDARD` in the main CMake file:
+
 ```cmake
-set(SUPPORTED_CPP_STANDARD 17)
+File: CMakeLists.txt
+148: set(SUPPORTED_CPP_STANDARD 17)
 ```
+
 - Which is then later used when defining the target properties in the `code/application/demo` CMake files:
+
 ```cmake
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+File: code/applications/demo/CMakeLists.txt
+95: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
 ```
+
 - Finally, the following options are added automatically by CMake, to generate a dependency file.
 ```
 -MD
@@ -1132,114 +1212,148 @@ Options used when linking are:
 - The first -g is automatically added by CMake as we are building for a debug configuration
 - The `-LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1` option is added by the toolchain:
 ```cmake
-set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
+File: baremetal.toolchain
+23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
+
 ...
 
-if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "")
-	set(HAVE_AUX_PATH false)
-else()
-	list(FIND ${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH} HAVE_AUX_PATH)
-endif()
-message(STATUS "CMAKE_EXE_LINKER_FLAGS=  ${CMAKE_EXE_LINKER_FLAGS}")
-if (NOT HAVE_AUX_PATH)
-	message(STATUS "Adding to CMAKE_EXE_LINKER_FLAGS -L${TOOLCHAIN_AUXILIARY_PATH}")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH}" CACHE INTERNAL "" FORCE)
-endif()
+63: if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "")
+64:     set(HAVE_AUX_PATH false)
+65: else()
+66:     list(FIND ${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH} HAVE_AUX_PATH)
+67: endif()
+68: message(STATUS "CMAKE_EXE_LINKER_FLAGS=  ${CMAKE_EXE_LINKER_FLAGS}")
+69: if (NOT HAVE_AUX_PATH)
+70:     message(STATUS "Adding to CMAKE_EXE_LINKER_FLAGS -L${TOOLCHAIN_AUXILIARY_PATH}")
+71:     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${TOOLCHAIN_AUXILIARY_PATH}" CACHE INTERNAL "" FORCE)
+72: endif()
 ```
+
 - So the `TOOLCHAIN_AUXILIARY_PATH` is set, and then appended to `CMAKE_EXE_LINKER_FLAGS` if not already there. This option specifies a directory searched for object and library files when linking the target.
 The `CMAKE_EXE_LINKER_FLAGS` are automatically added to the linker flags for a target by CMake.
 - The options `-Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles` are set in the main CMake file:
+
 ```cmake
-set(LINK_FLAGS
-    -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
-    -T ${CMAKE_SOURCE_DIR}/baremetal.ld
-    -nostdlib
-    -nostartfiles 
-    )
-set(LINK_FLAGS_DEBUG )
-set(LINK_FLAGS_RELEASE )
-set(LINK_FLAGS_MINSIZEREL )
-set(LINK_FLAGS_RELWITHDEBINFO )
+File: CMakeLists.txt
+134: set(LINK_FLAGS
+135:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+136:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+137:     -nostdlib
+138:     -nostartfiles 
+139:     )
+140: set(LINK_FLAGS_DEBUG )
+141: set(LINK_FLAGS_RELEASE )
+142: set(LINK_FLAGS_MINSIZEREL )
+143: set(LINK_FLAGS_RELWITHDEBINFO )
 ```
+
 - This is then combined later on with the build configuration specific linker flags:
+
 ```cmake
-set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
-set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
-set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
-set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
+File: CMakeLists.txt
+179: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
+180: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
+181: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
+182: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
 ```
+
 - Subsequently, the linker flags for the selected build configuration is set:
+
 ```cmake
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-    set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-    set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-    set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-    set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-    set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+File: CMakeLists.txt
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
+
 - The `LINKER_OPTIONS` variable is then used in the project CMake file (`code/applications/demo/CMakeLists.txt` and `code/libraries/baremetal/CMakeLists.txt`):
+
 ```cmake
-set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+File: code/applications/demo/CMakeLists.txt
+23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 ```
+
 - Then the target linker options are set on the target as a property using this veriable:
+
 ```cmake
-list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-endif()
+File: code/applications/demo/CMakeLists.txt
+97: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+98: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+99:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+100: endif()
 ```
+
 - What follows is a list of object files to be linked, in this case just one:
+- 
 ```text
 code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
 code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
 ```
-- This list is determined by the source files specified for the target:
-```cmake
-set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/start.S
-    )
 
-set(PROJECT_INCLUDES_PUBLIC )
-set(PROJECT_INCLUDES_PRIVATE )
+- This list is determined by the source files specified for the target:
+- 
+```cmake
+File: code/applications/demo/CMakeLists.txt
+33: set(PROJECT_SOURCES
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/start.S
+36:     )
+37: 
+38: set(PROJECT_INCLUDES_PUBLIC )
+39: set(PROJECT_INCLUDES_PRIVATE )
 
 ...
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+69: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
+
 - Next is the option `-o ..\output\Debug\bin\demo.elf`, which specifies the output of the linker, the application.
 This is determined by the specification of the name and location of the target file in the project CMake file:
+
 ```cmake
-set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+File: code/applications/demo/CMakeLists.txt
+12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 
 ...
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
+103: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+104: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+105: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 ```
+
 - As we are building an executable, the location will be the `OUTPUT_BIN_DIR`, the file name will be `PROJECT_TARGET_NAME`.
 - Finally, the list of libraries to link to is specified, which is for now empty:
-```
--Wl,--start-group
--Wl,--end-group
-```
-- This is determined by the list of libraries to link to in the project CMake file:
-```cmake
-set(PROJECT_DEPENDENCIES
-    )
 
-set(PROJECT_LIBS
-    ${LINKER_LIBRARIES}
-    ${PROJECT_DEPENDENCIES}
-    )
+```
+File: code/applications/demo/CMakeLists.txt
+64: if (PLATFORM_BAREMETAL)
+65:     set(START_GROUP -Wl,--start-group)
+66:     set(END_GROUP -Wl,--end-group)
+67: endif()
+```
+
+- This is determined by the list of libraries to link to in the project CMake file:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+25: set(PROJECT_DEPENDENCIES
+26:     )
+27: 
+28: set(PROJECT_LIBS
+29:     ${LINKER_LIBRARIES}
+30:     ${PROJECT_DEPENDENCIES}
+31:     )
 
 ...
 
-target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+71: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
 ```
+
 - The reason libraries linked to is placed in a group (`-Wl,--start-group <libraries> -Wl,--end-group`) is that the GCC linker tries to resolve symbols in reverse order, i.e. expects the lowest level symbols to be added last, and we cannot always guarantee the correct order of libraires.
 By putting them in a group, the linker will iterate as many times as needed to resolve all symbols, if possible of course.
 
@@ -1270,3 +1384,5 @@ tools\startQEMU-image-uart1.bat demo
 ```
 
 Start debugging as shown in [Visual Studio CMake integration](##Visual-Studio-CMake-integration). Make sure the demo applications is selected as startup project.
+
+Next: [05-console-uart1](05-console-uart1.md)

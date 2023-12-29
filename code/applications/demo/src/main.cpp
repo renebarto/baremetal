@@ -6,6 +6,6 @@ using namespace baremetal;
 
 int main()
 {
-    GetUART().WriteString("Hello World!\n");
+    GetUART1().WriteString("Hello World!\n");
     return static_cast<int>(ReturnCode::ExitHalt);
 }

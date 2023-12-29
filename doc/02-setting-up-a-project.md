@@ -1312,3 +1312,5 @@ Kill the program being debugged? (y or n) y
 [Inferior 1 (process 1) killed]
 (gdb) quit
 ```
+
+Next: [03-setting-up-project-structure](03-setting-up-project-structure.md)

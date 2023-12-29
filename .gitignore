@@ -32,7 +32,6 @@
 *.app
 
 .vs/
-tutorial/00-build/out/
 cmake-*/
 deploy/
 out/

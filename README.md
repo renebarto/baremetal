@@ -55,13 +55,12 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [System startup](doc/system-startup.md)
 
 ## Todo
-- Explain how to create the correct setup for Visual Studio 2019
 - Check if bug in Visual Studio 2022 is fixed
+- Try out code on Raspberry Pi 4
 - Try out Raspberry Pi 4 emulation in QEMU
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible
 - Add boot process for Odroid system
 - Add description of Odroid platform support in QEMU
 - Add list of Linux terminal applications
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
-- Add more description of how to create and SD card with CircleNetboot
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"

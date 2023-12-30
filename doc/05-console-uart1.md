@@ -18,9 +18,6 @@ Contents:
   - [UART1.cpp](###UART1.cpp)
   - [Update Linker Definition file](###Update-Linker-Definition-file)
   - [Update startup code](###Update-startup-code)
-    - [Startup.S](####Startup.S)
-    - [SysConfig.h](####SysConfig.h)
-    - [MemoryMap.h](####MemoryMap.h)
   - [Update CMake file for baremetal](###Update-CMake-file-for-baremetal)
   - [Update application](###Update-application)
   - [Update CMake file for applcation](###Update-CMake-file-for-applcation)
@@ -33,7 +30,9 @@ One of the simplest things to start with is the serial console.
 This is also practical, as using the serial console enables us to write output from the application, and also get input.
 
 There are two serial consoles possible, UART0 and UART1, which can be used in parallel, however it is most common to use one of the two, as they normally use the same GPIO pins (14 and 15).
-See also [here](01-setting-up-for-development.md###Attaching-a-serial-console). For this application, we will use UART1, which is the easiest to set up. It has less functionality, but for a simple serial console both are equally suitable.
+See also [here](01-setting-up-for-development.md###Attaching-a-serial-console).
+For this application, we will use UART1, which is the easiest to set up.
+It has less functionality, but for a simple serial console both are equally suitable.
 
 If you're curious to see how this works, or just want to dive directly into the code,
 in `tutorials/05-console-uart1` there is a complete copy of what we work towards in this section.
@@ -54,7 +53,7 @@ File: code/libraries/CMakeLists.txt
 
 - We will create a new folder underneath `code/libraries` named baremetal. 
 - We will add subdirectories underneath named `include` and `src`, which will hold header (.h) files and source files (.cpp) respectively. 
-- Underneath code/libraries/baremetal/include we will create another directory named baremetal. The reason for this will be explained shortly.
+- Underneath `code/libraries/baremetal/include` we will create another directory named `baremetal`. The reason for this will be explained shortly.
 - We will create a new `CMakeLists.txt` file in `code/libraries/baremetal` with the following contents:
 
 ```cmake
@@ -285,6 +284,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 You will recognize the structure used in the previous demo project, with a one addition:
 
 - line 17: We export the `code/libraries/baremetal/include` directory publicly
+- line 34: We export the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h` publicly
 
 ### Update application code
 
@@ -345,7 +345,7 @@ File: code/applications/demo/CMakeLists.txt
 ...
 ```
 
-See line 26. We add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
+- line 26: We add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
 
 ### Configure and build - Step 1
 
@@ -620,7 +620,7 @@ One important remark however:
 
 ## Creating the library code - step 2
 
-Let's try and write something functional. We'll write code to set up UART1 and the GPIO pins, and write a string to the console.
+Let's try and write something more useful. We'll write code to set up UART1 and the GPIO pins, and write a string to the console.
 
 In order to set up the console, we will need access to two devices:
 - GPIO to set up the connections for UART1 to GPIO pins 14 and 15
@@ -1165,7 +1165,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 
 This header declares the class UART1 inside the namespace baremetal. All types and functions inside the baremetal library will use this namespace.
 
-The class has a a default constructor, and a method to initialize it. It then has a method to read and write a character, as well as to write a string.
+The class has a default constructor, and a method to initialize it. It also declares a method to read and write a character, as well as to write a string.
 The other methods are used to set up the GPIO pins correctly, as part of the Initialize() method.
 
 ### UART1.cpp
@@ -1422,15 +1422,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
 - Line 48: We define the baremetal namespace again, everything else will be inside this namespace
-- Line 50: We declare a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
+- Line 50: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
 - Line 52-61: We define a static function `WaitCycles`, that waits the specified number of NOP instructions
 - Line 63-66: We implement the UART1 constructor, which only initializes the `m_initialized` member variable
 - Line 68-94: We implement the `Initialize` method. This invokes the most part of the code
-  - Line 71-72: We check whether the class was already initialized, if so we simply return
-  - Line 75: We read the UART1 Enable Register, which contains enable bits for SPI1, SPI2 and UART1
+  - Line 71-72: We check whether the class was already initialized (`m_initialized` is true), if so we simply return
+  - Line 75: We read the Enable Register, which contains enable bits for SPI1, SPI2 and UART1
   - Line 76: We clear the enable bit for UART1 by writing to the Enable Register. This will disable UART1, as advised in the documentation
-  - Line 78: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the TxD signal (transmit). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
-  - Line 80: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the RxD signal (receive). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
+  - Line 78: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
+  - Line 80: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
   - Line 82: We set the enable bit for UART1 by writing to the Enable Register. This will enable UART1, and makes its registers available
   - Line 83: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
   - Line 84: We set UART1 to 8 bit mode by writing to the Line Control Register
@@ -1440,6 +1440,7 @@ File: code/libraries/baremetal/src/UART1.cpp
   - Line 89: We set the baud rate (speed) to 115200, by writing 270 to the Baud Register.
 As shown in the comments, the documentation specifies how to set the value. The actual baud rate is 115313, but this is close enough to work well.
   - Line 91: We enable Rx and Tx signals again by writing to the UART1 Control Register
+  - Line 93: We set `m_initialized` to true
 - Line 98-108: We implement the `Write` method, which writes a character to UART1
   - The function waits for the device to become available for writing by executing NOP instructions while the Line Status Register does not contain a 1 for the Tx empty bit (which signals there is room for a character)
   - It then writes the character to the IO register
@@ -1448,9 +1449,10 @@ As shown in the comments, the documentation specifies how to set the value. The 
   - It then reads a character to the IO register and returns the character
 - Line 126-135: We implement the `WriteString` method, which writes a string to UART1
   - This simply iterates through the string and writes the character using the `Write()` method.
-  - The only specialty is that a line feed ('\n') in the string is written as a line feed plus carriage return character ('\n' followed by '\r')
+  - The only special case is that a line feed ('\n') in the string is written as a line feed plus carriage return character ('\r' followed by '\n')
 
-As we now have the first functional source file in the project, we can remove the previous `Dummy.cpp` file
+As we now have the first functional source file in the project, we can remove the previous `Dummy.cpp` file.
+
 #### SetMode
 
 The `SetMode()` method used in line 78 and 80 is implemented as:
@@ -1562,7 +1564,7 @@ This means there are 4 registers:
   - Line 209: We calculate the corresponding bit shift to select the correct bits in the GPIO pull up/down register
   - Line 213: We read the current value of the GPIO pull up/down register
   - Line 214: We mask the bits for the selected GPIO pin
-  - Line 215: We add the bits for the pull mode, using the conversion map defined in Line 211.
+  - Line 215: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
 For input of the map we use the integer conversion of the `GPIOPullMode` enum.
   - Line 216: We write the value to the GPIO pull up/down register
 
@@ -1594,7 +1596,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 
 - Line 174-177: Some sanity checks are performed. If these fail, false is returned
 - Line 179: We calculate the register for the GPIO function select register.
-This register uses 3 bits for every GPIO pin, so a 32 bit register can deal with 10 GPIO pins.
+This register uses 3 bits for every GPIO pin, so a 32 bit register can deal with 10 GPIO pins (the upper 2 bits are not used).
 This means there are 6 registers:
   - `RPI_GPIO_GPFSEL0` for GPIO pins 0 to 9
   - `RPI_GPIO_GPFSEL1` for GPIO pins 10 to 19
@@ -1605,7 +1607,7 @@ This means there are 6 registers:
 - Line 180: We calculate the corresponding bit shift to select the correct bits in the GPIO function select register
 - Line 184: We read the current value of the GPIO function select register
 - Line 185: We mask the bits for the selected GPIO pin
-- Line 186: We add the bits for the pull mode, using the conversion map defined in Line 182.
+- Line 186: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
 For input of the map we use the integer conversion of the `GPIOFunction` enum.
 - Line 187: We write the value to the GPIO function select register
 
@@ -1638,7 +1640,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 
 - Line 224-229: Some sanity checks are performed. If these fail, false is returned
 - Line 231: We calculate the index for the GPIO set or clear register.
-A GPIO pin can be set by writing a 1 to the correct GPIO pin set register at the correct bit offset, and can be reset by writing a 1 to the correct GPIO pin clear register at the correct bit offset
+A GPIO pin can be set by writing a 1 to the correct GPIO pin set register at the correct bit offset, and can be reset by writing a 1 to the correct GPIO pin clear register at the correct bit offset.
 This register uses 1 bit for every GPIO pin, so a 32 bit register can deal with 32 GPIO pins.
 This means there are 2 registers:
   - `RPI_GPIO_GPSET0` or `RPI_GPIO_GPCLR0` for GPIO pins 0 to 31
@@ -1650,8 +1652,7 @@ This means there are 2 registers:
 
 ### Update Linker Definition file
 
-We can remove the start address from the linker definition file, as this is now specified as a linker option.
-We also update the `.text` section as we will be changing the startup code. All code except for the startup code will now be in the `.text` section.
+We update the `.text` section as we will be changing the startup code. All code except for the startup code will now be in the `.text` section.
 The startup code itself will be in the `.init` section
 
 ```text
@@ -1765,7 +1766,9 @@ File: baremetal.ld
 
 #### Startup.S
 
-As we are going to write to registers, we first need to set up the system such that this is allowed. By default, all access to registers on Exception Level 1 (EL1) and below will be trapped, leading to an exception at El2.
+As we are going to write to registers, we first need to set up the system such that this is allowed.
+By default, all access to registers on Exception Level 1 (EL1) and below will be trapped, leading to an exception at EL2.
+
 So we will need to do some programming in assembly to make sure the SoC is set up correctly.
 Also, in order to prepare for running code which used stack and heap, we will change the startup code.
 This code will use a memory map, which will be loaded through two additional headers, which will be covered soon.
@@ -1851,7 +1854,7 @@ File: code/libraries/baremetal/src/Startup.S
 73:     // UCI,EE,EOE,WXN,nTWE,nTWI,UCT,DZE,I,UMA,SED,ITD,
 74:     // CP15BEN,SA0,SA,C,A,M to 0
 75:     mov	\xreg1, #0x0800
-76:     movk	\xreg1, #0x30d0, lsl #16
+76:     movk \xreg1, #0x30d0, lsl #16
 77:     msr	sctlr_el1, \xreg1
 78: 
 79:     // Return to the EL1_SP1 mode from EL2
@@ -1871,7 +1874,6 @@ File: code/libraries/baremetal/src/Startup.S
 93:     cmp x0, #4
 94:     beq EL1
 95: 
-95: 
 96:     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
 97:     msr sp_el1, x0                      // init their stack
 98: 
@@ -1881,20 +1883,20 @@ File: code/libraries/baremetal/src/Startup.S
 102:     ldr x0, =MEM_KERNEL_STACK           // main thread runs in EL1t and uses sp_el0
 103:     mov sp, x0                          // init its stack
 104: 
-105:     b main                              // Jump to main()
+105:     b sysinit                           // Jump to main()
 106: 
 107: // End
 ```
 
-- Line 42: We include `SysConfig.h`. This header will define some defaults, and then include `MemoryMap.h`. Both will be handled after this.
-- TODO explain macro in detail
+- Line 42: We include `SysConfig.h`. This header will define some defaults, and then include `MemoryMap.h`. Both will be handled in the next sections.
+- Line 44-86: A macro to set the ARM registers correctly, this will be explained in [Macro armv8_switch_to_el1_m](####Macro-armv8_switch_to_el1_m)
 - Line 88: Start of the .init section
-- Line 90: Declaration of the _start function, set if can be linked elsewhere
+- Line 90: Declaration of the _start function, such that it can be linked elsewhere
 - Line 91: Label of the _start function, which is where the function actually starts
 - Line 92: We read the current exception level, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 380.
 This will contain the current exception level in bit 2 and 3, the other bits will be 0.
-- Line 93: We check whether the value read is equal to 4, which means EL1, otherwise we continue
-- Line 94: If the values are equal, we jump to label EL1
+- Line 93: We check whether the value read is equal to 4 (i.e. bits 3 and 2 are `01`), which means EL1, otherwise we continue
+- Line 94: If the values are equal, we jump to label EL1, meaning that initialization was already done.
 - Line 96: We load the exception stack address for core 0.
 This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](###MemoryMap.h))
 - Line 97: We set the stack pointer for EL1 exceptions to this address
@@ -1955,9 +1957,9 @@ File: d:\Projects\baremetal.test\code\libraries\baremetal\src\Startup.S
 87: 
 ```
 
-- Line 47: The register `cnthctl_el2` (Counter-timer Hypervisor Control register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 223) is read. In short
+- Line 47: The register `cnthctl_el2` (Counter-timer Hypervisor Control register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 224) is read.
 - Line 48: The two lower bits (bit 0 and 1) are set on this value.
-In short this means the bits `EL0VCTEN` and `EL0CTEN` are set, which allows code in EL0 and EL1 to access the timer frequency and physical and vistual timer counter  registers wihout access being trapped.
+In short this means the bits `EL0VCTEN` and `EL0CTEN` are set, which allows code in EL0 and EL1 to access the timer frequency and physical and virtual timer counter registers without access being trapped.
 - Line 49: The new value is written to the `cnthctl_el2` register
 - Line 50: The register `cntvoff_el2` (Counter-timer Virtual Offset register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 339) is set to 0.
 The term `xzr` points to the virtual zero register, which can be wzr (32 bits) or xzr (64 bits).
@@ -1965,7 +1967,7 @@ This sets the offset of the virtual timer count relative to the physical timer c
 - Line 53: The register `midr_el1` (Main ID Register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 1330) is read and stored in the first parameter.
 This register is read-only and holds information on the chip, such as the manfacturer, the variant, architecture, part number and revision. 
 - Line 54: The register `mpidr_el1` (Multiprocessor Affinity Register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 1390) is read and stored in the second parameter.
-This register contains the affinity levels. What is comes down to, is that the lowest 7 bits of this register contain the core id. As we only have 4 cores, we mask out everything but the lowest two bits to find the id of the core currently running.
+This register contains the affinity levels. What is comes down to, is that the lowest 7 bits of this register contain the core id.
 - Line 55: We write to register `vpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 2456) the value read from the `midr_el1` register.
 This register is used for virtualization, and has a 64 bit value.
 - Line 56: We write to register `vmpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 2450) the value read from the `mpidr_el1` register.
@@ -2026,6 +2028,7 @@ The value written will set the following bits:
   - C bit to 0: this will flag access to L1 cache as non cacheable
   - A bit to 0: this will not check for memory alignment in EL1 / EL0
   - M bit to 0: this will disable MMU translation for EL1 / EL0
+  - In short, most access from EL0 level is trapped, and moved up to EL1. EL1 however can perform these operations.
 - Line 80-81: We set the value 0x03c4 into the first parameter, and write this to the register `spsr_el2` (Saved Program Status Register (EL2), see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 1743).
 This register will hold the programs state for when an exception moves to EL2 state.
 The value written will set the following bits:
@@ -2041,7 +2044,7 @@ The value written will set the following bits:
 - Line 82-83: We get the address of after the last instruction in the macro, which is the address of the next instruction to be executed after the macro is invoked.
 This is stored in the first parameter, and then written to the register `elr_el2` (Exception Link Register (EL2), see [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 525).
 This register sets the return address for when a EL2 exception was executed.
-- Line 84: We return to the eception level set in register `spsr_el2`, which means we move to EL1.
+- Line 84: We return to the exception level set in register `spsr_el2`, which means we move to EL1.
 
 As said this is all very intricate and detailed, forcing one to dive into all the details of quite some specific ARM registers. You could also simply decide to accept what was explained here, and use the code.
 
@@ -2122,8 +2125,8 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 For now, this header only defines some parameters:
 
 - Line 46: The number of cores used in this system. For Raspberry Pi 3 and higher, this is always 4.
-- Line 49: We define the value for one megabyte (Mb)
-- Line 51: We define the value for one gigabyte (Gb)
+- Line 49: We define the value for one megabyte (Mb), or 1 << 20
+- Line 51: We define the value for one gigabyte (Gb), or 1 << 30
 - Line 56-58: Unless overridden by the build, we set the size for the kernel code to be 2 Mb
 - Line 61-63: Unless overridden by the build, we set the GPU memory size to be 64 Mb.
 This splits up the physical memory between the CPU and the GPU.
@@ -2222,8 +2225,8 @@ This deserves some explanation. The memory map layout is as defined in the next 
 
 | Base       | Size       | Contents               | Remarks      |
 |------------|------------|------------------------|--------------|
-| 0x00000000 | 256 bytes  | ARM stub               | Contains spinlock for cores 1-3
-| 0x00000100 | variable   | ATAGS                  | unused |
+| 0x00000000 | 256 bytes  | ARM stub               | Contains spinlock table for cores 1-3 (start address for each core)
+| 0x00000100 | variable   | ATAGS                  | unused
 | 0x00080000 | 0x00200000 | Kernel image           | 2Mb, can be larger if KERNEL_MAX_SIZE redefined
 |            |            | .init                  | Startup code
 |            |            | .text                  | Code
@@ -2257,7 +2260,7 @@ This deserves some explanation. The memory map layout is as defined in the next 
 
 | Base        | Size       | Contents                   | Remarks      |
 |-------------|------------|----------------------------|--------------|
-| 0x000000000 | 0x00000100 | ARM stub                   | Contains spinlock for cores 1-3
+| 0x000000000 | 0x00000100 | ARM stub                   | Contains spinlock table for cores 1-3 (start address for each core)
 | 0x000000100 | variable   | ATAGS                      | unused
 | 0x00006F000 | 0x00001000 | EL3 stack                  | Stack for exception level 3
 | 0x000070000 | 0x00000800 | Exception vector table EL3 | Contains lookup table for exception level 3 handling
@@ -2435,7 +2438,7 @@ File: code/applications/demo/src/main.cpp
 
 In the main() function, we first create an instance of the UART, then initialize it with a call to `Initialize()`, and finally we write the string "Hello World!\n" to the console. Notice the `\n` character, and remember that we will write the sequency `\r\n` instead of the simple line feed.
 
-### Update CMake file for applcation
+### Update CMake file for application
 
 As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
 
@@ -2772,3 +2775,5 @@ qemu: QEMU: Terminated via GDBstub
 You will also notice that when you end the application, it is restarted again. This has to do with how QEMU runs our system. We will get to restarting and halting the system later.
 
 Unless something worthwhile can be mentioned, we will not describe building and running / debugging any longer.
+
+Next: [06-improving-startup-static-initialization](06-improving-startup-static-initialization.md)

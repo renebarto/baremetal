@@ -117,7 +117,7 @@ char UART1::Read()
 {
     // wait until something is in the buffer
     // Check Rx FIFO holds data
-    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY));
+    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY))
     {
         NOP();
     }

@@ -1314,7 +1314,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 117: {
 118:     // wait until something is in the buffer
 119:     // Check Rx FIFO holds data
-120:     while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY));
+120:     while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY))
 121:     {
 122:         NOP();
 123:     }

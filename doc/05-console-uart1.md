@@ -1404,7 +1404,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 207:     WaitCycles(NumWaitCycles);
 208:     *(clkRegister) = 0;
 209: #else
-210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
+210:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
 212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
@@ -1543,7 +1543,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 207:     WaitCycles(NumWaitCycles);
 208:     *(clkRegister) = 0;
 209: #else
-210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
+210:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
 212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };

@@ -215,7 +215,7 @@ bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
     WaitCycles(NumWaitCycles);
     m_memoryAccess.Write32(clkRegister, 0);
 #else
-    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
+    regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
     unsigned              shift = (pinNumber % 16) * 2;
 
     static const unsigned ModeMap[3] = { 0, 2, 1 };

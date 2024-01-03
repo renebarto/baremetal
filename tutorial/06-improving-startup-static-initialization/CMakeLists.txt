@@ -30,8 +30,16 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
 
-if("${BAREMETAL_RPI_TARGET}" STREQUAL "")
-    set(BAREMETAL_RPI_TARGET 3) # RPI board type (3/4)
+if("${BAREMETAL_TARGET}" STREQUAL "")
+    set(BAREMETAL_TARGET "RPI3") # Board type (RPI3/RPI4)
+endif()
+
+if (BAREMETAL_TARGET STREQUAL "RPI3")
+    message(STATUS "Building for Raspberry Pi 3")
+elseif (BAREMETAL_TARGET STREQUAL "RPI4")
+    message(STATUS "Building for Raspberry Pi 4")
+else()
+    message(FATAL_ERROR "Incorrect target ${BAREMETAL_TARGET} specified, must be RPI3 or RPI4")
 endif()
 
 message(STATUS "\n** Setting up project **\n--")
@@ -42,28 +50,18 @@ message(STATUS "\n** Setting up toolchain **\n--")
 project(baremetal-main
     DESCRIPTION "Baremetal overall project")
 
-message(STATUS "\n** Setting up project **\n--")
-
-message(STATUS "\n##################################################################################")
-message(STATUS "\n** Setting up toolchain **\n--")
-
-project(baremetal-main
-    DESCRIPTION "Baremetal overall project")
-
-if (BAREMETAL_RPI_TARGET EQUAL 3)
+if (BAREMETAL_TARGET STREQUAL "RPI3")
     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
     set(BAREMETAL_TARGET_KERNEL kernel8)
-elseif (BAREMETAL_RPI_TARGET EQUAL 4)
+elseif (BAREMETAL_TARGET STREQUAL "RPI4")
     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
     set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
-else()
-    message(FATAL_ERROR "Incorrect RPI target ${BAREMETAL_RPI_TARGET} specified, must be 3 or 4")
 endif()
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
-set(DEFINES_C 
+set(DEFINES_C
     PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    BAREMETAL_TARGET=${BAREMETAL_TARGET}
     )
 set(DEFINES_C_DEBUG _DEBUG)
 set(DEFINES_C_RELEASE NDEBUG)
@@ -71,22 +69,22 @@ set(DEFINES_C_MINSIZEREL NDEBUG)
 set(DEFINES_C_RELWITHDEBINFO NDEBUG)
 set(DEFINES_ASM
     PLATFORM_BAREMETAL
-    RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    BAREMETAL_TARGET=${BAREMETAL_TARGET}
     )
 
 set(FLAGS_C
     ${BAREMETAL_ARCH_CPU_OPTIONS}
-    -Wall 
+    -Wall
     -Wextra
     -Werror
     -Wno-parentheses
     -ffreestanding
     -fsigned-char
-    -nostartfiles 
-    -std=gnu99 
+    -nostartfiles
+    -std=gnu99
     -mno-outline-atomics
-    -nostdinc 
-    -nostdlib 
+    -nostdinc
+    -nostdlib
 )
 # -g is added by CMake
 set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
@@ -105,8 +103,8 @@ set(FLAGS_CXX
     -Wno-missing-field-initializers
     -Wno-unused-value
     -Wno-aligned-new
-    -ffreestanding 
-    -fsigned-char 
+    -ffreestanding
+    -fsigned-char
     -nostartfiles
     -mno-outline-atomics
     -nostdinc
@@ -135,7 +133,7 @@ set(LINK_FLAGS
     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
     -nostdlib
-    -nostartfiles 
+    -nostartfiles
     )
 set(LINK_FLAGS_DEBUG )
 set(LINK_FLAGS_RELEASE )

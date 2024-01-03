@@ -48,6 +48,8 @@ typedef unsigned char uint8;
 typedef unsigned short uint16;
 /// @brief Unsigned 32 bit integer
 typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
 /// @brief Signed 8 bit integer
 typedef signed char int8;
@@ -55,11 +57,9 @@ typedef signed char int8;
 typedef signed short int16;
 /// @brief Signed 32 bit integer
 typedef signed int int32;
-
-/// @brief Unsigned 64 bit integer
-typedef unsigned long uint64;
 /// @brief Signed 64 bit integer
 typedef signed long int64;
+
 /// @brief Pointer as signed 64 bit integer
 typedef int64 intptr;
 /// @brief Pointer as unsigned 64 bit integer
@@ -73,3 +73,8 @@ typedef int64 ssize_type;
 typedef size_type size_t;
 /// @brief Signed size
 typedef ssize_type ssize_t;
+
+/// @brief Unsigned volatile 32 bit integer (for registers)
+typedef volatile uint32 reg32;
+/// @brief Pointer to unsigned volatile 32 bit integer (for registers)
+typedef reg32* regaddr;

@@ -91,7 +91,7 @@
 #define INDEX_HAS_RUN		0
 #define INDEX_IN_USE		1
 
-extern "C" int __cxa_guard_acquire(volatile uint8 * guardObject)
+extern "C" int __cxa_guard_acquire(volatile uint8* guardObject)
 {
     if (guardObject[INDEX_HAS_RUN] != 0)
     {
@@ -103,13 +103,13 @@ extern "C" int __cxa_guard_acquire(volatile uint8 * guardObject)
     return 1;                               // Run constructor
 }
 
-extern "C" void __cxa_guard_release(volatile uint8 * guardObject)
+extern "C" void __cxa_guard_release(volatile uint8* guardObject)
 {
     guardObject[INDEX_HAS_RUN] = 1;
     guardObject[INDEX_IN_USE] = 0;
 }
 
-extern "C" void __cxa_guard_abort(volatile uint8 * guardObject)
+extern "C" void __cxa_guard_abort(volatile uint8* guardObject)
 {
     guardObject[INDEX_IN_USE] = 0;
 }

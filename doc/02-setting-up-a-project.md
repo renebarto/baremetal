@@ -56,9 +56,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- line 1: We require a minimum version of 3.18 for CMake. There should always be a similar line in the beginning of the main CMake file
-- line 3: We print the current version of CMake
-- line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as language
+- Line 1: We require a minimum version of 3.18 for CMake. There should always be a similar line in the beginning of the main CMake file
+- Line 3: We print the current version of CMake
+- Line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as language
 
 ## Create source file
 
@@ -103,9 +103,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Short explanation:
-- line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source file (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
-- line 12-13: We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
-- line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project we're in, so in this case `02-setting-up-a-project`)
+- Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source file (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
+- Line 12-13: We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
+- Line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project we're in, so in this case `02-setting-up-a-project`)
   - This target will build from the source files and headers just specified. The term `${X}` means the value of a variable named X.
 
 You will now be able to build the project, however this will be targeting the platform you are currently running on.
@@ -230,19 +230,19 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 20: set(CMAKE_VERBOSE_MAKEFILE ON)
 ```
 
-- line 1: Here, we include a CMake script to enable forcing the compiler. We need to be able to do this to override the default compiler
-- line 3-11: We check if there is an existing environment variable `BAREMETAL_TOOLCHAIN_ROOT` set to define the location of the toolchain,
+- Line 1: Here, we include a CMake script to enable forcing the compiler. We need to be able to do this to override the default compiler
+- Line 3-11: We check if there is an existing environment variable `BAREMETAL_TOOLCHAIN_ROOT` set to define the location of the toolchain,
 and otherwise fall back to a default, different for Windows and Linux of course
-- line 13: We set the variable `PLATFORM_BAREMETAL` for convenience later on
-- line 14: We set the variable `CMAKE_SYSTEM_NAME` which is a standard variable to denote the system we're going to build.
+- Line 13: We set the variable `PLATFORM_BAREMETAL` for convenience later on
+- Line 14: We set the variable `CMAKE_SYSTEM_NAME` which is a standard variable to denote the system we're going to build.
 For baremetal projects this must be set to `Generic`
-- line 15: We set the variable `CMAKE_SYSTEM_PROCESSOR` which is a standard variable to define the processor architecture we're going to build for.
+- Line 15: We set the variable `CMAKE_SYSTEM_PROCESSOR` which is a standard variable to define the processor architecture we're going to build for.
 In all cases this will be a 64 bit ARM processor, for which the architecture name is `aarch64`
-- line 16: `TOOL_DESTINATION_PLATFORM` is the so called target triplet / quadruplet.
+- Line 16: `TOOL_DESTINATION_PLATFORM` is the so called target triplet / quadruplet.
 It defines the combination of target architecture, vendor if needed, the operating system, and the build type.
 In our case this is `aarch64-none-elf` meaning a 64 bit ARM architecture, with no OS, and with elf output files
 -Line 18: We also print the used toolchain root
-- line 20: We set CMAKE build output to be more verbose
+- Line 20: We set CMAKE build output to be more verbose
 
 #### Part 2
 
@@ -292,21 +292,21 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 61: message(STATUS "Std include path         ${STDDEF_INCPATH}")
 ```
 
-- line 22: We set the variable `TOOLCHAIN_PATH` which is the actual location of the tools
-- line 23: We set the variable `TOOLCHAIN_AUXILIARY_PATH` which is the location of auxiliary libraries used for building
+- Line 22: We set the variable `TOOLCHAIN_PATH` which is the actual location of the tools
+- Line 23: We set the variable `TOOLCHAIN_AUXILIARY_PATH` which is the location of auxiliary libraries used for building
 
 Then depending on the build platform, we define the tools to be used. 
 The part at the end `CACHE FILEPATH "text" FORCE` simply means that the variable is enforced into the CMake cache.
 
 The CMake cache is a file CMake uses to store project variables for later reference.
 This file is named `CMakeCache.txt`, and is located in teh CMake build directory (explained later).
-- line 26/38: We set the variable `CMAKE_C_COMPILER` to the path to the C compiler (this is a gcc compiler)
-- line 27/39: We set the variable `CMAKE_C_COMPILER_FORCED` to the path to the C compiler, but forced to be this compiler
-- line 29/41: We set the variable `CMAKE_CXX_COMPILER` to the path to the C++ compiler (this could be gcc as well, but it's common to use g++)
-- line 30/42: We set the variable `CMAKE_CXX_COMPILER_FORCED` to the path to the C++ compiler, but forced to be this compiler
-- line 32/44: We set the variable `CMAKE_AR` to the path to the archiver, in other words the static library linker
-- line 34/46: We set the variable `CMAKE_LINKER` to the path to the linker, which links executables and dynamic libraries
-- line 36/48: We set the variable `CMAKE_OBJCOPY` to the path to the object copier, which we will need to create an image
+- Line 26/38: We set the variable `CMAKE_C_COMPILER` to the path to the C compiler (this is a gcc compiler)
+- Line 27/39: We set the variable `CMAKE_C_COMPILER_FORCED` to the path to the C compiler, but forced to be this compiler
+- Line 29/41: We set the variable `CMAKE_CXX_COMPILER` to the path to the C++ compiler (this could be gcc as well, but it's common to use g++)
+- Line 30/42: We set the variable `CMAKE_CXX_COMPILER_FORCED` to the path to the C++ compiler, but forced to be this compiler
+- Line 32/44: We set the variable `CMAKE_AR` to the path to the archiver, in other words the static library linker
+- Line 34/46: We set the variable `CMAKE_LINKER` to the path to the linker, which links executables and dynamic libraries
+- Line 36/48: We set the variable `CMAKE_OBJCOPY` to the path to the object copier, which we will need to create an image
 
 Notice that we did not set the assembler here, even though it will be used. In our case, gcc is also able to compile assembly code.
 
@@ -339,10 +339,10 @@ if not already done, with the auxiliary libary directory. This contains a bit of
 
 Lastly, we need to set some more standard CMake variable:
 
-- line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` to signal not to look for executables in the path just specfied
-- line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` to signal to look for libraries in the path just specfied
-- line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` to signal to look for include in the path just specfied
-- line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` to signal to look for packages in the path just specfied
+- Line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` to signal not to look for executables in the path just specfied
+- Line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` to signal to look for libraries in the path just specfied
+- Line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` to signal to look for include in the path just specfied
+- Line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` to signal to look for packages in the path just specfied
 
 We now need to use this toolchain file.
 
@@ -573,17 +573,17 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- line 5: We define a variable `SCRIPTS_DIR` to hold the path to CMake scripts we will be adding (to contain the custom functions)
-- line 6: We set the variable `CONFIG_DIR` to denote a build configuration specific directory. For now we'll simply set it to Debug, as we are building for the Debug build configuration
-- line 7: We define a variable `DEPLOYMENT_DIR` to point to the location where our final image will be.
+- Line 5: We define a variable `SCRIPTS_DIR` to hold the path to CMake scripts we will be adding (to contain the custom functions)
+- Line 6: We set the variable `CONFIG_DIR` to denote a build configuration specific directory. For now we'll simply set it to Debug, as we are building for the Debug build configuration
+- Line 7: We define a variable `DEPLOYMENT_DIR` to point to the location where our final image will be.
 This could be the same path as the output directory, however it makes sense to separate intermediate binaries from the final images
-- line 8: We set variable `OUTPUT_BASE_DIR` to denote the root for the intermediate binaries.
+- Line 8: We set variable `OUTPUT_BASE_DIR` to denote the root for the intermediate binaries.
 This directory will be used in combination with `CONFIG_DIR` and the target executable name to form the full path for the target executable file.
 By default, CMake will generate all object files, libraries and executables inside the build directory.
 This makes it impractical to find our end results, so we will specify a different directory tree for libraries and executables
-- line 10-12: We set, if not done yet, the `SCRIPTS_DIR` variable to the location of our custom CMake scripts.
+- Line 10-12: We set, if not done yet, the `SCRIPTS_DIR` variable to the location of our custom CMake scripts.
 It is custom practice to create a subfolder `cmake` at the project top level and place the scripts there
-- line 14: Lastly, we add the `SCRIPTS_DIR` to the standard CMake search path for CMake modules, `CMAKE_MODULE_PATH`
+- Line 14: Lastly, we add the `SCRIPTS_DIR` to the standard CMake search path for CMake modules, `CMAKE_MODULE_PATH`
 
 ### Adding project variables
 
@@ -635,11 +635,11 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 So, after the project is defined, we add the following lines:
-- line 20: We define the variable `PROJECT_TARGET_NAME`, which sets the file name used for our executable to `02-setting-up-a-project.elf`
-- line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions.
+- Line 20: We define the variable `PROJECT_TARGET_NAME`, which sets the file name used for our executable to `02-setting-up-a-project.elf`
+- Line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions.
 For now these are empty. There are two, as we can have definitions only for this executable (private) and possibly exported to other targets (public).
 As an executable file does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on.
-- line 25-31: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options.
+- Line 25-31: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options.
 Here we set the private compiler options to be:
   - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture)
   - -Wall: Set warning level to the highest possible level
@@ -657,20 +657,20 @@ Here we set the private compiler options to be:
   - -fno-rtti: Do not use Run Time Type Information
   - -O0: Do not optimize
   - -std=gnu++17: Support C++17 language
-- line 32: We set the public compiler options to be empty, meaning we don't export anything
-- line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories.
+- Line 32: We set the public compiler options to be empty, meaning we don't export anything
+- Line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories.
 For now, everything is in the same directory, so we leave this empty
-- line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
+- Line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
   - ${CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#Toolchain-file))
   - -nostdlib: Do not use the standard C libraries
   - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
   - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000
   - -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](###Adding-linker-definition-file))
-- line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
-- line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
-- line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
-- line 48-49: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
-- line 51-54: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`
+- Line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
+- Line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
+- Line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
+- Line 48-49: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
+- Line 51-54: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`
 
 ### Setting up the target
 
@@ -691,10 +691,10 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- line 58: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
-- line 59-60: We specify include directories for both private and public use
-- line 61-62: We specify compiler definitions for both private and public use
-- line 63-64: We specify compiler options for both private and public use
+- Line 58: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
+- Line 59-60: We specify include directories for both private and public use
+- Line 61-62: We specify compiler definitions for both private and public use
+- Line 63-64: We specify compiler options for both private and public use
 
 Next we specify the linker options.
 As the options are specified as a list separated by semicolons, and we need to create a string of values separated by spaces, we use a custom function:
@@ -710,9 +710,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- line 66: Converts the list to a string with spaces are delimiter using the custom functions `list_to_string`. We will define this custom function later on
-- line 67: prints the string
-- line 68-70: sets the linker flags, only if the string is not empty
+- Line 66: Converts the list to a string with spaces are delimiter using the custom functions `list_to_string`. We will define this custom function later on
+- Line 67: prints the string
+- Line 68-70: sets the linker flags, only if the string is not empty
 
 Lastly, we set the executable file name, and the location of executable files and libraries:
 
@@ -725,9 +725,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- line 71: sets the executable name `OUTPUT_NAME`, a standard property
-- line 72: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
-- line 73: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
+- Line 71: sets the executable name `OUTPUT_NAME`, a standard property
+- Line 72: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
+- Line 73: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
 
 The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](###Setting-up-for-custom-CMake-modules-and-binary-tree).
 It is common practice to collect output files together in a binaries tree.
@@ -895,19 +895,19 @@ File: tutorial/02-setting-up-a-project/link.ld
 
 The linker definition file defines the different sections in the executable file.
 
-- line 41: The `ENTRY(_start)` statement sets the starting point of the executable to the location denoted by label `_start`. We will cover this in a minute.
-- line 44-51: The `PHDRS` part defines the Program Header Table (refer to [ELF header format](cpu/elf-format.pdf) for more information)
-- line 56-61: .text is the code section
+- Line 41: The `ENTRY(_start)` statement sets the starting point of the executable to the location denoted by label `_start`. We will cover this in a minute.
+- Line 44-51: The `PHDRS` part defines the Program Header Table (refer to [ELF header format](cpu/elf-format.pdf) for more information)
+- Line 56-61: .text is the code section
   - This section starts with the .text.boot subsection, which is always stored in the executable (`KEEP`).
   - The other subsections (`.text* .text.* .gnu.linkonce.t*`) are only kept as needed.
-- line 65-67: .init is the initialization section, which contains code with is normally in the crtbegin.o file. We will run into this later on, for now it is empty
-- line 70-72: .fini is the cleanup section, similarly containing code in crtend.o.
-- line 75-77: .rodata is the constants section, i.e. it contains data that is read-only
-- line 80-86: .init_array is the static initializer section.
+- Line 65-67: .init is the initialization section, which contains code with is normally in the crtbegin.o file. We will run into this later on, for now it is empty
+- Line 70-72: .fini is the cleanup section, similarly containing code in crtend.o.
+- Line 75-77: .rodata is the constants section, i.e. it contains data that is read-only
+- Line 80-86: .init_array is the static initializer section.
 It contains a table of functions used to initialize static data, such as constructors of static class objects. This is always stored. We will get to this in [Improving startup and static initialization](06-improving-startup-static-initialization.md)
-- line 89-91: .data contains read/write data for the executable
-- line 94-101: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
-- line 104: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
+- Line 89-91: .data contains read/write data for the executable
+- Line 94-101: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
+- Line 104: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
 
 ## Startup assembly code
 
@@ -1013,15 +1013,15 @@ File: tutorial/02-setting-up-a-project/start.S
 
 Without going into too much detail, the code performs the following steps:
 
-- line 41: the startup code is part of the `.text.boot` subsection defined in the linker definition file
-- line 45: this is the entry point for the \_start function, essentially the entry point of our code
-- line 47-51: determine which core the code is running on, and jump to `core0` if the core id is 0. We'll explain the MPIDR_EL1 register, among others, a bit later
-- line 53-55: in other cases we loop waiting for an event (effectively halting the core)
-- line 61-62: the stack pointer is set just below the code
-- line 64-70: information on the `.bss` section is retrieved. If the .bss section is empty, we jump to `empty_bss`
-- line 74-78: write 0 to the next 8 bytes of the .bss section, and while not at the end, repeat
-- line 82: call to the main() function in `tutorial/02-setting-up-a-project/main.cpp`
-- line 84: when main() returns, also halt core 0
+- Line 41: the startup code is part of the `.text.boot` subsection defined in the linker definition file
+- Line 45: this is the entry point for the \_start function, essentially the entry point of our code
+- Line 47-51: determine which core the code is running on, and jump to `core0` if the core id is 0. We'll explain the MPIDR_EL1 register, among others, a bit later
+- Line 53-55: in other cases we loop waiting for an event (effectively halting the core)
+- Line 61-62: the stack pointer is set just below the code
+- Line 64-70: information on the `.bss` section is retrieved. If the .bss section is empty, we jump to `empty_bss`
+- Line 74-78: write 0 to the next 8 bytes of the .bss section, and while not at the end, repeat
+- Line 82: call to the main() function in `tutorial/02-setting-up-a-project/main.cpp`
+- Line 84: when main() returns, also halt core 0
 
 For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](cpu/getting-started-with-ARM-assembly-language.pdf).
 For more information on the `MPIDR_EL1` register see also [ARM Cortex-A53 System Registers](cpu/arm-cortex-a53-system-registers.md) and [Arm® Architecture Registers](cpu/ARM-architecture-registers.pdf) page 1390.
@@ -1061,12 +1061,12 @@ File: tutorial/02-setting-up-a-project/create-image/CMakeLists.txt
 13: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
-- line 1-2: We define a new project `02-setting-up-a-project-image`
-- line 9: We create the variable `BAREMETAL_TARGET_KERNEL` to specify the kernel image to create
+- Line 1-2: We define a new project `02-setting-up-a-project-image`
+- Line 9: We create the variable `BAREMETAL_TARGET_KERNEL` to specify the kernel image to create
 This depends on the target platform we're building for. Here we create kernel8.img for Raspberry Pi 3 64 bit (see [System startup](system-startup#config.txt))
-- line 10: We create the variable `DEPENDENCY` to specify the project we are going to create the image for (and which we depend on)
-- line 11: We create the variable `IMAGE_NAME` to specify the complete filename of the image
-- line 13: We call the custom function `create_image` to create a target for the image
+- Line 10: We create the variable `DEPENDENCY` to specify the project we are going to create the image for (and which we depend on)
+- Line 11: We create the variable `IMAGE_NAME` to specify the complete filename of the image
+- Line 13: We call the custom function `create_image` to create a target for the image
 
 The customer function is added to the `functions.cmake` module:
 
@@ -1111,20 +1111,20 @@ The function `create_image` takes three parameters:
 - The target (`project`) that creates the application to be added to the image, in this case `02-setting-up-a-project.elf`
 
 Explanation:
-- line 10: The function shows how it was called
-- line 12-15: The function checks whether the application target exists (is a target), and prints an error if not
-- line 17: The `OUTPUT_NAME` property of the application target (the project we depend on) is retrieved, so in this case `02-setting-up-a-project.elf`,
+- Line 10: The function shows how it was called
+- Line 12-15: The function checks whether the application target exists (is a target), and prints an error if not
+- Line 17: The `OUTPUT_NAME` property of the application target (the project we depend on) is retrieved, so in this case `02-setting-up-a-project.elf`,
 and stored in variable `TARGET_NAME`
-- line 18: The property value is printed
-- line 20: The action to be taken is printed
-- line 21-26: A custom CMake command is created
+- Line 18: The property value is printed
+- Line 20: The action to be taken is printed
+- Line 21-26: A custom CMake command is created
   - Its output is `${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}`.
 This uses the variables `DEPLOYMENT_DIR` and `CONFIG_DIR` defined before, and then adds the name of the application project as a directory, and then the image name
 So the final path will be `deploy/Debug/02-setting-up-a-project/kernel8.img`
   - The command to be performed uses the `CMAKE_OBJCOPY` tool specified in the toolchain file
   - The command depends on our application project
 The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/02-setting-up-a-project.elf -O binary deploy/Debug/02-setting-up-a-project/kernel8.img`
-- line 28-30: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
+- Line 28-30: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
 
 This may all seem complex, but this functionality can be used again later on by simply changing the parameters.
 

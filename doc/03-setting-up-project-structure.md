@@ -109,18 +109,18 @@ File: CMakeLists.txt
 ```
 
 Explanation:
-- line 1: As before we start with the minimum CMake version required
-- line 3: We then print the current CMake version
-- line 5-11: We define a cached variables for the script path, and set it to the cmake scripts directory. We then add this path to the `CMAKE_MODULE_PATH`. No news here.
-- line 13-16: Different is the way we defined the directory for the build configuration. 
+- Line 1: As before we start with the minimum CMake version required
+- Line 3: We then print the current CMake version
+- Line 5-11: We define a cached variables for the script path, and set it to the cmake scripts directory. We then add this path to the `CMAKE_MODULE_PATH`. No news here.
+- Line 13-16: Different is the way we defined the directory for the build configuration. 
 We set the `CMAKE_BUILD_TYPE` to Debug if it is not set, and then depending on the build configuration set the directory to either
 Debug, or Release, MinSizeRel or RelWithDebInfo.
-- line 18-19: We then define the variables for the common deployment directory `DEPLOYMENT_DIR` (for image files) and the common binary output directory
+- Line 18-19: We then define the variables for the common deployment directory `DEPLOYMENT_DIR` (for image files) and the common binary output directory
 `OUTPUT_BASE_DIR` (for built libraries and executables). Both variables will also be stored in the cache.
-- line 20-21: New is that we define two variable to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
-- line 23-26: We add some diagnostic printing to identify when the toolchain is being processed.
-- line 28-29: We define the main project.
-- line 31: Lastly, we include the CMake file in the code directory.
+- Line 20-21: New is that we define two variable to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
+- Line 23-26: We add some diagnostic printing to identify when the toolchain is being processed.
+- Line 28-29: We define the main project.
+- Line 31: Lastly, we include the CMake file in the code directory.
 
 ### Intermediate directory CMakeLists.txt
 
@@ -274,18 +274,18 @@ File: code/applications/demo/CMakeLists.txt
 
 As you can see, it does pretty much the same as the second part in our 02-setting-up-a-project project. However, some things are slightly different.
 
-- line 1-3: It defines the project, in this case `demo`. Notice that here we specify both C++ and assembly as source languages.
-- line 5-8: We print the current directory, and also which project we're going to configure.
-- line 10: We include the functions.cmake custom CMake script
-- line 12-32: We specify the project target file name, the compiler definitions, compiler options, include directories, and linker options, in the same way as before.
-- line 34-39: We specify which libraries we depend upon, and which libraries we link to. For now this is empty.
-- line 41-47: We specify which source and header files are used for this application.
+- Line 1-3: It defines the project, in this case `demo`. Notice that here we specify both C++ and assembly as source languages.
+- Line 5-8: We print the current directory, and also which project we're going to configure.
+- Line 10: We include the functions.cmake custom CMake script
+- Line 12-32: We specify the project target file name, the compiler definitions, compiler options, include directories, and linker options, in the same way as before.
+- Line 34-39: We specify which libraries we depend upon, and which libraries we link to. For now this is empty.
+- Line 41-47: We specify which source and header files are used for this application.
 Notice that the main.cpp and start.S are now in the src subdirectory. This keeps project files and source files separated.
-- line 49-52: We define the variables `START_GROUP` and `END_GROUP` as before.
-- line 54-87: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
+- Line 49-52: We define the variables `START_GROUP` and `END_GROUP` as before.
+- Line 54-87: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
 Different is the way we pass compiler definitions and options. We use a more generic approach here, where we set the definitions and options per language using so-called generator expressions.
-- line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
-- line 89: Finally we include the `CMakeLists.txt` for the image creation project.
+- Line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
+- Line 89: Finally we include the `CMakeLists.txt` for the image creation project.
 
 #### code/applications/demo/create-image CMake file
 
@@ -1191,30 +1191,30 @@ File: .vs/launch.vs.json
 ```
 
 Explanation:
-- line 6: `type` specifies which kind of debugger we are using. For GDB, this must be `cppgdb`
-- line 7: `project` specifies the kind of project, which is `CMakeLists.txt` for CMake projects (this is initially already correct)
-- line 8: `projectTarget` is the selected target, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
-- line 9: `name` is the name of the project, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
-- line 10: `program` is the executable name, in this case `demo.elf`
-- line 11: `request` is the way the debugger starts the session.
+- Line 6: `type` specifies which kind of debugger we are using. For GDB, this must be `cppgdb`
+- Line 7: `project` specifies the kind of project, which is `CMakeLists.txt` for CMake projects (this is initially already correct)
+- Line 8: `projectTarget` is the selected target, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
+- Line 9: `name` is the name of the project, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
+- Line 10: `program` is the executable name, in this case `demo.elf`
+- Line 11: `request` is the way the debugger starts the session.
 As we would like to start our application, we use `launch` (it is also possible to attach to a running application)
-- line 12: `stopAtEntry` determines whether the debugger will stop at the first code or not.
+- Line 12: `stopAtEntry` determines whether the debugger will stop at the first code or not.
 We set this to `false`, as we will simply put a breakpoint at the first line of code
-- line 13: `cwd` will be the working directory used for debugging.
+- Line 13: `cwd` will be the working directory used for debugging.
 Here we are able to use the variable `${workspaceRoot}` to denote the root directory, unlike in `projectTarget` and `name`
 It is best to select the directory from which the application is loaded, so `${workspaceRoot}\\output\\Debug\\bin`.
 Notice the double backslashes to escape single ones
-- line 14: `externalConsole` determines whether a console is created.
+- Line 14: `externalConsole` determines whether a console is created.
 We set this to `true` so a console is created in the lower panel
-- line 15: `MIMode` determines which debugger is used, this is set to `gdb`
-- line 16: `targetArchitecture` specifies which archecture is used on the target.
+- Line 15: `MIMode` determines which debugger is used, this is set to `gdb`
+- Line 16: `targetArchitecture` specifies which archecture is used on the target.
 As we are using a 64 bit ARM archittecture, this is set to `arm64`
-- line 17: `miDebuggerServerAddress` specifies the host and port of the debug server, in this case QEMU.
+- Line 17: `miDebuggerServerAddress` specifies the host and port of the debug server, in this case QEMU.
 QEMU starts a server on the same machine on port 1234, so we set this to `localhost:1234`
-- line 18: `miDebuggerPath` specifies the path to the gdb application we are using.
+- Line 18: `miDebuggerPath` specifies the path to the gdb application we are using.
 We'll use the same one as specified before, which is part of the toolchain.
 So we specify `D:\\Toolchains\\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe`
-- line 19: `args` specifies command line arguments for the application being debugged.
+- Line 19: `args` specifies command line arguments for the application being debugged.
 As our application is baremetal, we have no parameters, so we set it to an empty array `[]`
 - `env` can be used to specify a set of key-value pairs of environment variables passed. We leave this out
 

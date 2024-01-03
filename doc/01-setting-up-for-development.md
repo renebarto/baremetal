@@ -8,7 +8,7 @@ If we want to do development for an embedded board, a number of things need to b
 - [Deployment mechanism](##Deployment-mechanism)
   - [Attaching a serial console](###Attaching-a-serial-console)
   - [Running from SD card](###Running-from-SD-card)
-  - [Running using netboot](###Running-using-netboot)
+  - [Running using Netboot](###Running-using-Netboot)
   - [Running in QEMU](###Running-in-QEMU)
   - [Run output](###Run-output)
 - [Debugging](##Debugging)
@@ -320,10 +320,15 @@ In order to deploy a baremetal application, we will need to follow a couple of s
   - Copy the image onto an SD card and start the system (see [Running from SD card](###Running-from-SD-card)).
 The SD card will need to contain some other files in order for the system to start.
   - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
-Then go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
+
+In `tutorial/01-demo` you will find a `Netboot.zip`, which is verified to work on both Raspberry Pi 3 and 4.
+Unpack it onto the SD card (this must be formatted as FAT), make sure to eject (Windows) or sync (Linux) before taking the SD card out.
+Place it into your board, and go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
+
 __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again.
-See [Running using netboot](###Running-using-netboot).
+See [Running using Netboot](###Running-using-Netboot).
   - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4).
+
 __It is also possible to use QEMU with Odroid boards, this will be described later__.
 QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
 For running inside QEMU, see [Running in QEMU](###Running-in-QEMU).
@@ -347,11 +352,12 @@ For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product
 - Make sure to connect the serial to USB device to the <u>__correct pins__</u> (normally, and in this case as well, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1.
 In our examples we will be using UART 1 in most cases)
 - Make sure you have the drivers for the serial to USB device (USB side of course) correctly installed on your host system
-  - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well. Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://embetronicx.com/uncategorized/fixed-prolific-pl2303ta-usb-to-serial-and-windows-11/)
+  - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well.
+Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://embetronicx.com/uncategorized/fixed-prolific-pl2303ta-usb-to-serial-and-windows-11/). You'll have to re-install the drivers on Windows 11 after every reboot, which is annoying.
 - Make sure you have a terminal application to communicate with the serial to USB device
   - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
   - [Teraterm](https://tera-term.en.lo4d.com/download) is my personal favorite, but the download sites seem a bit less trustworthy nowadays
-  - One Linux there are quite a few applications available, e.g. minicom
+  - One Linux there are quite a few applications available, e.g. screen, minicom
 - Make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
 <img src="images/USB-RS232.jpg" alt="USB-to-serial example" width="400"/>
@@ -372,7 +378,7 @@ Please make sure to eject / sync your SD card first before removing it from the 
 
 Put the SD card in your board, and attach a serial to USB device to the board. Then power on the board.
 
-### Running using netboot
+### Running using Netboot
 
 The SD card will be created by unzipping the file `tutorial/01-demo/Netboot.zip`, and copying the contents to the SD card.
 Please make sure to eject / sync your SD card first before removing it from the reader.

@@ -180,124 +180,127 @@ File: CMakeLists.txt
 31: if (BAREMETAL_TARGET STREQUAL "RPI3")
 32:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
 33:     set(BAREMETAL_TARGET_KERNEL kernel8)
-34: elseif (BAREMETAL_TARGET STREQUAL "RPI4")
-35:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
-36:     set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
-37: endif()
-38: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-39: 
-40: set(DEFINES_C
-41:     PLATFORM_BAREMETAL
-42:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
-43:     )
-44: set(DEFINES_C_DEBUG _DEBUG)
-45: set(DEFINES_C_RELEASE NDEBUG)
-46: set(DEFINES_C_MINSIZEREL NDEBUG)
-47: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
-48: set(DEFINES_ASM
-49:     PLATFORM_BAREMETAL
-50:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
-51:     )
-52: 
-53: set(FLAGS_C
-54:     ${BAREMETAL_ARCH_CPU_OPTIONS}
-55:     -Wall
-56:     -Wextra
-57:     -Werror
-58:     -Wno-parentheses
-59:     -ffreestanding
-60:     -fsigned-char
-61:     -nostartfiles
-62:     -std=gnu99
-63:     -mno-outline-atomics
-64:     -nostdinc
-65:     -nostdlib
-66: )
-67: # -g is added by CMake
-68: set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
-69: # -O3 is added by CMake
-70: set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
-71: # -Os is added by CMake
-72: set(FLAGS_C_MINSIZEREL -O3)
-73: # -O2 -g is added by CMake
-74: set(FLAGS_C_RELWITHDEBINFO )
-75: 
-76: set(FLAGS_CXX
-77:     ${BAREMETAL_ARCH_CPU_OPTIONS}
-78:     -Wall
-79:     -Wextra
-80:     -Werror
-81:     -Wno-missing-field-initializers
-82:     -Wno-unused-value
-83:     -Wno-aligned-new
-84:     -ffreestanding
-85:     -fsigned-char
-86:     -nostartfiles
-87:     -mno-outline-atomics
-88:     -nostdinc
-89:     -nostdlib
-90:     -nostdinc++
-91:     -fno-exceptions
-92:     -fno-rtti
-93:     )
-94: 
-95: # -g is added by CMake
-96: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
-97: # -O3 is added by CMake
-98: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
-99: # -Os is added by CMake
-100: set(FLAGS_CXX_MINSIZEREL -O3)
-101: # -O2 -g is added by CMake
-102: set(FLAGS_CXX_RELWITHDEBINFO )
-103: 
-104: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
-105: set(FLAGS_ASM_DEBUG -O2)
-106: set(FLAGS_ASM_RELEASE -O2)
-107: set(FLAGS_ASM_MINSIZEREL -O2)
-108: set(FLAGS_ASM_RELWITHDEBINFO -O2)
-109: 
-110: set(LINK_FLAGS
-111:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
-112:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
-113:     -nostdlib
-114:     -nostartfiles
-115:     )
-116: set(LINK_FLAGS_DEBUG )
-117: set(LINK_FLAGS_RELEASE )
-118: set(LINK_FLAGS_MINSIZEREL )
-119: set(LINK_FLAGS_RELWITHDEBINFO )
-120: 
-121: list(APPEND LINK_LIBRARIES )
-122: list(APPEND LINK_DIRECTORIES )
-123: 
-124: set(SUPPORTED_CPP_STANDARD 17)
+34:     set(BAREMETAL_RPI_TARGET 3)
+35: elseif (BAREMETAL_TARGET STREQUAL "RPI4")
+36:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a72 -mlittle-endian -mcmodel=small)
+37:     set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
+38:     set(BAREMETAL_RPI_TARGET 4)
+39: endif()
+40: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+41: 
+42: set(DEFINES_C
+43:     PLATFORM_BAREMETAL
+44:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+45:     )
+46: set(DEFINES_C_DEBUG _DEBUG)
+47: set(DEFINES_C_RELEASE NDEBUG)
+48: set(DEFINES_C_MINSIZEREL NDEBUG)
+49: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+50: set(DEFINES_ASM
+51:     PLATFORM_BAREMETAL
+52:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+53:     )
+54: 
+55: set(FLAGS_C
+56:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+57:     -Wall
+58:     -Wextra
+59:     -Werror
+60:     -Wno-parentheses
+61:     -ffreestanding
+62:     -fsigned-char
+63:     -nostartfiles
+64:     -std=gnu99
+65:     -mno-outline-atomics
+66:     -nostdinc
+67:     -nostdlib
+68: )
+69: # -g is added by CMake
+70: set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+71: # -O3 is added by CMake
+72: set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
+73: # -Os is added by CMake
+74: set(FLAGS_C_MINSIZEREL -O3)
+75: # -O2 -g is added by CMake
+76: set(FLAGS_C_RELWITHDEBINFO )
+77: 
+78: set(FLAGS_CXX
+79:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+80:     -Wall
+81:     -Wextra
+82:     -Werror
+83:     -Wno-missing-field-initializers
+84:     -Wno-unused-value
+85:     -Wno-aligned-new
+86:     -ffreestanding
+87:     -fsigned-char
+88:     -nostartfiles
+89:     -mno-outline-atomics
+90:     -nostdinc
+91:     -nostdlib
+92:     -nostdinc++
+93:     -fno-exceptions
+94:     -fno-rtti
+95:     )
+96: 
+97: # -g is added by CMake
+98: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+99: # -O3 is added by CMake
+100: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+101: # -Os is added by CMake
+102: set(FLAGS_CXX_MINSIZEREL -O3)
+103: # -O2 -g is added by CMake
+104: set(FLAGS_CXX_RELWITHDEBINFO )
+105: 
+106: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
+107: set(FLAGS_ASM_DEBUG -O2)
+108: set(FLAGS_ASM_RELEASE -O2)
+109: set(FLAGS_ASM_MINSIZEREL -O2)
+110: set(FLAGS_ASM_RELWITHDEBINFO -O2)
+111: 
+112: set(LINK_FLAGS
+113:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+114:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+115:     -nostdlib
+116:     -nostartfiles
+117:     )
+118: set(LINK_FLAGS_DEBUG )
+119: set(LINK_FLAGS_RELEASE )
+120: set(LINK_FLAGS_MINSIZEREL )
+121: set(LINK_FLAGS_RELWITHDEBINFO )
+122: 
+123: list(APPEND LINK_LIBRARIES )
+124: list(APPEND LINK_DIRECTORIES )
 125: 
-126: message(STATUS "C++ compiler version:    ${CMAKE_CXX_COMPILER_VERSION}")
-127: message(STATUS "C compiler version:      ${CMAKE_C_COMPILER_VERSION}")
-128: message(STATUS "C++ supported standard:  ${SUPPORTED_CPP_STANDARD}")
-129: 
+126: set(SUPPORTED_CPP_STANDARD 17)
+127: 
+128: message(STATUS "C++ compiler version:    ${CMAKE_CXX_COMPILER_VERSION}")
+129: message(STATUS "C compiler version:      ${CMAKE_C_COMPILER_VERSION}")
+130: message(STATUS "C++ supported standard:  ${SUPPORTED_CPP_STANDARD}")
+131: 
 
 ...
 ```
 
 Explanation:
-- Line 31-37: Depending on the variable `BAREMETAL_TARGET` which we will define later on, we define the variables `BAREMETAL_ARCH_CPU_OPTIONS` and `BAREMETAL_TARGET_KERNEL`, which define specific compiler options for the platform we're building fir (for now Raspberry Pi 3 or 4), and the base name of the kernel image file
-- Line 38: We define the variable `BAREMETAL_LOAD_ADDRESS` to hold the start address for the baremetal application
-- Line 40-43: We define the variable `DEFINES_C` to hold the generic compiler definitions for C and C++, independent of the build configuration
-- Line 44-47: We define the variables `DEFINES_C_DEBUG`, `DEFINES_C_RELEASE`, `DEFINES_C_MINSIZEREL` and `DEFINES_C_RELWITHDEBINFO` to hold specific compiler definitions for C and C++ per build configuration
-- Line 48-51: We define the variable `DEFINES_ASM` to hold the generic compiler definitions for assembly, independent of the build configuration
-- Line 53-66: We define the variable `FLAGS_C` to hold the generic compiler options for C, independent of the build configuration
-- Line 67-74: We define the variables `FLAGS_C_DEBUG`, `FLAGS_C_RELEASE`, `FLAGS_C_MINSIZEREL` and `FLAGS_C_RELWITHDEBINFO` to hold specific compiler options for C per build configuration
-- Line 76-93: We define the variable `FLAGS_CXX` to hold the generic compiler options for C++, independent of the build configuration
-- Line 95-102: We define the variables `FLAGS_CXX_DEBUG`, `FLAGS_CXX_RELEASE`, `FLAGS_CXX_MINSIZEREL` and `FLAGS_CXX_RELWITHDEBINFO` to hold specific compiler options for C++ per build configuration
-- Line 104: We define the variable `FLAGS_ASM` to hold the generic compiler options for assembly, independent of the build configuration
-- Line 105-108: We define the variables `FLAGS_ASM_DEBUG`, `FLAGS_ASM_RELEASE`, `FLAGS_ASM_MINSIZEREL` and `FLAGS_ASM_RELWITHDEBINFO` to hold specific compiler options for assembly per build configuration
-- Line 110-115: We define the variable `LINK_FLAGS` to hold the linker options
-- Line 116-119: We define the variables `LINK_FLAGS_DEBUG`, `LINK_FLAGS_RELEASE`, `LINK_FLAGS_MINSIZEREL` and `LINK_FLAGS_RELWITHDEBINFO` to hold specific linker options per build configuration
-- Line 121: We add to variable `LINK_LIBRARIES` holding the generic list of libraries to link to (empty for now)
-- Line 122: We add to variable `LINK_DIRECTORIES` holding the generic list of directories to search for linking (empty for now)
-- Line 123: We define the variable `SUPPORTED_CPP_STANDARD` to holding the C++ standard used
-- Line 126-128: We print the current C++ and C compiler versions, as well as the C++ standard version just defined
+- Line 31-39: Depending on the variable `BAREMETAL_TARGET` which we will define later on, we define the variables `BAREMETAL_ARCH_CPU_OPTIONS` and `BAREMETAL_TARGET_KERNEL`, which define specific compiler options for the platform we're building for (for now Raspberry Pi 3 or 4), and the base name of the kernel image file.
+Also, if `BAREMETAL_TARGET` is set to "RPI3", we set `BAREMETAL_RPI_TARGET` to 3, and for `BAREMETAL_TARGET` equal "RPI4", we set `BAREMETAL_RPI_TARGET` to 4.
+- Line 40: We define the variable `BAREMETAL_LOAD_ADDRESS` to hold the start address for the baremetal application
+- Line 42-45: We define the variable `DEFINES_C` to hold the generic compiler definitions for C and C++, independent of the build configuration
+- Line 46-49: We define the variables `DEFINES_C_DEBUG`, `DEFINES_C_RELEASE`, `DEFINES_C_MINSIZEREL` and `DEFINES_C_RELWITHDEBINFO` to hold specific compiler definitions for C and C++ per build configuration
+- Line 50-53: We define the variable `DEFINES_ASM` to hold the generic compiler definitions for assembly, independent of the build configuration
+- Line 55-68: We define the variable `FLAGS_C` to hold the generic compiler options for C, independent of the build configuration
+- Line 69-76: We define the variables `FLAGS_C_DEBUG`, `FLAGS_C_RELEASE`, `FLAGS_C_MINSIZEREL` and `FLAGS_C_RELWITHDEBINFO` to hold specific compiler options for C per build configuration
+- Line 78-95: We define the variable `FLAGS_CXX` to hold the generic compiler options for C++, independent of the build configuration
+- Line 97-104: We define the variables `FLAGS_CXX_DEBUG`, `FLAGS_CXX_RELEASE`, `FLAGS_CXX_MINSIZEREL` and `FLAGS_CXX_RELWITHDEBINFO` to hold specific compiler options for C++ per build configuration
+- Line 106: We define the variable `FLAGS_ASM` to hold the generic compiler options for assembly, independent of the build configuration
+- Line 107-110: We define the variables `FLAGS_ASM_DEBUG`, `FLAGS_ASM_RELEASE`, `FLAGS_ASM_MINSIZEREL` and `FLAGS_ASM_RELWITHDEBINFO` to hold specific compiler options for assembly per build configuration
+- Line 112-117: We define the variable `LINK_FLAGS` to hold the linker options
+- Line 118-121: We define the variables `LINK_FLAGS_DEBUG`, `LINK_FLAGS_RELEASE`, `LINK_FLAGS_MINSIZEREL` and `LINK_FLAGS_RELWITHDEBINFO` to hold specific linker options per build configuration
+- Line 123: We add to variable `LINK_LIBRARIES` holding the generic list of libraries to link to (empty for now)
+- Line 124: We add to variable `LINK_DIRECTORIES` holding the generic list of directories to search for linking (empty for now)
+- Line 126: We define the variable `SUPPORTED_CPP_STANDARD` to holding the C++ standard used
+- Line 128-130: We print the current C++ and C compiler versions, as well as the C++ standard version just defined
 
 So the section above adds a lot of variables, to set compiler and linker definitions and options, common and for each different build configuration.
 
@@ -311,107 +314,106 @@ For this we add another section just before `add_subdirectory(code)` in the main
 File: CMakeLists.txt
 ...
 
-130: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
-131: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
-132: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
-133: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
-134: 
-135: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
-136: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
-137: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
-138: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
-139: 
-140: set(COMPILE_OPTIONS_C_DEBUG ${FLAGS_C} ${FLAGS_C_DEBUG})
-141: set(COMPILE_OPTIONS_C_RELEASE ${FLAGS_C} ${FLAGS_C_RELEASE})
-142: set(COMPILE_OPTIONS_C_MINSIZEREL ${FLAGS_C} ${FLAGS_C_MINSIZEREL})
-143: set(COMPILE_OPTIONS_C_RELWITHDEBINFO ${FLAGS_C} ${FLAGS_C_RELWITHDEBINFO})
-144: 
-145: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
-146: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
-147: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
-148: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
-149: 
-150: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
-151: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
-152: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
-153: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
-154: 
-155: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
-156: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
-157: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
-158: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
-159: 
-160: set(LINKER_LIBRARIES ${LINK_LIBRARIES})
+132: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
+133: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
+134: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
+135: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
+136: 
+137: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
+138: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
+139: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
+140: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
+141: 
+142: set(COMPILE_OPTIONS_C_DEBUG ${FLAGS_C} ${FLAGS_C_DEBUG})
+143: set(COMPILE_OPTIONS_C_RELEASE ${FLAGS_C} ${FLAGS_C_RELEASE})
+144: set(COMPILE_OPTIONS_C_MINSIZEREL ${FLAGS_C} ${FLAGS_C_MINSIZEREL})
+145: set(COMPILE_OPTIONS_C_RELWITHDEBINFO ${FLAGS_C} ${FLAGS_C_RELWITHDEBINFO})
+146: 
+147: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
+148: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
+149: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
+150: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
+151: 
+152: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
+153: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
+154: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
+155: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
+156: 
+157: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
+158: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
+159: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
+160: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
 161: 
-162: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-163:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-164:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-165:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-166:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-167:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-168:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
-169: elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-170:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELEASE})
-171:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELEASE})
-172:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELEASE})
-173:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELEASE})
-174:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELEASE})
-175:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELEASE})
-176: elseif(${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
-177:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_MINSIZEREL})
-178:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_MINSIZEREL})
-179:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_MINSIZEREL})
-180:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_MINSIZEREL})
-181:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_MINSIZEREL})
-182:     set(LINKER_OPTIONS ${LINKER_OPTIONS_MINSIZEREL})
-183: elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-184:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELWITHDEBINFO})
-185:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO})
-186:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELWITHDEBINFO})
-187:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELWITHDEBINFO})
-188:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELWITHDEBINFO})
-189:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELWITHDEBINFO})
-190: else()
-191:     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
-192: endif()
-193: 
+162: set(LINKER_LIBRARIES ${LINK_LIBRARIES})
+163: 
+164: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+165:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+166:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+167:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+168:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+169:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+170:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+171: elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+172:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELEASE})
+173:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELEASE})
+174:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELEASE})
+175:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELEASE})
+176:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELEASE})
+177:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELEASE})
+178: elseif(${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
+179:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_MINSIZEREL})
+180:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_MINSIZEREL})
+181:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_MINSIZEREL})
+182:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_MINSIZEREL})
+183:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_MINSIZEREL})
+184:     set(LINKER_OPTIONS ${LINKER_OPTIONS_MINSIZEREL})
+185: elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+186:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_RELWITHDEBINFO})
+187:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO})
+188:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_RELWITHDEBINFO})
+189:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_RELWITHDEBINFO})
+190:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_RELWITHDEBINFO})
+191:     set(LINKER_OPTIONS ${LINKER_OPTIONS_RELWITHDEBINFO})
+192: else()
+193:     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
+194: endif()
 
 ...
 ```
 
 Explanation:
-- Line 130-133: We combine the generic compiler definitions for C and C++ with the configuration specific ones in variables:
+- Line 132-135: We combine the generic compiler definitions for C and C++ with the configuration specific ones in variables:
   - `COMPILE_DEFINITIONS_C_DEBUG`
   - `COMPILE_DEFINITIONS_C_RELEASE`
   - `COMPILE_DEFINITIONS_C_MINSIZEREL`
   - `COMPILE_DEFINITIONS_C_RELWITHDEBINFO`
-- Line 135-138: We combine the generic compiler definitions for assembly with the configuration specific ones in variables:
+- Line 137-140: We combine the generic compiler definitions for assembly with the configuration specific ones in variables:
   - `COMPILE_DEFINITIONS_ASM_DEBUG`
   - `COMPILE_DEFINITIONS_ASM_RELEASE`
   - `COMPILE_DEFINITIONS_ASM_MINSIZEREL`
   - `COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO`
-- Line 140-143: We combine the generic compiler options for C with the configuration specific ones in variables:
+- Line 142-145: We combine the generic compiler options for C with the configuration specific ones in variables:
   - `COMPILE_OPTIONS_C_DEBUG`
   - `COMPILE_OPTIONS_C_RELEASE`
   - `COMPILE_OPTIONS_C_MINSIZEREL`
   - `COMPILE_OPTIONS_C_RELWITHDEBINFO`
-- Line 145-148: We combine the generic compiler options for C++ with the configuration specific ones in variables:
+- Line 147-150: We combine the generic compiler options for C++ with the configuration specific ones in variables:
   - `COMPILE_OPTIONS_CXX_DEBUG`
   - `COMPILE_OPTIONS_CXX_RELEASE`
   - `COMPILE_OPTIONS_CXX_MINSIZEREL`
   - `COMPILE_OPTIONS_CXX_RELWITHDEBINFO`
-- Line 150-153: We combine the generic compiler options for assembly with the configuration specific ones in variables:
+- Line 152-155: We combine the generic compiler options for assembly with the configuration specific ones in variables:
   - `COMPILE_OPTIONS_ASM_DEBUG`
   - `COMPILE_OPTIONS_ASM_RELEASE`
   - `COMPILE_OPTIONS_ASM_MINSIZEREL`
   - `COMPILE_OPTIONS_ASM_RELWITHDEBINFO`
-- Line 155-158: We combine the generic linker options with the configuration specific ones in variables:
+- Line 157-160: We combine the generic linker options with the configuration specific ones in variables:
   - `LINKER_OPTIONS_DEBUG`
   - `LINKER_OPTIONS_RELEASE`
   - `LINKER_OPTIONS_MINSIZEREL`
   - `LINKER_OPTIONS_RELWITHDEBINFO`
-- Line 160: We set the variable `LINKER_LIBRARIES` to hold the general libraries to link to
-- Line 162-192: Depending on the current build configuration, we define the following variables to the correct ones for the build configuration set:
+- Line 162: We set the variable `LINKER_LIBRARIES` to hold the general libraries to link to
+- Line 164-194: Depending on the current build configuration, we define the following variables to the correct ones for the build configuration set:
   - `COMPILE_DEFINITIONS_C`
   - `COMPILE_DEFINITIONS_ASM`
   - `COMPILE_OPTIONS_C`
@@ -915,32 +917,32 @@ The -D options specify all compiler definitions. You will recognize the options 
 
 ```cmake
 File: CMakeLists.txt
-70: set(DEFINES_ASM
-71:     PLATFORM_BAREMETAL
-72:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
-73:     )
+72: set(DEFINES_ASM
+73:     PLATFORM_BAREMETAL
+74:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
+75:     )
 ```
 
 - The generic and the build configuration specific definitions are later combined:
 ```cmake
 File: CMakeLists.txt
-157: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
-158: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
-159: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
-160: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
+159: set(COMPILE_DEFINITIONS_ASM_DEBUG ${DEFINES_ASM} ${DEFINES_ASM_DEBUG})
+160: set(COMPILE_DEFINITIONS_ASM_RELEASE ${DEFINES_ASM} ${DEFINES_ASM_RELEASE})
+161: set(COMPILE_DEFINITIONS_ASM_MINSIZEREL ${DEFINES_ASM} ${DEFINES_ASM_MINSIZEREL})
+162: set(COMPILE_DEFINITIONS_ASM_RELWITHDEBINFO ${DEFINES_ASM} ${DEFINES_ASM_RELWITHDEBINFO})
 ```
 
 - However we don't set any build configuration specific assembly definitions
 - And then later variable for the specific build configuration are set:
 ```cmake
 File: CMakeLists.txt
-184: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-185:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-186:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-187:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-188:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-189:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-190:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -962,46 +964,47 @@ File: CMakeLists.txt
 53: if (BAREMETAL_TARGET STREQUAL "RPI3")
 54:     set(BAREMETAL_ARCH_CPU_OPTIONS -mcpu=cortex-a53 -mlittle-endian -mcmodel=small)
 55:     set(BAREMETAL_TARGET_KERNEL kernel8)
+56:     set(BAREMETAL_RPI_TARGET 3)
 ...
 ```
 - The options all are defined later on in the main CMake file, where they are combinex with `BAREMETAL_ARCH_CPU_OPTIONS`:
 
 ```cmake
 File: CMakeLists.txt
-126: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
+128: set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
 ```
 
 - The `-O2` option is set for the specific Debug build configuration:
 
 ```cmake
 File: CMakeLists.txt
-127: set(FLAGS_ASM_DEBUG -O2)
-128: set(FLAGS_ASM_RELEASE -O2)
-129: set(FLAGS_ASM_MINSIZEREL -O2)
-130: set(FLAGS_ASM_RELWITHDEBINFO -O2)
+129: set(FLAGS_ASM_DEBUG -O2)
+130: set(FLAGS_ASM_RELEASE -O2)
+131: set(FLAGS_ASM_MINSIZEREL -O2)
+132: set(FLAGS_ASM_RELWITHDEBINFO -O2)
 ```
 
 - The generic and the build configuration specific definitions are later combined:
 
 ```cmake
 File: CMakeLists.txt
-172: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
-173: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
-174: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
-175: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
+174: set(COMPILE_OPTIONS_ASM_DEBUG ${FLAGS_ASM} ${FLAGS_ASM_DEBUG})
+175: set(COMPILE_OPTIONS_ASM_RELEASE ${FLAGS_ASM} ${FLAGS_ASM_RELEASE})
+176: set(COMPILE_OPTIONS_ASM_MINSIZEREL ${FLAGS_ASM} ${FLAGS_ASM_MINSIZEREL})
+177: set(COMPILE_OPTIONS_ASM_RELWITHDEBINFO ${FLAGS_ASM} ${FLAGS_ASM_RELWITHDEBINFO})
 ```
 
 - And then later variable for the specific build configuration are set:
 
 ```cmake
 File: CMakeLists.txt
-184: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-185:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-186:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-187:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-188:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-189:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-190:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -1054,43 +1057,43 @@ The -D options specify all compiler definitions. You will recognize the options 
 
 ```cmake
 File: CMakeLists.txt
-62: set(DEFINES_C
-63:     PLATFORM_BAREMETAL
-64:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
-65:     )
+64: set(DEFINES_C
+65:     PLATFORM_BAREMETAL
+66:     BAREMETAL_TARGET=${BAREMETAL_TARGET}
+67:     )
 ```
 
 - The \_DEBUG definition is caused by the `CMAKE_BUILD_TYPE` variable, which is set to `Debug` as we are building a Debug application. This is also done in the main CMake file:
 - 
 ```cmake
 File: CMakeLists.txt
-66: set(DEFINES_C_DEBUG _DEBUG)
-67: set(DEFINES_C_RELEASE NDEBUG)
-68: set(DEFINES_C_MINSIZEREL NDEBUG)
-69: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
+68: set(DEFINES_C_DEBUG _DEBUG)
+69: set(DEFINES_C_RELEASE NDEBUG)
+70: set(DEFINES_C_MINSIZEREL NDEBUG)
+71: set(DEFINES_C_RELWITHDEBINFO NDEBUG)
 ```
 
 - The generic and the build configuration specific definitions are later combined:
 
 ```cmake
 File: CMakeLists.txt
-152: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
-153: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
-154: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
-155: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
+154: set(COMPILE_DEFINITIONS_C_DEBUG ${DEFINES_C} ${DEFINES_C_DEBUG})
+155: set(COMPILE_DEFINITIONS_C_RELEASE ${DEFINES_C} ${DEFINES_C_RELEASE})
+156: set(COMPILE_DEFINITIONS_C_MINSIZEREL ${DEFINES_C} ${DEFINES_C_MINSIZEREL})
+157: set(COMPILE_DEFINITIONS_C_RELWITHDEBINFO ${DEFINES_C} ${DEFINES_C_RELWITHDEBINFO})
 ```
 
 - And then later variable for the specific build configuration are set:
 
 ```cmake
 File: CMakeLists.txt
-184: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-185:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-186:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-187:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-188:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-189:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-190:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -1121,61 +1124,61 @@ File: CMakeLists.txt
 
 ```cmake
 File: CMakeLists.txt
-98: set(FLAGS_CXX
-99:     ${BAREMETAL_ARCH_CPU_OPTIONS}
-100:     -Wall
-101:     -Wextra
-102:     -Werror
-103:     -Wno-missing-field-initializers
-104:     -Wno-unused-value
-105:     -Wno-aligned-new
-106:     -ffreestanding
-107:     -fsigned-char
-108:     -nostartfiles
-109:     -mno-outline-atomics
-110:     -nostdinc
-111:     -nostdlib
-112:     -nostdinc++
-113:     -fno-exceptions
-114:     -fno-rtti
-115:     )
+100: set(FLAGS_CXX
+101:     ${BAREMETAL_ARCH_CPU_OPTIONS}
+102:     -Wall
+103:     -Wextra
+104:     -Werror
+105:     -Wno-missing-field-initializers
+106:     -Wno-unused-value
+107:     -Wno-aligned-new
+108:     -ffreestanding
+109:     -fsigned-char
+110:     -nostartfiles
+111:     -mno-outline-atomics
+112:     -nostdinc
+113:     -nostdlib
+114:     -nostdinc++
+115:     -fno-exceptions
+116:     -fno-rtti
+117:     )
 ```
 
 - The `-O0 -Wno-unused-variable -Wno-unused-parameter` options are set for the specific Debug build configuration:
 
 ```cmake
 File: CMakeLists.txt
-117: # -g is added by CMake
-118: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
-119: # -O3 is added by CMake
-120: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
-121: # -Os is added by CMake
-122: set(FLAGS_CXX_MINSIZEREL -O3)
-123: # -O2 -g is added by CMake
-124: set(FLAGS_CXX_RELWITHDEBINFO )
+119: # -g is added by CMake
+120: set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
+121: # -O3 is added by CMake
+122: set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+123: # -Os is added by CMake
+124: set(FLAGS_CXX_MINSIZEREL -O3)
+125: # -O2 -g is added by CMake
+126: set(FLAGS_CXX_RELWITHDEBINFO )
 ```
 
 - The generic and the build configuration specific definitions are later combined:
 
 ```cmake
 File: CMakeLists.txt
-167: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
-168: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
-169: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
-170: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
+169: set(COMPILE_OPTIONS_CXX_DEBUG ${FLAGS_CXX} ${FLAGS_CXX_DEBUG})
+170: set(COMPILE_OPTIONS_CXX_RELEASE ${FLAGS_CXX} ${FLAGS_CXX_RELEASE})
+171: set(COMPILE_OPTIONS_CXX_MINSIZEREL ${FLAGS_CXX} ${FLAGS_CXX_MINSIZEREL})
+172: set(COMPILE_OPTIONS_CXX_RELWITHDEBINFO ${FLAGS_CXX} ${FLAGS_CXX_RELWITHDEBINFO})
 ```
 
 - And then later variable for the specific build configuration are set:
 
 ```cmake
 File: CMakeLists.txt
-184: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-185:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-186:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-187:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-188:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-189:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-190:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 
@@ -1183,7 +1186,7 @@ File: CMakeLists.txt
 
 ```cmake
 File: CMakeLists.txt
-146: set(SUPPORTED_CPP_STANDARD 17)
+148: set(SUPPORTED_CPP_STANDARD 17)
 ```
 
 - Which is then later used when defining the target properties in the `code/application/demo` CMake files:
@@ -1274,16 +1277,16 @@ The `CMAKE_EXE_LINKER_FLAGS` are automatically added to the linker flags for a t
 
 ```cmake
 File: CMakeLists.txt
-132: set(LINK_FLAGS
-133:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
-134:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
-135:     -nostdlib
-136:     -nostartfiles
-137:     )
-138: set(LINK_FLAGS_DEBUG )
-139: set(LINK_FLAGS_RELEASE )
-140: set(LINK_FLAGS_MINSIZEREL )
-141: set(LINK_FLAGS_RELWITHDEBINFO )
+134: set(LINK_FLAGS
+135:     -Wl,--section-start=.init=${BAREMETAL_LOAD_ADDRESS}
+136:     -T ${CMAKE_SOURCE_DIR}/baremetal.ld
+137:     -nostdlib
+138:     -nostartfiles
+139:     )
+140: set(LINK_FLAGS_DEBUG )
+141: set(LINK_FLAGS_RELEASE )
+142: set(LINK_FLAGS_MINSIZEREL )
+143: set(LINK_FLAGS_RELWITHDEBINFO )
 ```
 
 - This is then combined later on with the build configuration specific linker flags:
@@ -1291,23 +1294,23 @@ File: CMakeLists.txt
 ```cmake
 File: CMakeLists.txt
 File: d:\Projects\baremetal.github\CMakeLists.txt
-177: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
-178: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
-179: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
-180: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
+179: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
+180: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
+181: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
+182: set(LINKER_OPTIONS_RELWITHDEBINFO ${LINK_FLAGS} ${LINK_FLAGS_RELWITHDEBINFO})
 ```
 
 - Subsequently, the linker flags for the selected build configuration is set:
 
 ```cmake
 File: CMakeLists.txt
-184: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-185:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
-186:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
-187:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
-188:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
-189:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
-190:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
+186: if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+187:     set(COMPILE_DEFINITIONS_C ${COMPILE_DEFINITIONS_C_DEBUG})
+188:     set(COMPILE_DEFINITIONS_ASM ${COMPILE_DEFINITIONS_ASM_DEBUG})
+189:     set(COMPILE_OPTIONS_C ${COMPILE_OPTIONS_C_DEBUG})
+190:     set(COMPILE_OPTIONS_CXX ${COMPILE_OPTIONS_CXX_DEBUG})
+191:     set(COMPILE_OPTIONS_ASM ${COMPILE_OPTIONS_ASM_DEBUG})
+192:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ...
 ```
 

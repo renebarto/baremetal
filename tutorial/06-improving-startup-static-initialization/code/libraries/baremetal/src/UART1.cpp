@@ -47,7 +47,7 @@
 
 namespace baremetal {
 
-#if BAREMETAL_TARGET == RPI3
+#if BAREMETAL_RPI_TARGET == 3
 static const int NumWaitCycles = 150;
 
 static void WaitCycles(uint32 numCycles)
@@ -60,7 +60,7 @@ static void WaitCycles(uint32 numCycles)
         }
     }
 }
-#endif // BAREMETAL_TARGET == RPI3
+#endif // BAREMETAL_RPI_TARGET == 3
 
 UART1::UART1()
     : m_initialized{}
@@ -88,7 +88,7 @@ void UART1::Initialize()
     *(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
     *(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
     // Clear FIFO
-#if BAREMETAL_TARGET == RPI3
+#if BAREMETAL_RPI_TARGET == 3
     *(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
 #else
     *(RPI_AUX_MU_BAUD) = 541;                            // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
@@ -178,7 +178,7 @@ bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
     if (function >= GPIOFunction::Unknown)
         return false;
 
-    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
     uint32  shift = (pinNumber % 10) * 3;
 
     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
@@ -197,8 +197,8 @@ bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
 
     if (pinNumber >= NUM_GPIO)
         return false;
-#if BAREMETAL_TARGET == RPI3
-    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+#if BAREMETAL_RPI_TARGET == 3
+    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
     uint32  shift = pinNumber % 32;
 
     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
@@ -207,7 +207,7 @@ bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
     WaitCycles(NumWaitCycles);
     *(clkRegister) = 0;
 #else
-    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
     unsigned              shift = (pinNumber % 16) * 2;
 
     static const unsigned ModeMap[3] = { 0, 2, 1 };
@@ -230,7 +230,7 @@ bool UART1::Off(uint8 pinNumber, GPIOMode mode)
     if (mode >= GPIOMode::AlternateFunction0)
         return false;
 
-    unsigned regOffset = (pinNumber / 32) * 4;
+    unsigned regOffset = (pinNumber / 32);
     uint32 regMask = 1 << (pinNumber % 32);
 
     bool value = false;

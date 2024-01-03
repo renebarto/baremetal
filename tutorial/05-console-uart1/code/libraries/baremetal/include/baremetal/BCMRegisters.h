@@ -42,7 +42,7 @@
 #include <baremetal/Macros.h>
 #include <baremetal/Types.h>
 
-#if BAREMETAL_TARGET == RPI3
+#if BAREMETAL_RPI_TARGET == 3
 /// @brief Base address for Raspberry PI BCM I/O
 #define RPI_BCM_IO_BASE                 0x3F000000
 #else
@@ -110,7 +110,7 @@
 #define RPI_GPIO_GPAFEN0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000088)
 /// @brief Raspberry Pi GPIO asynchronous fallign edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
 #define RPI_GPIO_GPAFEN1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000008C)
-#if BAREMETAL_TARGET == RPI3
+#if BAREMETAL_RPI_TARGET == 3
 /// @brief Raspberry Pi GPIO pull up/down mode register (2 bits) (R/W)
 #define RPI_GPIO_GPPUD                  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000094)
 /// @brief Raspberry Pi GPIO pull up/down clock register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)

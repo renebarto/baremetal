@@ -1375,7 +1375,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 178:     if (function >= GPIOFunction::Unknown)
 179:         return false;
 180:
-181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
 182:     uint32  shift = (pinNumber % 10) * 3;
 183:
 184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
@@ -1395,7 +1395,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 198:     if (pinNumber >= NUM_GPIO)
 199:         return false;
 200: #if BAREMETAL_TARGET == RPI3
-201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
 202:     uint32  shift = pinNumber % 32;
 203:
 204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
@@ -1404,7 +1404,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 207:     WaitCycles(NumWaitCycles);
 208:     *(clkRegister) = 0;
 209: #else
-210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
 212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
@@ -1427,7 +1427,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 230:     if (mode >= GPIOMode::AlternateFunction0)
 231:         return false;
 232:
-233:     unsigned regOffset = (pinNumber / 32) * 4;
+233:     unsigned regOffset = (pinNumber / 32);
 234:     uint32 regMask = 1 << (pinNumber % 32);
 235:
 236:     bool value = false;
@@ -1534,7 +1534,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 198:     if (pinNumber >= NUM_GPIO)
 199:         return false;
 200: #if BAREMETAL_TARGET == RPI3
-201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
 202:     uint32  shift = pinNumber % 32;
 203:
 204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
@@ -1543,7 +1543,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 207:     WaitCycles(NumWaitCycles);
 208:     *(clkRegister) = 0;
 209: #else
-210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
 212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
@@ -1600,7 +1600,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 178:     if (function >= GPIOFunction::Unknown)
 179:         return false;
 180:
-181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
 182:     uint32  shift = (pinNumber % 10) * 3;
 183:
 184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
@@ -1644,7 +1644,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 230:     if (mode >= GPIOMode::AlternateFunction0)
 231:         return false;
 232:
-233:     unsigned regOffset = (pinNumber / 32) * 4;
+233:     unsigned regOffset = (pinNumber / 32);
 234:     uint32 regMask = 1 << (pinNumber % 32);
 235:
 236:     bool value = false;
@@ -2462,7 +2462,7 @@ In the main() function, we first create an instance of the UART, then initialize
 As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
 
 ```cmake
-File: d:\Projects\baremetal.github\code\applications\demo\CMakeLists.txt
+File: code/applications/demo/CMakeLists.txt
 ...
 
 25: set(PROJECT_DEPENDENCIES

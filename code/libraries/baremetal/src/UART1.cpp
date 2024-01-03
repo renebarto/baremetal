@@ -47,6 +47,7 @@
 
 namespace baremetal {
 
+#if BAREMETAL_TARGET == RPI3
 static const int NumWaitCycles = 150;
 
 static void WaitCycles(uint32 numCycles)
@@ -59,6 +60,7 @@ static void WaitCycles(uint32 numCycles)
         }
     }
 }
+#endif // BAREMETAL_TARGET == RPI3
 
 UART1::UART1()
     : m_initialized{}
@@ -72,58 +74,58 @@ void UART1::Initialize()
         return;
 
     // initialize UART
-    auto value = *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES);
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
+    auto value = *(RPI_AUX_ENABLES);
+    *(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
 
     SetMode(14, GPIOMode::AlternateFunction5);
 
     SetMode(15, GPIOMode::AlternateFunction5);
 
-    *reinterpret_cast<uint32 volatile*>(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
-                                                                                            // Clear FIFO
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
+    *(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
+    *(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
+    *(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
+    *(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
+    *(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
+    *(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
+    // Clear FIFO
+#if BAREMETAL_TARGET == RPI3
+    *(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
+#else
+    *(RPI_AUX_MU_BAUD) = 541;                            // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
+#endif
 
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
-                                                                                            // Enable Tx, Rx
+    *(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
+    // Enable Tx, Rx
     m_initialized = true;
 }
 
 // Write a character
-
 void UART1::Write(char c)
 {
     // wait until we can send
-    do
+    // Check Tx FIFO empty
+    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY))
     {
         NOP();
-    } while (!(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY));
-    // Check Tx FIFO empty
+    }
     // Write the character to the buffer
-    *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
+    *(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
 }
 
 // Receive a character
-
 char UART1::Read()
 {
-    char r;
     // wait until something is in the buffer
-    do
+    // Check Rx FIFO holds data
+    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY))
     {
         NOP();
-    } while (!(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY)); // Check Rx FIFO holds data
+    }
     // Read it and return
-    r = static_cast<char>(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IO));
-    // Convert carriage return to newline
-    return r;
+    return static_cast<char>(*(RPI_AUX_MU_IO));
 }
 
-void UART1::WriteString(const char *str)
+void UART1::WriteString(const char* str)
 {
     while (*str)
     {
@@ -176,15 +178,15 @@ bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
     if (function >= GPIOFunction::Unknown)
         return false;
 
-    uintptr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
-    uint32  shift          = (pinNumber % 10) * 3;
+    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+    uint32  shift = (pinNumber % 10) * 3;
 
-    static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
+    static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
 
-    uint32 value = *reinterpret_cast<uint32 volatile *>(selectRegister);
+    uint32 value = *(selectRegister);
     value &= ~(7 << shift);
     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-    *reinterpret_cast<uint32 volatile *>(selectRegister) = value;
+    *(selectRegister) = value;
     return true;
 }
 
@@ -195,25 +197,25 @@ bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
 
     if (pinNumber >= NUM_GPIO)
         return false;
-#if RPI_TARGET <= 3
-    uintptr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
-    uint32  shift       = pinNumber % 32;
+#if BAREMETAL_TARGET == RPI3
+    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+    uint32  shift = pinNumber % 32;
 
-    *reinterpret_cast<uint32 volatile *>(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
+    *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
     WaitCycles(NumWaitCycles);
-    *reinterpret_cast<uint32 volatile *>(clkRegister) = static_cast<uint32>(1 << shift);
+    *(clkRegister) = static_cast<uint32>(1 << shift);
     WaitCycles(NumWaitCycles);
-    *reinterpret_cast<uint32 volatile *>(clkRegister) = 0;
+    *(clkRegister) = 0;
 #else
-    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16) * 4;
-    unsigned              shift   = (m_pinNumber % 16) * 2;
+    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+    unsigned              shift = (pinNumber % 16) * 2;
 
-    static const unsigned ModeMap[3] = {0, 2, 1};
+    static const unsigned ModeMap[3] = { 0, 2, 1 };
 
-    uint32                value = m_memoryAccess.Read32(modeReg);
+    uint32                value = *(modeReg);
     value &= ~(3 << shift);
     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-    m_memoryAccess.Write32(modeReg, value);
+    *(modeReg) = value;
 #endif
 
     return true;
@@ -233,9 +235,9 @@ bool UART1::Off(uint8 pinNumber, GPIOMode mode)
 
     bool value = false;
 
-    uintptr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+    regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
 
-    *reinterpret_cast<uint32 volatile *>(setClrReg) = regMask;
+    *(setClrReg) = regMask;
 
     return true;
 }

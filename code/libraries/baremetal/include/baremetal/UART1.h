@@ -107,7 +107,7 @@ enum class GPIOPullMode
 ///
 class UART1
 {
-    friend UART1& GetUART();
+    friend UART1& GetUART1();
 
 private:
     bool            m_initialized;
@@ -127,7 +127,7 @@ public:
     void Write(char c);
     /// @brief Write a string
     /// @param str String to be written
-    void WriteString(const char *str);
+    void WriteString(const char* str);
 
 private:
     /// @param mode GPIO mode to be selected.

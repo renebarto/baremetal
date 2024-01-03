@@ -186,8 +186,8 @@ File: code/libraries/baremetal/CMakeLists.txt
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 3: 
 4: project(baremetal
-5: 	DESCRIPTION "Bare metal library"
-6: 	LANGUAGES CXX ASM)
+5:     DESCRIPTION "Bare metal library"
+6:     LANGUAGES CXX ASM)
 7: 
 8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
 9: 
@@ -355,9 +355,10 @@ The output for the configure step should be similar to:
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.test\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.test\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.test" 2>&1"
-1> Working directory: D:\Projects\baremetal.test\cmake-BareMetal-Debug
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
+1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
+1> [CMake] -- Building for Raspberry Pi 3
 1> [CMake] -- 
 1> [CMake] ** Setting up project **
 1> [CMake] --
@@ -392,17 +393,17 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code/applications
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo **
 1> [CMake] 
@@ -420,10 +421,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             : 
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.test/code/applications/demo/src/main.cpp D:/Projects/baremetal.test/code/applications/demo/src/start.S
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/applications/demo/src/main.cpp D:/Projects/baremetal.github/code/applications/demo/src/start.S
 1> [CMake] -- Include files - public            : 
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
@@ -434,7 +435,7 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
@@ -443,10 +444,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.test/output/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
-1> [CMake] -- Target binary location            :  D:/Projects/baremetal.test/output/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target binary location            :  D:/Projects/baremetal.github/output/Debug/bin
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
@@ -454,23 +455,23 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code/applications/demo/create-image
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal.test/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.test/output/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.test/code/libraries/baremetal
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
 1> [CMake] -- Defines C - public                : 
@@ -483,41 +484,41 @@ The output for the configure step should be similar to:
 1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.test/code/libraries/baremetal/include
+1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      : 
 1> [CMake] -- Link libs                         : 
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.test/code/libraries/baremetal/src/Dummy.cpp
-1> [CMake] -- Include files - public            :  D:/Projects/baremetal.test/code/libraries/baremetal/include/baremetal/ARMInstructions.h
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/libraries/baremetal/src/Dummy.cpp
+1> [CMake] -- Include files - public            :  D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/ARMInstructions.h
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.test/code/libraries/baremetal/include
-1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.test/code/libraries/baremetal/include
+1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.test/code/libraries/baremetal/include
+1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
 1> [CMake] -- Target imported dependencies      : 
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.test/output/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/baremetal.test/cmake-BareMetal-Debug
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
 1> Extracted CMake variables.
 1> Extracted source files and headers.
 1> Extracted code model.
@@ -538,8 +539,8 @@ We can then build:
   [2/6] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
   [3/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
   [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/dummy.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
-  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
-  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal.test\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.test/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.test/deploy/Debug/demo-image/kernel8.img"
+  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
+  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal.github\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
 
 Rebuild All succeeded.
 ```
@@ -586,7 +587,7 @@ cmd.exe /C
   D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
     -g
     -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-    -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld
+    -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld
     -nostdlib -nostartfiles
     code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
     code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
@@ -750,18 +751,18 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 48: typedef unsigned short uint16;
 49: /// @brief Unsigned 32 bit integer
 50: typedef unsigned int uint32;
-51: 
-52: /// @brief Signed 8 bit integer
-53: typedef signed char int8;
-54: /// @brief Signed 16 bit integer
-55: typedef signed short int16;
-56: /// @brief Signed 32 bit integer
-57: typedef signed int int32;
-58: 
-59: /// @brief Unsigned 64 bit integer
-60: typedef unsigned long uint64;
-61: /// @brief Signed 64 bit integer
-62: typedef signed long int64;
+51: /// @brief Unsigned 64 bit integer
+52: typedef unsigned long uint64;
+53: 
+54: /// @brief Signed 8 bit integer
+55: typedef signed char int8;
+56: /// @brief Signed 16 bit integer
+57: typedef signed short int16;
+58: /// @brief Signed 32 bit integer
+59: typedef signed int int32;
+60: /// @brief Signed 64 bit integer
+61: typedef signed long int64;
+62: 
 63: /// @brief Pointer as signed 64 bit integer
 64: typedef int64 intptr;
 65: /// @brief Pointer as unsigned 64 bit integer
@@ -775,13 +776,23 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 73: typedef size_type size_t;
 74: /// @brief Signed size
 75: typedef ssize_type ssize_t;
+76: 
+77: /// @brief Unsigned volatile 32 bit integer (for registers)
+78: typedef volatile uint32 reg32;
+79: /// @brief Pointer to unsigned volatile 32 bit integer (for registers)
+80: typedef reg32* regaddr;
 ```
 
-This header defines types for 8/16/32/64 bit integer types, both signed an unsigned, pointer like types, again both signed and unsigned, as well as size types, again both signed and unsigned.
+This header defines the following types:
+- 8/16/32/64 bit integer types, both signed an unsigned
+- pointer like types, again both signed and unsigned
+- size types, again both signed and unsigned
+- a volatile variant of the 32 bit unsigned type, as well as a pointer to this type
 
 ### BCMRegisters.h
 
-Now we add registers of the Broadcom SoC in the Raspberry Pi. This file will include the two header file defines before.
+Now we add some registers of the Broadcom SoC in the Raspberry Pi (specifically those for GPIO and UART1 (mini UART).
+This file will include the two header file defines before.
 Add the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 
 ```cpp
@@ -840,166 +851,172 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 52: /// @brief End address for Raspberry PI BCM I/O
 53: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 54: 
-55: // Raspberry Pi GPIO
-56: 
-57: /// @brief Raspberry Pi GPIO registers base address
-58: #define RPI_GPIO_BASE                   RPI_BCM_IO_BASE + 0x00200000
-59: /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W)
-60: #define RPI_GPIO_GPFSEL0                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000000)
-61: /// @brief Raspberry Pi GPIO function select register 1 (GPIO 10..19) (3 bits / GPIO) (R/W)
-62: #define RPI_GPIO_GPFSEL1                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000004)
-63: /// @brief Raspberry Pi GPIO function select register 2 (GPIO 20..29) (3 bits / GPIO) (R/W)
-64: #define RPI_GPIO_GPFSEL2                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000008)
-65: /// @brief Raspberry Pi GPIO function select register 3 (GPIO 30..39) (3 bits / GPIO) (R/W)
-66: #define RPI_GPIO_GPFSEL3                static_cast<uintptr>(RPI_GPIO_BASE + 0x0000000C)
-67: /// @brief Raspberry Pi GPIO function select register 4 (GPIO 40..49) (3 bits / GPIO) (R/W)
-68: #define RPI_GPIO_GPFSEL4                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000010)
-69: /// @brief Raspberry Pi GPIO function select register 5 (GPIO 50..53) (3 bits / GPIO) (R/W)
-70: #define RPI_GPIO_GPFSEL5                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000014)
-71: /// @brief Raspberry Pi GPIO set register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-72: #define RPI_GPIO_GPSET0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x0000001C)
-73: /// @brief Raspberry Pi GPIO set register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-74: #define RPI_GPIO_GPSET1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000020)
-75: /// @brief Raspberry Pi GPIO clear register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-76: #define RPI_GPIO_GPCLR0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000028)
-77: /// @brief Raspberry Pi GPIO clear register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-78: #define RPI_GPIO_GPCLR1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x0000002C)
-79: /// @brief Raspberry Pi GPIO level register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-80: #define RPI_GPIO_GPLEV0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000034)
-81: /// @brief Raspberry Pi GPIO level register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-82: #define RPI_GPIO_GPLEV1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000038)
-83: /// @brief Raspberry Pi GPIO event detected register 0 (GPIO 0..31) (1 bit / GPIO) (R)
-84: #define RPI_GPIO_GPEDS0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000040)
-85: /// @brief Raspberry Pi GPIO event detected register 1 (GPIO 32..53) (1 bit / GPIO) (R)
-86: #define RPI_GPIO_GPEDS1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000044)
-87: /// @brief Raspberry Pi GPIO rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-88: #define RPI_GPIO_GPREN0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x0000004C)
-89: /// @brief Raspberry Pi GPIO rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-90: #define RPI_GPIO_GPREN1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000050)
-91: /// @brief Raspberry Pi GPIO falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-92: #define RPI_GPIO_GPFEN0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000058)
-93: /// @brief Raspberry Pi GPIO falling edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-94: #define RPI_GPIO_GPFEN1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x0000005C)
-95: /// @brief Raspberry Pi GPIO high level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-96: #define RPI_GPIO_GPHEN0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000064)
-97: /// @brief Raspberry Pi GPIO high level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-98: #define RPI_GPIO_GPHEN1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000068)
-99: /// @brief Raspberry Pi GPIO low level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-100: #define RPI_GPIO_GPLEN0                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000070)
-101: /// @brief Raspberry Pi GPIO low level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-102: #define RPI_GPIO_GPLEN1                 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000074)
-103: /// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-104: #define RPI_GPIO_GPAREN0                static_cast<uintptr>(RPI_GPIO_BASE + 0x0000007C)
-105: /// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-106: #define RPI_GPIO_GPAREN1                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000080)
-107: /// @brief Raspberry Pi GPIO asynchronous falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-108: #define RPI_GPIO_GPAFEN0                static_cast<uintptr>(RPI_GPIO_BASE + 0x00000088)
-109: /// @brief Raspberry Pi GPIO asynchronous fallign edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-110: #define RPI_GPIO_GPAFEN1                static_cast<uintptr>(RPI_GPIO_BASE + 0x0000008C)
-111: #if RPI_TARGET <= 3
-112: /// @brief Raspberry Pi GPIO pull up/down mode register (2 bits) (R/W)
-113: #define RPI_GPIO_GPPUD     static_cast<uintptr>(RPI_GPIO_BASE + 0x00000094)
-114: /// @brief Raspberry Pi GPIO pull up/down clock register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
-115: #define RPI_GPIO_GPPUDCLK0 static_cast<uintptr>(RPI_GPIO_BASE + 0x00000098)
-116: /// @brief Raspberry Pi GPIO pull up/down clock register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
-117: #define RPI_GPIO_GPPUDCLK1 static_cast<uintptr>(RPI_GPIO_BASE + 0x0000009C)
-118: #else // RPI target 4 or 5
-119: #define RPI_GPIO_GPPINMUXSD static_cast<uintptr>(RPI_GPIO_BASE + 0x000000D0)
-120: #define RPI_GPIO_GPPUPPDN0  static_cast<uintptr>(RPI_GPIO_BASE + 0x000000E4)
-121: #define RPI_GPIO_GPPUPPDN1  static_cast<uintptr>(RPI_GPIO_BASE + 0x000000E8)
-122: #define RPI_GPIO_GPPUPPDN2  static_cast<uintptr>(RPI_GPIO_BASE + 0x000000EC)
-123: #define RPI_GPIO_GPPUPPDN3  static_cast<uintptr>(RPI_GPIO_BASE + 0x000000F0)
-124: #endif
-125: 
-126: // Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
+55: //---------------------------------------------
+56: // Raspberry Pi GPIO
+57: //---------------------------------------------
+58: 
+59: /// @brief Raspberry Pi GPIO registers base address
+60: #define RPI_GPIO_BASE                   RPI_BCM_IO_BASE + 0x00200000
+61: /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W)
+62: #define RPI_GPIO_GPFSEL0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000000)
+63: /// @brief Raspberry Pi GPIO function select register 1 (GPIO 10..19) (3 bits / GPIO) (R/W)
+64: #define RPI_GPIO_GPFSEL1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000004)
+65: /// @brief Raspberry Pi GPIO function select register 2 (GPIO 20..29) (3 bits / GPIO) (R/W)
+66: #define RPI_GPIO_GPFSEL2                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000008)
+67: /// @brief Raspberry Pi GPIO function select register 3 (GPIO 30..39) (3 bits / GPIO) (R/W)
+68: #define RPI_GPIO_GPFSEL3                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000000C)
+69: /// @brief Raspberry Pi GPIO function select register 4 (GPIO 40..49) (3 bits / GPIO) (R/W)
+70: #define RPI_GPIO_GPFSEL4                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000010)
+71: /// @brief Raspberry Pi GPIO function select register 5 (GPIO 50..53) (3 bits / GPIO) (R/W)
+72: #define RPI_GPIO_GPFSEL5                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000014)
+73: /// @brief Raspberry Pi GPIO set register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+74: #define RPI_GPIO_GPSET0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000001C)
+75: /// @brief Raspberry Pi GPIO set register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+76: #define RPI_GPIO_GPSET1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000020)
+77: /// @brief Raspberry Pi GPIO clear register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+78: #define RPI_GPIO_GPCLR0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000028)
+79: /// @brief Raspberry Pi GPIO clear register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+80: #define RPI_GPIO_GPCLR1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000002C)
+81: /// @brief Raspberry Pi GPIO level register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+82: #define RPI_GPIO_GPLEV0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000034)
+83: /// @brief Raspberry Pi GPIO level register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+84: #define RPI_GPIO_GPLEV1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000038)
+85: /// @brief Raspberry Pi GPIO event detected register 0 (GPIO 0..31) (1 bit / GPIO) (R)
+86: #define RPI_GPIO_GPEDS0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000040)
+87: /// @brief Raspberry Pi GPIO event detected register 1 (GPIO 32..53) (1 bit / GPIO) (R)
+88: #define RPI_GPIO_GPEDS1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000044)
+89: /// @brief Raspberry Pi GPIO rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+90: #define RPI_GPIO_GPREN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000004C)
+91: /// @brief Raspberry Pi GPIO rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+92: #define RPI_GPIO_GPREN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000050)
+93: /// @brief Raspberry Pi GPIO falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+94: #define RPI_GPIO_GPFEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000058)
+95: /// @brief Raspberry Pi GPIO falling edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+96: #define RPI_GPIO_GPFEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000005C)
+97: /// @brief Raspberry Pi GPIO high level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+98: #define RPI_GPIO_GPHEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000064)
+99: /// @brief Raspberry Pi GPIO high level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+100: #define RPI_GPIO_GPHEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000068)
+101: /// @brief Raspberry Pi GPIO low level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+102: #define RPI_GPIO_GPLEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000070)
+103: /// @brief Raspberry Pi GPIO low level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+104: #define RPI_GPIO_GPLEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000074)
+105: /// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+106: #define RPI_GPIO_GPAREN0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000007C)
+107: /// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+108: #define RPI_GPIO_GPAREN1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000080)
+109: /// @brief Raspberry Pi GPIO asynchronous falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+110: #define RPI_GPIO_GPAFEN0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000088)
+111: /// @brief Raspberry Pi GPIO asynchronous fallign edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+112: #define RPI_GPIO_GPAFEN1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000008C)
+113: #if RPI_TARGET <= 3
+114: /// @brief Raspberry Pi GPIO pull up/down mode register (2 bits) (R/W)
+115: #define RPI_GPIO_GPPUD                  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000094)
+116: /// @brief Raspberry Pi GPIO pull up/down clock register 0 (GPIO 0..31) (1 bit / GPIO) (R/W)
+117: #define RPI_GPIO_GPPUDCLK0              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000098)
+118: /// @brief Raspberry Pi GPIO pull up/down clock register 1 (GPIO 32..53) (1 bit / GPIO) (R/W)
+119: #define RPI_GPIO_GPPUDCLK1              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000009C)
+120: #else // RPI target 4 or 5
+121: #define RPI_GPIO_GPPINMUXSD             reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000D0)
+122: #define RPI_GPIO_GPPUPPDN0              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000E4)
+123: #define RPI_GPIO_GPPUPPDN1              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000E8)
+124: #define RPI_GPIO_GPPUPPDN2              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000EC)
+125: #define RPI_GPIO_GPPUPPDN3              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000F0)
+126: #endif
 127: 
-128: /// @brief Raspberry Pi Auxilary registers base address
-129: #define RPI_AUX_BASE                  RPI_BCM_IO_BASE + 0x00215000
-130: /// @brief Raspberry Pi Auxiliary IRQ register
-131: #define RPI_AUX_IRQ                   static_cast<uintptr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
-132: /// @brief Raspberry Pi Auxiliary Enable register
-133: #define RPI_AUX_ENABLES               static_cast<uintptr>(RPI_AUX_BASE + 0x00000004) // AUXENB
-134: 
-135: // Raspberry Pi auxilary mini UART registers (UART1)
-136: 
-137: /// @brief Raspberry Pi Mini UART (UART1) I/O register
-138: #define RPI_AUX_MU_IO                 static_cast<uintptr>(RPI_AUX_BASE + 0x00000040)
-139: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register
-140: #define RPI_AUX_MU_IER                static_cast<uintptr>(RPI_AUX_BASE + 0x00000044)
-141: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register
-142: #define RPI_AUX_MU_IIR                static_cast<uintptr>(RPI_AUX_BASE + 0x00000048)
-143: /// @brief Raspberry Pi Mini UART (UART1) Line Control register
-144: #define RPI_AUX_MU_LCR                static_cast<uintptr>(RPI_AUX_BASE + 0x0000004C)
-145: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register
-146: #define RPI_AUX_MU_MCR                static_cast<uintptr>(RPI_AUX_BASE + 0x00000050)
-147: /// @brief Raspberry Pi Mini UART (UART1) Line Status register
-148: #define RPI_AUX_MU_LSR                static_cast<uintptr>(RPI_AUX_BASE + 0x00000054)
-149: /// @brief Raspberry Pi Mini UART (UART1) Modem Status register
-150: #define RPI_AUX_MU_MSR                static_cast<uintptr>(RPI_AUX_BASE + 0x00000058)
-151: /// @brief Raspberry Pi Mini UART (UART1) Scratch register
-152: #define RPI_AUX_MU_SCRATCH            static_cast<uintptr>(RPI_AUX_BASE + 0x0000005C)
-153: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register
-154: #define RPI_AUX_MU_CNTL               static_cast<uintptr>(RPI_AUX_BASE + 0x00000060)
-155: /// @brief Raspberry Pi Mini UART (UART1) Extra Status register
-156: #define RPI_AUX_MU_STAT               static_cast<uintptr>(RPI_AUX_BASE + 0x00000064)
-157: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register
-158: #define RPI_AUX_MU_BAUD               static_cast<uintptr>(RPI_AUX_BASE + 0x00000068)
-159: 
-160: /// @brief Raspberry Pi Auxiliary Enable register values
-161: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2
-162: #define RPI_AUX_ENABLES_SPI2          BIT(2)
-163: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1
-164: #define RPI_AUX_ENABLES_SPI1          BIT(1)
-165: /// @brief Raspberry Pi Auxiliary Enable register Enable UART1
-166: #define RPI_AUX_ENABLES_UART1         BIT(0)
-167: 
-168: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
-169: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts
-170: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT(1)
-171: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts
-172: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT(0)
+128: //---------------------------------------------
+129: // Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
+130: //---------------------------------------------
+131: 
+132: /// @brief Raspberry Pi Auxilary registers base address
+133: #define RPI_AUX_BASE                  RPI_BCM_IO_BASE + 0x00215000
+134: /// @brief Raspberry Pi Auxiliary IRQ register
+135: #define RPI_AUX_IRQ                   reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
+136: /// @brief Raspberry Pi Auxiliary Enable register
+137: #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
+138: 
+139: //---------------------------------------------
+140: // Raspberry Pi auxilary mini UART registers (UART1)
+141: //---------------------------------------------
+142: 
+143: /// @brief Raspberry Pi Mini UART (UART1) I/O register
+144: #define RPI_AUX_MU_IO                 reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
+145: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register
+146: #define RPI_AUX_MU_IER                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
+147: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register
+148: #define RPI_AUX_MU_IIR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
+149: /// @brief Raspberry Pi Mini UART (UART1) Line Control register
+150: #define RPI_AUX_MU_LCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
+151: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register
+152: #define RPI_AUX_MU_MCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
+153: /// @brief Raspberry Pi Mini UART (UART1) Line Status register
+154: #define RPI_AUX_MU_LSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
+155: /// @brief Raspberry Pi Mini UART (UART1) Modem Status register
+156: #define RPI_AUX_MU_MSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
+157: /// @brief Raspberry Pi Mini UART (UART1) Scratch register
+158: #define RPI_AUX_MU_SCRATCH            reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
+159: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register
+160: #define RPI_AUX_MU_CNTL               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
+161: /// @brief Raspberry Pi Mini UART (UART1) Extra Status register
+162: #define RPI_AUX_MU_STAT               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
+163: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register
+164: #define RPI_AUX_MU_BAUD               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
+165: 
+166: /// @brief Raspberry Pi Auxiliary Enable register values
+167: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2
+168: #define RPI_AUX_ENABLES_SPI2          BIT(2)
+169: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1
+170: #define RPI_AUX_ENABLES_SPI1          BIT(1)
+171: /// @brief Raspberry Pi Auxiliary Enable register Enable UART1
+172: #define RPI_AUX_ENABLES_UART1         BIT(0)
 173: 
-174: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
-175: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R)
-176: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT(7)
-177: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R)
-178: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT(6)
-179: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W)
-180: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT(2)
-181: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W)
-182: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT(1)
-183: 
-184: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
-185: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters
-186: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
-187: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters
-188: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT(0) | BIT(1)
+174: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
+175: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts
+176: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT(1)
+177: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts
+178: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT(0)
+179: 
+180: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
+181: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R)
+182: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT(7)
+183: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R)
+184: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT(6)
+185: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W)
+186: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT(2)
+187: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W)
+188: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT(1)
 189: 
-190: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
-191: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low
-192: #define RPI_AUX_MU_MCR_RTS_LOW        BIT(1)
-193: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high
-194: #define RPI_AUX_MU_MCR_RTS_HIGH       0
+190: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
+191: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters
+192: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
+193: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters
+194: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT(0) | BIT(1)
 195: 
-196: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
-197: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle
-198: #define RPI_AUX_MU_LST_TX_IDLE        BIT(6)
-199: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty
-200: #define RPI_AUX_MU_LST_TX_EMPTY       BIT(5)
-201: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun
-202: #define RPI_AUX_MU_LST_RX_OVERRUN     BIT(1)
-203: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready
-204: #define RPI_AUX_MU_LST_RX_READY       BIT(0)
-205: 
-206: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
-207: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS
-208: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT(3)
-209: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS
-210: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT(2)
-211: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit
-212: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT(1)
-213: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive
-214: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT(0)
+196: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
+197: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low
+198: #define RPI_AUX_MU_MCR_RTS_LOW        BIT(1)
+199: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high
+200: #define RPI_AUX_MU_MCR_RTS_HIGH       0
+201: 
+202: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
+203: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle
+204: #define RPI_AUX_MU_LST_TX_IDLE        BIT(6)
+205: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty
+206: #define RPI_AUX_MU_LST_TX_EMPTY       BIT(5)
+207: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun
+208: #define RPI_AUX_MU_LST_RX_OVERRUN     BIT(1)
+209: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready
+210: #define RPI_AUX_MU_LST_RX_READY       BIT(0)
+211: 
+212: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
+213: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS
+214: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT(3)
+215: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS
+216: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT(2)
+217: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit
+218: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT(1)
+219: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive
+220: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT(0)
 ```
 
 As said, this header defines the address of the GPIO and UART1 registers, as well as values of fields within these registers.
@@ -1171,6 +1188,9 @@ The other methods are used to set up the GPIO pins correctly, as part of the Ini
 ### UART1.cpp
 
 Finally we need to implement the UART1 functions.
+
+<u>As we now have the first functional source file in the project, we can remove the previous `Dummy.cpp` file.</u>
+
 Add the file `code/libraries/baremetal/src/UART1.cpp`:
 
 ```cpp
@@ -1224,378 +1244,377 @@ File: code/libraries/baremetal/src/UART1.cpp
 47: 
 48: namespace baremetal {
 49: 
-50: static const int NumWaitCycles = 150;
-51: 
-52: static void WaitCycles(uint32 numCycles)
-53: {
-54:     if (numCycles)
-55:     {
-56:         while (numCycles--)
-57:         {
-58:             NOP();
-59:         }
-60:     }
-61: }
-62: 
-63: UART1::UART1()
-64:     : m_initialized{}
-65: {
-66: }
-67: 
-68: // Set baud rate and characteristics (115200 8N1) and map to GPIO
-69: void UART1::Initialize()
-70: {
-71:     if (m_initialized)
-72:         return;
-73: 
-74:     // initialize UART
-75:     auto value = *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES);
-76:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
-77: 
-78:     SetMode(14, GPIOMode::AlternateFunction5);
+50: #if BAREMETAL_TARGET == RPI3
+51: static const int NumWaitCycles = 150;
+52: 
+53: static void WaitCycles(uint32 numCycles)
+54: {
+55:     if (numCycles)
+56:     {
+57:         while (numCycles--)
+58:         {
+59:             NOP();
+60:         }
+61:     }
+62: }
+63: #endif // BAREMETAL_TARGET == RPI3
+64: 
+65: UART1::UART1()
+66:     : m_initialized{}
+67: {
+68: }
+69: 
+70: // Set baud rate and characteristics (115200 8N1) and map to GPIO
+71: void UART1::Initialize()
+72: {
+73:     if (m_initialized)
+74:         return;
+75: 
+76:     // initialize UART
+77:     auto value = *(RPI_AUX_ENABLES);
+78:     *(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
 79: 
-80:     SetMode(15, GPIOMode::AlternateFunction5);
+80:     SetMode(14, GPIOMode::AlternateFunction5);
 81: 
-82:     *reinterpret_cast<uint32 volatile*>(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
-83:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
-84:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
-85:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
-86:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
-87:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
-88:                                                                                             // Clear FIFO
-89:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
-90: 
-91:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
-92:                                                                                             // Enable Tx, Rx
-93:     m_initialized = true;
-94: }
-95: 
-96: // Write a character
-97: 
-98: void UART1::Write(char c)
-99: {
-100:     // wait until we can send
-101:     do
-102:     {
-103:         NOP();
-104:     } while (!(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY));
-105:     // Check Tx FIFO empty
-106:     // Write the character to the buffer
-107:     *reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
-108: }
-109: 
-110: // Receive a character
-111: 
-112: char UART1::Read()
-113: {
-114:     char r;
-115:     // wait until something is in the buffer
-116:     do
-117:     {
-118:         NOP();
-119:     } while (!(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY)); // Check Rx FIFO holds data
-120:     // Read it and return
-121:     r = static_cast<char>(*reinterpret_cast<uint32 volatile *>(RPI_AUX_MU_IO));
-122:     // Convert carriage return to newline
-123:     return r;
-124: }
-125: 
-126: void UART1::WriteString(const char *str)
-127: {
-128:     while (*str)
-129:     {
-130:         // convert newline to carriage return + newline
-131:         if (*str == '\n')
-132:             Write('\r');
-133:         Write(*str++);
-134:     }
-135: }
-136: 
-137: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
-138: {
-139:     if (pinNumber >= NUM_GPIO)
-140:         return false;
-141:     if (mode >= GPIOMode::Unknown)
+82:     SetMode(15, GPIOMode::AlternateFunction5);
+83: 
+84:     *(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
+85:     *(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
+86:     *(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
+87:     *(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
+88:     *(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
+89:     *(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
+90:     // Clear FIFO
+91: #if BAREMETAL_TARGET == RPI3
+92:     *(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
+93: #else
+94:     *(RPI_AUX_MU_BAUD) = 541;                            // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
+95: #endif
+96: 
+97:     *(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
+98:     // Enable Tx, Rx
+99:     m_initialized = true;
+100: }
+101: 
+102: // Write a character
+103: void UART1::Write(char c)
+104: {
+105:     // wait until we can send
+106:     // Check Tx FIFO empty
+107:     while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY))
+108:     {
+109:         NOP();
+110:     }
+111:     // Write the character to the buffer
+112:     *(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
+113: }
+114: 
+115: // Receive a character
+116: char UART1::Read()
+117: {
+118:     // wait until something is in the buffer
+119:     // Check Rx FIFO holds data
+120:     while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY));
+121:     {
+122:         NOP();
+123:     }
+124:     // Read it and return
+125:     return static_cast<char>(*(RPI_AUX_MU_IO));
+126: }
+127: 
+128: void UART1::WriteString(const char* str)
+129: {
+130:     while (*str)
+131:     {
+132:         // convert newline to carriage return + newline
+133:         if (*str == '\n')
+134:             Write('\r');
+135:         Write(*str++);
+136:     }
+137: }
+138: 
+139: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+140: {
+141:     if (pinNumber >= NUM_GPIO)
 142:         return false;
-143:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
-144:     {
-145:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-146:             return false;
-147: 
-148:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-149:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
-150:             return false;
-151:     }
-152:     else if (GPIOMode::Output == mode)
-153:     {
-154:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-155:             return false;
-156: 
-157:         if (!SetFunction(pinNumber, GPIOFunction::Output))
-158:             return false;
-159:     }
-160:     else
-161:     {
-162:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
-163:             return false;
-164:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+143:     if (mode >= GPIOMode::Unknown)
+144:         return false;
+145:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
+146:     {
+147:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+148:             return false;
+149: 
+150:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
+151:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
+152:             return false;
+153:     }
+154:     else if (GPIOMode::Output == mode)
+155:     {
+156:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+157:             return false;
+158: 
+159:         if (!SetFunction(pinNumber, GPIOFunction::Output))
+160:             return false;
+161:     }
+162:     else
+163:     {
+164:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
 165:             return false;
-166:     }
-167:     if (mode == GPIOMode::Output)
-168:         Off(pinNumber, mode);
-169:     return true;
-170: }
-171: 
-172: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
-173: {
-174:     if (pinNumber >= NUM_GPIO)
-175:         return false;
-176:     if (function >= GPIOFunction::Unknown)
+166:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+167:             return false;
+168:     }
+169:     if (mode == GPIOMode::Output)
+170:         Off(pinNumber, mode);
+171:     return true;
+172: }
+173: 
+174: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+175: {
+176:     if (pinNumber >= NUM_GPIO)
 177:         return false;
-178: 
-179:     uintptr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
-180:     uint32  shift          = (pinNumber % 10) * 3;
-181: 
-182:     static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
+178:     if (function >= GPIOFunction::Unknown)
+179:         return false;
+180: 
+181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+182:     uint32  shift = (pinNumber % 10) * 3;
 183: 
-184:     uint32 value = *reinterpret_cast<uint32 volatile *>(selectRegister);
-185:     value &= ~(7 << shift);
-186:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-187:     *reinterpret_cast<uint32 volatile *>(selectRegister) = value;
-188:     return true;
-189: }
-190: 
-191: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
-192: {
-193:     if (pullMode >= GPIOPullMode::Unknown)
-194:         return false;
-195: 
-196:     if (pinNumber >= NUM_GPIO)
-197:         return false;
-198: #if RPI_TARGET <= 3
-199:     uintptr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
-200:     uint32  shift       = pinNumber % 32;
-201: 
-202:     *reinterpret_cast<uint32 volatile *>(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
-203:     WaitCycles(NumWaitCycles);
-204:     *reinterpret_cast<uint32 volatile *>(clkRegister) = static_cast<uint32>(1 << shift);
+184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+185: 
+186:     uint32 value = *(selectRegister);
+187:     value &= ~(7 << shift);
+188:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+189:     *(selectRegister) = value;
+190:     return true;
+191: }
+192: 
+193: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+194: {
+195:     if (pullMode >= GPIOPullMode::Unknown)
+196:         return false;
+197: 
+198:     if (pinNumber >= NUM_GPIO)
+199:         return false;
+200: #if BAREMETAL_TARGET == RPI3
+201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+202:     uint32  shift = pinNumber % 32;
+203: 
+204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
 205:     WaitCycles(NumWaitCycles);
-206:     *reinterpret_cast<uint32 volatile *>(clkRegister) = 0;
-207: #else
-208:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16) * 4;
-209:     unsigned              shift   = (m_pinNumber % 16) * 2;
-210: 
-211:     static const unsigned ModeMap[3] = {0, 2, 1};
+206:     *(clkRegister) = static_cast<uint32>(1 << shift);
+207:     WaitCycles(NumWaitCycles);
+208:     *(clkRegister) = 0;
+209: #else
+210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+211:     unsigned              shift = (pinNumber % 16) * 2;
 212: 
-213:     uint32                value = m_memoryAccess.Read32(modeReg);
-214:     value &= ~(3 << shift);
-215:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-216:     m_memoryAccess.Write32(modeReg, value);
-217: #endif
-218: 
-219:     return true;
-220: }
-221: 
-222: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
-223: {
-224:     if (pinNumber >= NUM_GPIO)
-225:         return false;
-226: 
-227:     // Output level can be set in input mode for subsequent switch to output
-228:     if (mode >= GPIOMode::AlternateFunction0)
-229:         return false;
-230: 
-231:     unsigned regOffset = (pinNumber / 32) * 4;
-232:     uint32 regMask = 1 << (pinNumber % 32);
-233: 
-234:     bool value = false;
+213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
+214: 
+215:     uint32                value = *(modeReg);
+216:     value &= ~(3 << shift);
+217:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
+218:     *(modeReg) = value;
+219: #endif
+220: 
+221:     return true;
+222: }
+223: 
+224: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+225: {
+226:     if (pinNumber >= NUM_GPIO)
+227:         return false;
+228: 
+229:     // Output level can be set in input mode for subsequent switch to output
+230:     if (mode >= GPIOMode::AlternateFunction0)
+231:         return false;
+232: 
+233:     unsigned regOffset = (pinNumber / 32) * 4;
+234:     uint32 regMask = 1 << (pinNumber % 32);
 235: 
-236:     uintptr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+236:     bool value = false;
 237: 
-238:     *reinterpret_cast<uint32 volatile *>(setClrReg) = regMask;
+238:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
 239: 
-240:     return true;
-241: }
-242: 
-243: } // namespace baremetal
+240:     *(setClrReg) = regMask;
+241: 
+242:     return true;
+243: }
+244: 
+245: } // namespace baremetal
 ```
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
 - Line 48: We define the baremetal namespace again, everything else will be inside this namespace
-- Line 50: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
-- Line 52-61: We define a static function `WaitCycles`, that waits the specified number of NOP instructions
-- Line 63-66: We implement the UART1 constructor, which only initializes the `m_initialized` member variable
-- Line 68-94: We implement the `Initialize` method. This invokes the most part of the code
-  - Line 71-72: We check whether the class was already initialized (`m_initialized` is true), if so we simply return
-  - Line 75: We read the Enable Register, which contains enable bits for SPI1, SPI2 and UART1
-  - Line 76: We clear the enable bit for UART1 by writing to the Enable Register. This will disable UART1, as advised in the documentation
-  - Line 78: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
-  - Line 80: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
-  - Line 82: We set the enable bit for UART1 by writing to the Enable Register. This will enable UART1, and makes its registers available
-  - Line 83: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
-  - Line 84: We set UART1 to 8 bit mode by writing to the Line Control Register
-  - Line 85: We set the RTS signal high (see documentation, we don't use RTS in this case) by writing to the Modem Control Register
-  - Line 86: We disable UART1 interrupts by writing to the Interrupt Control Register
-  - Line 87: We enable and clear the receive and transmit FIFO buffers by writing to the Interrupt Identity Register
-  - Line 89: We set the baud rate (speed) to 115200, by writing 270 to the Baud Register.
+- Line 50-63: Note that these lines are only compiled for Raspberry Pi 3, we don't need them for Raspberry Pi 4 and higher
+- Line 51: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
+- Line 53-62: We define a static function `WaitCycles`, that waits the specified number of NOP instructions
+- Line 65-68: We implement the UART1 constructor, which only initializes the `m_initialized` member variable
+- Line 70-100: We implement the `Initialize` method. This invokes the most part of the code
+  - Line 73-74: We check whether the class was already initialized (`m_initialized` is true), if so we simply return
+  - Line 77: We read the Enable Register, which contains enable bits for SPI1, SPI2 and UART1
+  - Line 78: We clear the enable bit for UART1 by writing to the Enable Register. This will disable UART1, as advised in the documentation
+  - Line 80: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
+  - Line 82: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
+  - Line 84: We set the enable bit for UART1 by writing to the Enable Register. This will enable UART1, and makes its registers available
+  - Line 85: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
+  - Line 86: We set UART1 to 8 bit mode by writing to the Line Control Register
+  - Line 87: We set the RTS signal high (see documentation, we don't use RTS in this case) by writing to the Modem Control Register
+  - Line 88: We disable UART1 interrupts by writing to the Interrupt Control Register
+  - Line 89: We enable and clear the receive and transmit FIFO buffers by writing to the Interrupt Identity Register
+  - Line 91-95: We set the baud rate (speed) to 115200, by writing 270 (Raspberry Pi 3) or 541 (Raspberry Pi 4) to the Baud Rate Register.
 As shown in the comments, the documentation specifies how to set the value. The actual baud rate is 115313, but this is close enough to work well.
-  - Line 91: We enable Rx and Tx signals again by writing to the UART1 Control Register
-  - Line 93: We set `m_initialized` to true
-- Line 98-108: We implement the `Write` method, which writes a character to UART1
+  - Line 97: We enable Rx and Tx signals again by writing to the UART1 Control Register
+  - Line 99: We set `m_initialized` to true
+- Line 103-113: We implement the `Write` method, which writes a character to UART1
   - The function waits for the device to become available for writing by executing NOP instructions while the Line Status Register does not contain a 1 for the Tx empty bit (which signals there is room for a character)
   - It then writes the character to the IO register
-- Line 112-124: We implement the `Read` method, which reads a character from UART1
+- Line 116-126: We implement the `Read` method, which reads a character from UART1
   - The function waits for the device to become available for reading by executing NOP instructions while the Line Status Register does not contain a 1 for the Rx ready bit (which signals there is at least one character ready to be read)
   - It then reads a character to the IO register and returns the character
-- Line 126-135: We implement the `WriteString` method, which writes a string to UART1
+- Line 128-137: We implement the `WriteString` method, which writes a string to UART1
   - This simply iterates through the string and writes the character using the `Write()` method.
   - The only special case is that a line feed ('\n') in the string is written as a line feed plus carriage return character ('\r' followed by '\n')
-
-As we now have the first functional source file in the project, we can remove the previous `Dummy.cpp` file.
 
 #### SetMode
 
 The `SetMode()` method used in line 78 and 80 is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-137: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
-138: {
-139:     if (pinNumber >= NUM_GPIO)
-140:         return false;
-141:     if (mode >= GPIOMode::Unknown)
+139: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+140: {
+141:     if (pinNumber >= NUM_GPIO)
 142:         return false;
-143:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
-144:     {
-145:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-146:             return false;
-147: 
-148:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-149:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
-150:             return false;
-151:     }
-152:     else if (GPIOMode::Output == mode)
-153:     {
-154:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-155:             return false;
-156: 
-157:         if (!SetFunction(pinNumber, GPIOFunction::Output))
-158:             return false;
-159:     }
-160:     else
-161:     {
-162:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
-163:             return false;
-164:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+143:     if (mode >= GPIOMode::Unknown)
+144:         return false;
+145:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
+146:     {
+147:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+148:             return false;
+149: 
+150:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
+151:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
+152:             return false;
+153:     }
+154:     else if (GPIOMode::Output == mode)
+155:     {
+156:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+157:             return false;
+158: 
+159:         if (!SetFunction(pinNumber, GPIOFunction::Output))
+160:             return false;
+161:     }
+162:     else
+163:     {
+164:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
 165:             return false;
-166:     }
-167:     if (mode == GPIOMode::Output)
-168:         Off(pinNumber, mode);
-169:     return true;
-170: }
+166:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+167:             return false;
+168:     }
+169:     if (mode == GPIOMode::Output)
+170:         Off(pinNumber, mode);
+171:     return true;
+172: }
 ```
 
-- Line 139-142: Some sanity checks are performed. If these fail, false is returned
-- Line 143-151: If the GPIOMode passed signifies an Alternate Function, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set using `SetFunction()`
-- Line 152-159: If the GPIOMode is Output, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set to Output using `SetFunction()`
-- Line 160-166: If the GPIOMode is Input, InputPullDown or InputPullUp, the pull mode on the pin is set accordingly using `SetPullMode()`, and the function is set to Input using `SetFunction()`
-- Line 167-168: If the mode is output, the output is set to off (false, low) using `Off()`
+- Line 141-144: Some sanity checks are performed. If these fail, false is returned
+- Line 145-153: If the GPIOMode passed signifies an Alternate Function, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set using `SetFunction()`
+- Line 154-161: If the GPIOMode is Output, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set to Output using `SetFunction()`
+- Line 162-168: If the GPIOMode is Input, InputPullDown or InputPullUp, the pull mode on the pin is set accordingly using `SetPullMode()`, and the function is set to Input using `SetFunction()`
+- Line 169-170: If the mode is output, the output is set to off (false, low) using `Off()`
 
 #### SetPullMode
 
 The `SetPullMode()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-191: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
-192: {
-193:     if (pullMode >= GPIOPullMode::Unknown)
-194:         return false;
-195: 
-196:     if (pinNumber >= NUM_GPIO)
-197:         return false;
-198: #if RPI_TARGET <= 3
-199:     uintptr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
-200:     uint32  shift       = pinNumber % 32;
-201: 
-202:     *reinterpret_cast<uint32 volatile *>(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
-203:     WaitCycles(NumWaitCycles);
-204:     *reinterpret_cast<uint32 volatile *>(clkRegister) = static_cast<uint32>(1 << shift);
+193: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+194: {
+195:     if (pullMode >= GPIOPullMode::Unknown)
+196:         return false;
+197: 
+198:     if (pinNumber >= NUM_GPIO)
+199:         return false;
+200: #if BAREMETAL_TARGET == RPI3
+201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+202:     uint32  shift = pinNumber % 32;
+203: 
+204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
 205:     WaitCycles(NumWaitCycles);
-206:     *reinterpret_cast<uint32 volatile *>(clkRegister) = 0;
-207: #else
-208:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16) * 4;
-209:     unsigned              shift   = (m_pinNumber % 16) * 2;
-210: 
-211:     static const unsigned ModeMap[3] = {0, 2, 1};
+206:     *(clkRegister) = static_cast<uint32>(1 << shift);
+207:     WaitCycles(NumWaitCycles);
+208:     *(clkRegister) = 0;
+209: #else
+210:     uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+211:     unsigned              shift = (pinNumber % 16) * 2;
 212: 
-213:     uint32                value = m_memoryAccess.Read32(modeReg);
-214:     value &= ~(3 << shift);
-215:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-216:     m_memoryAccess.Write32(modeReg, value);
-217: #endif
-218: 
-219:     return true;
-220: }
-221: 
+213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
+214: 
+215:     uint32                value = *(modeReg);
+216:     value &= ~(3 << shift);
+217:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
+218:     *(modeReg) = value;
+219: #endif
+220: 
+221:     return true;
+222: }
 ```
 
-- Line 193-197: Some sanity checks are performed. If these fail, false is returned
-- Line 199-206: For Raspberry Pi 3 we set the pull mode
-  - Line 199: We calculate the register for the GPIO pull up/down clock.
+- Line 195-199: Some sanity checks are performed. If these fail, false is returned
+- Line 201-208: For Raspberry Pi 3 we set the pull mode
+  - Line 201: We calculate the register for the GPIO pull up/down clock.
 This register uses 1 bit for every GPIO pin, so a 32 bit register can deal with 32 GPIO pins.
 This means there are 2 registers:
     - `RPI_GPIO_GPPUDCLK0` for GPIO pins 0 to 31
     - `RPI_GPIO_GPPUDCLK1` for the rest of the GPIO pins
   - Line 200: We calculate the corresponding bit shift to select the correct bit in the GPIO pull up/down clock register.
 The GPIO pull up/down clock register uses one bit for every GPIO pin
-  - Line 202: We write the pull mode to the GPIO pull up/down register.
+  - Line 204: We write the pull mode to the GPIO pull up/down register.
 For the value we use the integer conversion of the `GPIOPullMode` enum.
-  - Line 203: We wait a bit (`NumWaitCycles` NOP operations)
-  - Line 204: We set the GPIO pull up/down clock bit high. This acts as a strobe to set the pull mode for the GPIO pin
-  - Line 205: We wait a bit again
-  - Line 206: We set the GPIO pull up/down clock bit low again
-- Line 208-216: For Raspberry Pi 4/5 we set the pull mode
-  - Line 208: We calculate the register for the GPIO pull up/down register.
+  - Line 205: We wait a bit (`NumWaitCycles` NOP operations)
+  - Line 206: We set the GPIO pull up/down clock bit high. This acts as a strobe to set the pull mode for the GPIO pin
+  - Line 207: We wait a bit again
+  - Line 208: We set the GPIO pull up/down clock bit low again
+- Line 210-218: For Raspberry Pi 4/5 we set the pull mode
+  - Line 210: We calculate the register for the GPIO pull up/down register.
 Raspberry Pi 4/5 use two bits for every pin, so a 32 bit register can deal with 16 GPIO pins.
 This means there are 4 registers:
     - `RPI_GPIO_GPPUPPDN0` for GPIO pins 0 to 15
     - `RPI_GPIO_GPPUPPDN1` for GPIO pins 16 to 31
     - `RPI_GPIO_GPPUPPDN2` for GPIO pins 32 to 47
     - `RPI_GPIO_GPPUPPDN3` for the rest of the GPIO pins
-  - Line 209: We calculate the corresponding bit shift to select the correct bits in the GPIO pull up/down register
-  - Line 213: We read the current value of the GPIO pull up/down register
-  - Line 214: We mask the bits for the selected GPIO pin
-  - Line 215: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
+  - Line 211: We calculate the corresponding bit shift to select the correct bits in the GPIO pull up/down register
+  - Line 215: We read the current value of the GPIO pull up/down register
+  - Line 216: We mask the bits for the selected GPIO pin
+  - Line 217: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
 For input of the map we use the integer conversion of the `GPIOPullMode` enum.
-  - Line 216: We write the value to the GPIO pull up/down register
+  - Line 218: We write the value to the GPIO pull up/down register
 
 #### SetFunction
 
 The `SetFunction()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-172: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
-173: {
-174:     if (pinNumber >= NUM_GPIO)
-175:         return false;
-176:     if (function >= GPIOFunction::Unknown)
+174: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+175: {
+176:     if (pinNumber >= NUM_GPIO)
 177:         return false;
-178: 
-179:     uintptr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
-180:     uint32  shift          = (pinNumber % 10) * 3;
-181: 
-182:     static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
+178:     if (function >= GPIOFunction::Unknown)
+179:         return false;
+180: 
+181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+182:     uint32  shift = (pinNumber % 10) * 3;
 183: 
-184:     uint32 value = *reinterpret_cast<uint32 volatile *>(selectRegister);
-185:     value &= ~(7 << shift);
-186:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-187:     *reinterpret_cast<uint32 volatile *>(selectRegister) = value;
-188:     return true;
-189: }
-190: 
+184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+185: 
+186:     uint32 value = *(selectRegister);
+187:     value &= ~(7 << shift);
+188:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+189:     *(selectRegister) = value;
+190:     return true;
+191: }
 ```
 
-- Line 174-177: Some sanity checks are performed. If these fail, false is returned
-- Line 179: We calculate the register for the GPIO function select register.
+- Line 176-179: Some sanity checks are performed. If these fail, false is returned
+- Line 181: We calculate the register for the GPIO function select register.
 This register uses 3 bits for every GPIO pin, so a 32 bit register can deal with 10 GPIO pins (the upper 2 bits are not used).
 This means there are 6 registers:
   - `RPI_GPIO_GPFSEL0` for GPIO pins 0 to 9
@@ -1604,51 +1623,51 @@ This means there are 6 registers:
   - `RPI_GPIO_GPFSEL3` for GPIO pins 30 to 39
   - `RPI_GPIO_GPFSEL4` for GPIO pins 40 to 49
   - `RPI_GPIO_GPFSEL5` for the rest of the GPIO pins
-- Line 180: We calculate the corresponding bit shift to select the correct bits in the GPIO function select register
-- Line 184: We read the current value of the GPIO function select register
-- Line 185: We mask the bits for the selected GPIO pin
-- Line 186: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
+- Line 182: We calculate the corresponding bit shift to select the correct bits in the GPIO function select register
+- Line 186: We read the current value of the GPIO function select register
+- Line 187: We mask the bits for the selected GPIO pin
+- Line 188: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
 For input of the map we use the integer conversion of the `GPIOFunction` enum.
-- Line 187: We write the value to the GPIO function select register
+- Line 189: We write the value to the GPIO function select register
 
 #### Off
 
 The `Off()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-222: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
-223: {
-224:     if (pinNumber >= NUM_GPIO)
-225:         return false;
-226: 
-227:     // Output level can be set in input mode for subsequent switch to output
-228:     if (mode >= GPIOMode::AlternateFunction0)
-229:         return false;
-230: 
-231:     unsigned regOffset = (pinNumber / 32) * 4;
-232:     uint32 regMask = 1 << (pinNumber % 32);
-233: 
-234:     bool value = false;
+224: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+225: {
+226:     if (pinNumber >= NUM_GPIO)
+227:         return false;
+228: 
+229:     // Output level can be set in input mode for subsequent switch to output
+230:     if (mode >= GPIOMode::AlternateFunction0)
+231:         return false;
+232: 
+233:     unsigned regOffset = (pinNumber / 32) * 4;
+234:     uint32 regMask = 1 << (pinNumber % 32);
 235: 
-236:     uintptr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+236:     bool value = false;
 237: 
-238:     *reinterpret_cast<uint32 volatile *>(setClrReg) = regMask;
+238:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
 239: 
-240:     return true;
-241: }
+240:     *(setClrReg) = regMask;
+241: 
+242:     return true;
+243: }
 ```
 
-- Line 224-229: Some sanity checks are performed. If these fail, false is returned
-- Line 231: We calculate the index for the GPIO set or clear register.
+- Line 226-231: Some sanity checks are performed. If these fail, false is returned
+- Line 233: We calculate the index for the GPIO set or clear register.
 A GPIO pin can be set by writing a 1 to the correct GPIO pin set register at the correct bit offset, and can be reset by writing a 1 to the correct GPIO pin clear register at the correct bit offset.
 This register uses 1 bit for every GPIO pin, so a 32 bit register can deal with 32 GPIO pins.
 This means there are 2 registers:
   - `RPI_GPIO_GPSET0` or `RPI_GPIO_GPCLR0` for GPIO pins 0 to 31
   - `RPI_GPIO_GPSET1` or `RPI_GPIO_GPCLR1` for the rest of the GPIO pins
-- Line 232: We calculate the corresponding bit shift to select the correct bit in the GPIO set of clear register
-- Line 234: We set the value. This is a bit superfluous, but we will be reusing this code later
-- Line 236: We decide depending on the value whether to use the GPIO set register or GPIO clear register
-- Line 238: We set the corresponding bit in the correct register
+- Line 234: We calculate the corresponding bit shift to select the correct bit in the GPIO set of clear register
+- Line 236: We set the value. This is a bit superfluous, but we will be reusing this code later
+- Line 238: We decide depending on the value whether to use the GPIO set register or GPIO clear register
+- Line 240: We set the corresponding bit in the correct register
 
 ### Update Linker Definition file
 
@@ -1854,7 +1873,7 @@ File: code/libraries/baremetal/src/Startup.S
 73:     // UCI,EE,EOE,WXN,nTWE,nTWI,UCT,DZE,I,UMA,SED,ITD,
 74:     // CP15BEN,SA0,SA,C,A,M to 0
 75:     mov	\xreg1, #0x0800
-76:     movk \xreg1, #0x30d0, lsl #16
+76:     movk	\xreg1, #0x30d0, lsl #16
 77:     msr	sctlr_el1, \xreg1
 78: 
 79:     // Return to the EL1_SP1 mode from EL2
@@ -1883,7 +1902,7 @@ File: code/libraries/baremetal/src/Startup.S
 102:     ldr x0, =MEM_KERNEL_STACK           // main thread runs in EL1t and uses sp_el0
 103:     mov sp, x0                          // init its stack
 104: 
-105:     b sysinit                           // Jump to main()
+105:     b main                              // Jump to main()
 106: 
 107: // End
 ```
@@ -1910,7 +1929,7 @@ This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). The varia
 The macro armv8_switch_to_el1_m sets up a number of registers for our code to run smoothly. This contains quite to intricate details, so bare with me.
 
 ```asm
-File: d:\Projects\baremetal.test\code\libraries\baremetal\src\Startup.S
+File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Startup.S
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
 45: 
 46:     // Initialize Generic Timers
@@ -2139,7 +2158,7 @@ We add the defintion of the memory layout for the system. As we are building a b
 Add the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 
 ```cpp
-File: d:\Projects\baremetal.test\code\libraries\baremetal\include\baremetal\MemoryMap.h
+File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\MemoryMap.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //
@@ -2314,8 +2333,8 @@ File: code/libraries/baremetal/CMakeLists.txt
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 3: 
 4: project(baremetal
-5: 	DESCRIPTION "Bare metal library"
-6: 	LANGUAGES CXX ASM)
+5:     DESCRIPTION "Bare metal library"
+6:     LANGUAGES CXX ASM)
 7: 
 8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
 9: 
@@ -2443,31 +2462,9 @@ In the main() function, we first create an instance of the UART, then initialize
 As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
 
 ```cmake
-File: d:\Projects\baremetal.test\code\applications\demo\CMakeLists.txt
-1: project(demo
-2:     DESCRIPTION "Demo application"
-3:     LANGUAGES CXX ASM)
-4: 
-5: message(STATUS "\n**********************************************************************************\n")
-6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-7: 
-8: message("\n** Setting up ${PROJECT_NAME} **\n")
-9: 
-10: include(functions)
-11: 
-12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
-13: 
-14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
-15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
-16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
-17: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
-18: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-19: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
-20: set(PROJECT_INCLUDE_DIRS_PRIVATE )
-21: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-22: 
-23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-24: 
+File: d:\Projects\baremetal.github\code\applications\demo\CMakeLists.txt
+...
+
 25: set(PROJECT_DEPENDENCIES
 26:     baremetal
 27:     )
@@ -2483,76 +2480,8 @@ File: d:\Projects\baremetal.test\code\applications\demo\CMakeLists.txt
 37: 
 38: set(PROJECT_INCLUDES_PUBLIC )
 39: set(PROJECT_INCLUDES_PRIVATE )
-40: 
-41: if (CMAKE_VERBOSE_MAKEFILE)
-42:     display_list("Package                           : " ${PROJECT_NAME} )
-43:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
-44:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
-45:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
-46:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
-47:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
-48:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
-49:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
-50:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
-51:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
-52:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
-53:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
-54:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
-55:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
-56:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
-57:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
-58:     display_list("Link libs                         : " ${PROJECT_LIBS} )
-59:     display_list("Source files                      : " ${PROJECT_SOURCES} )
-60:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
-61:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
-62: endif()
-63: 
-64: if (PLATFORM_BAREMETAL)
-65:     set(START_GROUP -Wl,--start-group)
-66:     set(END_GROUP -Wl,--end-group)
-67: endif()
-68: 
-69: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-70: 
-71: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
-72: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-73: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-74: target_compile_definitions(${PROJECT_NAME} PRIVATE 
-75:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
-76:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
-77:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
-78:     )
-79: target_compile_definitions(${PROJECT_NAME} PUBLIC 
-80:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
-81:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
-82:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
-83:     )
-84: target_compile_options(${PROJECT_NAME} PRIVATE 
-85:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
-86:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
-87:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
-88:     )
-89: target_compile_options(${PROJECT_NAME} PUBLIC 
-90:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
-91:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
-92:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
-93:     )
-94: 
-95: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-96: 
-97: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-98: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-99:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-100: endif()
-101: 
-102: link_directories(${LINK_DIRECTORIES})
-103: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-104: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-105: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
-106: 
-107: show_target_properties(${PROJECT_NAME})
-108: 
-109: add_subdirectory(create-image)
+
+...
 ```
 
 ### Configure and build - Step 2
@@ -2563,9 +2492,10 @@ The output for the configure step should be similar to:
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_RPI_TARGET=3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
-1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\tutorial\05-console-uart1\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\tutorial\05-console-uart1\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github\tutorial\05-console-uart1" 2>&1"
+1> Working directory: D:\Projects\baremetal.github\tutorial\05-console-uart1\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
+1> [CMake] -- Building for Raspberry Pi 3
 1> [CMake] -- 
 1> [CMake] ** Setting up project **
 1> [CMake] --
@@ -2585,14 +2515,6 @@ The output for the configure step should be similar to:
 1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
 1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
 1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] -- 
-1> [CMake] ** Setting up project **
-1> [CMake] --
-1> [CMake] -- 
-1> [CMake] ##################################################################################
-1> [CMake] -- 
-1> [CMake] ** Setting up toolchain **
-1> [CMake] --
 1> [CMake] -- C++ compiler version:    13.2.1
 1> [CMake] -- C compiler version:      13.2.1
 1> [CMake] -- C++ supported standard:  17
@@ -2600,17 +2522,17 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code/applications
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo **
 1> [CMake] 
@@ -2619,8 +2541,8 @@ The output for the configure step should be similar to:
 1> [CMake] -- Defines C - public                : 
 1> [CMake] -- Defines C - private               : 
 1> [CMake] -- Defines C++ - public              : 
-1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
-1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3
 1> [CMake] -- Compiler options C - public       : 
 1> [CMake] -- Compiler options C - private      : 
 1> [CMake] -- Compiler options C++ - public     : 
@@ -2628,21 +2550,21 @@ The output for the configure step should be similar to:
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             : 
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/applications/demo/src/main.cpp
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/applications/demo/src/main.cpp
 1> [CMake] -- Include files - public            : 
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
 1> [CMake] -- Properties for demo
 1> [CMake] -- Target type                       :  EXECUTABLE
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
@@ -2651,10 +2573,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/tutorial/05-console-uart1/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
-1> [CMake] -- Target binary location            :  D:/Projects/baremetal.github/output/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target binary location            :  D:/Projects/baremetal.github/tutorial/05-console-uart1/output/Debug/bin
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
@@ -2662,70 +2584,70 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code/applications/demo/create-image
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal.github/tutorial/05-console-uart1/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/tutorial/05-console-uart1/output/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries/baremetal
+1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
 1> [CMake] -- Defines C - public                : 
 1> [CMake] -- Defines C - private               : 
 1> [CMake] -- Defines C++ - public              : 
-1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
-1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3
 1> [CMake] -- Compiler options C - public       : 
 1> [CMake] -- Compiler options C - private      : 
 1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      : 
 1> [CMake] -- Link libs                         : 
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/libraries/baremetal/src/Startup.S D:/Projects/baremetal.github/code/libraries/baremetal/src/UART1.cpp
-1> [CMake] -- Include files - public            :  D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/ARMInstructions.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/BCMRegisters.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/Macros.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/MemoryMap.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/SysConfig.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/Types.h D:/Projects/baremetal.github/code/libraries/baremetal/include/baremetal/UART1.h
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/src/Startup.S D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/src/UART1.cpp
+1> [CMake] -- Include files - public            :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/ARMInstructions.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/BCMRegisters.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/Macros.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/MemoryMap.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/SysConfig.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/Types.h D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include/baremetal/UART1.h
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include
+1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
-1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.github/code/libraries/baremetal/include
+1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal.github/tutorial/05-console-uart1/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
 1> [CMake] -- Target imported dependencies      : 
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/tutorial/05-console-uart1/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/05-console-uart1/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-Baremetal-Debug
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/tutorial/05-console-uart1/cmake-BareMetal-Debug
 1> Extracted CMake variables.
 1> Extracted source files and headers.
 1> Extracted code model.
@@ -2744,8 +2666,8 @@ We can then build:
   [2/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
   [3/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\UART1.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -c ../code/libraries/baremetal/src/UART1.cpp
   [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
-  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
-  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal.test\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.test/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.test/deploy/Debug/demo-image/kernel8.img"
+  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
+  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal.github\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
 
 Rebuild All succeeded.
 ```
@@ -2774,6 +2696,6 @@ qemu: QEMU: Terminated via GDBstub
 
 You will also notice that when you end the application, it is restarted again. This has to do with how QEMU runs our system. We will get to restarting and halting the system later.
 
-Unless something worthwhile can be mentioned, we will not describe building and running / debugging any longer.
+Unless something worthwhile can be mentioned, we will not describe building and running / debugging in detail any longer.
 
 Next: [06-improving-startup-static-initialization](06-improving-startup-static-initialization.md)

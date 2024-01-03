@@ -93,7 +93,6 @@ _start:                                 // normally entered from armstub8 in EL2
     cmp x0, #4
     beq EL1
 
-
     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
     msr sp_el1, x0                      // init their stack
 

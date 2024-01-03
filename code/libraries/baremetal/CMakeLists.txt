@@ -28,6 +28,8 @@ set(PROJECT_LIBS
 
 set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
@@ -37,8 +39,11 @@ set(PROJECT_SOURCES
 set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h

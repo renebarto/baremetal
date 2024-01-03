@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : System.h
+// File        : MemoryAccess.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : MemoryAccess
 //
-// Description : Generic character read / write device interface
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -37,50 +37,66 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/MemoryAccess.h>
 
-#include <baremetal/Types.h>
+using namespace baremetal;
 
-namespace baremetal {
-
-class IMemoryAccess;
-
-class System
+uint8 MemoryAccess::Read8(regaddr address)
 {
-    friend System& GetSystem();
-
-private:
-    IMemoryAccess  &m_memoryAccess;
-
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
-    System();
-
-public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
-    System(IMemoryAccess &memoryAccess);
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System& GetSystem();
-
-} // namespace baremetal
-
-enum class ReturnCode
-{
-    ExitHalt,
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    int               main();
-    [[noreturn]] void sysinit();
-
-#ifdef __cplusplus
+    return *reinterpret_cast<uint8 volatile*>(address);
 }
-#endif
+
+void MemoryAccess::Write8(regaddr address, uint8 data)
+{
+    *reinterpret_cast<uint8 volatile*>(address) = data;
+}
+
+void MemoryAccess::ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)
+{
+    auto value = Read8(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write8(address, value);
+}
+
+uint16 MemoryAccess::Read16(regaddr address)
+{
+    return *reinterpret_cast<uint16 volatile*>(address);
+}
+
+void MemoryAccess::Write16(regaddr address, uint16 data)
+{
+    *reinterpret_cast<uint16 volatile*>(address) = data;
+}
+
+void MemoryAccess::ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift)
+{
+    auto value = Read16(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write16(address, value);
+}
+
+uint32 MemoryAccess::Read32(regaddr address)
+{
+    return *address;
+}
+
+void MemoryAccess::Write32(regaddr address, uint32 data)
+{
+    *address = data;
+}
+
+void MemoryAccess::ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift)
+{
+    auto value = Read32(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write32(address, value);
+}
+
+MemoryAccess &baremetal::GetMemoryAccess()
+{
+    static MemoryAccess value;
+    return value;
+}

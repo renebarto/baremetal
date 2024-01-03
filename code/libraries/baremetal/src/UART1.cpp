@@ -41,13 +41,14 @@
 
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
+#include <baremetal/MemoryAccess.h>
 
 /// @brief Total count of GPIO pins, numbered from 0 through 53
 #define NUM_GPIO 54
 
 namespace baremetal {
 
-#if BAREMETAL_TARGET == RPI3
+#if BAREMETAL_RPI_TARGET == 3
 static const int NumWaitCycles = 150;
 
 static void WaitCycles(uint32 numCycles)
@@ -60,10 +61,17 @@ static void WaitCycles(uint32 numCycles)
         }
     }
 }
-#endif // BAREMETAL_TARGET == RPI3
+#endif // BAREMETAL_RPI_TARGET == 3
 
 UART1::UART1()
     : m_initialized{}
+    , m_memoryAccess{GetMemoryAccess()}
+{
+}
+
+UART1::UART1(IMemoryAccess &memoryAccess)
+    : m_initialized{}
+    , m_memoryAccess{memoryAccess}
 {
 }
 
@@ -74,28 +82,28 @@ void UART1::Initialize()
         return;
 
     // initialize UART
-    auto value = *(RPI_AUX_ENABLES);
-    *(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
+    auto value = m_memoryAccess.Read32(RPI_AUX_ENABLES);
+    m_memoryAccess.Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);    // Disable UART1, AUX mini uart
 
     SetMode(14, GPIOMode::AlternateFunction5);
 
     SetMode(15, GPIOMode::AlternateFunction5);
 
-    *(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
-    *(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
-    *(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
-    *(RPI_AUX_MU_MCR) = RPI_AUX_MU_MCR_RTS_HIGH;         // RTS high
-    *(RPI_AUX_MU_IER) = 0;                               // Disable interrupts
-    *(RPI_AUX_MU_IIR) = RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR;
-    // Clear FIFO
-#if BAREMETAL_TARGET == RPI3
-    *(RPI_AUX_MU_BAUD) = 270;                            // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
+    m_memoryAccess.Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);     // enable UART1, AUX mini uart
+    m_memoryAccess.Write32(RPI_AUX_MU_CNTL, 0);                                 // Disable Tx, Rx
+    m_memoryAccess.Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);         // 8 bit mode
+    m_memoryAccess.Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);            // RTS high
+    m_memoryAccess.Write32(RPI_AUX_MU_IER, 0);                                  // Disable interrupts
+    m_memoryAccess.Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR);
+                                                                                // Clear FIFO
+#if BAREMETAL_RPI_TARGET == 3
+    m_memoryAccess.Write32(RPI_AUX_MU_BAUD, 270);                               // 250 MHz / (8 * (baud + 1)) = 250000000 / (8 * 271) =  115313 -> 115200 baud
 #else
-    *(RPI_AUX_MU_BAUD) = 541;                            // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
+    m_memoryAccess.Write32(RPI_AUX_MU_BAUD, 541);                               // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
 #endif
 
-    *(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
-    // Enable Tx, Rx
+    m_memoryAccess.Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
+                                                                                // Enable Tx, Rx
     m_initialized = true;
 }
 
@@ -104,12 +112,12 @@ void UART1::Write(char c)
 {
     // wait until we can send
     // Check Tx FIFO empty
-    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY))
+    while (!(m_memoryAccess.Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_TX_EMPTY))
     {
         NOP();
     }
     // Write the character to the buffer
-    *(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
+    m_memoryAccess.Write32(RPI_AUX_MU_IO, static_cast<unsigned int>(c));
 }
 
 // Receive a character
@@ -117,12 +125,12 @@ char UART1::Read()
 {
     // wait until something is in the buffer
     // Check Rx FIFO holds data
-    while (!(*(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY))
+    while (!(m_memoryAccess.Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LST_RX_READY))
     {
         NOP();
     }
     // Read it and return
-    return static_cast<char>(*(RPI_AUX_MU_IO));
+    return static_cast<char>(m_memoryAccess.Read32(RPI_AUX_MU_IO));
 }
 
 void UART1::WriteString(const char* str)
@@ -178,15 +186,15 @@ bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
     if (function >= GPIOFunction::Unknown)
         return false;
 
-    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
     uint32  shift = (pinNumber % 10) * 3;
 
     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
 
-    uint32 value = *(selectRegister);
+    uint32 value = m_memoryAccess.Read32(selectRegister);
     value &= ~(7 << shift);
     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-    *(selectRegister) = value;
+    m_memoryAccess.Write32(selectRegister, value);
     return true;
 }
 
@@ -197,17 +205,17 @@ bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
 
     if (pinNumber >= NUM_GPIO)
         return false;
-#if BAREMETAL_TARGET == RPI3
-    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+#if BAREMETAL_RPI_TARGET == 3
+    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
     uint32  shift = pinNumber % 32;
 
-    *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
+    m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
     WaitCycles(NumWaitCycles);
-    *(clkRegister) = static_cast<uint32>(1 << shift);
+    m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
     WaitCycles(NumWaitCycles);
-    *(clkRegister) = 0;
+    m_memoryAccess.Write32(clkRegister, 0);
 #else
-    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+    uintptr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
     unsigned              shift = (pinNumber % 16) * 2;
 
     static const unsigned ModeMap[3] = { 0, 2, 1 };
@@ -230,14 +238,14 @@ bool UART1::Off(uint8 pinNumber, GPIOMode mode)
     if (mode >= GPIOMode::AlternateFunction0)
         return false;
 
-    unsigned regOffset = (pinNumber / 32) * 4;
+    unsigned regOffset = (pinNumber / 32);
     uint32 regMask = 1 << (pinNumber % 32);
 
     bool value = false;
 
-    regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+    regaddr regAddress = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
 
-    *(setClrReg) = regMask;
+    m_memoryAccess.Write32(regAddress, regMask);
 
     return true;
 }

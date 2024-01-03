@@ -41,11 +41,30 @@
 
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
+#include <baremetal/MemoryAccess.h>
 #include <baremetal/SysConfig.h>
 #include <baremetal/UART1.h>
 #include <baremetal/Util.h>
 
 using namespace baremetal;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+void *__dso_handle WEAK;
+
+void __cxa_atexit(void* pThis, void (*func)(void* pThis), void* pHandle) WEAK;
+
+void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHandle*/)
+{
+    /// \todo Complete
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 System& baremetal::GetSystem()
 {
@@ -54,6 +73,12 @@ System& baremetal::GetSystem()
 }
 
 System::System()
+    : m_memoryAccess{GetMemoryAccess()}
+{
+}
+
+System::System(IMemoryAccess &memoryAccess)
+    : m_memoryAccess{memoryAccess}
 {
 }
 
@@ -62,12 +87,12 @@ void System::Halt()
     GetUART1().WriteString("Halt\n");
 
     // power off the SoC (GPU + CPU)
-    auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
     r |= 0x555; // partition 63 used to indicate halt
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r);
+    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -84,11 +109,11 @@ void System::Reboot()
     DisableFIQs();
 
     // power off the SoC (GPU + CPU)
-    auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : System.h
+// File        : MemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : MemoryAccess
 //
-// Description : Generic character read / write device interface
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,48 +39,24 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
+#include <baremetal/IMemoryAccess.h>
 
 namespace baremetal {
 
-class IMemoryAccess;
-
-class System
+class MemoryAccess : public IMemoryAccess
 {
-    friend System& GetSystem();
-
-private:
-    IMemoryAccess  &m_memoryAccess;
-
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
-    System();
-
 public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
-    System(IMemoryAccess &memoryAccess);
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    uint8  Read8(regaddr address) override;
+    void   Write8(regaddr address, uint8 data) override;
+    void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void   Write16(regaddr address, uint16 data) override;
+    void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void   Write32(regaddr address, uint32 data) override;
+    void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 };
 
-System& GetSystem();
+MemoryAccess &GetMemoryAccess();
 
 } // namespace baremetal
-
-enum class ReturnCode
-{
-    ExitHalt,
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    int               main();
-    [[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif

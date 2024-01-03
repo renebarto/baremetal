@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : System.h
+// File        : IMemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : IMemoryAccess
 //
-// Description : Generic character read / write device interface
+// Description : Memory read/write abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -43,44 +43,20 @@
 
 namespace baremetal {
 
-class IMemoryAccess;
-
-class System
+class IMemoryAccess
 {
-    friend System& GetSystem();
-
-private:
-    IMemoryAccess  &m_memoryAccess;
-
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
-    System();
-
 public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
-    System(IMemoryAccess &memoryAccess);
+    virtual ~IMemoryAccess() = default;
 
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    virtual uint8  Read8(regaddr address)                                                    = 0;
+    virtual void   Write8(regaddr address, uint8 data)                                       = 0;
+    virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)    = 0;
+    virtual uint16 Read16(regaddr address)                                                   = 0;
+    virtual void   Write16(regaddr address, uint16 data)                                     = 0;
+    virtual void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) = 0;
+    virtual uint32 Read32(regaddr address)                                                   = 0;
+    virtual void   Write32(regaddr address, uint32 data)                                     = 0;
+    virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
 };
-
-System& GetSystem();
 
 } // namespace baremetal
-
-enum class ReturnCode
-{
-    ExitHalt,
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    int               main();
-    [[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif

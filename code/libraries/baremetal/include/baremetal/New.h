@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : System.h
+// File        : New.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -41,46 +41,5 @@
 
 #include <baremetal/Types.h>
 
-namespace baremetal {
-
-class IMemoryAccess;
-
-class System
-{
-    friend System& GetSystem();
-
-private:
-    IMemoryAccess  &m_memoryAccess;
-
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
-    System();
-
-public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
-    System(IMemoryAccess &memoryAccess);
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System& GetSystem();
-
-} // namespace baremetal
-
-enum class ReturnCode
-{
-    ExitHalt,
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    int               main();
-    [[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif
+void operator delete(void* block) noexcept;
+void operator delete(void* block, size_t size) noexcept;

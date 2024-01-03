@@ -327,7 +327,7 @@ File: code/applications/demo/src/main.cpp
 The startup assembly code will for now be equal to that of the `02-setting-up-a-project` tutorial.
 
 ```asm
-File: d:\Projects\baremetal.github\code\applications\demo\src\start.S
+File: code/applications/demo/src/start.S
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //

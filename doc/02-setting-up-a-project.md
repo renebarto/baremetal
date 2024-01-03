@@ -1283,18 +1283,18 @@ Loading section .text, size 0x58 lma 0x80000
 Start address 0x0000000000080000, load size 128
 Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
+Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/main.cpp:3
 3	    return 0;
 ```
 
 So we ended up in line 3 of the main() function:
 
 ```cpp
-File: tutorial/02-setting-up-a-project/main.cpp
+File: main.cpp
 1: int main()
 2: {
 3:     return 0;
@@ -1305,7 +1305,7 @@ Next, we step one further, ending up in start.S, and then close down debugging a
 
 ```gdb
 (gdb) n
-empty_bss () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S:84
+empty_bss () at /home/rene/repo/baremetal.github/start.S:84
 84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y

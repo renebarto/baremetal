@@ -739,8 +739,8 @@ The output for the configure step should be similar to:
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\tutorial\04-setting-up-common-options\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\tutorial\04-setting-up-common-options\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github\tutorial\04-setting-up-common-options" 2>&1"
-1> Working directory: D:\Projects\baremetal.github\tutorial\04-setting-up-common-options\cmake-BareMetal-Debug
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
+1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
 1> [CMake] -- 
@@ -769,17 +769,17 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/applications
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo **
 1> [CMake] 
@@ -797,10 +797,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             : 
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      : 
 1> [CMake] -- Link libs                         : 
-1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo/src/main.cpp D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo/src/start.S
+1> [CMake] -- Source files                      :  D:/Projects/baremetal.github/code/applications/demo/src/main.cpp D:/Projects/baremetal.github/code/applications/demo/src/start.S
 1> [CMake] -- Include files - public            : 
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
@@ -811,7 +811,7 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
@@ -820,10 +820,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/output/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal.github/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
-1> [CMake] -- Target binary location            :  D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/output/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target binary location            :  D:/Projects/baremetal.github/output/Debug/bin
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
@@ -831,21 +831,21 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo/create-image
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/output/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/cmake-BareMetal-Debug
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
 1> Extracted CMake variables.
 1> Extracted source files and headers.
 1> Extracted code model.
@@ -864,8 +864,8 @@ We can then build for Raspberry Pi 3:
   Cleaning... 2 files.
   [1/4] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DBAREMETAL_TARGET=RPI3  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
   [2/4] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DBAREMETAL_TARGET=RPI3 -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.test/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal.test\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.test/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.test/deploy/Debug/demo-image/kernel8.img"
+  [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal.test\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
 
 Rebuild All succeeded.
 ```
@@ -878,8 +878,8 @@ Or Raspberry Pi 4:
   Cleaning... 4 files.
   [1/4] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_TARGET=RPI4 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
   [2/4] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_TARGET=RPI4 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal.github\tutorial\04-setting-up-common-options\cmake-BareMetal-RPI4-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/tutorial/04-setting-up-common-options/deploy/Debug/demo-image/kernel8-rpi4.img"
+  [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal.github\cmake-BareMetal-RPI4-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal.github/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8-rpi4.img"
 
 Rebuild All succeeded.
 ```
@@ -1220,7 +1220,7 @@ cmd.exe /C
    -g
    -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
    -Wl,--section-start=.init=0x80000
-   -T D:/Projects/baremetal.test/baremetal.ld
+   -T D:/Projects/baremetal.github/baremetal.ld
    -nostdlib -nostartfiles
    code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
    code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
@@ -1240,7 +1240,7 @@ Options used when linking are:
    -g
    -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
    -Wl,--section-start=.init=0x80000
-   -T D:/Projects/baremetal.test/baremetal.ld
+   -T D:/Projects/baremetal.github/baremetal.ld
    -nostdlib -nostartfiles
    code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
    code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
@@ -1290,7 +1290,7 @@ File: CMakeLists.txt
 
 ```cmake
 File: CMakeLists.txt
-File: d:\Projects\baremetal.github\tutorial\04-setting-up-common-options\CMakeLists.txt
+File: d:\Projects\baremetal.github\CMakeLists.txt
 177: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
 178: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
 179: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})
@@ -1403,8 +1403,8 @@ By putting them in a group, the linker will iterate as many times as needed to r
 cmd.exe /C
   "cd /D D:\Projects\baremetal.test\cmake-BareMetal-Debug\code\applications\demo\create-image &&
   D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe
-    D:/Projects/baremetal.test/output/Debug/bin/demo.elf
-    -O binary D:/Projects/baremetal.test/deploy/Debug/demo-image/kernel8.img"
+    D:/Projects/baremetal.github/output/Debug/bin/demo.elf
+    -O binary D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img"
 ```
 
 Here we see a 2 commands being performed inside a command shell:

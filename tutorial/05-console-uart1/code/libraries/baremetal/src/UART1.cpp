@@ -60,7 +60,7 @@ static void WaitCycles(uint32 numCycles)
         }
     }
 }
-#endif // BAREMETAL_TARGET == RPI3
+#endif // RPI_TARGET == RPI3
 
 UART1::UART1()
     : m_initialized{}

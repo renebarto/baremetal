@@ -62,12 +62,12 @@ void System::Halt()
     GetUART1().WriteString("Halt\n");
 
     // power off the SoC (GPU + CPU)
-    auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+    auto r = *(ARM_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
     r |= 0x555; // partition 63 used to indicate halt
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
+    *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
+    *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -84,11 +84,11 @@ void System::Reboot()
     DisableFIQs();
 
     // power off the SoC (GPU + CPU)
-    auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+    auto r = *(ARM_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-    *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+    *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
+    *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {

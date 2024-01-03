@@ -1098,12 +1098,12 @@ File: code/libraries/baremetal/src/System.cpp
 62:     GetUART1().WriteString("Halt\n");
 63: 
 64:     // power off the SoC (GPU + CPU)
-65:     auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+65:     auto r = *(ARM_PWRMGT_RSTS);
 66:     r &= ~0xFFFFFAAA;
 67:     r |= 0x555; // partition 63 used to indicate halt
-68:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
-69:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-70:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+68:     *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
+69:     *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
+70:     *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 71: 
 72:     for (;;) // Satisfy [[noreturn]]
 73:     {
@@ -1139,11 +1139,11 @@ File: code/libraries/baremetal/src/System.cpp
 84:     DisableFIQs();
 85: 
 86:     // power off the SoC (GPU + CPU)
-87:     auto r = *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS);
+87:     auto r = *(ARM_PWRMGT_RSTS);
 88:     r &= ~0xFFFFFAAA;
-89:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-90:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-91:     *reinterpret_cast<uint32 volatile*>(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+89:     *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+90:     *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
+91:     *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
 92: 
 93:     for (;;) // Satisfy [[noreturn]]
 94:     {

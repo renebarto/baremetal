@@ -215,5 +215,9 @@ else()
     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
 endif()
 
+option(BUILD_TUTORIALS "Build all tutorials" OFF)
+
 add_subdirectory(code)
-add_subdirectory(tutorial)
+if(BUILD_TUTORIALS)
+    add_subdirectory(tutorial)
+endif()

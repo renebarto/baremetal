@@ -54,9 +54,15 @@ Update the file `CMakeLists.txt`
 File: CMakeLists.txt
 ...
 
-218: add_subdirectory(code)
-219: add_subdirectory(tutorial)
+218: option(BUILD_TUTORIALS "Build all tutorials" OFF)
+219: 
+220: add_subdirectory(code)
+221: if(BUILD_TUTORIALS)
+222:     add_subdirectory(tutorial)
+223: endif()
 ```
+
+We add a variable `BUILD_TUTORIALS`, which is OFF by default. You can always set this to ON in your `CMakeSettings.json` file.
 
 ### Tutorial CMake file
 

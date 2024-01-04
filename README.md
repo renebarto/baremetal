@@ -56,11 +56,10 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Todo
 - Check if bug in Visual Studio 2022 is fixed
-- Try out code on Raspberry Pi 4
+- Build demo for RPI 4
 - Try out Raspberry Pi 4 emulation in QEMU
-- Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible
+- Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add boot process for Odroid system
 - Add description of Odroid platform support in QEMU
-- Add list of Linux terminal applications
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"

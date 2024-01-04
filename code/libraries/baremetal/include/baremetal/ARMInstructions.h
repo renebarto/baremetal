@@ -61,3 +61,25 @@
 #define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
 /// @brief Disable FIQs. Set bit 0 of DAIF register. See \ref DAIF_REGISTER
 #define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
+
+/// @brief Get counter timer frequency. See \ref CNTFRQ_EL0_REGISTER
+#define GetTimerFrequency(freq)         asm volatile ("mrs %0, CNTFRQ_EL0" : "=r"(freq))
+/// @brief Get counter timer value. See \ref CNTPCT_EL0_REGISTER
+#define GetTimerCounter(count)          asm volatile ("mrs %0, CNTPCT_EL0" : "=r"(count))
+
+/// @brief Get Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
+#define GetTimerControl(value)          asm volatile ("mrs %0, CNTP_CTL_EL0" : "=r" (value))
+/// @brief Set Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
+#define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
+
+/// @brief IStatus bit, flags if Physical counter-timer condition is met. See \ref CNTP_CTL_EL0_REGISTER
+#define CNTP_CTL_EL0_STATUS BIT(2)
+/// @brief IMask bit, flags if interrupts for Physical counter-timer are masked. See \ref CNTP_CTL_EL0_REGISTER
+#define CNTP_CTL_EL0_IMASK BIT(1)
+/// @brief Enable bit, flags if Physical counter-timer is enabled. See \ref CNTP_CTL_EL0_REGISTER
+#define CNTP_CTL_EL0_ENABLE BIT(0)
+
+/// @brief Get Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
+#define GetTimerCompareValue(value)     asm volatile ("mrs %0, CNTP_CVAL_EL0" : "=r" (value))
+/// @brief Set Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
+#define SetTimerCompareValue(value)     asm volatile ("msr CNTP_CVAL_EL0, %0" :: "r" (value))

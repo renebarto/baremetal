@@ -53,15 +53,28 @@
 #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 
 //---------------------------------------------
+// Raspberry Pi System Timer
+//---------------------------------------------
+
+#define RPI_SYSTMR_BASE                 RPI_BCM_IO_BASE + 0x00003000
+#define RPI_SYSTMR_CS                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000000)
+#define RPI_SYSTMR_LO                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000004)
+#define RPI_SYSTMR_HI                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000008)
+#define RPI_SYSTMR_CMP0                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x0000000C)
+#define RPI_SYSTMR_CMP1                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000010)
+#define RPI_SYSTMR_CMP2                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000014)
+#define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
+
+//---------------------------------------------
 // Raspberry Pi Power Management
 //---------------------------------------------
 
-#define ARM_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
-#define ARM_PWRMGT_RSTC                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x0000001c)
-#define ARM_PWRMGT_RSTS                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000020)
-#define ARM_PWRMGT_WDOG                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000024)
-#define ARM_PWRMGT_WDOG_MAGIC           0x5a000000
-#define ARM_PWRMGT_RSTC_FULLRST         0x00000020
+#define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
+#define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001c)
+#define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
+#define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
+#define RPI_PWRMGT_WDOG_MAGIC           0x5a000000
+#define RPI_PWRMGT_RSTC_FULLRST         0x00000020
 
 //---------------------------------------------
 // Raspberry Pi GPIO

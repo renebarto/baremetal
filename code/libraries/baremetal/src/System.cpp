@@ -67,7 +67,7 @@ void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHand
 }
 #endif
 
-static const uint32 NumWaitCycles = 100000000;
+static const uint32 WaitTime = 10; // ms
 
 System& baremetal::GetSystem()
 {
@@ -88,15 +88,15 @@ System::System(IMemoryAccess &memoryAccess)
 void System::Halt()
 {
     GetUART1().WriteString("Halt\n");
-    Timer::WaitCycles(NumWaitCycles);
+    Timer::WaitMilliSeconds(WaitTime);
 
     // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
     r |= 0x555; // partition 63 used to indicate halt
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r);
-    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -108,17 +108,17 @@ void System::Halt()
 void System::Reboot()
 {
     GetUART1().WriteString("Reboot\n");
-    Timer::WaitCycles(NumWaitCycles);
+    Timer::WaitMilliSeconds(WaitTime);
 
     DisableIRQs();
     DisableFIQs();
 
     // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {

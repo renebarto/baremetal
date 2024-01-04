@@ -40,8 +40,24 @@
 #include "baremetal/Timer.h"
 
 #include <baremetal/ARMInstructions.h>
+#include <baremetal/BCMRegisters.h>
+#include <baremetal/MemoryAccess.h>
+
+#define MSEC_PER_SEC  1000
+#define USEC_PER_SEC  1000000
+#define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
 
 using namespace baremetal;
+
+Timer::Timer()
+    : m_memoryAccess{ GetMemoryAccess() }
+{
+}
+
+Timer::Timer(IMemoryAccess& memoryAccess)
+    : m_memoryAccess{ memoryAccess }
+{
+}
 
 void Timer::WaitCycles(uint32 numCycles)
 {
@@ -52,4 +68,67 @@ void Timer::WaitCycles(uint32 numCycles)
             NOP();
         }
     }
+}
+
+void Timer::WaitMilliSeconds(uint64 msec)
+{
+    WaitMicroSeconds(msec * USEC_PER_MSEC);
+}
+
+#if !defined(USE_PHYSICAL_COUNTER)
+void Timer::WaitMicroSeconds(uint64 usec)
+{
+    unsigned long freq{};
+    unsigned long start{};
+    unsigned long current{};
+    // Get the current counter frequency (ticks per second)
+    GetTimerFrequency(freq);
+    // Read the current counter
+    GetTimerCounter(start);
+    // Calculate required count increase
+    unsigned long wait = ((freq / USEC_PER_SEC) * usec) / USEC_PER_SEC;
+    // Loop while counter increase is less than wait
+    // Careful: busy wait
+    do
+    {
+        GetTimerCounter(current);
+    } while (current - start < wait);
+}
+#else
+// Get System Timer counter (BCM2835 peripheral)
+uint64 Timer::GetSystemTimer()
+{
+    uint32 highWord = -1;
+    uint32 lowWord{};
+    // We must read MMIO area as two separate 32 bit reads
+    highWord = m_memoryAccess.Read32(RPI_SYSTMR_HI);
+    lowWord  = m_memoryAccess.Read32(RPI_SYSTMR_LO);
+    // We have to repeat it if high word changed during read
+    if (highWord != m_memoryAccess.Read32(RPI_SYSTMR_HI))
+    {
+        highWord = m_memoryAccess.Read32(RPI_SYSTMR_HI);
+        lowWord  = m_memoryAccess.Read32(RPI_SYSTMR_LO);
+    }
+    // compose long int value
+    // cppcheck-suppress shiftTooManyBits
+    return (static_cast<uint64>(highWord) << 32 | lowWord);
+}
+
+void Timer::WaitMicroSeconds(uint64 usec)
+{
+    auto start = GetTimer().GetSystemTimer();
+    // We must check if it's non-zero, because QEMU does not emulate
+    // system timer, and returning constant zero would mean infinite loop
+    if (start)
+    {
+        while (GetTimer().GetSystemTimer() - start < usec)
+            NOP();
+    }
+}
+#endif
+
+Timer& baremetal::GetTimer()
+{
+    static Timer timer;
+    return timer;
 }

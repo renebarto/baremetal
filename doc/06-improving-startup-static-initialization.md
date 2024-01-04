@@ -1244,3 +1244,5 @@ Press r to reboot, h to halt
 
 First, you will see strange characters being written, second, you will see that the string `Reboot` or `Halt` is not fully displayed.
 This has to do with the fact that we need to give the UART some time to do its work. We'll get around to that when we dive into timers.
+
+Next: [07-generalization](07-generalization.md)

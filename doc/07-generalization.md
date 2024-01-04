@@ -1,7 +1,7 @@
 # Improving startup and static initialization
 
 Contents:
-- [New tutorial setup](##New-tutorial-setup)
+- [Tutorial information](##Tutorial-information)
   - [Tutorial results](###Tutorial-results)
 - [Generalizing code](##Generalizing-code)
 - [Generic memory access - Step 1](##Generic-memory-access-Step-1)
@@ -27,9 +27,9 @@ Contents:
   - [Update project configuration - Step 3](###Update-project-configuration-Step-3)
   - [Configuring, building and debugging - Step 3](###Configuring-building-and-debugging-Step-3)
 
-## New tutorial setup
+## Tutorial information
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/06-improving-startup-static-initialization`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/07-generalization`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results

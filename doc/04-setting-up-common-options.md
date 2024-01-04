@@ -21,7 +21,7 @@ In order for CMake projects to work smoothly, it is convenient to do some ground
 This will again be a length story, as we will set up how we handle setting of compiler definitions and options, linker options, etc.
 
 If you're curious to see how this works, or just want to dive directly into the code,
-in `tutorials/04-setting-up-common-options` there is a complete copy of what we work towards in this section.
+in `tutorial/04-setting-up-common-options` there is a complete copy of what we work towards in this section.
 Its root will clearly be `tutorial/04-setting-up-common-options`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 

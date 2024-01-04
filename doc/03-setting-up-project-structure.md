@@ -23,7 +23,7 @@ In order to start larger scale development, as well as to use Visual Studio for 
 it is wise to set up your project in a certain way.
 
 If you're curious to see how this works, or just want to dive directly into the code,
-in `tutorials/03-setting-up-project-structure` there is a complete copy of what we work towards in this section.
+in `tutorial/03-setting-up-project-structure` there is a complete copy of what we work towards in this section.
 Its root will clearly be `tutorial/03-setting-up-project-structure`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
 To understand how to approach this, first a bit of information on how CMake projects are structured, and how Visual Studio integrates CMake projects.
@@ -167,7 +167,7 @@ As we have no projects in `libraries` yes, we simply print the current directory
 The `tutorials` CMake file for now will also simply print the current directory.
 
 ```cmake
-File: tutorials/CMakeLists.txt
+File: tutorial/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 3: 

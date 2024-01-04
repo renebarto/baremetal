@@ -322,6 +322,11 @@ The SD card will need to contain some other files in order for the system to sta
   - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
 
 In `tutorial/01-demo` you will find a `Netboot.zip`, which is verified to work on both Raspberry Pi 3 and 4.
+There is still one caveat, on Raspberry Pi 4, a reboot does not restart Netboot yet.
+
+_Correctly combining files for Raspberry Pi to boot is a challenge, especially if you don't know or understand how the system starts up.
+So it's wise to simply take something that works, and play around with it._
+
 Unpack it onto the SD card (this must be formatted as FAT), make sure to eject (Windows) or sync (Linux) before taking the SD card out.
 Place it into your board, and go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
 
@@ -357,7 +362,7 @@ Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://emb
 - Make sure you have a terminal application to communicate with the serial to USB device
   - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
   - [Teraterm](https://tera-term.en.lo4d.com/download) is my personal favorite, but the download sites seem a bit less trustworthy nowadays
-  - One Linux there are quite a few applications available, e.g. screen, minicom
+  - One Linux there are quite a few applications available, e.g. screen, minicom, gtkterm
 - Make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
 <img src="images/USB-RS232.jpg" alt="USB-to-serial example" width="400"/>

@@ -1,4 +1,4 @@
-project(demo
+project(07-generalization
     DESCRIPTION "Demo application"
     LANGUAGES CXX ASM)
 
@@ -23,7 +23,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal
+    baremetal-07
     )
 
 set(PROJECT_LIBS

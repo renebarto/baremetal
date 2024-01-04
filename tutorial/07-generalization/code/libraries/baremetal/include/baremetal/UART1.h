@@ -43,66 +43,6 @@
 
 namespace baremetal {
 
-/// @brief GPIO mode
-enum class GPIOMode
-{
-    /// @brief GPIO used as input
-    Input,
-    /// @brief GPIO used as output
-    Output,
-    /// @brief GPIO used as input, using pull-up
-    InputPullUp,
-    /// @brief GPIO used as input, using pull-down
-    InputPullDown,
-    /// @brief GPIO used as Alternate Function 0.
-    AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
-    AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
-    AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
-    AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
-    AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
-    AlternateFunction5,
-    Unknown,
-};
-
-/// @brief GPIO function
-enum class GPIOFunction
-{
-    /// @brief GPIO used as input
-    Input,
-    /// @brief GPIO used as output
-    Output,
-    /// @brief GPIO used as Alternate Function 0.
-    AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
-    AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
-    AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
-    AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
-    AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
-    AlternateFunction5,
-    Unknown,
-};
-
-/// @brief GPIO pull mode
-enum class GPIOPullMode
-{
-    /// @brief GPIO pull mode off (no pull-up or pull-down)
-    Off,
-    /// @brief GPIO pull mode pull-down
-    PullDown,
-    /// @brief GPIO pull mode pull-up
-    PullUp,
-    Unknown,
-};
-
 class IMemoryAccess;
 
 /// @brief Encapsulation for the UART1 device.
@@ -134,19 +74,6 @@ public:
     /// @brief Write a string
     /// @param str String to be written
     void WriteString(const char* str);
-
-private:
-    /// @param mode GPIO mode to be selected.
-    /// @return true if successful, false otherwise
-    bool SetMode(uint8 pinNumber, GPIOMode mode);
-    /// @brief Set GPIO pin function
-    /// @param function GPIO function to be selected.
-    bool SetFunction(uint8 pinNumber, GPIOFunction function);
-    /// @brief Set GPIO pin pull mode
-    /// @param pullMode GPIO pull mode to be used.
-    bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
-    /// @brief Switch GPIO off
-    bool Off(uint8 pinNumber, GPIOMode mode);
 };
 
 UART1& GetUART1();

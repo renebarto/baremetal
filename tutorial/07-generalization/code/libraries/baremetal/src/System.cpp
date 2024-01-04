@@ -43,6 +43,7 @@
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/SysConfig.h>
+#include <baremetal/Timer.h>
 #include <baremetal/UART1.h>
 #include <baremetal/Util.h>
 
@@ -66,6 +67,8 @@ void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHand
 }
 #endif
 
+static const uint32 NumWaitCycles = 100000000;
+
 System& baremetal::GetSystem()
 {
     static System value;
@@ -85,6 +88,7 @@ System::System(IMemoryAccess &memoryAccess)
 void System::Halt()
 {
     GetUART1().WriteString("Halt\n");
+    Timer::WaitCycles(NumWaitCycles);
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
@@ -104,6 +108,7 @@ void System::Halt()
 void System::Reboot()
 {
     GetUART1().WriteString("Reboot\n");
+    Timer::WaitCycles(NumWaitCycles);
 
     DisableIRQs();
     DisableFIQs();

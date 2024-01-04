@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : IMemoryAccess.h
+// File        : Timer.h
 //
 // Namespace   : baremetal
 //
-// Class       : IMemoryAccess
+// Class       : Timer
 //
-// Description : Memory read/write abstract interface
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -42,21 +42,16 @@
 #include <baremetal/Types.h>
 
 namespace baremetal {
-
-class IMemoryAccess
+    
+/// <summary>
+/// For now holds only busy waiting
+/// </summary>
+class Timer
 {
 public:
-    virtual ~IMemoryAccess() = default;
-
-    virtual uint8  Read8(regaddr address)                                                    = 0;
-    virtual void   Write8(regaddr address, uint8 data)                                       = 0;
-    virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)    = 0;
-    virtual uint16 Read16(regaddr address)                                                   = 0;
-    virtual void   Write16(regaddr address, uint16 data)                                     = 0;
-    virtual void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) = 0;
-    virtual uint32 Read32(regaddr address)                                                   = 0;
-    virtual void   Write32(regaddr address, uint32 data)                                     = 0;
-    virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
+    /// @brief Wait for specified number of NOP statements. Busy wait
+    /// @param numCycles    Wait time in cycles
+    static void WaitCycles(uint32 numCycles);
 };
 
 } // namespace baremetal

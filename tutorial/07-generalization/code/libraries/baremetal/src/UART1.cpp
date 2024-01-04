@@ -42,26 +42,9 @@
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/MemoryAccess.h>
-
-/// @brief Total count of GPIO pins, numbered from 0 through 53
-#define NUM_GPIO 54
+#include <baremetal/PhysicalGPIOPin.h>
 
 namespace baremetal {
-
-#if BAREMETAL_RPI_TARGET == 3
-static const int NumWaitCycles = 150;
-
-static void WaitCycles(uint32 numCycles)
-{
-    if (numCycles)
-    {
-        while (numCycles--)
-        {
-            NOP();
-        }
-    }
-}
-#endif // BAREMETAL_RPI_TARGET == 3
 
 UART1::UART1()
     : m_initialized{}
@@ -85,9 +68,8 @@ void UART1::Initialize()
     auto value = m_memoryAccess.Read32(RPI_AUX_ENABLES);
     m_memoryAccess.Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);    // Disable UART1, AUX mini uart
 
-    SetMode(14, GPIOMode::AlternateFunction5);
-
-    SetMode(15, GPIOMode::AlternateFunction5);
+    PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction5, m_memoryAccess);
+    PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction5, m_memoryAccess);
 
     m_memoryAccess.Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);     // enable UART1, AUX mini uart
     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, 0);                                 // Disable Tx, Rx
@@ -142,112 +124,6 @@ void UART1::WriteString(const char* str)
             Write('\r');
         Write(*str++);
     }
-}
-
-bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
-{
-    if (pinNumber >= NUM_GPIO)
-        return false;
-    if (mode >= GPIOMode::Unknown)
-        return false;
-    if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
-    {
-        if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-            return false;
-
-        if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-                                    static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
-            return false;
-    }
-    else if (GPIOMode::Output == mode)
-    {
-        if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-            return false;
-
-        if (!SetFunction(pinNumber, GPIOFunction::Output))
-            return false;
-    }
-    else
-    {
-        if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
-            return false;
-        if (!SetFunction(pinNumber, GPIOFunction::Input))
-            return false;
-    }
-    if (mode == GPIOMode::Output)
-        Off(pinNumber, mode);
-    return true;
-}
-
-bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
-{
-    if (pinNumber >= NUM_GPIO)
-        return false;
-    if (function >= GPIOFunction::Unknown)
-        return false;
-
-    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
-    uint32  shift = (pinNumber % 10) * 3;
-
-    static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-
-    uint32 value = m_memoryAccess.Read32(selectRegister);
-    value &= ~(7 << shift);
-    value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-    m_memoryAccess.Write32(selectRegister, value);
-    return true;
-}
-
-bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
-{
-    if (pullMode >= GPIOPullMode::Unknown)
-        return false;
-
-    if (pinNumber >= NUM_GPIO)
-        return false;
-#if BAREMETAL_RPI_TARGET == 3
-    regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
-    uint32  shift = pinNumber % 32;
-
-    m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
-    WaitCycles(NumWaitCycles);
-    m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
-    WaitCycles(NumWaitCycles);
-    m_memoryAccess.Write32(clkRegister, 0);
-#else
-    regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
-    unsigned              shift = (pinNumber % 16) * 2;
-
-    static const unsigned ModeMap[3] = { 0, 2, 1 };
-
-    uint32                value = *(modeReg);
-    value &= ~(3 << shift);
-    value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-    *(modeReg) = value;
-#endif
-
-    return true;
-}
-
-bool UART1::Off(uint8 pinNumber, GPIOMode mode)
-{
-    if (pinNumber >= NUM_GPIO)
-        return false;
-
-    // Output level can be set in input mode for subsequent switch to output
-    if (mode >= GPIOMode::AlternateFunction0)
-        return false;
-
-    unsigned regOffset = (pinNumber / 32);
-    uint32 regMask = 1 << (pinNumber % 32);
-
-    bool value = false;
-
-    regaddr regAddress = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-
-    m_memoryAccess.Write32(regAddress, regMask);
-
-    return true;
 }
 
 UART1& GetUART1()

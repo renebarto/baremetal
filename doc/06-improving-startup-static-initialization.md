@@ -1,29 +1,43 @@
 # Improving startup and static initialization
 
 Contents:
- - [Improving startup - step 1](##Improving-startup-step-1)
-   - [System.h - step 1](###System.h-step-1)
-   - [System.cpp - step 1](###System.cpp-step-1)
-   - [Util.h - step 1](###Util.h-step-1)
-   - [Util.cpp - step 1](###Util.cpp-step-1)
-   - [ARMInstructions.h - step 1](###ARMInstructions.h-step-1)
-   - [Update startup code - step 1](###Update-startup-code-step-1)
-   - [Update project configuration - step 1](###Update-project-configuration-step-1)
-   - [Update application code - step 1](###Update-application-code-step-1)
-   - [Configure, build and debug - step 1](###Configure-build-and-debug-step-1)
- - [Initializing static variables - Step 2](##Initializing-static-variables-step-2)
-   - [Call static initializers - Step 2](###Call-static-initializers-step-2)
-   - [Update GetSystem() - Step 2](###Update-GetSystem-step-2)
-   - [Update GetUART1() - Step 2](###Update-GetUART1-step-2)
-   - [Add static initializer functions - Step 2](###Add-static-initializer-functions-step-2)
-   - [Update project configuration - step 2](###Update-project-configuration-step-2)
-   - [Configure, build and debug - step 2](###Configure-build-and-debug-step-2)
- - [Implementing halt and reboot - step 3](##Implementing-halt-and-reboot-step-3)
-   - [BCMRegisters.h - step 3](###BCMRegisters.h-step-3)
-   - [System.cpp - step 3](###System.cpp-step-3)
-   - [Add option to reboot or halt - step 3](###Add-option-to-reboot-or-halt-step-3)
-   - [Update project configuration - step 3](###Update-project-configuration-step-3)
-   - [Configure, build and debug - step 3](###Configure-build-and-debug-step-3)
+- [New tutorial setup](##New-tutorial-setup)
+  - [Tutorial results](###Tutorial-results)
+- [Improving startup - step 1](##Improving-startup-step-1)
+  - [System.h - step 1](###System.h-step-1)
+  - [System.cpp - step 1](###System.cpp-step-1)
+  - [Util.h - step 1](###Util.h-step-1)
+  - [Util.cpp - step 1](###Util.cpp-step-1)
+  - [ARMInstructions.h - step 1](###ARMInstructions.h-step-1)
+  - [Update startup code - step 1](###Update-startup-code-step-1)
+  - [Update project configuration - step 1](###Update-project-configuration-step-1)
+  - [Update application code - step 1](###Update-application-code-step-1)
+  - [Configure, build and debug - step 1](###Configure-build-and-debug-step-1)
+- [Initializing static variables - Step 2](##Initializing-static-variables-step-2)
+  - [Call static initializers - Step 2](###Call-static-initializers-step-2)
+  - [Update GetSystem() - Step 2](###Update-GetSystem-step-2)
+  - [Update GetUART1() - Step 2](###Update-GetUART1-step-2)
+  - [Add static initializer functions - Step 2](###Add-static-initializer-functions-step-2)
+  - [Update project configuration - step 2](###Update-project-configuration-step-2)
+  - [Configure, build and debug - step 2](###Configure-build-and-debug-step-2)
+- [Implementing halt and reboot - step 3](##Implementing-halt-and-reboot-step-3)
+  - [BCMRegisters.h - step 3](###BCMRegisters.h-step-3)
+  - [System.cpp - step 3](###System.cpp-step-3)
+  - [Add option to reboot or halt - step 3](###Add-option-to-reboot-or-halt-step-3)
+  - [Update project configuration - step 3](###Update-project-configuration-step-3)
+  - [Configure, build and debug - step 3](###Configure-build-and-debug-step-3)
+
+## New tutorial setup
+
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/06-improving-startup-static-initialization`.
+In the same way, the project names are adapted to make sure there are no conflicts.
+
+### Tutorial results
+
+This tutorial will result in (next to the main project structure):
+- a library `output/Debug/lib/baremetal-06.a`
+- an application `output/Debug/bin/06-improving-startup-static-initialization.elf`
+- an image in `deploy/Debug/06-improving-startup-static-initialization-image`
 
 ## Improving startup - step 1
 
@@ -36,7 +50,7 @@ Next to that we will add a class named System, that will hold methods to reboot 
 For now, the implementation will be quite simple, we will add the actual implementation later.
 
 If you're curious to see how this works, or just want to dive directly into the code,
-in `tutorials/06-improving-startup-static-initialization` there is a complete copy of what we work towards in this section.
+in `tutorial/06-improving-startup-static-initialization` there is a complete copy of what we work towards in this section.
 Its root will clearly be `tutorial/06-improving-startup-static-initialization`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 

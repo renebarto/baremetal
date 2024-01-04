@@ -1,6 +1,13 @@
 # First application - using the console - UART1
 
 Contents:
+- [New tutorial setup](##New-tutorial-setup)
+  - [Main CMake file](###Main-CMake-file)
+  - [Tutorial CMake file](###Tutorial-CMake-file)
+  - [Main application CMake file](###Main-application-CMake-file)
+  - [Main application create-image CMake file](###Main-application-create-image-CMake-file)
+  - [Baremetal library CMake file](###Baremetal-library-CMake-file)
+  - [Tutorial results](###Tutorial-results)
 - [Creating the baremetal library structure](##Creating-the-baremetal-library-structure)
 - [Creating the library code - step 1](##Creating-the-library-code-step-1)
   - [ARMInstructions.h](###ARMInstructions.h)
@@ -34,9 +41,148 @@ See also [here](01-setting-up-for-development.md###Attaching-a-serial-console).
 For this application, we will use UART1, which is the easiest to set up.
 It has less functionality, but for a simple serial console both are equally suitable.
 
-If you're curious to see how this works, or just want to dive directly into the code,
-in `tutorials/05-console-uart1` there is a complete copy of what we work towards in this section.
-Its root will clearly be `tutorial/05-console-uart1`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
+## New tutorial setup
+
+Starting from this tutorial, we will no longer create a copy of everything, but simply use the infrastructure that is already there.
+We will there for add one line to the root CMake file:
+
+### Main CMake file
+
+Update the file `CMakeLists.txt`
+
+```cmake
+File: CMakeLists.txt
+...
+
+218: add_subdirectory(code)
+219: add_subdirectory(tutorial)
+```
+
+### Tutorial CMake file
+
+In the tutorial CMake file, we will add the folder for this tutorial.
+
+Update the file `tutorial/CMakeLists.txt`
+
+```cmake
+File: tutorial/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: add_subdirectory(05-console-uart1)
+```
+
+### Main application CMake file
+
+The main application's project name will be named after the tutorial, to not conflict with the one in the main code tree:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+1: project(demo
+2:     DESCRIPTION "Demo application"
+3:     LANGUAGES CXX ASM)
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
+1: project(05-console-uart1
+2:     DESCRIPTION "Tutorial 05 Console UART1 application"
+3:     LANGUAGES CXX ASM)
+...
+```
+
+### Main application create-image CMake file
+
+Similarly, the main application's create-image folder will have a project name named after the tutorial, to not conflict with the one in the main code tree:
+
+```cmake
+File: code/applications/demo/create-image/CMakeLists.txt
+1: project(demo-image
+2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+3: 
+4: message(STATUS "\n**********************************************************************************\n")
+5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+6: 
+7: message("\n** Setting up ${PROJECT_NAME} **\n")
+8: 
+9: set(DEPENDENCY demo)
+10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+11: 
+12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/create-image/CMakeLists.txt
+1: project(05-console-uart1-image
+2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+3: 
+4: message(STATUS "\n**********************************************************************************\n")
+5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+6: 
+7: message("\n** Setting up ${PROJECT_NAME} **\n")
+8: 
+9: set(DEPENDENCY 05-console-uart1)
+10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+11: 
+12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+```
+
+### Baremetal library CMake file
+
+We will get to the `baremetal` library shortly.
+In the same way, we need to make sure the baremetal library project name is not conflicting, so we add `-05` to the name.
+
+```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: project(baremetal
+5: 	DESCRIPTION "Bare metal library"
+6: 	LANGUAGES CXX ASM)
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: project(baremetal-05
+5:     DESCRIPTION "Bare metal library"
+6:     LANGUAGES CXX ASM)
+...
+`
+
+This also means that the main application project needs to depende on the new version of `baremetal`:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+...
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal
+27:     )
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
+...
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal-05
+27:     )
+...
+```
+
+### Tutorial results
+
+This tutorial will result in (next to the main project structure):
+- a library `output/Debug/lib/baremetal-05.a`
+- an application `output/Debug/bin/05-console-uart1.elf`
+- an image in `deploy/Debug/05-console-uart1-image`
+
+In every following tutorial, the changes described here will be similar.
 
 ## Creating the baremetal library structure
 

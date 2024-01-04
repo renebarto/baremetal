@@ -216,3 +216,4 @@ else()
 endif()
 
 add_subdirectory(code)
+add_subdirectory(tutorial)

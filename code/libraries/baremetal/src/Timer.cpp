@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : IMemoryAccess.h
+// File        : Timer.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : IMemoryAccess
+// Class       : Timer
 //
-// Description : Memory read/write abstract interface
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,19 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/Timer.h"
 
-#include <baremetal/Types.h>
+#include <baremetal/ARMInstructions.h>
 
-namespace baremetal {
+using namespace baremetal;
 
-class IMemoryAccess
+void Timer::WaitCycles(uint32 numCycles)
 {
-public:
-    virtual ~IMemoryAccess() = default;
-
-    virtual uint8  Read8(regaddr address)                                                    = 0;
-    virtual void   Write8(regaddr address, uint8 data)                                       = 0;
-    virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)    = 0;
-    virtual uint16 Read16(regaddr address)                                                   = 0;
-    virtual void   Write16(regaddr address, uint16 data)                                     = 0;
-    virtual void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) = 0;
-    virtual uint32 Read32(regaddr address)                                                   = 0;
-    virtual void   Write32(regaddr address, uint32 data)                                     = 0;
-    virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
-};
-
-} // namespace baremetal
+    if (numCycles)
+    {
+        while (numCycles--)
+        {
+            NOP();
+        }
+    }
+}

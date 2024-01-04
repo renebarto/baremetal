@@ -56,12 +56,12 @@
 // Raspberry Pi Power Management
 //---------------------------------------------
 
-#define ARM_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
-#define ARM_PWRMGT_RSTC                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x0000001c)
-#define ARM_PWRMGT_RSTS                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000020)
-#define ARM_PWRMGT_WDOG                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000024)
-#define ARM_PWRMGT_WDOG_MAGIC           0x5a000000
-#define ARM_PWRMGT_RSTC_FULLRST         0x00000020
+#define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
+#define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001c)
+#define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
+#define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
+#define RPI_PWRMGT_WDOG_MAGIC           0x5a000000
+#define RPI_PWRMGT_RSTC_FULLRST         0x00000020
 
 //---------------------------------------------
 // Raspberry Pi GPIO

@@ -1080,12 +1080,12 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 56: // Raspberry Pi Power Management
 57: //---------------------------------------------
 58: 
-59: #define ARM_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
-60: #define ARM_PWRMGT_RSTC                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x0000001c)
-61: #define ARM_PWRMGT_RSTS                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000020)
-62: #define ARM_PWRMGT_WDOG                 reinterpret_cast<regaddr>(ARM_PWRMGT_BASE + 0x00000024)
-63: #define ARM_PWRMGT_WDOG_MAGIC           0x5a000000
-64: #define ARM_PWRMGT_RSTC_FULLRST         0x00000020
+59: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
+60: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001c)
+61: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
+62: #define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
+63: #define RPI_PWRMGT_WDOG_MAGIC           0x5a000000
+64: #define RPI_PWRMGT_RSTC_FULLRST         0x00000020
 65: 
 66: //---------------------------------------------
 67: // Raspberry Pi GPIO
@@ -1112,12 +1112,12 @@ File: code/libraries/baremetal/src/System.cpp
 62:     GetUART1().WriteString("Halt\n");
 63: 
 64:     // power off the SoC (GPU + CPU)
-65:     auto r = *(ARM_PWRMGT_RSTS);
+65:     auto r = *(RPI_PWRMGT_RSTS);
 66:     r &= ~0xFFFFFAAA;
 67:     r |= 0x555; // partition 63 used to indicate halt
-68:     *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r);
-69:     *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-70:     *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+68:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
+69:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
+70:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 71: 
 72:     for (;;) // Satisfy [[noreturn]]
 73:     {
@@ -1129,11 +1129,11 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 ```
 
-- Line 65: So we read the register `ARM_PWRMGT_RSTS` (probably means reset status)
+- Line 65: So we read the register `RPI_PWRMGT_RSTS` (probably means reset status)
 - Line 66: We mask out bits 1, 3, 5, 7, 9, 11.
 These 6 bits seem to indicate the partition we're booting from. This is normally 0, but all 1's is a special case.
 - Line 67: We set the partition to boot from to 63, to enforce a halt.
-- Line 68: We write the result to the `ARM_PWRMGT_RSTS` register, we apparently need to add a magic number to the value.
+- Line 68: We write the result to the `RPI_PWRMGT_RSTS` register, we apparently need to add a magic number to the value.
 - Line 69: We write to the watchdog timer, presumably the value is the magic number with 10 added for 10 seconds.
 - Line 70: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
 
@@ -1153,11 +1153,11 @@ File: code/libraries/baremetal/src/System.cpp
 84:     DisableFIQs();
 85: 
 86:     // power off the SoC (GPU + CPU)
-87:     auto r = *(ARM_PWRMGT_RSTS);
+87:     auto r = *(RPI_PWRMGT_RSTS);
 88:     r &= ~0xFFFFFAAA;
-89:     *(ARM_PWRMGT_RSTS) = (ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-90:     *(ARM_PWRMGT_WDOG) = (ARM_PWRMGT_WDOG_MAGIC | 10);
-91:     *(ARM_PWRMGT_RSTC) = (ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+89:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+90:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
+91:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 92: 
 93:     for (;;) // Satisfy [[noreturn]]
 94:     {

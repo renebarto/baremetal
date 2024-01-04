@@ -637,12 +637,12 @@ File: code/libraries/baremetal/src/System.cpp
 69:     GetUART1().WriteString("Halt\n");
 70: 
 71:     // power off the SoC (GPU + CPU)
-72:     auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+72:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 73:     r &= ~0xFFFFFAAA;
 74:     r |= 0x555; // partition 63 used to indicate halt
-75:     m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r);
-76:     m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-77:     m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+75:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
+76:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+77:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 78: 
 79:     for (;;) // Satisfy [[noreturn]]
 80:     {
@@ -659,11 +659,11 @@ File: code/libraries/baremetal/src/System.cpp
 91:     DisableFIQs();
 92: 
 93:     // power off the SoC (GPU + CPU)
-94:     auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+94:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 95:     r &= ~0xFFFFFAAA;
-96:     m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-97:     m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-98:     m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+96:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+97:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+98:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 99: 
 100:     for (;;) // Satisfy [[noreturn]]
 101:     {

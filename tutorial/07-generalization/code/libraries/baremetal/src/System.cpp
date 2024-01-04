@@ -91,12 +91,12 @@ void System::Halt()
     Timer::WaitCycles(NumWaitCycles);
 
     // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
     r |= 0x555; // partition 63 used to indicate halt
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r);
-    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -114,11 +114,11 @@ void System::Reboot()
     DisableFIQs();
 
     // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(ARM_PWRMGT_RSTS);
+    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTS, ARM_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    m_memoryAccess.Write32(ARM_PWRMGT_WDOG, ARM_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(ARM_PWRMGT_RSTC, ARM_PWRMGT_WDOG_MAGIC | ARM_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
 
     for (;;) // Satisfy [[noreturn]]
     {

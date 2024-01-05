@@ -1176,7 +1176,7 @@ We will not go into details here, we'll cover this when we use the registers.
 More information on the GPIO registers can be found [here](boards/RaspberryPi/RaspberryPi-GPIO-registers.md) and [here](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 89).
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
-More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md), as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10).
+More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md), as well as in the official [Broadcom documentation BCM2835](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10) and [Broadcom documentation BCM2837](boards/RaspberryPi/BCM2837-peripherals.pdf) (page 14).
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 
 ### UART1.h
@@ -1593,6 +1593,9 @@ File: code/libraries/baremetal/src/UART1.cpp
 244:
 245: } // namespace baremetal
 ```
+
+For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](boards/RaspberryPi/BCM2837-peripherals.pdf) (page 14). 
+Be aware that some of the documentation for BCM2835 contains errors, which have been update for BCM2837. The Line Control Register (see below) contains such errors.
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
 - Line 48: We define the baremetal namespace again, everything else will be inside this namespace

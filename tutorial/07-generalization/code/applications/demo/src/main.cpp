@@ -1,6 +1,6 @@
-#include "baremetal/ARMInstructions.h"
-#include "baremetal/System.h"
-#include "baremetal/UART1.h"
+#include <baremetal/ARMInstructions.h>
+#include <baremetal/System.h>
+#include <baremetal/UART1.h>
 
 using namespace baremetal;
 

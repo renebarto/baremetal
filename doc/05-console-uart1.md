@@ -444,7 +444,7 @@ We will use the NOP instruction (which is part of the baremetal library) in a si
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include "baremetal/ARMInstructions.h"
+1: #include <baremetal/ARMInstructions.h>
 2:
 3: int main()
 4: {
@@ -2597,8 +2597,8 @@ So we change the code in main.cpp:
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include "baremetal/ARMInstructions.h"
-2: #include "baremetal/UART1.h"
+1: #include <baremetal/ARMInstructions.h>
+2: #include <baremetal/UART1.h>
 3:
 4: int main()
 5: {

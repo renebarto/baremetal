@@ -37,7 +37,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Timer.h"
+#include <baremetal/Timer.h>
 
 #include <baremetal/ARMInstructions.h>
 

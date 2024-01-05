@@ -715,9 +715,9 @@ We will no longer define the UART instance in the application, but use the one e
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include "baremetal/ARMInstructions.h"
-2: #include "baremetal/System.h"
-3: #include "baremetal/UART1.h"
+1: #include <baremetal/ARMInstructions.h>
+2: #include <baremetal/System.h>
+3: #include <baremetal/UART1.h>
 4: 
 5: using namespace baremetal;
 6: 

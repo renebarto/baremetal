@@ -48,6 +48,9 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [Setting up common options](doc/04-setting-up-common-options.md)
 - [First application - Using the console - UART1](doc/05-console-uart1.md)
 - [Improving startup and static initialization](doc/06-improving-startup-static-initialization.md)
+- [Generalization](doc/07-generalization.md)
+- [Timer](doc/08-timer.md)
+- [Mailbox](doc/09-mailbox.md)
 
 ## Additional information
 

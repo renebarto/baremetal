@@ -1,5 +1,5 @@
-#include "baremetal/ARMInstructions.h"
-#include "baremetal/UART1.h"
+#include <baremetal/ARMInstructions.h>
+#include <baremetal/UART1.h>
 
 int main()
 {

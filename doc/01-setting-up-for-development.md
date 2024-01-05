@@ -326,6 +326,7 @@ There is still one caveat, on Raspberry Pi 4, a reboot does not restart Netboot 
 
 _Correctly combining files for Raspberry Pi to boot is a challenge, especially if you don't know or understand how the system starts up.
 So it's wise to simply take something that works, and play around with it._
+More information can be found in [System startup](system-startup.md) and online [here](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-boot-eeprom)
 
 Unpack it onto the SD card (this must be formatted as FAT), make sure to eject (Windows) or sync (Linux) before taking the SD card out.
 Place it into your board, and go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
@@ -647,11 +648,11 @@ Now you can use the normal GDB commands to debug the application:
 (gdb) b main.cpp:55
 Breakpoint 1 at 0x8080c: file ../code/applications/demo/src/main.cpp, line 55.
 (gdb) l
-41      #include "baremetal/MachineInfo.h"
-42      #include "baremetal/Random.h"
-43      #include "baremetal/Serialization.h"
-44      #include "baremetal/Timer.h"
-45      #include "baremetal/UART0.h"
+41      #include <baremetal/MachineInfo.h>
+42      #include <baremetal/Random.h>
+43      #include <baremetal/Serialization.h>
+44      #include <baremetal/Timer.h>
+45      #include <baremetal/UART0.h>
 46
 47      using namespace baremetal;
 48
@@ -740,11 +741,11 @@ Now you can use the normal GDB commands to debug the application:
 (gdb) b main
 Breakpoint 1 at 0x8080c: file /home/rene/repo/baremetal/code/applications/demo/src/main.cpp, line 55.
 (gdb) l
-41	#include "baremetal/MachineInfo.h"
-42	#include "baremetal/Random.h"
-43	#include "baremetal/Serialization.h"
-44	#include "baremetal/Timer.h"
-45	#include "baremetal/UART0.h"
+41	#include <baremetal/MachineInfo.h>
+42	#include <baremetal/Random.h>
+43	#include <baremetal/Serialization.h>
+44	#include <baremetal/Timer.h>
+45	#include <baremetal/UART0.h>
 46	
 47	using namespace baremetal;
 48	

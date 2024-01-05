@@ -143,7 +143,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 37: //
 38: //------------------------------------------------------------------------------
 39: 
-40: #include "baremetal/Timer.h"
+40: #include <baremetal/Timer.h>
 41: 
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>

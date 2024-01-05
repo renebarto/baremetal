@@ -42,6 +42,7 @@
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/MemoryAccess.h>
+#include <baremetal/Timer.h>
 
 /// @file
 /// Physical GPIO pin implementation
@@ -238,9 +239,9 @@ void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
     uint32  shift = m_pinNumber % 32;
 
     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
-    WaitCycles(NumWaitCycles);
+    Timer::WaitCycles(NumWaitCycles);
     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
-    WaitCycles(NumWaitCycles);
+    Timer::WaitCycles(NumWaitCycles);
     m_memoryAccess.Write32(clkRegister, 0);
 #else
     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16);

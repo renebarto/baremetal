@@ -1,4 +1,4 @@
-# Improving startup and static initialization
+# Generalization
 
 Contents:
 - [Tutorial information](##Tutorial-information)
@@ -1917,7 +1917,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 37: //
 38: //------------------------------------------------------------------------------
 39: 
-40: #include "baremetal/Timer.h"
+40: #include <baremetal/Timer.h>
 41: 
 42: #include <baremetal/ARMInstructions.h>
 43: 
@@ -1944,6 +1944,11 @@ Update the file `code/libraries/baremetal/src/PhysicialGPIOPin.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 ...
+42: #include <baremetal/ARMInstructions.h>
+43: #include <baremetal/BCMRegisters.h>
+44: #include <baremetal/MemoryAccess.h>
+45: #include <baremetal/Timer.h>
+...
 49: /// @brief Total count of GPIO pins, numbered from 0 through 53
 50: #define NUM_GPIO 54
 51: 
@@ -1953,6 +1958,27 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 55:     static const int NumWaitCycles = 150;
 56: #endif // BAREMETAL_RPI_TARGET == 3
 57: 
+...
+237: #if BAREMETAL_RPI_TARGET == 3
+238:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (m_pinNumber / 32);
+239:     uint32  shift = m_pinNumber % 32;
+240: 
+241:     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
+242:     Timer::WaitCycles(NumWaitCycles);
+243:     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
+244:     Timer::WaitCycles(NumWaitCycles);
+245:     m_memoryAccess.Write32(clkRegister, 0);
+246: #else
+247:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16);
+248:     unsigned              shift = (m_pinNumber % 16) * 2;
+249: 
+250:     static const unsigned ModeMap[3] = { 0, 2, 1 };
+251: 
+252:     uint32                value = m_memoryAccess.Read32(modeReg);
+253:     value &= ~(3 << shift);
+254:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
+255:     m_memoryAccess.Write32(modeReg, value);
+256: #endif
 ...
 ```
 

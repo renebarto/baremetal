@@ -339,7 +339,12 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
 ```
 
-More information on the System Timer registers can be found in the official documentation for [Raspberry Pi 3](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 172) and [Raspberry Pi 4](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 142).
+More information on the System Timer registers can be found in the 
+[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 172), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 172), 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 142).
+It is currently unclear whether the System Timer is present in the same shape in Raspberry Pi 5.
+
 As you can see the System timer register addresses are all prefixed with `RPI_SYSTMR_`.
 
 ### System.cpp

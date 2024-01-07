@@ -1173,10 +1173,18 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 As said, this header defines the address of the GPIO and UART1 registers, as well as values of fields within these registers.
 We will not go into details here, we'll cover this when we use the registers.
-More information on the GPIO registers can be found [here](boards/RaspberryPi/RaspberryPi-GPIO-registers.md) and [here](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), as well as in the official [Broadcom documentation](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 89).
+More information on the GPIO registers can be found [here](boards/RaspberryPi/RaspberryPi-GPIO-registers.md) and [here](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), 
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 89), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 89), 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 65) and
+[Broadcom documentation RP1 (Raspberry Pi 5)](boards/RaspberryPi/rp1-peripherals.pdf) (page 14).
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
-More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md), as well as in the official [Broadcom documentation BCM2835](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10) and [Broadcom documentation BCM2837](boards/RaspberryPi/BCM2837-peripherals.pdf) (page 14).
+More information on the Mini UART (UART1) registers can be found [here](boards/RaspberryPi/RaspberryPi-AUX-registers.md), 
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 10) and 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 10). Raspberry Pi 5 no longer has a mini UART1.
+
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 
 ### UART1.h
@@ -2306,6 +2314,9 @@ For now, this header only defines some parameters:
 This splits up the physical memory between the CPU and the GPU.
 Unless we write heavy graphics applications, 64 Mb for the GPU should be fine
 - Line 65: We then include `MemoryMap.h`. See the next section
+
+Just for clarity, you will see the GPU (Graphics Processing Unit) also named VPU (Vector Processing Unit) and VC (VideoCore, which is the name Broadcom uses for this part of the SoC).
+This is all the same thing.
 
 #### MemoryMap.h
 

@@ -3,9 +3,17 @@ A project to develop baremetal applications for Raspberry Pi and Odroid
 
 This project is based on / inspired by the work of many others:
 - Circle by Rene Stange, a great piece of work covering almost all peripherals and devices on Raspberry Pi ([link](https://github.com/rsta2/circle)), with help of circle stdlib ([link](https://github.com/smuehlst/circle-stdlib)) and newlib ([link](https://github.com/smuehlst/circle-newlib)) by Stephan Muehlstrasser.
-- Tutotials by Zoltan Baldaszti ([link](https://github.com/bztsrc/raspi3-tutorial)), Daniels Umanovskis ([link](https://github.com/umanovskis/baremetal-arm)), Leon de Boer ([link](https://github.com/LdB-ECM/Raspberry-Pi))
+- Documentation from the Raspberry Pi foundation ([link](https://github.com/raspberrypi/documentation))
+- Tutorials by:
+  - Raspberry Pi foundation ([link](https://www.raspberrypi.com/documentation/computers/getting-started.html#tutorials))
+  - Zoltan Baldaszti ([link](https://github.com/bztsrc/raspi3-tutorial)), 
+  - Low Level Devel ([link](https://www.youtube.com/watch?v=pd9AVmcRc6U&list=PLVxiWMqQvhg9FCteL7I0aohj1_YiUx1x8&pp=iAQB)), 
+  - David Welch ([link](https://github.com/dwelch67/raspberrypi))
+  - Sergey Matyukevich ([link](https://github.com/s-matyukevich/raspberry-pi-os))
+- The community on the Raspberry Pi forum on Baremetal development ([link](https://forums.raspberrypi.com/viewforum.php?f=72&sid=d06afe6fe03d990ee719c83bde461beb))
 
 I decided to give it my own turn, for a number of reasons:
+- Some tutorials are __OLD__, covering only Raspberry Pi 2, sometimes 3
 - Most code is in C, not C++
 - Most code is not very well documented, and is missing pointers to the correct information sources
 - If the source is written in C++, the code is mostly C-ish
@@ -51,6 +59,9 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [Generalization](doc/07-generalization.md)
 - [Timer](doc/08-timer.md)
 - [Mailbox](doc/09-mailbox.md)
+- UART0 (create abstract interface for character device)
+- Add doxygen
+- Add clang format and git hook for commit
 
 ## Additional information
 

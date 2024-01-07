@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : IMailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : IMailbox
 //
-// Description : Utility functions
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,35 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Util.h>
+#pragma once
 
-void* memset(void* buffer, int value, size_t length)
+#include <baremetal/Types.h>
+
+namespace baremetal {
+
+/// @brief Mailbox channels
+/// \ref https://github.com/raspberrypi/firmware/wiki/Mailboxes
+enum class MailboxChannel
 {
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+    ARM_MAILBOX_CH_POWER = 0,       // Power management
+    ARM_MAILBOX_CH_FB = 1,          // Frame buffer
+    ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    ARM_MAILBOX_CH_LEDS = 4,
+    ARM_MAILBOX_CH_BTNS = 5,
+    ARM_MAILBOX_CH_TOUCH = 6,
+    ARM_MAILBOX_CH_COUNT = 7,
+    ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
+};
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
-}
-
-void* memcpy(void* dest, const void* src, size_t length)
+/// @brief IMailbox: Mailbox abstract interface
+class IMailbox
 {
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+public:
+    virtual ~IMailbox() = default;
 
-    while (length-- > 0)
-    {
-        *dstPtr++ = *srcPtr++;
-    }
-    return dest;
-}
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
+
+} // namespace baremetal

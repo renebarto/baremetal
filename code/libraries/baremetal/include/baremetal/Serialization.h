@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : Serialization.h
 //
-// Namespace   : -
+// Namespace   : serialization
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Serialization of types to character buffer
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,13 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Util.h>
+#pragma once
 
-void* memset(void* buffer, int value, size_t length)
-{
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+#include <baremetal/Types.h>
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
-}
+namespace baremetal {
 
-void* memcpy(void* dest, const void* src, size_t length)
-{
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
+void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
 
-    while (length-- > 0)
-    {
-        *dstPtr++ = *srcPtr++;
-    }
-    return dest;
-}
+} // namespace baremetal

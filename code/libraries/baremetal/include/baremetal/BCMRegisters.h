@@ -42,6 +42,17 @@
 #include <baremetal/Macros.h>
 #include <baremetal/Types.h>
 
+#define GPU_CACHED_BASE                 0x40000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5
+#define GPU_UNCACHED_BASE               0xC0000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5, 6
+
+#define GPU_MEM_BASE                    GPU_UNCACHED_BASE
+
+// Convert ARM address to GPU bus address (also works for aliases)
+#define ARM_TO_GPU(addr)                (((addr) & ~0xC0000000) | GPU_MEM_BASE)
+#define GPU_TO_ARM(addr)                ((addr) & ~0xC0000000)
+
+/// \ref doc/boards/RaspberryPi/BCM2835-peripherals.pdf
+/// \ref doc/boards/RaspberryPi/bcm2711-peripherals.pdf
 #if BAREMETAL_RPI_TARGET == 3
 /// @brief Base address for Raspberry PI BCM I/O
 #define RPI_BCM_IO_BASE                 0x3F000000
@@ -64,6 +75,25 @@
 #define RPI_SYSTMR_CMP1                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000010)
 #define RPI_SYSTMR_CMP2                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000014)
 #define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
+
+//---------------------------------------------
+// Mailbox registers
+//---------------------------------------------
+
+#define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
+#define RPI_MAILBOX0_READ               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000000)
+#define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
+#define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
+#define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
+#define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
+#define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
+#define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
+#define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
+#define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
+#define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
+#define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
+#define RPI_MAILBOX_STATUS_FULL         BIT(31)
+#define RPI_MAILBOX_REQUEST             0
 
 //---------------------------------------------
 // Raspberry Pi Power Management

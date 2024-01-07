@@ -1,20 +1,20 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : MemoryManager.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryManager
 //
-// Description : Utility functions
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-//
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-//
+// 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,30 +34,25 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
+// 
 //------------------------------------------------------------------------------
 
-#include <baremetal/Util.h>
+#pragma once
 
-void* memset(void* buffer, int value, size_t length)
+#include <baremetal/Types.h>
+
+enum class CoherentPageSlot
 {
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+    PropertyMailbox = 0,
+};
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
-}
+namespace baremetal {
 
-void* memcpy(void* dest, const void* src, size_t length)
+/// @brief MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
+class MemoryManager
 {
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+public:
+    static uintptr GetCoherentPage(CoherentPageSlot slot);
+};
 
-    while (length-- > 0)
-    {
-        *dstPtr++ = *srcPtr++;
-    }
-    return dest;
-}
+} // namespace baremetal

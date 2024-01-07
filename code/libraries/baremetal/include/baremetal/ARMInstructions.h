@@ -49,6 +49,8 @@
 
 /// @brief Data sync barrier
 #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
+/// @brief Data memory barrier
+#define DataMemBarrier()                asm volatile ("dmb sy" ::: "memory")
 
 /// @brief Wait for interrupt
 #define WaitForInterrupt()              asm volatile ("wfi")

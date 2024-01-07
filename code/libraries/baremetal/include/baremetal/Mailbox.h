@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : Mailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Mailbox
 //
-// Description : Utility functions
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,29 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Util.h>
+#pragma once
 
-void* memset(void* buffer, int value, size_t length)
+#include <baremetal/IMailbox.h>
+#include <baremetal/MemoryAccess.h>
+
+namespace baremetal {
+
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+class Mailbox : public IMailbox
 {
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+private:
+    MailboxChannel m_channel;
+    IMemoryAccess &m_memoryAccess;
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
-}
+public:
+    Mailbox(MailboxChannel channel, IMemoryAccess &memoryAccess = GetMemoryAccess());
 
-void* memcpy(void* dest, const void* src, size_t length)
-{
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+    uintptr WriteRead(uintptr address) override;
 
-    while (length-- > 0)
-    {
-        *dstPtr++ = *srcPtr++;
-    }
-    return dest;
-}
+private:
+    void   Flush();
+    uintptr Read();
+    void   Write(uintptr data);
+};
+
+} // namespace baremetal

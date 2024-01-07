@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : MemoryMap.h
 //
@@ -75,3 +75,14 @@
 #define MEM_EXCEPTION_STACK     (MEM_KERNEL_STACK + KERNEL_STACK_SIZE * (CORES - 1) + EXCEPTION_STACK_SIZE)
 /// @brief Top of exception stack for all cores (stack grows down). Also includes the exception stacks for cores 1..CORES-1
 #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
+
+#if BAREMETAL_RPI_TARGET == 3
+/// @brief Size reserved for coherent memory
+#define COHERENT_REGION_SIZE 1 * MEGABYTE
+#else
+/// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
+#define COHERENT_REGION_SIZE 4 * MEGABYTE
+#endif
+
+/// @brief Region reserved for coherent memory rounded to 1 Mb
+#define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))

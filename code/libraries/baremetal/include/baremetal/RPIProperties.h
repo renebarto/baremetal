@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : RPIProperties.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : RPIProperties
 //
-// Description : Utility functions
+// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,22 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Util.h>
+#pragma once
 
-void* memset(void* buffer, int value, size_t length)
+#include <baremetal/IMailbox.h>
+#include <baremetal/Types.h>
+
+namespace baremetal {
+
+class RPIProperties
 {
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+private:
+    IMailbox &m_mailbox;
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
-}
+public:
+    explicit RPIProperties(IMailbox &mailbox);
 
-void* memcpy(void* dest, const void* src, size_t length)
-{
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+    bool GetBoardSerial(uint64 &serial);
+};
 
-    while (length-- > 0)
-    {
-        *dstPtr++ = *srcPtr++;
-    }
-    return dest;
-}
+} // namespace baremetal

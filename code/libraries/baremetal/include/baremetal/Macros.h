@@ -45,6 +45,12 @@
 /// @defgroup Macros
 /// @{
 
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED              __attribute__ ((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+/// @param n alignment in bytes
+#define ALIGN(n)            __attribute__ ((aligned (n)))
+
 /// @brief Make a variable a weak instance (GCC compiler only)
 #define WEAK                __attribute__ ((weak))
 

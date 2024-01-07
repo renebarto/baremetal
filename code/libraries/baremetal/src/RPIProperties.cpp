@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.cpp
+// File        : RPIProperties.cpp
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : RPIProperties
 //
-// Description : Utility functions
+// Description : Access to BCM2835/6/7 properties using mailbox
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,38 @@
 //
 //------------------------------------------------------------------------------
 
+#include <baremetal/RPIProperties.h>
+
+#include <baremetal/BCMRegisters.h>
+#include <baremetal/RPIPropertiesInterface.h>
 #include <baremetal/Util.h>
 
-void* memset(void* buffer, int value, size_t length)
-{
-    uint8* ptr = reinterpret_cast<uint8*>(buffer);
+namespace baremetal {
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
+struct PropertySerial
+{
+    Property tag;
+    uint32   serial[2];
+} PACKED;
+
+RPIProperties::RPIProperties(IMailbox &mailbox)
+    : m_mailbox{mailbox}
+{
 }
 
-void* memcpy(void* dest, const void* src, size_t length)
+bool RPIProperties::GetBoardSerial(uint64 &serial)
 {
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+    PropertySerial         tag{};
+    RPIPropertiesInterface interface(m_mailbox);
 
-    while (length-- > 0)
+    auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
+
+    if (result)
     {
-        *dstPtr++ = *srcPtr++;
+        serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
     }
-    return dest;
+
+    return result;
 }
+
+} // namespace baremetal

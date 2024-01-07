@@ -445,19 +445,15 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 41: 
 42: #include <baremetal/Types.h>
 43: 
-44: #if defined(PLATFORM_BAREMETAL)
-45: 
-46: #ifdef __cplusplus
-47: extern "C" {
-48: #endif
+44: #ifdef __cplusplus
+45: extern "C" {
+46: #endif
+47: 
+48: void* memset(void* buffer, int value, size_t length);
 49: 
-50: void* memset(void* buffer, int value, size_t length);
-51: 
-52: #ifdef __cplusplus
-53: }
-54: #endif
-55: 
-56: #endif
+50: #ifdef __cplusplus
+51: }
+52: #endif
 ```
 
 This header simply declares the function memset (which is a standard C library function, but needs to be implemented specifically for the platform).

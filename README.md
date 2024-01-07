@@ -59,8 +59,10 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - [Generalization](doc/07-generalization.md)
 - [Timer](doc/08-timer.md)
 - [Mailbox](doc/09-mailbox.md)
-- UART0 (create abstract interface for character device)
+- [UART0](doc/10-uart0.md)
 - Add doxygen
+- Add logger, inject character device
+- Add retrieval of system information
 - Add clang format and git hook for commit
 
 ## Additional information

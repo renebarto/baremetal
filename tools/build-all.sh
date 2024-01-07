@@ -1,1 +1,1 @@
-cmake --build cmake-Baremetal-Debug
+cmake --build cmake-build

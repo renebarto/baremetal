@@ -1,0 +1,22 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "cppgdb",
+      "project": "CMakeLists.txt",
+      "projectTarget": "demo.elf (D:\\Projects\\baremetal.github\\tutorial\\03-setting-up-project-structure\\output\\Debug\\bin\\demo.elf)",
+      "name": "demo.elf (D:\\Projects\\baremetal.github\\tutorial\\03-setting-up-project-structure\\output\\Debug\\bin\\demo.elf)",
+      "program": "demo.elf",
+      "request": "launch",
+      "stopAtEntry": false,
+      "cwd": "${workspaceRoot}\\output\\Debug\\bin",
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "targetArchitecture": "arm64",
+      "miDebuggerServerAddress": "localhost:1234",
+      "miDebuggerPath": "D:\\Toolchains\\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe",
+      "args": []
+    }
+  ]
+}

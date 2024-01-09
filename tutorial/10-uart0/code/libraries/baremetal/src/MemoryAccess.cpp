@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : MemoryAccess.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : MemoryAccess
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -37,33 +37,66 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/MemoryAccess.h>
 
-#include <baremetal/IMailbox.h>
-#include <baremetal/Types.h>
+using namespace baremetal;
 
-namespace baremetal {
-
-enum class ClockID : uint32
+uint8 MemoryAccess::Read8(regaddr address)
 {
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+    return *reinterpret_cast<uint8 volatile*>(address);
+}
 
-class RPIProperties
+void MemoryAccess::Write8(regaddr address, uint8 data)
 {
-private:
-    IMailbox &m_mailbox;
+    *reinterpret_cast<uint8 volatile*>(address) = data;
+}
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
+void MemoryAccess::ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)
+{
+    auto value = Read8(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write8(address, value);
+}
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
+uint16 MemoryAccess::Read16(regaddr address)
+{
+    return *reinterpret_cast<uint16 volatile*>(address);
+}
 
-} // namespace baremetal
+void MemoryAccess::Write16(regaddr address, uint16 data)
+{
+    *reinterpret_cast<uint16 volatile*>(address) = data;
+}
+
+void MemoryAccess::ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift)
+{
+    auto value = Read16(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write16(address, value);
+}
+
+uint32 MemoryAccess::Read32(regaddr address)
+{
+    return *address;
+}
+
+void MemoryAccess::Write32(regaddr address, uint32 data)
+{
+    *address = data;
+}
+
+void MemoryAccess::ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift)
+{
+    auto value = Read32(address);
+    value &= ~mask;
+    value |= ((data << shift) & mask);
+    Write32(address, value);
+}
+
+MemoryAccess &baremetal::GetMemoryAccess()
+{
+    static MemoryAccess value;
+    return value;
+}

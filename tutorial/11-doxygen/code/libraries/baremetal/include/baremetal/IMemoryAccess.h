@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : IMemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : IMemoryAccess
 //
-// Description : RPI UART1 class
+// Description : Memory read/write abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,24 @@
 
 #pragma once
 
-#include <baremetal/CharDevice.h>
+#include <baremetal/Types.h>
 
 namespace baremetal {
 
-class IMemoryAccess;
-
-/// @brief Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-class UART1 : public CharDevice
+class IMemoryAccess
 {
-    friend UART1& GetUART1();
-
-private:
-    bool            m_initialized;
-    IMemoryAccess  &m_memoryAccess;
-
-    /// @brief Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
-    UART1();
-
 public:
-    /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
-    UART1(IMemoryAccess &memoryAccess);
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-    ///
-    ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
-    void Initialize();
-    /// @brief Read a character
-    /// @return Character read
-    char Read() override;
-    /// @brief Write a character
-    /// @param c Character to be written
-    void Write(char c) override;
-    /// @brief Write a string
-    /// @param str String to be written
-    void WriteString(const char* str);
-};
+    virtual ~IMemoryAccess() = default;
 
-/// @brief Constructs the singleton UART1 instance, if needed.
-/// @return A refence to the singleton UART1 instance.
-UART1 &GetUART1();
+    virtual uint8  Read8(regaddr address)                                                    = 0;
+    virtual void   Write8(regaddr address, uint8 data)                                       = 0;
+    virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)    = 0;
+    virtual uint16 Read16(regaddr address)                                                   = 0;
+    virtual void   Write16(regaddr address, uint16 data)                                     = 0;
+    virtual void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) = 0;
+    virtual uint32 Read32(regaddr address)                                                   = 0;
+    virtual void   Write32(regaddr address, uint32 data)                                     = 0;
+    virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
+};
 
 } // namespace baremetal

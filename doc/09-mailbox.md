@@ -2521,5 +2521,5 @@ Wait 5 seconds
 Press r to reboot, h to halt
 ```
 
-Next: [08-using-the-mailbox](08-using-the-mailbox.md)
+Next: [10-uart0](10-uart0.md)
 

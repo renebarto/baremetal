@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Util.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,33 +37,27 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/Util.h>
 
-#include <baremetal/IMailbox.h>
-#include <baremetal/Types.h>
-
-namespace baremetal {
-
-enum class ClockID : uint32
+void* memset(void* buffer, int value, size_t length)
 {
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+    uint8* ptr = reinterpret_cast<uint8*>(buffer);
 
-class RPIProperties
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}
+
+void* memcpy(void* dest, const void* src, size_t length)
 {
-private:
-    IMailbox &m_mailbox;
+    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
+    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    while (length-- > 0)
+    {
+        *dstPtr++ = *srcPtr++;
+    }
+    return dest;
+}

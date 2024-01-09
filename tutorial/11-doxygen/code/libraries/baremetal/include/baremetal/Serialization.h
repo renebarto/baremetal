@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Serialization.h
 //
-// Namespace   : baremetal
+// Namespace   : serialization
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Serialization of types to character buffer
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,11 @@
 
 #pragma once
 
-#include <baremetal/IMailbox.h>
 #include <baremetal/Types.h>
 
 namespace baremetal {
 
-enum class ClockID : uint32
-{
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
-
-class RPIProperties
-{
-private:
-    IMailbox &m_mailbox;
-
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
+void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
+void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
 
 } // namespace baremetal

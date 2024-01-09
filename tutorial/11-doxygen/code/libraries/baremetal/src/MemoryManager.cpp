@@ -1,20 +1,20 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : MemoryManager.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : MemoryManager
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-//
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-//
+// 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,36 +34,20 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
+// 
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/MemoryManager.h>
 
-#include <baremetal/IMailbox.h>
-#include <baremetal/Types.h>
+#include <baremetal/SysConfig.h>
 
-namespace baremetal {
+using namespace baremetal;
 
-enum class ClockID : uint32
+uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 {
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+    uint64 pageAddress = MEM_COHERENT_REGION;
 
-class RPIProperties
-{
-private:
-    IMailbox &m_mailbox;
+    pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    return pageAddress;
+}

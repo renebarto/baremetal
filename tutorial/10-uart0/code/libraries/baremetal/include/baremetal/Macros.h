@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Macros.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
 //
@@ -39,31 +39,23 @@
 
 #pragma once
 
-#include <baremetal/IMailbox.h>
-#include <baremetal/Types.h>
+/// @file
+/// Generic macros
 
-namespace baremetal {
+/// @defgroup Macros
+/// @{
 
-enum class ClockID : uint32
-{
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED              __attribute__ ((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+/// @param n alignment in bytes
+#define ALIGN(n)            __attribute__ ((aligned (n)))
 
-class RPIProperties
-{
-private:
-    IMailbox &m_mailbox;
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK                __attribute__ ((weak))
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
+/// @brief Convert bit index into integer
+/// @param n Bit index
+#define BIT(n)              (1U << (n))
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+/// @}

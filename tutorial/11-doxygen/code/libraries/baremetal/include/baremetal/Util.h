@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Util.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,15 @@
 
 #pragma once
 
-#include <baremetal/IMailbox.h>
 #include <baremetal/Types.h>
 
-namespace baremetal {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-enum class ClockID : uint32
-{
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+void* memset(void* buffer, int value, size_t length);
+void* memcpy(void* dest, const void* src, size_t length);
 
-class RPIProperties
-{
-private:
-    IMailbox &m_mailbox;
-
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+#ifdef __cplusplus
+}
+#endif

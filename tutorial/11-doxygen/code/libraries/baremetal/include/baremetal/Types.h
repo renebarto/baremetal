@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Types.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,42 @@
 
 #pragma once
 
-#include <baremetal/IMailbox.h>
-#include <baremetal/Types.h>
+/// @file
+/// Standard types
 
-namespace baremetal {
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-enum class ClockID : uint32
-{
-    EMMC      = 1,
-    UART      = 2,
-    ARM       = 3,
-    CORE      = 4,
-    EMMC2     = 12,
-    PIXEL_BVB = 14,
-};
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-class RPIProperties
-{
-private:
-    IMailbox &m_mailbox;
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+/// @brief Unsigned volatile 32 bit integer (for registers)
+typedef volatile uint32 reg32;
+/// @brief Pointer to unsigned volatile 32 bit integer (for registers)
+typedef reg32* regaddr;

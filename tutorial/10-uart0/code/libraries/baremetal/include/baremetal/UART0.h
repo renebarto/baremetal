@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : UART0.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : UART0
 //
-// Description : RPI UART1 class
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -45,25 +45,25 @@ namespace baremetal {
 
 class IMemoryAccess;
 
-/// @brief Encapsulation for the UART1 device.
+/// @brief Encapsulation for the UART0 device.
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
 /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-class UART1 : public CharDevice
+class UART0 : public CharDevice
 {
-    friend UART1& GetUART1();
+    friend UART0 &GetUART0();
 
 private:
     bool            m_initialized;
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
-    UART1();
+    /// @brief Constructs a default UART0 instance. Note that the constructor is private, so GetUART0() is needed to instantiate the UART0.
+    UART0();
 
 public:
-    /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
-    UART1(IMemoryAccess &memoryAccess);
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
+    /// @brief Constructs a specialized UART0 instance with a custom IMemoryAccess instance. This is intended for testing.
+    UART0(IMemoryAccess &memoryAccess);
+    /// @brief Initialize the UART0 device. Only performed once, guarded by m_initialized.
     ///
     ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
     void Initialize();
@@ -78,8 +78,8 @@ public:
     void WriteString(const char* str);
 };
 
-/// @brief Constructs the singleton UART1 instance, if needed.
-/// @return A refence to the singleton UART1 instance.
-UART1 &GetUART1();
+/// @brief Constructs the singleton UART0 instance, if needed.
+/// @return A refence to the singleton UART0 instance.
+UART0 &GetUART0();
 
 } // namespace baremetal

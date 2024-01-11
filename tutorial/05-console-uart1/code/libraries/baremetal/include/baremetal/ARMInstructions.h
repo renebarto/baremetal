@@ -39,10 +39,9 @@
 
 #pragma once
 
-/// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+// ARM instructions represented as macros for ease of use.
+//
+// For specific registers, we also define the fields and their possible values.
 
-/// @brief NOP instruction
+// NOP instruction
 #define NOP()                           asm volatile("nop")

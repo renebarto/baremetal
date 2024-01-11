@@ -129,7 +129,8 @@ We should have defined `s_uart` as static, but that does not work so far, as we 
 ### System.h - step 1
 
 We'll add the System class.
-We first add the header file. Create a file `code/libraries/baremetal/include/baremetal/System.h`.
+We first add the header file.
+Create a file `code/libraries/baremetal/include/baremetal/System.h`.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/System.h
@@ -844,13 +845,13 @@ Update 'code/libraries\baremetal/include/baremetal/UART1.cpp':
 File: code/libraries/baremetal/src/UART1.cpp
 ...
 
-245:     UART1& GetUART1()
-246:     {
-247:         static UART1 value;
-248:         value.Initialize();
+245: UART1& GetUART1()
+246: {
+247:     static UART1 value;
+248:     value.Initialize();
 249: 
-250:         return value;
-251:     }
+250:     return value;
+251: }
 252: 
 253: } // namespace baremetal
 ```

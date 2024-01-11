@@ -264,6 +264,7 @@ We add ARM instructions.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
+```
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //
@@ -1181,7 +1182,6 @@ Create the file `code/libraries/baremetal/include/baremetal/UART1.h`:
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
-File: f:\Projects\Private\baremetal.tmp\tutorial\05-console-uart1\code\libraries\baremetal\include\baremetal\UART1.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //

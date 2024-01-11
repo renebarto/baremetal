@@ -61,55 +61,47 @@ Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
-
 ...
-106: /// @brief Encapsulation for the UART1 device.
-107: ///
-108: class UART1
-109: {
-110:     friend UART1& GetUART1();
-111: 
-112: private:
-113:     bool            m_initialized;
-114: 
-115: public:
-116:     /// @brief Constructs a default UART1 instance.
-117:     UART1();
-118:     /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-119:     ///
-120:     ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
-121:     void Initialize();
-122:     /// @brief Read a character
-123:     /// @return Character read
-124:     char Read();
-125:     /// @brief Write a character
-126:     /// @param c Character to be written
-127:     void Write(char c);
-128:     /// @brief Write a string
-129:     /// @param str String to be written
-130:     void WriteString(const char *str);
-131: 
-132: private:
-133:     /// @param mode GPIO mode to be selected.
-134:     /// @return true if successful, false otherwise
-135:     bool SetMode(uint8 pinNumber, GPIOMode mode);
-136:     /// @brief Set GPIO pin function
-137:     /// @param function GPIO function to be selected.
-138:     bool SetFunction(uint8 pinNumber, GPIOFunction function);
-139:     /// @brief Set GPIO pin pull mode
-140:     /// @param pullMode GPIO pull mode to be used.
-141:     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
-142:     /// @brief Switch GPIO off
-143:     bool Off(uint8 pinNumber, GPIOMode mode);
-144: };
-145: 
-146: UART1& GetUART1();
-147: 
-148: } // namespace baremetal
+106: // Encapsulation for the UART1 device.
+107: class UART1
+108: {
+109:     friend UART1& GetUART1();
+110: 
+111: private:
+112:     bool            m_initialized;
+113: 
+114: public:
+115:     // Constructs a default UART1 instance.
+116:     UART1();
+117:     // Initialize the UART1 device. Only performed once, guarded by m_initialized.
+118:     //
+119:     //  Set baud rate and characteristics (115200 8N1) and map to GPIO
+120:     void Initialize();
+121:     // Read a character
+122:     char Read();
+123:     // Write a character
+124:     void Write(char c);
+125:     // Write a string
+126:     void WriteString(const char *str);
+127: 
+128: private:
+129:     // Set GPIO pin mode
+130:     bool SetMode(uint8 pinNumber, GPIOMode mode);
+131:     // Set GPIO pin function
+132:     bool SetFunction(uint8 pinNumber, GPIOFunction function);
+133:     // Set GPIO pin pull mode
+134:     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
+135:     // Switch GPIO off
+136:     bool Off(uint8 pinNumber, GPIOMode mode);
+137: };
+138: 
+139: UART1& GetUART1();
+140: 
+141: } // namespace baremetal
 ```
 
-- line 110: We declare a friend function `GetUART1()` to the UART1 class.
-- line 146: We declare the actual function `GetUART1()` to the UART1 class, which returns a reference to an instance of UART1.
+- line 109: We declare a friend function `GetUART1()` to the UART1 class.
+- line 139: We declare the actual function `GetUART1()` to the UART1 class, which returns a reference to an instance of UART1.
 
 ### Update UART1.cpp - step 1
 
@@ -212,8 +204,8 @@ File: code/libraries/baremetal/include/baremetal/System.h
 69: {
 70: #endif
 71: 
-72:     int               main();
-73:     [[noreturn]] void sysinit();
+72: int               main();
+73: [[noreturn]] void sysinit();
 74: 
 75: #ifdef __cplusplus
 76: }
@@ -333,7 +325,6 @@ File: code/libraries/baremetal/src/System.cpp
 96:     // clear BSS
 97:     extern unsigned char __bss_start;
 98:     extern unsigned char __bss_end;
-99:     // cppcheck-suppress comparePointers
 100:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 101: 
 102:     // halt, if KERNEL_MAX_SIZE is not properly set
@@ -529,30 +520,28 @@ Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`, 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
-
-50: /// @brief Data sync barrier
-51: #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
-52: 
-53: /// @brief Wait for interrupt
-54: #define WaitForInterrupt()              asm volatile ("wfi")
-55: 
-56: /// @brief Enable IRQss. Clear bit 1 of DAIF register. See \ref DAIF_REGISTER
-57: #define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-58: /// @brief Disable IRQs. Set bit 1 of DAIF register. See \ref DAIF_REGISTER
-59: #define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-60: /// @brief Enable FIQs. Clear bit 0 of DAIF register. See \ref DAIF_REGISTER
-61: #define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-62: /// @brief Disable FIQs. Set bit 0 of DAIF register. See \ref DAIF_REGISTER
-63: #define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
-64: 
+49: // Data sync barrier
+50: #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
+51: 
+52: // Wait for interrupt
+53: #define WaitForInterrupt()              asm volatile ("wfi")
+54: 
+55: // Enable IRQss. Clear bit 1 of DAIF register.
+56: #define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
+57: // Disable IRQs. Set bit 1 of DAIF register.
+58: #define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
+59: // Enable FIQs. Clear bit 0 of DAIF register.
+60: #define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
+61: // Disable FIQs. Set bit 0 of DAIF register.
+62: #define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
 ```
 
-- Line 51: This instruction enforces a synchronization with other cores concerning memory.
-- Line 54: This instruction waits for interrupts on the current core.
-- Line 57: This instruction enables interrupts
-- Line 59: This instruction disables interrupts
-- Line 61: This instruction enables fast interrupts
-- Line 63: This instruction disables fast interrupts
+- Line 50: This instruction enforces a synchronization with other cores concerning memory.
+- Line 53: This instruction waits for interrupts on the current core.
+- Line 56: This instruction enables interrupts
+- Line 58: This instruction disables interrupts
+- Line 60: This instruction enables fast interrupts
+- Line 62: This instruction disables fast interrupts
 
 ### Update startup code - step 1
 
@@ -765,7 +754,6 @@ File: \code/libraries/baremetal/src/System.cpp
 96:     // clear BSS
 97:     extern unsigned char __bss_start;
 98:     extern unsigned char __bss_end;
-99:     // cppcheck-suppress comparePointers
 100:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 101: 
 102:     // halt, if KERNEL_MAX_SIZE is not properly set
@@ -991,7 +979,7 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 91: #define INDEX_HAS_RUN		0
 92: #define INDEX_IN_USE		1
 93: 
-94: extern "C" int __cxa_guard_acquire(volatile uint8 * guardObject)
+94: extern "C" int __cxa_guard_acquire(volatile uint8* guardObject)
 95: {
 96:     if (guardObject[INDEX_HAS_RUN] != 0)
 97:     {
@@ -1003,13 +991,13 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 103:     return 1;                               // Run constructor
 104: }
 105: 
-106: extern "C" void __cxa_guard_release(volatile uint8 * guardObject)
+106: extern "C" void __cxa_guard_release(volatile uint8* guardObject)
 107: {
 108:     guardObject[INDEX_HAS_RUN] = 1;
 109:     guardObject[INDEX_IN_USE] = 0;
 110: }
 111: 
-112: extern "C" void __cxa_guard_abort(volatile uint8 * guardObject)
+112: extern "C" void __cxa_guard_abort(volatile uint8* guardObject)
 113: {
 114:     guardObject[INDEX_IN_USE] = 0;
 115: }
@@ -1069,7 +1057,7 @@ Update the file code/libraries/baremetal/include/baremetal/BCMRegisters.h
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
 
-52: /// @brief End address for Raspberry PI BCM I/O
+52: // End address for Raspberry PI BCM I/O
 53: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 54: 
 55: //---------------------------------------------

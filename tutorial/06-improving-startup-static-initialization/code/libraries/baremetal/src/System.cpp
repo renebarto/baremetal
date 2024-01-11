@@ -110,7 +110,6 @@ void sysinit()
     // clear BSS
     extern unsigned char __bss_start;
     extern unsigned char __bss_end;
-    // cppcheck-suppress comparePointers
     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 
     // halt, if KERNEL_MAX_SIZE is not properly set

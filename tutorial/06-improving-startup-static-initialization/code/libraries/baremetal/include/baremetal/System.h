@@ -69,8 +69,8 @@ extern "C"
 {
 #endif
 
-    int               main();
-    [[noreturn]] void sysinit();
+int               main();
+[[noreturn]] void sysinit();
 
 #ifdef __cplusplus
 }

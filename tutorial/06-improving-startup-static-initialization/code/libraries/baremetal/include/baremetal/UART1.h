@@ -43,68 +43,67 @@
 
 namespace baremetal {
 
-/// @brief GPIO mode
+// GPIO mode
 enum class GPIOMode
 {
-    /// @brief GPIO used as input
+    // GPIO used as input
     Input,
-    /// @brief GPIO used as output
+    // GPIO used as output
     Output,
-    /// @brief GPIO used as input, using pull-up
+    // GPIO used as input, using pull-up
     InputPullUp,
-    /// @brief GPIO used as input, using pull-down
+    // GPIO used as input, using pull-down
     InputPullDown,
-    /// @brief GPIO used as Alternate Function 0.
+    // GPIO used as Alternate Function 0.
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    // GPIO used as Alternate Function 1.
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    // GPIO used as Alternate Function 2.
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    // GPIO used as Alternate Function 3.
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    // GPIO used as Alternate Function 4.
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    // GPIO used as Alternate Function 5.
     AlternateFunction5,
     Unknown,
 };
 
-/// @brief GPIO function
+// GPIO function
 enum class GPIOFunction
 {
-    /// @brief GPIO used as input
+    // GPIO used as input
     Input,
-    /// @brief GPIO used as output
+    // GPIO used as output
     Output,
-    /// @brief GPIO used as Alternate Function 0.
+    // GPIO used as Alternate Function 0.
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    // GPIO used as Alternate Function 1.
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    // GPIO used as Alternate Function 2.
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    // GPIO used as Alternate Function 3.
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    // GPIO used as Alternate Function 4.
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    // GPIO used as Alternate Function 5.
     AlternateFunction5,
     Unknown,
 };
 
-/// @brief GPIO pull mode
+// GPIO pull mode
 enum class GPIOPullMode
 {
-    /// @brief GPIO pull mode off (no pull-up or pull-down)
+    // GPIO pull mode off (no pull-up or pull-down)
     Off,
-    /// @brief GPIO pull mode pull-down
+    // GPIO pull mode pull-down
     PullDown,
-    /// @brief GPIO pull mode pull-up
+    // GPIO pull mode pull-up
     PullUp,
     Unknown,
 };
 
-/// @brief Encapsulation for the UART1 device.
-///
+// Encapsulation for the UART1 device.
 class UART1
 {
     friend UART1& GetUART1();
@@ -113,33 +112,27 @@ private:
     bool            m_initialized;
 
 public:
-    /// @brief Constructs a default UART1 instance.
+    // Constructs a default UART1 instance.
     UART1();
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-    ///
-    ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+    // Initialize the UART1 device. Only performed once, guarded by m_initialized.
+    //
+    //  Set baud rate and characteristics (115200 8N1) and map to GPIO
     void Initialize();
-    /// @brief Read a character
-    /// @return Character read
+    // Read a character
     char Read();
-    /// @brief Write a character
-    /// @param c Character to be written
+    // Write a character
     void Write(char c);
-    /// @brief Write a string
-    /// @param str String to be written
-    void WriteString(const char* str);
+    // Write a string
+    void WriteString(const char *str);
 
 private:
-    /// @param mode GPIO mode to be selected.
-    /// @return true if successful, false otherwise
+    // Set GPIO pin mode
     bool SetMode(uint8 pinNumber, GPIOMode mode);
-    /// @brief Set GPIO pin function
-    /// @param function GPIO function to be selected.
+    // Set GPIO pin function
     bool SetFunction(uint8 pinNumber, GPIOFunction function);
-    /// @brief Set GPIO pin pull mode
-    /// @param pullMode GPIO pull mode to be used.
+    // Set GPIO pin pull mode
     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
-    /// @brief Switch GPIO off
+    // Switch GPIO off
     bool Off(uint8 pinNumber, GPIOMode mode);
 };
 

@@ -47,7 +47,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 45: 
 46: class IMemoryAccess;
 47: 
-48: /// @brief Timer class. For now only contains busy waiting methods
+48: // Timer class. For now only contains busy waiting methods
 49: /// Note that this class is created as a singleton, using the GetTimer function.
 50: class Timer
 51: {
@@ -56,14 +56,14 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 54: private:
 55:     IMemoryAccess& m_memoryAccess;
 56: 
-57:     /// @brief Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+57:     // Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
 58:     Timer();
 59: 
 60: public:
-61:     /// @brief Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
+61:     // Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
 62:     Timer(IMemoryAccess& memoryAccess);
 63: 
-64:     /// @brief Wait for specified number of NOP statements. Busy wait
+64:     // Wait for specified number of NOP statements. Busy wait
 65:     /// @param numCycles    Wait time in cycles
 66:     static void WaitCycles(uint32 numCycles);
 67: 
@@ -71,17 +71,17 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 69:     uint64 GetSystemTimer();
 70: #endif
 71: 
-72:     /// @brief Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+72:     // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 73:     /// counter). Busy wait
 74:     /// @param msec     Wait time in milliseconds
 75:     static void WaitMilliSeconds(uint64 msec);
-76:     /// @brief Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+76:     // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 77:     /// counter). Busy wait
 78:     /// @param usec     Wait time in microseconds
 79:     static void WaitMicroSeconds(uint64 usec);
 80: };
 81: 
-82: /// @brief Retrieves the singleton Timer instance. It is created in the first call to this function.
+82: // Retrieves the singleton Timer instance. It is created in the first call to this function.
 83: Timer& GetTimer();
 84: 
 85: } // namespace baremetal
@@ -216,7 +216,6 @@ File: code/libraries/baremetal/src/Timer.cpp
 110:         lowWord  = m_memoryAccess.Read32(RPI_SYSTMR_LO);
 111:     }
 112:     // compose long int value
-113:     // cppcheck-suppress shiftTooManyBits
 114:     return (static_cast<uint64>(highWord) << 32 | lowWord);
 115: }
 116: 
@@ -257,15 +256,14 @@ This needs to be added
   - Line 89: We calculate the number of counter ticks to wait by first calculating the number of ticks per microsecond, and then multiplying by the number of microseconds to wait.
 It would be more accurate to first multiply, however we might get an overflow
   - Line 92-95: We read the current count value, and loop as long as the number of ticks has not passed
-- Line 98-127: We implement the `WaitMicroSeconds()` method in case we use the physical system timer, using BCM registers. The System timer updates every microsecond
-  - Line 99-115: We need to implement the `GetSystemTimer()` to retrieve the current system timer count
+  - Line 99-114: We need to implement the `GetSystemTimer()` to retrieve the current system timer count
     - Line 104-105: We read the 64 bit system timer value
     - Line 107-111: The high word might have changed during the read, so in case it is read different, we read again. This prevents strange wrap-around errors
-    - Line 114: We combine the two 32 bit words into a 64 bit value
-  - Line 117-127: We implement `WaitMicroSeconds()`
-    - Line 119: We read the current system timer value
-    - Line 122-126: We loop (while executing NOP instructions) while number of microseconds has not elapsed
-- Line 130-134: We implement the getter function `GetTimer()`, which returns a reference to the singleton Timer instance.
+    - Line 113: We combine the two 32 bit words into a 64 bit value
+- Line 116-126: We implement the `WaitMicroSeconds()` method in case we use the physical system timer, using BCM registers. The System timer updates every microsecond
+  - Line 118: We read the current system timer value
+  - Line 121-125: We loop (while executing NOP instructions) while number of microseconds has not elapsed
+- Line 129-133: We implement the getter function `GetTimer()`, which returns a reference to the singleton Timer instance.
 
 ### ARMInstructions.h
 
@@ -276,41 +274,42 @@ Update the file `code/libraries/baremetal/include/baremetal/ASMInstructions.h`.
 ...
 File: code/libraries/baremetal/include/baremetal/ASMInstructions.h
 ...
-65: /// @brief Get counter timer frequency. See \ref CNTFRQ_EL0_REGISTER
-66: #define GetTimerFrequency(freq)         asm volatile ("mrs %0, CNTFRQ_EL0" : "=r"(freq))
-67: /// @brief Get counter timer value. See \ref CNTPCT_EL0_REGISTER
-68: #define GetTimerCounter(count)          asm volatile ("mrs %0, CNTPCT_EL0" : "=r"(count))
-69: 
-70: /// @brief Get Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
-71: #define GetTimerControl(value)          asm volatile ("mrs %0, CNTP_CTL_EL0" : "=r" (value))
-72: /// @brief Set Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
-73: #define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
-74: 
-75: /// @brief IStatus bit, flags if Physical counter-timer condition is met. See \ref CNTP_CTL_EL0_REGISTER
-76: #define CNTP_CTL_EL0_STATUS BIT(2)
-77: /// @brief IMask bit, flags if interrupts for Physical counter-timer are masked. See \ref CNTP_CTL_EL0_REGISTER
-78: #define CNTP_CTL_EL0_IMASK BIT(1)
-79: /// @brief Enable bit, flags if Physical counter-timer is enabled. See \ref CNTP_CTL_EL0_REGISTER
-80: #define CNTP_CTL_EL0_ENABLE BIT(0)
-81: 
-82: /// @brief Get Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
-83: #define GetTimerCompareValue(value)     asm volatile ("mrs %0, CNTP_CVAL_EL0" : "=r" (value))
-84: /// @brief Set Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
-85: #define SetTimerCompareValue(value)     asm volatile ("msr CNTP_CVAL_EL0, %0" :: "r" (value))
+64: // Get counter timer frequency.
+65: #define GetTimerFrequency(freq)         asm volatile ("mrs %0, CNTFRQ_EL0" : "=r"(freq))
+66: // Get counter timer value.
+67: #define GetTimerCounter(count)          asm volatile ("mrs %0, CNTPCT_EL0" : "=r"(count))
+68: 
+69: // Get Physical counter-timer control register.
+70: #define GetTimerControl(value)          asm volatile ("mrs %0, CNTP_CTL_EL0" : "=r" (value))
+71: // Set Physical counter-timer control register.
+72: #define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
+73: 
+74: // IStatus bit, flags if Physical counter-timer condition is met.
+75: #define CNTP_CTL_EL0_STATUS BIT(2)
+76: // IMask bit, flags if interrupts for Physical counter-timer are masked.
+77: #define CNTP_CTL_EL0_IMASK BIT(1)
+78: // Enable bit, flags if Physical counter-timer is enabled.
+79: #define CNTP_CTL_EL0_ENABLE BIT(0)
+80: 
+81: // Get Physical counter-timer comparison value.
+82: #define GetTimerCompareValue(value)     asm volatile ("mrs %0, CNTP_CVAL_EL0" : "=r" (value))
+83: // Set Physical counter-timer comparison value.
+84: #define SetTimerCompareValue(value)     asm volatile ("msr CNTP_CVAL_EL0, %0" :: "r" (value))
+85: 
 ```
 
-- Line 66: We define `GetTimerFrequency()`. It reads the Counter-timer Frequency (`CNTFRQ_EL0`) register.
+- Line 65: We define `GetTimerFrequency()`. It reads the Counter-timer Frequency (`CNTFRQ_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 222.
-- Line 68: We define `GetTimerCounter()`. It reads the Counter-timer Physical Count (`CNTPCT_EL0`) register.
+- Line 67: We define `GetTimerCounter()`. It reads the Counter-timer Physical Count (`CNTPCT_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 307.
-- Line 71: We define `GetTimerControl()`. It reads the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
+- Line 70: We define `GetTimerControl()`. It reads the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 293.
-- Line 73: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
+- Line 72: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 293.
-- Line 76-80: We define the bits of the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
-- Line 83: We define `SetTimerControl()`. It read the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
+- Line 75-79: We define the bits of the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
+- Line 82: We define `SetTimerControl()`. It read the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 298.
-- Line 85: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
+- Line 84: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
 See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 298.
 
 Only the first two functions are currently used.
@@ -355,23 +354,23 @@ Update the file `code/libraries/baremetal/src/System.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/System.cpp
 ...
-70: static const uint32 WaitTime = 10; // ms
+69: static const uint32 WaitTime = 10; // ms
 ...
-88: void System::Halt()
-89: {
-90:     GetUART1().WriteString("Halt\n");
-91:     Timer::WaitMilliSeconds(WaitTime);
+87: void System::Halt()
+88: {
+89:     GetUART1().WriteString("Halt\n");
+90:     Timer::WaitMilliSeconds(WaitTime);
 ...
-108: void System::Reboot()
-109: {
-110:     GetUART1().WriteString("Reboot\n");
-111:     Timer::WaitMilliSeconds(WaitTime);
+107: void System::Reboot()
+108: {
+109:     GetUART1().WriteString("Reboot\n");
+110:     Timer::WaitMilliSeconds(WaitTime);
 ...
 ```
 
-- Line 70: We replace the count with a delay in milliseconds
-- Line 91: We call `WaitMilliSeconds()` instead of `WaitCycles()`
-- Line 111: We call `WaitMilliSeconds()` instead of `WaitCycles()`
+- Line 69: We replace the count with a delay in milliseconds
+- Line 90: We call `WaitMilliSeconds()` instead of `WaitCycles()`
+- Line 110: We call `WaitMilliSeconds()` instead of `WaitCycles()`
 
 ### Update application
 
@@ -381,6 +380,15 @@ Update the file `code/application/demo/src/main.cpp`.
 
 ```cpp
 File: code/applications/demo/src/main.cpp
+1: #include <baremetal/ARMInstructions.h>
+2: #include <baremetal/System.h>
+3: #include <baremetal/Timer.h>
+4: #include <baremetal/UART1.h>
+5: 
+6: using namespace baremetal;
+7: 
+8: int main()
+9: {
 10:     auto& uart = GetUART1();
 11:     uart.WriteString("Hello World!\n");
 12: 
@@ -388,6 +396,15 @@ File: code/applications/demo/src/main.cpp
 14:     Timer::WaitMilliSeconds(5000);
 15: 
 16:     uart.WriteString("Press r to reboot, h to halt\n");
+17:     char ch{};
+18:     while ((ch != 'r') && (ch != 'h'))
+19:     {
+20:         ch = uart.Read();
+21:         uart.Write(ch);
+22:     }
+23: 
+24:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+25: }
 ```
 
 ### Update project configuration - Step 3

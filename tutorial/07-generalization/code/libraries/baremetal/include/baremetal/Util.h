@@ -41,8 +41,6 @@
 
 #include <baremetal/Types.h>
 
-#if defined(PLATFORM_BAREMETAL)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,6 +49,4 @@ void* memset(void* buffer, int value, size_t length);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

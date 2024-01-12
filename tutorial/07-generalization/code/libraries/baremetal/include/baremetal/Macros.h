@@ -39,17 +39,8 @@
 
 #pragma once
 
-/// @file
-/// Generic macros
-
-/// @defgroup Macros
-/// @{
-
-/// @brief Make a variable a weak instance (GCC compiler only)
+// Make a variable a weak instance (GCC compiler only)
 #define WEAK                __attribute__ ((weak))
 
-/// @brief Convert bit index into integer
-/// @param n Bit index
+// Convert bit index into integer
 #define BIT(n)              (1U << (n))
-
-/// @}

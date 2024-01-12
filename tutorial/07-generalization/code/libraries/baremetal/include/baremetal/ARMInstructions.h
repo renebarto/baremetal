@@ -39,25 +39,24 @@
 
 #pragma once
 
-/// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+// ARM instructions represented as macros for ease of use.
+//
+// For specific registers, we also define the fields and their possible values.
 
-/// @brief NOP instruction
+// NOP instruction
 #define NOP()                           asm volatile("nop")
 
-/// @brief Data sync barrier
+// Data sync barrier
 #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
 
-/// @brief Wait for interrupt
+// Wait for interrupt
 #define WaitForInterrupt()              asm volatile ("wfi")
 
-/// @brief Enable IRQss. Clear bit 1 of DAIF register. See \ref DAIF_REGISTER
+// Enable IRQss. Clear bit 1 of DAIF register.
 #define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See \ref DAIF_REGISTER
+// Disable IRQs. Set bit 1 of DAIF register.
 #define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See \ref DAIF_REGISTER
+// Enable FIQs. Clear bit 0 of DAIF register.
 #define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See \ref DAIF_REGISTER
+// Disable FIQs. Set bit 0 of DAIF register.
 #define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")

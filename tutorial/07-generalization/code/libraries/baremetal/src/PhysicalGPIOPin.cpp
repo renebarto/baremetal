@@ -44,16 +44,13 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/Timer.h>
 
-/// @file
-/// Physical GPIO pin implementation
-
-/// @brief Total count of GPIO pins, numbered from 0 through 53
+// Total count of GPIO pins, numbered from 0 through 53
 #define NUM_GPIO 54
 
 namespace baremetal {
 
 #if BAREMETAL_RPI_TARGET == 3
-    static const int NumWaitCycles = 150;
+static const int NumWaitCycles = 150;
 #endif // BAREMETAL_RPI_TARGET == 3
 
 PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)

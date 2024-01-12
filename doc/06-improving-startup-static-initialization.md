@@ -1066,15 +1066,18 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 57: //---------------------------------------------
 58: 
 59: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
-60: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001c)
+60: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
 61: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
 62: #define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
-63: #define RPI_PWRMGT_WDOG_MAGIC           0x5a000000
-64: #define RPI_PWRMGT_RSTC_FULLRST         0x00000020
-65: 
-66: //---------------------------------------------
-67: // Raspberry Pi GPIO
-68: //---------------------------------------------
+63: #define RPI_PWRMGT_WDOG_MAGIC           0x5A000000
+64: #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
+65: #define RPI_PWRMGT_RSTC_REBOOT          0x00000020
+66: #define RPI_PWRMGT_RSTC_RESET           0x00000102
+67: #define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
+68: 
+69: //---------------------------------------------
+70: // Raspberry Pi GPIO
+71: //---------------------------------------------
 
 ...
 ```
@@ -1098,11 +1101,11 @@ File: code/libraries/baremetal/src/System.cpp
 63: 
 64:     // power off the SoC (GPU + CPU)
 65:     auto r = *(RPI_PWRMGT_RSTS);
-66:     r &= ~0xFFFFFAAA;
+66:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
 67:     r |= 0x555; // partition 63 used to indicate halt
 68:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
-69:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
-70:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+69:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+70:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 71: 
 72:     for (;;) // Satisfy [[noreturn]]
 73:     {
@@ -1139,10 +1142,10 @@ File: code/libraries/baremetal/src/System.cpp
 85: 
 86:     // power off the SoC (GPU + CPU)
 87:     auto r = *(RPI_PWRMGT_RSTS);
-88:     r &= ~0xFFFFFAAA;
+88:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
 89:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-90:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
-91:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+90:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+91:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 92: 
 93:     for (;;) // Satisfy [[noreturn]]
 94:     {

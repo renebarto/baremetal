@@ -66,8 +66,8 @@ void System::Halt()
     r &= ~0xFFFFFAAA;
     r |= 0x555; // partition 63 used to indicate halt
     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
-    *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
-    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+    *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTS_PART_CLEAR);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -87,8 +87,8 @@ void System::Reboot()
     auto r = *(RPI_PWRMGT_RSTS);
     r &= ~0xFFFFFAAA;
     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 10);
-    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+    *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTS_PART_CLEAR);
 
     for (;;) // Satisfy [[noreturn]]
     {

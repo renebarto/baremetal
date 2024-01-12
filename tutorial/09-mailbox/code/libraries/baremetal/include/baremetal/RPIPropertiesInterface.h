@@ -45,8 +45,7 @@
 
 namespace baremetal {
 
-/// @brief Raspberry Pi mailbox property tags
-/// \ref https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
+// Raspberry Pi mailbox property tags
 enum class PropertyID : uint32
 {
     PROPTAG_END                     = 0x00000000,
@@ -109,10 +108,10 @@ struct MailboxBuffer
 
 struct Property
 {
-    uint32 tagID;                   // See PropertyID
-    uint32 tagBufferSize;           // Size of tag buffer in bytes, multiple of 4
-    uint32 tagRequestResponse;      // Tag request / response code (0 on request, 0x80000000 | size on response)
-    uint8  tagBuffer[0];            // Tag buffer, must be padded to be 4 byte aligned
+    uint32 tagID;               // See PropertyID
+    uint32 tagBufferSize;       // bytes, multiple of 4
+    uint32 tagRequestResponse;  // bytes
+    uint8  tagBuffer[0];        // must be padded to be 4 byte aligned
 } PACKED;
 
 class RPIPropertiesInterface

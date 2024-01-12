@@ -39,25 +39,22 @@
 
 #pragma once
 
-/// @file
-/// System definitions
-
-/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+// Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
 #define CORES    4
 
-/// @brief Size of 1 Megabyte
+// Size of 1 Megabyte
 #define MEGABYTE 0x100000
-/// @brief Size of 1 Gigabyte
+// Size of 1 Gigabyte
 #define GIGABYTE 0x40000000ULL
 
-/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
-/// If your kernel image contains big data areas it may be required to
-/// increase this value. The value must be a multiple of 16 KByte.
+// KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
+// If your kernel image contains big data areas it may be required to
+// increase this value. The value must be a multiple of 16 KByte.
 #ifndef KERNEL_MAX_SIZE
 #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
 
-/// @brief Set part to be used by GPU (normally set in config.txt)
+// Set part to be used by GPU (normally set in config.txt)
 #ifndef GPU_MEM_SIZE
 #define GPU_MEM_SIZE (64 * MEGABYTE)
 #endif

@@ -52,11 +52,11 @@ class System
 private:
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
+    // Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
     System();
 
 public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
+    // Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
     System(IMemoryAccess &memoryAccess);
 
     [[noreturn]] void Halt();
@@ -78,8 +78,8 @@ extern "C"
 {
 #endif
 
-    int               main();
-    [[noreturn]] void sysinit();
+int               main();
+[[noreturn]] void sysinit();
 
 #ifdef __cplusplus
 }

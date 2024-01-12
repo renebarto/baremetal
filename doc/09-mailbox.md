@@ -22,6 +22,7 @@ Contents:
   - [Configuring, building and debugging - Step 3](###Configuring-building-and-debugging-Step-3)
 - [Adding the properties interface - Step 4](##Adding-the-properties-interface-Step-4)
   - [RPIPropertiesInterface.h](###RPIPropertiesInterface.h)
+  - [Macros.h](###Macros.h)
   - [RPIPropertiesInterface.cpp](###RPIPropertiesInterface.cpp)
   - [Update the application code - Step 4](###Update-the-application-code-Step-4)
   - [Update project configuration - Step 4](###Update-project-configuration-Step-4)
@@ -74,19 +75,18 @@ Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 ...
-77: #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
-78: 
-79: #if BAREMETAL_RPI_TARGET == 3
-80: /// @brief Size reserved for coherent memory
-81: #define COHERENT_REGION_SIZE 1 * MEGABYTE
-82: #else
-83: /// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
-84: #define COHERENT_REGION_SIZE 4 * MEGABYTE
-85: #endif
-86: 
-87: /// @brief Region reserved for coherent memory rounded to 1 Mb
-88: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
-89: 
+74: #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
+75: 
+76: #if BAREMETAL_RPI_TARGET == 3
+77: // Size reserved for coherent memory
+78: #define COHERENT_REGION_SIZE 1 * MEGABYTE
+79: #else
+80: // Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
+81: #define COHERENT_REGION_SIZE 4 * MEGABYTE
+82: #endif
+83: 
+84: // Region reserved for coherent memory rounded to 1 Mb
+85: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
 
 ### Update the application code - Step 1
@@ -226,7 +226,6 @@ File: code/libraries/baremetal/src/Serialization.cpp
 57: 
 58: static constexpr char GetDigit(uint8 value)
 59: {
-60:     // cppcheck-suppress knownConditionTrueFalse
 61:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 62: }
 63: 
@@ -555,7 +554,9 @@ File: code/libraries/baremetal/CMakeLists.txt
 
 We can now configure and build our code, and start debugging.
 
-When running the application, you can see the memory map being printed:
+When running the application, you can see the memory map being printed.
+
+For Raspberry Pi 3:
 
 ```text
 Starting up
@@ -585,7 +586,37 @@ Hello World!
 ------------------------------------------------- 0x0000600000
 Wait 5 seconds
 Press r to reboot, h to halt
-hHalt
+```
+
+For Raspberry Pi 4:
+
+```text
+Hello World!
+------------------------------------------------- 0x0000080000 MEM_KERNEL_START
+ Kernel image : Size 0x0000200000
+------------------------------------------------- 0x0000280000 MEM_KERNEL_END
+ Core 0 stack : Size 0x0000020000
+------------------------------------------------- 0x00002A0000 MEM_KERNEL_STACK
+ Core 1 stack : Size 0x0000020000
+------------------------------------------------- 0x00002C0000
+ Core 2 stack : Size 0x0000020000
+------------------------------------------------- 0x00002E0000
+ Core 3 stack : Size 0x0000020000
+------------------------------------------------- 0x0000300000
+ Core 0 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000308000 MEM_EXCEPTION_STACK
+ Core 1 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000310000
+ Core 2 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000318000
+ Core 3 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000320000 MEM_EXCEPTION_STACK_END
+ Unused
+------------------------------------------------- 0x0000500000 MEM_COHERENT_REGION
+ Coherent region : Size 0x0000400000
+------------------------------------------------- 0x0000900000
+Wait 5 seconds
+Press r to reboot, h to halt
 ```
 
 ## Setting up for memory management - Step 2
@@ -649,7 +680,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 48: 
 49: namespace baremetal {
 50: 
-51: /// @brief MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
+51: // MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
 52: class MemoryManager
 53: {
 54: public:
@@ -797,37 +828,35 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 51: #define ARM_TO_GPU(addr)                (((addr) & ~0xC0000000) | GPU_MEM_BASE)
 52: #define GPU_TO_ARM(addr)                ((addr) & ~0xC0000000)
 53: 
-54: /// \ref doc/boards/RaspberryPi/BCM2835-peripherals.pdf
-55: /// \ref doc/boards/RaspberryPi/bcm2711-peripherals.pdf
-56: #if BAREMETAL_RPI_TARGET == 3
-57: /// @brief Base address for Raspberry PI BCM I/O
-58: #define RPI_BCM_IO_BASE                 0x3F000000
-59: #else
-60: /// @brief Base address for Raspberry PI BCM I/O
-61: #define RPI_BCM_IO_BASE                 0xFE000000
-62: #endif
-63: /// @brief End address for Raspberry PI BCM I/O
-64: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
+54: #if BAREMETAL_RPI_TARGET == 3
+55: // Base address for Raspberry PI BCM I/O
+56: #define RPI_BCM_IO_BASE                 0x3F000000
+57: #else
+58: // Base address for Raspberry PI BCM I/O
+59: #define RPI_BCM_IO_BASE                 0xFE000000
+60: #endif
+61: // End address for Raspberry PI BCM I/O
+62: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 ...
+77: //---------------------------------------------
+78: // Mailbox registers
 79: //---------------------------------------------
-80: // Mailbox registers
-81: //---------------------------------------------
-82: 
-83: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
-84: #define RPI_MAILBOX0_READ               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000000)
-85: #define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
-86: #define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
-87: #define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
-88: #define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
-89: #define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
-90: #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
-91: #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
-92: #define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
-93: #define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
-94: #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
-95: #define RPI_MAILBOX_STATUS_FULL         BIT(31)
-96: #define RPI_MAILBOX_REQUEST             0
-97: 
+80: 
+81: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
+82: #define RPI_MAILBOX0_READ               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000000)
+83: #define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
+84: #define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
+85: #define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
+86: #define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
+87: #define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
+88: #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
+89: #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
+90: #define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
+91: #define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
+92: #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
+93: #define RPI_MAILBOX_STATUS_FULL         BIT(31)
+94: #define RPI_MAILBOX_REQUEST             0
+95: 
 ```
 
 - Line 45:  We define the address of the VC mapped to ARM address space for cached usage (we will not use this)
@@ -835,7 +864,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 - Line 48:  We define the address of the VC mapped to ARM address we will use (the uncached variant)
 - Line 51:  We define a macro to convert an ARM address to the GPU / VC
 - Line 52:  We define a macro to convert an GPU / VC address to the ARM
-- Line 83-96: We define the register addresses and values for the mailbox
+- Line 81-94: We define the register addresses and values for the mailbox
 
 The Mailbox peripheral is not well described, it is not mentioned in the official documentation. There is however information available.
 More information on the Mailbox registers can be found in:
@@ -898,32 +927,31 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 43: 
 44: namespace baremetal {
 45: 
-46: /// @brief Mailbox channels
-47: /// \ref https://github.com/raspberrypi/firmware/wiki/Mailboxes
-48: enum class MailboxChannel
-49: {
-50:     ARM_MAILBOX_CH_POWER = 0,       // Power management
-51:     ARM_MAILBOX_CH_FB = 1,          // Frame buffer
-52:     ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
-53:     ARM_MAILBOX_CH_VCHIQ = 3,
-54:     ARM_MAILBOX_CH_LEDS = 4,
-55:     ARM_MAILBOX_CH_BTNS = 5,
-56:     ARM_MAILBOX_CH_TOUCH = 6,
-57:     ARM_MAILBOX_CH_COUNT = 7,
-58:     ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
-59:     ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
-60: };
-61: 
-62: /// @brief IMailbox: Mailbox abstract interface
-63: class IMailbox
-64: {
-65: public:
-66:     virtual ~IMailbox() = default;
-67: 
-68:     virtual uintptr WriteRead(uintptr address) = 0;
-69: };
-70: 
-71: } // namespace baremetal
+46: // Mailbox channels
+47: enum class MailboxChannel
+48: {
+49:     ARM_MAILBOX_CH_POWER = 0,       // Power management
+50:     ARM_MAILBOX_CH_FB = 1,          // Frame buffer
+51:     ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+52:     ARM_MAILBOX_CH_VCHIQ = 3,
+53:     ARM_MAILBOX_CH_LEDS = 4,
+54:     ARM_MAILBOX_CH_BTNS = 5,
+55:     ARM_MAILBOX_CH_TOUCH = 6,
+56:     ARM_MAILBOX_CH_COUNT = 7,
+57:     ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
+58:     ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
+59: };
+60: 
+61: // IMailbox: Mailbox abstract interface
+62: class IMailbox
+63: {
+64: public:
+65:     virtual ~IMailbox() = default;
+66: 
+67:     virtual uintptr WriteRead(uintptr address) = 0;
+68: };
+69: 
+70: } // namespace baremetal
 ```
 
 As you can see, there are multiple mailboxes available, which are identified by a channel number:
@@ -993,7 +1021,7 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 44: 
 45: namespace baremetal {
 46: 
-47: /// @brief Mailbox: Handles access to system parameters, stored in the VC
+47: // Mailbox: Handles access to system parameters, stored in the VC
 48: class Mailbox : public IMailbox
 49: {
 50: private:
@@ -1028,7 +1056,6 @@ Create the file: `code/libraries/baremetal/src/Mailbox.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Mailbox.cpp
-File: f:\Projects\Private\baremetal.github\code\libraries\baremetal\src\Mailbox.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1083,83 +1110,75 @@ File: f:\Projects\Private\baremetal.github\code\libraries\baremetal\src\Mailbox.
 52: {
 53: }
 54: 
-55: /// @brief Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
-56: /// \param address Address to write to VC mailbox register, mapped to VC address space, aligned to 16 bytes.
-57: /// \return Address read from VC mailbox register
-58: /// \ref https://github.com/raspberrypi/firmware/wiki/Accessing-mailboxes
-59: uintptr Mailbox::WriteRead(uintptr address)
-60: {
-61:     Flush();
-62: 
-63:     Write(address);
-64: 
-65:     uint32 result = Read();
+55: // Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
+56: uintptr Mailbox::WriteRead(uintptr address)
+57: {
+58:     Flush();
+59: 
+60:     Write(address);
+61: 
+62:     uint32 result = Read();
+63: 
+64:     return result;
+65: }
 66: 
-67:     return result;
-68: }
-69: 
-70: /// @brief Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
-71: void Mailbox::Flush()
-72: {
-73:     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
-74:     {
-75:         m_memoryAccess.Read32(RPI_MAILBOX0_READ);
-76: 
-77:         Timer::WaitMilliSeconds(20);
-78:     }
-79: }
-80: 
-81: /// @brief Read back the address of the data block to the mailbox
-82: /// The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
-83: ///
-84: /// @return Address to prepared data block written to write register (in VC address space), with channel in lower 4 bits. The channel is checked to be equal to m_channel.
-85: uintptr Mailbox::Read()
-86: {
-87:     uintptr result;
-88: 
-89:     do
-90:     {
-91:         while (m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY)
-92:         {
-93:             NOP();
-94:         }
-95: 
-96:         result = static_cast<uintptr>(m_memoryAccess.Read32(RPI_MAILBOX0_READ));
-97:     } while ((result & 0xF) != static_cast<uint32>(m_channel)); // channel number is in the lower 4 bits
-98: 
-99:     return result & ~0xF;
-100: }
-101: 
-102: /// @brief Write the address of the data block to the mailbox
-103: ///
-104: /// @param data Address to prepared data block for the mailbox, converted to the address space of the VC. This address should be 16 byte aligned, as the channel (m_channel) to be written to will be placed in the lower 4 bits
-File: f:\Projects\Private\baremetal.github\code\libraries\baremetal\src\Mailbox.cpp
-105: void Mailbox::Write(uintptr data)
-106: {
-107:     if ((data & 0xF) != 0)
-108:         return;
-109: 
-110:     while (m_memoryAccess.Read32(RPI_MAILBOX1_STATUS) & RPI_MAILBOX_STATUS_FULL)
-111:     {
-112:         NOP();
-113:     }
-114: 
-115:     m_memoryAccess.Write32(RPI_MAILBOX1_WRITE, static_cast<uint32>(m_channel) | static_cast<uint32>(data)); // channel number is in the lower 4 bits
-116: }
+67: // Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
+68: void Mailbox::Flush()
+69: {
+70:     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
+71:     {
+72:         m_memoryAccess.Read32(RPI_MAILBOX0_READ);
+73: 
+74:         Timer::WaitMilliSeconds(20);
+75:     }
+76: }
+77: 
+78: // Read back the address of the data block to the mailbox
+79: // The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
+80: uintptr Mailbox::Read()
+81: {
+82:     uintptr result;
+83: 
+84:     do
+85:     {
+86:         while (m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY)
+87:         {
+88:             NOP();
+89:         }
+90: 
+91:         result = static_cast<uintptr>(m_memoryAccess.Read32(RPI_MAILBOX0_READ));
+92:     } while ((result & 0xF) != static_cast<uint32>(m_channel)); // channel number is in the lower 4 bits
+93: 
+94:     return result & ~0xF;
+95: }
+96: 
+97: // Write the address of the data block to the mailbox
+98: void Mailbox::Write(uintptr data)
+99: {
+100:     if ((data & 0xF) != 0)
+101:         return;
+102: 
+103:     while (m_memoryAccess.Read32(RPI_MAILBOX1_STATUS) & RPI_MAILBOX_STATUS_FULL)
+104:     {
+105:         NOP();
+106:     }
+107: 
+108:     m_memoryAccess.Write32(RPI_MAILBOX1_WRITE, static_cast<uint32>(m_channel) | static_cast<uint32>(data)); // channel number is in the lower 4 bits
+109: }
 ```
 
 - Line 49-53: We implement the constructor, which is quite straightforward
-- Line 59-68: We implement the `WriteRead()` method, which simply calls `Flush()`, `Write()` and then `Read()` and returns the value returned
-- Line 71-79: We implement the `Flush()` method.
+- Line 56-65: We implement the `WriteRead()` method, which simply calls `Flush()`, `Write()` and then `Read()` and returns the value returned
+- Line 68-76: We implement the `Flush()` method.
 This keeps reading `RPI_MAILBOX0_READ` register while the `RPI_MAILBOX0_STATUS` register signals that it is not empty.
-- Line 85-100: We implement the `Read()` method.
+- Line 80-95: We implement the `Read()` method.
 This waits until the `RPI_MAILBOX0_STATUS` register signals that it is not empty, executing NOP instructions. 
 It then reads the mailbox through the `RPI_MAILBOX0_READ` register, and checks whether the result matches the mailbox channel.
 The result is a combination of the address (upper 28 bits, the lower 4 are expected to be 0) and the mailbox channel (lower 4 bits).
 If the mailbox channel is not as expected, it keeps reading.
 When successful, the mailbox channel is masked away, leaving only the address to return.
 The returned address should be equal to the address written
-- Line 105-115: We implement the `Write()` method.
+- Line 98-109: We implement the `Write()` method.
 This first does a sanity check on the address passed in. This should be 16 byte aligned, so the lower 4 bits should be 0.
 This is because the lower 4 bits are used for the mailbox channel.
 The method then waits until the `RPI_MAILBOX1_STATUS` register signals that it is not full, executing NOP instructions
@@ -1411,10 +1430,10 @@ Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
-50: /// @brief Data sync barrier
-51: #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
-52: /// @brief Data memory barrier
-53: #define DataMemBarrier()                asm volatile ("dmb sy" ::: "memory")
+49: // Data sync barrier
+50: #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
+51: // Data memory barrier
+52: #define DataMemBarrier()                asm volatile ("dmb sy" ::: "memory")
 ...
 ```
 
@@ -1533,7 +1552,7 @@ First we'll add a new class.
 Create the file `code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h`.
 
 ```cpp
-File: f:\Projects\Private\baremetal.github\tutorial\09-mailbox\code\libraries\baremetal\include\baremetal\RPIPropertiesInterface.h
+File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1581,146 +1600,143 @@ File: f:\Projects\Private\baremetal.github\tutorial\09-mailbox\code\libraries\ba
 45: 
 46: namespace baremetal {
 47: 
-48: /// @brief Raspberry Pi mailbox property tags
-49: /// \ref https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
-50: enum class PropertyID : uint32
-51: {
-52:     PROPTAG_END                     = 0x00000000,
-53:     PROPTAG_GET_FIRMWARE_REVISION   = 0x00000001,
-54:     PROPTAG_SET_CURSOR_INFO         = 0x00008010,
-55:     PROPTAG_SET_CURSOR_STATE        = 0x00008011,
-56:     PROPTAG_GET_BOARD_MODEL         = 0x00010001,
-57:     PROPTAG_GET_BOARD_REVISION      = 0x00010002,
-58:     PROPTAG_GET_MAC_ADDRESS         = 0x00010003,
-59:     PROPTAG_GET_BOARD_SERIAL        = 0x00010004,
-60:     PROPTAG_GET_ARM_MEMORY          = 0x00010005,
-61:     PROPTAG_GET_VC_MEMORY           = 0x00010006,
-62:     PROPTAG_GET_POWER_STATE         = 0x00020001,
-63:     PROPTAG_SET_POWER_STATE         = 0x00028001,
-64:     PROPTAG_GET_CLOCK_RATE          = 0x00030002,
-65:     PROPTAG_GET_MAX_CLOCK_RATE      = 0x00030004,
-66:     PROPTAG_GET_TEMPERATURE         = 0x00030006,
-67:     PROPTAG_GET_MIN_CLOCK_RATE      = 0x00030007,
-68:     PROPTAG_GET_TURBO               = 0x00030009,
-69:     PROPTAG_GET_MAX_TEMPERATURE     = 0x0003000A,
-70:     PROPTAG_GET_EDID_BLOCK          = 0x00030020,
-71:     PROPTAG_GET_LED_STATE           = 0x00030041,
-72:     PROPTAG_GET_THROTTLED           = 0x00030046,
-73:     PROPTAG_GET_CLOCK_RATE_MEASURED = 0x00030047,
-74:     PROPTAG_NOTIFY_XHCI_RESET       = 0x00030058,
-75:     PROPTAG_TEST_LED_STATE          = 0x00034041,
-76:     PROPTAG_SET_CLOCK_RATE          = 0x00038002,
-77:     PROPTAG_SET_TURBO               = 0x00038009,
-78:     PROPTAG_SET_DOMAIN_STATE        = 0x00038030,
-79:     PROPTAG_SET_LED_STATE           = 0x00038041,
-80:     PROPTAG_SET_SDHOST_CLOCK        = 0x00038042,
-81:     PROPTAG_ALLOCATE_DISPLAY_BUFFER = 0x00040001,
-82:     PROPTAG_GET_DISPLAY_DIMENSIONS  = 0x00040003,
-83:     PROPTAG_GET_PITCH               = 0x00040008,
-84:     PROPTAG_GET_TOUCHBUF            = 0x0004000F,
-85:     PROPTAG_GET_GPIO_VIRTBUF        = 0x00040010,
-86:     PROPTAG_GET_NUM_DISPLAYS        = 0x00040013,
-87:     PROPTAG_SET_PHYS_WIDTH_HEIGHT   = 0x00048003,
-88:     PROPTAG_SET_VIRT_WIDTH_HEIGHT   = 0x00048004,
-89:     PROPTAG_SET_DEPTH               = 0x00048005,
-90:     PROPTAG_SET_PIXEL_ORDER         = 0x00048006,
-91:     PROPTAG_SET_VIRTUAL_OFFSET      = 0x00048009,
-92:     PROPTAG_SET_PALETTE             = 0x0004800B,
-93:     PROPTAG_WAIT_FOR_VSYNC          = 0x0004800E,
-94:     PROPTAG_SET_BACKLIGHT           = 0x0004800F,
-95:     PROPTAG_SET_DISPLAY_NUM         = 0x00048013,
-96:     PROPTAG_SET_TOUCHBUF            = 0x0004801F,
-97:     PROPTAG_SET_GPIO_VIRTBUF        = 0x00048020,
-98:     PROPTAG_GET_COMMAND_LINE        = 0x00050001,
-99:     PROPTAG_GET_DMA_CHANNELS        = 0x00060001,
-100: };
-101: 
-102: struct Property
-103: {
-104:     uint32 tagID;           // See PropertyID
-105:     uint32 valueBufferSize; // bytes, multiple of 4
-106:     uint32 valueLength;     // bytes
-107:     // uint8  ValueBuffer[0];         // must be padded to be 4 byte aligned
-108: } PACKED;
-109: 
-110: struct MailboxBuffer
-111: {
-112:     uint32 bufferSize;      // bytes
-113:     uint32 code;
-114:     uint8  tags[0];
-115:     // end tag follows
-116: } PACKED ALIGN(16);
-117: 
-118: class RPIPropertiesInterface
-119: {
-120: private:
-121:     IMailbox &m_mailbox;
-122: 
-123: public:
-124:     explicit RPIPropertiesInterface(IMailbox &mailbox);
-125:     virtual ~RPIPropertiesInterface();
+48: // Raspberry Pi mailbox property tags
+49: enum class PropertyID : uint32
+50: {
+51:     PROPTAG_END                     = 0x00000000,
+52:     PROPTAG_GET_FIRMWARE_REVISION   = 0x00000001,
+53:     PROPTAG_SET_CURSOR_INFO         = 0x00008010,
+54:     PROPTAG_SET_CURSOR_STATE        = 0x00008011,
+55:     PROPTAG_GET_BOARD_MODEL         = 0x00010001,
+56:     PROPTAG_GET_BOARD_REVISION      = 0x00010002,
+57:     PROPTAG_GET_MAC_ADDRESS         = 0x00010003,
+58:     PROPTAG_GET_BOARD_SERIAL        = 0x00010004,
+59:     PROPTAG_GET_ARM_MEMORY          = 0x00010005,
+60:     PROPTAG_GET_VC_MEMORY           = 0x00010006,
+61:     PROPTAG_GET_POWER_STATE         = 0x00020001,
+62:     PROPTAG_SET_POWER_STATE         = 0x00028001,
+63:     PROPTAG_GET_CLOCK_RATE          = 0x00030002,
+64:     PROPTAG_GET_MAX_CLOCK_RATE      = 0x00030004,
+65:     PROPTAG_GET_TEMPERATURE         = 0x00030006,
+66:     PROPTAG_GET_MIN_CLOCK_RATE      = 0x00030007,
+67:     PROPTAG_GET_TURBO               = 0x00030009,
+68:     PROPTAG_GET_MAX_TEMPERATURE     = 0x0003000A,
+69:     PROPTAG_GET_EDID_BLOCK          = 0x00030020,
+70:     PROPTAG_GET_LED_STATE           = 0x00030041,
+71:     PROPTAG_GET_THROTTLED           = 0x00030046,
+72:     PROPTAG_GET_CLOCK_RATE_MEASURED = 0x00030047,
+73:     PROPTAG_NOTIFY_XHCI_RESET       = 0x00030058,
+74:     PROPTAG_TEST_LED_STATE          = 0x00034041,
+75:     PROPTAG_SET_CLOCK_RATE          = 0x00038002,
+76:     PROPTAG_SET_TURBO               = 0x00038009,
+77:     PROPTAG_SET_DOMAIN_STATE        = 0x00038030,
+78:     PROPTAG_SET_LED_STATE           = 0x00038041,
+79:     PROPTAG_SET_SDHOST_CLOCK        = 0x00038042,
+80:     PROPTAG_ALLOCATE_DISPLAY_BUFFER = 0x00040001,
+81:     PROPTAG_GET_DISPLAY_DIMENSIONS  = 0x00040003,
+82:     PROPTAG_GET_PITCH               = 0x00040008,
+83:     PROPTAG_GET_TOUCHBUF            = 0x0004000F,
+84:     PROPTAG_GET_GPIO_VIRTBUF        = 0x00040010,
+85:     PROPTAG_GET_NUM_DISPLAYS        = 0x00040013,
+86:     PROPTAG_SET_PHYS_WIDTH_HEIGHT   = 0x00048003,
+87:     PROPTAG_SET_VIRT_WIDTH_HEIGHT   = 0x00048004,
+88:     PROPTAG_SET_DEPTH               = 0x00048005,
+89:     PROPTAG_SET_PIXEL_ORDER         = 0x00048006,
+90:     PROPTAG_SET_VIRTUAL_OFFSET      = 0x00048009,
+91:     PROPTAG_SET_PALETTE             = 0x0004800B,
+92:     PROPTAG_WAIT_FOR_VSYNC          = 0x0004800E,
+93:     PROPTAG_SET_BACKLIGHT           = 0x0004800F,
+94:     PROPTAG_SET_DISPLAY_NUM         = 0x00048013,
+95:     PROPTAG_SET_TOUCHBUF            = 0x0004801F,
+96:     PROPTAG_SET_GPIO_VIRTBUF        = 0x00048020,
+97:     PROPTAG_GET_COMMAND_LINE        = 0x00050001,
+98:     PROPTAG_GET_DMA_CHANNELS        = 0x00060001,
+99: };
+100: 
+101: struct MailboxBuffer
+102: {
+103:     uint32 bufferSize;      // bytes
+104:     uint32 requestCode;
+105:     uint8  tags[0];
+106:     // end tag follows
+107: } PACKED ALIGN(16);
+108: 
+109: struct Property
+110: {
+111:     uint32 tagID;               // See PropertyID
+112:     uint32 tagBufferSize;       // bytes, multiple of 4
+113:     uint32 tagRequestResponse;  // bytes
+114:     uint8  tagBuffer[0];        // must be padded to be 4 byte aligned
+115: } PACKED;
+116: 
+117: class RPIPropertiesInterface
+118: {
+119: private:
+120:     IMailbox &m_mailbox;
+121: 
+122: public:
+123:     explicit RPIPropertiesInterface(IMailbox &mailbox);
+124: 
+125:     bool   GetTag(PropertyID tagID, void *tag, unsigned tagSize);
 126: 
-127:     bool   GetTag(PropertyID tagID, void *tag, unsigned tagSize, unsigned requestParmSize = 0);
-128: 
-129: private:
-130:     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize, unsigned requestParmSize = 0);
-131:     bool   CheckTagResult(void *tag);
-132:     bool   GetTags(void *tags, unsigned tagsSize);
-133: };
-134: 
-135: } // namespace baremetal
+127: private:
+128:     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize);
+129:     bool   CheckTagResult(void *tag);
+130:     bool   GetTags(void *tags, unsigned tagsSize);
+131: };
+132: 
+133: } // namespace baremetal
 ```
 
-- Line 50-100: We define all the known property tag IDs as an enum type `PropertyID`.
+- Line 49-99: We define all the known property tag IDs as an enum type `PropertyID`.
 These can be found in the [Raspberry Pi firmware wiki](https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface)
-- Line 102-108: We declare a structure for the mailbox buffer `MailboxBuffer`.
+- Line 101-107: We declare a structure for the mailbox buffer `MailboxBuffer`.
 This contains the fields for the mailbox buffer shown in the image in [the application update section above](###Update-the-application-code-Step-3):
   - bufferSize: The total buffer size of all tags, and the mailbox buffer header, including padding
   - requestCode: The mailbox request code (always set to 0 on request)
   - tags: The space used for the tags, as a placeholder
   - Notice that this struct has properties PACKED and ALIGN(16) 
-- Line 110-116: We declare a structure for the property tag `Property`. 
+- Line 109-115: We declare a structure for the property tag `Property`. 
 This contains the fields for the tag shown in the image in [the application update section above](###Update-the-application-code-Step-3):
   - tagID: The property tag id
   - tagBufferSize: The size of the tag buffer
   - tagRequestResponse: The tag request / response code
   - tagBuffer: The tag buffer contents, as a placeholder
   - Notice that this struct has property PACKED
-- Line 118-135: We declare the RPIPropertiesInterface class.
-  - Line 121: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
-  - Line 124: We declare the constructor, which receives a Mailbox instance
-  - Line 126: We declare the method to request a property. This has three parameters:
+- Line 117-131: We declare the RPIPropertiesInterface class.
+  - Line 120: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
+  - Line 123: We declare the constructor, which receives a Mailbox instance
+  - Line 125: We declare the method to request a property. This has three parameters:
     - tagID: The property tag ID, from the enum specied in `PropertyID`
     - tag: a pointer to a buffer that contains sufficient information for the tag request and its response.
 We will declare types for this per property
     - tagSize: The size of the buffer passed as `tag`
-  - Line 129: We declare a private method to fill the tag information
-  - Line 130: We declare a private method to check the result of a mailbox call
-  - Line 131: We declare a private method to perform the actual call.
+  - Line 128: We declare a private method to fill the tag information
+  - Line 129: We declare a private method to check the result of a mailbox call
+  - Line 130: We declare a private method to perform the actual call.
 This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page, 
 convert the address, and use the `Mailbox` to perform the call.
 
-You will notice that the structures declared in Line 102-108 and 110-116 use the keywords PACKED and ALIGN.
+You will notice that the structures declared in Line 101-107 and 109-115 use the keywords PACKED and ALIGN.
 We will add the definitions for this in `Macros.h`. The reason for a definition is to make it possible to redefine for a different compiler.
 
-### RPIPropertiesInterface.h
+### Macros.h
 
 Let's add the definitions for PACKED and ALIGN.
 Create the file `code/libraries/baremetal/include/baremetal/Macros.h`.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Macros.h
-45: /// @defgroup Macros
-46: /// @{
-47: 
-48: /// @brief Make a struct packed (GNU compiler only)
-49: #define PACKED              __attribute__ ((packed))
-50: /// @brief Make a struct have alignment of n bytes (GNU compiler only)
-51: /// @param n alignment in bytes
-52: #define ALIGN(n)            __attribute__ ((aligned (n)))
-53: 
-54: /// @brief Make a variable a weak instance (GCC compiler only)
-55: #define WEAK                __attribute__ ((weak))
+42: // Make a struct packed (GNU compiler only)
+43: #define PACKED              __attribute__ ((packed))
+44: // Make a struct have alignment of n bytes (GNU compiler only)
+45: #define ALIGN(n)            __attribute__ ((aligned (n)))
+46: 
+47: // Make a variable a weak instance (GCC compiler only)
+48: #define WEAK                __attribute__ ((weak))
+49: 
+50: // Convert bit index into integer
+51: #define BIT(n)              (1U << (n))
 ```
 
 ### RPIPropertiesInterface.cpp
@@ -2096,7 +2112,7 @@ Let's introduce a class that can handle this for us. For now, we'll only add fun
 
 ### RPIProperties.h
 
-Add the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
+Create the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/RPIProperties.h
@@ -2165,7 +2181,7 @@ We declare the class `RPIProperties` which has a constructor taking a `Mailbox` 
 ### RPIProperties.cpp
 
 We'll implement the class `RPIProperties`
-Add the file `code/libraries/baremetal/src/RPIProperties.cpp`
+Create the file `code/libraries/baremetal/src/RPIProperties.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/RPIProperties.cpp
@@ -2283,111 +2299,110 @@ Create the file `code/libraries/baremetal/src/Serialization.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Serialization.cpp
 ...
-175: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
-176: {
-177:     if ((base < 2) || (base > 36))
-178:         return;
-179: 
-180:     int       numDigits = 0;
-181:     uint64    divisor = 1;
-182:     size_t    absWidth = (width < 0) ? -width : width;
-183:     const int numBits = 64;
-184:     while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
-185:     {
-186:         divisor *= base;
-187:         ++numDigits;
-188:     }
-189: 
-190:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-191:     if (showBase)
-192:     {
-193:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-194:     }
-195:     if (absWidth > numChars)
-196:         numChars = absWidth;
-197:     if (numChars > bufferSize - 1) // Leave one character for \0
-198:         return;
-199: 
-200:     char* bufferPtr = buffer;
-201: 
-202:     switch (base)
-203:     {
-204:     case 10:
-205:     {
-206:         if (leadingZeros)
-207:         {
-208:             if (absWidth == 0)
-209:                 absWidth = BitsToDigits(numBits, base);
-210:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-211:             {
-212:                 *bufferPtr++ = '0';
-213:             }
-214:         }
-215:         else
-216:         {
-217:             if (numDigits == 0)
-218:             {
-219:                 *bufferPtr++ = '0';
-220:             }
-221:         }
-222:         while (numDigits > 0)
-223:         {
-224:             divisor /= base;
-225:             int digit = (value / divisor) % base;
-226:             *bufferPtr++ = GetDigit(digit);
-227:             --numDigits;
-228:         }
-229:     }
-230:     break;
-231:     default:
-232:     {
-233:         if (showBase)
-234:         {
-235:             if (base == 2)
-236:             {
-237:                 *bufferPtr++ = '0';
-238:                 *bufferPtr++ = 'b';
-239:             }
-240:             else if (base == 8)
-241:             {
-242:                 *bufferPtr++ = '0';
-243:             }
-244:             else if (base == 16)
-245:             {
-246:                 *bufferPtr++ = '0';
-247:                 *bufferPtr++ = 'x';
-248: 
-249:             }
-250:         }
-251:         if (leadingZeros)
-252:         {
-253:             if (absWidth == 0)
-254:                 absWidth = BitsToDigits(numBits, base);
-255:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-256:             {
-257:                 *bufferPtr++ = '0';
-258:             }
-259:         }
-260:         else
-261:         {
-262:             if (numDigits == 0)
-263:             {
-264:                 *bufferPtr++ = '0';
-265:             }
-266:         }
-267:         while (numDigits > 0)
-268:         {
-269:             divisor /= base;
-270:             int digit = (value / divisor) % base;
-271:             *bufferPtr++ = GetDigit(digit);
-272:             --numDigits;
-273:         }
-274:     }
-275:     break;
-276:     }
-277:     *bufferPtr++ = '\0';
-278: }
-...
+174: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+175: {
+176:     if ((base < 2) || (base > 36))
+177:         return;
+178: 
+179:     int       numDigits = 0;
+180:     uint64    divisor = 1;
+181:     size_t    absWidth = (width < 0) ? -width : width;
+182:     const int numBits = 64;
+183:     while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
+184:     {
+185:         divisor *= base;
+186:         ++numDigits;
+187:     }
+188: 
+189:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+190:     if (showBase)
+191:     {
+192:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+193:     }
+194:     if (absWidth > numChars)
+195:         numChars = absWidth;
+196:     if (numChars > bufferSize - 1) // Leave one character for \0
+197:         return;
+198: 
+199:     char* bufferPtr = buffer;
+200: 
+201:     switch (base)
+202:     {
+203:     case 10:
+204:     {
+205:         if (leadingZeros)
+206:         {
+207:             if (absWidth == 0)
+208:                 absWidth = BitsToDigits(numBits, base);
+209:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+210:             {
+211:                 *bufferPtr++ = '0';
+212:             }
+213:         }
+214:         else
+215:         {
+216:             if (numDigits == 0)
+217:             {
+218:                 *bufferPtr++ = '0';
+219:             }
+220:         }
+221:         while (numDigits > 0)
+222:         {
+223:             divisor /= base;
+224:             int digit = (value / divisor) % base;
+225:             *bufferPtr++ = GetDigit(digit);
+226:             --numDigits;
+227:         }
+228:     }
+229:     break;
+230:     default:
+231:     {
+232:         if (showBase)
+233:         {
+234:             if (base == 2)
+235:             {
+236:                 *bufferPtr++ = '0';
+237:                 *bufferPtr++ = 'b';
+238:             }
+239:             else if (base == 8)
+240:             {
+241:                 *bufferPtr++ = '0';
+242:             }
+243:             else if (base == 16)
+244:             {
+245:                 *bufferPtr++ = '0';
+246:                 *bufferPtr++ = 'x';
+247: 
+248:             }
+249:         }
+250:         if (leadingZeros)
+251:         {
+252:             if (absWidth == 0)
+253:                 absWidth = BitsToDigits(numBits, base);
+254:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+255:             {
+256:                 *bufferPtr++ = '0';
+257:             }
+258:         }
+259:         else
+260:         {
+261:             if (numDigits == 0)
+262:             {
+263:                 *bufferPtr++ = '0';
+264:             }
+265:         }
+266:         while (numDigits > 0)
+267:         {
+268:             divisor /= base;
+269:             int digit = (value / divisor) % base;
+270:             *bufferPtr++ = GetDigit(digit);
+271:             --numDigits;
+272:         }
+273:     }
+274:     break;
+275:     }
+276:     *bufferPtr++ = '\0';
+277: }
 ```
 
 The implementation is similar to the one for 32 bits unsigned integers, the only difference is:
@@ -2399,7 +2414,6 @@ Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-File: f:\Projects\Private\baremetal.github\code\applications\demo\src\main.cpp
 1: #include <baremetal/ARMInstructions.h>
 2: #include <baremetal/BCMRegisters.h>
 3: #include <baremetal/Mailbox.h>

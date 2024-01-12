@@ -42,12 +42,9 @@
 #include <baremetal/IGPIOPin.h>
 #include <baremetal/MemoryAccess.h>
 
-/// @file
-/// Physical GPIO pin
-
 namespace baremetal {
 
-/// @brief Physical GPIO pin (i.e. available on GPIO header)
+// Physical GPIO pin (i.e. available on GPIO header)
 class PhysicalGPIOPin : public IGPIOPin
 {
 private:
@@ -59,50 +56,41 @@ private:
     IMemoryAccess& m_memoryAccess;
 
 public:
-    /// @brief Creates a virtual GPIO pin
+    // Creates a virtual GPIO pin
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
     // PhysicalGPIOPin(const PhysicalGPIOPin &other);
 
-    /// @brief Creates a virtual GPIO pin
+    // Creates a virtual GPIO pin
     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
     uint8 GetPinNumber() const override;
-    /// @brief Assign a GPIO pin
-    /// @param pin      Pin number
-    /// @return true if successful, false otherwise
+    // Assign a GPIO pin
     bool AssignPin(uint8 pinNumber) override;
 
-    /// @brief Switch GPIO on
+    // Switch GPIO on
     void On() override;
-    /// @brief Switch GPIO off
+    // Switch GPIO off
     void Off() override;
-    /// @brief Get GPIO value
+    // Get GPIO value
     bool Get() override;
-    /// @brief Set GPIO on (true) or off (false)
+    // Set GPIO on (true) or off (false)
     void Set(bool on) override;
-    /// @brief Invert GPIO value on->off off->on
+    // Invert GPIO value on->off off->on
     void Invert() override;
 
-    /// @brief Get the mode for the GPIO pin
-    /// @return mode GPIO mode. See \ref GPIOMode
+    // Get the mode for the GPIO pin
     GPIOMode GetMode();
-    /// @brief Set the mode for the GPIO pin
-    /// @param mode GPIO mode to be selected. See \ref GPIOMode
-    /// @return true if successful, false otherwise
+    // Set the mode for the GPIO pin
     bool SetMode(GPIOMode mode);
-    /// @brief Get GPIO pin function
-    /// @return GPIO pin function used. See \ref GPIOFunction
+    // Get GPIO pin function
     GPIOFunction GetFunction();
-    /// @brief Get GPIO pin pull mode
-    /// @return GPIO pull mode used. See \ref GPIOPullMode
+    // Get GPIO pin pull mode
     GPIOPullMode GetPullMode();
-    /// @brief Set GPIO pin pull mode
-    /// @param pullMode GPIO pull mode to be used. See \ref GPIOPullMode
+    // Set GPIO pin pull mode
     void SetPullMode(GPIOPullMode pullMode);
 
 private:
-    /// @brief Set GPIO pin function
-    /// @param function GPIO function to be selected. See \ref GPIOFunction, \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
+    // Set GPIO pin function
     void SetFunction(GPIOFunction function);
 };
 

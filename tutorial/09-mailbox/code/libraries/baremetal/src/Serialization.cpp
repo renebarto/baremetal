@@ -57,7 +57,6 @@ inline constexpr int NextPowerOf2Bits(size_t value)
 
 static constexpr char GetDigit(uint8 value)
 {
-    // cppcheck-suppress knownConditionTrueFalse
     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 }
 

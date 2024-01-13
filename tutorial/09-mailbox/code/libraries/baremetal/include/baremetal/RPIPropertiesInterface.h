@@ -104,7 +104,7 @@ struct MailboxBuffer
     uint32 requestCode;
     uint8  tags[0];
     // end tag follows
-} PACKED ALIGN(16);
+} PACKED;
 
 struct Property
 {

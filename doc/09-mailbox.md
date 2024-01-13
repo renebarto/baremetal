@@ -212,149 +212,116 @@ File: code/libraries/baremetal/src/Serialization.cpp
 43: 
 44: static bool           Uppercase = true;
 45: 
-46: inline constexpr int NextPowerOf2Bits(size_t value)
+46: static constexpr char GetDigit(uint8 value)
 47: {
-48:     int bitCount{ 0 };
-49:     size_t temp = value;
-50:     while (temp >= 1)
-51:     {
-52:         ++bitCount;
-53:         temp >>= 1;
-54:     }
-55:     return bitCount;
-56: }
+48:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
+49: }
+50: 
+51: static constexpr int BitsToDigits(int bits, int base)
+52: {
+53:     int result = 0;
+54:     uint64 value = 0xFFFFFFFFFFFFFFFF;
+55:     if (bits < 64)
+56:         value &= ((1ULL << bits) - 1);
 57: 
-58: static constexpr char GetDigit(uint8 value)
-59: {
-61:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
-62: }
+58:     while (value > 0)
+59:     {
+60:         value /= base;
+61:         result++;
+62:     }
 63: 
-64: static constexpr int BitsToDigits(int bits, int base)
-65: {
-66:     int baseBits = NextPowerOf2Bits(base - 1);
-67:     return (bits + baseBits - 1) / baseBits;
-68: }
-69: 
-70: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
-71: {
-72:     if ((base < 2) || (base > 36))
-73:         return;
-74: 
-75:     int       numDigits = 0;
-76:     uint64    divisor   = 1;
-77:     size_t    absWidth  = (width < 0) ? -width : width;
-78:     const int numBits   = 32;
-79:     while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
-80:     {
+64:     return result;
+65: }
+66: 
+67: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
+68: {
+69:     if ((base < 2) || (base > 36))
+70:         return;
+71: 
+72:     int       numDigits = 0;
+73:     uint64    divisor   = 1;
+74:     uint64    divisorLast = 1;
+75:     size_t    absWidth  = (width < 0) ? -width : width;
+76:     const int numBits   = 32;
+77:     const int maxDigits = BitsToDigits(numBits, base);
+78:     while ((value >= divisor) && (numDigits <= maxDigits))
+79:     {
+80:         divisorLast = divisor;
 81:         divisor *= base;
 82:         ++numDigits;
 83:     }
-84: 
-85:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-86:     if (showBase)
-87:     {
-88:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-89:     }
-90:     if (absWidth > numChars)
-91:         numChars = absWidth;
-92:     if (numChars > bufferSize - 1) // Leave one character for \0
-93:         return;
-94: 
-95:     char* bufferPtr = buffer;
-96: 
-97:     switch (base)
-98:     {
-99:     case 10:
-100:         {
-101:             if (leadingZeros)
-102:             {
-103:                 if (absWidth == 0)
-104:                     absWidth = BitsToDigits(numBits, base);
-105:                 for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-106:                 {
-107:                     *bufferPtr++ = '0';
-108:                 }
-109:             }
-110:             else
-111:             {
-112:                 if (numDigits == 0)
-113:                 {
-114:                     *bufferPtr++ = '0';
-115:                 }
-116:             }
-117:             while (numDigits > 0)
-118:             {
-119:                 divisor /= base;
-120:                 int digit = (value / divisor) % base;
-121:                 *bufferPtr++ = GetDigit(digit);
-122:                 --numDigits;
-123:             }
-124:         }
-125:         break;
-126:     default:
-127:         {
-128:             if (showBase)
-129:             {
-130:                 if (base == 2)
-131:                 {
-132:                     *bufferPtr++ = '0';
-133:                     *bufferPtr++ = 'b';
-134:                 }
-135:                 else if (base == 8)
-136:                 {
-137:                     *bufferPtr++ = '0';
-138:                 }
-139:                 else if (base == 16)
-140:                 {
-141:                     *bufferPtr++ = '0';
-142:                     *bufferPtr++ = 'x';
-143: 
-144:                 }
-145:             }
-146:             if (leadingZeros)
-147:             {
-148:                 if (absWidth == 0)
-149:                     absWidth = BitsToDigits(numBits, base);
-150:                 for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-151:                 {
-152:                     *bufferPtr++ = '0';
-153:                 }
-154:             }
-155:             else
-156:             {
-157:                 if (numDigits == 0)
-158:                 {
-159:                     *bufferPtr++ = '0';
-160:                 }
-161:             }
-162:             while (numDigits > 0)
-163:             {
-164:                 divisor /= base;
-165:                 int digit = (value / divisor) % base;
-166:                 *bufferPtr++ = GetDigit(digit);
-167:                 --numDigits;
-168:             }
-169:         }
-170:         break;
-171:     }
-172:     *bufferPtr++ = '\0';
-173: }
-174: 
-175: } // namespace baremetal
+84:     divisor = divisorLast;
+85: 
+86:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+87:     if (showBase)
+88:     {
+89:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+90:     }
+91:     if (absWidth > numChars)
+92:         numChars = absWidth;
+93:     if (numChars > bufferSize - 1) // Leave one character for \0
+94:         return;
+95: 
+96:     char* bufferPtr = buffer;
+97: 
+98:     if (showBase)
+99:     {
+100:         if (base == 2)
+101:         {
+102:             *bufferPtr++ = '0';
+103:             *bufferPtr++ = 'b';
+104:         }
+105:         else if (base == 8)
+106:         {
+107:             *bufferPtr++ = '0';
+108:         }
+109:         else if (base == 16)
+110:         {
+111:             *bufferPtr++ = '0';
+112:             *bufferPtr++ = 'x';
+113: 
+114:         }
+115:     }
+116:     if (leadingZeros)
+117:     {
+118:         if (absWidth == 0)
+119:             absWidth = maxDigits;
+120:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+121:         {
+122:             *bufferPtr++ = '0';
+123:         }
+124:     }
+125:     else
+126:     {
+127:         if (numDigits == 0)
+128:         {
+129:             *bufferPtr++ = '0';
+130:         }
+131:     }
+132:     while (numDigits > 0)
+133:     {
+134:         int digit = (value / divisor) % base;
+135:         *bufferPtr++ = GetDigit(digit);
+136:         --numDigits;
+137:         divisor /= base;
+138:     }
+139:     *bufferPtr++ = '\0';
+140: }
+141: 
+142: } // namespace baremetal
 ```
 
 - Line 44: We define a value `Uppercase` which can be set to false to print hexadecimal values with lowercase letters. The default is uppercase.
-- Line 46-46: We determine the power of 2 equal or higher than the `value` passed, but return it as a power of 2. This is used to determine the size of a base in bits.
-- Line 58-62: We return a 'digit' for the `value` specified. So `0`..`9` for 0 to 9, `A`..`Z` for 10 to 35, or lower case if `uppercase` is false.
-- Line 64-68: We determine how many digits are needed to represent a type of size `bits` in base `base`
-- Line 70-173: The actual Serialize function
-  - Line 72-73: We do a sanity check on the base
-  - Line 75-83: We calculate how many digits are needed to represent the value using the base specified
-  - Line 85-91: We set the minimum number of digits needed to 1, we take the prefix into account if desired, and if the width is specified, that is the minimum.
-  - Line 92-93: We do a sanity check to see whether the characters to be written fit in the buffer
-  - Line 99-125: We print digits for decimal representation, taking into account leading zeros
-  - Line 126-170: We print digits for other base values, adding the prefix, and then taking into account leading zeros
-  - Line 172: We end the string with a null character
+- Line 46-49: We return a 'digit' for the `value` specified. So `0`..`9` for 0 to 9, `A`..`Z` for 10 to 35, or lower case if `uppercase` is false.
+- Line 51-65: We determine how many digits are needed to represent a type of size `bits` in base `base`. This uses a log2 implementation for integers
+- Line 67-140: The actual Serialize function
+  - Line 69-70: We do a sanity check on the base
+  - Line 75-84: We calculate how many digits are needed to represent the value using the base specified.
+  Meanwhile we calculate a maximum divisor, while keeping the last, which we reset to when the condition turns false
+  - Line 86-92: We set the minimum number of digits needed to 1, we take the prefix into account if desired, and if the width is specified, that is the minimum.
+  - Line 93-94: We do a sanity check to see whether the characters to be written fit in the buffer
+  - Line 98-138: We print the digits, adding the prefix, and taking into account leading zeros
+  - Line 139: We end the string with a null character
 
 #### main.cpp
 
@@ -2286,127 +2253,110 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 ...
 ```
 
-- Line 46: We declare a function that write a 32 bit unsigned integer value into a `buffer`, with a maximum `bufferSize` (including the trailing null character).
-The value will take `width` characters at most (if zero the space needed is calculated), it will use a `base` which can be between 2 and 36 (so e.g. 16 for hexadecimal).
-If `showBase` is true, the base prefix will be added (0b for `base` = 2, 0 for `base` = 8, 0x for `base` = 16).
-If the size of the type would require more characters than strictly needed for the value, and `leadingZeros` is true, the value is prefix with '0' characters.
-
 #### Serialization.cpp
 
-We need to implement the `Serialize` function. As we need to write into a fixed size buffer, we need to check whether what we need to write fits.
+We need to implement the `Serialize` function for two different types. As the behaviour is very similar, we will create a third static function that can handle both 32 and 64 bit unsigned values.
+There is one this a little tricky, as we need to calculate a divisor for 64 bit integers, the divisor can overflow. So we need to add a second variable to keep track of the overflowing.
 Create the file `code/libraries/baremetal/src/Serialization.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Serialization.cpp
 ...
-174: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
-175: {
-176:     if ((base < 2) || (base > 36))
-177:         return;
-178: 
-179:     int       numDigits = 0;
-180:     uint64    divisor = 1;
-181:     size_t    absWidth = (width < 0) ? -width : width;
-182:     const int numBits = 64;
-183:     while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
-184:     {
-185:         divisor *= base;
-186:         ++numDigits;
-187:     }
-188: 
-189:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-190:     if (showBase)
-191:     {
-192:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-193:     }
-194:     if (absWidth > numChars)
-195:         numChars = absWidth;
-196:     if (numChars > bufferSize - 1) // Leave one character for \0
-197:         return;
-198: 
-199:     char* bufferPtr = buffer;
-200: 
-201:     switch (base)
-202:     {
-203:     case 10:
-204:     {
-205:         if (leadingZeros)
-206:         {
-207:             if (absWidth == 0)
-208:                 absWidth = BitsToDigits(numBits, base);
-209:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-210:             {
-211:                 *bufferPtr++ = '0';
-212:             }
-213:         }
-214:         else
-215:         {
-216:             if (numDigits == 0)
-217:             {
-218:                 *bufferPtr++ = '0';
-219:             }
-220:         }
-221:         while (numDigits > 0)
-222:         {
-223:             divisor /= base;
-224:             int digit = (value / divisor) % base;
-225:             *bufferPtr++ = GetDigit(digit);
-226:             --numDigits;
-227:         }
-228:     }
-229:     break;
-230:     default:
-231:     {
-232:         if (showBase)
-233:         {
-234:             if (base == 2)
-235:             {
-236:                 *bufferPtr++ = '0';
-237:                 *bufferPtr++ = 'b';
-238:             }
-239:             else if (base == 8)
-240:             {
-241:                 *bufferPtr++ = '0';
-242:             }
-243:             else if (base == 16)
-244:             {
-245:                 *bufferPtr++ = '0';
-246:                 *bufferPtr++ = 'x';
-247: 
-248:             }
-249:         }
-250:         if (leadingZeros)
-251:         {
-252:             if (absWidth == 0)
-253:                 absWidth = BitsToDigits(numBits, base);
-254:             for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-255:             {
-256:                 *bufferPtr++ = '0';
-257:             }
-258:         }
-259:         else
-260:         {
-261:             if (numDigits == 0)
-262:             {
-263:                 *bufferPtr++ = '0';
-264:             }
-265:         }
-266:         while (numDigits > 0)
-267:         {
-268:             divisor /= base;
-269:             int digit = (value / divisor) % base;
-270:             *bufferPtr++ = GetDigit(digit);
-271:             --numDigits;
-272:         }
-273:     }
-274:     break;
-275:     }
-276:     *bufferPtr++ = '\0';
-277: }
+69: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
+70: {
+71:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+72: }
+73: 
+74: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+75: {
+76:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+77: }
+78: 
+79: static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+80: {
+81:     if ((base < 2) || (base > 36))
+82:         return;
+83: 
+84:     int       numDigits = 0;
+85:     uint64    divisor = 1;
+86:     uint64    divisorLast = 1;
+87:     uint64    divisorHigh = 0;
+88:     size_t    absWidth = (width < 0) ? -width : width;
+89:     const int maxDigits = BitsToDigits(numBits, base);
+90:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
+91:     {
+92:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+93:         divisorLast = divisor;
+94:         divisor *= base;
+95:         ++numDigits;
+96:     }
+97:     divisor = divisorLast;
+98: 
+99:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+100:     if (showBase)
+101:     {
+102:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+103:     }
+104:     if (absWidth > numChars)
+105:         numChars = absWidth;
+106:     if (numChars > bufferSize - 1) // Leave one character for \0
+107:         return;
+108: 
+109:     char* bufferPtr = buffer;
+110: 
+111:     if (showBase)
+112:     {
+113:         if (base == 2)
+114:         {
+115:             *bufferPtr++ = '0';
+116:             *bufferPtr++ = 'b';
+117:         }
+118:         else if (base == 8)
+119:         {
+120:             *bufferPtr++ = '0';
+121:         }
+122:         else if (base == 16)
+123:         {
+124:             *bufferPtr++ = '0';
+125:             *bufferPtr++ = 'x';
+126:         }
+127:     }
+128:     if (leadingZeros)
+129:     {
+130:         if (absWidth == 0)
+131:             absWidth = maxDigits;
+132:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+133:         {
+134:             *bufferPtr++ = '0';
+135:         }
+136:     }
+137:     else
+138:     {
+139:         if (numDigits == 0)
+140:         {
+141:             *bufferPtr++ = '0';
+142:         }
+143:     }
+144:     while (numDigits > 0)
+145:     {
+146:         int digit = (value / divisor) % base;
+147:         *bufferPtr++ = GetDigit(digit);
+148:         --numDigits;
+149:         divisor /= base;
+150:     }
+151:     *bufferPtr++ = '\0';
+152: }
 ```
 
-The implementation is similar to the one for 32 bits unsigned integers, the only difference is:
-- Line 183: const int numBits = 64;
+The implementation is similar to before, the main difference is keeping track of the divisor overflow:
+- Line 69-72: We call the internal function `SerializeInternal()` while passing 32 as the last parameter to print a 32 bit value
+- Line 74-77: We call the internal function `SerializeInternal()` while passing 64 as the last parameter to print a 64 bit value
+- Line 87: We add a new variable to take the high part (above 64 bits) of the divisor
+- Line 89: The number of bits is now passed in as a parameter
+- Line 90-96: We check whether the high part is not zero, and end the loop in that case.
+We also calculate the new value for the high part in the loop
+
+You may argue that it is a waste of resources to extend a 32 bit to 64 bits when printing, however this also save a lot of code, and thus memory footprint.
 
 #### main.cpp
 
@@ -2436,7 +2386,7 @@ File: code/applications/demo/src/main.cpp
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIProperties properties(mailbox);
 22: 
-23:     uint64 serial;
+23:     uint64 serial{};
 24:     if (properties.GetBoardSerial(serial))
 25:     {
 26:         uart.WriteString("Mailbox call succeeded\n");

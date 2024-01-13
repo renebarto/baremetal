@@ -20,12 +20,12 @@ int main()
     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
     RPIProperties properties(mailbox);
 
-    uint64 serial;
+    uint64 serial{};
     if (properties.GetBoardSerial(serial))
     {
         uart.WriteString("Mailbox call succeeded\n");
         uart.WriteString("Serial: ");
-        Serialize(buffer, sizeof(buffer), serial, 8, 16, false, true);
+        Serialize(buffer, sizeof(buffer), serial, 0, 16, false, true);
         uart.WriteString(buffer);
         uart.WriteString("\n");
     }

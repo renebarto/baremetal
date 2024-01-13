@@ -44,8 +44,16 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/Timer.h>
 
+/// @file
+/// Raspberry Pi Mailbox implementation
+
 using namespace baremetal;
 
+/// <summary>
+/// Constructor for Mailbox
+/// </summary>
+/// <param name="channel">Mailbox channel for this instance. Mostly used for MailboxChannel::ARM_MAILBOX_CH_PROP_OUT</param>
+/// <param name="memoryAccess">Interface to memory access. Default is singleton real memory access, can be replaced by injection a fake for testing</param>
 Mailbox::Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
     : m_channel{ channel }
     , m_memoryAccess{ memoryAccess }

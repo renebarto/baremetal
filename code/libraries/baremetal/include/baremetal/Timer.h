@@ -39,44 +39,57 @@
 
 #pragma once
 
+/// @file 
+/// Raspberry Pi Timer
+
 #include <baremetal/Types.h>
 
 namespace baremetal {
 
 class IMemoryAccess;
 
-// Timer class. For now only contains busy waiting methods
-// Note that this class is created as a singleton, using the GetTimer function.
+/// @brief Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
 class Timer
 {
     friend Timer& GetTimer();
 
 private:
+    /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
     IMemoryAccess& m_memoryAccess;
 
-    // Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+    /// @brief Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
     Timer();
 
 public:
-    // Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
+    /// @brief Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
     Timer(IMemoryAccess& memoryAccess);
 
-    // Wait for specified number of NOP statements. Busy wait
+    /// @brief Wait for specified number of NOP statements. Busy wait
     static void WaitCycles(uint32 numCycles);
 
 #if defined(USE_PHYSICAL_COUNTER)
+    /// @brief Reads the BCM2835 System Timer counter value
+    /// @return System Timer count value
     uint64 GetSystemTimer();
 #endif
 
-    // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    // counter). Busy wait
+    /// @brief Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+    /// counter). Busy wait
+    /// 
+    /// Depending on whether \ref USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+    /// @param msec  Wait time in milliseconds
     static void WaitMilliSeconds(uint64 msec);
-    // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    // counter). Busy wait
+    /// @brief Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+    /// counter). Busy wait
+    /// 
+    /// Depending on whether \ref USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+    /// @param usec  Wait time in microseconds
     static void WaitMicroSeconds(uint64 usec);
 };
 
-// Retrieves the singleton Timer instance. It is created in the first call to this function.
+/// @brief Retrieves the singleton Timer instance. It is created in the first call to this function.
 Timer& GetTimer();
 
 } // namespace baremetal

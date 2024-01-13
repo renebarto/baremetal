@@ -4,3 +4,4 @@ output/
 out/
 .vs/*
 !.vs/launch.vs.json
+doxygen/html

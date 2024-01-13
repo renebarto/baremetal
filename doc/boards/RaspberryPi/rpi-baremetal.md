@@ -120,8 +120,9 @@ Memory is mapping in ranges, with different address mapping for each range:
 | 0x3F000000-0x40000000 | 0x7E000000-0x7F000000               | I/O peripherals (RPI 2/3)
 | 0xFE000000-0xFF000000 | 0x7E000000-0x7F000000               | I/O peripherals (RPI 4)
 
-Mapping from BCM2835 peripherals specification ![Memory map](RPI-memory-mapping.png).
+Mapping from BCM2835 peripherals specification.
 
+<img src="../../images/rpi-memory-mapping.png"  alt="Memory map" width="800"/>
 Linux uses a virtual address mapping, however that is not relevant here.
 
 Circle uses the following layout of the ARM memory:

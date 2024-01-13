@@ -65,7 +65,7 @@ We'll finalize by using the mailbox to retrieve board information, such as board
 
 We need to update the memory map. We discussed the memory map before, in [05-console-uart1](05-console-uart1.md####Raspberry-Pi-3).
 The image below hopefully gives a clearer view on the memory map.
-![Memory map](images/memory-map.png).
+<img src="images/memory-map.png" alt="Memory map" width="800"/>
 So, we need to add the coherent region part.
 
 ### MemoryMap.h
@@ -1377,8 +1377,9 @@ If the returned address is the same as the address sent, and the request code si
 
 The images below show the structure of the block sent to and received back from the mailbox.
 
-![Mailbbox block structure send](images/mailbox-structure-send.png)
-![Mailbbox block structure send](images/mailbox-structure-receive.png)
+<img src="images/mailbox-structure-send.png"  alt="Mailbox block structure send" width="800"/>
+
+<img src="images/mailbox-structure-receive.png"  alt="Mailbox block structure receive" width="800"/>
 
 In general, the structure of the block remains the same. Every tag stays in the same location, if it is handled successfully, bit 31 of the request // response code is set.
 Bit 31 of request code is set to 1. If all tag requests were handled successfully, bit 0 of request code is set to 0, if something failed it is set to 1.

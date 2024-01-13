@@ -1,6 +1,10 @@
+\page TUTORIAL_01 Setting up for development
+
 # Setting up for development
 
 If we want to do development for an embedded board, a number of things need to be set up:
+
+[TOC]
 
 - [Compiler toolchain](##Compiler-toolchain)
 - [Build environment](##Build-environment)

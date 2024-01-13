@@ -43,13 +43,14 @@ For example:
 
 ## License
 
-Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE)).
+Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE.md)).
 This means that code will contain a copyright, but you are free to use it in whichever way you see fit. I would appreciate at least a reference to this GitHub project though.
 
 For now, we will focus on Raspberry Pi, as the information is more readily available than for Odroid.
 
 ## Contents
 
+- \subpage TUTORIALS 
 - [Setting up for development](doc/01-setting-up-for-development.md)
 - [Setting up a first project](doc/02-setting-up-a-project.md)
 - [Setting up project structure](doc/03-setting-up-project-structure.md)
@@ -67,10 +68,13 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Additional information
 
+- \subpage INFORMATION
 - [Hardware overview](doc/hardware-overview.md)
 - [System startup](doc/system-startup.md)
 
 ## Todo
+
+@todo
 - Check if bug in Visual Studio 2022 is fixed
 - Build demo for RPI 4
 - Try out Raspberry Pi 4 emulation in QEMU

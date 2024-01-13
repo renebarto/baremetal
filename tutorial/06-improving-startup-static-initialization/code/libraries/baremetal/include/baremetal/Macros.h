@@ -39,14 +39,5 @@
 
 #pragma once
 
-/// @file
-/// Generic macros
-
-/// @defgroup Macros
-/// @{
-
-/// @brief Convert bit index into integer
-/// @param n Bit index
+// Convert bit index into integer
 #define BIT(n)              (1U << (n))
-
-/// @}

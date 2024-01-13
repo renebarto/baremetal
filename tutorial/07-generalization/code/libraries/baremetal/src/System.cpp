@@ -60,7 +60,6 @@ void __cxa_atexit(void* pThis, void (*func)(void* pThis), void* pHandle) WEAK;
 
 void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHandle*/)
 {
-    /// \todo Complete
 }
 
 #ifdef __cplusplus
@@ -92,11 +91,11 @@ void System::Halt()
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
+    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
     r |= 0x555; // partition 63 used to indicate halt
     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -115,11 +114,10 @@ void System::Reboot()
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
+    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
-
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
     for (;;) // Satisfy [[noreturn]]
     {
         DataSyncBarrier();
@@ -140,7 +138,6 @@ void sysinit()
     // clear BSS
     extern unsigned char __bss_start;
     extern unsigned char __bss_end;
-    // cppcheck-suppress comparePointers
     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 
     // halt, if KERNEL_MAX_SIZE is not properly set

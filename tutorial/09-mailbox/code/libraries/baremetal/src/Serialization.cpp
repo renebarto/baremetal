@@ -43,149 +43,58 @@ namespace baremetal {
 
 static bool           Uppercase = true;
 
-inline constexpr int NextPowerOf2Bits(size_t value)
-{
-    int bitCount{ 0 };
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
-}
+static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 
 static constexpr char GetDigit(uint8 value)
 {
-    // cppcheck-suppress knownConditionTrueFalse
     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 }
 
 static constexpr int BitsToDigits(int bits, int base)
 {
-    int baseBits = NextPowerOf2Bits(base - 1);
-    return (bits + baseBits - 1) / baseBits;
+    int result = 0;
+    uint64 value = 0xFFFFFFFFFFFFFFFF;
+    if (bits < 64)
+        value &= ((1ULL << bits) - 1);
+
+    while (value > 0)
+    {
+        value /= base;
+        result++;
+    }
+
+    return result;
 }
 
 void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    if ((base < 2) || (base > 36))
-        return;
-
-    int       numDigits = 0;
-    uint64    divisor   = 1;
-    size_t    absWidth  = (width < 0) ? -width : width;
-    const int numBits   = 32;
-    while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
-    {
-        divisor *= base;
-        ++numDigits;
-    }
-
-    size_t numChars = (numDigits > 0) ? numDigits : 1;
-    if (showBase)
-    {
-        numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-    }
-    if (absWidth > numChars)
-        numChars = absWidth;
-    if (numChars > bufferSize - 1) // Leave one character for \0
-        return;
-
-    char* bufferPtr = buffer;
-
-    switch (base)
-    {
-    case 10:
-        {
-            if (leadingZeros)
-            {
-                if (absWidth == 0)
-                    absWidth = BitsToDigits(numBits, base);
-                for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-                {
-                    *bufferPtr++ = '0';
-                }
-            }
-            else
-            {
-                if (numDigits == 0)
-                {
-                    *bufferPtr++ = '0';
-                }
-            }
-            while (numDigits > 0)
-            {
-                divisor /= base;
-                int digit = (value / divisor) % base;
-                *bufferPtr++ = GetDigit(digit);
-                --numDigits;
-            }
-        }
-        break;
-    default:
-        {
-            if (showBase)
-            {
-                if (base == 2)
-                {
-                    *bufferPtr++ = '0';
-                    *bufferPtr++ = 'b';
-                }
-                else if (base == 8)
-                {
-                    *bufferPtr++ = '0';
-                }
-                else if (base == 16)
-                {
-                    *bufferPtr++ = '0';
-                    *bufferPtr++ = 'x';
-
-                }
-            }
-            if (leadingZeros)
-            {
-                if (absWidth == 0)
-                    absWidth = BitsToDigits(numBits, base);
-                for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-                {
-                    *bufferPtr++ = '0';
-                }
-            }
-            else
-            {
-                if (numDigits == 0)
-                {
-                    *bufferPtr++ = '0';
-                }
-            }
-            while (numDigits > 0)
-            {
-                divisor /= base;
-                int digit = (value / divisor) % base;
-                *bufferPtr++ = GetDigit(digit);
-                --numDigits;
-            }
-        }
-        break;
-    }
-    *bufferPtr++ = '\0';
+    SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 }
 
 void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+{
+    SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+}
+
+static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
 {
     if ((base < 2) || (base > 36))
         return;
 
     int       numDigits = 0;
     uint64    divisor = 1;
+    uint64    divisorLast = 1;
+    uint64    divisorHigh = 0;
     size_t    absWidth = (width < 0) ? -width : width;
-    const int numBits = 64;
-    while ((value >= divisor) && (numDigits <= BitsToDigits(numBits, base)))
+    const int maxDigits = BitsToDigits(numBits, base);
+    while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
     {
+        divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+        divisorLast = divisor;
         divisor *= base;
         ++numDigits;
     }
+    divisor = divisorLast;
 
     size_t numChars = (numDigits > 0) ? numDigits : 1;
     if (showBase)
@@ -199,80 +108,45 @@ void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int bas
 
     char* bufferPtr = buffer;
 
-    switch (base)
+    if (showBase)
     {
-    case 10:
-    {
-        if (leadingZeros)
+        if (base == 2)
         {
-            if (absWidth == 0)
-                absWidth = BitsToDigits(numBits, base);
-            for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-            {
-                *bufferPtr++ = '0';
-            }
+            *bufferPtr++ = '0';
+            *bufferPtr++ = 'b';
         }
-        else
+        else if (base == 8)
         {
-            if (numDigits == 0)
-            {
-                *bufferPtr++ = '0';
-            }
+            *bufferPtr++ = '0';
         }
-        while (numDigits > 0)
+        else if (base == 16)
         {
-            divisor /= base;
-            int digit = (value / divisor) % base;
-            *bufferPtr++ = GetDigit(digit);
-            --numDigits;
+            *bufferPtr++ = '0';
+            *bufferPtr++ = 'x';
         }
     }
-    break;
-    default:
+    if (leadingZeros)
     {
-        if (showBase)
+        if (absWidth == 0)
+            absWidth = maxDigits;
+        for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
         {
-            if (base == 2)
-            {
-                *bufferPtr++ = '0';
-                *bufferPtr++ = 'b';
-            }
-            else if (base == 8)
-            {
-                *bufferPtr++ = '0';
-            }
-            else if (base == 16)
-            {
-                *bufferPtr++ = '0';
-                *bufferPtr++ = 'x';
-
-            }
-        }
-        if (leadingZeros)
-        {
-            if (absWidth == 0)
-                absWidth = BitsToDigits(numBits, base);
-            for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-            {
-                *bufferPtr++ = '0';
-            }
-        }
-        else
-        {
-            if (numDigits == 0)
-            {
-                *bufferPtr++ = '0';
-            }
-        }
-        while (numDigits > 0)
-        {
-            divisor /= base;
-            int digit = (value / divisor) % base;
-            *bufferPtr++ = GetDigit(digit);
-            --numDigits;
+            *bufferPtr++ = '0';
         }
     }
-    break;
+    else
+    {
+        if (numDigits == 0)
+        {
+            *bufferPtr++ = '0';
+        }
+    }
+    while (numDigits > 0)
+    {
+        int digit = (value / divisor) % base;
+        *bufferPtr++ = GetDigit(digit);
+        --numDigits;
+        divisor /= base;
     }
     *bufferPtr++ = '\0';
 }

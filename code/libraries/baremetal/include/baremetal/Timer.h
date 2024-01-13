@@ -45,8 +45,8 @@ namespace baremetal {
 
 class IMemoryAccess;
 
-/// @brief Timer class. For now only contains busy waiting methods
-/// Note that this class is created as a singleton, using the GetTimer function.
+// Timer class. For now only contains busy waiting methods
+// Note that this class is created as a singleton, using the GetTimer function.
 class Timer
 {
     friend Timer& GetTimer();
@@ -54,32 +54,29 @@ class Timer
 private:
     IMemoryAccess& m_memoryAccess;
 
-    /// @brief Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+    // Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
     Timer();
 
 public:
-    /// @brief Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
+    // Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
     Timer(IMemoryAccess& memoryAccess);
 
-    /// @brief Wait for specified number of NOP statements. Busy wait
-    /// @param numCycles    Wait time in cycles
+    // Wait for specified number of NOP statements. Busy wait
     static void WaitCycles(uint32 numCycles);
 
 #if defined(USE_PHYSICAL_COUNTER)
     uint64 GetSystemTimer();
 #endif
 
-    /// @brief Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    /// counter). Busy wait
-    /// @param msec     Wait time in milliseconds
+    // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+    // counter). Busy wait
     static void WaitMilliSeconds(uint64 msec);
-    /// @brief Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    /// counter). Busy wait
-    /// @param usec     Wait time in microseconds
+    // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+    // counter). Busy wait
     static void WaitMicroSeconds(uint64 usec);
 };
 
-/// @brief Retrieves the singleton Timer instance. It is created in the first call to this function.
+// Retrieves the singleton Timer instance. It is created in the first call to this function.
 Timer& GetTimer();
 
 } // namespace baremetal

@@ -45,8 +45,7 @@ namespace baremetal {
 
 class IMemoryAccess;
 
-/// @brief Encapsulation for the UART1 device.
-///
+// Encapsulation for the UART1 device.
 class UART1
 {
     friend UART1& GetUART1();
@@ -55,24 +54,20 @@ private:
     bool            m_initialized;
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
+    // Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
     UART1();
 
 public:
-    /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
+    // Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
     UART1(IMemoryAccess &memoryAccess);
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-    ///
-    ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+    // Initialize the UART1 device. Only performed once, guarded by m_initialized.
+    //  Set baud rate and characteristics (115200 8N1) and map to GPIO
     void Initialize();
-    /// @brief Read a character
-    /// @return Character read
+    // Read a character
     char Read();
-    /// @brief Write a character
-    /// @param c Character to be written
+    // Write a character
     void Write(char c);
-    /// @brief Write a string
-    /// @param str String to be written
+    // Write a string
     void WriteString(const char* str);
 };
 

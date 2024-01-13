@@ -39,23 +39,13 @@
 
 #pragma once
 
-/// @file
-/// Generic macros
-
-/// @defgroup Macros
-/// @{
-
-/// @brief Make a struct packed (GNU compiler only)
+// Make a struct packed (GNU compiler only)
 #define PACKED              __attribute__ ((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-/// @param n alignment in bytes
+// Make a struct have alignment of n bytes (GNU compiler only)
 #define ALIGN(n)            __attribute__ ((aligned (n)))
 
-/// @brief Make a variable a weak instance (GCC compiler only)
+// Make a variable a weak instance (GCC compiler only)
 #define WEAK                __attribute__ ((weak))
 
-/// @brief Convert bit index into integer
-/// @param n Bit index
+// Convert bit index into integer
 #define BIT(n)              (1U << (n))
-
-/// @}

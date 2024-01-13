@@ -110,7 +110,6 @@ uint64 Timer::GetSystemTimer()
         lowWord  = m_memoryAccess.Read32(RPI_SYSTMR_LO);
     }
     // compose long int value
-    // cppcheck-suppress shiftTooManyBits
     return (static_cast<uint64>(highWord) << 32 | lowWord);
 }
 

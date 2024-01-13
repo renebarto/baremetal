@@ -44,7 +44,7 @@
 
 namespace baremetal {
 
-/// @brief Mailbox: Handles access to system parameters, stored in the VC
+// Mailbox: Handles access to system parameters, stored in the VC
 class Mailbox : public IMailbox
 {
 private:

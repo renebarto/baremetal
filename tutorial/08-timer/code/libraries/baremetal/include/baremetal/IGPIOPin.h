@@ -43,89 +43,86 @@
 
 namespace baremetal {
 
-/// @brief GPIO mode
+// GPIO mode
 enum class GPIOMode
 {
-    /// @brief GPIO used as input
+    // GPIO used as input
     Input,
-    /// @brief GPIO used as output
+    // GPIO used as output
     Output,
-    /// @brief GPIO used as input, using pull-up
+    // GPIO used as input, using pull-up
     InputPullUp,
-    /// @brief GPIO used as input, using pull-down
+    // GPIO used as input, using pull-down
     InputPullDown,
-    /// @brief GPIO used as Alternate Function 0.
+    // GPIO used as Alternate Function 0.
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    // GPIO used as Alternate Function 1.
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    // GPIO used as Alternate Function 2.
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    // GPIO used as Alternate Function 3.
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    // GPIO used as Alternate Function 4.
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    // GPIO used as Alternate Function 5.
     AlternateFunction5,
     Unknown,
 };
 
-/// @brief GPIO function
+// GPIO function
 enum class GPIOFunction
 {
-    /// @brief GPIO used as input
+    // GPIO used as input
     Input,
-    /// @brief GPIO used as output
+    // GPIO used as output
     Output,
-    /// @brief GPIO used as Alternate Function 0.
+    // GPIO used as Alternate Function 0.
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    // GPIO used as Alternate Function 1.
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    // GPIO used as Alternate Function 2.
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    // GPIO used as Alternate Function 3.
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    // GPIO used as Alternate Function 4.
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    // GPIO used as Alternate Function 5.
     AlternateFunction5,
     Unknown,
 };
 
-/// @brief GPIO pull mode
+// GPIO pull mode
 enum class GPIOPullMode
 {
-    /// @brief GPIO pull mode off (no pull-up or pull-down)
+    // GPIO pull mode off (no pull-up or pull-down)
     Off,
-    /// @brief GPIO pull mode pull-down
+    // GPIO pull mode pull-down
     PullDown,
-    /// @brief GPIO pull mode pull-up
+    // GPIO pull mode pull-up
     PullUp,
     Unknown,
 };
 
-/// @brief Abstraction of a GPIO pin
+// Abstraction of a GPIO pin
 class IGPIOPin
 {
 public:
     virtual ~IGPIOPin() = default;
 
-    /// @brief Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
-    /// @return Pin number
+    // Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
     virtual uint8 GetPinNumber() const = 0;
-    /// @brief Assign a GPIO pin
-    /// @param pin      Pin number
-    /// @return true if successful, false otherwise
+    // Assign a GPIO pin
     virtual bool AssignPin(uint8 pinNumber) = 0;
 
-    /// @brief Switch GPIO on
+    // Switch GPIO on
     virtual void On() = 0;
-    /// @brief Switch GPIO off
+    // Switch GPIO off
     virtual void Off() = 0;
-    /// @brief Get GPIO value
+    // Get GPIO value
     virtual bool Get() = 0;
-    /// @brief Set GPIO on (true) or off (false)
+    // Set GPIO on (true) or off (false)
     virtual void Set(bool on) = 0;
-    /// @brief Invert GPIO value on->off off->on
+    // Invert GPIO value on->off off->on
     virtual void Invert() = 0;
 };
 

@@ -39,39 +39,36 @@
 
 #pragma once
 
-/// @file
-/// Memory mapping definitions
-
-/// @brief Default RAM memory size (minimum size as of RPI 3)
+// Default RAM memory size (minimum size as of RPI 3)
 #define MEM_SIZE (1024 * MEGABYTE)
-/// @brief Part of RAM mapped to GPU (minimum size is 64Mb)
+// Part of RAM mapped to GPU (minimum size is 64Mb)
 #if !defined(GPU_MEM_SIZE)
 #define GPU_MEM_SIZE (64 * MEGABYTE) // set in config.txt
 #endif
-/// @brief Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
+// Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
 #define ARM_MEM_SIZE (MEM_SIZE - GPU_MEM_SIZE) // normally overwritten
 
-/// @brief Memory reserved for paging
+// Memory reserved for paging
 #define PAGE_RESERVE (16 * MEGABYTE)
 
-/// @brief Size of every page
+// Size of every page
 #define PAGE_SIZE    0x10000
 
-/// @brief Maximum size of the kernel space (if not already specified in SysConfig.h)
+// Maximum size of the kernel space (if not already specified in SysConfig.h)
 #if !defined(KERNEL_MAX_SIZE)
 #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
-/// @brief Memory reserved for the stack (this memory is reserved for every core)
+// Memory reserved for the stack (this memory is reserved for every core)
 #define KERNEL_STACK_SIZE       0x20000
-/// @brief Memory reserved for the exception stack (this memory is reserved for every core)
+// Memory reserved for the exception stack (this memory is reserved for every core)
 #define EXCEPTION_STACK_SIZE    0x8000
-/// @brief Location where the kernel starts. This is also the location where the code starts
+// Location where the kernel starts. This is also the location where the code starts
 #define MEM_KERNEL_START        0x80000
-/// @brief End of kernel space (start + size)
+// End of kernel space (start + size)
 #define MEM_KERNEL_END          (MEM_KERNEL_START + KERNEL_MAX_SIZE)
-/// @brief Top of stack for core 0 (stack grows down)
+// Top of stack for core 0 (stack grows down)
 #define MEM_KERNEL_STACK        (MEM_KERNEL_END + KERNEL_STACK_SIZE)
-/// @brief Top of exception stack for core 0 (stack grows down). Also includes the stacks for cores 1..CORES-1
+// Top of exception stack for core 0 (stack grows down). Also includes the stacks for cores 1..CORES-1
 #define MEM_EXCEPTION_STACK     (MEM_KERNEL_STACK + KERNEL_STACK_SIZE * (CORES - 1) + EXCEPTION_STACK_SIZE)
-/// @brief Top of exception stack for all cores (stack grows down). Also includes the exception stacks for cores 1..CORES-1
+// Top of exception stack for all cores (stack grows down). Also includes the exception stacks for cores 1..CORES-1
 #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))

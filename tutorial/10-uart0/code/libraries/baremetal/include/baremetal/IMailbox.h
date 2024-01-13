@@ -43,8 +43,7 @@
 
 namespace baremetal {
 
-/// @brief Mailbox channels
-/// \ref https://github.com/raspberrypi/firmware/wiki/Mailboxes
+// Mailbox channels
 enum class MailboxChannel
 {
     ARM_MAILBOX_CH_POWER = 0,       // Power management
@@ -59,7 +58,7 @@ enum class MailboxChannel
     ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
 };
 
-/// @brief IMailbox: Mailbox abstract interface
+// IMailbox: Mailbox abstract interface
 class IMailbox
 {
 public:

@@ -43,14 +43,11 @@
 
 namespace baremetal {
     
-/// <summary>
-/// For now holds only busy waiting
-/// </summary>
+// For now holds only busy waiting
 class Timer
 {
 public:
-    /// @brief Wait for specified number of NOP statements. Busy wait
-    /// @param numCycles    Wait time in cycles
+    // Wait for specified number of NOP statements. Busy wait
     static void WaitCycles(uint32 numCycles);
 };
 

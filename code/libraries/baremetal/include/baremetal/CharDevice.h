@@ -39,24 +39,18 @@
 
 #pragma once
 
-/// @file
-/// Abstract character CharDevice
-
 namespace baremetal {
 
-/// @brief Abstract character CharDevice
-///
-/// Abstraction of a CharDevice that can read and write characters
+// Abstract character CharDevice
+// Abstraction of a CharDevice that can read and write characters
 class CharDevice
 {
 public:
     virtual ~CharDevice() = default;
 
-    /// @brief Read a character
-    /// @return Character read
+    // Read a character
     virtual char Read() = 0;
-    /// @brief Write a character
-    /// @param c Character to be written
+    // Write a character
     virtual void Write(char c) = 0;
 };
 

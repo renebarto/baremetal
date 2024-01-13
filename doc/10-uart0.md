@@ -89,34 +89,28 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 39: 
 40: #pragma once
 41: 
-42: /// @file
-43: /// Abstract character CharDevice
-44: 
-45: namespace baremetal {
-46: 
-47: /// @brief Abstract character CharDevice
-48: ///
-49: /// Abstraction of a CharDevice that can read and write characters
-50: class CharDevice
-51: {
-52: public:
-53:     virtual ~CharDevice() = default;
-54: 
-55:     /// @brief Read a character
-56:     /// @return Character read
-57:     virtual char Read() = 0;
-58:     /// @brief Write a character
-59:     /// @param c Character to be written
-60:     virtual void Write(char c) = 0;
-61: };
-62: 
-63: } // namespace baremetal
+42: namespace baremetal {
+43: 
+44: // Abstract character CharDevice
+45: // Abstraction of a CharDevice that can read and write characters
+46: class CharDevice
+47: {
+48: public:
+49:     virtual ~CharDevice() = default;
+50: 
+51:     // Read a character
+52:     virtual char Read() = 0;
+53:     // Write a character
+54:     virtual void Write(char c) = 0;
+55: };
+56: 
+57: } // namespace baremetal
 ```
 
-- Line 50: We declare the class `CharDevice`
-- Line 53: As this is an abstract interface, we need to declare a virtual destructor. The default implementation is sufficient
-- Line 57: We declare a pure virtual method `Read()` like we did for UART1
-- Line 60: We declare a pure virtual method `Write()` like we did for UART1
+- Line 46: We declare the class `CharDevice`
+- Line 49: As this is an abstract interface, we need to declare a virtual destructor. The default implementation is sufficient
+- Line 52: We declare a pure virtual method `Read()` like we did for UART1
+- Line 54: We declare a pure virtual method `Write()` like we did for UART1
 
 ### UART1.h
 
@@ -126,45 +120,6 @@ Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
 ...
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
-3: //
-4: // File        : UART1.h
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : UART1
-9: //
-10: // Description : RPI UART1 class
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
 40: #pragma once
 41: 
 42: #include <baremetal/CharDevice.h>
@@ -173,50 +128,45 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 45: 
 46: class IMemoryAccess;
 47: 
-48: /// @brief Encapsulation for the UART1 device.
-49: ///
-50: /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-51: /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-52: class UART1 : public CharDevice
-53: {
-54:     friend UART1& GetUART1();
-55: 
-56: private:
-57:     bool            m_initialized;
-58:     IMemoryAccess  &m_memoryAccess;
-59: 
-60:     /// @brief Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
-61:     UART1();
-62: 
-63: public:
-64:     /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
-65:     UART1(IMemoryAccess &memoryAccess);
-66:     /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-67:     ///
-68:     ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
-69:     void Initialize();
-70:     /// @brief Read a character
-71:     /// @return Character read
-72:     char Read() override;
-73:     /// @brief Write a character
-74:     /// @param c Character to be written
-75:     void Write(char c) override;
-76:     /// @brief Write a string
-77:     /// @param str String to be written
-78:     void WriteString(const char* str);
-79: };
-80: 
-81: /// @brief Constructs the singleton UART1 instance, if needed.
-82: /// @return A refence to the singleton UART1 instance.
-83: UART1 &GetUART1();
-84: 
-85: } // namespace baremetal
+48: // Encapsulation for the UART1 device.
+49: // This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+50: // but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+51: class UART1 : public CharDevice
+52: {
+53:     friend UART1& GetUART1();
+54: 
+55: private:
+56:     bool            m_initialized;
+57:     IMemoryAccess  &m_memoryAccess;
+58: 
+59:     // Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
+60:     UART1();
+61: 
+62: public:
+63:     // Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
+64:     UART1(IMemoryAccess &memoryAccess);
+65:     // Initialize the UART1 device. Only performed once, guarded by m_initialized.
+66:     //
+67:     // Set baud rate and characteristics (115200 8N1) and map to GPIO
+68:     void Initialize();
+69:     // Read a character
+70:     char Read() override;
+71:     // Write a character
+72:     void Write(char c) override;
+73:     // Write a string
+74:     void WriteString(const char* str);
+75: };
+76: 
+77: // Constructs the singleton UART1 instance, if needed.
+78: UART1 &GetUART1();
+79: 
+80: } // namespace baremetal
 ```
 
 - Line 42: We need to include `CharDevice.h`. This indirectly includes `Types.h`.
-- Line 52: We derive from `CharDevice`
-- Line 72: We declare the `Read()` method as overriding the method on the interface
-- Line 75: We declare the `Write()` method as overriding the method on the interface
+- Line 51: We derive from `CharDevice`
+- Line 69: We declare the `Read()` method as overriding the method on the interface
+- Line 72: We declare the `Write()` method as overriding the method on the interface
 
 The code for UART1 does not need any changes.
 
@@ -355,44 +305,40 @@ Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
-182: //---------------------------------------------
-183: // Auxilary UART0 registers
-184: //---------------------------------------------
-185: // \ref doc/boards/RaspberryPi/BCM2835-peripherals.pdf page 175
-186: // \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 175
-187: // \ref doc/boards/RaspberryPi/bcm2711-peripherals.pdf page 144
-188: // \ref doc/boards/RaspberryPi/rp1-peripherals.pdf page 34
-189: 
-190: /// @brief Raspberry Pi UART0 registers base address
-191: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
-192: /// @brief Raspberry Pi UART0 data register (R/W)
-193: #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
-194: /// @brief Raspberry Pi UART0 flag register (R/W)
-195: #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
-196: /// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W)
-197: #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
-198: /// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W)
-199: #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
-200: /// @brief Raspberry Pi UART0 line control register (R/W)
-201: #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
-202: /// @brief Raspberry Pi UART0 control register register (R/W)
-203: #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
-204: /// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W)
-205: #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
-206: /// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W)
-207: #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
-208: /// @brief Raspberry Pi UART0 raw interrupt status register (R/W)
-209: #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
-210: /// @brief Raspberry Pi UART0 masked interrupt status  register (R/W)
-211: #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
-212: /// @brief Raspberry Pi UART0 interrupt clear register (R/W)
-213: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
-214: /// @brief Raspberry Pi UART0 DMA control register (R/W)
-215: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
+183: //---------------------------------------------
+184: // UART0 registers
+185: //---------------------------------------------
+186: 
+187: // Raspberry Pi UART0 registers base address
+188: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
+189: // Raspberry Pi UART0 data register (R/W)
+190: #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
+191: // Raspberry Pi UART0 flag register (R/W)
+192: #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
+193: // Raspberry Pi UART0 integer baud rate divisor register (R/W)
+194: #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
+195: // Raspberry Pi UART0 factional baud rate divisor register (R/W)
+196: #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
+197: // Raspberry Pi UART0 line control register (R/W)
+198: #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
+199: // Raspberry Pi UART0 control register register (R/W)
+200: #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
+201: // Raspberry Pi UART0 interrupt FIFO level select register (R/W)
+202: #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
+203: // Raspberry Pi UART0 interrupt mask set/clear register (R/W)
+204: #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
+205: // Raspberry Pi UART0 raw interrupt status register (R/W)
+206: #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
+207: // Raspberry Pi UART0 masked interrupt status  register (R/W)
+208: #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
+209: // Raspberry Pi UART0 interrupt clear register (R/W)
+210: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
+211: // Raspberry Pi UART0 DMA control register (R/W)
+212: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
+213: 
+214: #define RPI_UART0_FR_RX_READY         BIT(4)
+215: #define RPI_UART0_FR_TX_EMPTY         BIT(5)
 216: 
-217: #define RPI_UART0_FR_RX_READY         BIT(4)
-218: #define RPI_UART0_FR_TX_EMPTY         BIT(5)
-219: 
 ...
 ```
 
@@ -412,6 +358,7 @@ Create the file `code/libraries/baremetal/include/baremetal/UART0.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART0.h
+File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremetal\UART0.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -459,44 +406,38 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 45: 
 46: class IMemoryAccess;
 47: 
-48: /// @brief Encapsulation for the UART0 device.
-49: ///
-50: /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
-51: /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-52: class UART0 : public CharDevice
-53: {
-54:     friend UART0 &GetUART0();
-55: 
-56: private:
-57:     bool            m_initialized;
-58:     IMemoryAccess  &m_memoryAccess;
-59: 
-60:     /// @brief Constructs a default UART0 instance. Note that the constructor is private, so GetUART0() is needed to instantiate the UART0.
-61:     UART0();
-62: 
-63: public:
-64:     /// @brief Constructs a specialized UART0 instance with a custom IMemoryAccess instance. This is intended for testing.
-65:     UART0(IMemoryAccess &memoryAccess);
-66:     /// @brief Initialize the UART0 device. Only performed once, guarded by m_initialized.
-67:     ///
-68:     ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
-69:     void Initialize();
-70:     /// @brief Read a character
-71:     /// @return Character read
-72:     char Read() override;
-73:     /// @brief Write a character
-74:     /// @param c Character to be written
-75:     void Write(char c) override;
-76:     /// @brief Write a string
-77:     /// @param str String to be written
-78:     void WriteString(const char* str);
-79: };
-80: 
-81: /// @brief Constructs the singleton UART0 instance, if needed.
-82: /// @return A refence to the singleton UART0 instance.
-83: UART0 &GetUART0();
-84: 
-85: } // namespace baremetal
+48: // Encapsulation for the UART0 device.
+49: // This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
+50: // but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+51: class UART0 : public CharDevice
+52: {
+53:     friend UART0 &GetUART0();
+54: 
+55: private:
+56:     bool            m_initialized;
+57:     IMemoryAccess  &m_memoryAccess;
+58: 
+59:     // Constructs a default UART0 instance. Note that the constructor is private, so GetUART0() is needed to instantiate the UART0.
+60:     UART0();
+61: 
+62: public:
+63:     // Constructs a specialized UART0 instance with a custom IMemoryAccess instance. This is intended for testing.
+64:     UART0(IMemoryAccess &memoryAccess);
+65:     // Initialize the UART0 device. Only performed once, guarded by m_initialized.
+66:     // Set baud rate and characteristics (115200 8N1) and map to GPIO
+67:     void Initialize();
+68:     // Read a character
+69:     char Read() override;
+70:     // Write a character
+71:     void Write(char c) override;
+72:     // Write a string
+73:     void WriteString(const char* str);
+74: };
+75: 
+76: // Constructs the singleton UART0 instance, if needed.
+77: UART0 &GetUART0();
+78: 
+79: } // namespace baremetal
 ```
 
 The `UART0` class declaration is identical to the `UART1` class.
@@ -555,106 +496,104 @@ File: code/libraries/baremetal/src/UART0.cpp
 45: #include <baremetal/MemoryAccess.h>
 46: #include <baremetal/PhysicalGPIOPin.h>
 47: #include <baremetal/RPIProperties.h>
-48: #include <baremetal/RPIPropertiesInterface.h>
-49: 
-50: namespace baremetal {
-51: 
-52: UART0::UART0()
-53:     : m_initialized{}
-54:     , m_memoryAccess{GetMemoryAccess()}
-55: {
-56: }
-57: 
-58: UART0::UART0(IMemoryAccess &memoryAccess)
-59:     : m_initialized{}
-60:     , m_memoryAccess{memoryAccess}
-61: {
-62: }
-63: 
-64: // Set baud rate and characteristics (115200 8N1) and map to GPIO
-65: void UART0::Initialize()
-66: {
-67:     if (m_initialized)
-68:         return;
-69:     // initialize UART
-70:     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
-71: 
-72:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
-73:     RPIProperties properties(mailbox);
-74:     if (!properties.SetClockRate(ClockID::UART, 4000000, false))
-75:         return;
-76: 
-77:     // map UART0 to GPIO pins
-78:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction0, m_memoryAccess);
-79:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction0, m_memoryAccess);
-80:     m_memoryAccess.Write32(RPI_UART0_ICR, 0x7FF); // clear interrupts
-81:     m_memoryAccess.Write32(RPI_UART0_IBRD, 2);    // 115200 baud
-82:     m_memoryAccess.Write32(RPI_UART0_FBRD, 0xB);
-83:     m_memoryAccess.Write32(RPI_UART0_LCRH, 0x7 << 4); // 8n1, enable FIFOs
-84:     m_memoryAccess.Write32(RPI_UART0_CR, 0x301);      // enable Tx, Rx, UART
-85:     m_initialized = true;
-86: }
-87: 
-88: // Write a character
-89: void UART0::Write(char c)
-90: {
-91:     // wait until we can send
-92:     // Check Tx FIFO empty
-93:     while (m_memoryAccess.Read32(RPI_UART0_FR) & RPI_UART0_FR_TX_EMPTY)
-94:     {
-95:         NOP();
-96:     }
-97:     // Write the character to the buffer
-98:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
-99: }
-100: 
-101: // Receive a character
-102: 
-103: char UART0::Read()
-104: {
-105:     // wait until something is in the buffer
-106:     // Check Rx FIFO holds data
-107:     while (m_memoryAccess.Read32(RPI_UART0_FR) & RPI_UART0_FR_RX_READY)
-108:     {
-109:         NOP();
-110:     }
-111:     // Read it and return
-112:     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
-113: }
-114: 
-115: void UART0::WriteString(const char *str)
-116: {
-117:     while (*str)
-118:     {
-119:         // convert newline to carriage return + newline
-120:         if (*str == '\n')
-121:             Write('\r');
-122:         Write(*str++);
-123:     }
-124: }
-125: 
-126: UART0 &GetUART0()
-127: {
-128:     static UART0 value;
-129:     value.Initialize();
-130:     return value;
-131: }
-132: 
-133: } // namespace baremetal
+48: 
+49: namespace baremetal {
+50: 
+51: UART0::UART0()
+52:     : m_initialized{}
+53:     , m_memoryAccess{GetMemoryAccess()}
+54: {
+55: }
+56: 
+57: UART0::UART0(IMemoryAccess &memoryAccess)
+58:     : m_initialized{}
+59:     , m_memoryAccess{memoryAccess}
+60: {
+61: }
+62: 
+63: // Set baud rate and characteristics (115200 8N1) and map to GPIO
+64: void UART0::Initialize()
+65: {
+66:     if (m_initialized)
+67:         return;
+68:     // initialize UART
+69:     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
+70: 
+71:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
+72:     RPIProperties properties(mailbox);
+73:     if (!properties.SetClockRate(ClockID::UART, 4000000, false))
+74:         return;
+75: 
+76:     // map UART0 to GPIO pins
+77:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction0, m_memoryAccess);
+78:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction0, m_memoryAccess);
+79:     m_memoryAccess.Write32(RPI_UART0_ICR, 0x7FF); // clear interrupts
+80:     m_memoryAccess.Write32(RPI_UART0_IBRD, 2);    // 115200 baud
+81:     m_memoryAccess.Write32(RPI_UART0_FBRD, 0xB);
+82:     m_memoryAccess.Write32(RPI_UART0_LCRH, 0x7 << 4); // 8n1, enable FIFOs
+83:     m_memoryAccess.Write32(RPI_UART0_CR, 0x301);      // enable Tx, Rx, UART
+84:     m_initialized = true;
+85: }
+86: 
+87: // Write a character
+88: void UART0::Write(char c)
+89: {
+90:     // wait until we can send
+91:     // Check Tx FIFO empty
+92:     while (m_memoryAccess.Read32(RPI_UART0_FR) & RPI_UART0_FR_TX_EMPTY)
+93:     {
+94:         NOP();
+95:     }
+96:     // Write the character to the buffer
+97:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
+98: }
+99: 
+100: // Receive a character
+101: char UART0::Read()
+102: {
+103:     // wait until something is in the buffer
+104:     // Check Rx FIFO holds data
+105:     while (m_memoryAccess.Read32(RPI_UART0_FR) & RPI_UART0_FR_RX_READY)
+106:     {
+107:         NOP();
+108:     }
+109:     // Read it and return
+110:     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
+111: }
+112: 
+113: void UART0::WriteString(const char *str)
+114: {
+115:     while (*str)
+116:     {
+117:         // convert newline to carriage return + newline
+118:         if (*str == '\n')
+119:             Write('\r');
+120:         Write(*str++);
+121:     }
+122: }
+123: 
+124: UART0 &GetUART0()
+125: {
+126:     static UART0 value;
+127:     value.Initialize();
+128:     return value;
+129: }
+130: 
+131: } // namespace baremetal
 ```
 
 The implementation is very similar to that for `UART1`
 
-- Line 42-48: We also need to include `Mailbox.h`, `RPIProperties.h` and `RPIPropertiesInterface.h`
-- Line 52-56: The default constructor is identical to the one for `UART1`
-- Line 58-62: The non default constructor is identical to the one for `UART1`
-- Line 65-86: The `Initialize()` method is similar to the one for `UART1`
-  - Line 70: Disabling the UART uses a different register and value
-  - Line 72-75: We set the clock rate for the UART clock to 4 MHz, so that we can set up the baud rate correctly
-  - Line 78: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the TxD pin GPIO 14 to alternate function 0 to get the UART0 TxD signal
-  - Line 79: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the RxD pin GPIO 15 to alternate function 0 to get the UART0 RxD signal
-  - Line 80: Switching off interrupts uses a different register and value
-  - Line 81-82: Setting the baudrate works differently. 
+- Line 42-47: We also need to include `Mailbox.h` and `RPIProperties.h`
+- Line 51-55: The default constructor is identical to the one for `UART1`
+- Line 57-61: The non default constructor is identical to the one for `UART1`
+- Line 64-85: The `Initialize()` method is similar to the one for `UART1`
+  - Line 69: Disabling the UART uses a different register and value
+  - Line 71-74: We set the clock rate for the UART clock to 4 MHz, so that we can set up the baud rate correctly
+  - Line 77: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the TxD pin GPIO 14 to alternate function 0 to get the UART0 TxD signal
+  - Line 78: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the RxD pin GPIO 15 to alternate function 0 to get the UART0 RxD signal
+  - Line 79: Switching off interrupts uses a different register and value
+  - Line 80-81: Setting the baudrate works differently. 
 The `RPI_UART0_IBRD` register holds the integral part of a divisor, `RPI_UART0_FBRD` the fractional part. We calculate these part as follows
 
 ```text
@@ -662,16 +601,16 @@ divisor = UART clock rate / (16 * baudrate) = 4000000 / (16 * 115200) = 2.170184
 integer part = 2
 fractional part = 0.170184 * 64 = 10.89 -> 11 = 0xB
 ```
-  - Line 83: Setting the mode 8N1 enabling the FIFO uses a different register and value.
-  - Line 84: Enabling the UART uses a different register and value
-- Line 89-99: The `Write()` method is similar to the one for `UART1`
-  - Line 93: The Tx FIFO empty check uses a different register and value
-  - Line 98: The Tx data buffer uses a different register and value
-- Line 105-113: The `Read()` method is similar to the one for `UART1`
-  - Line 93: The Rx data ready check uses a different register and value
-  - Line 98: The Rx data buffer uses a different register and value
-- Line 115-124: The `WriteString()` method is identical to the one for `UART1`
-- Line 126-130: The `GetUART0()` method is almost identical to the one for `UART1`
+  - Line 82: Setting the mode 8N1 enabling the FIFO uses a different register and value.
+  - Line 83: Enabling the UART uses a different register and value
+- Line 88-98: The `Write()` method is similar to the one for `UART1`
+  - Line 92: The Tx FIFO empty check uses a different register and value
+  - Line 97: The Tx data buffer uses a different register and value
+- Line 101-111: The `Read()` method is similar to the one for `UART1`
+  - Line 105: The Rx data ready check uses a different register and value
+  - Line 110: The Rx data buffer uses a different register and value
+- Line 113-122: The `WriteString()` method is identical to the one for `UART1`
+- Line 124-129: The `GetUART0()` method is almost identical to the one for `UART1`
 
 ### Update the application code - Step 2
 
@@ -732,6 +671,29 @@ File: code/applications/demo/src/main.cpp
 47: 
 48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
+```
+
+#### System.cpp
+
+As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly checking the port over, with strange effects.
+Update the file `code/libraries/baremetal/src/System.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/System.cpp
+47: #include <baremetal/UART0.h>
+...
+87: void System::Halt()
+88: {
+89:     GetUART0().WriteString("Halt\n");
+...
+107: void System::Reboot()
+108: {
+109:     GetUART0().WriteString("Reboot\n");
+...
+158:    GetUART0().WriteString("Starting up\n");
+159: 
+160:     extern int main();
+...
 ```
 
 ### Update project configuration - Step 2
@@ -799,7 +761,7 @@ In the end, the visible behaviour does not change.
 Starting up
 Hello World!
 Mailbox call succeeded
-Serial: 00000000000000000
+Serial: 10000000D18E8B28
 Wait 5 seconds
 Press r to reboot, h to halt
 ```

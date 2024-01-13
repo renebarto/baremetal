@@ -42,7 +42,7 @@
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
 
-/// @brief Total count of GPIO pins, numbered from 0 through 53
+// Total count of GPIO pins, numbered from 0 through 53
 #define NUM_GPIO 54
 
 namespace baremetal {

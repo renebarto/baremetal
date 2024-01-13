@@ -43,12 +43,13 @@ Update the file `code/libraries/baremetal/include/baremetal/Timer.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
+File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremetal\Timer.h
 44: namespace baremetal {
 45: 
 46: class IMemoryAccess;
 47: 
 48: // Timer class. For now only contains busy waiting methods
-49: /// Note that this class is created as a singleton, using the GetTimer function.
+49: // Note that this class is created as a singleton, using the GetTimer function.
 50: class Timer
 51: {
 52:     friend Timer& GetTimer();
@@ -64,27 +65,24 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 62:     Timer(IMemoryAccess& memoryAccess);
 63: 
 64:     // Wait for specified number of NOP statements. Busy wait
-65:     /// @param numCycles    Wait time in cycles
-66:     static void WaitCycles(uint32 numCycles);
-67: 
-68: #if defined(USE_PHYSICAL_COUNTER)
-69:     uint64 GetSystemTimer();
-70: #endif
-71: 
-72:     // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-73:     /// counter). Busy wait
-74:     /// @param msec     Wait time in milliseconds
-75:     static void WaitMilliSeconds(uint64 msec);
-76:     // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-77:     /// counter). Busy wait
-78:     /// @param usec     Wait time in microseconds
-79:     static void WaitMicroSeconds(uint64 usec);
-80: };
+65:     static void WaitCycles(uint32 numCycles);
+66: 
+67: #if defined(USE_PHYSICAL_COUNTER)
+68:     uint64 GetSystemTimer();
+69: #endif
+70: 
+71:     // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+72:     // counter). Busy wait
+73:     static void WaitMilliSeconds(uint64 msec);
+74:     // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+75:     // counter). Busy wait
+76:     static void WaitMicroSeconds(uint64 usec);
+77: };
+78: 
+79: // Retrieves the singleton Timer instance. It is created in the first call to this function.
+80: Timer& GetTimer();
 81: 
-82: // Retrieves the singleton Timer instance. It is created in the first call to this function.
-83: Timer& GetTimer();
-84: 
-85: } // namespace baremetal
+82: } // namespace baremetal
 ```
 
 - Line 46: We forward declare IMemoryAccess, as this class will need it for memory access
@@ -92,10 +90,10 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 - Line 55: We add a class variable for the memory access
 - Line 58: We declare a private constructor (called by `GetTimer()`)
 - Line 62: We declare a public constructor for testing
-- Line 68-70: We add a method to request the timer count in case we use the BCM2835 (SoC) timer. As this method needs memory access, we use the IMemoryAccess interface, so this method needs to have an instance
-- Line 75: We add a method to delay for a specified number of milliseconds
-- Line 79: We add a method to delay for a specified number of microseconds
-- Line 83: We declare the getter function `GetTimer()`
+- Line 67-69: We add a method to request the timer count in case we use the BCM2835 (SoC) timer. As this method needs memory access, we use the IMemoryAccess interface, so this method needs to have an instance
+- Line 73: We add a method to delay for a specified number of milliseconds
+- Line 76: We add a method to delay for a specified number of microseconds
+- Line 80: We declare the getter function `GetTimer()`
 
 ### Timer.cpp
 

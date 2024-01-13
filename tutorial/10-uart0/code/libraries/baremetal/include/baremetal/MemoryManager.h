@@ -48,7 +48,7 @@ enum class CoherentPageSlot
 
 namespace baremetal {
 
-/// @brief MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
+// MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
 class MemoryManager
 {
 public:

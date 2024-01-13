@@ -45,7 +45,6 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/PhysicalGPIOPin.h>
 #include <baremetal/RPIProperties.h>
-#include <baremetal/RPIPropertiesInterface.h>
 
 namespace baremetal {
 
@@ -99,7 +98,6 @@ void UART0::Write(char c)
 }
 
 // Receive a character
-
 char UART0::Read()
 {
     // wait until something is in the buffer

@@ -46,7 +46,7 @@ namespace baremetal {
 class IMemoryAccess;
 
 // Timer class. For now only contains busy waiting methods
-/// Note that this class is created as a singleton, using the GetTimer function.
+// Note that this class is created as a singleton, using the GetTimer function.
 class Timer
 {
     friend Timer& GetTimer();
@@ -62,7 +62,6 @@ public:
     Timer(IMemoryAccess& memoryAccess);
 
     // Wait for specified number of NOP statements. Busy wait
-    /// @param numCycles    Wait time in cycles
     static void WaitCycles(uint32 numCycles);
 
 #if defined(USE_PHYSICAL_COUNTER)
@@ -70,12 +69,10 @@ public:
 #endif
 
     // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    /// counter). Busy wait
-    /// @param msec     Wait time in milliseconds
+    // counter). Busy wait
     static void WaitMilliSeconds(uint64 msec);
     // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-    /// counter). Busy wait
-    /// @param usec     Wait time in microseconds
+    // counter). Busy wait
     static void WaitMicroSeconds(uint64 usec);
 };
 

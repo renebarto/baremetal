@@ -52,10 +52,7 @@ Mailbox::Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess /*= GetMemo
 {
 }
 
-/// @brief Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
-/// \param address Address to write to VC mailbox register, mapped to VC address space, aligned to 16 bytes.
-/// \return Address read from VC mailbox register
-/// \ref https://github.com/raspberrypi/firmware/wiki/Accessing-mailboxes
+// Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
 uintptr Mailbox::WriteRead(uintptr address)
 {
     Flush();
@@ -67,7 +64,7 @@ uintptr Mailbox::WriteRead(uintptr address)
     return result;
 }
 
-/// @brief Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
+// Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
 void Mailbox::Flush()
 {
     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
@@ -78,10 +75,8 @@ void Mailbox::Flush()
     }
 }
 
-/// @brief Read back the address of the data block to the mailbox
-/// The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
-///
-/// @return Address to prepared data block written to write register (in VC address space), with channel in lower 4 bits. The channel is checked to be equal to m_channel.
+// Read back the address of the data block to the mailbox
+// The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
 uintptr Mailbox::Read()
 {
     uintptr result;
@@ -99,9 +94,7 @@ uintptr Mailbox::Read()
     return result & ~0xF;
 }
 
-/// @brief Write the address of the data block to the mailbox
-///
-/// @param data Address to prepared data block for the mailbox, converted to the address space of the VC. This address should be 16 byte aligned, as the channel (m_channel) to be written to will be placed in the lower 4 bits
+// Write the address of the data block to the mailbox
 void Mailbox::Write(uintptr data)
 {
     if ((data & 0xF) != 0)

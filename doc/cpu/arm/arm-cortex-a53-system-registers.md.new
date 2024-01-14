@@ -1,6 +1,6 @@
-# ARM Cortex-A53 System Registers
+# ARM Cortex-A53 System Registers {#ARM_CORTEXA53_SYSTEM_REGISTERS}
 
-## Register overview 
+## Register overview {#ARM_CORTEXA53_SYSTEM_REGISTERS_REGISTER_OVERVIEW}
 
 | Register name | Width | Acc | Reset value | Meaning |
 |---------------|-------|-----|-------------|---------|
@@ -25,7 +25,7 @@
 |               | 15:8  | Aff1              |     | Affinity level 1, CLUSTERIDAFF1 configuration signal value
 |               | 7:0   | Aff0              |     | Affinity level 0, core id (0, 1, 2, 3)
 | L2CTLR_EL1    | 31:26 | -                 |     | Reserved
-|               | 25:24 | #cores            | R   | Number of cores (0 = 1 core, 1 = 2 cores, 2 = 3 cores, 3 = 4 cores)
+|               | 25:24 | number of cores   | R   | Number of cores (0 = 1 core, 1 = 2 cores, 2 = 3 cores, 3 = 4 cores)
 |               | 23    | -                 |     | Reserved
 |               | 22    | CPU cache prot    |     | CPU RAM protection (0 = without ECC, 1 = with ECC)
 |               | 21    | SCU-L2 cache prot |     | L2 cache protection (0 = without ECC, 1 = with ECC)

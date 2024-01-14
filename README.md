@@ -50,17 +50,7 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Contents
 
-- \subpage TUTORIALS 
-- [Setting up for development](doc/01-setting-up-for-development.md)
-- [Setting up a first project](doc/02-setting-up-a-project.md)
-- [Setting up project structure](doc/03-setting-up-project-structure.md)
-- [Setting up common options](doc/04-setting-up-common-options.md)
-- [First application - Using the console - UART1](doc/05-console-uart1.md)
-- [Improving startup and static initialization](doc/06-improving-startup-static-initialization.md)
-- [Generalization](doc/07-generalization.md)
-- [Timer](doc/08-timer.md)
-- [Mailbox](doc/09-mailbox.md)
-- [UART0](doc/10-uart0.md)
+- @subpage TUTORIALS
 - Add doxygen
 - Add logger, inject character device
 - Add retrieval of system information
@@ -68,13 +58,12 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 
 ## Additional information
 
-- \subpage INFORMATION
+- @subpage INFORMATION
 - [Hardware overview](doc/hardware-overview.md)
 - [System startup](doc/system-startup.md)
 
-## Todo
+## Todo {#todo}
 
-@todo
 - Check if bug in Visual Studio 2022 is fixed
 - Build demo for RPI 4
 - Try out Raspberry Pi 4 emulation in QEMU

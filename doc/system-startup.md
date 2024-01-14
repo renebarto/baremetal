@@ -1,4 +1,4 @@
-# System startup
+# System startup {#SYSTEM_STARTUP}
 
 ## Boot sequence for Raspberry Pi 3
 

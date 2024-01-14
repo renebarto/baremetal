@@ -5,3 +5,5 @@ out/
 .vs/*
 !.vs/launch.vs.json
 doxygen/html
+links.json
+doxygen/doxygen.log

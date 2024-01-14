@@ -1,0 +1,11 @@
+# Raspberry Pi peripherals {#RASPBERRY_PI_PERIPHERALS}
+
+\todo Add UART0 registers
+
+\subpage RPI_BCM_REGISTERS
+\subpage RPI_SYSTEM_TIMER
+\subpage RPI_RANDOM_NUMBER_GENERATOR
+\subpage RPI_GPIO
+\subpage RPI_MAILBOX
+\subpage RPI_AUX
+\subpage RPI_UART1

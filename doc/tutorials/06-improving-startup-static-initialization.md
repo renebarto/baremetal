@@ -1,4 +1,4 @@
-# Improving startup and static initialization
+# Tutorial 06: Improving startup and static initialization {#TUTORIAL_06}
 
 Contents:
 - [New tutorial setup](##New-tutorial-setup)

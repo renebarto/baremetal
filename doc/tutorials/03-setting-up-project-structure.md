@@ -1,4 +1,4 @@
-# Setting up project structure
+# Tutorial 03: Setting up project structure {#TUTORIAL_03}
 
 Contents:
 - [CMake project structure](##CMake-project-structure)

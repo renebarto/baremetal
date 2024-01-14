@@ -1,4 +1,4 @@
-# Timer
+# Tutorial 08: Timer {#TUTORIAL_08}
 
 Contents:
 - [Tutorial information](##Tutorial-information)
@@ -297,18 +297,18 @@ File: code/libraries/baremetal/include/baremetal/ASMInstructions.h
 ```
 
 - Line 65: We define `GetTimerFrequency()`. It reads the Counter-timer Frequency (`CNTFRQ_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 222.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 222.
 - Line 67: We define `GetTimerCounter()`. It reads the Counter-timer Physical Count (`CNTPCT_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 307.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 307.
 - Line 70: We define `GetTimerControl()`. It reads the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 293.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 293.
 - Line 72: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 293.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 293.
 - Line 75-79: We define the bits of the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
 - Line 82: We define `SetTimerControl()`. It read the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 298.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 298.
 - Line 84: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
-See [ARM architecture registers](cpu/ARM-architecture-registers.pdf), page 298.
+See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 298.
 
 Only the first two functions are currently used.
 

@@ -1,4 +1,4 @@
-# Generalization
+# Tutorial 07: Generalization {#TUTORIAL_07}
 
 Contents:
 - [Tutorial information](##Tutorial-information)

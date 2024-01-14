@@ -1,4 +1,4 @@
-# UART0
+# Tutorial 10: UART0 {#TUTORIAL_10}
 
 Contents:
 - [New tutorial setup](##New-tutorial-setup)

@@ -1,4 +1,4 @@
-# Doxygen
+# Tutorial 11: Doxygen {#TUTORIAL_11}
 
 Contents:
 - [New tutorial setup](##New-tutorial-setup)
@@ -317,21 +317,28 @@ Searching for files in directory F:/Projects/Private/baremetal.github/code/libra
 Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/include
 Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/include/baremetal
 Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/src
+Searching for files in directory F:/Projects/Private/baremetal.github/doc
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards/Odroid
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards/RaspberryPi
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/cpu
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/firmware
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/firmware/dts
+Searching for files in directory F:/Projects/Private/baremetal.github/doc/images
 Reading and parsing tag files
 Parsing files
 Preprocessing F:/Projects/Private/baremetal.github/code/applications/demo/src/main.cpp...
 Parsing file F:/Projects/Private/baremetal.github/code/applications/demo/src/main.cpp...
-Preprocessing F:/Projects/Private/baremetal.github/code/libraries/baremetal/include/baremetal/ARMInstructions.h...
-Parsing file F:/Projects/Private/baremetal.github/code/libraries/baremetal/include/baremetal/ARMInstructions.h...
+
 ...
+
 finalizing index lists...
 writing tag file...
 Running plantuml with JAVA...
 Running dot...
-type lookup cache used 444/65536 hits=1200 misses=485
-symbol lookup cache used 373/65536 hits=1045 misses=373
-finished
-...
+type lookup cache used 1065/65536 hits=5179 misses=1106
+symbol lookup cache used 887/65536 hits=5013 misses=887
+finished...
 ```
 
 ### Linux
@@ -349,7 +356,44 @@ tools/run-doxygen.sh
 ```
 
 ```text
+warning: ignoring unsupported tag 'PROJECT_ICON' at line 70, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'MARKDOWN_ID_STYLE' at line 381, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'TIMESTAMP' at line 513, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'WARN_IF_UNDOC_ENUM_VAL' at line 894, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'INPUT_FILE_ENCODING' at line 972, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'FORTRAN_COMMENT_AFTER' at line 1177, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'HTML_COLORSTYLE' at line 1455, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'HTML_CODE_FOLDING' at line 1511, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'HTML_COPY_CLIPBOARD' at line 1522, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'HTML_PROJECT_COOKIE' at line 1531, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'SITEMAP_URL' at line 1671, file doxygen/doxygen.conf
+warning: Tag 'GENERATE_SQLITE3' at line 2371 of file 'doxygen/doxygen.conf' belongs to an option that was not enabled at compile time.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u", or recompile doxygen with this feature enabled.
+warning: Tag 'SQLITE3_OUTPUT' at line 2379 of file 'doxygen/doxygen.conf' belongs to an option that was not enabled at compile time.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u", or recompile doxygen with this feature enabled.
+warning: Tag 'SQLITE3_RECREATE_DB' at line 2387 of file 'doxygen/doxygen.conf' belongs to an option that was not enabled at compile time.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u", or recompile doxygen with this feature enabled.
+warning: ignoring unsupported tag 'DOT_COMMON_ATTR' at line 2592, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'DOT_EDGE_ATTR' at line 2601, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'DOT_NODE_ATTR' at line 2609, file doxygen/doxygen.conf
+warning: ignoring unsupported tag 'MSCGEN_TOOL' at line 2912, file doxygen/doxygen.conf
+Doxygen version used: 1.9.4
+Searching for include files...
+Searching for example files...
+Searching for images...
+Searching for dot files...
+Searching for msc files...
+Searching for dia files...
+Searching for files to exclude
+Searching INPUT for files to process...
+Searching for files in directory /home/rene/repo/baremetal.github/code
+...
+Patching output file 33/33
+lookup cache used 1097/65536 hits=6511 misses=1138
+finished...
 ```
+
+You may notice that some options are not supported by the Linux version, as it is slightly older than the Windows version.
 
 ## Viewing Doxygen output
 
@@ -412,13 +456,29 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 
 You will see some special tags appearing
 
-- @file
-- @brief
-- @param
-- @return
+```text
+@file
+@brief
+@param
+@return
+@ref
+```
 
 There are some others worth mentioning:
 
-- @todo
+```text
+@todo
+```
+
+Old:
+
+type lookup cache used 1065/65536 hits=5179 misses=1106
+symbol lookup cache used 887/65536 hits=5013 misses=887
+
+New:
+
+type lookup cache used 1070/65536 hits=5186 misses=1111
+symbol lookup cache used 895/65536 hits=5013 misses=895
+
 Next: [08-using-the-mailbox](08-using-the-mailbox.md)
 

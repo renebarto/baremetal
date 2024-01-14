@@ -1,4 +1,4 @@
-# Mailbox
+# Tutorial 09: Mailbox {#TUTORIAL_09}
 
 Contents:
 - [New tutorial setup](##New-tutorial-setup)

@@ -1,4 +1,4 @@
-# Setting up common options
+# Tutorial 04: Setting up common options {#TUTORIAL_04}
 
 Contents:
 - [CMake function display_list](##CMake-function-display_list)

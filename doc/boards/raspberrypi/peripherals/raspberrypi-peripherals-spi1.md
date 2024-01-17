@@ -2,7 +2,7 @@
 
 \todo Add register details
 
-See [documentation](BCM2837-peripherals.pdf), page 20
+See [documentation](bcm2837-peripherals.pdf), page 20
 
 Also refer to [aux device](#RASPBERRY_PI_AUXILIARY_PERIPHERAL).
 

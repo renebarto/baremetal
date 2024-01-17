@@ -267,7 +267,7 @@ Some items worth changing:
 | HTML_HEADER            | Sets a HTML header if desired                        | `doxygen/header.html`
 | HTML_FOOTER            | Sets a HTML footer if desired                        | `doxygen/footer.html`
 | HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | `doxygen/stylesheet.css`
-| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `doc/boards/RaspberryPi/BCM2835-peripherals.pdf`
+| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `doc/boards/RaspberryPi/bcm2835-peripherals.pdf`
 | HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | `120`
 | HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | `160`
 | GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | `YES`
@@ -283,9 +283,9 @@ We don't need to add Markdown (`.md`) files, they will automatically be found if
 ```text
 HTML_EXTRA_FILES       = doc/boards/Odroid/S922X_Public_Datasheet_V0.2.pdf \
                          doc/boards/raspberrypi/peripherals/bcm2711-peripherals.pdf \
-                         doc/boards/raspberrypi/peripherals/BCM2835-peripherals.pdf \
+                         doc/boards/raspberrypi/peripherals/bcm2835-peripherals.pdf \
                          doc/boards/raspberrypi/peripherals/bcm2836-peripherals.pdf \
-                         doc/boards/raspberrypi/peripherals/BCM2837-peripherals.pdf \
+                         doc/boards/raspberrypi/peripherals/bcm2837-peripherals.pdf \
                          doc/boards/raspberrypi/raspberry-pi-3-b-plus-product-brief.pdf \
                          doc/boards/raspberrypi/raspberry-pi-4-product-brief.pdf \
                          doc/boards/raspberrypi/raspberry-pi-5-product-brief.pdf \

@@ -328,8 +328,8 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 We will not go into details here, we'll cover this when we use the registers.
 More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found in the official 
-[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 175), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/BCM2835-peripherals.pdf) (page 175),  
+[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/bcm2835-peripherals.pdf) (page 175), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/bcm2835-peripherals.pdf) (page 175),  
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 144) and
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/rp1-peripherals.pdf) (page 34)
 

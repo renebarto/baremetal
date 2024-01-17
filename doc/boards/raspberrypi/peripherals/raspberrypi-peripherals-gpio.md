@@ -1,6 +1,6 @@
 # Raspberry Pi GPIO {#RASPBERRY_PI_GPIO}
 
-See [documentation](BCM2837-Peripherals.pdf), page 90
+See [documentation](bcm2837-peripherals.pdf), page 90
 
 Pinout:
 

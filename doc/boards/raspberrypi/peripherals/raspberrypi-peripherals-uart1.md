@@ -1,6 +1,6 @@
 # Raspberry Pi UART1 {#RASPBERRY_PI_UART1}
 
-See [documentation](BCM2837-Peripherals.pdf), page 10
+See [documentation](bcm2837-peripherals.pdf), page 10
 
 Also refer to [aux device](#RASPBERRY_PI_AUXILIARY_PERIPHERAL).
 

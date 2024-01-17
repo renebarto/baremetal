@@ -1,6 +1,6 @@
-# Raspberry Pi baremetal development {#RPI_BAREMETAL}
+# Raspberry Pi baremetal development {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT}
 
-## Reference material
+## Reference material {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_REFERENCE_MATERIAL}
 
  - [Raspberry Pi documentation](https://github.com/raspberrypi/documentation/tree/develop/documentation/asciidoc/computers/raspberry-pi)
  - [Raspberry Pi 3B schematics](RPI-3B-V1_2-schematic-reduced.pdf)
@@ -18,9 +18,9 @@
  - [RP1 peripherals specification](peripherals/rp1-peripherals.pdf)
  - [VideoCore IV specification](VideoCore-IV-3D-architecture-reference-guide.pdf)
 
-## Startup
+## Startup {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP}
 
-### Start of execution, loading image
+### Start of execution, loading image {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_START_OF_EXECUTION_LOADING_IMAGE}
 
 At startup, the video core (VC) starts first. It loads start.elf, and executes it, i.e. start.elf is a GPU executable, not an ARM executable.
 The code in the GPU loads the image for execution, which depends on the board and the architecture used:
@@ -36,7 +36,7 @@ The code in the GPU loads the image for execution, which depends on the board an
 
 Once the image is loaded, the GPU resets the ARM, which then starts executing. The start address depends on the architecture:
 
-### CPU execution start address
+### CPU execution start address {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU_EXECUTION_START_ADDRESS}
 
 | Architecture     | Start address |
 |------------------|---------------|
@@ -45,7 +45,7 @@ Once the image is loaded, the GPU resets the ARM, which then starts executing. T
 
 This is due to the GPU placing a jump opcode at address 0x0000, which is the initial starting point.
 
-### CPU <-> GPU communication
+### CPU <-> GPU communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU__GPU_COMMUNICATION}
 
 CPU and GPU communicate through a mailbox interface:
  - CPU writes data
@@ -56,7 +56,7 @@ CPU and GPU communicate through a mailbox interface:
 
 The mailbox interface is just another peripheral.
 
-### CPU <-> Peripheral communication
+### CPU <-> Peripheral communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU__PERIPHERAL_COMMUNICATION}
 
 Every peripheral has a slot of memory mapped I/O (MMIO). The start address depends on the SoC:
 
@@ -85,11 +85,11 @@ Peripheral MMIO slots for BCM2837:
 | 0x3F300000    | External Mass Media Controller (SD card reader)
 | 0x3F980000    | Universal Serial Bus controller
 
-### Memory Management Unit (MMU)
+### Memory Management Unit (MMU) {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MANAGEMENT_UNIT_MMU}
 
 The CPU also has a MMU, which can be used to map addresses to virtual addresses.
 
-### Code execution
+### Code execution {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CODE_EXECUTION}
 
 After the GPU initializes, all cores are started, however depending on whether the core is core 0 or a secondary core:
 
@@ -106,7 +106,7 @@ To determine which core is currently running, use the MPIDR_EL1 system register,
 asm volatile ("mrs %0, mpidr_el1" : "=r" (nMPIDR));
 ```
 
-### Memory mapping
+### Memory mapping {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING}
 
 Memory is mapping in ranges, with different address mapping for each range:
 
@@ -121,12 +121,12 @@ Memory is mapping in ranges, with different address mapping for each range:
 
 Mapping from BCM2835 peripherals specification.
 
-<img src="../../images/rpi-memory-mapping.png"  alt="Memory map" width="800"/>
+<img src="images/rpi-memory-mapping.png"  alt="Memory map" width="800"/>
 Linux uses a virtual address mapping, however that is not relevant here.
 
 Circle uses the following layout of the ARM memory:
 
-#### RPI 1
+#### RPI 1 {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING_RPI_1}
 
 | Base     | Size         | Contents               | Remarks                      |
 |----------|--------------|------------------------|------------------------------|
@@ -157,7 +157,7 @@ Circle uses the following layout of the ARM memory:
 | 20000000 |              | Peripherals            |                              |
 | ...      |              |                        |                              |
 
-#### RPI 2/3 32 bit
+#### RPI 2/3 32 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING_RPI_23_32_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -203,7 +203,7 @@ Circle uses the following layout of the ARM memory:
 | 40000000 |              | Local peripherals            |                              |
 | ...      |              |                              |                              |
 
-#### RPI 2/3 64 bit
+#### RPI 2/3 64 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING_RPI_23_64_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -234,7 +234,7 @@ Circle uses the following layout of the ARM memory:
 | 40000000 |              | Local peripherals            |                              |
 | ...      |              |                              |                              |
 
-#### RPI 4 32 bit
+#### RPI 4 32 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING_RPI_4_32_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -281,7 +281,7 @@ Circle uses the following layout of the ARM memory:
 | ...      |              |                              |                              |
 | FE000000 | 64 MByte     | Peripherals                  |                              |
 
-#### RPI 4 64 bit
+#### RPI 4 64 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_MEMORY_MAPPING_RPI_4_64_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|

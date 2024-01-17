@@ -44,7 +44,6 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/Timer.h>
 
-/// @file
 /// Raspberry Pi Mailbox implementation
 
 using namespace baremetal;

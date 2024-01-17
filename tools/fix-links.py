@@ -1,6 +1,8 @@
 import os
+import sys
 import re
 import json
+import click
 
 existingLinks = dict()
 
@@ -20,7 +22,7 @@ def EmptyLine(s):
     return not EmptyString(s) and s == "\n"
 
 def ConvertNameToLink(name):
-    result = ''.join([c.upper() if c.isalnum() else '_' for c in name if (c.isalnum() or c == ' ')])
+    result = ''.join([c.upper() if c.isalnum() else '_' for c in name if (c.isalnum() or c == ' ' or c == '_')])
     return result
 
 class MarkDownLinkFixer:
@@ -32,8 +34,10 @@ class MarkDownLinkFixer:
     linkNames = []
     dirty = False
     inCodeSection = False
+    logfile = None
+    verbose = False
 
-    def __init__(self):
+    def __init__(self, logOutput, verbose):
         self.path = ""
         self.inFile = None
         self.outFile = None
@@ -42,6 +46,11 @@ class MarkDownLinkFixer:
         self.linkNames = []
         self.dirty = False
         self.inCodeSection = False
+        self.logFile = logOutput
+        self.verbose = verbose
+
+    def log(self, str):
+        print(str, file=self.logFile)
 
     def AddLinkName(self, name):
         if self.currentSectionLevel > len(self.linkNames):
@@ -75,7 +84,7 @@ class MarkDownLinkFixer:
                 raise ValueError(f"{self.path}:{self.lineNumber} TOO MANY MATCHES: {line.strip()}")
             
             if len(matchesNoLink) == 1:
-                print(f"{self.path}:{self.lineNumber} MISSING LINK: {line.strip()}")
+                self.log(f"{self.path}:{self.lineNumber} MISSING LINK: {line.strip()}")
                 match = matchesNoLink[0]
                 newLevel = len(match[0])
                 if (newLevel > self.currentSectionLevel) and (newLevel != self.currentSectionLevel + 1):
@@ -94,7 +103,8 @@ class MarkDownLinkFixer:
                 return line
 
             if len(matchesWithLink) == 1:
-                print(f"{self.path}:{self.lineNumber} MATCH: {line.strip()}")
+                if self.verbose:
+                    self.log(f"{self.path}:{self.lineNumber} MATCH: {line.strip()}")
                 match = matchesWithLink[0]
                 newLevel = len(match[0])
                 if (newLevel > self.currentSectionLevel) and (newLevel != self.currentSectionLevel +1):
@@ -113,7 +123,6 @@ class MarkDownLinkFixer:
         return line
 
     def CreateLinksForSections(self, path):
-        print(path)
         with open(path, 'r') as self.inFile:
             outPath = path + '.new'
             with open(outPath, 'w') as self.outFile:
@@ -129,13 +138,17 @@ class MarkDownLinkFixer:
                         line = self.CheckAndAddLink(line)
                     self.outFile.write(line)
                     line = self.inFile.readline()
-                if self.dirty:
-                    print(f"Should rename {path} to {outPath}")
+        if self.dirty:
+            os.remove(path)
+            os.rename(outPath, path)
+            self.dirty = False
+        else:
+            os.remove(outPath)
         return
 
     def CreateLinksForMarkdownSections(self):
         for (root,dirs,files) in os.walk(GetRootDir(),topdown=True):
-            # print(f"Directory path: {root}")
+            # self.log(f"Directory path: {root}")
             mdFiles = [x for x in files if HasExtension(x, '.md')]
             for file in mdFiles:
                 self.CreateLinksForSections(os.path.join(root, file))
@@ -145,11 +158,16 @@ class PageFinder:
     path = ""
     inFile = None
     lineNumber = 0
+    logfile = None
 
-    def __init__(self):
+    def __init__(self, logOutput):
         self.path = ""
         self.inFile = None
         self.lineNumber = 0
+        self.logFile = logOutput
+
+    def log(self, str):
+        print(str, file=self.logFile)
 
     def UpdateLink(self, line):
         matcherPage = re.compile(r'[\\@]page\s+([\w_]+)')
@@ -159,10 +177,9 @@ class PageFinder:
             if linkName in existingLinks.keys():
                 raise ValueError(f"{self.path}:{self.lineNumber} PANIC: link {linkName} already defined")
             existingLinks[linkName] = f"{self.path}:{self.lineNumber}"
-            print(f"{self.path}:{self.lineNumber} Add link {linkName}")
+            self.log(f"{self.path}:{self.lineNumber} Add link {linkName}")
 
     def UpdateLinksForFile(self, path):
-        print(path)
         with open(path, 'r') as self.inFile:
             self.path = path
             self.lineNumber = 0
@@ -176,7 +193,7 @@ class PageFinder:
 
     def UpdateLinks(self):
         for (root,dirs,files) in os.walk(GetRootDir(),topdown=True):
-            # print(f"Directory path: {root}")
+            # self.log(f"Directory path: {root}")
             mdFiles = [x for x in files if HasExtension(x, '.md')]
             for file in mdFiles:
                 self.UpdateLinksForFile(os.path.join(root, file))
@@ -186,34 +203,51 @@ class MarkDownLinkChecker:
     path = ""
     inFile = None
     lineNumber = 0
+    logfile = None
+    inCodeSection = False
 
-    def __init__(self):
+    def __init__(self, logOutput):
         self.path = ""
         self.inFile = None
         self.lineNumber = 0
+        self.logFile = logOutput
+        self.inCodeSection = False
+
+    def log(self, str):
+        print(str, file=self.logFile)
 
     def CheckLink(self, line):
+        matcherCodeBegin = re.compile(r'^```\w*$')
+        matcherCodeEnd = re.compile(r'^```$')
         matcherRef = re.compile(r'[\\@]ref\s+([\w_]+)')
         matcherSubPage = re.compile(r'[\\@]subpage\s+([\w_]+)')
         matcherMarkDownRef = re.compile(r'\[[^\]]+\]\(#([\w_]+)\)')
         matchRef = matcherRef.findall(line)
+        if not matcherCodeEnd.match(line) is None:
+            self.inCodeSection = not self.inCodeSection
+            return
+        if not matcherCodeBegin.match(line) is None:
+            self.inCodeSection = True
+            return
+
+        if self.inCodeSection:
+            return
         for m in matchRef:
             linkName = m
             if not linkName in existingLinks.keys():
-                print(f"{self.path}:{self.lineNumber} Link {linkName} not found")
+                self.log(f"{self.path}:{self.lineNumber} Link {linkName} not found")
         matchSubPage = matcherSubPage.findall(line)
         for m in matchSubPage:
             linkName = m
             if not linkName in existingLinks.keys():
-                print(f"{self.path}:{self.lineNumber} Link {linkName} not found")
+                self.log(f"{self.path}:{self.lineNumber} Link {linkName} not found")
         matchMarkDownRef = matcherMarkDownRef.findall(line)
         for m in matchMarkDownRef:
             linkName = m
             if not linkName in existingLinks.keys():
-                print(f"{self.path}:{self.lineNumber} Link {linkName} not found")
+                self.log(f"{self.path}:{self.lineNumber} Link {linkName} not found")
 
     def CheckLinksForFile(self, path):
-        print(path)
         with open(path, 'r') as self.inFile:
             self.path = path
             self.lineNumber = 0
@@ -227,25 +261,35 @@ class MarkDownLinkChecker:
 
     def CheckLinks(self):
         for (root,dirs,files) in os.walk(GetRootDir(),topdown=True):
-            # print(f"Directory path: {root}")
+            # self.log(f"Directory path: {root}")
             mdFiles = [x for x in files if HasExtension(x, '.md')]
             for file in mdFiles:
                 self.CheckLinksForFile(os.path.join(root, file))
         return True
 
-if __name__ == '__main__':
-    markDownLinkFixer = MarkDownLinkFixer()
+@click.command()
+@click.option('--xmloutput', default='links.json', help='Output links to XML')
+@click.option('--logfile', default='fix-links.log', help='Log output file')
+@click.option('--verbose', default=False, help='Generate more detailed logging')
+def FixLinks(xmloutput, logfile, verbose):
+    logOutput = sys.stdout if logfile == None else open(logfile, 'w')
+    print('Create links for markdown sections')
+    markDownLinkFixer = MarkDownLinkFixer(logOutput, verbose)
     if not markDownLinkFixer.CreateLinksForMarkdownSections():
         print("Fail")
         exit(1)
-    pageFinder = PageFinder()
+    print('Create links for page entries')
+    pageFinder = PageFinder(logOutput)
     if not pageFinder.UpdateLinks():
         print("Fail")
         exit(1)
-    with open(f"{os.path.join(GetRootDir(), 'links.json')}", "w") as f:
+    with open(f"{os.path.join(GetRootDir(), xmloutput)}", "w") as f:
         json.dump(existingLinks, f, indent=4)
-    markDownLinkChecker = MarkDownLinkChecker()
+    print('Check markdown links')
+    markDownLinkChecker = MarkDownLinkChecker(logOutput)
     if not markDownLinkChecker.CheckLinks():
         print("Fail")
         exit(1)
-    print(f"List of existing links: {len(existingLinks)}")
+    
+if __name__ == '__main__':
+    FixLinks()

@@ -1,45 +1,20 @@
-# Tutorial 07: Generalization {#TUTORIAL_07}
+# Tutorial 07: Generalization {#TUTORIAL_07_GENERALIZATION}
 
-Contents:
-- [Tutorial information](##Tutorial-information)
-  - [Tutorial results](###Tutorial-results)
-- [Generalizing code](##Generalizing-code)
-- [Generic memory access - Step 1](##Generic-memory-access-Step-1)
-  - [IMemoryAccess.h - Step 1](###IMemoryAccess.h-Step-1)
-  - [MemoryAccess.h - Step 1](###MemoryAccess.h-Step-1)
-  - [MemoryAccess.cpp - Step 1](###MemoryAccess.cpp-Step-1)
-  - [Update UART1 code - Step 1](###Update-UART1-code-Step-1)
-  - [Update System code - Step 1](###Update-System-code-Step-1)
-  - [Update project configuration - Step 1](###Update-project-configuration-Step-1)
-  - [Configuring, building and debugging - Step 1](###Configuring-building-and-debugging-Step-1)
-- [Separating out GPIO code - Step 2](##Separating-out-GPIO-code-Step-2)
-  - [IGPIOPin.h - Step 2](###IGPIOPin.h-Step-2)
-  - [PhysicalGPIOPin.h - Step 2](###PhysicalGPIOPin.h-Step-2)
-  - [PhysicalGPIOPin.cpp - Step 2](###PhysicalGPIOPin.cpp-Step-2)
-  - [Update UART1 code - Step 2](###Update-UART1-code-Step-2)
-  - [Update project configuration - Step 2](###Update-project-configuration-Step-2)
-  - [Configuring, building and debugging - Step 2](###Configuring-building-and-debugging-Step-2)
-- [Separating out delay code - Step 3](##Separating-out-delay-code-Step-3)
-  - [Timer.h - Step 3](###Timer.h-Step-3)
-  - [Timer.cpp - Step 3](###Timer.cpp-Step-3)
-  - [Update PhysicalGPIOPin code - Step 3](###Update-PhysicalGPIOPin-code-Step-3)
-  - [Adding a wait before system halt or reboot - Step 3](###Adding-a-wait-before-system-halt-or-reboot-Step-3)
-  - [Update project configuration - Step 3](###Update-project-configuration-Step-3)
-  - [Configuring, building and debugging - Step 3](###Configuring-building-and-debugging-Step-3)
+@tableofcontents
 
-## Tutorial information
+## Tutorial information {#TUTORIAL_07_GENERALIZATION_TUTORIAL_INFORMATION}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/07-generalization`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results
+### Tutorial results {#TUTORIAL_07_GENERALIZATION_TUTORIAL_INFORMATION_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-07.a`
 - an application `output/Debug/bin/07-generalization.elf`
 - an image in `deploy/Debug/07-generalization-image`
 
-## Generalizing code
+## Generalizing code {#TUTORIAL_07_GENERALIZATION_GENERALIZING_CODE}
 
 So far, we've added some code for UART, GPIO, and for system startup.
 
@@ -53,14 +28,14 @@ in `tutorial/07-generalization` there is a complete copy of what we work towards
 Its root will clearly be `tutorial/07-generalization`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
-## Generic memory access - Step 1
+## Generic memory access - Step 1 {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1}
 
 We'll add an abstract interface `IMemoryAccess` that is implemented by the class `MemoryAccess`.
 We will pass the interface to classes that need to write to memory, such as `UART1` and `System`.
 
 First, let's create the interface.
 
-### IMemoryAccess.h - Step 1
+### IMemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_IMEMORYACCESSH}
 
 Let's create the abstract interface first.
 Create the file `code/libraries/baremetal/include/baremetal/IMemoryAccess.h`.
@@ -148,7 +123,7 @@ We have three sets of these methods:
 - one for 16 bit access
 - one for 32 bit access
 
-### MemoryAccess.h - Step 1
+### MemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSH}
 
 Next we derive from the abstract `IMemoryAccess` interface.
 Create the file `code/libraries/baremetal/include/baremetal/MemoryAccess.h`.
@@ -221,7 +196,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 
 So we create a class `MemoryAccess`, derived from `IMemoryAccess`. Next to this, we create an accessor function for the singleton `MemoryAccess` instance.
 
-### MemoryAccess.cpp - Step 1
+### MemoryAccess.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSCPP}
 
 Next we implement `MemoryAccess`.
 Create the file `code/libraries/baremetal/src/MemoryAccess.cpp`.
@@ -336,9 +311,9 @@ As you can see, the implementation is using a reinterpration cast to a uint8 / u
 
 We can now start replacing the direct memory access with calls to the methods of IMemoryAccess.
 
-### Update UART1 code - Step 1
+### Update UART1 code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE}
 
-#### UART1.h
+#### UART1.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1H}
 
 So, we update UART1 to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor:
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
@@ -375,7 +350,7 @@ This means only our accessor function can create an default instance of UART1, m
 - Line 122-123: We add a method to create an instance with a specific memory access instance injected.
 This can later be used for testing.
 
-#### UART1.cpp
+#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1CPP}
 
 Let's update the implementation:
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
@@ -552,9 +527,9 @@ File: code/libraries/baremetal/src/UART1.cpp
 ...
 ```
 
-### Update System code - Step 1
+### Update System code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE}
 
-#### System.h
+#### System.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMH}
 
 We update System to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor:
 Update the file `code/libraries/baremetal/include/baremetal/System.h`.
@@ -589,7 +564,7 @@ This means only our accessor function can create an default instance of System, 
 - Line 59-60: We add a method to create an instance with a specific memory access instance injected.
 This can later be used for testing.
 
-#### System.cpp
+#### System.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMCPP}
 
 Let's update the implementation:
 Update the file `code/libraries/baremetal/src/System.cpp`.
@@ -670,7 +645,7 @@ File: code/libraries/baremetal/src/System.cpp
 105: }
 ```
 
-### Update project configuration - Step 1
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 We need to update the CMake file for baremetal.
 Update the file `code/libraries/baremetal/CMakeLists.txt`.
@@ -942,13 +917,13 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging - Step 1
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code.
 
 The code will not behave differently, but will be more well-structured.
 
-## Separating out GPIO code - Step 2
+## Separating out GPIO code - Step 2 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2}
 
 Now let's separate out the GPIO functionality. We'll create a new class PhysicalGPIOPin which will implement the functionality.
 
@@ -956,7 +931,7 @@ Raspberry Pi also has virtual GPIO pins, hence the name. We'll cover these later
 
 Again, to enable testing later on, we'll create an abstract interface IGPIOPin, which we'll derive from.
 
-### IGPIOPin.h - Step 2
+### IGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_IGPIOPINH}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -1093,7 +1068,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 129: } // namespace baremetal
 ```
 
-### PhysicalGPIOPin.h - Step 2
+### PhysicalGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_PHYSICALGPIOPINH}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -1198,7 +1173,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 97: } // namespace baremetal
 ```
 
-### PhysicalGPIOPin.cpp - Step 2
+### PhysicalGPIOPin.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_PHYSICALGPIOPINCPP}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -1474,11 +1449,11 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 268: } // namespace baremetal
 ```
 
-### Update UART1 code - Step 2
+### Update UART1 code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE}
 
 We can now clean up the code for `UART1`, and make use of the `PhysicalGPIOPin` we just implemented.
 
-#### UART1.h
+#### UART1.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE_UART1H}
 
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
@@ -1565,7 +1540,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 - Line 46-106: We remove the enum definitions which are now in `IGPIOPin.h`
 - Line 137-149: We remove the methods for GPIO which are noew in 'PhysicalGPIOPin.h`
 
-#### UART1.cpp
+#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE_UART1CPP}
 
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
 
@@ -1717,7 +1692,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 - Line 90: We now instantiate a local PhysicialGPIOPin instance (we will no longer need it once the GPIO pin is configured) to set up the RxD pin (15)
 - Line 147-253: We can remove the implementation of methods now moved to `PhysicalGPIOPin.cpp`
 
-### Update project configuration - Step 2
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -1756,13 +1731,13 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging - Step 2
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
 The code will not behave differently, it's just cleaner in its structure.
 
-## Separating out delay code - Step 3
+## Separating out delay code - Step 3 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3}
 
 You may have notices that we still have a delay loop in `PhysicalGPIOPin.cpp`.
 This code is also generic, and can be used to perform a busy form of waiting also when rebooting or haldting the system.
@@ -1770,7 +1745,7 @@ It therefore seems wise to separate out this code as well.
 
 We will create a new class Timer, which fornow will only have one method, but we will be using different forms of waiting using the system timer later on, as well as an interrupt based timer.
 
-### Timer.h - Step 3
+### Timer.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERH}
 
 Let's create the `Timer` class.
 Create the file `code/libraries/baremetal/include/baremetal/Timer.h`.
@@ -1833,7 +1808,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 54: } // namespace baremetal
 ```
 
-### Timer.cpp - Step 3
+### Timer.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERCPP}
 
 Next we implement `Timer`.
 Create the file `code/libraries/baremetal/src/Timer.cpp`.
@@ -1897,7 +1872,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 55: }
 ```
 
-### Update PhysicalGPIOPin code - Step 3
+### Update PhysicalGPIOPin code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_UPDATE_PHYSICALGPIOPIN_CODE}
 
 We can now remove the implmentation of the delay loop from `PhysicalGPIOPin.cpp`.
 
@@ -1946,7 +1921,7 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 - Line 56-66: We can remove the `WaitCycles()` function.
 - Line 239, 241: We replace the call to `WaitCycles()` with a call to the `Timer` method `WaitCycles()`.
 
-### Adding a wait before system halt or reboot
+### Adding a wait before system halt or reboot {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_ADDING_A_WAIT_BEFORE_SYSTEM_HALT_OR_REBOOT}
 
 As we have now isolated the delay loop into the Timer class, we can also use it to implement short delays when halting or rebooting the system, giving the UART1 some time to complete its output.
 
@@ -1988,7 +1963,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 91: We wait the specified number of cycles before halting the system
 - Line 111: We wait the specified number of cycles before rebooting the system
 
-### Update project configuration - Step 3
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -2029,7 +2004,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging - Step 3
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

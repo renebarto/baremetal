@@ -1,10 +1,13 @@
 # Information {#INFORMATION}
 
-## Raspberry Pi {#Information_Raspberry_Pi}
+## Raspberry Pi {#INFORMATION_RASPBERRY_PI}
 
-- \subpage RPI_BAREMETAL
-- \subpage RPI_PERIPHERALS
+- @subpage RASPBERRY_PI_BAREMETAL_DEVELOPMENT
+- @subpage RASPBERRY_PI_PERIPHERALS
+- @subpage HARDWARE_OVERVIEW
+- @subpage SYSTEM_STARTUP
 
-## ARM {#Information_ARM}
+## ARM {#INFORMATION_ARM}
 
-- \subpage ARM_REGISTERS
+- @subpage ARM_REGISTERS
+- @subpage ARM_CORTEXA53_SYSTEM_REGISTERS

@@ -1,4 +1,4 @@
-# baremetal
+# baremetal {#BAREMETAL}
 A project to develop baremetal applications for Raspberry Pi and Odroid
 
 This project is based on / inspired by the work of many others:
@@ -41,29 +41,19 @@ For example:
 - Unit testing, even at baremetal level, using stubs and mocks. This will use an alternative to gtest / gmock, as this relies on the standard C++ library
 - Debugging on platform (with the addition of HW), as well as in QEMU, even directly from Visual Studio
 
-## License
+## License {#BAREMETAL_LICENSE}
 
 Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE.md)).
 This means that code will contain a copyright, but you are free to use it in whichever way you see fit. I would appreciate at least a reference to this GitHub project though.
 
 For now, we will focus on Raspberry Pi, as the information is more readily available than for Odroid.
 
-## Contents
+## Contents {#BAREMETAL_CONTENTS}
 
 - @subpage TUTORIALS
-- Add doxygen
-- Add logger, inject character device
-- Add retrieval of system information
-- Add clang format and git hook for commit
-
-## Additional information
-
 - @subpage INFORMATION
-- [Hardware overview](doc/hardware-overview.md)
-- [System startup](doc/system-startup.md)
 
-## Todo {#todo}
-
+@todo
 - Check if bug in Visual Studio 2022 is fixed
 - Build demo for RPI 4
 - Try out Raspberry Pi 4 emulation in QEMU
@@ -72,3 +62,6 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - Add description of Odroid platform support in QEMU
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- Add logger, inject character device
+- Add retrieval of system information
+- Add clang format and git hook for commit

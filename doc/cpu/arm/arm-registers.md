@@ -4,7 +4,7 @@ This page enumarates the definition of some of the registers inside the ARM proc
 
 @tableofcontents
 
-## DAIF register {#ARM_DAIF_REGISTER}
+## DAIF register {#ARM_REGISTERS_DAIF_REGISTER}
 
 <table>
 <caption id="DAIF_bits">DAIF bits</caption>

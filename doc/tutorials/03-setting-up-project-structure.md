@@ -1,23 +1,6 @@
-# Tutorial 03: Setting up project structure {#TUTORIAL_03}
+# Tutorial 03: Setting up project structure {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE}
 
-Contents:
-- [CMake project structure](##CMake-project-structure)
-  - [Root CMakeLists.txt](###Root-CMakeLists.txt)
-  - [Intermediate directory CMakeLists.txt](###Intermediate-directory-CMakeLists.txt)
-  - [Project CMakeLists.txt](###Project-CMakeLists.txt)
-- [Adding source file](###Adding-source-file)
-- [Adding startup assembly code](###Adding-startup-assembly-code)
-- [Building](##Building)
-  - [Configuring CMake](###Configuring-CMake)
-  - [Building a specific target](###Building-a-specific-target)
-  - [Building a specific image](###Building-a-specific-image)
-  - [Building all targets](###Building-all-targets)
-  - [Starting QEMU](###Starting-QEMU)
-  - [Starting GDB](###Starting-GDB)
-- [Visual Studio CMake integration](##Visual-Studio-CMake-integration)
-  - [Configuring CMake](###Configuring-CMake)
-  - [Building](###Building)
-  - [Debugging](###Debugging)
+@tableofcontents
 
 In order to start larger scale development, as well as to use Visual Studio for CMake project development for baremetal platforms,
 it is wise to set up your project in a certain way.
@@ -28,7 +11,7 @@ Its root will clearly be `tutorial/03-setting-up-project-structure`. Please be a
 
 To understand how to approach this, first a bit of information on how CMake projects are structured, and how Visual Studio integrates CMake projects.
 
-## CMake project structure
+## CMake project structure {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE}
 
 When using `CMake`, there is a root `CMakeLists.txt`, that acts as the starting point for `CMake`. 
 Normally, this is at the root directory of your project. In our case, for now, this was in `tutorial/02-setting-up-a-project`.
@@ -64,7 +47,7 @@ In order to explain how to populate the new structure, let's start setting up a 
 
 <img src="images/project-structure-new-project.png" alt="New project structure" width="1000"/>
 
-### Root CMakeLists.txt
+### Root CMakeLists.txt {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_ROOT_CMAKELISTSTXT}
 
 The root `CMakeLists.txt` is the starting point for CMake, we will be calling this the root CMake file. 
 It contains all global definitions and settings, such as the path to the custom CMake scripts, definition of base output directory,
@@ -122,11 +105,11 @@ Debug, or Release, MinSizeRel or RelWithDebInfo.
 - Line 28-29: We define the main project.
 - Line 31: Lastly, we include the CMake file in the code directory.
 
-### Intermediate directory CMakeLists.txt
+### Intermediate directory CMakeLists.txt {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT}
 
 The CMake files in the code, applications, and libraries directories simply print the current path, and then include the next level `CMakeLists.txt` files:
 
-#### code CMake file
+#### code CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_CODE_CMAKE_FILE}
 
 ```cmake
 File: code/CMakeLists.txt
@@ -139,7 +122,7 @@ File: code/CMakeLists.txt
 
 The `applications` and `libraries` directories are included, such that their CMake files are processed.
 
-#### code/applications CMake file
+#### code/applications CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_CODEAPPLICATIONS_CMAKE_FILE}
 
 ```cmake
 File: code/applications/CMakeLists.txt
@@ -151,7 +134,7 @@ File: code/applications/CMakeLists.txt
 
 The `applications` CMake file will include the demo project CMake file, which is a normal project file.
 
-#### code/libraries CMake file
+#### code/libraries CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_CODELIBRARIES_CMAKE_FILE}
 
 ```cmake
 File: code/libraries/CMakeLists.txt
@@ -162,7 +145,7 @@ File: code/libraries/CMakeLists.txt
 
 As we have no projects in `libraries` yes, we simply print the current directory.
 
-#### tutorials CMake file
+#### tutorials CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_TUTORIALS_CMAKE_FILE}
 
 The `tutorials` CMake file for now will also simply print the current directory.
 
@@ -173,9 +156,9 @@ File: tutorial/CMakeLists.txt
 3: 
 ```
 
-### Project CMakeLists.txt
+### Project CMakeLists.txt {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT}
 
-#### code/applications/demo CMake file
+#### code/applications/demo CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMO_CMAKE_FILE}
 
 The CMake file in `code/applications/demo` defines our application:
 
@@ -287,7 +270,7 @@ Different is the way we pass compiler definitions and options. We use a more gen
 - Line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
 - Line 89: Finally we include the `CMakeLists.txt` for the image creation project.
 
-#### code/applications/demo/create-image CMake file
+#### code/applications/demo/create-image CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMOCREATEIMAGE_CMAKE_FILE}
 
 The CMake file in `code/applications/demo/create-image` defines the project to create the image:
 
@@ -310,7 +293,7 @@ File: code/applications/demo/create-image/CMakeLists.txt
 
 Again this is very much like what we saw for `tutorial/02-setting-up-a-project/create-image`. The only difference is the dependency and the project name.
 
-## Adding source file
+## Adding source file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_ADDING_SOURCE_FILE}
 
 The source code file `main.cpp` will for now be equal to that of the `02-setting-up-a-project` tutorial.
 
@@ -322,7 +305,7 @@ File: code/applications/demo/src/main.cpp
 4: }
 ```
 
-## Adding startup assembly code
+## Adding startup assembly code {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_ADDING_STARTUP_ASSEMBLY_CODE}
 
 The startup assembly code will for now be equal to that of the `02-setting-up-a-project` tutorial.
 
@@ -415,15 +398,15 @@ File: code/applications/demo/src/start.S
 85: 
 ```
 
-## Building
+## Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING}
 
 As now we have a common structure, it may be helpful to create some scripts to help us build.
 
-### Configuring CMake
+### Configuring CMake {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE}
 
 We will create a script for Windows and for Linux to configure the build. They will be placed in the tools directory underneath the root directory:
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS}
 
 ```bat
 File: tools/configure.bat
@@ -518,7 +501,7 @@ tools\configure.bat
 -- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX}
 
 We will leave the Linux scripts as with build directory cmake-build, as we will still build on the command line there.
 
@@ -617,32 +600,32 @@ tools/configure.sh
 ~/repo/baremetal.github
 ```
 
-### Building a specific target
+### Building a specific target {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET}
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS}
 
 ```bat
 File: tools/build-target.bat
 1: cmake --build cmake-BareMetal-Debug --target %1
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX}
 
 ```bash
 File: tools/build-target.sh
 1: cmake --build cmake-build --target $1
 ```
 
-### Building a specific image
+### Building a specific image {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE}
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS}
 
 ```bat
 File: tools/build-image.bat
 1: cmake --build cmake-BareMetal-Debug --target %1-image
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX}
 
 ```bash
 File: tools/build-image.sh
@@ -651,9 +634,9 @@ File: tools/build-image.sh
 
 Note we simple add the `-image` suffix to make sure we build the corresponding image.
 
-### Building all targets
+### Building all targets {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS}
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS}
 
 ```bat
 File: tools/build-all.bat
@@ -671,7 +654,7 @@ tools\build-all.bat
 [4/4] Generating D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
 
 ```bash
 File: tools/build-all.sh
@@ -689,9 +672,9 @@ tools/build-all.sh
 [4/4] Generating /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img
 ```
 
-### Starting QEMU
+### Starting QEMU {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU}
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS}
 
 Start QEMU listening to UART0
 
@@ -739,7 +722,7 @@ ninja: no work to do.
 This may indicate that pixbuf loaders or the mime database could not be found.
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX}
 
 Start QEMU listening to UART0
 
@@ -790,7 +773,7 @@ ninja: no work to do.
 qemu-system-aarch64 -M raspi3b -kernel tools/../deploy/Debug/demo-image/kernel8.img -serial stdio -s -S
 ```
 
-### Starting GDB
+### Starting GDB {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB}
 
 When starting GDB, we need a way to specify GDB to connect to our QEMU gdb server. We do that using a command file:
 
@@ -800,7 +783,7 @@ target remote localhost:1234
 load
 ```
 
-#### Windows
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_WINDOWS}
 
 ```bat
 File: tools/startgdb.bat
@@ -843,7 +826,7 @@ Transfer rate: 398 KB/sec, 714 bytes/write.
 (gdb) 
 ```
 
-#### Linux
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_LINUX}
 
 ```bash
 File: tools/startgdb.sh
@@ -883,7 +866,7 @@ Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
 (gdb) 
 ```
 
-## Visual Studio CMake integration
+## Visual Studio CMake integration {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION}
 
 When using Visual Studio, there are two methods to integrate CMake projects.
 
@@ -961,7 +944,7 @@ Visual Studio will select `Ninja` as the default for CMake project, which is wha
 - `configurationType` specifies what kind of build we're going to perform. This is one of the CMake build types (Debug, Release, RelWithDebInfo, MinSizeRel).
 - `buildRoot` specifies the cmake build directory to be used. 
 Until now, we've been using `cmake-build`, we'll use `cmake-${name}` here, where `${name}` is the `name` of the configuration, e.g. resulting in `cmake-Baremetal-Debug` for the Debug configuration.
-- `installRoot` is not so relevant now, but is the directory root used when executing an install target. We set it to `${projectDir}\\output\\install\\${name}`, in other words it will be in the ouput\install directory, under a subdirectory named after the CMake project we're building.
+- `installRoot` is not so relevant now, but is the directory root used when executing an install target. We set it to `${projectDir}\\output\\install\\${name}`, in other words it will be in the `output\install` directory, under a subdirectory named after the CMake project we're building.
 - `cmakeCommandArgs` will specify the CMake definitions we wish to pass. These variable will be defined in our CMake scrips. We leave this empty for now, but will revisit this later.
 - `buildCommandArgs` specifies additional parameters to pass on to CMake for building. We are not using any.
 - `ctestCommandArgs` specifies additional parameters when running CMake in test mode. As we will not be using CMake for testing, this is empty.
@@ -991,7 +974,7 @@ In that case you can click `Project->CMake Cache (Baremetal-Debug Only)->Delete 
 Again notice that the select configuration is shown.
 This will completely remove the CMake cache for this configuration (`CMakeCache.txt`). You will then need to reconfigure again.
 
-### Configuring CMake
+### Configuring CMake {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_CONFIGURING_CMAKE}
 
 After automatically or manually configuring CMake, the Output panel at the bottom will show the CMake output:
 
@@ -1083,7 +1066,7 @@ If the toolchain was already checked, the output will be shorter.
 
 After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure.bat` or `tools/configure.sh` on the command line.
 
-### Building
+### Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_BUILDING}
 
 After configuration is done, we can build the project, using `Build->Build All` or `Build->Rebuild All`. This will build or rebuild everything.
 Another option is selecting the project to be built in the dropdown box next to the configuration, "Select Startup Items...".
@@ -1125,7 +1108,7 @@ Build All succeeded.
 
 As you can see, both `demo.elf` and `kernel8.img` have been built.
 
-### Debugging
+### Debugging {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_DEBUGGING}
 
 As already stated in [Debugging](01-setting-up-for-development.md##Debugging) it is possible to debug on a real board using a FTDI JTAG adapter.
 However this is not trivial and will be skipped for now.

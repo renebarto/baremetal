@@ -42,8 +42,8 @@
 #include <baremetal/Macros.h>
 #include <baremetal/Types.h>
 
-#define GPU_CACHED_BASE                 0x40000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5
-#define GPU_UNCACHED_BASE               0xC0000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5, 6
+#define GPU_CACHED_BASE                 0x40000000
+#define GPU_UNCACHED_BASE               0xC0000000
 
 #define GPU_MEM_BASE                    GPU_UNCACHED_BASE
 
@@ -179,6 +179,40 @@
 #define RPI_GPIO_GPPUPPDN2              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000EC)
 #define RPI_GPIO_GPPUPPDN3              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000F0)
 #endif
+
+//---------------------------------------------
+// UART0 registers
+//---------------------------------------------
+
+// Raspberry Pi UART0 registers base address
+#define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
+// Raspberry Pi UART0 data register (R/W)
+#define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
+// Raspberry Pi UART0 flag register (R/W)
+#define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
+// Raspberry Pi UART0 integer baud rate divisor register (R/W)
+#define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
+// Raspberry Pi UART0 factional baud rate divisor register (R/W)
+#define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
+// Raspberry Pi UART0 line control register (R/W)
+#define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
+// Raspberry Pi UART0 control register register (R/W)
+#define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
+// Raspberry Pi UART0 interrupt FIFO level select register (R/W)
+#define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
+// Raspberry Pi UART0 interrupt mask set/clear register (R/W)
+#define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
+// Raspberry Pi UART0 raw interrupt status register (R/W)
+#define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
+// Raspberry Pi UART0 masked interrupt status  register (R/W)
+#define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
+// Raspberry Pi UART0 interrupt clear register (R/W)
+#define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
+// Raspberry Pi UART0 DMA control register (R/W)
+#define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
+
+#define RPI_UART0_FR_RX_READY         BIT(4)
+#define RPI_UART0_FR_TX_EMPTY         BIT(5)
 
 //---------------------------------------------
 // Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)

@@ -1,20 +1,6 @@
-# Tutorial 04: Setting up common options {#TUTORIAL_04}
+# Tutorial 04: Setting up common options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS}
 
-Contents:
-- [CMake function display_list](##CMake-function-display_list)
-- [CMake function show_target_properties](##CMake-function-show_target_properties)
-- [Common compiler directives](##Common-compiler-directives)
-  - [Common definitions and options](###Common-definitions-and-options)
-  - [Combining common definitions and options](###Combining-common-definitions-and-options)
-  - [Adding some variables](###Adding-some-variables)
-- [Update default variables in CMakeSettings.json](##Update-default-variables-in-CMakeSettings.json)
-- [Update demo CMake file](##Update-demo-CMake-file)
-- [Update demo-image CMake file](##Updatedemo-image-CMake-file)
-- [Configure and build](##Configure-and-build)
-  - [Compiling startup code](###Compiling-startup-code)
-  - [Compiling source code](###Compiling-source-code)
-  - [Linking the demo application](###Linking-the-demo-application)
-  - [Creating the kernel image](###Creating-the-kernel-image)
+@tableofcontents
 
 In order for CMake projects to work smoothly, it is convenient to do some groundwork for them.
 
@@ -25,7 +11,7 @@ in `tutorial/04-setting-up-common-options` there is a complete copy of what we w
 Its root will clearly be `tutorial/04-setting-up-common-options`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
-## CMake function display_list
+## CMake function display_list {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CMAKE_FUNCTION_DISPLAY_LIST}
 
 We will add a function to the `cmake/functions.cmake` file:
 
@@ -49,7 +35,7 @@ File: cmake/functions.cmake
 This function prints a text followed by a list of values, separated by spaces.
 This can be used for single values, but also for a list of e.g. compiler definitions.
 
-## CMake function show_target_properties
+## CMake function show_target_properties {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CMAKE_FUNCTION_SHOW_TARGET_PROPERTIES}
 
 We will add a another function to the `cmake/functions.cmake` file:
 
@@ -162,7 +148,7 @@ Without going into too much detail, this function prints for a specific target:
 - Line 88-89: the target so version in case of a shared library
 - Line 91-92: the target output name
 
-## Common compiler directives
+## Common compiler directives {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES}
 
 As most compiler definitions and compiler options will have some commonality, it is convenient to define these common parts in variables,
 and use them in our project configuration.
@@ -171,7 +157,7 @@ So we will update the main CMake file to set these variables. We will revisit th
 
 Just before `add_subdirectory(code)` in the main CMake file, insert the following:
 
-### Common definitions and options
+### Common definitions and options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES_COMMON_DEFINITIONS_AND_OPTIONS}
 
 ```cmake
 File: CMakeLists.txt
@@ -304,7 +290,7 @@ Also, if `BAREMETAL_TARGET` is set to "RPI3", we set `BAREMETAL_RPI_TARGET` to 3
 
 So the section above adds a lot of variables, to set compiler and linker definitions and options, common and for each different build configuration.
 
-### Combining common definitions and options
+### Combining common definitions and options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES_COMBINING_COMMON_DEFINITIONS_AND_OPTIONS}
 
 We will now combine the variables definined in the previous section to one for each build configuration.
 Then we create a specific version for the currently set build configuration.
@@ -421,7 +407,7 @@ Explanation:
   - `COMPILE_OPTIONS_ASM`
   - `LINKER_OPTIONS`
 
-### Adding some variables
+### Adding some variables {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES_ADDING_SOME_VARIABLES}
 
 We need to set a default value for the platform `BAREMETAL_TARGET`, and we add a variable to be used to set verbose build output.
 Just before the main project definition insert the following:
@@ -467,7 +453,7 @@ This can come in handy when trying to figure out which source is compiler with w
 - Line 33-35: Finally, we set the variable `BAREMETAL_TARGET`, if not set already, to 3, to make it default to Raspberry Pi 3.
 - Line 37-43: We check the variable `BAREMETAL_TARGET`, and print the platform we're building for.
 
-## Update default variables in CMakeSettings.json
+## Update default variables in CMakeSettings.json {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_UPDATE_DEFAULT_VARIABLES_IN_CMAKESETTINGSJSON}
 
 In order to get more verbose output from CMake, and to set the correct target platform (we will select RaspBerry Pi 3 here), we will need to update `CMakeSettings.json`.
 We will add a duplicate set of build configurations, one for Raspberry Pi 3, one for Raspberry Pi 4.
@@ -578,7 +564,7 @@ File: CMakeSettings.json
 101: }
 ```
 
-## Update demo CMake file
+## Update demo CMake file {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_UPDATE_DEMO_CMAKE_FILE}
 
 With the addition the new CMake custom functions, and the addition of the set of variables we just defined, we can extend and simplify the demo application CMake file a bit:
 
@@ -711,7 +697,7 @@ This is only done if verbose output is requested
 - Line 102: We set the search path for standard libraries using `LINK_DIRECTORIES`
 - Line 107: Using the custom CMake function `show_target_properties` we can now print all target properties.
 
-## Update demo-image CMake file
+## Update demo-image CMake file {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_UPDATE_DEMOIMAGE_CMAKE_FILE}
 
 The same way, we can update the demo-image CMake file:
 
@@ -733,7 +719,7 @@ File: code/applications/demo/create-image/CMakeLists.txt
 
 The only difference here is that the `BAREMETAL_TARGET_KERNEL` is defined in the main CMake file, so we can remove the definition here.
 
-## Configure and build
+## Configure and build {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD}
 
 We are now able to configure the project again, and build it.
 
@@ -888,10 +874,10 @@ Rebuild All succeeded.
 
 You can see that the startup code is compiled (step 1), as well as the demo application's main.cpp (step 2).
 The demo application is linked (step 3), and finally the image is created (step 4).
-It takes a while to start understanding, even with the description of [Common compiler directives](##Common-compiler-directives),  what the compiler and linker actually do, so we'll dive a bit deeper here.
+It takes a while to start understanding, even with the description of [Common compiler directives](#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES),  what the compiler and linker actually do, so we'll dive a bit deeper here.
 For this we'll have a look at the build output shown above:
 
-### Compiling startup code
+### Compiling startup code {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE}
 
 When compiling `code/applications/demo/src/start.S`
 ```text
@@ -904,12 +890,12 @@ D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aa
   -c ../code/applications/demo/src/start.S
 ```
 
-#### Compiler
+#### Compiler {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_COMPILER}
 
 The first part is the compiler call, the rest are command line parameters for the compiler.
 For the startup code (which is assembly), this is `aarch64-none-elf-gcc.exe`.
 
-#### Compiler definitions
+#### Compiler definitions {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_COMPILER_DEFINITIONS}
 
 The -D options specify all compiler definitions. You will recognize the options specified in CMakeSettings.json: `"cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3"`.
 - The first option triggers setting the `BAREMETAL_TARGET=RPI3` definition.
@@ -946,7 +932,7 @@ File: CMakeLists.txt
 ...
 ```
 
-#### Compiler options
+#### Compiler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_COMPILER_OPTIONS}
 
 The complete list below are all compiler options:
 
@@ -1016,7 +1002,7 @@ File: CMakeLists.txt
 -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d
 ```
  
-#### Actual compilation
+#### Actual compilation {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ACTUAL_COMPILATION}
 
 The final parameters determine the source files compiled, and the resulting object file:
 
@@ -1027,7 +1013,7 @@ The final parameters determine the source files compiled, and the resulting obje
 
 The -c option tells the compiler to compile the specified file, the -o option tells it to generate the specified object file. Notice that the path for the object file is relative to the CMake build directory, in this case `cmake-BareMetal-Debug`.
 
-### Compiling source code
+### Compiling source code {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_SOURCE_CODE}
 
 ```text
 D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
@@ -1043,12 +1029,12 @@ D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aa
   -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
 ```
 
-#### Compiler
+#### Compiler {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_SOURCE_CODE_COMPILER}
 
 The first part is the compiler call, the rest are command line parameters for the compiler.
 For the C++ code this is `aarch64-none-elf-g++.exe`.
 
-#### Compiler definitions
+#### Compiler definitions {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_SOURCE_CODE_COMPILER_DEFINITIONS}
 
 The -D options specify all compiler definitions. You will recognize the options specified in CMakeSettings.json: `"cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3"`.
 - The first option triggers setting the `CMAKE_VERBOSE_MAKEFILE` setting, that shows the configuration output.
@@ -1097,7 +1083,7 @@ File: CMakeLists.txt
 ...
 ```
 
-#### Compiler options
+#### Compiler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_SOURCE_CODE_COMPILER_OPTIONS}
 
 The complete list below are all compiler options:
 
@@ -1203,7 +1189,7 @@ File: code/applications/demo/CMakeLists.txt
 -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d
 ```
 
-#### Actual compilation
+#### Actual compilation {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_SOURCE_CODE_ACTUAL_COMPILATION}
 
 The final parameters determine the source files compiled, and the resulting object file:
 
@@ -1214,7 +1200,7 @@ The final parameters determine the source files compiled, and the resulting obje
 
 The -c option tells the compiler to compile the specified file, the -o option tells it to generate the specified object file. Notice that the paths are relative to the CMake build directory, in this case `cmake-BareMetal-Debug`.
 
-### Linking the demo application
+### Linking the demo application {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_LINKING_THE_DEMO_APPLICATION}
 
 ```text
 cmd.exe /C
@@ -1400,7 +1386,7 @@ File: code/applications/demo/CMakeLists.txt
 - The reason libraries linked to is placed in a group (`-Wl,--start-group <libraries> -Wl,--end-group`) is that the GCC linker tries to resolve symbols in reverse order, i.e. expects the lowest level symbols to be added last, and we cannot always guarantee the correct order of libraires.
 By putting them in a group, the linker will iterate as many times as needed to resolve all symbols, if possible of course.
 
-### Creating the kernel image
+### Creating the kernel image {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_CREATING_THE_KERNEL_IMAGE}
 
 ```text
 cmd.exe /C
@@ -1418,7 +1404,7 @@ Here we see a 2 commands being performed inside a command shell:
   - Its first parameter is the executable file to be placed in the image
   - The second parameter (specified with option `-O`) specifies the image file to be created.
 
-## Running the application
+## Running the application {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_RUNNING_THE_APPLICATION}
 
 Start QEMU listening to UART1 for the demo project:
 
@@ -1426,6 +1412,6 @@ Start QEMU listening to UART1 for the demo project:
 tools\startQEMU-image-uart1.bat demo
 ```
 
-Start debugging as shown in [Visual Studio CMake integration](##Visual-Studio-CMake-integration). Make sure the demo applications is selected as startup project.
+Start debugging as shown in [Visual Studio CMake integration](#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION). Make sure the demo applications is selected as startup project.
 
 Next: [05-console-uart1](05-console-uart1.md)

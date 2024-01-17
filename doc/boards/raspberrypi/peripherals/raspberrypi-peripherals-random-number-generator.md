@@ -1,4 +1,4 @@
-# Random number generator {#RPI_RANDOM_NUMBER_GENERATOR}
+# Raspberry Pi Random number generator {#RASPBERRY_PI_RANDOM_NUMBER_GENERATOR}
 
 <u>__Undocumented__</u>
 

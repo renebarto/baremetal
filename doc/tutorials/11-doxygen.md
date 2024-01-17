@@ -1,25 +1,19 @@
-# Tutorial 11: Doxygen {#TUTORIAL_11}
+# Tutorial 11: Doxygen {#TUTORIAL_11_DOXYGEN}
 
-Contents:
-- [New tutorial setup](##New-tutorial-setup)
-- [An intermezzo](##An-intermezzo)
-- [Installing Doxygen](##Installing-Doxygen)
-- [Installing Graphviz](##Installing-Graphviz)
-- [Configuring Doxygen](##Configuring-Doxygen)
-- [Running Doxygen](##Running-Doxygen)
+@tableofcontents
 
-## New tutorial setup
+## New tutorial setup {#TUTORIAL_11_DOXYGEN_NEW_TUTORIAL_SETUP}
 
 This tutorial will not add any code, the changes will be reflected in the overall project structure.
 
-## An intermezzo
+## An intermezzo {#TUTORIAL_11_DOXYGEN_AN_INTERMEZZO}
 
 Now that we have already created quite some code, let's focus a bit on documentation.
 If you're not interested in this part, feel free to skip to the next tutorial.
 However, especially with development that needs a lot of detailed knowledge, it might be handy to have a clear, searchable source of information.
 
 If well configured, `Doxygen` can be just that.
-After running a script to collect all information configured for Doxygen, it can generate a HTML tree for you, that you can copy to a web server if desired, so you always have a source of information on all the platforms.
+After running a script to collect all information configured for `Doxygen`, it can generate a HTML tree for you, that you can copy to a web server if desired, so you always have a source of information on all the platforms.
 It can also generate other forms of documentation, such as LaTeX, XCode docset, Windows help files (CHM), QT help files, etc.
 
 `Doxygen` is an open source tool to collect documentation from your code and other documents, and present it in a tree-like, searchable web structure.
@@ -28,17 +22,17 @@ For an example of how this can look see below.
 
 <img src="images/doxygen-sample.png" alt="Doxygen sample" width="800"/>
 
-## Installing Doxygen
+## Installing Doxygen {#TUTORIAL_11_DOXYGEN_INSTALLING_DOXYGEN}
 
-To install Doxygen, go to their [site](https://www.doxygen.nl/index.html), and click on Download. Then select the platform your wish to download for.
+To install `Doxygen`, go to their [site](https://www.doxygen.nl/index.html), and click on Download. Then select the platform your wish to download for.
 You can either download a tarball, that you can install somewhere, or for Windows, download the installer. On Linux, you can simply install the package.
 We'll decide to install the package in both Windows and Linux, as in that case, the location is clear.
 
-### Windows
+### Windows {#TUTORIAL_11_DOXYGEN_INSTALLING_DOXYGEN_WINDOWS}
 
-We will install the latest Doxygen available at the moment, 1.10.0.
+We will install the latest `Doxygen` available at the moment, 1.10.0.
 Download the installer [here](https://www.doxygen.nl/files/doxygen-1.10.0-setup.exe), and run it.
-You might be warned that Doxygen is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
+You might be warned that `Doxygen` is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
 
 <img src="images/doxygen-install-1.png" alt="Installing Doxygen 1" width="500"/>
 
@@ -65,13 +59,13 @@ To test, open a command line prompt, and execute:
 doxygen -v
 ```
 
-The command should execute without error, and print the version of Doxygen:
+The command should execute without error, and print the version of `Doxygen`:
 
 ```text
 1.10.0 (ebc57c6dd303a980bd19dd74b8b61c8f3f5180ca)
 ```
 
-### Linux
+### Linux {#TUTORIAL_11_DOXYGEN_INSTALLING_DOXYGEN_LINUX}
 
 On Linux, simply run apt to install:
 
@@ -123,19 +117,21 @@ To test, first log out and log in again, open a command line prompt, and execute
 doxygen -v
 ```
 
+The command should execute without error, and print the version of `Doxygen`:
+
 ```text
 1.9.4
 ```
 
-## Installing Graphviz
+## Installing Graphviz {#TUTORIAL_11_DOXYGEN_INSTALLING_GRAPHVIZ}
 
-Graphviz (dot) is a visualization tool that will enable Doxygen to create diagrams for e.g. inheritance in the generated documentation.
+Graphviz (dot) is a visualization tool that will enable `Doxygen` to create diagrams for e.g. inheritance in the generated documentation.
 
-### Windows
+### Windows {#TUTORIAL_11_DOXYGEN_INSTALLING_GRAPHVIZ_WINDOWS}
 
 We will install the latest Graphviz available for Windows at the moment, 9.0.0.
 Download the installer [here](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/9.0.0/windows_10_cmake_Release_graphviz-install-9.0.0-win64.exe), and run it.
-You might be warned that Doxygen is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
+You might be warned that `Doxygen` is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
 
 <img src="images/graphviz-install-1.png" alt="Installing Graphviz 1" width="500"/>
 
@@ -166,13 +162,13 @@ To test, open a command line prompt, and execute:
 dot -V
 ```
 
-The command should execute without error, and print the version of Doxygen:
+The command should execute without error, and print the version of Graphviz:
 
 ```text
 dot - graphviz version 9.0.0 (20230911.1827)
 ```
 
-### Linux
+### Linux {#TUTORIAL_11_DOXYGEN_INSTALLING_GRAPHVIZ_LINUX}
 
 On Linux, simply run apt to install:
 
@@ -211,19 +207,21 @@ To test, first log out and log in again, open a command line prompt, and execute
 dot -V
 ```
 
+The command should execute without error, and print the version of Graphviz:
+
 ```text
 dot - graphviz version 2.43.0 (0)
 ```
 
-## Configuring Doxygen
+## Configuring Doxygen {#TUTORIAL_11_DOXYGEN_CONFIGURING_DOXYGEN}
 
-Doxygen has many options, which are just too much to cover here, so we'll pick out a few relevant ones. The full documentation can be found in [Docs](https://www.doxygen.nl/manual/index.html).
+`Doxygen` has many options, which are just too much to cover here, so we'll pick out a few relevant ones. The full documentation can be found in [Docs](https://www.doxygen.nl/manual/index.html).
 
 The main part is the configuration file.
 You can let `Doxygen` generate a default configuration file for you, that you can then adapt to your wishes.
 Let's place this file in the folder `doxygen` in the root of the project.
 
-```bash```
+```bash
 mkdir doxygen
 doxygen -g doxygen\doxygen.conf
 ```
@@ -246,44 +244,143 @@ Don't hesitate to play around and see the results.
 Some items worth changing:
 
 | Tag                    | Information                                          | Example |
-|------------------      |-------------------------------------------------     |---------|
-| PROJECT_NAME           | The name of your project                             | "Baremetal"
-| PROJECT_BRIEF          | A short description of the project                   | "Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices"
-| PROJECT_LOGO           | A logo image for your project                        | doxygen/logo.png
-| PROJECT_ICON           | An icon for your project                             | doxygen/logo.ico
-| OUTPUT_DIRECTORY       | The location where Doxygen generates its output      | doxygen
-| ALWAYS_DETAILED_SEC    | Will force Doxygen to generate a detailed section in all cases, if REPEAT_BRIEF is also set | YES
-| GROUP_NESTED_COMPOUNDS | Also generate information for nested class or struct | YES
-| EXTRACT_PRIVATE        | Also generate information for private members of a class or struct | YES
-| EXTRACT_PRIV_VIRTUAL   | Also generate information for private virtual methods of a class or struct | YES
-| EXTRACT_STATIC         | Also generate information for static members of a class or struct | YES
-| EXTRACT_ANON_NSPACES   | Also generate information for anonymous namespaces   | YES
-| CASE_SENSE_NAMES       | Handles names case sensitive if set                  | YES
-| WARN_NO_PARAMDOC       | Generate a warning if a parameter is not documented  | YES
-| WARN_IF_UNDOC_ENUM_VAL | Generate a warning if an enum is not documented      | YES
-| WARN_LOGFILE           | Write warnings to specified log file (stderr if not set) | doxygen/doxygen.log
-| INPUT                  | root location to scan for code (need . for root directory, e.g. README.md) | code doc README.md LICENSE.MD
-| RECURSIVE              | Search INPUT directory recursively                   | YES
-| USE_MDFILE_AS_MAINPAGE | Sets a Markdown file as the main page for documentation | README.md
-| GENERATE_HTML          | If set generates HTML output                         | YES
-| HTML_HEADER            | Sets a HTML header if desired                        | doxygen/header.html
-| HTML_FOOTER            | Sets a HTML footer if desired                        | doxygen/footer.html
-| HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | doxygen/stylesheet.css
-| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| doc/boards/RaspberryPi/BCM2835-peripherals.pdf
-| HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | 120
-| HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | 160
-| GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | YES
-| GENERATE_LATEX         | If set generates LaTeX output                        | NO
-| PREDEFINED             | Any definitions you would like set for source code, much like the -D options for the compiler. Requires ENABLE_PREPROCESSING to be set | BAREMETAL_RPI_TARGET=4 PLATFORM_BAREMETAL USE_PHYSICAL_COUNTER
-| SKIP_FUNCTION_MACROS   | If set ignores function like macros. Requires ENABLE_PREPROCESSING to be set | NO
-| HIDE_UNDOC_RELATIONS   | If set ignores inheritance and usage of items that are not documented | NO
-| HAVE_DOT               | Set if you have dot (Graphviz) installed. This will enable generation of e.g. inheritance diagrams in the documentation | YES
+|------------------------|------------------------------------------------------|---------|
+| PROJECT_NAME           | The name of your project                             | `"Baremetal"`
+| PROJECT_BRIEF          | A short description of the project                   | `"Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices"`
+| PROJECT_LOGO           | A logo image for your project                        | `doxygen/logo.png`
+| PROJECT_ICON           | An icon for your project                             | `doxygen/logo.ico`
+| OUTPUT_DIRECTORY       | The location where Doxygen generates its output      | `doxygen`
+| ALWAYS_DETAILED_SEC    | Will force `Doxygen` to generate a detailed section in all cases, if REPEAT_BRIEF is also set | `YES`
+| GROUP_NESTED_COMPOUNDS | Also generate information for nested class or struct | `YES`
+| EXTRACT_PRIVATE        | Also generate information for private members of a class or struct | `YES`
+| EXTRACT_PRIV_VIRTUAL   | Also generate information for private virtual methods of a class or struct | `YES`
+| EXTRACT_STATIC         | Also generate information for static members of a class or struct | `YES`
+| EXTRACT_ANON_NSPACES   | Also generate information for anonymous namespaces   | `YES`
+| CASE_SENSE_NAMES       | Handles names case sensitive if set                  | `YES`
+| WARN_NO_PARAMDOC       | Generate a warning if a parameter is not documented  | `YES`
+| WARN_IF_UNDOC_ENUM_VAL | Generate a warning if an enum is not documented      | `YES`
+| WARN_LOGFILE           | Write warnings to specified log file (stderr if not set) | `doxygen/doxygen.log`
+| INPUT                  | root location to scan for code (need . for root directory, e.g. README.md) | `code doc README.md LICENSE.MD`
+| RECURSIVE              | Search INPUT directory recursively                   | `YES`
+| USE_MDFILE_AS_MAINPAGE | Sets a Markdown file as the main page for documentation | `README.md`
+| GENERATE_HTML          | If set generates HTML output                         | `YES`
+| HTML_HEADER            | Sets a HTML header if desired                        | `doxygen/header.html`
+| HTML_FOOTER            | Sets a HTML footer if desired                        | `doxygen/footer.html`
+| HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | `doxygen/stylesheet.css`
+| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `doc/boards/RaspberryPi/BCM2835-peripherals.pdf`
+| HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | `120`
+| HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | `160`
+| GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | `YES`
+| GENERATE_LATEX         | If set generates LaTeX output                        | `NO`
+| PREDEFINED             | Any definitions you would like set for source code, much like the -D options for the compiler. Requires ENABLE_PREPROCESSING to be set | `BAREMETAL_RPI_TARGET=4 PLATFORM_BAREMETAL USE_PHYSICAL_COUNTER`
+| SKIP_FUNCTION_MACROS   | If set ignores function like macros. Requires ENABLE_PREPROCESSING to be set | `NO`
+| HIDE_UNDOC_RELATIONS   | If set ignores inheritance and usage of items that are not documented | `NO`
+| HAVE_DOT               | Set if you have dot (Graphviz) installed. This will enable generation of e.g. inheritance diagrams in the documentation | `YES`
 
-## Running Doxygen
+In addition to the settings described in the table above, we make sure to set the `HTML_EXTRA_FILES` to all additional files in our repo.
+We don't need to add Markdown (`.md`) files, they will automatically be found if they are in the trees or files specified for `INPUT`.
 
-Running doxygen is easy, but let's create a script for it.
+```text
+HTML_EXTRA_FILES       = doc/boards/Odroid/S922X_Public_Datasheet_V0.2.pdf \
+                         doc/boards/raspberrypi/peripherals/bcm2711-peripherals.pdf \
+                         doc/boards/raspberrypi/peripherals/BCM2835-peripherals.pdf \
+                         doc/boards/raspberrypi/peripherals/bcm2836-peripherals.pdf \
+                         doc/boards/raspberrypi/peripherals/BCM2837-peripherals.pdf \
+                         doc/boards/raspberrypi/raspberry-pi-3-b-plus-product-brief.pdf \
+                         doc/boards/raspberrypi/raspberry-pi-4-product-brief.pdf \
+                         doc/boards/raspberrypi/raspberry-pi-5-product-brief.pdf \
+                         doc/boards/raspberrypi/peripherals/rp1-peripherals.pdf \
+                         doc/boards/raspberrypi/RPI-3B-V1_2-mechanical-drawing.pdf \
+                         doc/boards/raspberrypi/RPI-3B-V1_2-SCHEMATIC-REDUCED.pdf \
+                         doc/boards/raspberrypi/RPI-4B-mechanical-drawing.pdf \
+                         doc/boards/raspberrypi/RPI-4B-schematics-reduced.pdf \                         
+                         doc/boards/raspberrypi/VideoCore-IV-3D-architecture-reference-guide.pdf \
+                         doc/cpu/arm/ARM-architecture-registers.pdf \
+                         doc/cpu/arm/ARM-Cortex-A53-r0p2.pdf \
+                         doc/cpu/arm/ARM-Cortex-A53-r0p4.pdf \
+                         doc/cpu/arm/ARM-Cortex-A72-r0p3.pdf \
+                         doc/cpu/arm/ARM-Cortex-A73-r0p2.pdf \
+                         doc/cpu/arm/ARM-Cortex-A76_r4p1.pdf \
+                         doc/cpu/arm/Cortex-A-series_Programmer-guide.pdf \
+                         doc/cpu/arm/elf-format.pdf \
+                         doc/cpu/arm/getting-started-with-ARM-assembly-language.pdf
+```
+
+## A caveat with Doxygen
+
+Doxygen does have one issue, related to Markdown and images.
+In Markdown, we can use relative paths for all links, for example to other Markdown files, but also to say PDF files.
+We use the standard link syntax for that:
+
+```text
+[Description](../abc.pdf)
+```
+
+As long as the documents referred to are exported as part of HTML_EXTRA_FILES, `Doxygen` will match the documents linked to, and correctly link to them.
+This is however not true for images that need to be displayed inline.
+
+In Markdown we can use the syntax:
+
+```text
+![My image](../images/image.png)
+```
+
+or using HTML
+
+```text
+<img src="../images/image.png" alt="My image"/>
+```
+
+However, these will not be correctly translated, leading to dead links. If we use the link for normal documents, they will work, but not be displayed inline, but merely show a link to the image.
+
+To resolved this, we place all images in a single directory `image`, and always use the relative link to the `images` directory, so e.g. `images/xxx.png`.
+In every folder that needs links to images, in this case:
+
+- doc
+- doc/tutorials
+- doc/boards/raspberrypi/peripherals
+
+We make sure so have the images directory available.
+For the `doc` folder the subfolder `doc/images` is present, so that is trivial.
+For the other two, we create a symlink to the `doc/images` folder names `images`.
+This only has to be done once.
 
 ### Windows
+
+Windows 10 and later support this, but you need to run a command a administrator:
+
+```bat
+push doc/tutorials
+mklink /D images ../images
+popd
+
+pushd doc/board/raspberrypi/peripherals
+mklink /D images ../../../images
+popd
+```
+
+### Linux
+
+On Linux symlinks are common:
+
+```bash
+```
+
+We then need to make sure the images are also present in the resulting HTML tree, so we add a line to the `run-doxygen` script:
+
+### Windows
+
+```bat
+```
+
+### Linux
+
+
+## Running Doxygen {#TUTORIAL_11_DOXYGEN_RUNNING_DOXYGEN}
+
+Running `Doxygen` is easy, but let's create a script for it.
+
+### Windows {#TUTORIAL_11_DOXYGEN_RUNNING_DOXYGEN_WINDOWS}
 
 Create the file `tools/run-doxygen.bat`
 
@@ -341,7 +438,7 @@ symbol lookup cache used 887/65536 hits=5013 misses=887
 finished...
 ```
 
-### Linux
+### Linux {#TUTORIAL_11_DOXYGEN_RUNNING_DOXYGEN_LINUX}
 
 Create the file `tools/run-doxygen.sh`
 
@@ -395,90 +492,236 @@ finished...
 
 You may notice that some options are not supported by the Linux version, as it is slightly older than the Windows version.
 
-## Viewing Doxygen output
+## Viewing Doxygen output {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT}
 
 Now open the file `doxygen/html/index.html` in your browser.
 
 <img src="images/doxygen-page.png" alt="Doxygen in browser" width="800"/>
 
-As you can you, for example the Timer class is known, along with its member functions, and the fact that it uses a IMemoryAccess member variable.
+As you can you, for example the `Timer` class is known, along with its member functions, and the fact that it uses a `IMemoryAccess` member variable.
 
-We'll be adding more information to our code and other documentation for Doxygen, so that the generated info will become richer.
+We'll be adding more information to our code and other documentation for `Doxygen`, so that the generated info will become richer.
 
 As an example, let's update `code/libraries/baremetal/include/baremetal/Timer.h` with some information.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
+...
+39: 
 40: #pragma once
 41: 
-42: #include <baremetal/Types.h>
-43: 
-44: namespace baremetal {
-45: 
-46: class IMemoryAccess;
-47: 
-48: // Timer class. For now only contains busy waiting methods
-49: // Note that this class is created as a singleton, using the GetTimer function.
-50: class Timer
-51: {
-52:     friend Timer& GetTimer();
-53: 
-54: private:
-55:     IMemoryAccess& m_memoryAccess;
-56: 
-57:     // Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
-58:     Timer();
+42: /// @file 
+43: /// Raspberry Pi Timer
+44: 
+45: #include <baremetal/Types.h>
+46: 
+47: namespace baremetal {
+48: 
+49: class IMemoryAccess;
+50: 
+51: /// <summary>
+52: /// Timer class. For now only contains busy waiting methods
+53: ///
+54: /// Note that this class is created as a singleton, using the GetTimer() function.
+55: /// </summary>
+56: class Timer
+57: {
+58:     friend Timer& GetTimer();
 59: 
-60: public:
-61:     // Constructs a specialized Timer instance with a custom IMemoryAccess instance. This is intended for testing.
-62:     Timer(IMemoryAccess& memoryAccess);
-63: 
-64:     // Wait for specified number of NOP statements. Busy wait
-65:     static void WaitCycles(uint32 numCycles);
-66: 
-67: #if defined(USE_PHYSICAL_COUNTER)
-68:     uint64 GetSystemTimer();
-69: #endif
+60: private:
+61:     /// <summary>
+62:     /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+63:     /// </summary>
+64:     IMemoryAccess& m_memoryAccess;
+65: 
+66:     /// <summary>
+67:     /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+68:     /// </summary>
+69:     Timer();
 70: 
-71:     // Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-72:     // counter). Busy wait
-73:     static void WaitMilliSeconds(uint64 msec);
-74:     // Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-75:     // counter). Busy wait
-76:     static void WaitMicroSeconds(uint64 usec);
-77: };
-78: 
-79: // Retrieves the singleton Timer instance. It is created in the first call to this function.
-80: Timer& GetTimer();
-81: 
-82: } // namespace baremetal
+71: public:
+72:     /// <summary>
+73:     /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
+74:     /// </summary>
+75:     /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+76:     Timer(IMemoryAccess& memoryAccess);
+77: 
+78:     /// <summary>
+79:     /// Wait for specified number of NOP statements. Busy wait
+80:     /// </summary>
+81:     /// <param name="numCycles">Number of cycles to wait</param>
+82:     static void WaitCycles(uint32 numCycles);
+83: 
+84: #if defined(USE_PHYSICAL_COUNTER)
+85:     /// <summary>
+86:     /// Reads the BCM2835 System Timer counter value. See @ref RASPBERRY_PI_SYSTEM_TIMER
+87:     /// </summary>
+88:     /// <returns>System Timer count value</returns>
+89:     uint64 GetSystemTimer();
+90: #endif
+91: 
+92:     /// <summary>
+93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
+94:     /// 
+95:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+96:     /// </summary>
+97:     /// <param name="msec">Wait time in milliseconds</param>
+98:     static void WaitMilliSeconds(uint64 msec);
+99: 
+100:     /// <summary>
+101:     /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
+102:     /// counter). Busy wait
+103:     /// 
+104:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+105:     /// </summary>
+106:     /// <param name="usec">Wait time in microseconds</param>
+107:     static void WaitMicroSeconds(uint64 usec);
+108: };
+109: 
+110: /// <summary>
+111: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
+112: /// </summary>
+113: /// <returns>A reference to the singleton Timer</returns>
+114: Timer& GetTimer();
+115: 
+116: } // namespace baremetal
 ```
 
-You will see some special tags appearing
+Before updating `Timer.h`:
 
-```text
-@file
-@brief
-@param
-@return
-@ref
-```
+type lookup cache used 1065/65536 hits=5179 misses=1106
+symbol lookup cache used 887/65536 hits=5016 misses=887
+
+After updating `Timer.h`:
+
+type lookup cache used 1070/65536 hits=5186 misses=1111
+symbol lookup cache used 895/65536 hits=5014 misses=895
+
+You will see some special tags appearing:
+
+- `<summary></summary>`
+- `<param name="..."></param>`
+- `<returns></returns>`
+- `@file`
+- `@brief`
+- `@param`
+- `@return`
+- `@ref`
 
 There are some others worth mentioning:
 
-```text
-@todo
+- `@page`
+- `@subpage`
+- `@todo`
+- `@tableofcontents`
+
+Comments recognized by `Doxygen` can be in several formats, I have chosen to use C++ comments using three forward slashes
+
+### file tag
+
+The tag `@file` will add the current file to the `Doxygen` index. This way it will show the symbols found linked with the file.
+If the `@file` tag is used with a filename, that filename will be linked to symbols found, if left empty the current file is used.
+
+The line after the `@file` tag will be used as a detailed description of the file:
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Timer.h
+...
+42: /// @file 
+43: /// Raspberry Pi Timer
+...
 ```
 
-Old:
+<img src="images/doxygen-file-list.png" alt="Doxygen file list for a directory" width="800"/>
 
-type lookup cache used 1065/65536 hits=5179 misses=1106
-symbol lookup cache used 887/65536 hits=5013 misses=887
+You can see that the `Timer.h` file is highlighted, meaning there is a link for it.
+The link will show the information collected for the file:
+- classes
+- functions
+- usage
+- detailed desription
 
-New:
+<img src="images/doxygen-file-information.png" alt="Doxygen information for a file" width="800"/>
 
-type lookup cache used 1070/65536 hits=5186 misses=1111
-symbol lookup cache used 895/65536 hits=5013 misses=895
+### brief and summary tags
 
-Next: [08-using-the-mailbox](08-using-the-mailbox.md)
+The tag `@brief` is roughly equal to `<summary></summary>` Both allow an item (class, function, type, method, etc.) to be given a brief description, and a more detailed description.
+Comment text will always be just before the item being described.
+The comment text in the first lines before an empty comment line form the brief description, the comment lines after an empty comment line (but before a non-comment line) serve as a detailed description:
+
+```cpp
+/// <summary>
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
+/// </summary>
+class Timer
+```
+
+Adding a `@brief` or `<summary></summary>` entry will add the item to the index, and add the information to its page.
+
+<img src="images/doxygen-class-list.png" alt="Doxygen class list" width="800"/>
+
+You can see that the `Timer` class is highlighted just like others, meaning there is a link for it. The difference is that it has a brief description
+The link will show the information collected for the class:
+- inheritance
+- public members, public static members and private members
+- public and private attributes 
+- friend functions
+- detailed desription
+- detailed documentation on constructors, desctructors, members, friends and attributes
+
+<img src="images/doxygen-class-reference.png" alt="Doxygen class reference" width="800"/>
+
+### param, return(s) tags
+
+For every method or function, a `@param` or `<param name="..."></param>` tag can be added for each parameter of the function to describe it.
+If the method or function returns a value, a `@return` or `<returns></returns>` tag can be added to describe the return value.
+
+```cpp
+...
+92:     /// <summary>
+93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
+94:     /// 
+95:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+96:     /// </summary>
+97:     /// <param name="msec">Wait time in milliseconds</param>
+98:     static void WaitMilliSeconds(uint64 msec);
+...
+110: /// <summary>
+111: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
+112: /// </summary>
+113: /// <returns>A reference to the singleton Timer</returns>
+114: Timer& GetTimer();
+```
+
+Adding a `@param`, `<param></param>`, `@return` or `<returns></returns>` will add the function to the index, and add the information to its page.
+
+<img src="images/doxygen-class-reference.png" alt="Doxygen class reference" width="800"/>
+
+You can see that the `WaitMilliSeconds()` method and the `GetTimer()` friend function are highlighted just like others (all are documented), meaning there is a link for it.
+Any method not described will appear in black and have no link.
+
+The link will show the information collected for the class:
+- the signature of the method
+- description of parameters and return value
+- the brief and detailed description
+
+<img src="images/doxygen-function-reference.png" alt="Doxygen function reference" width="800"/>
+
+### ref tag
+
+### page tag
+
+### subpage tag
+
+### todo tag
+
+### tableofcontents tag
+
+The `@tableofcontents` tag is useful in Markdown files. It will (if enabled) make `Doxygen` generate a table of contents for the file, which is shown at the top right of the page.
+
+<img src="images/doxygen-table-of-contents.png" alt="Doxygen table of contents" width="1000"/>
+
+Next: [12-]()
 

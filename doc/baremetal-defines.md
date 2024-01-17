@@ -1,20 +1,74 @@
-# Baremetal defines and options
+# Baremetal defines and options {#BAREMETAL_DEFINES_AND_OPTIONS}
 
-## CMake setting controlled defines and options
+## CMake setting controlled defines and options {#BAREMETAL_DEFINES_AND_OPTIONS_CMAKE_SETTING_CONTROLLED_DEFINES_AND_OPTIONS}
 
 There are some defines that influence how the Baremetal software is built. These can be influenced by settings at CMake level
 
-| CMake variable   | #define affected     | Compiler options affected | Comments            |
-|------------------|----------------------|---------------------------|---------------------|
-| CMAKE_BUILD_TYPE<br/>Debug<br/>Release<br/>RelWithDebInfo<br/>MinSizeRel | <br/>_DEBUG</br>NDEBUG<br/>NDEBUG<br/>NDEBUG | <br/>-g -O0<br/>-O3<br/>-Os -O3<br/>-g -O2      | Determines Debug / Release / RelWithDebInfo / MinSizeRel build
-| VERBOSE_BUILD    | -                    | -                         | Adds verbosity to the build
-| BAREMETAL_TARGET | BAREMETAL_RPI_TARGET | -mcpu                     | Determines type of platform to build for:<br/>BAREMETAL_TARGET=RPI3 -> BAREMETAL_RPI_TARGET=3<br/>BAREMETAL_TARGET=RPI4 -> BAREMETAL_RPI_TARGET=4
-| BUILD_TUTORIALS  | -                    | -                         | If on, also builds all tutorials
+### CMAKE_BUILD_TYPE {#BAREMETAL_DEFINES_AND_OPTIONS_CMAKE_SETTING_CONTROLLED_DEFINES_AND_OPTIONS_CMAKE_BUILD_TYPE}
 
-## Important defines
+Purpose:
+Determines Debug / Release / RelWithDebInfo / MinSizeRel build
 
-| #define              | Comments            |
-|----------------------|---------------------|
-| PLATFORM_BAREMETAL   | Alwyas defined, indicates we are building for baremetal
-| BAREMETAL_RPI_TARGET | Determines type of platform to build for:<br/>3: Raspberry Pi 3<br/>4: Raspberry Pi 4
-| USE_PHYSICAL_COUNTER | Determines whether to use BCM2835 System Timer instead of ARM timer:<br/>not defined: User ARM timer<br/>defined: USe BCM2835 System Timer
+Affects defines:
+- Debug -> _DEBUG
+- Release -> NDEBUG
+- RelWithDebInfo-> NDEBUG
+- MinSizeRel -> NDEBUG
+
+Affects compiler options:
+- Debug -> -g -O0
+- Release -> -O3
+- RelWithDebInfo-> -Os -O3
+- MinSizeRel -> -g -O2
+
+### VERBOSE_BUILD {#BAREMETAL_DEFINES_AND_OPTIONS_CMAKE_SETTING_CONTROLLED_DEFINES_AND_OPTIONS_VERBOSE_BUILD}
+
+Purpose:
+Adds verbosity to the build
+
+Affects defines:
+- None
+
+Affects compiler options:
+- None
+
+### BAREMETAL_TARGET {#BAREMETAL_DEFINES_AND_OPTIONS_CMAKE_SETTING_CONTROLLED_DEFINES_AND_OPTIONS_BAREMETAL_TARGET}
+
+Purpose:
+Determines type of platform to build for:
+
+Affects defines:
+- BAREMETAL_TARGET=RPI3 -> BAREMETAL_RPI_TARGET=3
+- BAREMETAL_TARGET=RPI4 -> BAREMETAL_RPI_TARGET=4
+
+Affects compiler options:
+- -mcpu
+
+### BUILD_TUTORIALS {#BAREMETAL_DEFINES_AND_OPTIONS_CMAKE_SETTING_CONTROLLED_DEFINES_AND_OPTIONS_BUILD_TUTORIALS}
+
+Purpose:
+If on, also builds all tutorials
+
+Affects defines:
+- None
+
+Affects compiler options:
+- None
+
+## Important defines {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES}
+
+### PLATFORM_BAREMETAL {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_PLATFORM_BAREMETAL}
+
+Always defined, indicates we are building for baremetal
+
+### BAREMETAL_RPI_TARGET {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_BAREMETAL_RPI_TARGET}
+
+Determines type of platform to build for:
+- 3: Raspberry Pi 3
+- 4: Raspberry Pi 4
+
+### USE_PHYSICAL_COUNTER {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER}
+
+Determines whether to use BCM2835 System Timer instead of ARM timer:
+- not defined: User ARM timer
+- defined: USe BCM2835 System Timer

@@ -1,8 +1,8 @@
-# Hardware overview
+# Hardware overview {#HARDWARE_OVERVIEW}
 
 So let's start with the description of the boards we're targeting. I currently own a RPI3B, 4B and 5, as well as a Odroid N2+
 
-## Rasperry Pi 3B
+## Rasperry Pi 3B {#HARDWARE_OVERVIEW_RASPERRY_PI_3B}
 
 Raspberry Pi 3 was introduced in 2016. It was the first board to have a quad core ARM v8, 64-bit OS support, and with the model B, also Wifi and Bluetooth connectivity. It is arguably the best sold model up until now.
 
@@ -14,7 +14,7 @@ __Raspberry Pi 3B top view__
 
 __Raspberry Pi 3B bottom view__
 
-## Raspberry Pi 4B
+## Raspberry Pi 4B {#HARDWARE_OVERVIEW_RASPBERRY_PI_4B}
 
 After the success of Raspberry Pi 3, the waiting for its follow up took long.
 Raspberry Pi 4B was finally introduced in 2019.
@@ -34,7 +34,7 @@ __Raspberry Pi 4B top view__
 
 __Raspberry Pi 4B bottom view__
 
-## Raspberry Pi 5
+## Raspberry Pi 5 {#HARDWARE_OVERVIEW_RASPBERRY_PI_5}
 
 Again after quite some time, Raspberry Pi 5 was introduced October 2023.
 It has quite some feature improvements, amongst which are a power / reset switch and of course an improved SoC.
@@ -51,7 +51,7 @@ __Raspberry Pi 5 top view__
 
 __Raspberry Pi 5 bottom view__
 
-## Odroid N2+
+## Odroid N2+ {#HARDWARE_OVERVIEW_ODROID_N2}
 
 Due to the shortage of Raspberry Pi during the Covid period, most enthusiasts were looking for good alternatives.
 One of these is made by Odroid. The Odroid N2+ features a 4 + 2 Core Arm processor, and RTC (which was missing on Raspberry Pi until version 5), IR received, power switch, but is lacking Wifi and Bluetooth capabilities.
@@ -61,7 +61,7 @@ In constrast with Raspberry Pi, Odroid is larger, but has a very good heat sink.
 
 __Raspberry Odroid N2+ top view__
 
-## Hardware specifications
+## Hardware specifications {#HARDWARE_OVERVIEW_HARDWARE_SPECIFICATIONS}
 
 The table below shows the different hardware specifications for the boards mentioned
 

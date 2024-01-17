@@ -1,45 +1,20 @@
-# Tutorial 06: Improving startup and static initialization {#TUTORIAL_06}
+# Tutorial 06: Improving startup and static initialization {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION}
 
-Contents:
-- [New tutorial setup](##New-tutorial-setup)
-  - [Tutorial results](###Tutorial-results)
-- [Improving startup - step 1](##Improving-startup-step-1)
-  - [System.h - step 1](###System.h-step-1)
-  - [System.cpp - step 1](###System.cpp-step-1)
-  - [Util.h - step 1](###Util.h-step-1)
-  - [Util.cpp - step 1](###Util.cpp-step-1)
-  - [ARMInstructions.h - step 1](###ARMInstructions.h-step-1)
-  - [Update startup code - step 1](###Update-startup-code-step-1)
-  - [Update project configuration - step 1](###Update-project-configuration-step-1)
-  - [Update application code - step 1](###Update-application-code-step-1)
-  - [Configure, build and debug - step 1](###Configure-build-and-debug-step-1)
-- [Initializing static variables - Step 2](##Initializing-static-variables-step-2)
-  - [Call static initializers - Step 2](###Call-static-initializers-step-2)
-  - [Update GetSystem() - Step 2](###Update-GetSystem-step-2)
-  - [Update GetUART1() - Step 2](###Update-GetUART1-step-2)
-  - [Add static initializer functions - Step 2](###Add-static-initializer-functions-step-2)
-  - [Update project configuration - step 2](###Update-project-configuration-step-2)
-  - [Configure, build and debug - step 2](###Configure-build-and-debug-step-2)
-- [Implementing halt and reboot - step 3](##Implementing-halt-and-reboot-step-3)
-  - [BCMRegisters.h - step 3](###BCMRegisters.h-step-3)
-  - [System.cpp - step 3](###System.cpp-step-3)
-  - [Add option to reboot or halt - step 3](###Add-option-to-reboot-or-halt-step-3)
-  - [Update project configuration - step 3](###Update-project-configuration-step-3)
-  - [Configure, build and debug - step 3](###Configure-build-and-debug-step-3)
+@tableofcontents
 
-## New tutorial setup
+## New tutorial setup {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_NEW_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/06-improving-startup-static-initialization`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results
+### Tutorial results {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-06.a`
 - an application `output/Debug/bin/06-improving-startup-static-initialization.elf`
 - an image in `deploy/Debug/06-improving-startup-static-initialization-image`
 
-## Improving startup - step 1
+## Improving startup - step 1 {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1}
 
 Until now, in the startup assembly code, we immediately called main().
 However, very often, we will need to do some initial setup, such as initializing the console or screen, initializing the memory manager, and initializing static variables.
@@ -54,7 +29,7 @@ in `tutorial/06-improving-startup-static-initialization` there is a complete cop
 Its root will clearly be `tutorial/06-improving-startup-static-initialization`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
-### Update UART1.h - step 1
+### Update UART1.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_UART1H}
 
 First, we'll add a method to return a global UART1 instance that we will create in UART1.cpp.
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
@@ -103,7 +78,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 - line 109: We declare a friend function `GetUART1()` to the UART1 class.
 - line 139: We declare the actual function `GetUART1()` to the UART1 class, which returns a reference to an instance of UART1.
 
-### Update UART1.cpp - step 1
+### Update UART1.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_UART1CPP}
 
 We will implement the new function `GetUART1()`.
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
@@ -126,7 +101,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 We define a variable named `s_uart` here, and in the `GetUART1()` function, we first call `Initialize()` on it (which guards against multiple initialization), and then return the intstance.
 We should have defined `s_uart` as static, but that does not work so far, as we cannot inititialize static variables yet. We'll get to that.
 
-### System.h - step 1
+### System.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_SYSTEMH}
 
 We'll add the System class.
 We first add the header file.
@@ -222,7 +197,7 @@ File: code/libraries/baremetal/include/baremetal/System.h
 - Line 72: We forward declare the main() function. Notice that it is wrapped inside `extern "C" { }`. This enforces the functions inside this construction to have C linkage.
 - Line 73: We declare the sysinit() method, which will be called from startup assembly code, and will eventually call main()
 
-### System.cpp - step 1
+### System.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_SYSTEMCPP}
 
 We add the implementation for `System.h`. Create a file `code/libraries/baremetal/src/System.cpp`.
 
@@ -385,7 +360,7 @@ Notice that we include a new header in the top of the source:
 
 The header `Util.h` declares the `memset()` function used above and will be described below.
 
-### Util.h - step 1
+### Util.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UTILH}
 
 We will add a header to declare the protoype of the function memset().
 This function is normally part of the standard C library, but as we are defining our own platform, we need to implement it.
@@ -451,7 +426,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 This header simply declares the function memset (which is a standard C library function, but needs to be implemented specifically for the platform).
 Notice that this function is again wrapped in `extern "C" { }` to enforce C linking.
 
-### Util.cpp - step 1
+### Util.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UTILCPP}
 
 We will implement the function memset(). For now we will use a simple C++ implementation, we will move to assembly later on.
 
@@ -512,7 +487,7 @@ File: code/libraries/baremetal/src/Util.cpp
 51: }
 ```
 
-### ARMInstructions.h - step 1
+### ARMInstructions.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_ARMINSTRUCTIONSH}
 
 We will add some more assembly instructions which were used in `System.cpp`.
 
@@ -544,7 +519,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 - Line 60: This instruction enables fast interrupts
 - Line 62: This instruction disables fast interrupts
 
-### Update startup code - step 1
+### Update startup code {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_STARTUP_CODE}
 
 We need to update the startup code so that it calls sysinit() instead of main().
 
@@ -663,7 +638,7 @@ File: code/libraries/baremetal/src/Startup.S
 
 The only difference is that we call `sysinit()` instead of `main()` when starting the system.
 
-### Update project configuration - step 1
+### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 We need to add the newly created files to the project.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -695,7 +670,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Update application code - step 1
+### Update application code {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_APPLICATION_CODE}
 
 We will no longer define the UART instance in the application, but use the one exported from `UART1.h` through the function `GetUART1()`.
 
@@ -714,7 +689,7 @@ File: code/applications/demo/src/main.cpp
 11: }
 ```
 
-### Configure, build and debug - step 1
+### Configure, build and debug {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_CONFIGURE_BUILD_AND_DEBUG}
 
 The project will not behave much different from before, but will print more information to the console:
 
@@ -731,13 +706,13 @@ The first printed line is done in `sysinit()`, the call to `GetUART1()` will ini
 The second line is printed as before in `main()`.
 The third line is printed as part of `System::Halt()`, as we return `static_cast<int>(ReturnCode::ExitHalt)` from `main()`.
 
-## Initializing static variables - Step 2
+## Initializing static variables - Step 2 {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2}
 
 You may have noticed how we defined two variables in `System.cpp` and `UART1.cpp` that we could not make static, due to missing initialization code.
 My preferred way of dealing with a singleton is wrapping it into a function to retrieve their reference, so we can simply call this function,
 and it will be instantiated the first time the function is called.
 
-### Call static initializers - Step 2
+### Call static initializers {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_CALL_STATIC_INITIALIZERS}
 
 Let's first call static initialization code to `System.cpp`.
 
@@ -805,7 +780,7 @@ File: d:\Projects\baremetal.github\baremetal.ld
 
 So we simple loop through this array, and call the function pointed to (which has signature `void()`).
 
-### Update GetSystem() - Step 2
+### Update GetSystem() {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_UPDATE_GETSYSTEM}
 
 We will now update the implementation `GetSystem()` to use a static local variable.
 Update 'code/libraries\baremetal/include/baremetal/System.cpp':
@@ -835,7 +810,7 @@ File: code/libraries\baremetal/include/baremetal/System.cpp
 This will make sure there is only one instantiation of this variable.
 Also this will make sure the variable is instantiated only when the function is first called.
 
-### Update GetUART1() - Step 2
+### Update GetUART1() {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_UPDATE_GETUART1}
 
 We will now update the implementation of `GetUART1()` to use static local variables:
 
@@ -862,7 +837,7 @@ This will make sure there is only one instantiation of this variable.
 Also this will make sure the variable is instantiated only when the function is first called.
 We will call the `Initialize()` method, which will be called every time the function is called, however, due to the guard we built in, the actual initialization will only happen once.
 
-### Add static initializer functions - Step 2
+### Add static initializer functions {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_ADD_STATIC_INITIALIZER_FUNCTIONS}
 
 If you would now build the code, you would get linker errors:
 
@@ -1018,7 +993,7 @@ We define three functions here, of which one is not currently used.
 - Line 112-115" We implement `__cxa_guard_abort` which aborts the static initialization for an object
   - We clear the in-use flag
 
-### Update project configuration - Step 2
+### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 We need to add the newly added source file to the project:
 
@@ -1039,17 +1014,17 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configure, build and debug - Step 2
+### Configure, build and debug {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_CONFIGURE_BUILD_AND_DEBUG}
 
 The project will not behave different from before. However, it is interesting to see how static variables are initialized.
 Try setting a breakpoint on the functions in `CXAGuard.cpp` and see when they get called.
 Another interesting breakpoint is for example inside the `GetUART1()` function.
 
-## Implementing halt and reboot - Step 3
+## Implementing halt and reboot - Step 3 {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3}
 
 We will again need to write to some registers to implement halt and reboot functionality.
 
-### BCMRegisters.h - Step 3
+### BCMRegisters.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_BCMREGISTERSH}
 
 We need to update the header containing register addresses again.
 Update the file code/libraries/baremetal/include/baremetal/BCMRegisters.h
@@ -1085,9 +1060,9 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 We will not go into the details of these registers, as they are not officially described as far as I know.
 We will simply use proven code to implement halt and reboot.
 
-### System.cpp - Step 3
+### System.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_SYSTEMCPP}
 
-#### Implement System::Halt()
+#### Implement System::Halt() {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMHALT}
 
 Update the file code/libraries/baremetal/src/System.cpp
 
@@ -1125,7 +1100,7 @@ These 6 bits seem to indicate the partition we're booting from. This is normally
 - Line 69: We write to the watchdog timer, presumably the value is the magic number with 10 added for 10 seconds.
 - Line 70: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
 
-#### Implement System::System()
+#### Implement System::System() {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMSYSTEM}
 
 Update the file code/libraries/baremetal/src/System.cpp
 
@@ -1159,12 +1134,12 @@ File: code/libraries/baremetal/src/System.cpp
 
 The functionality is almost equal, except that the boot partition is set to 0 instead of 63.
 
-### Add option to reboot or halt - Step 3
+### Add option to reboot or halt {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_ADD_OPTION_TO_REBOOT_OR_HALT}
 
 Now that we can actually reboot and halt the system, it would be nice to let the user choose.
 We will read a character from the serial console, if it is `h` we will halt, if it is `r` we will reboot.
 
-#### Update application code
+#### Update application code {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_ADD_OPTION_TO_REBOOT_OR_HALT_UPDATE_APPLICATION_CODE}
 
 Update the file code/applications/demo/src/main.cpp
 
@@ -1196,11 +1171,11 @@ File: code/applications/demo/src/main.cpp
 - Line 13-18: We read a character and loop until it is either `h` or `r`
 - Line 20: We return the correct return code depending on the choice
 
-### Update project configuration - step 3
+### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As nothing was added or removed, we do not need to update the CMake files.
 
-### Configure, build and debug - step 3
+### Configure, build and debug {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_CONFIGURE_BUILD_AND_DEBUG}
 
 Where building are running, you will notice that the application waits for a key to be pressed. If `r` is pressed the system will reboot, if `h` is pressed it will halt.
 

@@ -1,8 +1,8 @@
-# UART1 {#RPI_UART1}
+# Raspberry Pi UART1 {#RASPBERRY_PI_UART1}
 
 See [documentation](BCM2837-Peripherals.pdf), page 10
 
-Also refer to [aux device](#RPI_AUX).
+Also refer to [aux device](#RASPBERRY_PI_AUXILIARY_PERIPHERAL).
 
 | Register        | Address         | Bits  | Name                                  | Acc | Meaning |
 |-----------------|-----------------|-------|---------------------------------------|-----|---------|

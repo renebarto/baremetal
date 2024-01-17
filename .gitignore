@@ -7,3 +7,4 @@ out/
 doxygen/html
 links.json
 doxygen/doxygen.log
+/fix-links.log

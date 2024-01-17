@@ -1,4 +1,4 @@
-# Tutorial 02: Setting up a project for building and debugging {#TUTORIAL_02}
+# Tutorial 02: Setting up a project for building and debugging {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING}
 
 @tableofcontents
 
@@ -22,7 +22,7 @@ As soon as you add this file in Visual Studio, it may detect this is a CMake pro
 This will fail as we don't have the correct contents yet. Don't worry about this.
 We'll get to Visual Studio in [Setting up project structure](03-setting-up-project-structure.md).
 
-## Create project {#TUTORIAL_02_Create_project}
+## Create project {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_PROJECT}
 
 In this file we will first create a project:
 
@@ -42,7 +42,7 @@ Explanation:
 - Line 3: We print the current version of CMake
 - Line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as language
 
-## Create source file {#TUTORIAL_02_Create_source_file}
+## Create source file {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_SOURCE_FILE}
 
 We'll now add a source file to the project, so let's create a source file first, and simply call it `main.cpp`. The contents will be:
 
@@ -58,9 +58,9 @@ For now the application does nothing but return 0. Notice that we have created a
 As we are running a baremetal application, there is no way to specify parameters, except through the kernel parameters file.
 
 We will also need some assembly code to correctly initialize the CPU.
-This will be discussed later, together with the [linker definition file](#TUTORIAL_02_Build_for_target_Toolchain_file) and the [startup assembly code](#TUTORIAL_02_Startup_assembly_code) section.
+This will be discussed later, together with the [linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE) and the [startup assembly code](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE) section.
 
-## Add source to project {#TUTORIAL_02_Add_source_to_project}
+## Add source to project {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_ADD_SOURCE_TO_PROJECT}
 
 We will add the source file to the project by defining an executable target:
 
@@ -94,9 +94,9 @@ You will now be able to build the project, however this will be targeting the pl
 So it will build a Windows application `02-setting-up-a-project.exe` for Windows, and a Linux application `02-setting-up-a-project` on Linux.
 We'll get to building once we can target the correct platform.
 
-## Build for target {#TUTORIAL_02_Build_for_target}
+## Build for target {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET}
 
-### Toolchain file {#TUTORIAL_02_Build_for_target_Toolchain_file}
+### Toolchain file {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE}
 
 In order to target the correct platform, we will need to use the toolchain we downloaded. We do this by adding a so-called toolchain file to CMake.
 Unlike the CMake file, this file can be named in any way we like, I tend to use the extension `.toolchain` for toolchain files.
@@ -186,7 +186,7 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 
 A bit of explanation is in order.
 
-#### Part 1 {#TUTORIAL_02_Build_for_target_Toolchain_file_Part1}
+#### Part 1 {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE_PART_1}
 
 ```cmake
 File: tutorial/02-setting-up-a-project/baremetal.toolchain
@@ -226,7 +226,7 @@ In our case this is `aarch64-none-elf` meaning a 64 bit ARM architecture, with n
 -Line 18: We also print the used toolchain root
 - Line 20: We set CMAKE build output to be more verbose
 
-#### Part 2 {#TUTORIAL_02_Build_for_target_Toolchain_file_Part2}
+#### Part 2 {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE_PART_2}
 
 The next part defines the tools to be used, such as the compiler, linker, etc.:
 
@@ -295,7 +295,7 @@ Notice that we did not set the assembler here, even though it will be used. In o
 - Line 51: We also define the variable `STDDEF_INCPATH` for the standard include path
 - Line 53-61: We print all the variables just defined
 
-#### Part 3 {#TUTORIAL_02_Build_for_target_Toolchain_file_Part3}
+#### Part 3 {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE_PART_3}
 
 ```cmake
 File: tutorial/02-setting-up-a-project/baremetal.toolchain
@@ -328,7 +328,7 @@ Lastly, we need to set some more standard CMake variable:
 
 We now need to use this toolchain file.
 
-### Windows {#TUTORIAL_02_Build_for_target_Windows}
+### Windows {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_WINDOWS}
 
 On the command line, first configure the build:
 
@@ -426,7 +426,7 @@ As you can see, in both cases, the source file is compiled, but the link stage f
 This is due to the fact that the compiler uses the C standard library, but this leaves a number of platform specific functions undefined.
 We therefore need to set compiler options the correct way to really build a baremetal `standalone` application.
 
-### Linux {#TUTORIAL_02_Build_for_target_Linux}
+### Linux {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_LINUX}
 
 On the command line, first configure the build:
 
@@ -524,9 +524,9 @@ Again it is important to be in the correct directory, the directory where our ma
 As you can see, in both cases, the source file is compiled, but the link stage failed due to some undefined references. This is due to the fact that the compiler uses the C standard library, but this leaves a number of platform specific functions undefined.
 We therefore need to set compiler options the correct way to really build a baremetal `standalone` application.
  
-## Compiler settings {#TUTORIAL_02_Compiler_settings}
+## Compiler settings {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS}
 
-### Setting up for custom CMake modules and binary tree {#TUTORIAL_02_Compiler_settings_Setting_up_for_custom_CMake_modules_and_binary_tree}
+### Setting up for custom CMake modules and binary tree {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_FOR_CUSTOM_CMAKE_MODULES_AND_BINARY_TREE}
 
 We will define two variables `OUTPUT_BASE_DIR` and `CONFIG_DIR`, which are later used to form the path to the target executable file.
 Next to that, we will need some CMake custom functions, for which we need to prepare.
@@ -567,7 +567,7 @@ This makes it impractical to find our end results, so we will specify a differen
 It is custom practice to create a subfolder `cmake` at the project top level and place the scripts there
 - Line 14: Lastly, we add the `SCRIPTS_DIR` to the standard CMake search path for CMake modules, `CMAKE_MODULE_PATH`
 
-### Adding project variables {#TUTORIAL_02_Compiler_settings_Adding_project_variables}
+### Adding project variables {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_ADDING_PROJECT_VARIABLES}
 
 We need to add a few lines to our CMakeLists file, to add definitions, compiler settings, linker options, and link libraries
 
@@ -643,18 +643,18 @@ Here we set the private compiler options to be:
 - Line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories.
 For now, everything is in the same directory, so we leave this empty
 - Line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
-  - ${CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#TUTORIAL_02_Build_for_target_Toolchain_file))
+  - ${CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
   - -nostdlib: Do not use the standard C libraries
   - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
   - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000
-  - -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](#TUTORIAL_02_Build_for_target_Toolchain_file))
+  - -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
 - Line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
 - Line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
 - Line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
 - Line 48-49: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
 - Line 51-54: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`
 
-### Setting up the target {#TUTORIAL_02_Compiler_settings_Setting_up_the_target}
+### Setting up the target {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_THE_TARGET}
 
 We then need to link these variables to the target we're building:
 
@@ -711,7 +711,7 @@ Explanation:
 - Line 72: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
 - Line 73: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
 
-The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](#TUTORIAL_02_Compiler_settings_Setting_up_for_custom_CMake_modules_and_binary_tree).
+The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_FOR_CUSTOM_CMAKE_MODULES_AND_BINARY_TREE).
 It is common practice to collect output files together in a binaries tree.
 `OUTPUT_BASE_DIR` is the root of this tree. `CONFIG_DIR` is the configuration we're building for. CMake supports 4 configurations by default:
 - Debug: Debug build (with debug symbols)
@@ -721,7 +721,7 @@ It is common practice to collect output files together in a binaries tree.
 
 When building, we can set the configuration using the standard CMake variable `CMAKE_BUILD_TYPE`, as we did earlier setting it to Debug.
 
-### Adding custom CMake module
+### Adding custom CMake module {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_ADDING_CUSTOM_CMAKE_MODULE}
 
 Now, we still need to add the custom CMake script for the function `list_to_string`. 
 So we create a folder `cmake` and underneath create a file `functions.cmake`.
@@ -761,9 +761,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 As you can see, we just name the script (line 16), without path or extension.
 This is possible, because we already added the path to the standard CMake module paths `CMAKE_MODULE_PATH`, and because we're using the standard CMake module extension `.cmake`
 
-## Adding the linker definition file {#TUTORIAL_02_Adding_the_linker_definition_file}
+## Adding the linker definition file {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_ADDING_THE_LINKER_DEFINITION_FILE}
 
-The we need to set up the linker definitions file as pointed to by the [linker options](#TUTORIAL_02_Compiler_settings_Setting_up_the_target).
+The we need to set up the linker definitions file as pointed to by the [linker options](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_THE_TARGET).
 
 This file is named `link.ld` and contains the following:
 
@@ -891,7 +891,7 @@ It contains a table of functions used to initialize static data, such as constru
 - Line 94-101: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
 - Line 104: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
 
-## Startup assembly code {#TUTORIAL_02_Startup_assembly_code}
+## Startup assembly code {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE}
 
 The final step is adding startup code.
 
@@ -900,8 +900,8 @@ In order for the CPU to be correctly initialized, and the cores handled correctl
 If it is core 0, we will continue, otherwise we will start a waiting loop, simply waiting for events (one of the events that may happen is shutdown, we need to wait for that).
 Effectively, we simply halt all cores except core 0
 - Next, we set the stack point just below our code (the stack grows down), so that we have a stack to work with
-- Then we initialize the data in the .bss section (see above in [Adding the linker definition file](#TUTORIAL_02_Build_for_target_Toolchain_file))
-- Lastly, we call the main() function defined in [Create source file](#TUTORIAL_02_Create_source_file).
+- Then we initialize the data in the .bss section (see above in [Adding the linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
+- Lastly, we call the main() function defined in [Create source file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_SOURCE_FILE).
 
 The startup code will be stored in the `start.S` assembly file:
 
@@ -1019,7 +1019,7 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 50: 
 ```
 
-## Creating an image {#TUTORIAL_02_Creating_an_image}
+## Creating an image {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATING_AN_IMAGE}
 
 Now we can build the code to generate `output/Debug/bin/02-setting-up-a-project.elf`, however that application cannot simply be run in e.g. QEMU.
 We need to create an image for that. This is a fairly simple step, adding a new target for the image.
@@ -1125,11 +1125,11 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 
 We can now start to build the application and image.
 
-## Configuring {#TUTORIAL_02_Configuring}
+## Configuring {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CONFIGURING}
 
 We first need to configure the build for CMake:
 
-### Windows {#TUTORIAL_02_Configuring_Windows}
+### Windows {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CONFIGURING_WINDOWS}
 
 ```bat
 del /S /f /q cmake-build\*.*
@@ -1140,7 +1140,7 @@ cmake ../tutorial/02-setting-up-a-project -G Ninja -DCMAKE_BUILD_TYPE:STRING="De
 popd
 ```
 
-### Linux {#TUTORIAL_02_Configuring_Linux}
+### Linux {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CONFIGURING_LINUX}
 
 ```bash
 rm -rf cmake-build/
@@ -1153,11 +1153,11 @@ popd
 In other words, we clean up the CMake build directory, and recreate it, then we step into this directory, and configure CMake to use `tutorial/02-setting-up-a-project` as the root CMake directory, and use the toolchain file.
 We are building for Debug.
 
-## Building {#TUTORIAL_02_Building}
+## Building {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILDING}
 
 Then we can build the targets:
 
-### Windows {#TUTORIAL_02_Building_Windows}
+### Windows {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILDING_WINDOWS}
 
 ```bat
 set ROOT=%CD%
@@ -1166,7 +1166,7 @@ cmake --build %ROOT%/cmake-build --target 02-setting-up-a-project-image
 popd
 ```
 
-### Linux {#TUTORIAL_02_Building_Linux}
+### Linux {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILDING_LINUX}
 
 ```bash
 rootdir=`pwd`
@@ -1183,11 +1183,11 @@ After this step, we will have built the application in `output/Debug/bin/02-sett
 
 The image is very small, as the application basically does nothing, but you have built your __first baremetal application!__
 
-## Debugging {#TUTORIAL_02_Debugging}
+## Debugging {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_DEBUGGING}
 
 To show that the application actually works, let's run it in QEMU and debug it.
 
-### Windows {#TUTORIAL_02_Debugging_Windows}
+### Windows {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_DEBUGGING_WINDOWS}
 
 To run QEMU:
 
@@ -1221,7 +1221,7 @@ Type "apropos word" to search for commands related to "word"...
 Reading symbols from 02-setting-up-a-project.elf...
 ```
 
-### Linux {#TUTORIAL_02_Debugging_Linux}
+### Linux {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_DEBUGGING_LINUX}
 
 To run QEMU:
 

@@ -42,8 +42,8 @@
 #include <baremetal/Macros.h>
 #include <baremetal/Types.h>
 
-#define GPU_CACHED_BASE                 0x40000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5
-#define GPU_UNCACHED_BASE               0xC0000000 // see \ref doc/boards/RaspberryPi/BCM2837-peripherals.pdf page 5, 6
+#define GPU_CACHED_BASE                 0x40000000
+#define GPU_UNCACHED_BASE               0xC0000000
 
 #define GPU_MEM_BASE                    GPU_UNCACHED_BASE
 

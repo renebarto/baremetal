@@ -1,10 +1,12 @@
-# GPIO {#RPI_GPIO}
+# Raspberry Pi GPIO {#RASPBERRY_PI_GPIO}
 
 See [documentation](BCM2837-Peripherals.pdf), page 90
 
 Pinout:
 
- <img src="raspberrypi-gpio-pinout.png" alt="Top view" width="500"/>
+[Test](images/raspberrypi-gpio-pinout.png)
+
+ <img src="images/raspberrypi-gpio-pinout.png" alt="Raspberry Pi GPIO pins" width="500"/>
  
 
 | Register        | Address         | Bits  | Name                                  | Acc | Meaning |
@@ -693,7 +695,7 @@ Pinout:
 | -               | Base+0x002000AC | 31:0  | -                                     | -   | Reserved
 | -               | Base+0x002000B0 | 31:0  | -                                     | -   | Test
 
-## Pull up-down mode {#RPI_GPIO_PULL__UP_DOWN_MODE}
+## Pull up-down mode {#RASPBERRY_PI_GPIO_PULL_UPDOWN_MODE}
 
 Details GPIO pin pull up/down mode
 
@@ -704,7 +706,7 @@ Details GPIO pin pull up/down mode
 | 10    | Enable pull up control     |
 | 11    | Reserved                   |
 
-## Alternative functions for GPIO {#RPI_GPIO_ALTERNATIVE_FUNCTIONS}
+## Alternative functions for GPIO {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO}
 
 See [documentation](BCM2837-ARM-Peripherals.pdf), page 102
 

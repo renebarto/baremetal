@@ -1,36 +1,20 @@
-# Tutorial 10: UART0 {#TUTORIAL_10}
+# Tutorial 10: UART0 {#TUTORIAL_10_UART0}
 
-Contents:
-- [New tutorial setup](##New-tutorial-setup)
-  - [Tutorial results](###Tutorial-results)
-- [UART0 - Step 1](##UART0-Step-1)
-- [Defining a common interface - Step 1](##Defining-a-common-interface-Step-1)
-  - [CharDevice.h](###MemoryMap.h)
-  - [UART1.h](###UART1.h)
-  - [Update project configuration - Step 1](###Update-project-configuration-Step-1)
-  - [Configuring, building and debugging - Step 1](###Configuring-building-and-debugging-Step-1)
-- [Adding uart0 - Step 2](##Adding-uart0-Step-2)
-  - [RPIProperties.h](###RPIProperties.h)
-  - [RPIProperties.cpp](###RPIProperties.cpp)
-  - [UART0.h](###UART0.h)
-  - [UART0.cpp](###UART0.cpp)
-  - [Update application code Step 2](###Update-application-code-Step-2)
-  - [Update project configuration - Step 2](###Update-project-configuration-Step-2)
-  - [Configuring, building and debugging - Step 2](###Configuring-building-and-debugging-Step-2)
+@tableofcontents
 
-## New tutorial setup
+## New tutorial setup {#TUTORIAL_10_UART0_NEW_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/10-uart0`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results
+### Tutorial results {#TUTORIAL_10_UART0_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-10.a`
 - an application `output/Debug/bin/10-mailbox.elf`
 - an image in `deploy/Debug/10-mailbox-image`
 
-## UART0
+## UART0 {#TUTORIAL_10_UART0_UART0}
 
 Now that we have the mailbox implemented, we can start to add UART0.
 The reason for this is that UART0 needs a clock frequency set, that has to be done through the mailbox.
@@ -38,11 +22,11 @@ We'll first start by defining a common interface for UART0 and UART1, so that we
 We will then add functionality for setting the UART clock.
 Finally we will add and implement UART0.
 
-### Defining a common interface - Step 1
+### Defining a common interface - Step 1 {#TUTORIAL_10_UART0_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1}
 
 In order to be able to use any of UART0 and UART1 for e.g. logging, we need to define a common abstract interface.
 
-### CharDevice.h
+### CharDevice.h {#TUTORIAL_10_UART0_UART0_CHARDEVICEH}
 
 Create the file `code/libraries/baremetal/include/baremetal/CharDevice.h`
 
@@ -112,7 +96,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 - Line 52: We declare a pure virtual method `Read()` like we did for UART1
 - Line 54: We declare a pure virtual method `Write()` like we did for UART1
 
-### UART1.h
+### UART1.h {#TUTORIAL_10_UART0_UART0_UART1H}
 
 We will now derive `UART1` from our new `CharDevice` interface.
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
@@ -170,7 +154,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 
 The code for UART1 does not need any changes.
 
-### Update project configuration - Step 1
+### Update project configuration {#TUTORIAL_10_UART0_UART0_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -206,17 +190,17 @@ File: f:\Projects\Private\baremetal.github\code\libraries\baremetal\CMakeLists.t
 ...
 ```
 
-### Configuring, building and debugging - Step 1
+### Configuring, building and debugging {#TUTORIAL_10_UART0_UART0_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
 The application does not behave differently.
 
-## Extending mailbox interface - Step 2
+## Extending mailbox interface - Step 2 {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2}
 
 In order to set the clock, we need to extend `RPIProperties`.
 
-### RPIProperties.h
+### RPIProperties.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESH}
 
 We add the method `SetClockRate()` as well as the type for the clock to set.
 Update the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
@@ -251,7 +235,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 69: } // namespace baremetal
 ```
 
-### RPIProperties.cpp
+### RPIProperties.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESCPP}
 
 We implement the new method `SetClockRate()`. 
 Update the file `code/libraries/baremetal/src/RPIProperties.cpp`
@@ -297,7 +281,7 @@ You can disable this effect by setting skipTurbo to 1
 - Line 82-93: We implement the method `SetClockRate()`.
 The implementation is comparable to that of `GetBoardSerial()`, we simple create an instance of the struct, fill its fields, and call `GetTag()` on the properties interface
 
-### BCMRegisters.h
+### BCMRegisters.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_BCMREGISTERSH}
 
 We need to add some registers of the Broadcom SoC in the Raspberry Pi for UART0 (or PL011 UART).
 Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
@@ -351,7 +335,7 @@ More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) r
 
 The Mini UART or UART1 register addresses are all prefixed with `RPI_UART0_`.
 
-### UART0.h
+### UART0.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0H}
 
 We declare the class `UART0` which derives from `CharDevice`.
 Create the file `code/libraries/baremetal/include/baremetal/UART0.h`
@@ -442,7 +426,7 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 
 The `UART0` class declaration is identical to the `UART1` class.
 
-### UART0.cpp
+### UART0.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0CPP}
 
 We implement the class `UART0`. 
 Create the file `code/libraries/baremetal/src/UART0.cpp`
@@ -590,8 +574,8 @@ The implementation is very similar to that for `UART1`
 - Line 64-85: The `Initialize()` method is similar to the one for `UART1`
   - Line 69: Disabling the UART uses a different register and value
   - Line 71-74: We set the clock rate for the UART clock to 4 MHz, so that we can set up the baud rate correctly
-  - Line 77: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the TxD pin GPIO 14 to alternate function 0 to get the UART0 TxD signal
-  - Line 78: As can be seen in [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md), we need to set the RxD pin GPIO 15 to alternate function 0 to get the UART0 RxD signal
+  - Line 77: As can be seen in [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO), we need to set the TxD pin GPIO 14 to alternate function 0 to get the UART0 TxD signal
+  - Line 78: As can be seen in [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO), we need to set the RxD pin GPIO 15 to alternate function 0 to get the UART0 RxD signal
   - Line 79: Switching off interrupts uses a different register and value
   - Line 80-81: Setting the baudrate works differently. 
 The `RPI_UART0_IBRD` register holds the integral part of a divisor, `RPI_UART0_FBRD` the fractional part. We calculate these part as follows
@@ -601,8 +585,8 @@ divisor = UART clock rate / (16 * baudrate) = 4000000 / (16 * 115200) = 2.170184
 integer part = 2
 fractional part = 0.170184 * 64 = 10.89 -> 11 = 0xB
 ```
-  - Line 82: Setting the mode 8N1 enabling the FIFO uses a different register and value.
-  - Line 83: Enabling the UART uses a different register and value
+- Line 82: Setting the mode 8N1 enabling the FIFO uses a different register and value.
+- Line 83: Enabling the UART uses a different register and value
 - Line 88-98: The `Write()` method is similar to the one for `UART1`
   - Line 92: The Tx FIFO empty check uses a different register and value
   - Line 97: The Tx data buffer uses a different register and value
@@ -612,9 +596,9 @@ fractional part = 0.170184 * 64 = 10.89 -> 11 = 0xB
 - Line 113-122: The `WriteString()` method is identical to the one for `UART1`
 - Line 124-129: The `GetUART0()` method is almost identical to the one for `UART1`
 
-### Update the application code - Step 2
+### Update the application code {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE}
 
-#### main.cpp
+#### main.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Let's use UART0 now.
 
@@ -673,7 +657,7 @@ File: code/applications/demo/src/main.cpp
 49: }
 ```
 
-#### System.cpp
+#### System.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_SYSTEMCPP}
 
 As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly checking the port over, with strange effects.
 Update the file `code/libraries/baremetal/src/System.cpp`
@@ -696,7 +680,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 ```
 
-### Update project configuration - Step 2
+### Update project configuration {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -751,7 +735,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging - Step 2
+### Configuring, building and debugging {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 The code will now write to UART0, which is connected to GPIO pins 14 (Txd) and 15 (RxD) instead of UART1.

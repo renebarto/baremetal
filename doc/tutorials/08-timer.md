@@ -1,30 +1,20 @@
-# Tutorial 08: Timer {#TUTORIAL_08}
+# Tutorial 08: Timer {#TUTORIAL_08_TIMER}
 
-Contents:
-- [Tutorial information](##Tutorial-information)
-  - [Tutorial results](###Tutorial-results)
-- [Using the system timer](##Using-the-system-timer)
-  - [Timer.h](###Timer.h)
-  - [Timer.cpp](###Timer.cpp)
-  - [ArmInstructions.h](###ArmInstructions.h)
-  - [BCMRegisters.h](###BCMRegisters.h)
-  - [System.cpp](###System.cpp)
-  - [Update project configuration - Step 3](###Update-project-configuration-Step-3)
-  - [Configuring, building and debugging - Step 3](###Configuring-building-and-debugging-Step-3)
+@tableofcontents
 
-## Tutorial information
+## Tutorial information {#TUTORIAL_08_TIMER_TUTORIAL_INFORMATION}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/08-timer`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results
+### Tutorial results {#TUTORIAL_08_TIMER_TUTORIAL_INFORMATION_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-08.a`
 - an application `output/Debug/bin/08-timer.elf`
 - an image in `deploy/Debug/08-timer-image`
 
-## Using the system timer
+## Using the system timer {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER}
 
 In the previous tutorial we added some delay before halting or rebooting the system. The delay was specified as the number of NOP instructions to execute.
 That is not a very accurate way of specifying a delay. It would be better if we could use a hardware timer.
@@ -35,7 +25,7 @@ That is exactly what we will do in this tutorial. There are two kinds of timers:
 
 We will be implementing both, but using the second.
 
-### Timer.h
+### Timer.h {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_TIMERH}
 
 First, we will add some methods to the `Timer` class.
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`.
@@ -95,7 +85,7 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 - Line 76: We add a method to delay for a specified number of microseconds
 - Line 80: We declare the getter function `GetTimer()`
 
-### Timer.cpp
+### Timer.cpp {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_TIMERCPP}
 
 Let's implement the new methods.
 Update the file `code/libraries/baremetal/src/Timer.cpp`.
@@ -263,7 +253,7 @@ It would be more accurate to first multiply, however we might get an overflow
   - Line 121-125: We loop (while executing NOP instructions) while number of microseconds has not elapsed
 - Line 129-133: We implement the getter function `GetTimer()`, which returns a reference to the singleton Timer instance.
 
-### ARMInstructions.h
+### ARMInstructions.h {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_ARMINSTRUCTIONSH}
 
 You will have noticed that we use two "function calls" which are actually reading ARM registers. We need to add them.
 Update the file `code/libraries/baremetal/include/baremetal/ASMInstructions.h`.
@@ -312,7 +302,7 @@ See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), pag
 
 Only the first two functions are currently used.
 
-### BCMRegisters.h
+### BCMRegisters.h {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_BCMREGISTERSH}
 
 In case we use the System Timer, we need to access some registers in the SoC. We need to add them.
 Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`.
@@ -344,7 +334,7 @@ It is currently unclear whether the System Timer is present in the same shape in
 
 As you can see the System timer register addresses are all prefixed with `RPI_SYSTMR_`.
 
-### System.cpp
+### System.cpp {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_SYSTEMCPP}
 
 Let's change the delays in `Halt()` and `Reboot()` to a 10 milliseconds delay.
 Update the file `code/libraries/baremetal/src/System.cpp`.
@@ -370,7 +360,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 90: We call `WaitMilliSeconds()` instead of `WaitCycles()`
 - Line 110: We call `WaitMilliSeconds()` instead of `WaitCycles()`
 
-### Update application
+### Update application {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_UPDATE_APPLICATION}
 
 To show that the timer actually waits correctly, let's add a 5 seconds delay between the "Hello World!" output and the "Press r to reboot, h to halt" output.
 
@@ -405,7 +395,7 @@ File: code/applications/demo/src/main.cpp
 25: }
 ```
 
-### Update project configuration - Step 3
+### Update project configuration {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_UPDATE_PROJECT_CONFIGURATION}
 
 We did not add any new files, so the project configuration needs no change.
 
@@ -423,7 +413,7 @@ File: CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging - Step 3
+### Configuring, building and debugging {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

@@ -1,6 +1,6 @@
-# ARM Cortex-A53 System Registers
+# ARM Cortex-A53 System Registers {#ARM_CORTEXA53_SYSTEM_REGISTERS}
 
-## Register overview 
+## Register overview {#ARM_CORTEXA53_SYSTEM_REGISTERS_REGISTER_OVERVIEW}
 
 | Register name | Width | Acc | Reset value | Meaning |
 |---------------|-------|-----|-------------|---------|

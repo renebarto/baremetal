@@ -1005,8 +1005,8 @@ Without going into too much detail, the code performs the following steps:
 - Line 82: call to the main() function in `tutorial/02-setting-up-a-project/main.cpp`
 - Line 84: when main() returns, also halt core 0
 
-For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](../cpu/arm/getting-started-with-ARM-assembly-language.pdf).
-For more information on the `MPIDR_EL1` register see also [ARM Cortex-A53 System Registers](../cpu/arm/arm-cortex-a53-system-registers.md) and [Arm® Architecture Registers](../cpu/arm/ARM-architecture-registers.pdf) page 1390.
+For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](pdf/getting-started-with-arm-assembly-language.pdf).
+For more information on the `MPIDR_EL1` register see also [ARM Cortex-A53 System Registers](../cpu/arm/arm-cortex-a53-system-registers.md) and [Arm Architecture Registers](pdf/ARM-architecture-registers.pdf) page 1390.
 
 We need to add the startup code to the project:
 

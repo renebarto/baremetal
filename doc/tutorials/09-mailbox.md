@@ -1345,9 +1345,9 @@ If the returned address is the same as the address sent, and the request code si
 
 The images below show the structure of the block sent to and received back from the mailbox.
 
-<img src="images/mailbox-structure-send.png"  alt="Mailbox block structure send" width="800"/>
+<img src="images/mailbox-structure-send.png"  alt="Mailbox block structure send" width="1000"/>
 
-<img src="images/mailbox-structure-receive.png"  alt="Mailbox block structure receive" width="800"/>
+<img src="images/mailbox-structure-receive.png"  alt="Mailbox block structure receive" width="1000"/>
 
 In general, the structure of the block remains the same. Every tag stays in the same location, if it is handled successfully, bit 31 of the request // response code is set.
 Bit 31 of request code is set to 1. If all tag requests were handled successfully, bit 0 of request code is set to 0, if something failed it is set to 1.

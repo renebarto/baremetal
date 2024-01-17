@@ -267,7 +267,7 @@ Some items worth changing:
 | HTML_HEADER            | Sets a HTML header if desired                        | `doxygen/header.html`
 | HTML_FOOTER            | Sets a HTML footer if desired                        | `doxygen/footer.html`
 | HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | `doxygen/stylesheet.css`
-| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `doc/boards/RaspberryPi/bcm2835-peripherals.pdf`
+| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `pdf/bcm2835-peripherals.pdf`
 | HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | `120`
 | HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | `160`
 | GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | `YES`
@@ -281,29 +281,29 @@ In addition to the settings described in the table above, we make sure to set th
 We don't need to add Markdown (`.md`) files, they will automatically be found if they are in the trees or files specified for `INPUT`.
 
 ```text
-HTML_EXTRA_FILES       = doc/boards/Odroid/S922X_Public_Datasheet_V0.2.pdf \
-                         doc/boards/raspberrypi/peripherals/bcm2711-peripherals.pdf \
-                         doc/boards/raspberrypi/peripherals/bcm2835-peripherals.pdf \
-                         doc/boards/raspberrypi/peripherals/bcm2836-peripherals.pdf \
-                         doc/boards/raspberrypi/peripherals/bcm2837-peripherals.pdf \
-                         doc/boards/raspberrypi/raspberry-pi-3-b-plus-product-brief.pdf \
-                         doc/boards/raspberrypi/raspberry-pi-4-product-brief.pdf \
-                         doc/boards/raspberrypi/raspberry-pi-5-product-brief.pdf \
-                         doc/boards/raspberrypi/peripherals/rp1-peripherals.pdf \
-                         doc/boards/raspberrypi/RPI-3B-V1_2-mechanical-drawing.pdf \
-                         doc/boards/raspberrypi/RPI-3B-V1_2-SCHEMATIC-REDUCED.pdf \
-                         doc/boards/raspberrypi/RPI-4B-mechanical-drawing.pdf \
-                         doc/boards/raspberrypi/RPI-4B-schematics-reduced.pdf \                         
-                         doc/boards/raspberrypi/VideoCore-IV-3D-architecture-reference-guide.pdf \
-                         doc/cpu/arm/ARM-architecture-registers.pdf \
-                         doc/cpu/arm/ARM-Cortex-A53-r0p2.pdf \
-                         doc/cpu/arm/ARM-Cortex-A53-r0p4.pdf \
-                         doc/cpu/arm/ARM-Cortex-A72-r0p3.pdf \
-                         doc/cpu/arm/ARM-Cortex-A73-r0p2.pdf \
-                         doc/cpu/arm/ARM-Cortex-A76_r4p1.pdf \
-                         doc/cpu/arm/Cortex-A-series_Programmer-guide.pdf \
-                         doc/cpu/arm/elf-format.pdf \
-                         doc/cpu/arm/getting-started-with-ARM-assembly-language.pdf
+HTML_EXTRA_FILES       = doc/pdf/s922x_public_datasheet_v0.2.pdf \
+                         doc/pdf/bcm2711-peripherals.pdf \
+                         doc/pdf/bcm2835-peripherals.pdf \
+                         doc/pdf/bcm2836-peripherals.pdf \
+                         doc/pdf/bcm2837-peripherals.pdf \
+                         doc/pdf/raspberry-pi-3-b-plus-product-brief.pdf \
+                         doc/pdf/raspberry-pi-4-product-brief.pdf \
+                         doc/pdf/raspberry-pi-5-product-brief.pdf \
+                         doc/pdf/rp1-peripherals.pdf \
+                         doc/pdf/rpi-3b-v1_2-mechanical-drawing.pdf \
+                         doc/pdf/rpi-3b-v1_2-schematics-reduced.pdf \
+                         doc/pdf/rpi-4b-mechanical-drawing.pdf \
+                         doc/pdf/rpi-4b-schematics-reduced.pdf \                         
+                         doc/pdf/videocore-iv-3d-architecture-reference-guide.pdf \
+                         doc/pdf/arm-architecture-registers.pdf \
+                         doc/pdf/arm-cortex-a53-r0p2.pdf \
+                         doc/pdf/arm-cortex-a53-r0p4.pdf \
+                         doc/pdf/arm-cortex-a72-r0p3.pdf \
+                         doc/pdf/arm-cortex-a73-r0p2.pdf \
+                         doc/pdf/arm-cortex-a76_r4p1.pdf \
+                         doc/pdf/cortex-a-series_programmer-guide.pdf \
+                         doc/pdf/elf-format.pdf \
+                         doc/pdf/getting-started-with-arm-assembly-language.pdf
 ```
 
 ## A caveat with Doxygen

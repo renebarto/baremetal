@@ -955,12 +955,12 @@ We've placed the file in the root directory, so the location is `${projectDir}\\
 As soon as the `CMakeSettings.json` file is saved, you will see that Visual Studio recognizes it. 
 If you were not using Visual Studio yet, you can open the project by first starting Visual Studio 2019, and then selecting "Open a local folder". 
 
-<img src="images/VisualStudioOpenProject.png" alt="Visual Studio start screen" width="1000"/>
+<img src="images/visualstudio-open-project.png" alt="Visual Studio start screen" width="1000"/>
 
 In the dialog that pops up select the root folder of your project (the folder that contains the `CMakeSettings.json`, `baremetal.toolchain`, `baremetal.ld` and main `CMakeLists.txt` file).
 Then click "Select Folder"
 
-<img src="images/VisualStudioSelectProjectFolder.png" alt="Visual Studio select root folder" width="800"/>
+<img src="images/visualstudio-select-project-folder.png" alt="Visual Studio select root folder" width="800"/>
 
 Visual Studio will now open your project folder, and start loading `CMakeSettings.json`.
 After loading, it will select the first configuration in your `CMakeSettings.json` file, in this case "Baremetal-Debug".
@@ -1071,24 +1071,24 @@ After this, the CMake build directory is created, and CMake is configured, much 
 After configuration is done, we can build the project, using `Build->Build All` or `Build->Rebuild All`. This will build or rebuild everything.
 Another option is selecting the project to be built in the dropdown box next to the configuration, "Select Startup Items...".
 
-<img src="images/VisualStudioSelectBuildTarget.png" alt="Select build target" width="600"/><br/>
+<img src="images/visualstudio-select-build-target.png" alt="Select build target" width="600"/><br/>
 
-<img src="images/VisualStudioBuildTargetSelected.png" alt="Select build target" width="1150"/>
+<img src="images/visualstudio-build-target-selected.png" alt="Select build target" width="1150"/>
 
 When a build target is selected, it can also be built using `Build->Build <target>` or `Build->Rebuild <target>`
 
 Please be aware that in the current view, `Solution Explorer`, it is not possible to select the `demo-image` target.
 
-<img src="images/VisualStudioSolutionExplorer.png" alt="Solution explorer tab" width="600"/>
+<img src="images/visualstudio-solution-explorer.png" alt="Solution explorer tab" width="600"/>
 
 In order for all possible targets to be built, we need to change the view. 
 For this click on the button "Switch between solutions and available views", and then double-click "CMake Targets View".
 
-<img src="images/VisualStudioSolutionSwitchView.png" alt="Switch view" width="500"/><br/>
+<img src="images/visualstudio-solution-switch-view.png" alt="Switch view" width="500"/><br/>
 
-<img src="images/VisualStudioSelectCMakeTargetsView.png" alt="Select CMake Targets View" width="800"/>
+<img src="images/visualstudio-select-cmake-targets-view.png" alt="Select CMake Targets View" width="800"/>
 
-<img src="images/VisualStudioCMakeTargetsView.png" alt="CMake Targets View" width="800"/>
+<img src="images/visualstudio-cmake-targets-view.png" alt="CMake Targets View" width="800"/>
 
 Going back to Solution Explorer can be done using the same mechanism, but then double-clicking "Folder View".
 
@@ -1213,11 +1213,11 @@ tools/startQEMU-image-uart0.bat
 Then we start the debugger by either clicking on the _Selected Startup Item_ button (which actually shows the selected application),
 or by selecting Debug->Start Debugging
 
-<img src="images/VisualStudioBuildTargetSelected.png" alt="Selected debug target" width="1100"/>
+<img src="images/visualstudio-build-target-selected.png" alt="Selected debug target" width="1100"/>
 
 The program breaks on the first sensible line after the breakpoint, which is inside the main function.
 
-<img src="images/VisualStudioDebug.png" alt="Debug window" width="850"/>
+<img src="images/visualstudio-debug.png" alt="Debug window" width="850"/>
 
 In the Output tab, we can also see the output of the debugger:
 

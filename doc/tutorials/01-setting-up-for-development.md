@@ -110,29 +110,29 @@ When not using Visual Studio, or if you prefer to use the latest and greatest ve
 by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
 The latest stable release at the moment of writing this document is [3.27.8](https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-windows-x86_64.msi).
 
-<img src="images/CMake-install-1.png" alt="CMake installation step 1" width="400"/>
+<img src="images/cmake-install-1.png" alt="CMake installation step 1" width="400"/>
 
 Click Next
 
-<img src="images/CMake-install-2.png" alt="CMake installation step 2" width="400"/>
+<img src="images/cmake-install-2.png" alt="CMake installation step 2" width="400"/>
 
 Check "I accept the terms in the License Agreement", and click Next
 
-<img src="images/CMake-install-3.png" alt="CMake installation step 3" width="400"/>
+<img src="images/cmake-install-3.png" alt="CMake installation step 3" width="400"/>
 
 Select "Add CMake to the system PATH for all users" or "Add CMake to the system PATH for the current user"
 
 Click Next
 
-<img src="images/CMake-install-4.png" alt="CMake installation step 4" width="400"/>
+<img src="images/cmake-install-4.png" alt="CMake installation step 4" width="400"/>
 
 Leave the installation path as is. Click Next
 
-<img src="images/CMake-install-5.png" alt="CMake installation step 5" width="400"/>
+<img src="images/cmake-install-5.png" alt="CMake installation step 5" width="400"/>
 
 Click Install and approve installation
 
-<img src="images/CMake-install-6.png" alt="CMake installation step 6" width="400"/>
+<img src="images/cmake-install-6.png" alt="CMake installation step 6" width="400"/>
 
 Click Finish
 
@@ -356,13 +356,13 @@ Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://emb
   - One Linux there are quite a few applications available, e.g. screen, minicom, gtkterm
 - Make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
-<img src="images/USB-RS232.jpg" alt="USB-to-serial example" width="400"/>
+<img src="images/usb-rs232.jpg" alt="USB-to-serial example" width="400"/>
 
 #### Pinning for serial to USB {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_ATTACHING_A_SERIAL_CONSOLE_PINNING_FOR_SERIAL_TO_USB}
 
 Please refer to the image below (the wiring color is common for most Prolific 2303 devices):
 
-<img src="images/GPIO-Pinout-Diagram-UART1.png" alt="GPIO pinout for UART1" width="400"/>
+<img src="images/gpio-pinout-diagram-uart1.png" alt="GPIO pinout for UART1" width="400"/>
 
 Do <u>__NOT__</u> connect the red wire (+3.3V).
 
@@ -382,7 +382,7 @@ Please make sure to eject / sync your SD card first before removing it from the 
 Put the SD card in your board, and attach a serial to USB device to the board. Also make sure the board is attached to the network. Then power on the board.
 Then find out the IP address of the board, and navigate using a browser to `http://<IP address>:8080/index.html`
 
-<img src="images/Netboot.png" alt="Netboot screen" width="500"/>
+<img src="images/netboot.png" alt="Netboot screen" width="500"/>
 
 Click on `Choose File`, select the correct image (either version of kernel8.img), and click on `Boot now!`. The board will now restart and start your application.
 
@@ -399,27 +399,27 @@ The latest version at the moment of writing this document is [8.2.0](https://qem
 
 Simply run the executable, which will install QEMU.
 
-<img src="images/QEMU-install-1.png" alt="QEMU installation 1" width="500"/>
+<img src="images/qemu-install-1.png" alt="QEMU installation 1" width="500"/>
 
 Click OK
 
-<img src="images/QEMU-install-2.png" alt="QEMU installation 2" width="500"/>
+<img src="images/qemu-install-2.png" alt="QEMU installation 2" width="500"/>
 
 Click Next
 
-<img src="images/QEMU-install-3.png" alt="QEMU installation 3" width="500"/>
+<img src="images/qemu-install-3.png" alt="QEMU installation 3" width="500"/>
 
 Click I Agree
 
-<img src="images/QEMU-install-4.png" alt="QEMU installation 4" width="500"/>
+<img src="images/qemu-install-4.png" alt="QEMU installation 4" width="500"/>
 
 Click Next
 
-<img src="images/QEMU-install-5.png" alt="QEMU installation 5" width="500"/>
+<img src="images/qemu-install-5.png" alt="QEMU installation 5" width="500"/>
 
 Leave the installation path as is, click Install
 
-<img src="images/QEMU-install-6.png" alt="QEMU installation 6" width="500"/>
+<img src="images/qemu-install-6.png" alt="QEMU installation 6" width="500"/>
 
 Click Finish
 
@@ -569,7 +569,7 @@ Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
 
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be like:
 
-<img src="images/QEMU-wait-Windows.png" alt="QEMU waiting for debugger" width="500"/>
+<img src="images/qemu-wait-windows.png" alt="QEMU waiting for debugger" width="500"/>
 
 ##### Linux {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEBUGGING_DEBUGGING_IN_QEMU_START_APPLICATION_IN_QEMU_LINUX}
 
@@ -583,7 +583,7 @@ Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
 
 The kernel8.img file needs to be in the current location, otherwise point to the correct path. The output should be similar to Windows.
 
-<img src="images/QEMU-wait-Linux.png" alt="QEMU waiting for debugger" width="500"/>
+<img src="images/qemu-wait-linux.png" alt="QEMU waiting for debugger" width="500"/>
 
 #### Starting the debugger {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEBUGGING_DEBUGGING_IN_QEMU_STARTING_THE_DEBUGGER}
 

@@ -1,6 +1,6 @@
 # Raspberry PI auxiliary peripheral {#RASPBERRY_PI_AUXILIARY_PERIPHERAL}
 
-See [documentation](bcm2837-peripherals.pdf), page 8
+See [documentation](pdf/bcm2837-peripherals.pdf), page 8
 
 | Register        | Address         | Bits  | Name                                  | Acc | Meaning |
 |-----------------|-----------------|-------|---------------------------------------|-----|---------|

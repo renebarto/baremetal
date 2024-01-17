@@ -1,6 +1,12 @@
-# Raspberry Pi BCM registers {#RASPBERRY_PI_BCM_REGISTERS}
+# Raspberry Pi I2C registers {#RASPBERRY_PI_I2C_REGISTERS}
 
-This page enumarates the definition of all BCM specific registers.
+See [documentation](pdf/bcm2837-peripherals.pdf), page 28
+
+The BSC is the Broadcom Serial Controller, which handles the I2C communication.
+There are three BSC masters inside BCM. The register addresses start from
+- BSC0: 0x7E205000
+- BSC1: 0x7E804000
+- BSC2: 0x7E805000
 
 ## BSC control register {#RASPBERRY_PI_BCM_REGISTERS_BSC_CONTROL_REGISTER}
 

@@ -990,7 +990,7 @@ We define three functions here, of which one is not currently used.
 - Line 106-110: We implement `__cxa_guard_release` which releases an object for static initialization
   - We set the initialized flag
   - We clear the in-use flag
-- Line 112-115" We implement `__cxa_guard_abort` which aborts the static initialization for an object
+- Line 112-115: We implement `__cxa_guard_abort` which aborts the static initialization for an object
   - We clear the in-use flag
 
 ### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_INITIALIZING_STATIC_VARIABLES__STEP_2_UPDATE_PROJECT_CONFIGURATION}

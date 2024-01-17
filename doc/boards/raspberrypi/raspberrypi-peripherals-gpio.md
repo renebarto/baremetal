@@ -1,6 +1,6 @@
 # Raspberry Pi GPIO {#RASPBERRY_PI_GPIO}
 
-See [documentation](bcm2837-peripherals.pdf), page 90
+See [documentation](pdf/bcm2837-peripherals.pdf), page 90
 
 Pinout:
 
@@ -708,7 +708,7 @@ Details GPIO pin pull up/down mode
 
 ## Alternative functions for GPIO {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO}
 
-See [documentation](BCM2837-ARM-Peripherals.pdf), page 102
+See [documentation](pdf/bcm2837-peripherals.pdf), page 102
 
 Every GPIO may have one of multiple functions
 - Input

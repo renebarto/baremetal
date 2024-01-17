@@ -239,7 +239,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 `GetTimerFrequency()` is an ARM instruction to read the counter frequency register `CNTFRQ_EL0`, which returns the counter frequency in ticks per second.
 This needs to be added
   - Line 87: We read the current counter value. 
-'GetTimerCounter()` is an ARM instruction to read the physical counter register `CNTPCT_EL0`, which returns the current counter value.
+`GetTimerCounter()` is an ARM instruction to read the physical counter register `CNTPCT_EL0`, which returns the current counter value.
 This needs to be added
   - Line 89: We calculate the number of counter ticks to wait by first calculating the number of ticks per microsecond, and then multiplying by the number of microseconds to wait.
 It would be more accurate to first multiply, however we might get an overflow
@@ -287,18 +287,18 @@ File: code/libraries/baremetal/include/baremetal/ASMInstructions.h
 ```
 
 - Line 65: We define `GetTimerFrequency()`. It reads the Counter-timer Frequency (`CNTFRQ_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 222.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 222.
 - Line 67: We define `GetTimerCounter()`. It reads the Counter-timer Physical Count (`CNTPCT_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 307.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 307.
 - Line 70: We define `GetTimerControl()`. It reads the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 293.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 293.
 - Line 72: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 293.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 293.
 - Line 75-79: We define the bits of the Counter-timer Physical Timer Control (`CNTP_CTL_EL0`) register.
 - Line 82: We define `SetTimerControl()`. It read the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 298.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 298.
 - Line 84: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
-See [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 298.
+See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 298.
 
 Only the first two functions are currently used.
 
@@ -327,9 +327,9 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ```
 
 More information on the System Timer registers can be found in the 
-[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](boards/RaspberryPi/bcm2835-peripherals.pdf) (page 172), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](boards/RaspberryPi/bcm2835-peripherals.pdf) (page 172), 
-[Broadcom documentation BCM2711 (Raspberry Pi 4)](boards/RaspberryPi/bcm2711-peripherals.pdf) (page 142).
+[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 172), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 172), 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 142).
 It is currently unclear whether the System Timer is present in the same shape in Raspberry Pi 5.
 
 As you can see the System timer register addresses are all prefixed with `RPI_SYSTMR_`.

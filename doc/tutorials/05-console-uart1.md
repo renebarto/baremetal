@@ -130,7 +130,7 @@ File: tutorial/05-console-uart1/code/libraries/baremetal/CMakeLists.txt
 5:     DESCRIPTION "Bare metal library"
 6:     LANGUAGES CXX ASM)
 ...
-`
+```
 
 This also means that the main application project needs to depende on the new version of `baremetal`:
 
@@ -200,7 +200,7 @@ File: code/libraries/CMakeLists.txt
 
 The resulting structure will look like this:
 
-<img src="images/TreeViewBaremetalLibrary.png" alt="Tree view" width="600"/>
+<img src="images/treeview-baremetal-library.png" alt="Tree view" width="600"/>
 
 The reason for adding an extra directory with the same name as the library underneath `code/libraries/baremetal/include` is the following:
 
@@ -229,10 +229,10 @@ The first step we'll take is including a header to contain standard ARM instruct
 ### ARMInstructions.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_ARMINSTRUCTIONSH}
 
 We add ARM instructions.
+Create the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
-```
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2023 Rene Barto
 3: //
@@ -727,7 +727,7 @@ This is due to the added dependency on baremetal in the application's CMake file
 
 Start QEMU, and start debugging as before, only this time, set a breakpoint on line 47 of start.S.
 
-<img src="images/VisualStudioDebugAssembly.png" alt="Debugging assembly code" width="800"/>
+<img src="images/visualstudio-debug-assembly.png" alt="Debugging assembly code" width="800"/>
 
 As you can see, we can also debug inside the assembly code. You can step through and see the code inside main() be called.
 One thing you will see after continuing to the next line, is that register x1 is filled with value 0x80000000, which after masking results in 0x00000000. In other words, we're running on core 0.
@@ -737,7 +737,7 @@ One important remark however:
 - The code that sets the stack pointer tends to throw the debugger off balance. So in this case it is better to also set a breakpoint on line 82 of start.S, and simply continue once you get to line 62.
 - Next to this, you might notice a bit of unstable behaviour which we will come to next. This has to do with the startup code.
 
-<img src="images/VisualStudioDebugAssembly2.png" alt="Debugging assembly code before jumping into main()" width="600"/>
+<img src="images/visualstudio-debug-assembly-2.png" alt="Debugging assembly code before jumping into main()" width="600"/>
 
 ## Creating the library code - step 2 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2}
 
@@ -1129,17 +1129,17 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 As said, this header defines the address of the GPIO and UART1 registers, as well as values of fields within these registers.
 We will not go into details here, we'll cover this when we use the registers.
-More information on the GPIO registers can be found [here](../boards/raspberrypi/peripherals/raspberrypi-peripherals-gpio.md), 
-as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](../boards/raspberrypi/peripherals/BCM2835-peripherals.pdf) (page 89), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](../boards/raspberrypi/peripherals/BCM2835-peripherals.pdf) (page 89), 
-[Broadcom documentation BCM2711 (Raspberry Pi 4)](../boards/raspberrypi/peripherals/bcm2711-peripherals.pdf) (page 65) and
-[Broadcom documentation RP1 (Raspberry Pi 5)](../boards/raspberrypi/peripherals/rp1-peripherals.pdf) (page 14).
+More information on the GPIO registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-gpio.md), 
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 89), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 89), 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 65) and
+[Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 14).
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
-More information on the Mini UART (UART1) registers can be found [here](../boards/raspberrypi/peripherals/raspberrypi-peripherals-aux.md), 
-as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](../boards/raspberrypi/peripherals/BCM2835-peripherals.pdf) (page 10), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](../boards/raspberrypi/peripherals/BCM2835-peripherals.pdf) (page 10) and 
-[Broadcom documentation BCM2711 (Raspberry Pi 4)](../boards/raspberrypi/peripherals/bcm2711-peripherals.pdf) (page 10). Raspberry Pi 5 no longer has a mini UART1.
+More information on the Mini UART (UART1) registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-aux.md), 
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 10), 
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 10) and 
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 10). Raspberry Pi 5 no longer has a mini UART1.
 
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 
@@ -1551,7 +1551,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 245: } // namespace baremetal
 ```
 
-For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](boards/RaspberryPi/BCM2837-peripherals.pdf) (page 14). 
+For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](pdf/bcm2837-peripherals.pdf) (page 14). 
 Be aware that some of the documentation for BCM2835 contains errors, which have been update for BCM2837. The Line Control Register (see below) contains such errors.
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
@@ -1564,8 +1564,8 @@ Be aware that some of the documentation for BCM2835 contains errors, which have 
   - Line 73-74: We check whether the class was already initialized (`m_initialized` is true), if so we simply return
   - Line 77: We read the Enable Register, which contains enable bits for SPI1, SPI2 and UART1
   - Line 78: We clear the enable bit for UART1 by writing to the Enable Register. This will disable UART1, as advised in the documentation
-  - Line 80: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
-  - Line 82: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](boards/RaspberryPi/RaspberryPi-GPIO-functions.md#GPIO-functions)
+  - Line 80: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
+  - Line 82: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
   - Line 84: We set the enable bit for UART1 by writing to the Enable Register. This will enable UART1, and makes its registers available
   - Line 85: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
   - Line 86: We set UART1 to 8 bit mode by writing to the Line Control Register
@@ -2024,7 +2024,7 @@ File: code/libraries/baremetal/src/Startup.S
 - Line 88: Start of the .init section
 - Line 90: Declaration of the _start function, such that it can be linked elsewhere
 - Line 91: Label of the _start function, which is where the function actually starts
-- Line 92: We read the current exception level, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 380.
+- Line 92: We read the current exception level, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 380.
 This will contain the current exception level in bit 2 and 3, the other bits will be 0.
 - Line 93: We check whether the value read is equal to 4 (i.e. bits 3 and 2 are `01`), which means EL1, otherwise we continue
 - Line 94: If the values are equal, we jump to label EL1, meaning that initialization was already done.
@@ -2088,22 +2088,22 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Startup.S
 87:
 ```
 
-- Line 47: The register `cnthctl_el2` (Counter-timer Hypervisor Control register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 224) is read.
+- Line 47: The register `cnthctl_el2` (Counter-timer Hypervisor Control register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 224) is read.
 - Line 48: The two lower bits (bit 0 and 1) are set on this value.
 In short this means the bits `EL0VCTEN` and `EL0CTEN` are set, which allows code in EL0 and EL1 to access the timer frequency and physical and virtual timer counter registers without access being trapped.
 - Line 49: The new value is written to the `cnthctl_el2` register
-- Line 50: The register `cntvoff_el2` (Counter-timer Virtual Offset register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 339) is set to 0.
+- Line 50: The register `cntvoff_el2` (Counter-timer Virtual Offset register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 339) is set to 0.
 The term `xzr` points to the virtual zero register, which can be wzr (32 bits) or xzr (64 bits).
 This sets the offset of the virtual timer count relative to the physical timer count to 0.
-- Line 53: The register `midr_el1` (Main ID Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 1330) is read and stored in the first parameter.
+- Line 53: The register `midr_el1` (Main ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1330) is read and stored in the first parameter.
 This register is read-only and holds information on the chip, such as the manfacturer, the variant, architecture, part number and revision.
-- Line 54: The register `mpidr_el1` (Multiprocessor Affinity Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 1390) is read and stored in the second parameter.
+- Line 54: The register `mpidr_el1` (Multiprocessor Affinity Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1390) is read and stored in the second parameter.
 This register contains the affinity levels. What is comes down to, is that the lowest 7 bits of this register contain the core id.
-- Line 55: We write to register `vpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 2456) the value read from the `midr_el1` register.
+- Line 55: We write to register `vpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 2456) the value read from the `midr_el1` register.
 This register is used for virtualization, and has a 64 bit value.
-- Line 56: We write to register `vmpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 2450) the value read from the `mpidr_el1` register.
+- Line 56: We write to register `vmpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 2450) the value read from the `mpidr_el1` register.
 This register is used for virtualization, and has a 64 bit value.
-- Line 59-60: We set the value 0x33FF into the first parameter, and write this to the register `cptr_el2` (Architectural Feature Trap Register (EL2), see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 358).
+- Line 59-60: We set the value 0x33FF into the first parameter, and write this to the register `cptr_el2` (Architectural Feature Trap Register (EL2), see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 358).
 This register defines which traps are set for exception level 2. The value written will set the following bits:
   - TCPAC bit to 0: this will not trap any instructions
   - TAM bit to 0: this will not trap any access to activity monitor registers
@@ -2112,18 +2112,18 @@ This register defines which traps are set for exception level 2. The value writt
   - TSM bit to 1: this will trap SME and SVE instructions
   - TFP to 0: this will not trap SIMD and floating point operations
   - TZ bit to 1: this will trap SVE instructions
-- Line 61: The register `hstr_el2` (Hypervisor System Trap Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 942) is set to 0.
+- Line 61: The register `hstr_el2` (Hypervisor System Trap Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 942) is set to 0.
 This register defines which traps are set for the hypervisor mode for exception level 2. The value written will set all trap bits to 0, disabling the traps for all kinds of instructions.
-- Line 62-63: We set the value 0x03 << 20 => 0x00300000 into the first parameter, and write this to the register `cpacr_el1` (Architectural Feature Access Control Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 347).
+- Line 62-63: We set the value 0x03 << 20 => 0x00300000 into the first parameter, and write this to the register `cpacr_el1` (Architectural Feature Access Control Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 347).
 This register controls access to certain functions in EL0 and EL1 mode. The value written will set the following bits:
   - TTA bit to 0: this will not trap any access to system registers
   - SMEN bits to 0: this will trap SME instructions
   - FPEN bits to 1: this will not trap SIMD and floating point instructions
   - ZEN bits to 0: this will trap SVE instructions
-- Line 66-67: We set the value 0x01 << 31 => 0x80000000 into the first parameter, and write this to the register `hcr_el2` (Hypervisor Configuration Register, see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 788).
+- Line 66-67: We set the value 0x01 << 31 => 0x80000000 into the first parameter, and write this to the register `hcr_el2` (Hypervisor Configuration Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 788).
 This register controls virtualization and trapping for EL2 in this mode. The value written will set the following bits:
   - RW bit to 1: this will set EL1 mode to 64 bit
-- Line 75-77: We set the value 0x0800 | 0x30d0 << 16 => 0x30D00800 into the first parameter, and write this to the register `sctlr_el1` (System Control Register (EL1), see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 1611).
+- Line 75-77: We set the value 0x0800 | 0x30d0 << 16 => 0x30D00800 into the first parameter, and write this to the register `sctlr_el1` (System Control Register (EL1), see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1611).
 This register controls the system, from a EL1 perspective.
 The value is constructed in a strange way, but the first part `mov \xreg1, #0x0800` writes a 16 bit value in the first parameter, and the second `movk \xreg1, #0x30d0, lsl #16` copies a 16 bit value, while shiftting it 16 bits to the left, into the first parameter, while keeping the other bits untouched.
 The final result is that 0x0800 is written in the lower 16 bits, and 0x30D0 is written in the higher 16 bits.
@@ -2160,7 +2160,7 @@ The value written will set the following bits:
   - A bit to 0: this will not check for memory alignment in EL1 / EL0
   - M bit to 0: this will disable MMU translation for EL1 / EL0
   - In short, most access from EL0 level is trapped, and moved up to EL1. EL1 however can perform these operations.
-- Line 80-81: We set the value 0x03c4 into the first parameter, and write this to the register `spsr_el2` (Saved Program Status Register (EL2), see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 1743).
+- Line 80-81: We set the value 0x03c4 into the first parameter, and write this to the register `spsr_el2` (Saved Program Status Register (EL2), see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1743).
 This register will hold the programs state for when an exception moves to EL2 state.
 The value written will set the following bits:
   - ALLINT bit to 0: this feature is not implemented to we set RES0
@@ -2173,7 +2173,7 @@ The value written will set the following bits:
   - M[4] bit to 0: execute in 64 bit mode
   - M[3:0] bits to 00100: set EL1t mode -> move to EL1t
 - Line 82-83: We get the address of after the last instruction in the macro, which is the address of the next instruction to be executed after the macro is invoked.
-This is stored in the first parameter, and then written to the register `elr_el2` (Exception Link Register (EL2), see [ARM architecture registers](../cpu/arm/ARM-architecture-registers.pdf), page 525).
+This is stored in the first parameter, and then written to the register `elr_el2` (Exception Link Register (EL2), see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 525).
 This register sets the return address for when a EL2 exception was executed.
 - Line 84: We return to the exception level set in register `spsr_el2`, which means we move to EL1.
 

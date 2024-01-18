@@ -41,9 +41,12 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// Abstract Mailbox
+
 namespace baremetal {
 
-// Mailbox channels
+/// @brief Mailbox channels
 enum class MailboxChannel
 {
     ARM_MAILBOX_CH_POWER = 0,       // Power management
@@ -58,12 +61,20 @@ enum class MailboxChannel
     ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
 };
 
-// IMailbox: Mailbox abstract interface
+/// @brief IMailbox: Mailbox abstract interface
 class IMailbox
 {
 public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
     virtual ~IMailbox() = default;
 
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
     virtual uintptr WriteRead(uintptr address) = 0;
 };
 

@@ -1,6 +1,6 @@
 # Raspberry Pi peripheral base addresses {#RASPBERRY_PI_PERIPHERAL_BASE_ADDRESSES}
 
-\todo Detail out, add correct addresses
+@todo Detail out, add correct addresses
 
 | Device                                | Base address RPI3B | Base address RPI4B | Base address RPI5 |
 |---------------------------------------|--------------------|--------------------|-------------------|

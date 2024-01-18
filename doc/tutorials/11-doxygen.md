@@ -280,33 +280,7 @@ Some items worth changing:
 In addition to the settings described in the table above, we make sure to set the `HTML_EXTRA_FILES` to all additional files in our repo.
 We don't need to add Markdown (`.md`) files, they will automatically be found if they are in the trees or files specified for `INPUT`.
 
-```text
-HTML_EXTRA_FILES       = doc/pdf/s922x_public_datasheet_v0.2.pdf \
-                         doc/pdf/bcm2711-peripherals.pdf \
-                         doc/pdf/bcm2835-peripherals.pdf \
-                         doc/pdf/bcm2836-peripherals.pdf \
-                         doc/pdf/bcm2837-peripherals.pdf \
-                         doc/pdf/raspberry-pi-3-b-plus-product-brief.pdf \
-                         doc/pdf/raspberry-pi-4-product-brief.pdf \
-                         doc/pdf/raspberry-pi-5-product-brief.pdf \
-                         doc/pdf/rp1-peripherals.pdf \
-                         doc/pdf/rpi-3b-v1_2-mechanical-drawing.pdf \
-                         doc/pdf/rpi-3b-v1_2-schematics-reduced.pdf \
-                         doc/pdf/rpi-4b-mechanical-drawing.pdf \
-                         doc/pdf/rpi-4b-schematics-reduced.pdf \                         
-                         doc/pdf/videocore-iv-3d-architecture-reference-guide.pdf \
-                         doc/pdf/arm-architecture-registers.pdf \
-                         doc/pdf/arm-cortex-a53-r0p2.pdf \
-                         doc/pdf/arm-cortex-a53-r0p4.pdf \
-                         doc/pdf/arm-cortex-a72-r0p3.pdf \
-                         doc/pdf/arm-cortex-a73-r0p2.pdf \
-                         doc/pdf/arm-cortex-a76_r4p1.pdf \
-                         doc/pdf/cortex-a-series_programmer-guide.pdf \
-                         doc/pdf/elf-format.pdf \
-                         doc/pdf/getting-started-with-arm-assembly-language.pdf
-```
-
-## A caveat with Doxygen
+## A caveat with Doxygen {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN}
 
 Doxygen does have one issue, related to Markdown and images.
 In Markdown, we can use relative paths for all links, for example to other Markdown files, but also to say PDF files.
@@ -316,65 +290,57 @@ We use the standard link syntax for that:
 [Description](../abc.pdf)
 ```
 
-As long as the documents referred to are exported as part of HTML_EXTRA_FILES, `Doxygen` will match the documents linked to, and correctly link to them.
-This is however not true for images that need to be displayed inline.
+If documents are exported as part of HTML_EXTRA_FILES, `Doxygen` will copy them to the root folder of the generated HTML.
+This means that relative paths do not work.
+The only exception is Markdown files themselves, they will be correctly de-referenced.
+All full URLs work correctly of course, but often you will want to use local files, and organize them into folders.
 
-In Markdown we can use the syntax:
-
-```text
-![My image](../images/image.png)
-```
-
-or using HTML
-
-```text
-<img src="../images/image.png" alt="My image"/>
-```
-
-However, these will not be correctly translated, leading to dead links. If we use the link for normal documents, they will work, but not be displayed inline, but merely show a link to the image.
-
-To resolved this, we place all images in a single directory `image`, and always use the relative link to the `images` directory, so e.g. `images/xxx.png`.
+To resolved this, we place all images in a single directory `doc/images`, and PDF files in `doc/pdf`, and always use the relative link to the `images` or `pdf` directory, so e.g. `images/xxx.png`.
 In every folder that needs links to images, in this case:
 
 - doc
 - doc/tutorials
-- doc/boards/raspberrypi/peripherals
+- doc/boards/raspberrypi
 
-We make sure so have the images directory available.
-For the `doc` folder the subfolder `doc/images` is present, so that is trivial.
-For the other two, we create a symlink to the `doc/images` folder names `images`.
+We make sure to have the `images` and `pdf` directories available.
+For the `doc` folder the subfolders `doc/images` and `doc/pdf` are present as they contain the actual files, so that is trivial.
+For the other two, we create a symlink to the `doc/images` folder names `images`, and to the `doc/pdf` folder names `pdf`.
 This only has to be done once.
 
-### Windows
+### Windows {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN_WINDOWS}
 
-Windows 10 and later support this, but you need to run a command a administrator:
+Windows 10 and later support this, but you need to run a command a administrator.
+Create the file `tools\create-links.bat`
 
 ```bat
-push doc/tutorials
-mklink /D images ../images
+pushd doc\tutorials
+mklink /D images ..\images
+mklink /D pdf ..\pdf
 popd
 
-pushd doc/board/raspberrypi/peripherals
-mklink /D images ../../../images
+pushd doc\boards\raspberrypi
+mklink /D images ..\..\images
+mklink /D pdf ..\..\pdf
 popd
 ```
 
-### Linux
+### Linux {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN_LINUX}
 
 On Linux symlinks are common:
 
+Create the file `tools/create-links.sh`
+
 ```bash
+pushd doc/tutorials
+ln -s ../images images
+ln -s ../pdf pdf
+popd
+
+pushd doc/boards/raspberrypi
+ln -s ../../images images
+ln -s ../../pdf pdf
+popd
 ```
-
-We then need to make sure the images are also present in the resulting HTML tree, so we add a line to the `run-doxygen` script:
-
-### Windows
-
-```bat
-```
-
-### Linux
-
 
 ## Running Doxygen {#TUTORIAL_11_DOXYGEN_RUNNING_DOXYGEN}
 
@@ -382,10 +348,12 @@ Running `Doxygen` is easy, but let's create a script for it.
 
 ### Windows {#TUTORIAL_11_DOXYGEN_RUNNING_DOXYGEN_WINDOWS}
 
-Create the file `tools/run-doxygen.bat`
+Create the file `tools\run-doxygen.bat`
 
 ```bat
 doxygen doxygen\doxygen.conf
+robocopy doc\images doxygen\html\images /MIR
+robocopy doc\pdf doxygen\html\pdf /MIR
 ```
 
 Run doxygen:
@@ -444,6 +412,12 @@ Create the file `tools/run-doxygen.sh`
 
 ```bat
 doxygen doxygen/doxygen.conf
+rm -rf doxygen/html/images
+mkdir -p doxygen/html/images
+cp -f doc/images/* doxygen/html/images
+rm -rf doxygen/html/pdf
+mkdir -p doxygen/html/pdf
+cp -f doc/pdf/* doxygen/html/pdf
 ```
 
 Run doxygen:
@@ -492,6 +466,13 @@ finished...
 
 You may notice that some options are not supported by the Linux version, as it is slightly older than the Windows version.
 
+You'll end up with a directory tree that looks as follows:
+
+- doxygen
+  - html: Contains HTML pages, including the main file `index.html`
+    - images: All images that are copied from `doc/images`
+    - pdf: All PDF files that are copied from `doc/pdf`
+
 ## Viewing Doxygen output {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT}
 
 Now open the file `doxygen/html/index.html` in your browser.
@@ -510,7 +491,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 39: 
 40: #pragma once
 41: 
-42: /// @file 
+42: /// @file
 43: /// Raspberry Pi Timer
 44: 
 45: #include <baremetal/Types.h>
@@ -597,7 +578,7 @@ After updating `Timer.h`:
 type lookup cache used 1070/65536 hits=5186 misses=1111
 symbol lookup cache used 895/65536 hits=5014 misses=895
 
-You will see some special tags appearing:
+You will see some special tags in the source code, as well as in Markdown documents:
 
 - `<summary></summary>`
 - `<param name="..."></param>`
@@ -617,7 +598,7 @@ There are some others worth mentioning:
 
 Comments recognized by `Doxygen` can be in several formats, I have chosen to use C++ comments using three forward slashes
 
-### file tag
+### file tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_FILE_TAG}
 
 The tag `@file` will add the current file to the `Doxygen` index. This way it will show the symbols found linked with the file.
 If the `@file` tag is used with a filename, that filename will be linked to symbols found, if left empty the current file is used.
@@ -643,7 +624,7 @@ The link will show the information collected for the file:
 
 <img src="images/doxygen-file-information.png" alt="Doxygen information for a file" width="800"/>
 
-### brief and summary tags
+### brief and summary tags {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_BRIEF_AND_SUMMARY_TAGS}
 
 The tag `@brief` is roughly equal to `<summary></summary>` Both allow an item (class, function, type, method, etc.) to be given a brief description, and a more detailed description.
 Comment text will always be just before the item being described.
@@ -673,7 +654,7 @@ The link will show the information collected for the class:
 
 <img src="images/doxygen-class-reference.png" alt="Doxygen class reference" width="800"/>
 
-### param, return(s) tags
+### param, return(s) tags {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_PARAM_RETURNS_TAGS}
 
 For every method or function, a `@param` or `<param name="..."></param>` tag can be added for each parameter of the function to describe it.
 If the method or function returns a value, a `@return` or `<returns></returns>` tag can be added to describe the return value.
@@ -709,19 +690,73 @@ The link will show the information collected for the class:
 
 <img src="images/doxygen-function-reference.png" alt="Doxygen function reference" width="800"/>
 
-### ref tag
+### ref tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_REF_TAG}
 
-### page tag
+A ref tag creates a link to another item in the repository, or a URL to an external document.
 
-### subpage tag
+```cpp
+    /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+```
 
-### todo tag
+In Markdown files, this is done using `[description](link)`
 
-### tableofcontents tag
+```
+Configuration of the project is described later in [Setting up a project](02-setting-up-a-project.md).
+
+See [Running using Netboot](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_USING_NETBOOT).
+
+Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
+```
+
+So there are three ways to reference an internal or externel document:
+
+- Using a full URL like `@ref url` in code or `[description](url)` in Markdown
+- Using a reference tag like `@ref tag` in code or `[description](#tag)` in Markdown
+- In Markdown only using a link to another Markdown file link `[description](file-name)`
+
+### page tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_PAGE_TAG}
+
+A page tag has roughly the same function as a header marker in Markdown, with a tag.
+
+```
+# Tutorial 11: Doxygen {#TUTORIAL_11_DOXYGEN}
+
+\page TUTORIAL_11 Tutorial 11: Doxygen
+```
+
+Both entries mean essentially the same for `Doxygen`, however the first one is more logical for Markdown.
+
+### subpage tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_SUBPAGE_TAG}
+
+A subpage tag is used to reference another document.
+This can be used to create a hierarchy of pages. 
+It behaves similar as \ref in the sense that it creates a reference to a page labeled `<name>` with the optional link text as specified in the second argument.
+
+```
+- @subpage TUTORIALS
+```
+
+In Markdown this has no meaning, but in Doxygen, it creates a tree with subpages underneath parent pages.
+
+<img src="images/doxygen-page-tree.png" alt="Doxygen page tree" width="300"/>
+
+### todo tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_TODO_TAG}
+
+The todo tag is used to gather things still to do under one page. This is handy to collect open issues for example.
+
+```
+@todo Add register details
+```
+
+This will result in a page in the tree named `Todo List`.
+
+<img src="images/doxygen-todo-page.png" alt="Doxygen page tree" width="1000"/>
+
+### tableofcontents tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_TABLEOFCONTENTS_TAG}
 
 The `@tableofcontents` tag is useful in Markdown files. It will (if enabled) make `Doxygen` generate a table of contents for the file, which is shown at the top right of the page.
 
 <img src="images/doxygen-table-of-contents.png" alt="Doxygen table of contents" width="1000"/>
 
-Next: [12-]()
+Next: [12-logger](12-logger.md)
 

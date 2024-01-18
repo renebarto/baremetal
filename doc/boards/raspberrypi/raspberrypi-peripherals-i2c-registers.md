@@ -8,7 +8,7 @@ There are three BSC masters inside BCM. The register addresses start from
 - BSC1: 0x7E804000
 - BSC2: 0x7E805000
 
-## BSC control register {#RASPBERRY_PI_BCM_REGISTERS_BSC_CONTROL_REGISTER}
+## BSC control register {#RASPBERRY_PI_I2C_REGISTERS_BSC_CONTROL_REGISTER}
 
 The control register is used to enable interrupts, clear the FIFO, define a read or write operation and start a transfer.
 The READ field specifies the type of transfer.The CLEAR field is used to clear the FIFO.Writing to this field is a one-shot operation
@@ -66,7 +66,7 @@ The I2CEN field enables BSC operations. If this bit is 0 then transfers will not
                              1 = Read Packet Transfer.              <td>RW  <td>0x0</tr>
 </table>
 
-## BSC status register {#RASPBERRY_PI_BCM_REGISTERS_BSC_STATUS_REGISTER}
+## BSC status register {#RASPBERRY_PI_I2C_REGISTERS_BSC_STATUS_REGISTER}
 
 - The status register is used to record activity status, errors and interrupt requests.
 - The TA field indicates the activity status of the BSC controller. This read-only field returns a 1 when the controller is in

@@ -39,6 +39,9 @@
 
 #pragma once
 
+/// @file
+/// Abstract GPIO pin. Could be either a virtual or physical pin
+
 #include <baremetal/Types.h>
 
 namespace baremetal {
@@ -46,25 +49,25 @@ namespace baremetal {
 // GPIO mode
 enum class GPIOMode
 {
-    // GPIO used as input
+    /// @brief GPIO used as input
     Input,
-    // GPIO used as output
+    /// @brief GPIO used as output
     Output,
-    // GPIO used as input, using pull-up
+    /// @brief GPIO used as input, using pull-up
     InputPullUp,
-    // GPIO used as input, using pull-down
+    /// @brief GPIO used as input, using pull-down
     InputPullDown,
-    // GPIO used as Alternate Function 0.
+    /// @brief GPIO used as Alternate Function 0. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction0,
-    // GPIO used as Alternate Function 1.
+    /// @brief GPIO used as Alternate Function 1. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction1,
-    // GPIO used as Alternate Function 2.
+    /// @brief GPIO used as Alternate Function 2. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction2,
-    // GPIO used as Alternate Function 3.
+    /// @brief GPIO used as Alternate Function 3. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction3,
-    // GPIO used as Alternate Function 4.
+    /// @brief GPIO used as Alternate Function 4. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction4,
-    // GPIO used as Alternate Function 5.
+    /// @brief GPIO used as Alternate Function 5. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction5,
     Unknown,
 };
@@ -72,21 +75,21 @@ enum class GPIOMode
 // GPIO function
 enum class GPIOFunction
 {
-    // GPIO used as input
+    /// @brief GPIO used as input
     Input,
-    // GPIO used as output
+    /// @brief GPIO used as output
     Output,
-    // GPIO used as Alternate Function 0.
+    /// @brief GPIO used as Alternate Function 0. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction0,
-    // GPIO used as Alternate Function 1.
+    /// @brief GPIO used as Alternate Function 1. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction1,
-    // GPIO used as Alternate Function 2.
+    /// @brief GPIO used as Alternate Function 2. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction2,
-    // GPIO used as Alternate Function 3.
+    /// @brief GPIO used as Alternate Function 3. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction3,
-    // GPIO used as Alternate Function 4.
+    /// @brief GPIO used as Alternate Function 4. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction4,
-    // GPIO used as Alternate Function 5.
+    /// @brief GPIO used as Alternate Function 5. See \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     AlternateFunction5,
     Unknown,
 };
@@ -94,35 +97,59 @@ enum class GPIOFunction
 // GPIO pull mode
 enum class GPIOPullMode
 {
-    // GPIO pull mode off (no pull-up or pull-down)
+    /// @brief GPIO pull mode off (no pull-up or pull-down)
     Off,
-    // GPIO pull mode pull-down
+    /// @brief GPIO pull mode pull-down
     PullDown,
-    // GPIO pull mode pull-up
+    /// @brief GPIO pull mode pull-up
     PullUp,
     Unknown,
 };
 
-// Abstraction of a GPIO pin
+/// <summary>
+/// Abstraction of a GPIO pin
+/// </summary>
 class IGPIOPin
 {
 public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
     virtual ~IGPIOPin() = default;
 
-    // Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
+    /// <summary>
+    /// Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
+    /// </summary>
+    /// <returns>Pin number</returns>
     virtual uint8 GetPinNumber() const = 0;
-    // Assign a GPIO pin
+    /// <summary>
+    /// Assign a GPIO pin
+    /// </summary>
+    /// <param name="pinNumber">Pin number</param>
+    /// <returns>true if successful, false otherwise</returns>
     virtual bool AssignPin(uint8 pinNumber) = 0;
 
-    // Switch GPIO on
+    /// <summary>
+    /// Switch GPIO on
+    /// </summary>
     virtual void On() = 0;
-    // Switch GPIO off
+    /// <summary>
+    /// Switch GPIO off
+    /// </summary>
     virtual void Off() = 0;
-    // Get GPIO value
+    /// <summary>
+    /// Get GPIO value
+    /// </summary>
+    /// <returns>GPIO value, true if on, false if off</returns>
     virtual bool Get() = 0;
-    // Set GPIO on (true) or off (false)
+    /// <summary>
+    /// Set GPIO on (true) or off (false)
+    /// </summary>
+    /// <param name="on">Value to set, on (true) or off (false)</param>
     virtual void Set(bool on) = 0;
-    // Invert GPIO value on->off off->on
+    /// <summary>
+    /// Invert GPIO value on->off off->on
+    /// </summary>
     virtual void Invert() = 0;
 };
 

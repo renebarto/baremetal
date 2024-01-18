@@ -1,6 +1,6 @@
 # Raspberry PI SPI1 {#RASPBERRY_PI_SPI1}
 
-\todo Add register details
+@todo Add register details
 
 See [documentation](pdf/bcm2837-peripherals.pdf), page 20
 

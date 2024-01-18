@@ -41,11 +41,18 @@
 
 #include <baremetal/Types.h>
 
+/// @file Abstract memory access interface
 namespace baremetal {
 
+/// <summary>
+/// Abstract memory access interface
+/// </summary>
 class IMemoryAccess
 {
 public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
     virtual ~IMemoryAccess() = default;
 
     virtual uint8  Read8(regaddr address)                                                    = 0;

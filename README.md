@@ -60,7 +60,7 @@ For now, we will focus on Raspberry Pi, as the information is more readily avail
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add boot process for Odroid system
 - Add description of Odroid platform support in QEMU
-- Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
+- Add description of how to use JTAG device with Raspberry Pi and possibly Odroid, using e.g. [Macoy Madson's page](https://macoy.me/blog/programming/RaspberryPi5Debugging)
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 - Add logger, inject character device
 - Add retrieval of system information

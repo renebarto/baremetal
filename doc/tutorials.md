@@ -11,3 +11,4 @@
 - @subpage TUTORIAL_09_MAILBOX
 - @subpage TUTORIAL_10_UART0
 - @subpage TUTORIAL_11_DOXYGEN
+- @subpage TUTORIAL_12_LOGGER

@@ -39,39 +39,42 @@
 
 #pragma once
 
-// Unsigned 8 bit integer
+/// @file
+/// Standard types
+
+/// @brief Unsigned 8 bit integer
 typedef unsigned char uint8;
-// Unsigned 16 bit integer
+/// @brief Unsigned 16 bit integer
 typedef unsigned short uint16;
-// Unsigned 32 bit integer
+/// @brief Unsigned 32 bit integer
 typedef unsigned int uint32;
-// Unsigned 64 bit integer
+/// @brief Unsigned 64 bit integer
 typedef unsigned long uint64;
 
-// Signed 8 bit integer
+/// @brief Signed 8 bit integer
 typedef signed char int8;
-// Signed 16 bit integer
+/// @brief Signed 16 bit integer
 typedef signed short int16;
-// Signed 32 bit integer
+/// @brief Signed 32 bit integer
 typedef signed int int32;
-// Signed 64 bit integer
+/// @brief Signed 64 bit integer
 typedef signed long int64;
 
-// Pointer as signed 64 bit integer
+/// @brief Pointer as signed 64 bit integer
 typedef int64 intptr;
-// Pointer as unsigned 64 bit integer
+/// @brief Pointer as unsigned 64 bit integer
 typedef uint64 uintptr;
-// Unsigned size type
+/// @brief Unsigned size type
 typedef uint64 size_type;
-// Signed size type
+/// @brief Signed size type
 typedef int64 ssize_type;
 
-// Unsigned size
+/// @brief Unsigned size
 typedef size_type size_t;
-// Signed size
+/// @brief Signed size
 typedef ssize_type ssize_t;
 
-// Unsigned volatile 32 bit integer (for registers)
+/// @brief Unsigned volatile 32 bit integer (for registers)
 typedef volatile uint32 reg32;
-// Pointer to unsigned volatile 32 bit integer (for registers)
+/// @brief Pointer to unsigned volatile 32 bit integer (for registers)
 typedef reg32* regaddr;

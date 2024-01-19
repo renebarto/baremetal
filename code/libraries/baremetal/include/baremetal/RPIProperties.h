@@ -42,27 +42,60 @@
 #include <baremetal/IMailbox.h>
 #include <baremetal/Types.h>
 
+/// @file
+/// Top level functionality handling for Raspberry Pi Mailbox
+
 namespace baremetal {
 
+/// <summary>
+/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// </summary>
 enum class ClockID : uint32
 {
+    /// @brief EMMC clock
     EMMC      = 1,
+    /// @brief UART0 clock
     UART      = 2,
+    /// @brief ARM processor clock
     ARM       = 3,
+    /// @brief Core SoC clock
     CORE      = 4,
+    /// @brief EMMC clock 2
     EMMC2     = 12,
+    /// @brief Pixel clock
     PIXEL_BVB = 14,
 };
 
+/// <summary>
+/// Top level functionality for requests on Mailbox interface
+/// </summary>
 class RPIProperties
 {
 private:
+    /// @brief Reference to mailbox for functions requested
     IMailbox &m_mailbox;
 
 public:
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
     explicit RPIProperties(IMailbox &mailbox);
 
+    /// <summary>
+    /// Request board serial number
+    /// </summary>
+    /// <param name="serial">On return, set to serial number, if successful</param>
+    /// <returns>Return true on success, false on failure</returns>
     bool GetBoardSerial(uint64 &serial);
+    /// <summary>
+    /// Set clock rate for specified clock
+    /// </summary>
+    /// <param name="clockID">ID of clock to be set</param>
+    /// <param name="freqHz">Clock frequencyy in Hz</param>
+    /// <param name="skipTurbo">When true, do not switch to turbo setting if ARM clock is above default. 
+    /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.</param>
+    /// <returns>Return true on success, false on failure</returns>
     bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
 };
 

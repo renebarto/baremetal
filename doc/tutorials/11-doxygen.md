@@ -730,7 +730,7 @@ Both entries mean essentially the same for `Doxygen`, however the first one is m
 
 A subpage tag is used to reference another document.
 This can be used to create a hierarchy of pages. 
-It behaves similar as \ref in the sense that it creates a reference to a page labeled `<name>` with the optional link text as specified in the second argument.
+It behaves similar as `\ref` in the sense that it creates a reference to a page labeled `<name>` with the optional link text as specified in the second argument.
 
 ```
 - @subpage TUTORIALS

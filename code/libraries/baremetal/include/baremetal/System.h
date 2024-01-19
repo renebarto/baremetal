@@ -41,35 +41,62 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// System startup / shutdown functionality
+
 namespace baremetal {
 
 class IMemoryAccess;
 
+/// <summary>
+/// System startup / shutdown handling class
+/// </summary>
 class System
 {
     friend System& GetSystem();
 
 private:
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
 
-    // Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
+    /// <summary>
+    /// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
+    /// </summary>
     System();
 
 public:
-    // Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
+    /// <summary>
+    /// Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
+    /// </summary>
+    /// <param name="memoryAccess">Memory access interface</param>
     System(IMemoryAccess &memoryAccess);
 
+    /// <summary>
+    /// Halts the system. This function will not return
+    /// </summary>
     [[noreturn]] void Halt();
+    /// <summary>
+    /// Reboots the system. This function will not return
+    /// </summary>
     [[noreturn]] void Reboot();
 };
 
+/// <summary>
+/// Construct the singleton system handler if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton system handler</returns>
 System& GetSystem();
 
 } // namespace baremetal
 
+/// <summary>
+/// Return code for main() function
+/// </summary>
 enum class ReturnCode
 {
+    /// @brief If main() returns this, the system will be halted
     ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
     ExitReboot,
 };
 
@@ -78,7 +105,14 @@ extern "C"
 {
 #endif
 
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
 int               main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
 [[noreturn]] void sysinit();
 
 #ifdef __cplusplus

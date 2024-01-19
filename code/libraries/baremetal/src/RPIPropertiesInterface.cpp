@@ -44,7 +44,7 @@
 #include <baremetal/MemoryManager.h>
 #include <baremetal/Util.h>
 
-using namespace baremetal;
+namespace baremetal {
 
 struct PropertySimple
 {
@@ -133,3 +133,5 @@ bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
 
     return true;
 }
+
+} // namespace baremetal

@@ -76,12 +76,19 @@
 
 /// @brief Raspberry Pi System Timer Registers base address. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_BASE                 RPI_BCM_IO_BASE + 0x00003000
+/// @brief System Timer Control / Status register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_CS                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000000)
+/// @brief System Timer Counter Lower 32 bits register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_LO                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000004)
+/// @brief System Timer Counter Higher 32 bits register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_HI                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000008)
+/// @brief System Timer Compare 0 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_CMP0                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x0000000C)
+/// @brief System Timer Compare 1 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_CMP1                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000010)
+/// @brief System Timer Compare 2 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_CMP2                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000014)
+/// @brief System Timer Compare 3 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 #define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
 
 //---------------------------------------------
@@ -90,18 +97,31 @@
 
 /// @brief Raspberry Pi Mailbox Registers base address. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
+/// @brief Raspberry Pi Mailbox 0 (incoming) Read register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX0_READ               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000000)
+/// @brief Raspberry Pi Mailbox 0 (incoming) Poll register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
+/// @brief Raspberry Pi Mailbox 0 (incoming) Sender register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
+/// @brief Raspberry Pi Mailbox 0 (incoming) Status register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
+/// @brief Raspberry Pi Mailbox Configuration register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
+/// @brief Raspberry Pi Mailbox 1 (outgoing) Write register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
+/// @brief Raspberry Pi Mailbox 1 (outgoing) Status register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
+/// @brief Raspberry Pi Mailbox buffer requestCode success value. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
+/// @brief Raspberry Pi Mailbox buffer requestCode failure value
 #define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
+/// @brief Raspberry Pi Mailbox buffer property tag response bit
 #define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
+/// @brief Raspberry Pi Mailbox 0 (incoming) Status register empty bit
 #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
+/// @brief Raspberry Pi Mailbox 1 (outgoing) Status register full bit. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_STATUS_FULL         BIT(31)
+/// @brief Raspberry Pi Mailbox buffer requestCode value for request. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_REQUEST             0
 
 //---------------------------------------------

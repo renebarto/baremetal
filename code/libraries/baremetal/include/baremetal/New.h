@@ -39,7 +39,19 @@
 
 #pragma once
 
+/// @file
+/// Basic memory allocation functions
+
 #include <baremetal/Types.h>
 
+/// <summary>
+/// Delete a block of memory allocated with new
+/// </summary>
+/// <param name="block">Pointer to memory block to be deleted / freed</param>
 void operator delete(void* block) noexcept;
+/// <summary>
+/// Delete a block of memory allocated with new, with size specified
+/// </summary>
+/// <param name="block">Pointer to memory block to be deleted / freed</param>
+/// <param name="size">Size of memory block to be deleted / freed</param>
 void operator delete(void* block, size_t size) noexcept;

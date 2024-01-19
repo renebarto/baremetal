@@ -42,26 +42,40 @@
 #include <baremetal/Types.h>
 
 /// @file
-/// Abstract Mailbox
+/// Abstract Mailbox interface
 
 namespace baremetal {
 
-/// @brief Mailbox channels
+/// <summary>
+/// Mailbox channel
+/// </summary>
 enum class MailboxChannel
 {
-    ARM_MAILBOX_CH_POWER = 0,       // Power management
-    ARM_MAILBOX_CH_FB = 1,          // Frame buffer
-    ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART?
+    ARM_MAILBOX_CH_VUART = 2,
+    /// ?
     ARM_MAILBOX_CH_VCHIQ = 3,
+    /// ?
     ARM_MAILBOX_CH_LEDS = 4,
+    /// ?
     ARM_MAILBOX_CH_BTNS = 5,
+    /// ?
     ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
     ARM_MAILBOX_CH_COUNT = 7,
-    ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
-    ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
 };
 
-/// @brief IMailbox: Mailbox abstract interface
+/// <summary>
+/// Mailbox abstract interface
+/// </summary>
 class IMailbox
 {
 public:

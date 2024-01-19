@@ -41,17 +41,33 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// Memory management
+
+/// <summary>
+/// Page slot for requesting coherent memory region
+/// </summary>
 enum class CoherentPageSlot
 {
+    /// @brief Coherent memory page slot for Raspberry Pi mailbox
     PropertyMailbox = 0,
 };
 
 namespace baremetal {
 
-// MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
+/// <summary>
+/// Handles memory allocation, re-allocation, and de-allocation for heap and paging memory, as well as assignment of coherent memory slots.
+/// 
+/// This is a SINGLETON class
+/// </summary>
 class MemoryManager
 {
 public:
+    /// <summary>
+    /// Return the coherent memory page (allocated with the GPU) for the requested page slot
+    /// </summary>
+    /// <param name="slot">Page slot to return the address for</param>
+    /// <returns>Page slot coherent memory address</returns>
     static uintptr GetCoherentPage(CoherentPageSlot slot);
 };
 

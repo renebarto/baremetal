@@ -69,7 +69,7 @@ It must be programmed with this value as part of system initialization.
 The value of the register is not interpreted by hardware.
 
 <table>
-<caption id="multi_row">System Control Register(EL1)</caption>
+<caption id="CNTFRQ_EL0 bits">System Control Register(EL1)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:32<td>Res0<td>Reserved, must be 0</tr>
 <tr><td>31:0<td>Clock frequency<td>Clock frequency. Indicates the system counter clock frequency, in Hz.</tr>
@@ -80,7 +80,7 @@ The value of the register is not interpreted by hardware.
 Holds the 64-bit physical count value.
 
 <table>
-<caption id="multi_row">System Control Register(EL1)</caption>
+<caption id="CNTPCT_EL0 bits">System Control Register(EL1)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:0<td>Physical count value<td>Physical count value.</tr>
 </table>
@@ -90,7 +90,7 @@ Holds the 64-bit physical count value.
 Holds the 64-bit physical count value.
 
 <table>
-<caption id="multi_row">Counter-timer Physical Timer Control Register (EL0)</caption>
+<caption id="CNTP_CTL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:3<td>Res 0<td>Reserved, must be 0.</tr>
 <tr><td>2<td>ISTATUS<td>The status of the timer. This bit indicates whether the timer condition is met:\n
@@ -109,7 +109,7 @@ Holds the 64-bit physical count value.
 Holds the compare value for the EL1 physical timer.
 
 <table>
-<caption id="multi_row">Counter-timer Physical Timer Control Register (EL0)</caption>
+<caption id="CNTP_CVAL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:0<td>CompareValue<td>Holds the EL1 physical timer CompareValue.\n
 When CNTP_CTL_EL0.ENABLE is 1, the timer condition is met when(CNTPCT_EL0 - CompareValue) is greater than or equal to zero.This means that CompareValue acts like a 64 - bit upcounter timer.When the timer condition is met:\n

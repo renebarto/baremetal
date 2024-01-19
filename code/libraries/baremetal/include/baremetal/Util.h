@@ -41,11 +41,28 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// Standard C library utility functions
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/// <summary>
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
+/// </summary>
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns></returns>
 void* memset(void* buffer, int value, size_t length);
+/// <summary>
+/// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
+/// </summary>
+/// <param name="dest">Destination buffer pointer</param>
+/// <param name="src">Source buffer pointer</param>
+/// <param name="length">Size of buffer to copy in bytes</param>
+/// <returns></returns>
 void* memcpy(void* dest, const void* src, size_t length);
 
 #ifdef __cplusplus

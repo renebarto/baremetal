@@ -1728,7 +1728,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 44: #include <baremetal/MemoryManager.h>
 45: #include <baremetal/Util.h>
 46: 
-47: using namespace baremetal;
+47: namespace baremetal {
 48: 
 49: struct PropertySimple
 50: {
@@ -1817,6 +1817,8 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 133: 
 134:     return true;
 135: }
+136: 
+137: } // namespace baremetal
 ```
 
 - Line 49-53: We declare a structure to hold the minimum property tag, which holds a single 32 bit value in the tag buffer.

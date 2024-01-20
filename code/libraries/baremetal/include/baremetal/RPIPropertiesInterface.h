@@ -183,45 +183,13 @@ private:
     IMailbox &m_mailbox;
 
 public:
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
     explicit RPIPropertiesInterface(IMailbox &mailbox);
 
-    /// <summary>
-    /// Request property tag. The tag data for request must be filled in, the header will be filled in to the buffer.
-    /// The buffer must be large enough to hold the complete tag including its header.
-    /// On successful return, the buffer will be filled with the response data
-    /// </summary>
-    /// <param name="tagID">Property tag to be requested</param>
-    /// <param name="tag">Buffer to tag data, large enough to hold complete Property</param>
-    /// <param name="tagSize">Size of the tag data buffer in bytes</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool GetTag(PropertyID tagID, void *tag, unsigned tagSize);
 
 private:
-    /// <summary>
-    /// Fill in tag header for the requested property tag.
-    /// </summary>
-    /// <param name="tagID">Property tag to be requested</param>
-    /// <param name="tag">Buffer to tag data, large enough to hold complete Property</param>
-    /// <param name="tagSize">Size of the tag data buffer in bytes</param>
-    /// <returns>Tag size in bytes</returns>
     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize);
-    /// <summary>
-    /// Check whether the property tag was successfully requested, by checking the tagRequestResponse field in the Property header
-    /// </summary>
-    /// <param name="tag">Buffer to property tag data</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool   CheckTagResult(void *tag);
-    /// <summary>
-    /// Fill in the Mailbox buffer with the tags requested, and perform the request.
-    /// Will fill in the mailbox buffer header, and the tag data, append the end tag, and perform the mailbox request.
-    /// </summary>
-    /// <param name="tags">Buffer to tag data, for all requested properties, except the end tag</param>
-    /// <param name="tagsSize">Size of the tag data buffer in bytes</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool   GetTags(void *tags, unsigned tagsSize);
 };
 

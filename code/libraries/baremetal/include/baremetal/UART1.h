@@ -48,10 +48,12 @@ namespace baremetal {
 
 class IMemoryAccess;
 
-/// @brief Encapsulation for the UART1 device.
+/// <summary>
+/// Encapsulation for the UART1 device.
 ///
 /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
 /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// </summary>
 class UART1 : public CharDevice
 {
     friend UART1& GetUART1();
@@ -62,41 +64,17 @@ private:
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default UART1 instance.
-    /// Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
     UART1();
 
 public:
-    /// <summary>
-    /// Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
-    /// </summary>
-    /// <param name="memoryAccess">Memory access interface</param>
     UART1(IMemoryAccess &memoryAccess);
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-    ///
-    ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+
     void Initialize();
-    /// <summary>
-    /// Read a character
-    /// </summary>
-    /// <returns>Character read</returns>
     char Read() override;
-    /// <summary>
-    /// Write a character
-    /// </summary>
-    /// <param name="c">Character to be written</param>
     void Write(char c) override;
-    /// <summary>
-    /// Write a string
-    /// </summary>
-    /// <param name="str">String to be written</param>
     void WriteString(const char* str);
 };
 
-/// <summary>
-/// Construct the singleton UART1 device if needed, and return a reference to the instance
-/// </summary>
-/// <returns>Reference to the singleton UART1 device</returns>
 UART1 &GetUART1();
 
 } // namespace baremetal

@@ -568,16 +568,6 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 116: } // namespace baremetal
 ```
 
-Before updating `Timer.h`:
-
-type lookup cache used 1065/65536 hits=5179 misses=1106
-symbol lookup cache used 887/65536 hits=5016 misses=887
-
-After updating `Timer.h`:
-
-type lookup cache used 1070/65536 hits=5186 misses=1111
-symbol lookup cache used 895/65536 hits=5014 misses=895
-
 You will see some special tags in the source code, as well as in Markdown documents:
 
 - `<summary></summary>`

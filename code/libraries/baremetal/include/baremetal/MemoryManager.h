@@ -63,11 +63,6 @@ namespace baremetal {
 class MemoryManager
 {
 public:
-    /// <summary>
-    /// Return the coherent memory page (allocated with the GPU) for the requested page slot
-    /// </summary>
-    /// <param name="slot">Page slot to return the address for</param>
-    /// <returns>Page slot coherent memory address</returns>
     static uintptr GetCoherentPage(CoherentPageSlot slot);
 };
 

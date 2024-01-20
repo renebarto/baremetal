@@ -44,21 +44,37 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/PhysicalGPIOPin.h>
 
+/// @file
+/// Raspberry Pi UART1 serial device implementation
+
 namespace baremetal {
 
+/// <summary>
+/// Constructs a default UART1 instance.
+/// 
+/// Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
+/// </summary>
 UART1::UART1()
     : m_initialized{}
     , m_memoryAccess{GetMemoryAccess()}
 {
 }
 
+/// <summary>
+/// Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
+/// </summary>
+/// <param name="memoryAccess">Memory access interface</param>
 UART1::UART1(IMemoryAccess &memoryAccess)
     : m_initialized{}
     , m_memoryAccess{memoryAccess}
 {
 }
 
-// Set baud rate and characteristics (115200 8N1) and map to GPIO
+/// <summary>
+/// Initialize the UART1 device. Only performed once, guarded by m_initialized.
+///
+///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+/// </summary>
 void UART1::Initialize()
 {
     if (m_initialized)
@@ -89,7 +105,10 @@ void UART1::Initialize()
     m_initialized = true;
 }
 
-// Write a character
+/// <summary>
+/// Send a character
+/// </summary>
+/// <param name="c">Character to be sent</param>
 void UART1::Write(char c)
 {
     // wait until we can send
@@ -102,7 +121,10 @@ void UART1::Write(char c)
     m_memoryAccess.Write32(RPI_AUX_MU_IO, static_cast<unsigned int>(c));
 }
 
-// Receive a character
+/// <summary>
+/// Receive a character
+/// </summary>
+/// <returns>Character received</returns>
 char UART1::Read()
 {
     // wait until something is in the buffer
@@ -115,6 +137,10 @@ char UART1::Read()
     return static_cast<char>(m_memoryAccess.Read32(RPI_AUX_MU_IO));
 }
 
+/// <summary>
+/// Write a string
+/// </summary>
+/// <param name="str">String to be written</param>
 void UART1::WriteString(const char* str)
 {
     while (*str)
@@ -126,6 +152,10 @@ void UART1::WriteString(const char* str)
     }
 }
 
+/// <summary>
+/// Construct the singleton UART1 device if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton UART1 device</returns>
 UART1& GetUART1()
 {
     static UART1 value;

@@ -67,87 +67,26 @@ private:
     IMemoryAccess& m_memoryAccess;
 
 public:
-    /// <summary>
-    /// Creates a virtual GPIO pin 
-    /// </summary>
-    /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    /// <summary>
-    /// Creates a virtual GPIO pin 
-    /// </summary>
-    /// <param name="pinNumber">GPIO pin number (0..53)</param>
-    /// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
-    /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    /// <summary>
-    /// Return the configured GPIO pin number
-    /// </summary>
-    /// <returns>GPIO pin number (0..53)</returns>
     uint8 GetPinNumber() const override;
-    /// <summary>
-    /// Assign a GPIO pin
-    /// </summary>
-    /// <param name="pinNumber">GPIO pin number to set (0..53)</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool AssignPin(uint8 pinNumber) override;
 
-    /// <summary>
-    /// Switch GPIO on
-    /// </summary>
     void On() override;
-    /// <summary>
-    /// Switch GPIO off
-    /// </summary>
     void Off() override;
-    /// <summary>
-    /// Get GPIO value
-    /// </summary>
-    /// <returns>The status of the configured GPIO pin. Returns true if on, false if off</returns>
     bool Get() override;
-    /// <summary>
-    /// Set GPIO on (true) or off (false)
-    /// </summary>
-    /// <param name="on">Value to set GPIO pin to (true for on, false for off).</param>
     void Set(bool on) override;
-    /// <summary>
-    /// Invert GPIO value on->off off->on
-    /// </summary>
     void Invert() override;
 
-    ///     /// <summary>
-    /// Get the mode for the GPIO pin
-    /// </summary>
-    /// <returns>Currently set mode for the configured GPIO pin</returns>
     GPIOMode GetMode();
-    /// <summary>
-    /// Set the mode for the GPIO pin
-    /// </summary>
-    /// <param name="mode">Mode to be set for the configured GPIO. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool SetMode(GPIOMode mode);
-    /// <summary>
-    /// Get GPIO pin function
-    /// </summary>
-    /// <returns>Function set for the configured GPIO pin</returns>
     GPIOFunction GetFunction();
-    /// <summary>
-    /// Get GPIO pin pull mode
-    /// </summary>
-    /// <returns>Pull mode set for the configured GPIO pin</returns>
     GPIOPullMode GetPullMode();
-    /// <summary>
-    /// Set GPIO pin pull mode
-    /// </summary>
-    /// <param name="pullMode">Pull mode to be set for the configured GPIO pin</param>
     void SetPullMode(GPIOPullMode pullMode);
 
 private:
-    /// <summary>
-    /// Set GPIO pin function
-    /// </summary>
-    /// <param name="function">Function to be set for the configured GPIO pin</param>
     void SetFunction(GPIOFunction function);
 };
 

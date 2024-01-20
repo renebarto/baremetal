@@ -128,15 +128,28 @@
 // Raspberry Pi Power Management
 //---------------------------------------------
 
+// The power management features of Raspberry Pi are not well documented.
+// Most information is extracted from the source code of an old BCM2835 watchdog timer
+// A good reference is https://elixir.bootlin.com/linux/latest/source/drivers/watchdog/bcm2835_wdt.c or
+// https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
+
 /// @brief Raspberry Pi Power management Registers base address. See @ref RASPBERRY_PI_POWER_MANAGEMENT
 #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
+/// @brief Raspberry Pi Power management reset control register
 #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
+/// @brief Raspberry Pi Power management reset sector register
 #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
+/// @brief Raspberry Pi Power management watchdog register
 #define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
+/// @brief Raspberry Pi Power management magic number, to be ORed with value when setting register values
 #define RPI_PWRMGT_WDOG_MAGIC           0x5A000000
+/// @brief Raspberry Pi Power management clear mask.
 #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
-#define RPI_PWRMGT_RSTC_REBOOT          0x00000020
+/// @brief Raspberry Pi Power management full reset bit. Can be used to check if watchdog timer is still running
+#define RPI_PWRMGT_RSTC_REBOOT          BIT(5)
+/// @brief Raspberry Pi Power management watchdog timer reset code
 #define RPI_PWRMGT_RSTC_RESET           0x00000102
+/// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
 #define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
 
 //---------------------------------------------

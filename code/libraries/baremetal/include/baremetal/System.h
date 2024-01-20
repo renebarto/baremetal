@@ -53,38 +53,25 @@ class IMemoryAccess;
 /// </summary>
 class System
 {
+    /// <summary>
+    /// Construct the singleton system handler if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system handler</returns>
     friend System& GetSystem();
 
 private:
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
 
-    /// <summary>
-    /// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
-    /// </summary>
     System();
 
 public:
-    /// <summary>
-    /// Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
-    /// </summary>
-    /// <param name="memoryAccess">Memory access interface</param>
     System(IMemoryAccess &memoryAccess);
 
-    /// <summary>
-    /// Halts the system. This function will not return
-    /// </summary>
     [[noreturn]] void Halt();
-    /// <summary>
-    /// Reboots the system. This function will not return
-    /// </summary>
     [[noreturn]] void Reboot();
 };
 
-/// <summary>
-/// Construct the singleton system handler if needed, and return a reference to the instance
-/// </summary>
-/// <returns>Reference to the singleton system handler</returns>
 System& GetSystem();
 
 } // namespace baremetal

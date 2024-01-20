@@ -63,10 +63,6 @@ public:
     void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 };
 
-/// <summary>
-/// Construct the singleton memory access interface if needed, and return a reference to the instance
-/// </summary>
-/// <returns>Reference to the singleton memory access interface</returns>
 MemoryAccess &GetMemoryAccess();
 
 } // namespace baremetal

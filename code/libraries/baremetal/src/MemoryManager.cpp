@@ -41,8 +41,16 @@
 
 #include <baremetal/SysConfig.h>
 
+/// @file
+/// Memory management implementation
+
 using namespace baremetal;
 
+/// <summary>
+/// Return the coherent memory page (allocated with the GPU) for the requested page slot
+/// </summary>
+/// <param name="slot">Page slot to return the address for</param>
+/// <returns>Page slot coherent memory address</returns>
 uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 {
     uint64 pageAddress = MEM_COHERENT_REGION;

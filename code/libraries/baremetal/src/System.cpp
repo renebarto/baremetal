@@ -47,6 +47,9 @@
 #include <baremetal/UART0.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// System startup / shutdown functionality implementation
+
 using namespace baremetal;
 
 #ifdef __cplusplus
@@ -54,11 +57,21 @@ extern "C"
 {
 #endif
 
+/// <summary>
+/// __dso_handle is a "guard" that is used to identify dynamic shared objects during global destruction. It is only known to the compiler / linker
+/// </summary>
 void *__dso_handle WEAK;
 
-void __cxa_atexit(void* pThis, void (*func)(void* pThis), void* pHandle) WEAK;
+/// @brief WEAK version of __cxa_atexit
+void __cxa_atexit(void (*func)(void* param), void* param, void* handle) WEAK;
 
-void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHandle*/)
+/// <summary>
+/// __cxa_atexit() will call the destructor of the static of a dynamic library when this dynamic library is unloaded before the program exits.
+/// </summary>
+/// <param name="func">Registered function to be called</param>
+/// <param name="param">Parameter to be passed to registered function</param>
+/// <param name="handle">Handle of the shared library to be unloaded (its __dso_handle)</param>
+void __cxa_atexit([[maybe_unused]] void (* func)(void* param), [[maybe_unused]] void* param, [[maybe_unused]] void* handle)
 {
 }
 
@@ -66,24 +79,39 @@ void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHand
 }
 #endif
 
-static const uint32 WaitTime = 10; // ms
+/// @brief Wait time in milliseconds to ensure that UART info is written before system halt or reboot
+static const uint32 WaitTime = 10;
 
+/// <summary>
+/// Construct the singleton system handler if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton system handler</returns>
 System& baremetal::GetSystem()
 {
     static System value;
     return value;
 }
 
+/// <summary>
+/// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
+/// </summary>
 System::System()
     : m_memoryAccess{GetMemoryAccess()}
 {
 }
 
+/// <summary>
+/// Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
+/// </summary>
+/// <param name="memoryAccess">Memory access interface</param>
 System::System(IMemoryAccess &memoryAccess)
     : m_memoryAccess{memoryAccess}
 {
 }
 
+/// <summary>
+/// Halts the system. This function will not return
+/// </summary>
 void System::Halt()
 {
     GetUART0().WriteString("Halt\n");
@@ -104,6 +132,9 @@ void System::Halt()
     }
 }
 
+/// <summary>
+/// Reboots the system. This function will not return
+/// </summary>
 void System::Reboot()
 {
     GetUART0().WriteString("Reboot\n");

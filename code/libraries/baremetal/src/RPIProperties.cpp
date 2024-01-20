@@ -43,27 +43,52 @@
 #include <baremetal/RPIPropertiesInterface.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Top level functionality handling for Raspberry Pi Mailbox implementation
+
 namespace baremetal {
 
+/// <summary>
+/// Mailbox property tag structure for requesting board serial number.
+/// </summary>
 struct PropertySerial
 {
+    /// Tag ID, must be equal to PROPTAG_GET_BOARD_REVISION.
     Property tag;
+    /// The requested serial number/ This is a 64 bit unsigned number, divided up into two times a 32 bit number
     uint32   serial[2];
 } PACKED;
 
+/// <summary>
+/// Mailbox property tag structure for requesting board serial number.
+/// </summary>
 struct PropertyClockRate
 {
+    /// @brief Tag ID, must be equal to PROPTAG_GET_CLOCK_RATE, PROPTAG_GET_MAX_CLOCK_RATE, PROPTAG_GET_MIN_CLOCK_RATE, PROPTAG_GET_CLOCK_RATE_MEASURED or PROPTAG_SET_CLOCK_RATE.
     Property tag;
+    /// @brief Clock ID, selected the clock for which information is requested or set
     uint32   clockID;
-    uint32   rate;      // Hz
-    uint32   skipTurbo; // If 1, do not set turbo mode, if 0, set turbo mode if necessary
+    /// @brief Requested or set clock frequency, in Hz
+    uint32   rate;
+    /// @brief If 1, do not switch to turbo setting if ARM clock is above default. 
+    /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.
+    uint32   skipTurbo;
 } PACKED;
 
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
 RPIProperties::RPIProperties(IMailbox &mailbox)
     : m_mailbox{mailbox}
 {
 }
 
+/// <summary>
+/// Request board serial number
+/// </summary>
+/// <param name="serial">On return, set to serial number, if successful</param>
+/// <returns>Return true on success, false on failure</returns>
 bool RPIProperties::GetBoardSerial(uint64 &serial)
 {
     PropertySerial         tag{};
@@ -79,6 +104,14 @@ bool RPIProperties::GetBoardSerial(uint64 &serial)
     return result;
 }
 
+/// <summary>
+/// Set clock rate for specified clock
+/// </summary>
+/// <param name="clockID">ID of clock to be set</param>
+/// <param name="freqHz">Clock frequencyy in Hz</param>
+/// <param name="skipTurbo">When true, do not switch to turbo setting if ARM clock is above default. 
+/// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.</param>
+/// <returns>Return true on success, false on failure</returns>
 bool RPIProperties::SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo)
 {
     PropertyClockRate      tag{};

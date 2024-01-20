@@ -76,26 +76,9 @@ private:
     IMailbox &m_mailbox;
 
 public:
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
     explicit RPIProperties(IMailbox &mailbox);
 
-    /// <summary>
-    /// Request board serial number
-    /// </summary>
-    /// <param name="serial">On return, set to serial number, if successful</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool GetBoardSerial(uint64 &serial);
-    /// <summary>
-    /// Set clock rate for specified clock
-    /// </summary>
-    /// <param name="clockID">ID of clock to be set</param>
-    /// <param name="freqHz">Clock frequencyy in Hz</param>
-    /// <param name="skipTurbo">When true, do not switch to turbo setting if ARM clock is above default. 
-    /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.</param>
-    /// <returns>Return true on success, false on failure</returns>
     bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
 };
 

@@ -50,19 +50,6 @@
 namespace baremetal {
 
 /// <summary>
-/// Basic tag structure for a simple property request sending or receiving a 32 bit unsigned number.
-/// 
-/// This is also used for sanity checks on the size of the request
-/// </summary>
-struct PropertySimple
-{
-    /// @brief Tag ID of the the requested property
-    Property tag;
-    /// @brief A 32 bit unsigned value being send or requested
-    uint32   value;
-} PACKED;
-
-/// <summary>
  /// Constructs a RPI properties interface object
  /// </summary>
  /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>

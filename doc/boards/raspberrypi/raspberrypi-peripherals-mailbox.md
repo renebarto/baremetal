@@ -1,5 +1,7 @@
 # Raspberry Pi Mailbox {#RASPBERRY_PI_MAILBOX}
 
+The Raspberry Pi mailbox is not well described, it is not part of the peripheral description of BCM2835/2836/2837/2711/2712.
+
 For more information:
 - [Raspberry Pi firmware wiki - Mailboxes](https://github.com/raspberrypi/firmware/wiki/Mailboxes)
 - [Raspberry Pi firmware wiki - Accessing mailboxes](https://github.com/raspberrypi/firmware/wiki/Accessing-mailboxes)

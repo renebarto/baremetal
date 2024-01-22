@@ -44,13 +44,29 @@
 #include <baremetal/MemoryManager.h>
 #include <baremetal/Util.h>
 
-using namespace baremetal;
+/// @file
+/// Functionality handling for Raspberry Pi Mailbox implementation
 
+namespace baremetal {
+
+/// <summary>
+ /// Constructs a RPI properties interface object
+ /// </summary>
+ /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
 RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
     : m_mailbox{mailbox}
 {
 }
 
+/// <summary>
+/// Request property tag. The tag data for request must be filled in, the header will be filled in to the buffer.
+/// The buffer must be large enough to hold the complete tag including its header.
+/// On successful return, the buffer will be filled with the response data
+/// </summary>
+/// <param name="tagID">Property tag to be requested</param>
+/// <param name="tag">Buffer to tag data, large enough to hold complete Property</param>
+/// <param name="tagSize">Size of the tag data buffer in bytes</param>
+/// <returns>Return true on success, false on failure</returns>
 bool RPIPropertiesInterface::GetTag(PropertyID tagID, void *tag, unsigned tagSize)
 {
     if (FillTag(tagID, tag, tagSize) != tagSize)
@@ -66,6 +82,11 @@ bool RPIPropertiesInterface::GetTag(PropertyID tagID, void *tag, unsigned tagSiz
     return CheckTagResult(tag);
 }
 
+/// <summary>
+/// Check whether the property tag was successfully requested, by checking the tagRequestResponse field in the Property header
+/// </summary>
+/// <param name="tag">Buffer to property tag data</param>
+/// <returns>Return true on success, false on failure</returns>
 bool RPIPropertiesInterface::CheckTagResult(void *tag)
 {
     Property *header = reinterpret_cast<Property *>(tag);
@@ -77,6 +98,13 @@ bool RPIPropertiesInterface::CheckTagResult(void *tag)
     return (header->tagRequestResponse != 0);
 }
 
+/// <summary>
+/// Fill in tag header for the requested property tag.
+/// </summary>
+/// <param name="tagID">Property tag to be requested</param>
+/// <param name="tag">Buffer to tag data, large enough to hold complete Property</param>
+/// <param name="tagSize">Size of the tag data buffer in bytes</param>
+/// <returns>Tag size in bytes</returns>
 size_t RPIPropertiesInterface::FillTag(PropertyID tagID, void *tag, unsigned tagSize)
 {
     if ((tag == nullptr) || (tagSize < sizeof(PropertySimple)))
@@ -90,6 +118,13 @@ size_t RPIPropertiesInterface::FillTag(PropertyID tagID, void *tag, unsigned tag
     return tagSize;
 }
 
+/// <summary>
+/// Fill in the Mailbox buffer with the tags requested, and perform the request.
+/// Will fill in the mailbox buffer header, and the tag data, append the end tag, and perform the mailbox request.
+/// </summary>
+/// <param name="tags">Buffer to tag data, for all requested properties, except the end tag</param>
+/// <param name="tagsSize">Size of the tag data buffer in bytes</param>
+/// <returns>Return true on success, false on failure</returns>
 bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
 {
     if ((tags == nullptr) || (tagsSize < sizeof(PropertySimple)))
@@ -127,3 +162,5 @@ bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
 
     return true;
 }
+
+} // namespace baremetal

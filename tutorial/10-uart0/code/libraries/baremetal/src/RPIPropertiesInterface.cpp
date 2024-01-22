@@ -46,12 +46,6 @@
 
 using namespace baremetal;
 
-struct PropertySimple
-{
-    Property tag;
-    uint32   value;
-} PACKED;
-
 RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
     : m_mailbox{mailbox}
 {

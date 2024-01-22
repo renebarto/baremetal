@@ -114,6 +114,12 @@ struct Property
     uint8  tagBuffer[0];        // must be padded to be 4 byte aligned
 } PACKED;
 
+struct PropertySimple
+{
+    Property tag;
+    uint32   value;
+} PACKED;
+
 class RPIPropertiesInterface
 {
 private:

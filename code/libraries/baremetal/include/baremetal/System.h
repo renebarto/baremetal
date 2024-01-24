@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : System.h
 //
@@ -54,22 +54,25 @@ class IMemoryAccess;
 class System
 {
     /// <summary>
-    /// Construct the singleton system handler if needed, and return a reference to the instance. This is a friend function of class System
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
     /// </summary>
-    /// <returns>Reference to the singleton system handler</returns>
+    /// <returns>Reference to the singleton system instance</returns>
     friend System& GetSystem();
 
 private:
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
+    /// @brief The instance pointer
+    static System* s_instance;
 
     System();
+    static System* GetInstance();
 
 public:
     System(IMemoryAccess &memoryAccess);
 
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    [[noreturn]] static void Halt();
+    [[noreturn]] static void Reboot();
 };
 
 System& GetSystem();

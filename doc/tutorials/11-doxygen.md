@@ -568,6 +568,9 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 116: } // namespace baremetal
 ```
 
+I've documented the code as far as I could, so you should now see all documentation in the Doxugen generated web pages.
+The code at this point is also copied into `tutorial/11-doxygen`.
+
 You will see some special tags in the source code, as well as in Markdown documents:
 
 - `<summary></summary>`

@@ -51,6 +51,10 @@ extern "C" {
 void* memset(void* buffer, int value, size_t length);
 void* memcpy(void* dest, const void* src, size_t length);
 
+size_t strlen(const char* str);
+char* strncpy(char* dest, const char* src, size_t maxLen);
+char* strncat(char* dest, const char* src, size_t maxLen);
+
 #ifdef __cplusplus
 }
 #endif

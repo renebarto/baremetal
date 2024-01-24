@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : System.cpp
 //
@@ -41,16 +41,20 @@
 
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
+#include <baremetal/Logger.h>
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/SysConfig.h>
 #include <baremetal/Timer.h>
-#include <baremetal/UART0.h>
 #include <baremetal/Util.h>
+#include <baremetal/Version.h>
 
 /// @file
 /// System startup / shutdown functionality implementation
 
 using namespace baremetal;
+
+/// @brief Define log name for this module
+LOG_MODULE("System");
 
 #ifdef __cplusplus
 extern "C"
@@ -82,6 +86,8 @@ void __cxa_atexit([[maybe_unused]] void (* func)(void* param), [[maybe_unused]] 
 /// @brief Wait time in milliseconds to ensure that UART info is written before system halt or reboot
 static const uint32 WaitTime = 10;
 
+System* System::s_instance{};
+
 /// <summary>
 /// Construct the singleton system handler if needed, and return a reference to the instance
 /// </summary>
@@ -93,11 +99,21 @@ System& baremetal::GetSystem()
 }
 
 /// <summary>
+/// Return a pointer to the singleton system handler
+/// </summary>
+/// <returns>Pointer to the singleton system handler</returns>
+System* System::GetInstance()
+{
+    return s_instance;
+}
+
+/// <summary>
 /// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
 /// </summary>
 System::System()
     : m_memoryAccess{GetMemoryAccess()}
 {
+    s_instance = this;
 }
 
 /// <summary>
@@ -107,6 +123,7 @@ System::System()
 System::System(IMemoryAccess &memoryAccess)
     : m_memoryAccess{memoryAccess}
 {
+    s_instance = this;
 }
 
 /// <summary>
@@ -114,16 +131,20 @@ System::System(IMemoryAccess &memoryAccess)
 /// </summary>
 void System::Halt()
 {
-    GetUART0().WriteString("Halt\n");
+    auto* instance = System::GetInstance();
+    LOG_INFO("Halt");
     Timer::WaitMilliSeconds(WaitTime);
 
-    // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
-    r |= 0x555; // partition 63 used to indicate halt
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+    if (instance != nullptr)
+    {
+        // power off the SoC (GPU + CPU)
+        auto r = instance->m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
+        r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
+        r |= 0x555; // partition 63 used to indicate halt
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+    }
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -137,18 +158,22 @@ void System::Halt()
 /// </summary>
 void System::Reboot()
 {
-    GetUART0().WriteString("Reboot\n");
+    auto* instance = System::GetInstance();
+    LOG_INFO("Reboot");
     Timer::WaitMilliSeconds(WaitTime);
 
     DisableIRQs();
     DisableFIQs();
 
-    // power off the SoC (GPU + CPU)
-    auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+    if (instance != nullptr)
+    {
+        // power off the SoC (GPU + CPU)
+        auto r = instance->m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
+        r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+        instance->m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+    }
     for (;;) // Satisfy [[noreturn]]
     {
         DataSyncBarrier();
@@ -185,8 +210,10 @@ void sysinit()
     {
         (**func)();
     }
+    SetupVersion();
 
-    GetUART0().WriteString("Starting up\n");
+    GetLogger();
+    LOG_INFO("Starting up");
 
     extern int main();
 

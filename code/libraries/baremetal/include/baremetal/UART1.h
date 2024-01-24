@@ -56,6 +56,10 @@ class IMemoryAccess;
 /// </summary>
 class UART1 : public CharDevice
 {
+    /// <summary>
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// </summary>
+    /// <returns>Reference to the singleton UART1 instance</returns>
     friend UART1& GetUART1();
 
 private:

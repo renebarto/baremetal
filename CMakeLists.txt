@@ -10,6 +10,13 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 
+include (functions)
+
+parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
+
+message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD}")
+set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE Debug)
 endif()
@@ -41,6 +48,9 @@ elseif (BAREMETAL_TARGET STREQUAL "RPI4")
 else()
     message(FATAL_ERROR "Incorrect target ${BAREMETAL_TARGET} specified, must be RPI3 or RPI4")
 endif()
+option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 
 message(STATUS "\n** Setting up project **\n--")
 
@@ -59,13 +69,31 @@ elseif (BAREMETAL_TARGET STREQUAL "RPI4")
     set(BAREMETAL_TARGET_KERNEL kernel8-rpi4)
     set(BAREMETAL_RPI_TARGET 4)
 endif()
+if (BAREMETAL_COLOR_LOGGING)
+    set(BAREMETAL_COLOR_OUTPUT 1)
+else ()
+    set(BAREMETAL_COLOR_OUTPUT 0)
+endif()
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
+
 
 set(DEFINES_C
     PLATFORM_BAREMETAL
     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    USE_LOG_COLORS=${BAREMETAL_COLOR_OUTPUT}
     USE_PHYSICAL_COUNTER
+    BAREMETAL_MAJOR=${VERSION_MAJOR} 
+    BAREMETAL_MINOR=${VERSION_MINOR} 
+    BAREMETAL_LEVEL=${VERSION_LEVEL} 
+    BAREMETAL_BUILD=${VERSION_BUILD} 
+    BAREMETAL_VERSION="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}" 
     )
+if (BAREMETAL_CONSOLE_UART0)
+    list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART0)
+endif()
+if (BAREMETAL_CONSOLE_UART1)
+    list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART1)
+endif()
 set(DEFINES_C_DEBUG _DEBUG)
 set(DEFINES_C_RELEASE NDEBUG)
 set(DEFINES_C_MINSIZEREL NDEBUG)
@@ -216,7 +244,16 @@ else()
     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
 endif()
 
-option(BUILD_TUTORIALS "Build all tutorials" OFF)
+message(STATUS "Baremetal settings:")
+message(STATUS "-- RPI target:          ${BAREMETAL_RPI_TARGET}")
+message(STATUS "-- Architecture options:${BAREMETAL_ARCH_CPU_OPTIONS}")
+message(STATUS "-- Kernel name:         ${BAREMETAL_TARGET_KERNEL}")
+message(STATUS "-- Kernel load address: ${BAREMETAL_LOAD_ADDRESS}")
+message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
+message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
+message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
+
+option(BUILD_TUTORIALS "Build all tutorials" ON)
 
 add_subdirectory(code)
 if(BUILD_TUTORIALS)

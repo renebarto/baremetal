@@ -1595,7 +1595,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 104:     uint32 requestCode;
 105:     uint8  tags[0];
 106:     // end tag follows
-107: } PACKED ALIGN(16);
+107: } PACKED;
 108: 
 109: struct Property
 110: {
@@ -1605,23 +1605,29 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 114:     uint8  tagBuffer[0];        // must be padded to be 4 byte aligned
 115: } PACKED;
 116: 
-117: class RPIPropertiesInterface
+117: struct PropertySimple
 118: {
-119: private:
-120:     IMailbox &m_mailbox;
-121: 
-122: public:
-123:     explicit RPIPropertiesInterface(IMailbox &mailbox);
-124: 
-125:     bool   GetTag(PropertyID tagID, void *tag, unsigned tagSize);
-126: 
-127: private:
-128:     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize);
-129:     bool   CheckTagResult(void *tag);
-130:     bool   GetTags(void *tags, unsigned tagsSize);
-131: };
+119:     Property tag;
+120:     uint32   value;
+121: } PACKED;
+122: 
+123: class RPIPropertiesInterface
+124: {
+125: private:
+126:     IMailbox &m_mailbox;
+127: 
+128: public:
+129:     explicit RPIPropertiesInterface(IMailbox &mailbox);
+130: 
+131:     bool   GetTag(PropertyID tagID, void *tag, unsigned tagSize);
 132: 
-133: } // namespace baremetal
+133: private:
+134:     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize);
+135:     bool   CheckTagResult(void *tag);
+136:     bool   GetTags(void *tags, unsigned tagsSize);
+137: };
+138: 
+139: } // namespace baremetal
 ```
 
 - Line 49-99: We define all the known property tag IDs as an enum type `PropertyID`.
@@ -1639,21 +1645,23 @@ This contains the fields for the tag shown in the image in [the application upda
   - tagRequestResponse: The tag request / response code
   - tagBuffer: The tag buffer contents, as a placeholder
   - Notice that this struct has property PACKED
-- Line 117-131: We declare the RPIPropertiesInterface class.
-  - Line 120: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
-  - Line 123: We declare the constructor, which receives a Mailbox instance
-  - Line 125: We declare the method to request a property. This has three parameters:
+- Line 117-121: We declare a structure for the a simple property `PropertySimple` which only holds a single 32 bit value. 
+This will also be used for sanity checks on the tag sizes
+- Line 123-137: We declare the RPIPropertiesInterface class.
+  - Line 126: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
+  - Line 129: We declare the constructor, which receives a Mailbox instance
+  - Line 131: We declare the method to request a property. This has three parameters:
     - tagID: The property tag ID, from the enum specied in `PropertyID`
     - tag: a pointer to a buffer that contains sufficient information for the tag request and its response.
 We will declare types for this per property
     - tagSize: The size of the buffer passed as `tag`
-  - Line 128: We declare a private method to fill the tag information
-  - Line 129: We declare a private method to check the result of a mailbox call
-  - Line 130: We declare a private method to perform the actual call.
+  - Line 134: We declare a private method to fill the tag information
+  - Line 135: We declare a private method to check the result of a mailbox call
+  - Line 136: We declare a private method to perform the actual call.
 This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page, 
 convert the address, and use the `Mailbox` to perform the call.
 
-You will notice that the structures declared in Line 101-107 and 109-115 use the keywords PACKED and ALIGN.
+You will notice that the structures declared in Line 101-107, 109-115 and 117-121 use the keyword PACKED. We may be using the keyword align as well later.
 We will add the definitions for this in `Macros.h`. The reason for a definition is to make it possible to redefine for a different compiler.
 
 ### Macros.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_MACROSH}
@@ -1728,132 +1736,122 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 44: #include <baremetal/MemoryManager.h>
 45: #include <baremetal/Util.h>
 46: 
-47: namespace baremetal {
+47: using namespace baremetal;
 48: 
-49: struct PropertySimple
-50: {
-51:     Property tag;
-52:     uint32   value;
-53: } PACKED;
-54: 
-55: RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
-56:     : m_mailbox{mailbox}
-57: {
-58: }
-59: 
-60: bool RPIPropertiesInterface::GetTag(PropertyID tagID, void *tag, unsigned tagSize)
-61: {
-62:     if (FillTag(tagID, tag, tagSize) != tagSize)
+49: RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
+50:     : m_mailbox{mailbox}
+51: {
+52: }
+53: 
+54: bool RPIPropertiesInterface::GetTag(PropertyID tagID, void *tag, unsigned tagSize)
+55: {
+56:     if (FillTag(tagID, tag, tagSize) != tagSize)
+57:         return false;
+58: 
+59:     auto result = GetTags(tag, tagSize);
+60: 
+61:     if (!result)
+62:     {
 63:         return false;
-64: 
-65:     auto result = GetTags(tag, tagSize);
-66: 
-67:     if (!result)
-68:     {
-69:         return false;
-70:     }
-71: 
-72:     return CheckTagResult(tag);
-73: }
-74: 
-75: bool RPIPropertiesInterface::CheckTagResult(void *tag)
-76: {
-77:     Property *header = reinterpret_cast<Property *>(tag);
-78: 
-79:     if ((header->tagRequestResponse & RPI_MAILBOX_TAG_RESPONSE) == 0)
-80:         return false;
-81: 
-82:     header->tagRequestResponse &= ~RPI_MAILBOX_TAG_RESPONSE;
-83:     return (header->tagRequestResponse != 0);
-84: }
-85: 
-86: size_t RPIPropertiesInterface::FillTag(PropertyID tagID, void *tag, unsigned tagSize)
-87: {
-88:     if ((tag == nullptr) || (tagSize < sizeof(PropertySimple)))
-89:         return 0;
-90: 
-91:     Property *header        = reinterpret_cast<Property *>(tag);
-92:     header->tagID           = static_cast<uint32>(tagID);
-93:     header->tagBufferSize   = tagSize - sizeof(Property);
-94:     header->tagRequestResponse = 0;
-95: 
-96:     return tagSize;
-97: }
-98: 
-99: bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
-100: {
-101:     if ((tags == nullptr) || (tagsSize < sizeof(PropertySimple)))
-102:         return false;
+64:     }
+65: 
+66:     return CheckTagResult(tag);
+67: }
+68: 
+69: bool RPIPropertiesInterface::CheckTagResult(void *tag)
+70: {
+71:     Property *header = reinterpret_cast<Property *>(tag);
+72: 
+73:     if ((header->tagRequestResponse & RPI_MAILBOX_TAG_RESPONSE) == 0)
+74:         return false;
+75: 
+76:     header->tagRequestResponse &= ~RPI_MAILBOX_TAG_RESPONSE;
+77:     return (header->tagRequestResponse != 0);
+78: }
+79: 
+80: size_t RPIPropertiesInterface::FillTag(PropertyID tagID, void *tag, unsigned tagSize)
+81: {
+82:     if ((tag == nullptr) || (tagSize < sizeof(PropertySimple)))
+83:         return 0;
+84: 
+85:     Property *header        = reinterpret_cast<Property *>(tag);
+86:     header->tagID           = static_cast<uint32>(tagID);
+87:     header->tagBufferSize   = tagSize - sizeof(Property);
+88:     header->tagRequestResponse = 0;
+89: 
+90:     return tagSize;
+91: }
+92: 
+93: bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
+94: {
+95:     if ((tags == nullptr) || (tagsSize < sizeof(PropertySimple)))
+96:         return false;
+97: 
+98:     unsigned bufferSize = sizeof(MailboxBuffer) + tagsSize + sizeof(uint32);
+99:     if ((bufferSize & 3) != 0)
+100:         return false;
+101: 
+102:     MailboxBuffer *buffer = reinterpret_cast<MailboxBuffer *>(MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox));
 103: 
-104:     unsigned bufferSize = sizeof(MailboxBuffer) + tagsSize + sizeof(uint32);
-105:     if ((bufferSize & 3) != 0)
-106:         return false;
+104:     buffer->bufferSize  = bufferSize;
+105:     buffer->requestCode = RPI_MAILBOX_REQUEST;
+106:     memcpy(buffer->tags, tags, tagsSize);
 107: 
-108:     MailboxBuffer *buffer = reinterpret_cast<MailboxBuffer *>(MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox));
-109: 
-110:     buffer->bufferSize  = bufferSize;
-111:     buffer->requestCode = RPI_MAILBOX_REQUEST;
-112:     memcpy(buffer->tags, tags, tagsSize);
-113: 
-114:     uint32 *endTag = reinterpret_cast<uint32 *>(buffer->tags + tagsSize);
-115:     *endTag        = static_cast<uint32>(PropertyID::PROPTAG_END);
-116: 
-117:     DataSyncBarrier();
+108:     uint32 *endTag = reinterpret_cast<uint32 *>(buffer->tags + tagsSize);
+109:     *endTag        = static_cast<uint32>(PropertyID::PROPTAG_END);
+110: 
+111:     DataSyncBarrier();
+112: 
+113:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(buffer));
+114:     if (m_mailbox.WriteRead(bufferAddress) != bufferAddress)
+115:     {
+116:         return false;
+117:     }
 118: 
-119:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(buffer));
-120:     if (m_mailbox.WriteRead(bufferAddress) != bufferAddress)
-121:     {
-122:         return false;
-123:     }
-124: 
-125:     DataMemBarrier();
-126: 
-127:     if (buffer->requestCode != RPI_MAILBOX_RESPONSE_SUCCESS)
-128:     {
-129:         return false;
-130:     }
-131: 
-132:     memcpy(tags, buffer->tags, tagsSize);
-133: 
-134:     return true;
-135: }
-136: 
-137: } // namespace baremetal
+119:     DataMemBarrier();
+120: 
+121:     if (buffer->requestCode != RPI_MAILBOX_RESPONSE_SUCCESS)
+122:     {
+123:         return false;
+124:     }
+125: 
+126:     memcpy(tags, buffer->tags, tagsSize);
+127: 
+128:     return true;
+129: }
 ```
 
-- Line 49-53: We declare a structure to hold the minimum property tag, which holds a single 32 bit value in the tag buffer.
-This will be used for sanity checks on the tag sizes
-- Line 55-58: We implement the `RPIPropertiesInterface` constructor. This is quite straightforward
-- Line 60-73: We implement the `GetTag()` method.
-  - Line 62-63: We fill in the tag data, and return false if the sanity check fails
-  - Line 65-70: We request the property, which will return true if successful. If this fails, we return false
-  - Line 72: We check whether the tag result is as expected
-- Line 75-84: We implement the private `CheckTagResult()` method
-  - Line 77: We cast the tag pointer to a `Property` struct so we can evaluate it easily
-  - Line 79-80: We check that bit 31 on the tag request / response field is set. This flags successful handling of the tag
-  - Line 82-83: We check that the size returned in the tag request / response field is not zero
-- Line 86-97: We implement the private `FillTag()` method
-  - Line 88-89: We do a sanity check that the tag pointer is not null, and the size is at least the minimum. If not, we return false
-  - Line 91: We cast the tag pointer to a `Property` struct so we can evaluate it easily
-  - Line 92: We set the tagID
-  - Line 93: We set the tag buffer size (which is the size of the tag - the header size)
-  - Line 94: We set the tag request code
-- Line 99-135: We implement the private `GetTags()` method
-  - Line 101-102: We do a sanity check that the tag pointer is not null, and the size is at least the minimum. If not, we return false
-  - Line 104: We calculate the size of the mailbox buffer (in this case the size of the mailbox buffer header, the size of the property tag we wish to rqeuest, and the end tag size)
-  - Line 105-106: We do a sanity check that the mailbox buffer size is a multiple of 4. If not, we return false
-  - Line 108: We retrieve the coherent page for the mailbox, and cast it to a `MailboxBuffer` for easy manipulation
-  - Line 110: We set the mailbox buffer size
-  - Line 111: We set the mailbox request code
-  - Line 112: We copy the contents of the tag we pass in to the mailbox buffer
-  - Line 114: We calculate the address just after the tag, and cast it to a 32 bit unsigned int pointer
-  - Line 115: We set the end tag ID
-  - Line 116: We perform a sync using `DataSyncBarrier()` as before
-  - Line 119: We convert the mailbox buffer address to VC address space as before
-  - Line 120-123: We can `WriteRead()` on the mailbox, and check the return value. If not the same as the address we passed in, we return false
-  - Line 125: We perform a sync using `DataMemBarrier()` as before
-  - Line 127-130: We check that the requestCode is equal to success `0x80000000`, and return false if not
-  - Line 132: We copy the tag contents back to the tag
+- Line 49-52: We implement the `RPIPropertiesInterface` constructor. This is quite straightforward
+- Line 54-67: We implement the `GetTag()` method.
+  - Line 56-57: We fill in the tag data, and return false if the sanity check fails
+  - Line 59-64: We request the property, which will return true if successful. If this fails, we return false
+  - Line 66: We check whether the tag result is as expected
+- Line 69-78: We implement the private `CheckTagResult()` method
+  - Line 71: We cast the tag pointer to a `Property` struct so we can evaluate it easily
+  - Line 73-74: We check that bit 31 on the tag request / response field is set. This flags successful handling of the tag
+  - Line 76-77: We check that the size returned in the tag request / response field is not zero
+- Line 80-91: We implement the private `FillTag()` method
+  - Line 82-83: We do a sanity check that the tag pointer is not null, and the size is at least the minimum. If not, we return false
+  - Line 85: We cast the tag pointer to a `Property` struct so we can evaluate it easily
+  - Line 86: We set the tagID
+  - Line 87: We set the tag buffer size (which is the size of the tag - the header size)
+  - Line 88: We set the tag request code
+- Line 93-129: We implement the private `GetTags()` method
+  - Line 95-96: We do a sanity check that the tag pointer is not null, and the size is at least the minimum. If not, we return false
+  - Line 98: We calculate the size of the mailbox buffer (in this case the size of the mailbox buffer header, the size of the property tag we wish to rqeuest, and the end tag size)
+  - Line 99-100: We do a sanity check that the mailbox buffer size is a multiple of 4. If not, we return false
+  - Line 102: We retrieve the coherent page for the mailbox, and cast it to a `MailboxBuffer` for easy manipulation
+  - Line 104: We set the mailbox buffer size
+  - Line 105: We set the mailbox request code
+  - Line 106: We copy the contents of the tag we pass in to the mailbox buffer
+  - Line 108: We calculate the address just after the tag, and cast it to a 32 bit unsigned int pointer
+  - Line 109: We set the end tag ID
+  - Line 110: We perform a sync using `DataSyncBarrier()` as before
+  - Line 113: We convert the mailbox buffer address to VC address space as before
+  - Line 114-117: We can `WriteRead()` on the mailbox, and check the return value. If not the same as the address we passed in, we return false
+  - Line 119: We perform a sync using `DataMemBarrier()` as before
+  - Line 121-124: We check that the requestCode is equal to success `0x80000000`, and return false if not
+  - Line 126: We copy the tag contents back to the tag
 
 As you can see, we use a function `memcpy()` here to copy data, which is a standard C function. However, we need to implement it.
 

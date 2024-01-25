@@ -15,6 +15,25 @@ function(display_list text)
     message(STATUS ${text} ${list_str})
 endfunction()
 
+function(get_git_tag out)
+    if (UNIX)
+        find_package(Git)
+    else()
+        find_program(GIT_EXECUTABLE git PATHS "C:/Program Files/Git/bin")
+    endif()
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --match "[0-9]*.[0-9]*.[0-9]*" --tags --abbrev=5 HEAD
+        RESULT_VARIABLE RESULT
+        OUTPUT_VARIABLE OUTPUT
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "OUTPUT=${OUTPUT} RESULT=${RESULT}")
+    if (${RESULT} EQUAL 0)
+        set(${out} "${OUTPUT}" PARENT_SCOPE)
+    else()
+        set(${out} "" PARENT_SCOPE)
+    endif()
+endfunction()
+
 function(parse_version version_number version_major version_minor version_level version_build)
     if ("${${version_number}}" STREQUAL "")
         set(${version_number} "0.0.0.0" PARENT_SCOPE)
@@ -46,7 +65,6 @@ function(parse_version version_number version_major version_minor version_level 
     endif()
     set(${version_build} "${VERSION_BUILD}" PARENT_SCOPE)
     
-    message(STATUS "Version ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD}")
     if ("${VERSION_MAJOR}" STREQUAL "" OR
         "${VERSION_MINOR}" STREQUAL "" OR
         "${VERSION_LEVEL}" STREQUAL "" OR

@@ -162,7 +162,6 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: f:\Projects\Private\baremetal.github\code\libraries\baremetal\CMakeLists.txt
 46: set(PROJECT_INCLUDES_PUBLIC
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -659,7 +658,7 @@ File: code/applications/demo/src/main.cpp
 
 #### System.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_SYSTEMCPP}
 
-As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly checking the port over, with strange effects.
+As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly changing the port over, with strange effects.
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp

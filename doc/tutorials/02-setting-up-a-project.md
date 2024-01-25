@@ -109,9 +109,9 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
 4:     if (CMAKE_HOST_UNIX)
-5:         set(TOOLCHAIN_ROOT "/opt/toolchains/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf")
+5:         set(TOOLCHAIN_ROOT "/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf")
 6:     else()
-7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf")
+7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf")
 8:     endif()
 9: else()
 10:     set(TOOLCHAIN_ROOT $ENV{BAREMETAL_TOOLCHAIN_ROOT})
@@ -194,9 +194,9 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
 4:     if (CMAKE_HOST_UNIX)
-5:         set(TOOLCHAIN_ROOT "/home/rene/toolchains/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf")
+5:         set(TOOLCHAIN_ROOT "/home/rene/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf")
 6:     else()
-7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf")
+7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf")
 8:     endif()
 9: else()
 10:     set(TOOLCHAIN_ROOT $ENV{BAREMETAL_TOOLCHAIN_ROOT})

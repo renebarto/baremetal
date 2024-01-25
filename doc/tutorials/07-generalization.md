@@ -531,7 +531,8 @@ File: code/libraries/baremetal/src/UART1.cpp
 
 #### System.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMH}
 
-We update System to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor:
+We update System to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor.
+Also, we will need to make `Halt()` and `Reboot()` non-static members, as they will need to use the memory access reference.
 Update the file `code/libraries/baremetal/include/baremetal/System.h`.
 
 ```cpp
@@ -553,7 +554,9 @@ File: code/libraries/baremetal/include/baremetal/System.h
 58: public:
 59:     // Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
 60:     System(IMemoryAccess &memoryAccess);
-
+61: 
+62:     [[noreturn]] static void Halt();
+63:     [[noreturn]] static void Reboot();
 ...
 ```
 

@@ -27,6 +27,7 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
@@ -50,6 +51,7 @@ set(PROJECT_SOURCES
 
 set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h

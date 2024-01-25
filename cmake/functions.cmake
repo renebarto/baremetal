@@ -26,7 +26,6 @@ function(get_git_tag out)
         OUTPUT_VARIABLE OUTPUT
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "OUTPUT=${OUTPUT} RESULT=${RESULT}")
     if (${RESULT} EQUAL 0)
         set(${out} "${OUTPUT}" PARENT_SCOPE)
     else()
@@ -38,33 +37,33 @@ function(parse_version version_number version_major version_minor version_level 
     if ("${${version_number}}" STREQUAL "")
         set(${version_number} "0.0.0.0" PARENT_SCOPE)
     endif()
-    string(REPLACE "." ";" MSI_VERSION_PARTS "${${version_number}}")
-    LIST(LENGTH MSI_VERSION_PARTS MSI_NUM_PARTS)
+    string(REPLACE "." ";" VERSION_PARTS "${${version_number}}")
+    LIST(LENGTH VERSION_PARTS VERSION_NUM_PARTS)
 
     set(VERSION_MAJOR 0)
-    if (MSI_NUM_PARTS GREATER_EQUAL 1)
-        list(GET MSI_VERSION_PARTS 0 VERSION_MAJOR)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 1)
+        list(GET VERSION_PARTS 0 VERSION_MAJOR)
     endif()
     set(${version_major} "${VERSION_MAJOR}" PARENT_SCOPE)
 
     set(VERSION_MINOR 0)
-    if (MSI_NUM_PARTS GREATER_EQUAL 2)
-        list(GET MSI_VERSION_PARTS 1 VERSION_MINOR)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 2)
+        list(GET VERSION_PARTS 1 VERSION_MINOR)
     endif()
     set(${version_minor} "${VERSION_MINOR}" PARENT_SCOPE)
 
     set(VERSION_LEVEL 0)
-    if (MSI_NUM_PARTS GREATER_EQUAL 3)
-        list(GET MSI_VERSION_PARTS 2 VERSION_LEVEL)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 3)
+        list(GET VERSION_PARTS 2 VERSION_LEVEL)
     endif()
     set(${version_level} "${VERSION_LEVEL}" PARENT_SCOPE)
 
     set(VERSION_BUILD 0)
-    if (MSI_NUM_PARTS GREATER_EQUAL 4)
-        list(GET MSI_VERSION_PARTS 3 VERSION_BUILD)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 4)
+        list(GET VERSION_PARTS 3 VERSION_BUILD)
     endif()
     set(${version_build} "${VERSION_BUILD}" PARENT_SCOPE)
-    
+
     if ("${VERSION_MAJOR}" STREQUAL "" OR
         "${VERSION_MINOR}" STREQUAL "" OR
         "${VERSION_LEVEL}" STREQUAL "" OR
@@ -171,7 +170,7 @@ function(create_image target image project)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
-    add_custom_target(${target} ALL DEPENDS 
+    add_custom_target(${target} ALL DEPENDS
         ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
         )
 endfunction()

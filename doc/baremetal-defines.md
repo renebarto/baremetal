@@ -71,4 +71,4 @@ Determines type of platform to build for:
 
 Determines whether to use BCM2835 System Timer instead of ARM timer:
 - not defined: User ARM timer
-- defined: USe BCM2835 System Timer
+- defined: Use BCM2835 System Timer

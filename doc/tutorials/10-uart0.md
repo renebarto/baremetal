@@ -22,11 +22,11 @@ We'll first start by defining a common interface for UART0 and UART1, so that we
 We will then add functionality for setting the UART clock.
 Finally we will add and implement UART0.
 
-### Defining a common interface - Step 1 {#TUTORIAL_10_UART0_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1}
+## Defining a common interface - Step 1 {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1}
 
 In order to be able to use any of UART0 and UART1 for e.g. logging, we need to define a common abstract interface.
 
-### CharDevice.h {#TUTORIAL_10_UART0_UART0_CHARDEVICEH}
+### CharDevice.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_CHARDEVICEH}
 
 Create the file `code/libraries/baremetal/include/baremetal/CharDevice.h`
 
@@ -96,7 +96,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 - Line 52: We declare a pure virtual method `Read()` like we did for UART1
 - Line 54: We declare a pure virtual method `Write()` like we did for UART1
 
-### UART1.h {#TUTORIAL_10_UART0_UART0_UART1H}
+### UART1.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UART1H}
 
 We will now derive `UART1` from our new `CharDevice` interface.
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
@@ -154,7 +154,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 
 The code for UART1 does not need any changes.
 
-### Update project configuration {#TUTORIAL_10_UART0_UART0_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -189,7 +189,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_10_UART0_UART0_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

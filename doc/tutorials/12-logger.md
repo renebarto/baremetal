@@ -32,13 +32,13 @@ Also, we will need a way to retrieve the current time.
 
 So, all in all, quite some work to do.
 
-### Console - Step 1 {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1}
+## Console - Step 1 {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1}
 
 The first step we need to take is get hold of a console, depending on what is set as the default.
 We will add a definition in the root CMake file to select whether this is is UART0 or UART1, and retrieve a console based on this.
 The console will have some additional functionality, such as enabling the use of ANSI colors.
 
-#### CMakeSettings.json {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_CMAKESETTINGSJSON}
+### CMakeSettings.json {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_CMAKESETTINGSJSON}
 
 We'll start by adding the option for a default console.
 Were going to add two variables to CMake:
@@ -91,7 +91,7 @@ File: CMakeSettings.json
 
 In other words, in all configurations we will add `-DBAREMETAL_CONSOLE_UART0=ON` to make UART0 the default console.
 
-#### Root CMake file {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_ROOT_CMAKE_FILE}
+### Root CMake file {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_ROOT_CMAKE_FILE}
 
 Now, we'll define the new variables, and create definitions for our code accordingly.
 
@@ -131,7 +131,7 @@ File: CMakeLists.txt
 - Line 74-76: If `BAREMETAL_CONSOLE_UART1` is set to on, We add the definition `BAREMETAL_CONSOLE_UART1`
 - Line 227-233: We also print the current settings for all relevant variables
 
-#### Console.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_CONSOLEH}
+### Console.h {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_CONSOLEH}
 
 We will now add the console class declaration.
 
@@ -295,7 +295,7 @@ File: code/libraries/baremetal/include/baremetal/Console.h
   - Line 125: We declare the method `WriteChar()` to write a character to the console
 - Line 130: We declare the accessor for the `Console` class. This will create an instance if needed, initialize it, and return a reference.
 
-#### Console.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_CONSOLECPP}
+### Console.cpp {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_CONSOLECPP}
 
 Create the file `code/libraries/baremetal/src/Console.cpp`:
 
@@ -750,7 +750,7 @@ Notice how we define a static UART0 instance when `BAREMETAL_CONSOLE_UART0` is d
 otherwise we define a static UART1 instance when `BAREMETAL_CONSOLE_UART1` is defined, 
 and if both are not defined, we set the console to a nullptr device.
 
-#### Serialization.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_SERIALIZATIONH}
+### Serialization.h {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_SERIALIZATIONH}
 
 We need to add serialization of an 8 bit unsigned integer.
 Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
@@ -769,7 +769,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 
 - Line 49: Declares a function similar to the existing two, for a 8 bit unsigned integer
 
-#### Serialization.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_SERIALIZATIONCPP}
+### Serialization.cpp {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_SERIALIZATIONCPP}
 
 Of course we also need to add the implementation for the newly added function.
 
@@ -804,7 +804,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 
 As you can see, it again re-uses the `SerializeInternal()` function.
 
-#### main.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_MAINCPP}
+### Update application code {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_UPDATE_APPLICATION_CODE}
 
 Let's use the console now.
 
@@ -870,7 +870,7 @@ File: code/applications/demo/src/main.cpp
 - Line 33: We again print the string through the console, in red this time
 - Line 36-45: We again use the console instead of the UART0 instance
 
-#### System.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_SYSTEMCPP}
+### System.cpp {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_SYSTEMCPP}
 
 As we switch the main application to the console, we should also switch the code in `System.cpp` to the console, otherwise we will be suddenly checking the port over, with strange effects.
 Update the file `code/libraries/baremetal/src/System.cpp`
@@ -979,7 +979,7 @@ Note that line number have changed due to the `Doxygen` comments that were added
 - Line 140: We write to the console, in cyan color
 - Line 190: We write to the console, in cyan color
 
-#### Update project configuration {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -1036,7 +1036,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-#### Configuring, building and debugging {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_CONSOLE__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1044,7 +1044,7 @@ The application will now print output in color:
 
 <img src="images/tutorial-12-console.png" alt="Console output" width="400"/>
 
-### Printing a formatted string - Step 2 {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2}
+## Printing a formatted string - Step 2 {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2}
 
 In order to introduce the actual logging functionality, we would like to be able to print using variable arguments, 
 much like the standard C `printf()` function.
@@ -1055,7 +1055,7 @@ We will then need to implement formatting of strings to a buffer, using format s
 We'll also want to support printing version information, so we'll provide for a way to pass on the version in the build, and make a string out of it.
 Finally we can then add the logger class.
 
-#### StdArg.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_STDARGH}
+### StdArg.h {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_STDARGH}
 
 So let's add a header to act as the standard C library's `stdarg.h` would.
 Create the file `code/libraries/baremetal/include/baremetal/StdArg.h`
@@ -1128,7 +1128,7 @@ File: code/libraries/baremetal/include/baremetal/StdArg.h
 - Line 54: We define `va_end` as a built-in version
 - Line 56: We define `va_arg` as a built-in version
 
-#### Format.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_FORMATH}
+### Format.h {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_FORMATH}
 
 We'll define two variants of a formatting function for printing to a string with variable arguments.
 One using the ellipsis argument `...`, the other with a `va_list` argument.
@@ -1188,7 +1188,7 @@ File: code/libraries/baremetal/include/baremetal/Format.h
 50: } // namespace baremetal
 ```
 
-#### Format.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_FORMATCPP}
+### Format.cpp {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_FORMATCPP}
 
 Now we will implement the formatting functions.
 Be aware that this is a poor man's implementation, but it will do for now.
@@ -1583,12 +1583,14 @@ Note that this is an addition to `printf()` behaviour
     - Line 327-337: If the format character is a `p` we print the value as a pointer, meaning it is printed as a 64 bit unsigned integer
   - Line 345-348: If the format character is not `%` we simply add the character
 
-### Adding version information {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_VERSION_INFORMATION}
+## Adding the Logger class - Step 3 {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3}
+
+### Adding version information {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION}
 
 In order to be able to print the version of our code, we will add some infrastructure to CMake, to pass definitions on to our code.
 We will extract the latest tag from our repository, and use that as the version number. If there is no tag, we will assume the version is `0.0.0`.
 
-#### Updating the root CMake file {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_VERSION_INFORMATION_UPDATING_THE_ROOT_CMAKE_FILE}
+#### Updating the root CMake file {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_UPDATING_THE_ROOT_CMAKE_FILE}
 
 We'll add reading the most recent tag from `Git`, converting it to a version number, and then splitting the version number into components.
 Additionaly, we'll add a variable to control whether logging is done using ANSI color coding.
@@ -1660,7 +1662,7 @@ The components are stored respectively in variables `VERSION_MAJOR`, `VERSION_MI
 - Line 89-99: We add compiler definitions using the version components, the composed version, and the ANSI color log output selection
 - Line 263-268: We print the variable settings for ANSI color log output, and version information
 
-#### Adding functionality to the CMake utility file {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_VERSION_INFORMATION_ADDING_FUNCTIONALITY_TO_THE_CMAKE_UTILITY_FILE}
+#### Adding functionality to the CMake utility file {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_ADDING_FUNCTIONALITY_TO_THE_CMAKE_UTILITY_FILE}
 
 We just used two utility functions that still need to be defined.
 Update the file `cmake/functions.cmake`
@@ -1749,7 +1751,7 @@ If the number of parts is at least 3, we get the third item in the list and stor
 If the number of parts is at least 4, we get the fourth item in the list and stored it in variable `VERSION_BUILD` (again we use `PARENT_SCOPE`)
   - Line 67-72: We perform a sanity check on the parts, and print an error message if one of them is empty
 
-#### Version.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_VERSION_INFORMATION_VERSIONH}
+#### Version.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_VERSIONH}
 
 Now that we have set compiler definitions for the version, we can use them in code.
 Create the file `code/libraries/baremetal/include/baremetal/Version.h`
@@ -1818,7 +1820,7 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 - Line 51: We declare a function `SetupVersion()` to build the version string
 - Line 52: We declare a function `GetVersion()` to return the version string
 
-#### Version.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_VERSION_INFORMATION_VERSIONCPP}
+#### Version.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_VERSIONCPP}
 
 We need to implement the functions we just declared.
 Create the file `code/libraries/baremetal/src/Version.cpp`
@@ -1887,13 +1889,9 @@ File: code/libraries/baremetal/src/Version.cpp
 - Line 48-51: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
 - Line 53-56: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
 
-### Adding the Logger class - Step 3 {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3}
+#### Logger.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERH}
 
 We'll now add the `Logger` class, which can be used to log to the console, at different log levels.
-
-#### Logger.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_LOGGERH}
-
-We will now add the `Logger` class.
 Create the file `code/libraries/baremetal/include/baremetal/Logger.h`
 
 ```cpp
@@ -2041,7 +2039,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 - Line 115: The macro `LOG_DEBUG` writes to the log at level `Debug`
 - Line 118: The macro `LOG` writes to the log at the specified level, with a single string as the argument
 
-#### Logger.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_LOGGERCPP}
+#### Logger.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERCPP}
 
 We will add the implementation for the `Logger` class.
 Create the file `code/libraries/baremetal/src/Logger.cpp`
@@ -2276,9 +2274,9 @@ We'll add the timer method in a minute
 - Line 199-205: We implement the friend function `GetLogger()` to retrieve the singleton instance of the logger.
 As a default, we set the maximum log level to `Debug` meaning that everything is logged. We also use the singleton `Timer` instance
 
-### Updating the Timer class {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATING_THE_TIMER_CLASS}
+### Updating the Timer class {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS}
 
-#### Timer.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATING_THE_TIMER_CLASS_TIMERH}
+#### Timer.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS_TIMERH}
 
 We need to add the method `GetTimeString()` to the `Timer` class.
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
@@ -2296,7 +2294,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
 ```
 
-#### Timer.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATING_THE_TIMER_CLASS_TIMERCPP}
+#### Timer.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS_TIMERCPP}
 
 We then implement method `GetTimeString()` for the `Timer` class.
 Update the file `code/libraries/baremetal/src/Timer.cpp`
@@ -2322,9 +2320,9 @@ File: code/libraries/baremetal/src/Timer.cpp
 
 So for now we simply return an empty string. Updating the clock will take some more effort, which will be done later.
 
-### Using the Logger class {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_USING_THE_LOGGER_CLASS}
+### Using the Logger class {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_USING_THE_LOGGER_CLASS}
 
-#### System.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_USING_THE_LOGGER_CLASS_SYSTEMCPP}
+#### System.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_USING_THE_LOGGER_CLASS_SYSTEMCPP}
 
 We will be using the logger in the `sysinit()` function, to instanntiate it and print the first log message.
 Also, we will print logging info in `Halt()` and `Reboot()`.
@@ -2373,7 +2371,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 196: We instantiate  the `Logger` singleton
 - Line 197: We use `LOG_INFO` to log the message `Starting up`
 
-### Update the application code {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATE_THE_APPLICATION_CODE}
 
 We can now also update the application to use the logging macros.
 Update the file `code/applications/demo/src/main.cpp`
@@ -2441,7 +2439,7 @@ Notice that we use the format string `%016llx` to write a zero leading 16 digit 
 
 Notice also that we keep using the console, as we need to read and write characters from and to the console.
 
-#### Update project configuration {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATE_THE_APPLICATION_CODE_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -2505,7 +2503,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-#### Configuring, building and debugging {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATE_THE_APPLICATION_CODE_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -2513,13 +2511,13 @@ The application will now print output in color, depending on the log severity le
 
 <img src="images/tutorial-12-logger.png" alt="Console output" width="600"/>
 
-### Assertion - Step 4 {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ASSERTION__STEP_4}
+## Assertion - Step 4 {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4}
 
 It is handy to have a function or macro available to check for a condition, and panic if this is not fulfilled. Very similar to the standard C assert() macro.
 
 So let's add this, and log a Panic message if the condition check fails.
 
-#### Assert.h {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ASSERTION__STEP_4_ASSERTH}
+### Assert.h {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_ASSERTH}
 
 Create the file `code/libraries/baremetal/include/baremetal/Assert.h`
 
@@ -2605,7 +2603,7 @@ This will call the assertion failure handler, which log a `Panic` message and ha
 - Line 60: We declare the function `SetAssertionCallback()` which sets a custom assertion failure handler
 - Line 66: We define the `assert()` macro. This will invoke the assertion failure function `AssertionFailed()` in case the assertion fails
 
-#### Assert.cpp {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_ASSERTION__STEP_4_ASSERTCPP}
+### Assert.cpp {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_ASSERTCPP}
 
 Create the file `code/libraries/baremetal/src/Assert.cpp`
 
@@ -2713,7 +2711,7 @@ This will call the set assertion failure handler function
 - Line 79-82: We implement the function `ResetAssertionCallback()` which will reset the assertion failure handler function to default
 - Line 88-91: We implement the function `SetAssertionCallback()` which will set a custom assertion failure handler function
 
-#### Macros.h
+### Macros.h {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_MACROSH}
 
 We use the construct `likely()` in the `assert()` macro. This needs to be defined.
 Update the file `code/libraries/baremetal/include/baremetal/Macros.h`
@@ -2731,7 +2729,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 
 These macros make use of builtin functionality in the compiler to influence the branch prediction.
 
-#### Update application code
+### Update application code {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_UPDATE_APPLICATION_CODE}
 
 Let us for the sake of demonstration add a failing assertion to the application code.
 Update the file `code/applications/demo/src/main.cpp`
@@ -2796,7 +2794,7 @@ File: code/applications/demo/src/main.cpp
 - Line 41: We print a different message, adding the input `p` to force a panic
 - Line 48-49: If `p` was pressed, we perform a failed assertion
 
-#### Update project configuration {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATE_THE_APPLICATION_CODE_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -2862,7 +2860,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-#### Configuring, building and debugging {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER_UPDATE_THE_APPLICATION_CODE_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

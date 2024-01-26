@@ -29,14 +29,14 @@ A logical location for the coherent page is a bit after the last address used by
 Let's first revisit the memory map and add the coherent page information. Then we will add a mamory manager, that for now will only hand out coherent memory pages, and after that we can start using the mailbox.
 We'll finalize by using the mailbox to retrieve board information, such as board type, serial number and memory size.
 
-### Updating the memory map - Step 1 {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1}
+## Updating the memory map - Step 1 {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1}
 
 We need to update the memory map. We discussed the memory map before, in [05-console-uart1](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_3).
 The image below hopefully gives a clearer view on the memory map.
 <img src="images/memory-map.png" alt="Memory map" width="800"/>
 So, we need to add the coherent region part.
 
-### MemoryMap.h {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_MEMORYMAPH}
+### MemoryMap.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_MEMORYMAPH}
 
 Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 
@@ -57,9 +57,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 85: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
 
-### Update the application code {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE}
 
-#### Serialization.h {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
+#### Serialization.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
 
 In order to show which exact addresses we have, let's print them in our application.
 However, we can write characters and strings to the console, but how about integers?
@@ -128,7 +128,7 @@ The value will take `width` characters at most (if zero the space needed is calc
 If `showBase` is true, the base prefix will be added (0b for `base` = 2, 0 for `base` = 8, 0x for `base` = 16).
 If the size of the type would require more characters than strictly needed for the value, and `leadingZeros` is true, the value is prefix with '0' characters.
 
-#### Serialization.cpp {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
+#### Serialization.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
 
 We need to implement the `Serialize` function. As we need to write into a fixed size buffer, we need to check whether what we need to write fits.
 Create the file `code/libraries/baremetal/src/Serialization.cpp`
@@ -291,7 +291,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
   - Line 98-138: We print the digits, adding the prefix, and taking into account leading zeros
   - Line 139: We end the string with a null character
 
-#### main.cpp {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATE_THE_APPLICATION_CODE_MAINCPP}
+#### main.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Now we can update the application code and print the memory map.
 Update the file `code/applications/demo/src/main.cpp`
@@ -442,7 +442,7 @@ File: code/applications/demo/src/main.cpp
 
 The code should speak for itself.
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 Update the file `code/libraries/baremetal/CMakeLists.txt`
@@ -485,7 +485,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_THE_RASPBERRY_PI_MAILBOX_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

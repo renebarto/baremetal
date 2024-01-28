@@ -18,6 +18,32 @@
  - [RP1 peripherals specification](pdf/rp1-peripherals.pdf)
  - [VideoCore IV specification](pdf/videocore-iv-3d-architecture-reference-guide.pdf)
 
+## SoC for each board {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD}
+
+The Raspberry Pi and Odroid boards uses different types and versions of SoC (System-on-Chip)
+
+| Board                          | SoC       | Processor              | Number of cores |
+|--------------------------------|-----------|------------------------|-----------------|
+| Raspberry Pi 1A                | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi 1A+               | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi 1B                | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi 1B+               | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi Zero              | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi Zero W            | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi Compute Module 1  | BCM2835   | ARM1176JZF-S           | 1 |
+| Raspberry Pi 2B                | BCM2836   | ARM Cortex-A7          | 4 |
+| Raspberry Pi 3B                | BCM2837   | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi 2B (later models) | BCM2837   | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi Compute Module 3  | BCM2837   | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi 3A+               | BCM2837B0 | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi 3B+               | BCM2837B0 | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi Compute Module 3+ | BCM2837B0 | ARM Cortex A53 (ARMv8) | 4 |
+| Raspberry Pi 4B                | BCM2711   | ARM Cortex A72 (ARMv8) | 4 |
+| Raspberry Pi 400               | BCM2711   | ARM Cortex A72 (ARMv8) | 4 |
+| Raspberry Pi Compute Module 4  | BCM2711   | ARM Cortex A72 (ARMv8) | 4 |
+| Raspberry Pi 5B                | BCM2712   | ARM Cortex A76 (ARMv8) | 4 |
+
+Built around a quad-core Arm Cortex-A76
 ## Startup {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP}
 
 ### Start of execution, loading image {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_START_OF_EXECUTION_LOADING_IMAGE}
@@ -66,6 +92,7 @@ Every peripheral has a slot of memory mapped I/O (MMIO). The start address depen
 | BCM2836       | 0x3F000000               | 0x01000000
 | BCM2837       | 0x3F000000               | 0x01000000
 | BCM2711       | 0xFE000000               | 0x01800000
+| BCM2712       | 0xFE000000               | 0x01800000
  
 Peripheral data is written in 32 bit words, aligned on 4 bytes.
 Every peripheral has control/status and data words.

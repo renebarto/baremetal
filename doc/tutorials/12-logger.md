@@ -12,7 +12,7 @@ In the same way, the project names are adapted to make sure there are no conflic
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-12.a`
 - an application `output/Debug/bin/12-logger.elf`
-- an image in `deploy/Debug/12-mailbox-image`
+- an image in `deploy/Debug/12-logger-image`
 
 ## Adding a logger {#TUTORIAL_12_LOGGER_ADDING_A_LOGGER}
 
@@ -1632,7 +1632,7 @@ File: CMakeLists.txt
 89: set(DEFINES_C
 90:     PLATFORM_BAREMETAL
 91:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-92:     USE_LOG_COLORS=${BAREMETAL_COLOR_OUTPUT}
+92:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
 93:     USE_PHYSICAL_COUNTER
 94:     BAREMETAL_MAJOR=${VERSION_MAJOR} 
 95:     BAREMETAL_MINOR=${VERSION_MINOR} 
@@ -2208,7 +2208,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 160:     strncat(buffer, sourceString, BufferSize);
 161:     strncat(buffer, "\n", BufferSize);
 162: 
-163: #if USE_LOG_COLORS
+163: #if BAREMETAL_COLOR_OUTPUT
 164:     switch (severity)
 165:     {
 166:     case LogSeverity::Panic:
@@ -2269,7 +2269,7 @@ File: code/libraries/baremetal/src/Logger.cpp
   - Line 147-157: If a `Timer` was passed in, we request the current time, and print it into the line buffer.
 We'll add the timer method in a minute
   - Line 159-161: We add the message, source information and end of line to the buffer
-  - Line 163-187: Depending on whether we defined `USE_LOG_COLORS`, we either simply print the buffer without color, or we use a severity level specific color
+  - Line 163-187: Depending on whether we defined `BAREMETAL_COLOR_OUTPUT`, we either simply print the buffer without color, or we use a severity level specific color
   - Line 189-192: If the severity level is `Panic` we halt the system
 - Line 199-205: We implement the friend function `GetLogger()` to retrieve the singleton instance of the logger.
 As a default, we set the maximum log level to `Debug` meaning that everything is logged. We also use the singleton `Timer` instance
@@ -2870,5 +2870,5 @@ When pressing the `p` key, the application will assert and halt:
 
 We can now start adding sanity checks that fail assertion if not successful.
 
-Next: [13-](13-.md)
+Next: [13-board-information](13-board-information.md)
 

@@ -61,6 +61,7 @@ endif()
 option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
 option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
+option(BAREMETAL_TRACE_ENABLE "Enable debug tracing output" OFF)
 
 message(STATUS "\n** Setting up project **\n--")
 
@@ -84,12 +85,18 @@ if (BAREMETAL_COLOR_LOGGING)
 else ()
     set(BAREMETAL_COLOR_OUTPUT 0)
 endif()
+if (BAREMETAL_TRACE_ENABLE)
+    set(BAREMETAL_TRACE 1)
+else ()
+    set(BAREMETAL_TRACE 0)
+endif()
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
 set(DEFINES_C
     PLATFORM_BAREMETAL
     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-    USE_LOG_COLORS=${BAREMETAL_COLOR_OUTPUT}
+    BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+    BAREMETAL_TRACE=${BAREMETAL_TRACE}
     USE_PHYSICAL_COUNTER
     BAREMETAL_MAJOR=${VERSION_MAJOR}
     BAREMETAL_MINOR=${VERSION_MINOR}
@@ -261,6 +268,7 @@ message(STATUS "-- Kernel load address: ${BAREMETAL_LOAD_ADDRESS}")
 message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
 message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
 message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
+message(STATUS "-- Debug tracing output:${BAREMETAL_TRACE_ENABLE}")
 message(STATUS "-- Version major:       ${VERSION_MAJOR}")
 message(STATUS "-- Version minor:       ${VERSION_MINOR}")
 message(STATUS "-- Version level:       ${VERSION_LEVEL}")

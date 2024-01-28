@@ -11,8 +11,8 @@ In the same way, the project names are adapted to make sure there are no conflic
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-10.a`
-- an application `output/Debug/bin/10-mailbox.elf`
-- an image in `deploy/Debug/10-mailbox-image`
+- an application `output/Debug/bin/10-uart0.elf`
+- an image in `deploy/Debug/10-uart0-image`
 
 ## UART0 {#TUTORIAL_10_UART0_UART0}
 

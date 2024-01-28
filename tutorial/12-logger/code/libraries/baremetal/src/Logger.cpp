@@ -160,7 +160,7 @@ void Logger::WriteV(const char *source, int line, LogSeverity severity, const ch
     strncat(buffer, sourceString, BufferSize);
     strncat(buffer, "\n", BufferSize);
 
-#if USE_LOG_COLORS
+#if BAREMETAL_COLOR_OUTPUT
     switch (severity)
     {
     case LogSeverity::Panic:

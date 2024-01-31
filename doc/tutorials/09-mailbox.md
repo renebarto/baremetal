@@ -33,7 +33,9 @@ We'll finalize by using the mailbox to retrieve board information, such as board
 
 We need to update the memory map. We discussed the memory map before, in [05-console-uart1](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_3).
 The image below hopefully gives a clearer view on the memory map.
+
 <img src="images/memory-map.png" alt="Memory map" width="800"/>
+
 So, we need to add the coherent region part.
 
 ### MemoryMap.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_MEMORYMAPH}
@@ -88,7 +90,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -150,7 +152,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -580,7 +582,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: // 
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -649,7 +651,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: // 
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -832,7 +834,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -925,7 +927,7 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1006,7 +1008,7 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1504,7 +1506,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1705,7 +1707,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2067,7 +2069,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2136,7 +2138,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation

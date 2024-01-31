@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -42,6 +42,7 @@
 #include <baremetal/Logger.h>
 #include <baremetal/System.h>
 
+/// @brief Define log name
 LOG_MODULE("Assert");
 
 namespace baremetal {

@@ -42,17 +42,17 @@ File: CMakeLists.txt
 61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
 63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_ENABLE "Enable debug tracing output" OFF)
+64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
 ...
 83: if (BAREMETAL_COLOR_LOGGING)
 84:     set(BAREMETAL_COLOR_OUTPUT 1)
 85: else ()
 86:     set(BAREMETAL_COLOR_OUTPUT 0)
 87: endif()
-88: if (BAREMETAL_TRACE_ENABLE)
-89:     set(BAREMETAL_TRACE 1)
+88: if (BAREMETAL_TRACE_DEBUG)
+89:     set(BAREMETAL_DEBUG_TRACING 1)
 90: else ()
-91:     set(BAREMETAL_TRACE 0)
+91:     set(BAREMETAL_DEBUG_TRACING 0)
 92: endif()
 93: set(BAREMETAL_LOAD_ADDRESS 0x80000)
 94: 
@@ -60,7 +60,7 @@ File: CMakeLists.txt
 96:     PLATFORM_BAREMETAL
 97:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
 98:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
-99:     BAREMETAL_TRACE=${BAREMETAL_TRACE}
+99:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
 100:     USE_PHYSICAL_COUNTER
 101:     BAREMETAL_MAJOR=${VERSION_MAJOR}
 102:     BAREMETAL_MINOR=${VERSION_MINOR}
@@ -70,14 +70,14 @@ File: CMakeLists.txt
 106:     )
 ...
 270: message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
-271: message(STATUS "-- Debug tracing output:${BAREMETAL_TRACE_ENABLE}")
+271: message(STATUS "-- Debug tracing output:${BAREMETAL_TRACE_DEBUG}")
 ...
 ```
 
-- Line 64: We add the variable `BAREMETAL_TRACE_ENABLE` which will enable debug trace output. It is set to `OFF` by default.
-- Line 88-92: We set variable `BAREMETAL_TRACE` to 1 if `BAREMETAL_TRACE_ENABLE` is `ON, and 0 otherwise
-- Line 99: We set the compiler definition `BAREMETAL_TRACE` to the value of the `BAREMETAL_TRACE` variable
-- Line 271: We print the value of the `BAREMETAL_TRACE` variable
+- Line 64: We add the variable `BAREMETAL_TRACE_DEBUG` which will enable debug trace output. It is set to `OFF` by default.
+- Line 88-92: We set variable `BAREMETAL_DEBUG_TRACING` to 1 if `BAREMETAL_TRACE_DEBUG` is `ON, and 0 otherwise
+- Line 99: We set the compiler definition `BAREMETAL_DEBUG_TRACING` to the value of the `BAREMETAL_DEBUG_TRACING` variable
+- Line 271: We print the value of the `BAREMETAL_TRACE_DEBUG` variable
 
 ### RPIProperties.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESH}
 
@@ -320,7 +320,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 126: 
 127:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_FIRMWARE_REVISION, &tag, sizeof(tag));
 128: 
-129: #if BAREMETAL_TRACE
+129: #if BAREMETAL_DEBUG_TRACING
 130:     LOG_DEBUG("GetFirmwareRevision");
 131: 
 132:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -328,7 +328,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 134:     if (result)
 135:     {
 136:         revision = tag.value;
-137: #if BAREMETAL_TRACE
+137: #if BAREMETAL_DEBUG_TRACING
 138:         LOG_DEBUG("Revision: %08lx", tag.value);
 139: #endif
 140:     }
@@ -348,7 +348,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 154: 
 155:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_MODEL, &tag, sizeof(tag));
 156: 
-157: #if BAREMETAL_TRACE
+157: #if BAREMETAL_DEBUG_TRACING
 158:     LOG_DEBUG("GetBoardModel");
 159: 
 160:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -356,7 +356,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 162:     if (result)
 163:     {
 164:         model = static_cast<BoardModel>(tag.value);
-165: #if BAREMETAL_TRACE
+165: #if BAREMETAL_DEBUG_TRACING
 166:         LOG_DEBUG("Model: %08lx", tag.value);
 167: #endif
 168:     }
@@ -376,7 +376,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 182: 
 183:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_REVISION, &tag, sizeof(tag));
 184: 
-185: #if BAREMETAL_TRACE
+185: #if BAREMETAL_DEBUG_TRACING
 186:     LOG_DEBUG("GetBoardRevision");
 187: 
 188:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -384,7 +384,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 190:     if (result)
 191:     {
 192:         revision = static_cast<BoardRevision>(tag.value);
-193: #if BAREMETAL_TRACE
+193: #if BAREMETAL_DEBUG_TRACING
 194:         LOG_DEBUG("Revision: %08lx", tag.value);
 195: #endif
 196:     }
@@ -404,7 +404,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 210: 
 211:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_MAC_ADDRESS, &tag, sizeof(tag));
 212: 
-213: #if BAREMETAL_TRACE
+213: #if BAREMETAL_DEBUG_TRACING
 214:     LOG_DEBUG("GetBoardMACAddress");
 215: 
 216:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -412,7 +412,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 218:     if (result)
 219:     {
 220:         memcpy(address, tag.address, sizeof(tag.address));
-221: #if BAREMETAL_TRACE
+221: #if BAREMETAL_DEBUG_TRACING
 222:         LOG_DEBUG("Address:");
 223:         GetConsole().Write(address, sizeof(tag.address));
 224: #endif
@@ -433,7 +433,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 239: 
 240:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
 241: 
-242: #if BAREMETAL_TRACE
+242: #if BAREMETAL_DEBUG_TRACING
 243:     LOG_DEBUG("GetBoardSerial");
 244: 
 245:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -441,7 +441,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 247:     if (result)
 248:     {
 249:         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
-250: #if BAREMETAL_TRACE
+250: #if BAREMETAL_DEBUG_TRACING
 251:         LOG_DEBUG("Serial: %016llx", serial);
 252: #endif
 253:     }
@@ -462,7 +462,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 268: 
 269:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_ARM_MEMORY, &tag, sizeof(tag));
 270: 
-271: #if BAREMETAL_TRACE
+271: #if BAREMETAL_DEBUG_TRACING
 272:     LOG_DEBUG("GetARMMemory");
 273: 
 274:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -471,7 +471,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 277:     {
 278:         baseAddress = tag.baseAddress;
 279:         size = tag.size;
-280: #if BAREMETAL_TRACE
+280: #if BAREMETAL_DEBUG_TRACING
 281:         LOG_DEBUG("Base address: %08lx", baseAddress);
 282:         LOG_DEBUG("Size:         %08lx", size);
 283: #endif
@@ -493,7 +493,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 299: 
 300:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_VC_MEMORY, &tag, sizeof(tag));
 301: 
-302: #if BAREMETAL_TRACE
+302: #if BAREMETAL_DEBUG_TRACING
 303:     LOG_DEBUG("GetARMMemory");
 304: 
 305:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -502,7 +502,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 308:     {
 309:         baseAddress = tag.baseAddress;
 310:         size = tag.size;
-311: #if BAREMETAL_TRACE
+311: #if BAREMETAL_DEBUG_TRACING
 312:         LOG_DEBUG("Base address: %08lx", baseAddress);
 313:         LOG_DEBUG("Size:         %08lx", size);
 314: #endif
@@ -525,7 +525,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 331:     tag.clockID = static_cast<uint32>(clockID);
 332:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
 333: 
-334: #if BAREMETAL_TRACE
+334: #if BAREMETAL_DEBUG_TRACING
 335:     LOG_DEBUG("GetClockRate");
 336:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
 337: 
@@ -534,7 +534,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 340:     if (result)
 341:     {
 342:         freqHz = tag.rate;
-343: #if BAREMETAL_TRACE
+343: #if BAREMETAL_DEBUG_TRACING
 344:         LOG_DEBUG("Rate:       %08lx", tag.rate);
 345: #endif
 346:     }
@@ -556,7 +556,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 362:     tag.clockID = static_cast<uint32>(clockID);
 363:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
 364: 
-365: #if BAREMETAL_TRACE
+365: #if BAREMETAL_DEBUG_TRACING
 366:     LOG_DEBUG("GetMeasuredClockRate");
 367:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
 368: 
@@ -565,7 +565,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 371:     if (result)
 372:     {
 373:         freqHz = tag.rate;
-374: #if BAREMETAL_TRACE
+374: #if BAREMETAL_DEBUG_TRACING
 375:         LOG_DEBUG("Rate:       %08lx", tag.rate);
 376: #endif
 377:     }
@@ -603,7 +603,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 - Line 69-77: We declare the tag structure to hold the MAC addres `PropertyMACAddress`
 - Line 82-90: We declare the tag structure to memory information `PropertyMemory`
 - Line 122-143: We implement the member function `GetFirmwareRevision()`.
-Note that debug statements are added, which print more information in case `BAREMETAL_TRACE` is defined
+Note that debug statements are added, which print more information in case `BAREMETAL_DEBUG_TRACING` is defined
 - Line 150-171: We implement the member function `GetBoardModel()`
 - Line 178-199: We implement the member function `GetBoardRevision()`
 - Line 206-228: We implement the member function `GetBoardMACAddress()`
@@ -639,7 +639,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -811,7 +811,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation

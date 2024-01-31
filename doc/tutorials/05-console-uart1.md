@@ -234,7 +234,7 @@ Create the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : ArmInstructions.h
 5: //
@@ -248,7 +248,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: // 
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -759,7 +759,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Macros.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Macros.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : Macros.h
 5: //
@@ -773,7 +773,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -813,7 +813,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Types.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Types.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : Types.h
 5: //
@@ -827,7 +827,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -906,7 +906,7 @@ Create the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : BCMRegisters.h
 5: //
@@ -920,7 +920,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1151,7 +1151,7 @@ Create the file `code/libraries/baremetal/include/baremetal/UART1.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : UART1.h
 5: //
@@ -1165,7 +1165,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1305,7 +1305,7 @@ Create the file `code/libraries/baremetal/src/UART1.cpp`:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : UART1.cpp
 5: //
@@ -1319,7 +1319,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1789,7 +1789,7 @@ The startup code itself will be in the `.init` section
 ```text
 File: baremetal.ld
 1: /*------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : baremetal.ld
 5: //
@@ -1803,7 +1803,7 @@ File: baremetal.ld
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1911,7 +1911,7 @@ This also means we can remove `code/applications/demo/src/start.S`.
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : Startup.S
 5: //
@@ -1927,7 +1927,7 @@ File: code/libraries/baremetal/src/Startup.S
 15: //
 16: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 17: //
-18: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+18: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 19: //
 20: // Permission is hereby granted, free of charge, to any person
 21: // obtaining a copy of this software and associated documentation
@@ -2187,7 +2187,7 @@ Create the file `code/libraries/baremetal/include/baremetal/SysConfig.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/SysConfig.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : SysConfig.h
 5: //
@@ -2201,7 +2201,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2272,7 +2272,7 @@ Create the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 ```cpp
 File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\MemoryMap.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : MemoryMap.h
 5: //
@@ -2286,7 +2286,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\Me
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation

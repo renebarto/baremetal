@@ -770,7 +770,7 @@ This file is named `link.ld` and contains the following:
 ```text
 File: tutorial/02-setting-up-a-project/link.ld
 1: /*------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : link.ld
 5: //
@@ -784,7 +784,7 @@ File: tutorial/02-setting-up-a-project/link.ld
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -908,7 +908,7 @@ The startup code will be stored in the `start.S` assembly file:
 ```assembly
 File: tutorial/02-setting-up-a-project/start.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : start.S
 5: //
@@ -923,7 +923,7 @@ File: tutorial/02-setting-up-a-project/start.S
 14: //
 15: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 16: //
-17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 18: //
 19: // Permission is hereby granted, free of charge, to any person
 20: // obtaining a copy of this software and associated documentation

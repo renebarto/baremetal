@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -126,7 +126,7 @@ bool RPIProperties::GetFirmwareRevision(uint32& revision)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_FIRMWARE_REVISION, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetFirmwareRevision");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -134,7 +134,7 @@ bool RPIProperties::GetFirmwareRevision(uint32& revision)
     if (result)
     {
         revision = tag.value;
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Revision: %08lx", tag.value);
 #endif
     }
@@ -154,7 +154,7 @@ bool RPIProperties::GetBoardModel(BoardModel& model)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_MODEL, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetBoardModel");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -162,7 +162,7 @@ bool RPIProperties::GetBoardModel(BoardModel& model)
     if (result)
     {
         model = static_cast<BoardModel>(tag.value);
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Model: %08lx", tag.value);
 #endif
     }
@@ -182,7 +182,7 @@ bool RPIProperties::GetBoardRevision(BoardRevision& revision)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_REVISION, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetBoardRevision");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -190,7 +190,7 @@ bool RPIProperties::GetBoardRevision(BoardRevision& revision)
     if (result)
     {
         revision = static_cast<BoardRevision>(tag.value);
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Revision: %08lx", tag.value);
 #endif
     }
@@ -210,7 +210,7 @@ bool RPIProperties::GetBoardMACAddress(uint8 address[6])
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_MAC_ADDRESS, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetBoardMACAddress");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -218,7 +218,7 @@ bool RPIProperties::GetBoardMACAddress(uint8 address[6])
     if (result)
     {
         memcpy(address, tag.address, sizeof(tag.address));
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Address:");
         GetConsole().Write(address, sizeof(tag.address));
 #endif
@@ -239,7 +239,7 @@ bool RPIProperties::GetBoardSerial(uint64 &serial)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetBoardSerial");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -247,7 +247,7 @@ bool RPIProperties::GetBoardSerial(uint64 &serial)
     if (result)
     {
         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Serial: %016llx", serial);
 #endif
     }
@@ -268,7 +268,7 @@ bool RPIProperties::GetARMMemory(uint32& baseAddress, uint32& size)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_ARM_MEMORY, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetARMMemory");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -277,7 +277,7 @@ bool RPIProperties::GetARMMemory(uint32& baseAddress, uint32& size)
     {
         baseAddress = tag.baseAddress;
         size = tag.size;
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Base address: %08lx", baseAddress);
         LOG_DEBUG("Size:         %08lx", size);
 #endif
@@ -299,7 +299,7 @@ bool RPIProperties::GetVCMemory(uint32& baseAddress, uint32& size)
 
     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_VC_MEMORY, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetARMMemory");
 
     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
@@ -308,7 +308,7 @@ bool RPIProperties::GetVCMemory(uint32& baseAddress, uint32& size)
     {
         baseAddress = tag.baseAddress;
         size = tag.size;
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Base address: %08lx", baseAddress);
         LOG_DEBUG("Size:         %08lx", size);
 #endif
@@ -331,7 +331,7 @@ bool RPIProperties::GetClockRate(ClockID clockID, uint32& freqHz)
     tag.clockID = static_cast<uint32>(clockID);
     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetClockRate");
     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
 
@@ -340,7 +340,7 @@ bool RPIProperties::GetClockRate(ClockID clockID, uint32& freqHz)
     if (result)
     {
         freqHz = tag.rate;
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Rate:       %08lx", tag.rate);
 #endif
     }
@@ -362,7 +362,7 @@ bool RPIProperties::GetMeasuredClockRate(ClockID clockID, uint32& freqHz)
     tag.clockID = static_cast<uint32>(clockID);
     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
 
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
     LOG_DEBUG("GetMeasuredClockRate");
     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
 
@@ -371,7 +371,7 @@ bool RPIProperties::GetMeasuredClockRate(ClockID clockID, uint32& freqHz)
     if (result)
     {
         freqHz = tag.rate;
-#if BAREMETAL_TRACE
+#if BAREMETAL_DEBUG_TRACING
         LOG_DEBUG("Rate:       %08lx", tag.rate);
 #endif
     }

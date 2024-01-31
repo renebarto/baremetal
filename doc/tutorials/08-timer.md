@@ -93,7 +93,7 @@ Update the file `code/libraries/baremetal/src/Timer.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : Timer.cpp
 5: //
@@ -107,7 +107,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation

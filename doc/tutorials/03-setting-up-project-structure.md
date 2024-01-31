@@ -312,7 +312,7 @@ The startup assembly code will for now be equal to that of the `02-setting-up-a-
 ```asm
 File: code/applications/demo/src/start.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
+2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : start.S
 5: //
@@ -327,7 +327,7 @@ File: code/applications/demo/src/start.S
 14: //
 15: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 16: //
-17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 18: //
 19: // Permission is hereby granted, free of charge, to any person
 20: // obtaining a copy of this software and associated documentation

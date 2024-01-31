@@ -75,7 +75,7 @@ File: CMakeLists.txt
 ```
 
 - Line 64: We add the variable `BAREMETAL_TRACE_DEBUG` which will enable debug trace output. It is set to `OFF` by default.
-- Line 88-92: We set variable `BAREMETAL_DEBUG_TRACING` to 1 if `BAREMETAL_TRACE_DEBUG` is `ON, and 0 otherwise
+- Line 88-92: We set variable `BAREMETAL_DEBUG_TRACING` to 1 if `BAREMETAL_TRACE_DEBUG` is `ON`, and 0 otherwise
 - Line 99: We set the compiler definition `BAREMETAL_DEBUG_TRACING` to the value of the `BAREMETAL_DEBUG_TRACING` variable
 - Line 271: We print the value of the `BAREMETAL_TRACE_DEBUG` variable
 

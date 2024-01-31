@@ -825,9 +825,6 @@ File: code/libraries/baremetal/include/baremetal/New.h
 40: #pragma once
 41: 
 42: #include <baremetal/Types.h>
-43: 
-44: void operator delete(void* block) noexcept;
-45: void operator delete(void* block, size_t size) noexcept;
 ```
 
 Create the file `code/libraries/baremetal/src/New.cpp`

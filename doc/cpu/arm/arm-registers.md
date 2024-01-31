@@ -18,6 +18,7 @@ This page enumarates the definition of some of the registers inside the ARM proc
 | CNTPCT_EL0    | 64    |
 | CNTP_CTL_EL0  | 64    | R/W
 | CNTP_CVAL_EL0 | 64    |
+| CTR_EL0       | 64    | R   |             | Cache Type Register, EL0
 
 ### Common registers {#ARM_REGISTERS_REGISTER_OVERVIEW_COMMON_REGISTERS}
 

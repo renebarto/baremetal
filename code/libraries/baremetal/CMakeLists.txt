@@ -31,6 +31,7 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
@@ -57,6 +58,7 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h

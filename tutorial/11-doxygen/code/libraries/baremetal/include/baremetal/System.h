@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : System.h
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -41,22 +41,31 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// System startup / shutdown functionality
+
 namespace baremetal {
 
 class IMemoryAccess;
 
+/// <summary>
+/// System startup / shutdown handling class
+/// </summary>
 class System
 {
+    /// <summary>
+    /// Construct the singleton system handler if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system handler</returns>
     friend System& GetSystem();
 
 private:
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
     System();
 
 public:
-    /// @brief Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
     System(IMemoryAccess &memoryAccess);
 
     [[noreturn]] void Halt();
@@ -67,9 +76,14 @@ System& GetSystem();
 
 } // namespace baremetal
 
+/// <summary>
+/// Return code for main() function
+/// </summary>
 enum class ReturnCode
 {
+    /// @brief If main() returns this, the system will be halted
     ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
     ExitReboot,
 };
 
@@ -78,8 +92,15 @@ extern "C"
 {
 #endif
 
-    int               main();
-    [[noreturn]] void sysinit();
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+int               main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
 
 #ifdef __cplusplus
 }

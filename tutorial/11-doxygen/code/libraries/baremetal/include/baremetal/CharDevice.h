@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -40,23 +40,29 @@
 #pragma once
 
 /// @file
-/// Abstract character CharDevice
+/// Abstract character device
 
 namespace baremetal {
 
-/// @brief Abstract character CharDevice
+/// <summary>
+/// Abstract character CharDevice
 ///
 /// Abstraction of a CharDevice that can read and write characters
+/// </summary>
 class CharDevice
 {
 public:
     virtual ~CharDevice() = default;
 
-    /// @brief Read a character
-    /// @return Character read
+    /// <summary>
+    /// Read a character
+    /// </summary>
+    /// <returns>Character read</returns>
     virtual char Read() = 0;
-    /// @brief Write a character
-    /// @param c Character to be written
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="c">Character to be written</param>
     virtual void Write(char c) = 0;
 };
 

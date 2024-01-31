@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -39,6 +39,9 @@
 
 #pragma once
 
+/// @file
+/// Abstract GPIO pin. Could be either a virtual or physical pin
+
 #include <baremetal/Types.h>
 
 namespace baremetal {
@@ -54,18 +57,19 @@ enum class GPIOMode
     InputPullUp,
     /// @brief GPIO used as input, using pull-down
     InputPullDown,
-    /// @brief GPIO used as Alternate Function 0.
+    /// @brief GPIO used as Alternate Function 0. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    /// @brief GPIO used as Alternate Function 1. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    /// @brief GPIO used as Alternate Function 2. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    /// @brief GPIO used as Alternate Function 3. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    /// @brief GPIO used as Alternate Function 4. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    /// @brief GPIO used as Alternate Function 5. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction5,
+    /// @brief GPIO mode unknown / not set / invalid
     Unknown,
 };
 
@@ -76,18 +80,19 @@ enum class GPIOFunction
     Input,
     /// @brief GPIO used as output
     Output,
-    /// @brief GPIO used as Alternate Function 0.
+    /// @brief GPIO used as Alternate Function 0. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1.
+    /// @brief GPIO used as Alternate Function 1. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2.
+    /// @brief GPIO used as Alternate Function 2. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3.
+    /// @brief GPIO used as Alternate Function 3. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4.
+    /// @brief GPIO used as Alternate Function 4. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5.
+    /// @brief GPIO used as Alternate Function 5. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
     AlternateFunction5,
+    /// @brief GPIO function unknown / not set / invalid
     Unknown,
 };
 
@@ -100,32 +105,54 @@ enum class GPIOPullMode
     PullDown,
     /// @brief GPIO pull mode pull-up
     PullUp,
+    /// @brief GPIO pull mode unknown / not set / invalid
     Unknown,
 };
 
-/// @brief Abstraction of a GPIO pin
+/// <summary>
+/// Abstraction of a GPIO pin
+/// </summary>
 class IGPIOPin
 {
 public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
     virtual ~IGPIOPin() = default;
 
-    /// @brief Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
-    /// @return Pin number
+    /// <summary>
+    /// Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
+    /// </summary>
+    /// <returns>Pin number</returns>
     virtual uint8 GetPinNumber() const = 0;
-    /// @brief Assign a GPIO pin
-    /// @param pin      Pin number
-    /// @return true if successful, false otherwise
+    /// <summary>
+    /// Assign a GPIO pin
+    /// </summary>
+    /// <param name="pinNumber">Pin number</param>
+    /// <returns>true if successful, false otherwise</returns>
     virtual bool AssignPin(uint8 pinNumber) = 0;
 
-    /// @brief Switch GPIO on
+    /// <summary>
+    /// Switch GPIO on
+    /// </summary>
     virtual void On() = 0;
-    /// @brief Switch GPIO off
+    /// <summary>
+    /// Switch GPIO off
+    /// </summary>
     virtual void Off() = 0;
-    /// @brief Get GPIO value
+    /// <summary>
+    /// Get GPIO value
+    /// </summary>
+    /// <returns>GPIO value, true if on, false if off</returns>
     virtual bool Get() = 0;
-    /// @brief Set GPIO on (true) or off (false)
+    /// <summary>
+    /// Set GPIO on (true) or off (false)
+    /// </summary>
+    /// <param name="on">Value to set, on (true) or off (false)</param>
     virtual void Set(bool on) = 0;
-    /// @brief Invert GPIO value on->off off->on
+    /// <summary>
+    /// Invert GPIO value on->off off->on
+    /// </summary>
     virtual void Invert() = 0;
 };
 

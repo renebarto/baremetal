@@ -1,4 +1,4 @@
-project(10-uart0
+project(11-doxygen
     DESCRIPTION "Demo application"
     LANGUAGES CXX ASM)
 
@@ -23,7 +23,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal-10
+    baremetal-11
     )
 
 set(PROJECT_LIBS

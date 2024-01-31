@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : CXAGuard.cpp
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -87,28 +87,49 @@
 
 #include <baremetal/Types.h>
 
-// byte index into the guard object
+/// @file
+/// Static variable acquire / release functionality
+
+// Byte index into the guard object
+/// @brief Index to byte signalling that the static object was acquired and released
 #define INDEX_HAS_RUN		0
+/// @brief Index to byte signalling that the static object was acquired but not released yes
 #define INDEX_IN_USE		1
 
+/// <summary>
+/// Acquire guard for static initialization
+/// </summary>
+/// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
+/// <returns>Returns 1 if acquire is successful, 0 if already done</returns>
 extern "C" int __cxa_guard_acquire(volatile uint8* guardObject)
 {
+    // Did we already initialize this object?
     if (guardObject[INDEX_HAS_RUN] != 0)
     {
         return 0;                           // Do not run constructor
     }
 
+    // Lock this guard while acquired
     guardObject[INDEX_IN_USE] = 1;
 
     return 1;                               // Run constructor
 }
 
+/// <summary>
+/// Release the acquired guard
+/// </summary>
+/// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
 extern "C" void __cxa_guard_release(volatile uint8* guardObject)
 {
+    // Set acquire / release cycle complete
     guardObject[INDEX_HAS_RUN] = 1;
     guardObject[INDEX_IN_USE] = 0;
 }
 
+/// <summary>
+/// Abort the static object initialization, release the acquired object
+/// </summary>
+/// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
 extern "C" void __cxa_guard_abort(volatile uint8* guardObject)
 {
     guardObject[INDEX_IN_USE] = 0;

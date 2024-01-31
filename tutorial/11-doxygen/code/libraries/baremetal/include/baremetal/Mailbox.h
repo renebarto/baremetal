@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -42,13 +42,24 @@
 #include <baremetal/IMailbox.h>
 #include <baremetal/MemoryAccess.h>
 
+/// @file
+/// Raspberry Pi Mailbox
+
 namespace baremetal {
 
 /// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
 class Mailbox : public IMailbox
 {
 private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
     MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
     IMemoryAccess &m_memoryAccess;
 
 public:

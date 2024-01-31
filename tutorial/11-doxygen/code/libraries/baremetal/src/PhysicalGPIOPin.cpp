@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -53,9 +53,14 @@
 namespace baremetal {
 
 #if BAREMETAL_RPI_TARGET == 3
-    static const int NumWaitCycles = 150;
+/// @brief Number of cycles to wait when setting pull mode for GPIO pin (Raspberry Pi 3 only)
+static const int NumWaitCycles = 150;
 #endif // BAREMETAL_RPI_TARGET == 3
 
+/// <summary>
+/// Creates a virtual GPIO pin 
+/// </summary>
+/// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
 PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
     : m_pinNumber{ NUM_GPIO }
     , m_mode{ GPIOMode::Unknown }
@@ -66,6 +71,12 @@ PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess& memoryAccess /*= GetMemoryAccess
 {
 }
 
+/// <summary>
+/// Creates a virtual GPIO pin 
+/// </summary>
+/// <param name="pinNumber">GPIO pin number (0..53)</param>
+/// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
+/// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
 PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
     : m_pinNumber{ NUM_GPIO }
     , m_mode{ GPIOMode::Unknown }
@@ -76,11 +87,20 @@ PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& 
     SetMode(mode);
 }
 
+/// <summary>
+/// Return the configured GPIO pin number
+/// </summary>
+/// <returns>GPIO pin number (0..53)</returns>
 uint8 PhysicalGPIOPin::GetPinNumber() const
 {
     return m_pinNumber;
 }
 
+/// <summary>
+/// Assign a GPIO pin
+/// </summary>
+/// <param name="pinNumber">GPIO pin number to set (0..53)</param>
+/// <returns>Return true on success, false on failure</returns>
 bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
 {
     // Check if pin already assigned
@@ -91,16 +111,26 @@ bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
     return true;
 }
 
+/// <summary>
+/// Switch GPIO on
+/// </summary>
 void PhysicalGPIOPin::On()
 {
     Set(true);
 }
 
+/// <summary>
+/// Switch GPIO off
+/// </summary>
 void PhysicalGPIOPin::Off()
 {
     Set(false);
 }
 
+/// <summary>
+/// Get GPIO value
+/// </summary>
+/// <returns>The status of the configured GPIO pin. Returns true if on, false if off</returns>
 bool PhysicalGPIOPin::Get()
 {
     // Check if pin is assigned
@@ -116,6 +146,10 @@ bool PhysicalGPIOPin::Get()
     return m_value;
 }
 
+/// <summary>
+/// Set GPIO on (true) or off (false)
+/// </summary>
+/// <param name="on">Value to set GPIO pin to (true for on, false for off).</param>
 void PhysicalGPIOPin::Set(bool on)
 {
     // Check if pin is assigned
@@ -135,16 +169,28 @@ void PhysicalGPIOPin::Set(bool on)
     m_memoryAccess.Write32(regAddress, regMask);
 }
 
+/// <summary>
+/// Invert GPIO value on->off off->on
+/// </summary>
 void PhysicalGPIOPin::Invert()
 {
     Set(!Get());
 }
 
+/// <summary>
+/// Get the mode for the GPIO pin
+/// </summary>
+/// <returns>Currently set mode for the configured GPIO pin</returns>
 GPIOMode PhysicalGPIOPin::GetMode()
 {
     return m_mode;
 }
 
+/// <summary>
+/// Convert GPIO mode to GPIO function. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
+/// </summary>
+/// <param name="mode">GPIO mode</param>
+/// <returns>GPIO function</returns>
 static GPIOFunction ConvertGPIOModeToFunction(GPIOMode mode)
 {
     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
@@ -159,6 +205,11 @@ static GPIOFunction ConvertGPIOModeToFunction(GPIOMode mode)
     return GPIOFunction::Input;
 }
 
+/// <summary>
+/// Set the mode for the GPIO pin
+/// </summary>
+/// <param name="mode">Mode to be set for the configured GPIO. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
+/// <returns>Return true on success, false on failure</returns>
 bool PhysicalGPIOPin::SetMode(GPIOMode mode)
 {
     // Check if pin is assigned
@@ -192,16 +243,28 @@ bool PhysicalGPIOPin::SetMode(GPIOMode mode)
     return true;
 }
 
+/// <summary>
+/// Get GPIO pin function
+/// </summary>
+/// <returns>Function set for the configured GPIO pin</returns>
 GPIOFunction PhysicalGPIOPin::GetFunction()
 {
     return m_function;
 }
 
+/// <summary>
+/// Get GPIO pin pull mode
+/// </summary>
+/// <returns>Pull mode set for the configured GPIO pin</returns>
 GPIOPullMode PhysicalGPIOPin::GetPullMode()
 {
     return m_pullMode;
 }
 
+/// <summary>
+/// Set GPIO pin function
+/// </summary>
+/// <param name="function">Function to be set for the configured GPIO pin</param>
 void PhysicalGPIOPin::SetFunction(GPIOFunction function)
 {
     // Check if pin is assigned
@@ -224,6 +287,10 @@ void PhysicalGPIOPin::SetFunction(GPIOFunction function)
     m_function = function;
 }
 
+/// <summary>
+/// Set GPIO pin pull mode
+/// </summary>
+/// <param name="pullMode">Pull mode to be set for the configured GPIO pin</param>
 void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
 {
     // Check if pin is assigned

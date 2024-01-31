@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -45,23 +45,38 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/PhysicalGPIOPin.h>
 #include <baremetal/RPIProperties.h>
-#include <baremetal/RPIPropertiesInterface.h>
+
+/// @file
+/// Raspberry Pi UART0 serial device implementation
 
 namespace baremetal {
 
+/// <summary>
+/// Constructs a default UART0 instance.
+/// 
+/// Note that the constructor is private, so GetUART0() is needed to instantiate the UART0.
+/// </summary>
 UART0::UART0()
     : m_initialized{}
     , m_memoryAccess{GetMemoryAccess()}
 {
 }
 
+/// <summary>
+/// Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
+/// </summary>
+/// <param name="memoryAccess">Memory access interface</param>
 UART0::UART0(IMemoryAccess &memoryAccess)
     : m_initialized{}
     , m_memoryAccess{memoryAccess}
 {
 }
 
-// Set baud rate and characteristics (115200 8N1) and map to GPIO
+/// <summary>
+/// Initialize the UART0 device. Only performed once, guarded by m_initialized.
+///
+///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+/// </summary>
 void UART0::Initialize()
 {
     if (m_initialized)
@@ -85,7 +100,10 @@ void UART0::Initialize()
     m_initialized = true;
 }
 
-// Write a character
+/// <summary>
+/// Send a character
+/// </summary>
+/// <param name="c">Character to be sent</param>
 void UART0::Write(char c)
 {
     // wait until we can send
@@ -98,8 +116,10 @@ void UART0::Write(char c)
     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 }
 
-// Receive a character
-
+/// <summary>
+/// Receive a character
+/// </summary>
+/// <returns>Character received</returns>
 char UART0::Read()
 {
     // wait until something is in the buffer
@@ -112,6 +132,10 @@ char UART0::Read()
     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
 }
 
+/// <summary>
+/// Write a string
+/// </summary>
+/// <param name="str">String to be written</param>
 void UART0::WriteString(const char *str)
 {
     while (*str)
@@ -123,6 +147,10 @@ void UART0::WriteString(const char *str)
     }
 }
 
+/// <summary>
+/// Construct the singleton UART0 device if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton UART0 device</returns>
 UART0 &GetUART0()
 {
     static UART0 value;

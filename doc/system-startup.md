@@ -1,6 +1,6 @@
-# System startup
+# System startup {#SYSTEM_STARTUP}
 
-## Boot sequence for Raspberry Pi 3
+## Boot sequence for Raspberry Pi 3 {#SYSTEM_STARTUP_BOOT_SEQUENCE_FOR_RASPBERRY_PI_3}
 
 See also [Boot sequence](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#boot-sequence)
 
@@ -26,7 +26,7 @@ __Raspberry Pi 3 boot sequence__
 
 Be aware that a large part of the bootup is performed by the GPU (bootcode.bin, start.elf), which has different assembly code than the CPU.
 
-## Boot sequence for Raspberry Pi 4 / 5
+## Boot sequence for Raspberry Pi 4 / 5 {#SYSTEM_STARTUP_BOOT_SEQUENCE_FOR_RASPBERRY_PI_4__5}
 
 See also [Boot flow](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-4-boot-flow)
 
@@ -62,7 +62,7 @@ __Raspberry Pi 5 boot sequence__
 
 For RPI 5, the GPU firmware is embedded into the kernel image, so the kernel image is loaded directly.
 
-## config.txt
+## config.txt {#SYSTEM_STARTUP_CONFIGTXT}
 
 For 64 bit systems, the mimimal contents of config.txt are similar to:
 
@@ -119,7 +119,7 @@ For baremetal, the defaults are as follows:
 
 Once the image is loaded, the GPU resets the ARM, which then starts executing. The start address depends on the architecture:
 
-### CPU execution start address
+### CPU execution start address {#SYSTEM_STARTUP_CONFIGTXT_CPU_EXECUTION_START_ADDRESS}
 
 | Architecture     | Start address |
 |------------------|---------------|

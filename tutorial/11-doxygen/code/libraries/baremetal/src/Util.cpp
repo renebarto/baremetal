@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : Util.cpp
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -39,6 +39,16 @@
 
 #include <baremetal/Util.h>
 
+/// @file
+/// Standard C library utility functions implementation
+
+/// <summary>
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
+/// </summary>
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns></returns>
 void* memset(void* buffer, int value, size_t length)
 {
     uint8* ptr = reinterpret_cast<uint8*>(buffer);
@@ -50,6 +60,13 @@ void* memset(void* buffer, int value, size_t length)
     return buffer;
 }
 
+/// <summary>
+/// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
+/// </summary>
+/// <param name="dest">Destination buffer pointer</param>
+/// <param name="src">Source buffer pointer</param>
+/// <param name="length">Size of buffer to copy in bytes</param>
+/// <returns></returns>
 void* memcpy(void* dest, const void* src, size_t length)
 {
     uint8* dstPtr = reinterpret_cast<uint8*>(dest);

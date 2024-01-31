@@ -1,4 +1,4 @@
-# baremetal
+# baremetal {#BAREMETAL}
 A project to develop baremetal applications for Raspberry Pi and Odroid
 
 This project is based on / inspired by the work of many others:
@@ -41,41 +41,27 @@ For example:
 - Unit testing, even at baremetal level, using stubs and mocks. This will use an alternative to gtest / gmock, as this relies on the standard C++ library
 - Debugging on platform (with the addition of HW), as well as in QEMU, even directly from Visual Studio
 
-## License
+## License {#BAREMETAL_LICENSE}
 
-Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE)).
+Code included in this repository, as well as code in the tutorials, is shared under the Creative Commons 1.0 license (see [here](LICENSE.md)).
 This means that code will contain a copyright, but you are free to use it in whichever way you see fit. I would appreciate at least a reference to this GitHub project though.
 
 For now, we will focus on Raspberry Pi, as the information is more readily available than for Odroid.
 
-## Contents
+## Contents {#BAREMETAL_CONTENTS}
 
-- [Setting up for development](doc/01-setting-up-for-development.md)
-- [Setting up a first project](doc/02-setting-up-a-project.md)
-- [Setting up project structure](doc/03-setting-up-project-structure.md)
-- [Setting up common options](doc/04-setting-up-common-options.md)
-- [First application - Using the console - UART1](doc/05-console-uart1.md)
-- [Improving startup and static initialization](doc/06-improving-startup-static-initialization.md)
-- [Generalization](doc/07-generalization.md)
-- [Timer](doc/08-timer.md)
-- [Mailbox](doc/09-mailbox.md)
-- [UART0](doc/10-uart0.md)
-- Add doxygen
-- Add logger, inject character device
-- Add retrieval of system information
-- Add clang format and git hook for commit
+- @subpage TUTORIALS
+- @subpage INFORMATION
 
-## Additional information
-
-- [Hardware overview](doc/hardware-overview.md)
-- [System startup](doc/system-startup.md)
-
-## Todo
+@todo
 - Check if bug in Visual Studio 2022 is fixed
 - Build demo for RPI 4
 - Try out Raspberry Pi 4 emulation in QEMU
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add boot process for Odroid system
 - Add description of Odroid platform support in QEMU
-- Add description of how to use JTAG device with Raspberry Pi and possibly Odroid
+- Add description of how to use JTAG device with Raspberry Pi and possibly Odroid, using e.g. [Macoy Madson's page](https://macoy.me/blog/programming/RaspberryPi5Debugging)
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- Add logger, inject character device
+- Add retrieval of system information
+- Add clang format and git hook for commit

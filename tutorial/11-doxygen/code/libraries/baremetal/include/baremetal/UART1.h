@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : UART1.h
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -41,45 +41,40 @@
 
 #include <baremetal/CharDevice.h>
 
+/// @file
+/// Raspberry Pi UART1 serial device
+
 namespace baremetal {
 
 class IMemoryAccess;
 
-/// @brief Encapsulation for the UART1 device.
+/// <summary>
+/// Encapsulation for the UART1 device.
 ///
 /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
 /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// </summary>
 class UART1 : public CharDevice
 {
     friend UART1& GetUART1();
 
 private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
     bool            m_initialized;
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess  &m_memoryAccess;
 
-    /// @brief Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
     UART1();
 
 public:
-    /// @brief Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
     UART1(IMemoryAccess &memoryAccess);
-    /// @brief Initialize the UART1 device. Only performed once, guarded by m_initialized.
-    ///
-    ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+
     void Initialize();
-    /// @brief Read a character
-    /// @return Character read
     char Read() override;
-    /// @brief Write a character
-    /// @param c Character to be written
     void Write(char c) override;
-    /// @brief Write a string
-    /// @param str String to be written
     void WriteString(const char* str);
 };
 
-/// @brief Constructs the singleton UART1 instance, if needed.
-/// @return A refence to the singleton UART1 instance.
 UART1 &GetUART1();
 
 } // namespace baremetal

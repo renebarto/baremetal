@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -41,30 +41,54 @@
 
 #include <baremetal/Types.h>
 
+/// @file
+/// Abstract Mailbox interface
+
 namespace baremetal {
 
-/// @brief Mailbox channels
-/// \ref https://github.com/raspberrypi/firmware/wiki/Mailboxes
+/// <summary>
+/// Mailbox channel
+/// </summary>
 enum class MailboxChannel
 {
-    ARM_MAILBOX_CH_POWER = 0,       // Power management
-    ARM_MAILBOX_CH_FB = 1,          // Frame buffer
-    ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART?
+    ARM_MAILBOX_CH_VUART = 2,
+    /// ?
     ARM_MAILBOX_CH_VCHIQ = 3,
+    /// ?
     ARM_MAILBOX_CH_LEDS = 4,
+    /// ?
     ARM_MAILBOX_CH_BTNS = 5,
+    /// ?
     ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
     ARM_MAILBOX_CH_COUNT = 7,
-    ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
-    ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
 };
 
-/// @brief IMailbox: Mailbox abstract interface
+/// <summary>
+/// Mailbox abstract interface
+/// </summary>
 class IMailbox
 {
 public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
     virtual ~IMailbox() = default;
 
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
     virtual uintptr WriteRead(uintptr address) = 0;
 };
 

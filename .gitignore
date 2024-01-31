@@ -4,3 +4,11 @@ output/
 out/
 .vs/*
 !.vs/launch.vs.json
+doxygen/html
+links.json
+doxygen/doxygen.log
+/fix-links.log
+doc/boards/raspberrypi/images
+doc/boards/raspberrypi/pdf
+doc/tutorials/images
+doc/tutorials/pdf

@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -47,62 +47,46 @@
 
 namespace baremetal {
 
-/// @brief Physical GPIO pin (i.e. available on GPIO header)
+/// <summary>
+/// Physical GPIO pin (i.e. available on GPIO header) 
+/// </summary>
 class PhysicalGPIOPin : public IGPIOPin
 {
 private:
+    /// @brief Configured GPIO pin number (0..53)
     uint8                 m_pinNumber;
+    /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
     GPIOMode              m_mode;
+    /// @brief Configured GPIO function.
     GPIOFunction          m_function;
+    /// @brief Configured GPIO pull mode (only for input function).
     GPIOPullMode          m_pullMode;
+    /// @brief Current value of the GPIO pin (true for on, false for off).
     bool                  m_value;
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
 
 public:
-    /// @brief Creates a virtual GPIO pin
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
-    // PhysicalGPIOPin(const PhysicalGPIOPin &other);
 
-    /// @brief Creates a virtual GPIO pin
     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
     uint8 GetPinNumber() const override;
-    /// @brief Assign a GPIO pin
-    /// @param pin      Pin number
-    /// @return true if successful, false otherwise
     bool AssignPin(uint8 pinNumber) override;
 
-    /// @brief Switch GPIO on
     void On() override;
-    /// @brief Switch GPIO off
     void Off() override;
-    /// @brief Get GPIO value
     bool Get() override;
-    /// @brief Set GPIO on (true) or off (false)
     void Set(bool on) override;
-    /// @brief Invert GPIO value on->off off->on
     void Invert() override;
 
-    /// @brief Get the mode for the GPIO pin
-    /// @return mode GPIO mode. See \ref GPIOMode
     GPIOMode GetMode();
-    /// @brief Set the mode for the GPIO pin
-    /// @param mode GPIO mode to be selected. See \ref GPIOMode
-    /// @return true if successful, false otherwise
     bool SetMode(GPIOMode mode);
-    /// @brief Get GPIO pin function
-    /// @return GPIO pin function used. See \ref GPIOFunction
     GPIOFunction GetFunction();
-    /// @brief Get GPIO pin pull mode
-    /// @return GPIO pull mode used. See \ref GPIOPullMode
     GPIOPullMode GetPullMode();
-    /// @brief Set GPIO pin pull mode
-    /// @param pullMode GPIO pull mode to be used. See \ref GPIOPullMode
     void SetPullMode(GPIOPullMode pullMode);
 
 private:
-    /// @brief Set GPIO pin function
-    /// @param function GPIO function to be selected. See \ref GPIOFunction, \ref BCM_GPIO_ALTERNATIVE_FUNCTIONS
     void SetFunction(GPIOFunction function);
 };
 

@@ -1,9 +1,9 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal-10
-	DESCRIPTION "Bare metal library"
-	LANGUAGES CXX ASM)
+project(baremetal-11
+    DESCRIPTION "Bare metal library"
+    LANGUAGES CXX ASM)
 
 set(PROJECT_TARGET_NAME ${PROJECT_NAME})
 

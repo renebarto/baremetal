@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -44,18 +44,27 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/Timer.h>
 
+/// @file
+/// Raspberry Pi Mailbox implementation
+
 using namespace baremetal;
 
+/// <summary>
+/// Construct a mailbox
+/// </summary>
+/// <param name="channel">Channel to be used for communication</param>
+/// <param name="memoryAccess">Memory access interface for registers, default to the singleton memory access instantiation</param>
 Mailbox::Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
     : m_channel{ channel }
     , m_memoryAccess{ memoryAccess }
 {
 }
 
-/// @brief Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
-/// \param address Address to write to VC mailbox register, mapped to VC address space, aligned to 16 bytes.
-/// \return Address read from VC mailbox register
-/// \ref https://github.com/raspberrypi/firmware/wiki/Accessing-mailboxes
+/// <summary>
+/// Perform a write - read cycle on the mailbox for the selected channel (m_channel)
+/// </summary>
+/// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+/// <returns>Address of mailbox data block, should be equal to input address</returns>
 uintptr Mailbox::WriteRead(uintptr address)
 {
     Flush();
@@ -67,7 +76,9 @@ uintptr Mailbox::WriteRead(uintptr address)
     return result;
 }
 
-/// @brief Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
+/// <summary>
+/// Flush the mailbox for the selected channel (m_channel), by reading until it is empty. A short wait is added for synchronization reasons.
+/// </summary>
 void Mailbox::Flush()
 {
     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
@@ -78,10 +89,11 @@ void Mailbox::Flush()
     }
 }
 
-/// @brief Read back the address of the data block to the mailbox
-/// The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
-///
-/// @return Address to prepared data block written to write register (in VC address space), with channel in lower 4 bits. The channel is checked to be equal to m_channel.
+/// <summary>
+/// Read back the address of the data block to the mailbox for the selected channel (m_channel)
+// The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
+/// </summary>
+/// <returns>The pointer to the mailbox data block passed in to Write() on success (in GPU address space).</returns>
 uintptr Mailbox::Read()
 {
     uintptr result;
@@ -99,11 +111,13 @@ uintptr Mailbox::Read()
     return result & ~0xF;
 }
 
-/// @brief Write the address of the data block to the mailbox
-///
-/// @param data Address to prepared data block for the mailbox, converted to the address space of the VC. This address should be 16 byte aligned, as the channel (m_channel) to be written to will be placed in the lower 4 bits
+/// <summary>
+/// Write to the mailbox on the selected channel
+/// </summary>
+/// <param name="data">Address of mailbox data block (converted to GPU address space)</param>
 void Mailbox::Write(uintptr data)
 {
+    // Data must be 16 byte aligned
     if ((data & 0xF) != 0)
         return;
 

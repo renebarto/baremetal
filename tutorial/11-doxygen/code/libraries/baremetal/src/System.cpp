@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : System.cpp
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -44,8 +44,11 @@
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/SysConfig.h>
 #include <baremetal/Timer.h>
-#include <baremetal/UART1.h>
+#include <baremetal/UART0.h>
 #include <baremetal/Util.h>
+
+/// @file
+/// System startup / shutdown functionality implementation
 
 using namespace baremetal;
 
@@ -54,49 +57,73 @@ extern "C"
 {
 #endif
 
+/// <summary>
+/// __dso_handle is a "guard" that is used to identify dynamic shared objects during global destruction. It is only known to the compiler / linker
+/// </summary>
 void *__dso_handle WEAK;
 
-void __cxa_atexit(void* pThis, void (*func)(void* pThis), void* pHandle) WEAK;
+/// @brief WEAK version of __cxa_atexit
+void __cxa_atexit(void (*func)(void* param), void* param, void* handle) WEAK;
 
-void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHandle*/)
+/// <summary>
+/// __cxa_atexit() will call the destructor of the static of a dynamic library when this dynamic library is unloaded before the program exits.
+/// </summary>
+/// <param name="func">Registered function to be called</param>
+/// <param name="param">Parameter to be passed to registered function</param>
+/// <param name="handle">Handle of the shared library to be unloaded (its __dso_handle)</param>
+void __cxa_atexit([[maybe_unused]] void (* func)(void* param), [[maybe_unused]] void* param, [[maybe_unused]] void* handle)
 {
-    /// \todo Complete
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-static const uint32 WaitTime = 10; // ms
+/// @brief Wait time in milliseconds to ensure that UART info is written before system halt or reboot
+static const uint32 WaitTime = 10;
 
+/// <summary>
+/// Construct the singleton system handler if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton system handler</returns>
 System& baremetal::GetSystem()
 {
     static System value;
     return value;
 }
 
+/// <summary>
+/// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
+/// </summary>
 System::System()
     : m_memoryAccess{GetMemoryAccess()}
 {
 }
 
+/// <summary>
+/// Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
+/// </summary>
+/// <param name="memoryAccess">Memory access interface</param>
 System::System(IMemoryAccess &memoryAccess)
     : m_memoryAccess{memoryAccess}
 {
 }
 
+/// <summary>
+/// Halts the system. This function will not return
+/// </summary>
 void System::Halt()
 {
-    GetUART1().WriteString("Halt\n");
+    GetUART0().WriteString("Halt\n");
     Timer::WaitMilliSeconds(WaitTime);
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
+    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
     r |= 0x555; // partition 63 used to indicate halt
     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -105,9 +132,12 @@ void System::Halt()
     }
 }
 
+/// <summary>
+/// Reboots the system. This function will not return
+/// </summary>
 void System::Reboot()
 {
-    GetUART1().WriteString("Reboot\n");
+    GetUART0().WriteString("Reboot\n");
     Timer::WaitMilliSeconds(WaitTime);
 
     DisableIRQs();
@@ -115,11 +145,10 @@ void System::Reboot()
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
+    r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
-    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
-
+    m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+    m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
     for (;;) // Satisfy [[noreturn]]
     {
         DataSyncBarrier();
@@ -140,7 +169,6 @@ void sysinit()
     // clear BSS
     extern unsigned char __bss_start;
     extern unsigned char __bss_end;
-    // cppcheck-suppress comparePointers
     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 
     // halt, if KERNEL_MAX_SIZE is not properly set
@@ -158,7 +186,7 @@ void sysinit()
         (**func)();
     }
 
-    GetUART1().WriteString("Starting up\n");
+    GetUART0().WriteString("Starting up\n");
 
     extern int main();
 

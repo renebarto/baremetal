@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : Macros.h
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -42,13 +42,9 @@
 /// @file
 /// Generic macros
 
-/// @defgroup Macros
-/// @{
-
 /// @brief Make a struct packed (GNU compiler only)
 #define PACKED              __attribute__ ((packed))
 /// @brief Make a struct have alignment of n bytes (GNU compiler only)
-/// @param n alignment in bytes
 #define ALIGN(n)            __attribute__ ((aligned (n)))
 
 /// @brief Make a variable a weak instance (GCC compiler only)
@@ -57,5 +53,3 @@
 /// @brief Convert bit index into integer
 /// @param n Bit index
 #define BIT(n)              (1U << (n))
-
-/// @}

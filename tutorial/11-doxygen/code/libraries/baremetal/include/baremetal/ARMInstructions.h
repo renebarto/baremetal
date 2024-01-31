@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : ArmInstructions.h
 //
@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 // 
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 // 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -55,33 +55,33 @@
 /// @brief Wait for interrupt
 #define WaitForInterrupt()              asm volatile ("wfi")
 
-/// @brief Enable IRQss. Clear bit 1 of DAIF register. See \ref DAIF_REGISTER
+/// @brief Enable IRQss. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
 #define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See \ref DAIF_REGISTER
+/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
 #define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See \ref DAIF_REGISTER
+/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
 #define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See \ref DAIF_REGISTER
+/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
 #define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
 
-/// @brief Get counter timer frequency. See \ref CNTFRQ_EL0_REGISTER
+/// @brief Get counter timer frequency. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTFRQ_EL0_REGISTER
 #define GetTimerFrequency(freq)         asm volatile ("mrs %0, CNTFRQ_EL0" : "=r"(freq))
-/// @brief Get counter timer value. See \ref CNTPCT_EL0_REGISTER
+/// @brief Get counter timer value. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTPCT_EL0_REGISTER
 #define GetTimerCounter(count)          asm volatile ("mrs %0, CNTPCT_EL0" : "=r"(count))
 
-/// @brief Get Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
+/// @brief Get Physical counter-timer control register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 #define GetTimerControl(value)          asm volatile ("mrs %0, CNTP_CTL_EL0" : "=r" (value))
-/// @brief Set Physical counter-timer control register. See \ref CNTP_CTL_EL0_REGISTER
+/// @brief Set Physical counter-timer control register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 #define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
 
-/// @brief IStatus bit, flags if Physical counter-timer condition is met. See \ref CNTP_CTL_EL0_REGISTER
+/// @brief IStatus bit, flags if Physical counter-timer condition is met. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 #define CNTP_CTL_EL0_STATUS BIT(2)
-/// @brief IMask bit, flags if interrupts for Physical counter-timer are masked. See \ref CNTP_CTL_EL0_REGISTER
+/// @brief IMask bit, flags if interrupts for Physical counter-timer are masked. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 #define CNTP_CTL_EL0_IMASK BIT(1)
-/// @brief Enable bit, flags if Physical counter-timer is enabled. See \ref CNTP_CTL_EL0_REGISTER
+/// @brief Enable bit, flags if Physical counter-timer is enabled. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 #define CNTP_CTL_EL0_ENABLE BIT(0)
 
-/// @brief Get Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
+/// @brief Get Physical counter-timer comparison value. See \ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER
 #define GetTimerCompareValue(value)     asm volatile ("mrs %0, CNTP_CVAL_EL0" : "=r" (value))
-/// @brief Set Physical counter-timer comparison value. See \ref CNTP_CVAL_EL0_REGISTER
+/// @brief Set Physical counter-timer comparison value. See \ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER
 #define SetTimerCompareValue(value)     asm volatile ("msr CNTP_CVAL_EL0, %0" :: "r" (value))

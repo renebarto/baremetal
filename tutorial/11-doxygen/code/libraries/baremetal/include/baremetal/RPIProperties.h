@@ -13,7 +13,7 @@
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -42,21 +42,37 @@
 #include <baremetal/IMailbox.h>
 #include <baremetal/Types.h>
 
+/// @file
+/// Top level functionality handling for Raspberry Pi Mailbox
+
 namespace baremetal {
 
+/// <summary>
+/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// </summary>
 enum class ClockID : uint32
 {
+    /// @brief EMMC clock
     EMMC      = 1,
+    /// @brief UART0 clock
     UART      = 2,
+    /// @brief ARM processor clock
     ARM       = 3,
+    /// @brief Core SoC clock
     CORE      = 4,
+    /// @brief EMMC clock 2
     EMMC2     = 12,
+    /// @brief Pixel clock
     PIXEL_BVB = 14,
 };
 
+/// <summary>
+/// Top level functionality for requests on Mailbox interface
+/// </summary>
 class RPIProperties
 {
 private:
+    /// @brief Reference to mailbox for functions requested
     IMailbox &m_mailbox;
 
 public:

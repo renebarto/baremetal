@@ -43,6 +43,7 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/String.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
@@ -75,6 +76,7 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/StdArg.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/String.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h

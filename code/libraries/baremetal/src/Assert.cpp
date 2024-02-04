@@ -71,7 +71,7 @@ void AssertionFailed(const char *expression, const char *fileName, int lineNumbe
 /// <param name="lineNumber">Line number causing the failed assertion</param>
 static void AssertionFailedDefault(const char *expression, const char *fileName, int lineNumber)
 {
-    LOG_PANIC("assertion failed: %s", expression);
+    GetLogger().Write(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
 }
 
 /// <summary>

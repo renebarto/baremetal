@@ -82,6 +82,68 @@ void* memcpy(void* dest, const void* src, size_t length)
 }
 
 /// <summary>
+/// Compare two regions of memory
+/// </summary>
+/// <param name="buffer1">Pointer to first memory buffer</param>
+/// <param name="buffer2">Pointer to second memory buffer</param>
+/// <param name="length">Number of bytes to compare</param>
+/// <returns>Returns 0 if the two regions are equal, 
+/// 1 if the values in the first buffer are greater, 
+/// -1 if the values in the second buffer are greater</returns>
+int memcmp(const void* buffer1, const void* buffer2, size_t length)
+{
+    const unsigned char* p1 = reinterpret_cast<const unsigned char*>(buffer1);
+    const unsigned char* p2 = reinterpret_cast<const unsigned char*>(buffer2);
+
+    while (length-- > 0)
+    {
+        if (*p1 > *p2)
+        {
+            return 1;
+        }
+        else if (*p1 < *p2)
+        {
+            return -1;
+        }
+
+        p1++;
+        p2++;
+    }
+
+    return 0;
+}
+
+/// <summary>
+/// Convert character to upper case
+/// </summary>
+/// <param name="c">Character</param>
+/// <returns>Uper case version of character c, if alphabetic, otherwise c</returns>
+int toupper(int c)
+{
+    if (('a' <= c) && (c <= 'z'))
+    {
+        c -= 'a' - 'A';
+    }
+
+    return c;
+}
+
+/// <summary>
+/// Convert character to lower case
+/// </summary>
+/// <param name="c">Character</param>
+/// <returns>Lower case version of character c, if alphabetic, otherwise c</returns>
+int tolower(int c)
+{
+    if (('A' <= c) && (c <= 'Z'))
+    {
+        c += 'a' - 'A';
+    }
+
+    return c;
+}
+
+/// <summary>
 /// Standard C strlen function. Calculates the length of a string, in other words the index to the first '\0' character
 /// </summary>
 /// <param name="str">String for which to calculate the length</param>
@@ -96,6 +158,176 @@ size_t strlen(const char* str)
     }
 
     return result;
+}
+
+/// <summary>
+/// Compare two strings
+/// </summary>
+/// <param name="str1">Pointer to first string</param>
+/// <param name="str2">Pointer to second string</param>
+/// <returns>Returns 0 if the two strings are equal, 
+/// 1 if the values in the first string are greater, 
+/// -1 if the values in the second string are greater</returns>
+int strcmp(const char* str1, const char* str2)
+{
+    while ((*str1 != '\0') && (*str2 != '\0'))
+    {
+        if (*str1 > *str2)
+        {
+            return 1;
+        }
+        else if (*str1 < *str2)
+        {
+            return -1;
+        }
+
+        str1++;
+        str2++;
+    }
+
+    if (*str1 > *str2)
+    {
+        return 1;
+    }
+    else if (*str1 < *str2)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+/// <summary>
+/// Compare two strings, case insensitive
+/// </summary>
+/// <param name="str1">Pointer to first string</param>
+/// <param name="str2">Pointer to second string</param>
+/// <returns>Returns 0 is the two strings are equal ignoring case, 
+/// 1 if the values in the first string are greater, 
+/// -1 if the values in the second string are greater</returns>
+int strcasecmp(const char* str1, const char* str2)
+{
+    int chr1, chr2;
+
+    while (((chr1 = toupper(*str1)) != '\0') && ((chr2 = toupper(*str2)) != '\0'))
+    {
+        if (chr1 > chr2)
+        {
+            return 1;
+        }
+        else if (chr1 < chr2)
+        {
+            return -1;
+        }
+
+        str1++;
+        str2++;
+    }
+
+    chr2 = toupper(*str2);
+
+    if (chr1 > chr2)
+    {
+        return 1;
+    }
+    else if (chr1 < chr2)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+/// <summary>
+/// Compare two strings, up to maxLen characters
+/// </summary>
+/// <param name="str1">Pointer to first string</param>
+/// <param name="str2">Pointer to second string</param>
+/// <param name="maxLen">Maximum number of characters to compare</param>
+/// <returns>Returns 0 is the two strings are equal, 
+/// 1 if the values in the first string are greater, 
+/// -1 if the values in the second string are greater</returns>
+int strncmp(const char* str1, const char* str2, size_t maxLen)
+{
+    while ((maxLen > 0) && (*str1 != '\0') && (*str2 != '\0'))
+    {
+        if (*str1 > *str2)
+        {
+            return 1;
+        }
+        else if (*str1 < *str2)
+        {
+            return -1;
+        }
+
+        maxLen--;
+        str1++;
+        str2++;
+    }
+
+    if (maxLen == 0)
+    {
+        return 0;
+    }
+
+    if (*str1 > *str2)
+    {
+        return 1;
+    }
+    else if (*str1 < *str2)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+/// <summary>
+/// Compare two strings, up to maxLen characters, case insensitive
+/// </summary>
+/// <param name="str1">Pointer to first string</param>
+/// <param name="str2">Pointer to second string</param>
+/// <param name="maxLen">Maximum number of characters to compare</param>
+/// <returns>Returns 0 is the two strings are equal ignoring case, 
+/// 1 if the values in the first string are greater, 
+/// -1 if the values in the second string are greater</returns>
+int strncasecmp(const char* str1, const char* str2, size_t maxLen)
+{
+    int chr1, chr2;
+
+    while ((maxLen > 0) && ((chr1 = toupper(*str1)) != '\0') && ((chr2 = toupper(*str2)) != '\0'))
+    {
+        if (chr1 > chr2)
+        {
+            return 1;
+        }
+        else if (chr1 < chr2)
+        {
+            return -1;
+        }
+
+        maxLen--;
+        str1++;
+        str2++;
+    }
+
+    chr2 = toupper(*str2);
+
+    if (maxLen == 0)
+    {
+        return 0;
+    }
+
+    if (chr1 > chr2)
+    {
+        return 1;
+    }
+    else if (chr1 < chr2)
+    {
+        return -1;
+    }
+
+    return 0;
 }
 
 /// <summary>

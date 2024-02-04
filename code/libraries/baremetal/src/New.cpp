@@ -137,7 +137,6 @@ void operator delete[](void* address) noexcept
 /// Standard de-allocation with size for single value.
 /// </summary>
 /// <param name="address">Block to free</param>
-/// <param name="size">Size of block to free</param>
 void operator delete (void* address, size_t /*size*/) noexcept
 {
 	MemoryManager::HeapFree(address);

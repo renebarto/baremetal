@@ -2681,7 +2681,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 70: /// <param name="lineNumber">Line number causing the failed assertion</param>
 71: static void AssertionFailedDefault(const char *expression, const char *fileName, int lineNumber)
 72: {
-73:     LOG_PANIC("assertion failed: %s", expression);
+73:     GetLogger().Write(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
 74: }
 75: 
 76: /// <summary>

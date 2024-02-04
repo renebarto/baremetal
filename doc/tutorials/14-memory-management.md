@@ -1289,7 +1289,7 @@ If any heap is selected, the freespace for both heaps is added together
   - Line 225-226: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
 - Line 234-238: We implement the function `GetMemoryManager()`
 
-### System.cpp
+### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSTEMCPP}
 
 Although not urgently needed yet, we'll need singleton the `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
 So let's go ahead and instantiate the `MemoryManager` there.
@@ -2018,7 +2018,9 @@ You can see that we allocated three blocks of memory and freed them again. Two w
 
 In order to stop overloading the console with memory debug information, let's set the detail to `OFF`
 
-### Main CMake file
+## Switching off debugging for memory management - step 3 {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3}
+
+### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_MAIN_CMAKE_FILE}
 
 ```cmake
 File: CMakeLists.txt
@@ -2028,7 +2030,7 @@ File: CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

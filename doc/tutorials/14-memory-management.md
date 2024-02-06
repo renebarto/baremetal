@@ -1755,21 +1755,20 @@ File: code/libraries/baremetal/src/New.cpp
 137: /// Standard de-allocation with size for single value.
 138: /// </summary>
 139: /// <param name="address">Block to free</param>
-140: /// <param name="size">Size of block to free</param>
-141: void operator delete (void* address, size_t /*size*/) noexcept
-142: {
-143: 	MemoryManager::HeapFree(address);
-144: }
-145: 
-146: /// <summary>
-147: /// Standard de-allocation for array.
-148: /// </summary>
-149: /// <param name="address">Block to free</param>
-150: //// <param name="size">Size of block to free</param>
-151: void operator delete[](void* address, size_t /*size*/) noexcept
-152: {
-153: 	MemoryManager::HeapFree(address);
-154: }
+140: void operator delete (void* address, size_t /*size*/) noexcept
+141: {
+142: 	MemoryManager::HeapFree(address);
+143: }
+144: 
+145: /// <summary>
+146: /// Standard de-allocation for array.
+147: /// </summary>
+148: /// <param name="address">Block to free</param>
+149: //// <param name="size">Size of block to free</param>
+150: void operator delete[](void* address, size_t /*size*/) noexcept
+151: {
+152: 	MemoryManager::HeapFree(address);
+153: }
 ```
 
 - Line 56-59: We implement the `new` operator for placement with heap specification
@@ -1868,7 +1867,7 @@ File: code\applications\demo\src\main.cpp
 
 ### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
-As we added did not add any files, we don't need to update the CMake file.
+As we did not add any files, we don't need to update the CMake file.
 
 ### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 

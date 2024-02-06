@@ -2885,32 +2885,6 @@ This is a way to test code, however we'd like to see all of the failure found in
 This is the subject of the next tutorial.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Info   Starting up (System:201)
-Debug  Hello World! (main:24)
-Info   s4 (main:37)
-Info   b (main:40)
-Info   b (main:40)
-Info   b (main:40)
-Info   b (main:40)
-Info   Wait 5 seconds (main:432)
-Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
 ```
 
 Next: [16-unit-tests](16-unit-tests.md)

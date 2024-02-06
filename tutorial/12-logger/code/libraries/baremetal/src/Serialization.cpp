@@ -400,7 +400,7 @@ static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, i
     }
     while (numDigits > 0)
     {
-        int digit = (value / divisor) % base;
+        int digit = (absVal / divisor) % base;
         *bufferPtr++ = GetDigit(digit);
         --numDigits;
         divisor /= base;

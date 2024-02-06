@@ -1289,7 +1289,7 @@ If any heap is selected, the freespace for both heaps is added together
   - Line 225-226: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
 - Line 234-238: We implement the function `GetMemoryManager()`
 
-### System.cpp
+### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSTEMCPP}
 
 Although not urgently needed yet, we'll need singleton the `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
 So let's go ahead and instantiate the `MemoryManager` there.
@@ -1755,21 +1755,20 @@ File: code/libraries/baremetal/src/New.cpp
 137: /// Standard de-allocation with size for single value.
 138: /// </summary>
 139: /// <param name="address">Block to free</param>
-140: /// <param name="size">Size of block to free</param>
-141: void operator delete (void* address, size_t /*size*/) noexcept
-142: {
-143: 	MemoryManager::HeapFree(address);
-144: }
-145: 
-146: /// <summary>
-147: /// Standard de-allocation for array.
-148: /// </summary>
-149: /// <param name="address">Block to free</param>
-150: //// <param name="size">Size of block to free</param>
-151: void operator delete[](void* address, size_t /*size*/) noexcept
-152: {
-153: 	MemoryManager::HeapFree(address);
-154: }
+140: void operator delete (void* address, size_t /*size*/) noexcept
+141: {
+142: 	MemoryManager::HeapFree(address);
+143: }
+144: 
+145: /// <summary>
+146: /// Standard de-allocation for array.
+147: /// </summary>
+148: /// <param name="address">Block to free</param>
+149: //// <param name="size">Size of block to free</param>
+150: void operator delete[](void* address, size_t /*size*/) noexcept
+151: {
+152: 	MemoryManager::HeapFree(address);
+153: }
 ```
 
 - Line 56-59: We implement the `new` operator for placement with heap specification
@@ -1868,7 +1867,7 @@ File: code\applications\demo\src\main.cpp
 
 ### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
-As we added did not add any files, we don't need to update the CMake file.
+As we did not add any files, we don't need to update the CMake file.
 
 ### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
@@ -2018,7 +2017,9 @@ You can see that we allocated three blocks of memory and freed them again. Two w
 
 In order to stop overloading the console with memory debug information, let's set the detail to `OFF`
 
-### Main CMake file
+## Switching off debugging for memory management - step 3 {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3}
+
+### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_MAIN_CMAKE_FILE}
 
 ```cmake
 File: CMakeLists.txt
@@ -2028,7 +2029,7 @@ File: CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

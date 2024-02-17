@@ -1,15 +1,11 @@
-project(demo
-    DESCRIPTION "Demo application"
-    LANGUAGES CXX ASM)
-
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-message("\n** Setting up ${PROJECT_NAME} **\n")
+project(unittest
+    DESCRIPTION "Unit test library"
+    LANGUAGES CXX)
 
-include(functions)
-
-set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
+set(PROJECT_TARGET_NAME ${PROJECT_NAME})
 
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
@@ -18,13 +14,12 @@ set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
 set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
 set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
 set(PROJECT_INCLUDE_DIRS_PRIVATE )
-set(PROJECT_INCLUDE_DIRS_PUBLIC )
+set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
     baremetal
-    unittest
     )
 
 set(PROJECT_LIBS
@@ -33,10 +28,33 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
     )
 
-set(PROJECT_INCLUDES_PUBLIC )
+set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
+    )
 set(PROJECT_INCLUDES_PRIVATE )
 
 if (CMAKE_VERBOSE_MAKEFILE)
@@ -62,32 +80,26 @@ if (CMAKE_VERBOSE_MAKEFILE)
     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 endif()
 
-if (PLATFORM_BAREMETAL)
-    set(START_GROUP -Wl,--start-group)
-    set(END_GROUP -Wl,--end-group)
-endif()
-
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-
-target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
 target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-target_compile_definitions(${PROJECT_NAME} PRIVATE 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
     )
-target_compile_definitions(${PROJECT_NAME} PUBLIC 
+target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
     )
-target_compile_options(${PROJECT_NAME} PRIVATE 
+target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
     )
-target_compile_options(${PROJECT_NAME} PUBLIC 
+target_compile_options(${PROJECT_NAME} PUBLIC
     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
@@ -103,8 +115,5 @@ endif()
 link_directories(${LINK_DIRECTORIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 show_target_properties(${PROJECT_NAME})
-
-add_subdirectory(create-image)

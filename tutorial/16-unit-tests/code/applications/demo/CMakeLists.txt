@@ -1,4 +1,4 @@
-project(demo
+project(16-unit-tests
     DESCRIPTION "Demo application"
     LANGUAGES CXX ASM)
 
@@ -23,8 +23,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal
-    unittest
+    baremetal-16
     )
 
 set(PROJECT_LIBS

@@ -14,9 +14,40 @@
 #include <baremetal/Timer.h>
 #include <baremetal/Util.h>
 
+#include <unittest/unittest.h>
+
 LOG_MODULE("main");
 
 using namespace baremetal;
+using namespace unittest;
+
+TEST(MyTest)
+{
+    string s1{ "a" };
+    assert(s1.equals("a"));
+};
+
+class MyTestClass : public unittest::TestFixture
+{
+
+};
+
+TEST_FIXTURE(MyTestClass, ATest)
+{
+    string s1{ "a" };
+    assert(s1.equals("a"));
+};
+
+TEST_SUITE(MyTestSuite)
+{
+
+    TEST_FIXTURE(MyTestClass, ANestedTest)
+    {
+        string s1{ "a" };
+        assert(s1.equals("a"));
+    };
+
+}
 
 int main()
 {

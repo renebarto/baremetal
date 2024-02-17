@@ -69,7 +69,7 @@ public:
     static const size_t npos;
 
     string();
-    explicit string(const ValueType* str);
+    string(const ValueType* str);
     string(const ValueType* str, size_t count);
     string(size_t count, ValueType ch);
     string(const string& other);

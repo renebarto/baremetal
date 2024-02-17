@@ -1873,21 +1873,26 @@ File: code/libraries/baremetal/src/Version.cpp
 44: 
 45: static const size_t BufferSize = 20;
 46: static char s_baremetalVersionString[BufferSize]{};
-47: 
-48: void baremetal::SetupVersion()
-49: {
-50:     Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-51: }
-52: 
-53: const char* baremetal::GetVersion()
-54: {
-55:     return s_baremetalVersionString;
+47: static bool s_baremetalVersionSetupDone = false;
+48: 
+49: void baremetal::SetupVersion()
+50: {
+51:     if (!s_baremetalVersionSetupDone)
+52:     {
+53:         Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+54:         s_baremetalVersionSetupDone = true;
+55:     }
 56: }
+57: 
+58: const char* baremetal::GetVersion()
+59: {
+60:     return s_baremetalVersionString;
+61: }
 ```
 
 - Line 45-46: We define the local variable `s_baremetalVersionString` and its size
-- Line 48-51: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
-- Line 53-56: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
+- Line 49-56: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
+- Line 58-61: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
 
 #### Logger.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERH}
 

@@ -44,10 +44,15 @@
 
 static const size_t BufferSize = 20;
 static char s_baremetalVersionString[BufferSize]{};
+static bool s_baremetalVersionSetupDone = false;
 
 void baremetal::SetupVersion()
 {
-    Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+    if (!s_baremetalVersionSetupDone)
+    {
+        Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+        s_baremetalVersionSetupDone = true;
+    }
 }
 
 const char* baremetal::GetVersion()

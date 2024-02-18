@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Version.h
 //
 // Namespace   : -
 //
@@ -37,26 +37,18 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+#define BAREMETAL_NAME              "Baremetal"
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+#define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
+#define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
+#define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
+#define BAREMETAL_VERSION_STRING    GetVersion()
 
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+namespace baremetal {
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
+void SetupVersion();
+const char* GetVersion();
+
 }

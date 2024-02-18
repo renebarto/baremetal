@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Format.h
+// File        : PhysicalGPIOPin.h
 //
 // Namespace   : baremetal
 //
-// Class       : -
+// Class       : PhysicalGPIOPin
 //
-// Description : String formatting using standard argument handling
+// Description : Physical GPIO pin
 //
 //------------------------------------------------------------------------------
 //
@@ -39,16 +39,55 @@
 
 #pragma once
 
-#include <baremetal/StdArg.h>
-#include <baremetal/Types.h>
+#include <baremetal/IGPIOPin.h>
+#include <baremetal/MemoryAccess.h>
+
+/// @file
+/// Physical GPIO pin
 
 namespace baremetal {
 
-class string;
+/// <summary>
+/// Physical GPIO pin (i.e. available on GPIO header) 
+/// </summary>
+class PhysicalGPIOPin : public IGPIOPin
+{
+private:
+    /// @brief Configured GPIO pin number (0..53)
+    uint8                 m_pinNumber;
+    /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
+    GPIOMode              m_mode;
+    /// @brief Configured GPIO function.
+    GPIOFunction          m_function;
+    /// @brief Configured GPIO pull mode (only for input function).
+    GPIOPullMode          m_pullMode;
+    /// @brief Current value of the GPIO pin (true for on, false for off).
+    bool                  m_value;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
 
-string FormatV(const char* format, va_list args);
-string Format(const char* format, ...);
-void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args);
-void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...);
+public:
+    PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
+
+    PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+
+    uint8 GetPinNumber() const override;
+    bool AssignPin(uint8 pinNumber) override;
+
+    void On() override;
+    void Off() override;
+    bool Get() override;
+    void Set(bool on) override;
+    void Invert() override;
+
+    GPIOMode GetMode();
+    bool SetMode(GPIOMode mode);
+    GPIOFunction GetFunction();
+    GPIOPullMode GetPullMode();
+    void SetPullMode(GPIOPullMode pullMode);
+
+private:
+    void SetFunction(GPIOFunction function);
+};
 
 } // namespace baremetal

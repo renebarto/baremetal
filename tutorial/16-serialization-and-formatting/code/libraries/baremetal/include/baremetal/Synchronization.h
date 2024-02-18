@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Synchronization.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Synchronization functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,9 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
-
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
-
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
-
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MIN  64
+/// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MAX  64

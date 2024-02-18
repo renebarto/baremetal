@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,44 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+/// @file
+/// Standard types
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
+
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
+
+/// @brief Unsigned volatile 32 bit integer (for registers)
+typedef volatile uint32 reg32;
+/// @brief Pointer to unsigned volatile 32 bit integer (for registers)
+typedef reg32* regaddr;

@@ -2408,7 +2408,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ### Application code {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_APPLICATION_CODE}
 
 We'll start making use of the string class we just added, but we'll do it in a way that shows that the string methods function as expected.
-This is a first attempt at creating class / micro / unit tests for our code, which we will start doing in the next tutorial.
+This is a first attempt at creating class / micro / unit tests for our code, which we will start doing soon.
 
 Update the file `code\applications\demo\src\main.cpp`
 
@@ -2892,7 +2892,6 @@ We can now configure and build our code, and start debugging.
 The application will print the characters in the string "bbbb" in log statements.
 Next to this nothing special is shown, as the tests will all succeed. If a test were to fail, the assertion would fire, and the application would crash.
 This is a way to test code, however we'd like to see all of the failure found in our code, not have the first one crash the application.
-This is the subject of the next tutorial.
 
 ```text
 Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)

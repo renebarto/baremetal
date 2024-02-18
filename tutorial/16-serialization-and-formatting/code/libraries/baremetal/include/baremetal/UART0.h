@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : UART0.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : UART0
 //
-// Description : Baremetal version information
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,48 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+#include <baremetal/CharDevice.h>
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @file
+/// Raspberry Pi UART0 serial device
 
-void baremetal::SetupVersion()
+namespace baremetal {
+
+class IMemoryAccess;
+
+/// <summary>
+/// Encapsulation for the UART0 device.
+///
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// </summary>
+class UART0 : public CharDevice
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// <summary>
+    /// Construct the singleton UART0 instance if needed, and return a reference to the instance. This is a friend function of class UART0
+    /// </summary>
+    /// <returns>Reference to the singleton UART0 instance</returns>
+    friend UART0 &GetUART0();
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool            m_initialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess  &m_memoryAccess;
+
+    UART0();
+
+public:
+    UART0(IMemoryAccess &memoryAccess);
+
+    void Initialize();
+    char Read() override;
+    void Write(char c) override;
+    void WriteString(const char* str);
+};
+
+UART0 &GetUART0();
+
+} // namespace baremetal

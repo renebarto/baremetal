@@ -39,10 +39,6 @@
 
 #include <unittest/TestBase.h>
 
-#include "unittest/CurrentTest.h"
-#include "unittest/ExecuteTest.h"
-#include "unittest/TestRegistry.h"
-
 using namespace baremetal;
 
 namespace unittest {
@@ -63,20 +59,9 @@ TestBase::~TestBase()
 {
 }
 
-void TestBase::Run(int /*maxTestTimeInMs*/, TestResults* testResults)
-{
-    CurrentTest::Results() = testResults;
-
-    testResults->OnTestStart(m_details);
-
-    Run();
-
-    testResults->OnTestFinish(m_details, 0);
-}
-
 void TestBase::Run()
 {
-    ExecuteTest(*this, m_details);
+    RunImpl();
 }
 
 void TestBase::RunImpl() const

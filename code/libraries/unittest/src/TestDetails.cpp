@@ -12,9 +12,9 @@
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-// 
+//
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,7 +34,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 //------------------------------------------------------------------------------
 
 #include <unittest/TestDetails.h>
@@ -57,15 +57,6 @@ TestDetails::TestDetails(const string& testName, const string& fixtureName, cons
     , m_fixtureName{ fixtureName }
     , m_testName{ testName }
     , m_fileName{ fileName }
-    , m_lineNumber{ lineNumber }
-{
-}
-
-TestDetails::TestDetails(const TestDetails& details, int lineNumber)
-    : m_suiteName{ details.m_suiteName }
-    , m_fixtureName{ details.m_fixtureName }
-    , m_testName{ details.m_testName }
-    , m_fileName{ details.m_fileName }
     , m_lineNumber{ lineNumber }
 {
 }

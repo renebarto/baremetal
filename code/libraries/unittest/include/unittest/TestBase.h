@@ -44,13 +44,9 @@
 namespace unittest
 {
 
-class TestRegistry;
-class TestResults;
-
 class TestBase
 {
 private:
-    friend class TestFixtureInfo;
     TestDetails const m_details;
     TestBase* m_next;
 
@@ -60,10 +56,10 @@ public:
     TestBase(TestBase&&) = delete;
     explicit TestBase(
         const baremetal::string& testName,
-        const baremetal::string& fixtureName = baremetal::string(""),
-        const baremetal::string& suiteName = baremetal::string(""),
-        const baremetal::string& fileName = baremetal::string(""),
-        int lineNumber = 0);
+        const baremetal::string& fixtureName = {},
+        const baremetal::string& suiteName = {},
+        const baremetal::string& fileName = {},
+        int lineNumber = {});
     virtual ~TestBase();
 
     TestBase& operator = (const TestBase&) = delete;
@@ -72,8 +68,6 @@ public:
     const TestDetails& Details() const { return m_details; }
 
     void Run();
-
-    void Run(int maxTestTimeInMs, TestResults* testResults);
 
     virtual void RunImpl() const;
 };

@@ -253,24 +253,16 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 112: 
 113:     void Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor = ConsoleColor::Default);
 114:     void Write(const char *str);
-115:     void Write(uint8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-116:     void Write(uint32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-117:     void Write(uint64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-118:     void Write(const uint8 *value, size_t size);
-119:     void Write(uint8 *value, size_t size);
-120:     void Write(const uint32 *value, size_t size);
-121:     void Write(uint32 *value, size_t size);
-122:     void Write(bool value);
+115: 
+116:     char ReadChar();
+117:     void WriteChar(char ch);
+118: 
+119: private:
+120: };
+121: 
+122: Console &GetConsole();
 123: 
-124:     char ReadChar();
-125:     void WriteChar(char ch);
-126: 
-127: private:
-128: };
-129: 
-130: Console &GetConsole();
-131: 
-132: } // namespace baremetal
+124: } // namespace baremetal
 ```
 
 - Line 53-89: We declare an enum type for the foreground or background color
@@ -283,17 +275,9 @@ File: code/libraries/baremetal/include/baremetal/Console.h
   - Line 111: We declare the method `ResetTerminalColor()` to reset the foreground and background color for the console. This outputs ANSI color codes
   - Line 113: We declare the method `Write()` to write a string with the foreground and background color specified
   - Line 114: We declare the method `Write()` to write a string without setting the color
-  - Line 115: We declare the method `Write()` to write a 8 bit unsigned integer. This will use the `Serialize()` function
-  - Line 116: We declare the method `Write()` to write a 32 bit unsigned integer. This will use the `Serialize()` function
-  - Line 117: We declare the method `Write()` to write a 64 bit unsigned integer. This will use the `Serialize()` function
-  - Line 118: We declare the method `Write()` to write an array of const bytes. This will output a memory dump with 16 bytes per row
-  - Line 119: We declare the method `Write()` to write an array of non-const bytes. This will output a memory dump with 16 bytes per row
-  - Line 120: We declare the method `Write()` to write an array of const unsigned 32 bit values. This will output a memory dump with 8 words per row
-  - Line 121: We declare the method `Write()` to write an array of non-const unsigned 32 bit values. This will output a memory dump with 8 words per row
-  - Line 122: We declare the method `Write()` to write a boolean value
-  - Line 124: We declare the method `ReadChar()` to read a character from the console
-  - Line 125: We declare the method `WriteChar()` to write a character to the console
-- Line 130: We declare the accessor for the `Console` class. This will create an instance if needed, initialize it, and return a reference.
+  - Line 116: We declare the method `ReadChar()` to read a character from the console
+  - Line 117: We declare the method `WriteChar()` to write a character to the console
+- Line 122: We declare the accessor for the `Console` class. This will create an instance if needed, initialize it, and return a reference.
 
 ### Console.cpp {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_CONSOLECPP}
 
@@ -483,243 +467,52 @@ File: code/libraries/baremetal/src/Console.cpp
 180: }
 181: 
 182: /// <summary>
-183: /// Write an unsigned 8 bit integer value formatted as specified
+183: /// Read a character
 184: /// </summary>
-185: /// <param name="value">Value to be written</param>
-186: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-187: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-188: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-189: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-190: void Console::Write(uint8 value, int width, int base, bool showBase, bool leadingZeros)
-191: {
-192:     const size_t BufferSize = 256;
-193:     char buffer[BufferSize];
-194: 
-195:     Serialize(buffer, BufferSize, value, width, base, showBase, leadingZeros);
-196:     Write(buffer);
-197: }
-198: 
-199: /// <summary>
-200: /// Write an unsigned 32 bit integer value formatted as specified
-201: /// </summary>
-202: /// <param name="value">Value to be written</param>
-203: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-204: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-205: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-206: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-207: void Console::Write(uint32 value, int width, int base, bool showBase, bool leadingZeros)
-208: {
-209:     const size_t BufferSize = 256;
-210:     char buffer[BufferSize];
-211:     
-212:     Serialize(buffer, BufferSize, value, width, base, showBase, leadingZeros);
-213:     Write(buffer);
-214: }
-215: 
-216: /// <summary>
-217: /// Write an unsigned 64 bit integer value formatted as specified
-218: /// </summary>
-219: /// <param name="value">Value to be written</param>
-220: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-221: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-222: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-223: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-224: void Console::Write(uint64 value, int width, int base, bool showBase, bool leadingZeros)
-225: {
-226:     const size_t BufferSize = 256;
-227:     char buffer[BufferSize];
-228: 
-229:     Serialize(buffer, BufferSize, value, width, base, showBase, leadingZeros);
-230:     Write(buffer);
-231: }
-232: 
-233: static const size_t WordsPerRow     = 8;
-234: static const size_t MaxDisplayWords = 2048;
-235: 
-236: /// <summary>
-237: /// Write a const array of unsigned 32 bit values. 
-238: /// Values are separated by spaces in rows of 8, each row prepended with the offset of the start of the row.
-239: /// The maximum count of values shown is 2048.
-240: /// </summary>
-241: /// <param name="value">Pointer to array of values to be written</param>
-242: /// <param name="size">Count of values in array</param>
-243: void                Console::Write(const uint32 *value, size_t size)
-244: {
-245:     if (m_device == nullptr)
-246:         return;
-247:     if (value != nullptr)
-248:     {
-249:         Write("\r\n");
-250:         size_t displayWords = (size < MaxDisplayWords) ? size : MaxDisplayWords;
-251:         // cppcheck-suppress knownConditionTrueFalse
-252:         for (size_t i = 0; i < displayWords; i += WordsPerRow)
-253:         {
-254:             Write(i, 0, 16, false, true);
-255:             Write("  ");
-256:             for (size_t j = 0; j < WordsPerRow; ++j)
-257:             {
-258:                 if (j != 0)
-259:                     WriteChar(' ');
-260:                 if ((i + j) < displayWords)
-261:                     Write(value[i + j], 8, 16, false, true);
-262:                 else
-263:                     Write("        ");
-264:             }
-265:             Write("\r\n");
-266:         }
-267:     }
-268:     else
-269:     {
-270:         Write("null\r\n");
-271:     }
-272: }
-273: 
-274: /// <summary>
-275: /// Write a non-const array of unsigned 32 bit values. 
-276: /// Values are separated by spaces in rows of 8, each row prepended with the offset of the start of the row.
-277: /// The maximum count of values shown is 2048.
-278: /// </summary>
-279: /// <param name="value">Pointer to array of values to be written</param>
-280: /// <param name="size">Count of values in array</param>
-281: void Console::Write(uint32 *value, size_t size)
-282: {
-283:     Write(reinterpret_cast<const uint32 *>(value), size);
-284: }
-285: 
-286: static const size_t BytesPerRow     = 16;
-287: static const size_t MaxDisplayBytes = 4096;
-288: 
-289: /// <summary>
-290: /// Write a const byte array.
-291: /// 
-292: /// Bytes are separated by spaces in rows of 16, each row prepended with the offset of the start of the row.
-293: /// At the end of every row, the bytes are also shown as characters, if printable, otherwise as '.'.
-294: /// The maximum count of bytes shown is 4096.
-295: /// </summary>
-296: /// <param name="value">Pointer to array of bytes to be written</param>
-297: /// <param name="size">Count of bytes in array</param>
-298: void                Console::Write(const uint8 *value, size_t size)
-299: {
-300:     if (m_device == nullptr)
-301:         return;
-302:     if (value != nullptr)
-303:     {
-304:         Write("\r\n");
-305:         size_t displayBytes = (size < MaxDisplayBytes) ? size : MaxDisplayBytes;
-306:         // cppcheck-suppress knownConditionTrueFalse
-307:         for (size_t i = 0; i < displayBytes; i += BytesPerRow)
-308:         {
-309:             Write(i, 8, 16, false, true);
-310:             Write("  ");
-311:             for (size_t j = 0; j < BytesPerRow; ++j)
-312:             {
-313:                 if (j != 0)
-314:                     WriteChar(' ');
-315:                 if ((i + j) < displayBytes)
-316:                     Write(static_cast<uint8>(value[i + j]), 2, 16, false, true);
-317:                 else
-318:                     Write("  ");
-319:             }
-320:             Write("  ");
-321:             for (size_t j = 0; j < BytesPerRow; ++j)
-322:             {
-323:                 if (j != 0)
-324:                     WriteChar(' ');
-325:                 if ((i + j) < displayBytes)
-326:                 {
-327:                     auto ch = value[i + j];
-328:                     WriteChar(((ch >= 32) && (ch < 127)) ? static_cast<char>(ch) : '.');
-329:                 }
-330:                 else
-331:                 {
-332:                     WriteChar(' ');
-333:                 }
-334:             }
-335:             Write("\r\n");
-336:         }
-337:     }
-338:     else
-339:     {
-340:         Write("null\r\n");
-341:     }
-342: }
-343: 
-344: /// <summary>
-345: /// Write a non-const byte array.
-346: /// 
-347: /// Bytes are separated by spaces in rows of 16, each row prepended with the offset of the start of the row.
-348: /// At the end of every row, the bytes are also shown as characters, if printable, otherwise as '.'.
-349: /// The maximum count of bytes shown is 4096.
-350: /// </summary>
-351: /// <param name="value">Pointer to array of bytes to be written</param>
-352: /// <param name="size">Count of bytes in array</param>
-353: void Console::Write(uint8 *value, size_t size)
-354: {
-355:     if (m_device == nullptr)
-356:         return;
-357:     Write(reinterpret_cast<const uint8 *>(value), size);
-358: }
-359: 
-360: /// <summary>
-361: /// Write a boolean value.
-362: /// 
-363: /// Will write "true" if the value is true, "false" otherwise
-364: /// </summary>
-365: /// <param name="value">Value to be written</param>
-366: void Console::Write(bool value)
-367: {
-368:     if (m_device == nullptr)
-369:         return;
-370:     Write(value ? "true" : "false");
-371: }
-372: 
-373: /// <summary>
-374: /// Read a character
-375: /// </summary>
-376: /// <returns>Character received</returns>
-377: char Console::ReadChar()
-378: {
-379:     char ch{};
-380:     if (m_device != nullptr)
-381:     {
-382:         ch = m_device->Read();
-383:     }
-384:     return ch;
-385: }
-386: 
-387: /// <summary>
-388: /// Write a single character.
-389: /// </summary>
-390: /// <param name="ch">Character to be written</param>
-391: void Console::WriteChar(char ch)
-392: {
-393:     if (m_device != nullptr)
-394:     {
-395:         m_device->Write(ch);
-396:     }
-397: }
-398: 
-399: /// <summary>
-400: /// Retrieve the singleton console
-401: ///
-402: /// Creates a static instance of Console, and returns a reference to it.
-403: /// </summary>
-404: /// <returns>A reference to the singleton console.</returns>
-405: Console &GetConsole()
-406: {
-407: #if defined(BAREMETAL_CONSOLE_UART0)
-408:     static UART0&  uart = GetUART0();
-409:     static Console console(&uart);
-410: #elif defined(BAREMETAL_CONSOLE_UART1)
-411:     static UART1&  uart = GetUART1();
-412:     static Console console(&uart);
-413: #else
-414:     static Console console(nullptr);
-415: #endif
-416:     return console;
-417: }
-418: 
-419: } // namespace baremetal
+185: /// <returns>Character received</returns>
+186: char Console::ReadChar()
+187: {
+188:     char ch{};
+189:     if (m_device != nullptr)
+190:     {
+191:         ch = m_device->Read();
+192:     }
+193:     return ch;
+194: }
+195: 
+196: /// <summary>
+197: /// Write a single character.
+198: /// </summary>
+199: /// <param name="ch">Character to be written</param>
+200: void Console::WriteChar(char ch)
+201: {
+202:     if (m_device != nullptr)
+203:     {
+204:         m_device->Write(ch);
+205:     }
+206: }
+207: 
+208: /// <summary>
+209: /// Retrieve the singleton console
+210: ///
+211: /// Creates a static instance of Console, and returns a reference to it.
+212: /// </summary>
+213: /// <returns>A reference to the singleton console.</returns>
+214: Console &GetConsole()
+215: {
+216: #if defined(BAREMETAL_CONSOLE_UART0)
+217:     static UART0&  uart = GetUART0();
+218:     static Console console(&uart);
+219: #elif defined(BAREMETAL_CONSOLE_UART1)
+220:     static UART1&  uart = GetUART1();
+221:     static Console console(&uart);
+222: #else
+223:     static Console console(nullptr);
+224: #endif
+225:     return console;
+226: }
+227: 
+228: } // namespace baremetal
 ```
 
 - Line 50-81: Implements a color conversion to an ANSI color code. Not that normal and bright colors use the same code, but have a different prefix.
@@ -731,21 +524,9 @@ File: code/libraries/baremetal/src/Console.cpp
 The only exception is that we wait for the bool inUse to became false. This is a very simple locking mechanism that will prevent multiple cores writing to the console at the same time, to organize output a bit better.
 We'll get to that when we actually start using multiple cores.
 - Line 171-180: Implements the `Write()` method for a string with no color specification.
-- Line 190-197: Implements the `Write()` method for 8 bit unsigned integer. The method to serialize this is not defined in Serialization.h yet, so we're going to add it in a minute.
-- Line 207-214: Implements the `Write()` method for 32 bit unsigned integer. 
-- Line 224-231: Implements the `Write()` method for 64 bit unsigned integer. 
-- Line 243-272: Implements the `Write()` method for an array of const 32 bit unsigned integers.
-You can see that we print a maximum of 2048 words, 8 on each line.
-If the pointer is nullptr, we print `null`
-- Line 281-284: Implements the `Write()` method for an array of non const 32 bit unsigned integers.
-- Line 298-342: Implements the `Write()` method for an array of const 8 bit unsigned integers.
-You can see that we print a maximum of 4096 bytes, 16 on each line. If the byte is printable, it will also be printed to the right of the 16 value in each row, otherwise it will be printed as '.'.
-If the pointer is nullptr, we print `null`
-- Line 353-358: Implements the `Write()` method for an array of non const 8 bit unsigned integers.
-- Line 366-371: Implements the `Write()` method for a boolean.
-- Line 377-385: Implements the `ReadChar()` method.
-- Line 391-397: Implements the `WriteChar()` method.
-- Line 405-419: Implements the `GetConsole()` function.
+- Line 186-194: Implements the `ReadChar()` method.
+- Line 200-206: Implements the `WriteChar()` method.
+- Line 214-226: Implements the `GetConsole()` function.
 Notice how we define a static UART0 instance when `BAREMETAL_CONSOLE_UART0` is defined, 
 otherwise we define a static UART1 instance when `BAREMETAL_CONSOLE_UART1` is defined, 
 and if both are not defined, we set the console to a nullptr device.

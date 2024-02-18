@@ -112,14 +112,6 @@ public:
 
     void Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor = ConsoleColor::Default);
     void Write(const char *str);
-    void Write(uint8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-    void Write(uint32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-    void Write(uint64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-    void Write(const uint8 *value, size_t size);
-    void Write(uint8 *value, size_t size);
-    void Write(const uint32 *value, size_t size);
-    void Write(uint32 *value, size_t size);
-    void Write(bool value);
 
     char ReadChar();
     void WriteChar(char ch);

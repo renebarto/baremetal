@@ -95,6 +95,7 @@ string::string(const ValueType* str)
     {
         strncpy(m_buffer, str, size);
     }
+    m_end = m_buffer + size;
 }
 
 /// <summary>
@@ -118,6 +119,7 @@ string::string(const ValueType* str, size_t count)
     {
         strncpy(m_buffer, str, size);
     }
+    m_end = m_buffer + size;
 }
 
 /// <summary>
@@ -137,6 +139,7 @@ string::string(size_t count, ValueType ch)
     {
         memset(m_buffer, ch, size);
     }
+    m_end = m_buffer + size;
 }
 
 /// <summary>
@@ -155,6 +158,7 @@ string::string(const string& other)
     {
         strncpy(m_buffer, other.data(), size);
     }
+    m_end = m_buffer + size;
 }
 
 /// <summary>
@@ -193,6 +197,7 @@ string::string(const string& other, size_t pos, size_t count /*= npos*/)
     {
         strncpy(m_buffer, other.data() + pos, size);
     }
+    m_end = m_buffer + size;
 }
 
 /// <summary>
@@ -1408,7 +1413,8 @@ bool string::reallocate(size_t requestedLength)
 
     if (!reallocate_allocation_size(allocationSize))
         return false;
-    m_end = m_buffer + requestedLength;
+    if (m_end > m_buffer + requestedLength)
+        m_end = m_buffer + requestedLength;
     return true;
 }
 
@@ -1425,6 +1431,10 @@ bool string::reallocate_allocation_size(size_t allocationSize)
         return false;
     }
     m_buffer = newBuffer;
+    if (m_end == nullptr)
+        m_end = m_buffer;
+    if (m_end > m_buffer + allocationSize)
+        m_end = m_buffer + allocationSize;
     m_allocatedSize = allocationSize;
     return true;
 }

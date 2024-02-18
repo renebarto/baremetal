@@ -2167,7 +2167,7 @@ File: code/libraries/baremetal/src/Version.cpp
 62: }
 ```
 
-## Application code {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_APPLICATION_CODE}
+## Application code {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_APPLICATION_CODE}
 
 We'll add some tests for check whether the serialization functions work as expected.
 This is the second attempt at creating class / micro / unit tests for our code, which we will start doing in the next tutorial.
@@ -2315,11 +2315,11 @@ File: code\applications\demo\src\main.cpp
 137: }
 ```
 
-## Update project configuration {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+## Update project configuration {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATE_PROJECT_CONFIGURATION}
 
 As we did not add any new files, we don't need to update the CMake file.
 
-## Configuring, building and debugging {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+## Configuring, building and debugging {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

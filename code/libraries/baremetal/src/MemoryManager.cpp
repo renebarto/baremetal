@@ -218,12 +218,14 @@ size_t MemoryManager::GetHeapFreeSpace(HeapType type)
 /// </summary>
 void MemoryManager::DumpStatus()
 {
+#if BAREMETAL_MEMORY_TRACING
     auto& memoryManager = GetMemoryManager();
     LOG_DEBUG("Low heap:");
     memoryManager.m_heapLow.DumpStatus();
 #if BAREMETAL_RPI_TARGET >= 4
     LOG_DEBUG("High heap:");
-    memoryManager.m_heapHigh.DumpState();
+    memoryManager.m_heapHigh.DumpStatus();
+#endif
 #endif
 }
 

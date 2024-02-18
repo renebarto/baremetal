@@ -456,7 +456,7 @@ File: code/libraries/baremetal/src/String.cpp
 93:     auto size = strlen(str);
 94:     if (reallocate(size))
 95:     {
-96:         strncpy(m_buffer, str, size);
+96:         strncpy(m_buffer, str, size + 1);
 97:     }
 98:     m_end = m_buffer + size;
 99: }
@@ -480,7 +480,7 @@ File: code/libraries/baremetal/src/String.cpp
 117:         size = count;
 118:     if (reallocate(size))
 119:     {
-120:         strncpy(m_buffer, str, size);
+120:         strncpy(m_buffer, str, size + 1);
 121:     }
 122:     m_end = m_buffer + size;
 123: }
@@ -681,7 +681,7 @@ File: code/libraries/baremetal/src/String.cpp
 318:         if (!reallocate(size))
 319:             return *this;
 320:     }
-321:     strncpy(m_buffer, str, size);
+321:     strncpy(m_buffer, str, size + 1);
 322:     m_end = m_buffer + size;
 323:     m_buffer[size] = NullCharConst;
 324:     return *this;
@@ -709,7 +709,7 @@ File: code/libraries/baremetal/src/String.cpp
 346:         if (!reallocate(size))
 347:             return *this;
 348:     }
-349:     strncpy(m_buffer, str, size);
+349:     strncpy(m_buffer, str, size + 1);
 350:     m_end = m_buffer + size;
 351:     m_buffer[size] = NullCharConst;
 352:     return *this;

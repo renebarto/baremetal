@@ -100,7 +100,7 @@ string::string(const ValueType* str)
     auto size = strlen(str);
     if (reallocate(size))
     {
-        strncpy(m_buffer, str, size);
+        strncpy(m_buffer, str, size + 1);
     }
     m_end = m_buffer + size;
 }
@@ -124,7 +124,7 @@ string::string(const ValueType* str, size_t count)
         size = count;
     if (reallocate(size))
     {
-        strncpy(m_buffer, str, size);
+        strncpy(m_buffer, str, size + 1);
     }
     m_end = m_buffer + size;
 }
@@ -325,7 +325,7 @@ string& string::assign(const ValueType* str)
         if (!reallocate(size))
             return *this;
     }
-    strncpy(m_buffer, str, size);
+    strncpy(m_buffer, str, size + 1);
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
     return *this;
@@ -353,7 +353,7 @@ string& string::assign(const ValueType* str, size_t count)
         if (!reallocate(size))
             return *this;
     }
-    strncpy(m_buffer, str, size);
+    strncpy(m_buffer, str, size + 1);
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
     return *this;

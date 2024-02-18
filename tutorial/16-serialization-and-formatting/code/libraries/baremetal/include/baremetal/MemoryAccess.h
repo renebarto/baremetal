@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : MemoryAccess.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryAccess
 //
-// Description : Baremetal version information
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,32 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+#include <baremetal/IMemoryAccess.h>
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @file
+/// Memory access class
 
-void baremetal::SetupVersion()
+namespace baremetal {
+
+/// <summary>
+/// Memory access interface
+/// </summary>
+class MemoryAccess : public IMemoryAccess
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+public:
+    uint8  Read8(regaddr address) override;
+    void   Write8(regaddr address, uint8 data) override;
+    void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void   Write16(regaddr address, uint16 data) override;
+    void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void   Write32(regaddr address, uint32 data) override;
+    void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
+};
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+MemoryAccess &GetMemoryAccess();
+
+} // namespace baremetal

@@ -1,20 +1,20 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : StdArg.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Variable arguments handling
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-//
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-//
+// 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,29 +34,25 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
+// 
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+/// @file
+/// Standard variable argument list handling using builtin functionality in GCC
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+// prevent warning, if <stdarg.h> from toolchain is included too
+#ifndef _STDARG_H
 
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief declare standard va_list type
+typedef __builtin_va_list va_list;
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief define standard va_start macro
+#define va_start(arg, last)     __builtin_va_start (arg, last)
+/// @brief define standard va_end macro
+#define va_end(arg)             __builtin_va_end (arg)
+/// @brief define standard va_arg macro
+#define va_arg(arg, type)       __builtin_va_arg (arg, type)
+
+#endif

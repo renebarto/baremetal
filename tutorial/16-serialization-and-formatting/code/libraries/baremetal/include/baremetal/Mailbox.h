@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Mailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Mailbox
 //
-// Description : Baremetal version information
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,40 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+#include <baremetal/IMailbox.h>
+#include <baremetal/MemoryAccess.h>
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @file
+/// Raspberry Pi Mailbox
 
-void baremetal::SetupVersion()
+namespace baremetal {
+
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+public:
+    Mailbox(MailboxChannel channel, IMemoryAccess &memoryAccess = GetMemoryAccess());
+
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void   Flush();
+    uintptr Read();
+    void   Write(uintptr data);
+};
+
+} // namespace baremetal

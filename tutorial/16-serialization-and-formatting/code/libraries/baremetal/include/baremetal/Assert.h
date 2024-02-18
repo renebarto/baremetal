@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Assert.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Assertion functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,34 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+#include <baremetal/Macros.h>
+#include <baremetal/Types.h>
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @file
+/// Assertion functions
 
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+namespace baremetal {
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+#ifdef NDEBUG
+/// If building for release, assert is replaced by nothing
+#define assert(expr) ((void)0)
+#else
+void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
+
+/// @brief Assertion callback function, which can be installed to handle a failed assertion
+using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
+
+void ResetAssertionCallback();
+void SetAssertionCallback(AssertionCallback* callback);
+
+/// @brief Assertion. If the assertion fails, AssertionFailed is called.
+///
+/// <param name="expression">Expression to evaluate.
+/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
+#define assert(expression) (likely(expression) ? ((void)0) : AssertionFailed(#expression, __FILE__, __LINE__))
+
+#endif
+
+} // namespace baremetal

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Timer.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Timer
 //
-// Description : Baremetal version information
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,26 +37,53 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+/// @file
+/// Raspberry Pi Timer
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+#include <baremetal/Types.h>
 
-void baremetal::SetupVersion()
+namespace baremetal {
+
+class IMemoryAccess;
+
+/// <summary>
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
+/// </summary>
+class Timer
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// <summary>
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// </summary>
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer& GetTimer();
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+private:
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
+    IMemoryAccess& m_memoryAccess;
+
+    Timer();
+
+public:
+    Timer(IMemoryAccess& memoryAccess);
+
+    void GetTimeString(char* buffer, size_t bufferSize);
+
+    static void WaitCycles(uint32 numCycles);
+
+#if defined(USE_PHYSICAL_COUNTER)
+    uint64 GetSystemTimer();
+#endif
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
+};
+
+Timer& GetTimer();
+
+} // namespace baremetal

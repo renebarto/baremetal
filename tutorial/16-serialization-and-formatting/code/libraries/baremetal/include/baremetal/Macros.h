@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Macros.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
@@ -37,26 +37,26 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+/// @file
+/// Generic macros
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED              __attribute__ ((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+#define ALIGN(n)            __attribute__ ((aligned (n)))
 
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK                __attribute__ ((weak))
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Make branch prediction expect exp to be true (GCC compiler only)
+/// @param exp Expression to be evaluated
+#define likely(exp)         __builtin_expect (!!(exp), 1)
+/// @brief Make branch prediction expect exp to be false (GCC compiler only)
+/// @param exp Expression to be evaluated
+#define unlikely(exp)       __builtin_expect (!!(exp), 0)
+
+/// @brief Convert bit index into integer
+/// @param n Bit index
+#define BIT(n)              (1U << (n))

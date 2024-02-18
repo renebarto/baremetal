@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : CharDevice.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : CharDevice
 //
-// Description : Baremetal version information
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
 //
@@ -37,26 +37,33 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <baremetal/Format.h>
-#include <baremetal/String.h>
-#include <baremetal/Util.h>
+/// @file
+/// Abstract character device
 
-static const size_t BufferSize = 20;
-static char s_baremetalVersionString[BufferSize]{};
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
 
-void baremetal::SetupVersion()
+/// <summary>
+/// Abstract character CharDevice
+///
+/// Abstraction of a CharDevice that can read and write characters
+/// </summary>
+class CharDevice
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+public:
+    virtual ~CharDevice() = default;
 
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+    /// <summary>
+    /// Read a character
+    /// </summary>
+    /// <returns>Character read</returns>
+    virtual char Read() = 0;
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="c">Character to be written</param>
+    virtual void Write(char c) = 0;
+};
+
+} // namespace baremetal

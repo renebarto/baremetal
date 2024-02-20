@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : TestSuiteInfo.h
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : TestSuiteInfo
 //
-// Description : Testcase
+// Description : Test suite info
 //
 //------------------------------------------------------------------------------
 //
@@ -39,38 +39,43 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
+#include <unittest/TestFixtureInfo.h>
 
 namespace unittest
 {
 
-class TestBase
+class TestBase;
+class TestFixtureInfo;
+
+class TestSuiteInfo
 {
 private:
-    friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+    TestFixtureInfo* m_head;
+    TestFixtureInfo* m_tail;
+    TestSuiteInfo* m_next;
+    baremetal::string m_suiteName;
 
 public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+    TestSuiteInfo() = delete;
+    TestSuiteInfo(const TestSuiteInfo&) = delete;
+    TestSuiteInfo(TestSuiteInfo&&) = delete;
+    explicit TestSuiteInfo(const baremetal::string& suiteName);
+    virtual ~TestSuiteInfo();
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
+    TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
+    TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
 
-    const TestDetails& Details() const { return m_details; }
+    TestFixtureInfo* GetHead() const;
+
+    const baremetal::string& Name() const { return m_suiteName; }
 
     void Run();
 
-    virtual void RunImpl() const;
+    int CountFixtures();
+    int CountTests();
+
+    void AddFixture(TestFixtureInfo* testFixture);
+    TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
 };
 
 } // namespace unittest

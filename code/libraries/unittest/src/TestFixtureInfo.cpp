@@ -1,14 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : TestFixtureInfo.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : TestFixtureInfo
 //
-// Description : Testcase
-//
+// Description : Test fixture
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -37,40 +36,73 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "unittest/TestFixtureInfo.h"
 
-#include <unittest/TestDetails.h>
+#include <baremetal/Assert.h>
 
-namespace unittest
+using namespace baremetal;
+
+namespace unittest {
+
+TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
+    : m_head{}
+    , m_tail{}
+    , m_next{}
+    , m_fixtureName{ fixtureName }
 {
+}
 
-class TestBase
+TestFixtureInfo::~TestFixtureInfo()
 {
-private:
-    friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+    TestBase* test = m_head;
+    while (test != nullptr)
+    {
+        TestBase* currentTest = test;
+        test = test->m_next;
+        delete currentTest;
+    }
+}
 
-public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+void TestFixtureInfo::AddTest(TestBase* test)
+{
+    if (m_tail == nullptr)
+    {
+        assert(m_head == nullptr);
+        m_head = test;
+        m_tail = test;
+    }
+    else
+    {
+        m_tail->m_next = test;
+        m_tail = test;
+    }
+}
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
+TestBase* TestFixtureInfo::GetHead() const
+{
+    return m_head;
+}
 
-    const TestDetails& Details() const { return m_details; }
+void TestFixtureInfo::Run()
+{
+    TestBase* test = this->GetHead();
+    while (test != nullptr)
+    {
+        test->Run();
+        test = test->m_next;
+    }
+}
 
-    void Run();
-
-    virtual void RunImpl() const;
-};
+int TestFixtureInfo::CountTests()
+{
+    int numberOfTests = 0;
+    TestBase* test = m_head;
+    while (test != nullptr)
+    {
+        ++numberOfTests;
+        test = test->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

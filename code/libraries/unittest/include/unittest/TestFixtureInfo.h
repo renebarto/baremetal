@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : TestFixtureInfo.h
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : TestFixtureInfo
 //
-// Description : Testcase
+// Description : Test fixture info
 //
 //------------------------------------------------------------------------------
 //
@@ -39,38 +39,41 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
+#include "unittest/TestBase.h"
 
 namespace unittest
 {
 
-class TestBase
+class TestBase;
+
+class TestFixtureInfo
 {
 private:
-    friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+    friend class TestSuiteInfo;
+    TestBase* m_head;
+    TestBase* m_tail;
+    TestFixtureInfo* m_next;
+    baremetal::string m_fixtureName;
 
 public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+    TestFixtureInfo() = delete;
+    TestFixtureInfo(const TestFixtureInfo&) = delete;
+    TestFixtureInfo(TestFixtureInfo&&) = delete;
+    explicit TestFixtureInfo(const baremetal::string& fixtureName);
+    virtual ~TestFixtureInfo();
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
+    TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
+    TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
 
-    const TestDetails& Details() const { return m_details; }
+    TestBase* GetHead() const;
+
+    const baremetal::string& Name() const { return m_fixtureName; }
 
     void Run();
 
-    virtual void RunImpl() const;
+    int CountTests();
+
+    void AddTest(TestBase* test);
 };
 
 } // namespace unittest

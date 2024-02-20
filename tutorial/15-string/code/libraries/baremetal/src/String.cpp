@@ -40,6 +40,7 @@
 #include <baremetal/String.h>
 
 #include <baremetal/Assert.h>
+#include <baremetal/Logger.h>
 #include <baremetal/Util.h>
 
 /// @file
@@ -54,6 +55,8 @@ const size_t string::npos = static_cast<size_t>(-1);
 static const string::ValueType NullCharConst = '\0';
 /// @brief Non-constant null character, returned as a reference for const methods where nothing can be returned (always reinitialized before returning)
 static string::ValueType NullChar = '\0';
+
+LOG_MODULE("String");
 
 /// <summary>
 /// Default constructor
@@ -74,6 +77,10 @@ string::string()
 /// </summary>
 string::~string()
 {
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    if (m_buffer != nullptr)
+        LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+#endif
     delete[] m_buffer;
 }
 
@@ -91,11 +98,12 @@ string::string(const ValueType* str)
     if (str == nullptr)
         return;
     auto size = strlen(str);
-    if (reallocate(size))
+    if (reallocate(size + 1))
     {
-        strncpy(m_buffer, str, size + 1);
+        strncpy(m_buffer, str, size);
     }
     m_end = m_buffer + size;
+    m_buffer[size] = NullCharConst;
 }
 
 /// <summary>
@@ -115,11 +123,12 @@ string::string(const ValueType* str, size_t count)
     auto size = strlen(str);
     if (count < size)
         size = count;
-    if (reallocate(size))
+    if (reallocate(size + 1))
     {
-        strncpy(m_buffer, str, size + 1);
+        strncpy(m_buffer, str, size);
     }
     m_end = m_buffer + size;
+    m_buffer[size] = NullCharConst;
 }
 
 /// <summary>
@@ -135,11 +144,12 @@ string::string(size_t count, ValueType ch)
     , m_allocatedSize{}
 {
     auto size = count;
-    if (reallocate(size))
+    if (reallocate(size + 1))
     {
         memset(m_buffer, ch, size);
     }
     m_end = m_buffer + size;
+    m_buffer[size] = NullCharConst;
 }
 
 /// <summary>
@@ -154,11 +164,12 @@ string::string(const string& other)
     , m_allocatedSize{}
 {
     auto size = other.length();
-    if (reallocate(size))
+    if (reallocate(size + 1))
     {
         strncpy(m_buffer, other.data(), size);
     }
     m_end = m_buffer + size;
+    m_buffer[size] = NullCharConst;
 }
 
 /// <summary>
@@ -193,11 +204,12 @@ string::string(const string& other, size_t pos, size_t count /*= npos*/)
     auto size = other.length() - pos;
     if (count < size)
         size = count;
-    if (reallocate(size))
+    if (reallocate(size + 1))
     {
         strncpy(m_buffer, other.data() + pos, size);
     }
     m_end = m_buffer + size;
+    m_buffer[size] = NullCharConst;
 }
 
 /// <summary>
@@ -313,12 +325,15 @@ string& string::assign(const ValueType* str)
     {
         size = strlen(str);
     }
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return *this;
     }
-    strncpy(m_buffer, str, size + 1);
+    if (str != nullptr)
+    {
+        strncpy(m_buffer, str, size);
+    }
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
     return *this;
@@ -341,12 +356,15 @@ string& string::assign(const ValueType* str, size_t count)
     }
     if (count < size)
         size = count;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return *this;
     }
-    strncpy(m_buffer, str, size + 1);
+    if (str != nullptr)
+    {
+        strncpy(m_buffer, str, size);
+    }
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
     return *this;
@@ -363,9 +381,9 @@ string& string::assign(const ValueType* str, size_t count)
 string& string::assign(size_t count, ValueType ch)
 {
     auto size = count;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return *this;
     }
     memset(m_buffer, ch, size);
@@ -384,9 +402,9 @@ string& string::assign(size_t count, ValueType ch)
 string& string::assign(const string& str)
 {
     auto size = str.length();
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return *this;
     }
     strncpy(m_buffer, str.data(), size);
@@ -410,9 +428,9 @@ string& string::assign(const string& str, size_t pos, size_t count /*= npos*/)
     auto size = str.length() - pos;
     if (count < size)
         size = count;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return *this;
     }
     strncpy(m_buffer, str.data() + pos, size);
@@ -651,13 +669,13 @@ void string::append(size_t count, ValueType ch)
 {
     auto len = length();
     auto size = len + count;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return;
     }
     memset(m_buffer + len, ch, count);
-    m_end += count;
+    m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
 
@@ -671,14 +689,14 @@ void string::append(const string& str)
 {
     auto len = length();
     auto strLength = str.length();
-    auto size = len+ strLength;
-    if (size > m_allocatedSize)
+    auto size = len + strLength;
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return;
     }
     strncpy(m_buffer + len, str.data(), strLength);
-    m_end += strLength;
+    m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
 
@@ -700,13 +718,13 @@ void string::append(const string& str, size_t pos, size_t count /*= npos*/)
     if (pos + strCount > strLength)
         strCount = strLength - pos;
     auto size = len + strCount;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return;
     }
     strncpy(m_buffer + len, str.data() + pos, strCount);
-    m_end += strCount;
+    m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
 
@@ -723,13 +741,13 @@ void string::append(const ValueType* str)
     auto len = length();
     auto strLength = strlen(str);
     auto size = len + strLength;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return;
     }
     strncpy(m_buffer + len, str, strLength);
-    m_end += strLength;
+    m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
 
@@ -750,13 +768,13 @@ void string::append(const ValueType* str, size_t count)
     if (strCount > strLength)
         strCount = strLength;
     auto size = len + strCount;
-    if (size > m_allocatedSize)
+    if ((size + 1) > m_allocatedSize)
     {
-        if (!reallocate(size))
+        if (!reallocate(size + 1))
             return;
     }
     strncpy(m_buffer + len, str, strCount);
-    m_end += strCount;
+    m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
 
@@ -1012,7 +1030,7 @@ string string::substr(size_t pos /*= 0*/, size_t count /*= npos*/) const
     {
         if (count > len - pos)
             count = len - pos;
-        result.reallocate(count);
+        result.reallocate(count + 1);
         memcpy(result.data(), data() + pos, count);
         result.data()[count] = NullCharConst;
     }
@@ -1402,19 +1420,17 @@ string string::align(int width) const
 }
 
 /// <summary>
-/// Allocate or re-allocate string to have a capacity of requestedLength characters (+1 is added for the terminating null character)
+/// Allocate or re-allocate string to have a capacity of requestedLength characters
 /// </summary>
-/// <param name="requestedLength">Amount of characters in the string to allocate space for (excluding the terminating null character)</param>
+/// <param name="requestedLength">Amount of characters in the string to allocate space for</param>
 /// <returns>True if successful, false otherwise</returns>
 bool string::reallocate(size_t requestedLength)
 {
-    auto requestedSize = requestedLength + 1;
+    auto requestedSize = requestedLength;
     auto allocationSize = NextPowerOf2((requestedSize < MinimumAllocationSize) ? MinimumAllocationSize : requestedSize);
 
     if (!reallocate_allocation_size(allocationSize))
         return false;
-    if (m_end > m_buffer + requestedLength)
-        m_end = m_buffer + requestedLength;
     return true;
 }
 
@@ -1428,9 +1444,13 @@ bool string::reallocate_allocation_size(size_t allocationSize)
     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
     if (newBuffer == nullptr)
     {
+        LOG_NO_ALLOC_DEBUG("Alloc failed!");
         return false;
     }
     m_buffer = newBuffer;
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+#endif
     if (m_end == nullptr)
         m_end = m_buffer;
     if (m_end > m_buffer + allocationSize)

@@ -442,7 +442,7 @@ File: code/libraries/baremetal/src/String.cpp
 79: {
 80: #if BAREMETAL_MEMORY_TRACING_DETAIL
 81:     if (m_buffer != nullptr)
-82:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+82:         LOG_DEBUG("Free string %p", m_buffer);
 83: #endif
 84:     delete[] m_buffer;
 85: }
@@ -1807,12 +1807,12 @@ File: code/libraries/baremetal/src/String.cpp
 1444:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
 1445:     if (newBuffer == nullptr)
 1446:     {
-1447:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
+1447:         LOG_DEBUG("Alloc failed!");
 1448:         return false;
 1449:     }
 1450:     m_buffer = newBuffer;
 1451: #if BAREMETAL_MEMORY_TRACING_DETAIL
-1452:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+1452:     LOG_DEBUG("Alloc string %p", m_buffer);
 1453: #endif
 1454:     if (m_end == nullptr)
 1455:         m_end = m_buffer;

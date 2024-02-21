@@ -1444,7 +1444,6 @@ bool string::reallocate_allocation_size(size_t allocationSize)
     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
     if (newBuffer == nullptr)
     {
-        LOG_NO_ALLOC_DEBUG("Alloc failed!");
         return false;
     }
     m_buffer = newBuffer;

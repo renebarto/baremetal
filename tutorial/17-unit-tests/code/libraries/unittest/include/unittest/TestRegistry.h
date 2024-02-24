@@ -46,6 +46,7 @@ namespace unittest
 
 class TestBase;
 class TestSuiteInfo;
+class TestResults;
 
 class TestRegistry
 {
@@ -68,10 +69,10 @@ public:
     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
     TestSuiteInfo* GetHead() const;
 
-    void Run();
-    int CountSuites();
-    int CountFixtures();
-    int CountTests();
+    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+    template <typename Predicate> int CountSuitesIf(Predicate predicate);
+    template <typename Predicate> int CountFixturesIf(Predicate predicate);
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
     static TestRegistry& GetTestRegistry();
 
@@ -83,5 +84,56 @@ class TestRegistrar
 public:
     TestRegistrar(TestRegistry& registry, TestBase* test);
 };
+
+template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    TestSuiteInfo* testSuite = GetHead();
+
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            testSuite->RunIf(predicate, testResults);
+        testSuite = testSuite->m_next;
+    }
+}
+
+template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
+{
+    int numberOfTestSuites = 0;
+    TestSuiteInfo* testSuite = GetHead();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            ++numberOfTestSuites;
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTestSuites;
+}
+
+template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
+{
+    int numberOfTestFixtures = 0;
+    TestSuiteInfo* testSuite = GetHead();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTestFixtures;
+}
+
+template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestSuiteInfo* testSuite = GetHead();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            numberOfTests += testSuite->CountTestsIf(predicate);
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

@@ -1,13 +1,14 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestFixtureInfo.cpp
+// File        : unittest.h
 //
-// Namespace   : unittest
+// Namespace   : -
 //
-// Class       : TestFixtureInfo
+// Class       : -
 //
-// Description : Test fixture
+// Description : unittest general include file, with functions to start tests
+//
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -36,63 +37,18 @@
 //
 //------------------------------------------------------------------------------
 
+#pragma once
+
+#include <unittest/TestFixture.h>
+#include <unittest/TestSuite.h>
+
+#include <unittest/ITestReporter.h>
+#include <unittest/ConsoleTestReporter.h>
+#include <unittest/ExecuteTest.h>
+#include <unittest/TestBase.h>
+#include <unittest/TestDetails.h>
 #include <unittest/TestFixtureInfo.h>
-
-#include <baremetal/Assert.h>
-
-using namespace baremetal;
-
-namespace unittest {
-
-TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-    : m_head{}
-    , m_tail{}
-    , m_next{}
-    , m_fixtureName{ fixtureName }
-{
-}
-
-TestFixtureInfo::~TestFixtureInfo()
-{
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        TestBase* currentTest = test;
-        test = test->m_next;
-        delete currentTest;
-    }
-}
-
-void TestFixtureInfo::AddTest(TestBase* test)
-{
-    if (m_tail == nullptr)
-    {
-        assert(m_head == nullptr);
-        m_head = test;
-        m_tail = test;
-    }
-    else
-    {
-        m_tail->m_next = test;
-        m_tail = test;
-    }
-}
-
-TestBase* TestFixtureInfo::GetHead() const
-{
-    return m_head;
-}
-
-int TestFixtureInfo::CountTests()
-{
-    int numberOfTests = 0;
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        ++numberOfTests;
-        test = test->m_next;
-    }
-    return numberOfTests;
-}
-
-} // namespace unittest
+#include <unittest/TestRegistry.h>
+#include <unittest/TestResults.h>
+#include <unittest/TestRunner.h>
+#include <unittest/TestSuiteInfo.h>

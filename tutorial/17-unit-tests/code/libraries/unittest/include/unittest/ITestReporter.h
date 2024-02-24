@@ -1,13 +1,14 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestFixtureInfo.cpp
+// File        : ITestReporter.h
 //
 // Namespace   : unittest
 //
-// Class       : TestFixtureInfo
+// Class       : ITestReporter
 //
-// Description : Test fixture
+// Description : Test reporter abstract class
+//
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -36,63 +37,32 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestFixtureInfo.h>
+#pragma once
 
-#include <baremetal/Assert.h>
+#include <baremetal/String.h>
 
-using namespace baremetal;
-
-namespace unittest {
-
-TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-    : m_head{}
-    , m_tail{}
-    , m_next{}
-    , m_fixtureName{ fixtureName }
+namespace unittest
 {
-}
 
-TestFixtureInfo::~TestFixtureInfo()
-{
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        TestBase* currentTest = test;
-        test = test->m_next;
-        delete currentTest;
-    }
-}
+class TestDetails;
+class TestResults;
 
-void TestFixtureInfo::AddTest(TestBase* test)
+class ITestReporter
 {
-    if (m_tail == nullptr)
-    {
-        assert(m_head == nullptr);
-        m_head = test;
-        m_tail = test;
-    }
-    else
-    {
-        m_tail->m_next = test;
-        m_tail = test;
-    }
-}
+public:
+    virtual ~ITestReporter() {}
 
-TestBase* TestFixtureInfo::GetHead() const
-{
-    return m_head;
-}
-
-int TestFixtureInfo::CountTests()
-{
-    int numberOfTests = 0;
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        ++numberOfTests;
-        test = test->m_next;
-    }
-    return numberOfTests;
-}
+    virtual void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+    virtual void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+    virtual void ReportTestRunSummary(const TestResults& results) = 0;
+    virtual void ReportTestRunOverview(const TestResults& results) = 0;
+    virtual void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTests) = 0;
+    virtual void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTests) = 0;
+    virtual void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) = 0;
+    virtual void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) = 0;
+    virtual void ReportTestStart(const TestDetails& details) = 0;
+    virtual void ReportTestFinish(const TestDetails& details, bool success) = 0;
+    virtual void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) = 0;
+};
 
 } // namespace unittest

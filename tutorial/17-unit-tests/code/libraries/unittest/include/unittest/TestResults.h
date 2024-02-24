@@ -1,13 +1,14 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestFixtureInfo.cpp
+// File        : TestResults.h
 //
 // Namespace   : unittest
 //
-// Class       : TestFixtureInfo
+// Class       : TestResults
 //
-// Description : Test fixture
+// Description : Test results
+//
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -36,63 +37,47 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestFixtureInfo.h>
+#pragma once
 
-#include <baremetal/Assert.h>
+#include <baremetal/String.h>
 
-using namespace baremetal;
-
-namespace unittest {
-
-TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-    : m_head{}
-    , m_tail{}
-    , m_next{}
-    , m_fixtureName{ fixtureName }
+namespace unittest
 {
-}
 
-TestFixtureInfo::~TestFixtureInfo()
-{
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        TestBase* currentTest = test;
-        test = test->m_next;
-        delete currentTest;
-    }
-}
+class ITestReporter;
+class TestDetails;
+class TestSuiteInfo;
+class TestFixtureInfo;
 
-void TestFixtureInfo::AddTest(TestBase* test)
+class TestResults
 {
-    if (m_tail == nullptr)
-    {
-        assert(m_head == nullptr);
-        m_head = test;
-        m_tail = test;
-    }
-    else
-    {
-        m_tail->m_next = test;
-        m_tail = test;
-    }
-}
+public:
+    explicit TestResults(ITestReporter* reporter = nullptr);
+    TestResults(const TestResults&) = delete;
+    TestResults(TestResults&&) = delete;
+    virtual ~TestResults();
 
-TestBase* TestFixtureInfo::GetHead() const
-{
-    return m_head;
-}
+    TestResults& operator = (const TestResults&) = delete;
+    TestResults& operator = (TestResults&&) = delete;
 
-int TestFixtureInfo::CountTests()
-{
-    int numberOfTests = 0;
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        ++numberOfTests;
-        test = test->m_next;
-    }
-    return numberOfTests;
-}
+    void OnTestSuiteStart(TestSuiteInfo* suite);
+    void OnTestSuiteFinish(TestSuiteInfo* suite);
+    void OnTestFixtureStart(TestFixtureInfo* fixture);
+    void OnTestFixtureFinish(TestFixtureInfo* fixture);
+    void OnTestStart(const TestDetails& details);
+    void OnTestFailure(const TestDetails& details, const baremetal::string& message);
+    void OnTestFinish(const TestDetails& details);
+
+    int GetTotalTestCount() const;
+    int GetFailedTestCount() const;
+    int GetFailureCount() const;
+
+private:
+    ITestReporter* m_reporter;
+    int m_totalTestCount;
+    int m_failedTestCount;
+    int m_failureCount;
+    bool m_currentTestFailed;
+};
 
 } // namespace unittest

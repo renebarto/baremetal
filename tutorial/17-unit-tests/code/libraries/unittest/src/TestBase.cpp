@@ -39,6 +39,10 @@
 
 #include <unittest/TestBase.h>
 
+#include <unittest/CurrentTest.h>
+#include <unittest/ExecuteTest.h>
+#include <unittest/TestResults.h>
+
 using namespace baremetal;
 
 namespace unittest {
@@ -59,9 +63,20 @@ TestBase::~TestBase()
 {
 }
 
+void TestBase::Run(TestResults& testResults)
+{
+    CurrentTest::Results() = &testResults;
+
+    testResults.OnTestStart(m_details);
+
+    Run();
+
+    testResults.OnTestFinish(m_details);
+}
+
 void TestBase::Run()
 {
-    RunImpl();
+    ExecuteTest(*this, m_details);
 }
 
 void TestBase::RunImpl() const

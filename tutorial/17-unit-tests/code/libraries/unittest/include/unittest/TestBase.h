@@ -44,6 +44,8 @@
 namespace unittest
 {
 
+class TestResults;
+
 class TestBase
 {
 private:
@@ -68,6 +70,7 @@ public:
 
     const TestDetails& Details() const { return m_details; }
 
+    void Run(TestResults& testResults);
     void Run();
 
     virtual void RunImpl() const;

@@ -3327,112 +3327,115 @@ Update the file `code/libraries/unittest/include/unittest/TestRegistry.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestRegistry.h
 ...
-45: namespace unittest
-46: {
-47: 
-48: class TestBase;
-49: class TestSuiteInfo;
-50: class TestResults;
-51: 
-52: class TestRegistry
-53: {
-54: private:
-55:     TestSuiteInfo* m_head;
-56:     TestSuiteInfo* m_tail;
-57: 
-58: public:
-59:     TestRegistry();
-60:     TestRegistry(const TestRegistry&) = delete;
-61:     TestRegistry(TestRegistry&&) = delete;
-62:     virtual ~TestRegistry();
-63: 
-64:     TestRegistry& operator = (const TestRegistry&) = delete;
-65:     TestRegistry& operator = (TestRegistry&&) = delete;
-66: 
-67:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
-68:     TestSuiteInfo* GetHead() const;
-69: 
-70:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-71:     template <typename Predicate> int CountSuitesIf(Predicate predicate);
-72:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
-73:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-74: 
-75:     static TestRegistry& GetTestRegistry();
+44: namespace unittest
+45: {
+46: 
+47: class TestBase;
+48: class TestSuiteInfo;
+49: class TestResults;
+50: 
+51: class TestRegistry
+52: {
+53: private:
+54:     TestSuiteInfo* m_head;
+55:     TestSuiteInfo* m_tail;
+56: 
+57: public:
+58:     static const char* DefaultFixtureName;
+59:     static const char* DefaultSuiteName;
+60: 
+61:     TestRegistry();
+62:     TestRegistry(const TestRegistry&) = delete;
+63:     TestRegistry(TestRegistry&&) = delete;
+64:     virtual ~TestRegistry();
+65: 
+66:     TestRegistry& operator = (const TestRegistry&) = delete;
+67:     TestRegistry& operator = (TestRegistry&&) = delete;
+68: 
+69:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
+70:     TestSuiteInfo* GetHead() const;
+71: 
+72:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+73:     template <typename Predicate> int CountSuitesIf(Predicate predicate);
+74:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
+75:     template <typename Predicate> int CountTestsIf(Predicate predicate);
 76: 
-77:     void AddSuite(TestSuiteInfo* testSuite);
-78: };
-79: 
-80: class TestRegistrar
-81: {
-82: public:
-83:     TestRegistrar(TestRegistry& registry, TestBase* test);
-84: };
-85: 
-86: template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
-87: {
-88:     TestSuiteInfo* testSuite = GetHead();
-89: 
-90:     while (testSuite != nullptr)
-91:     {
-92:         if (predicate(testSuite))
-93:             testSuite->RunIf(predicate, testResults);
-94:         testSuite = testSuite->m_next;
-95:     }
-96: }
-97: 
-98: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
-99: {
-100:     int numberOfTestSuites = 0;
-101:     TestSuiteInfo* testSuite = GetHead();
-102:     while (testSuite != nullptr)
-103:     {
-104:         if (predicate(testSuite))
-105:             ++numberOfTestSuites;
-106:         testSuite = testSuite->m_next;
-107:     }
-108:     return numberOfTestSuites;
-109: }
-110: 
-111: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
-112: {
-113:     int numberOfTestFixtures = 0;
-114:     TestSuiteInfo* testSuite = GetHead();
-115:     while (testSuite != nullptr)
-116:     {
-117:         if (predicate(testSuite))
-118:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
-119:         testSuite = testSuite->m_next;
-120:     }
-121:     return numberOfTestFixtures;
-122: }
-123: 
-124: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
-125: {
-126:     int numberOfTests = 0;
-127:     TestSuiteInfo* testSuite = GetHead();
-128:     while (testSuite != nullptr)
-129:     {
-130:         if (predicate(testSuite))
-131:             numberOfTests += testSuite->CountTestsIf(predicate);
-132:         testSuite = testSuite->m_next;
-133:     }
-134:     return numberOfTests;
-135: }
-136: 
-137: } // namespace unittest
+77:     static TestRegistry& GetTestRegistry();
+78: 
+79:     void AddSuite(TestSuiteInfo* testSuite);
+80: };
+81: 
+82: class TestRegistrar
+83: {
+84: public:
+85:     TestRegistrar(TestRegistry& registry, TestBase* test);
+86: };
+87: 
+88: template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+89: {
+90:     TestSuiteInfo* testSuite = GetHead();
+91: 
+92:     while (testSuite != nullptr)
+93:     {
+94:         if (predicate(testSuite))
+95:             testSuite->RunIf(predicate, testResults);
+96:         testSuite = testSuite->m_next;
+97:     }
+98: }
+99: 
+100: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
+101: {
+102:     int numberOfTestSuites = 0;
+103:     TestSuiteInfo* testSuite = GetHead();
+104:     while (testSuite != nullptr)
+105:     {
+106:         if (predicate(testSuite))
+107:             ++numberOfTestSuites;
+108:         testSuite = testSuite->m_next;
+109:     }
+110:     return numberOfTestSuites;
+111: }
+112: 
+113: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
+114: {
+115:     int numberOfTestFixtures = 0;
+116:     TestSuiteInfo* testSuite = GetHead();
+117:     while (testSuite != nullptr)
+118:     {
+119:         if (predicate(testSuite))
+120:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
+121:         testSuite = testSuite->m_next;
+122:     }
+123:     return numberOfTestFixtures;
+124: }
+125: 
+126: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
+127: {
+128:     int numberOfTests = 0;
+129:     TestSuiteInfo* testSuite = GetHead();
+130:     while (testSuite != nullptr)
+131:     {
+132:         if (predicate(testSuite))
+133:             numberOfTests += testSuite->CountTestsIf(predicate);
+134:         testSuite = testSuite->m_next;
+135:     }
+136:     return numberOfTests;
+137: }
+138: 
+139: } // namespace unittest
 ```
 
-- Line 50: We forward declare the `TestResults` class
-- Line 70: We replace the `Run()` method with a template version `RunIf()`, which takes a predicate, as well as a `TestResults` reference
-- Line 71: We replace then `CountSuites()` method with a template version `CountSuitesIf()`
-- Line 72: We replace then `CountFixtures()` method with a template version `CountFixturesIf()`
-- Line 73: We replace then `CountTests()` method with a template version `CountTestsIf()`
-- Line 86-96: We implement the `RunIf()` template method.
+- Line 49: We forward declare the `TestResults` class
+- Line 72: We replace the `Run()` method with a template version `RunIf()`, which takes a predicate, as well as a `TestResults` reference
+- Line 73: We replace then `CountSuites()` method with a template version `CountSuitesIf()`
+- Line 74: We replace then `CountFixtures()` method with a template version `CountFixturesIf()`
+- Line 75: We replace then `CountTests()` method with a template version `CountTestsIf()`
+- Line 88-98: We implement the `RunIf()` template method.
 Note that we use the `RunIf()` method on the test suite. We'll need to implement this
-- Line 98-109: We implement the `CountSuitesIf()` template method
-- Line 111-122: We implement the `CountFixturesIf()` template method.
+- Line 100-111: We implement the `CountSuitesIf()` template method
+- Line 113-124: We implement the `CountFixturesIf()` template method.
 Note that we use the `CountFixturesIf()` method on the test suite. We'll need to implement this
-- Line 124-135: We implement the `CountTestsIf()` template method.
+- Line 126-137: We implement the `CountTestsIf()` template method.
 Note that we use the `CountTestsIf()` method on the test suite. We'll need to implement this
 
 ### TestRegistry.cpp {#TUTORIAL_17_UNIT_TESTS_TEST_RUNNER_AND_VISITOR__STEP_5_TESTREGISTRYCPP}
@@ -3454,85 +3457,88 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 48: 
 49: namespace unittest {
 50: 
-51: TestRegistry& TestRegistry::GetTestRegistry()
-52: {
-53:     static TestRegistry s_registry;
-54:     return s_registry;
-55: }
-56: 
-57: TestRegistry::TestRegistry()
-58:     : m_head{}
-59:     , m_tail{}
-60: {
-61: }
-62: 
-63: TestRegistry::~TestRegistry()
-64: {
-65:     TestSuiteInfo *testSuite = m_head;
-66:     while (testSuite != nullptr)
-67:     {
-68:         TestSuiteInfo *currentSuite = testSuite;
-69:         testSuite               = testSuite->m_next;
-70:         delete currentSuite;
-71:     }
-72: }
-73: 
-74: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
-75: {
-76:     TestSuiteInfo *testSuite = m_head;
-77:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
-78:         testSuite = testSuite->m_next;
-79:     if (testSuite == nullptr)
-80:     {
-81: #ifdef DEBUG_REGISTRY
-82:         LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? "-" : suiteName.c_str()));
-83: #endif
-84:         testSuite = new TestSuiteInfo(suiteName);
-85:         AddSuite(testSuite);
-86:     }
-87:     else
-88:     {
-89: #ifdef DEBUG_REGISTRY
-90:         LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? "-" : suiteName.c_str()));
-91: #endif
-92:     }
-93:     return testSuite;
-94: }
-95: 
-96: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
-97: {
-98:     if (m_tail == nullptr)
-99:     {
-100:         assert(m_head == nullptr);
-101:         m_head = testSuite;
-102:         m_tail = testSuite;
-103:     }
-104:     else
-105:     {
-106:         m_tail->m_next = testSuite;
-107:         m_tail         = testSuite;
-108:     }
-109: }
-110: 
-111: TestSuiteInfo *TestRegistry::GetHead() const
-112: {
-113:     return m_head;
-114: }
-115: 
-116: TestRegistrar::TestRegistrar(TestRegistry &registry, TestBase *test)
-117: {
-118: #ifdef DEBUG_REGISTRY
-119:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
-120:         test->Details().TestName().c_str(),
-121:         (test->Details().FixtureName().empty() ? "-" : test->Details().FixtureName().c_str()),
-122:         (test->Details().SuiteName().empty() ? "-" : test->Details().SuiteName().c_str()));
-123: #endif
-124:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(test->Details().SuiteName());
-125:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(test->Details().FixtureName());
-126:     testFixture->AddTest(test);
-127: }
-128: 
-129: } // namespace unittest
+51:     const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
+52:     const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
+53: 
+54:     TestRegistry& TestRegistry::GetTestRegistry()
+55: {
+56:     static TestRegistry s_registry;
+57:     return s_registry;
+58: }
+59: 
+60: TestRegistry::TestRegistry()
+61:     : m_head{}
+62:     , m_tail{}
+63: {
+64: }
+65: 
+66: TestRegistry::~TestRegistry()
+67: {
+68:     TestSuiteInfo *testSuite = m_head;
+69:     while (testSuite != nullptr)
+70:     {
+71:         TestSuiteInfo *currentSuite = testSuite;
+72:         testSuite = testSuite->m_next;
+73:         delete currentSuite;
+74:     }
+75: }
+76: 
+77: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
+78: {
+79:     TestSuiteInfo *testSuite = m_head;
+80:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
+81:         testSuite = testSuite->m_next;
+82:     if (testSuite == nullptr)
+83:     {
+84: #ifdef DEBUG_REGISTRY
+85:         LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+86: #endif
+87:         testSuite = new TestSuiteInfo(suiteName);
+88:         AddSuite(testSuite);
+89:     }
+90:     else
+91:     {
+92: #ifdef DEBUG_REGISTRY
+93:         LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+94: #endif
+95:     }
+96:     return testSuite;
+97: }
+98: 
+99: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
+100: {
+101:     if (m_tail == nullptr)
+102:     {
+103:         assert(m_head == nullptr);
+104:         m_head = testSuite;
+105:         m_tail = testSuite;
+106:     }
+107:     else
+108:     {
+109:         m_tail->m_next = testSuite;
+110:         m_tail = testSuite;
+111:     }
+112: }
+113: 
+114: TestSuiteInfo *TestRegistry::GetHead() const
+115: {
+116:     return m_head;
+117: }
+118: 
+119: TestRegistrar::TestRegistrar(TestRegistry &registry, TestBase *test)
+120: {
+121: #ifdef DEBUG_REGISTRY
+122:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
+123:         test->Details().TestName().c_str(),
+124:         (test->Details().FixtureName().empty() ? TestRegistry::DefaultFixtureName : test->Details().FixtureName().c_str()),
+125:         (test->Details().SuiteName().empty() ? TestRegistry::DefaultSuiteName : test->Details().SuiteName().c_str()));
+126: #endif
+127:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(test->Details().SuiteName());
+128:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(test->Details().FixtureName());
+129:     testFixture->AddTest(test);
+130: }
+131: 
+132: } // namespace unittest
 ```
 
 - Line 116: We remove the implementation for the methods `Run()`, `CountSuites()`, `CountFixtures()` and `CountTests()`.
@@ -3545,12 +3551,14 @@ Update the file `code/libraries/unittest/include/unittest/TestSuiteInfo.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 ...
-44: namespace unittest
-45: {
-46: 
-47: class TestBase;
-48: class TestFixtureInfo;
-49: class TestResults;
+42: #include <unittest/TestFixtureInfo.h>
+43: #include <unittest/TestResults.h>
+44: 
+45: namespace unittest
+46: {
+47: 
+48: class TestBase;
+49: class TestFixtureInfo;
 50: 
 51: class TestSuiteInfo
 52: {
@@ -3630,8 +3638,8 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 126: } // namespace unittest
 ```
 
-- Line 49: We forward declare the `TestResults` class as we will need to use it
-- Line 72: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
+- Line 43: We include the header for the `TestResults` class as we will need to use it
+- Line 74: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
 - Line 78: We add a template method `CountFixturesIf()`
 - Line 79: We add a template method `CountTestsIf()`
 - Line 85-98: We implement the `RunIf()` template method.
@@ -3648,98 +3656,109 @@ Update the file `code/libraries/unittest/src/TestSuiteInfo.cpp`
 ```cpp
 File: code/libraries/unittest/src/TestSuiteInfo.cpp
 ...
-47: namespace unittest {
-48: 
-49: LOG_MODULE("TestSuiteInfo");
-50: 
-51: TestSuiteInfo::TestSuiteInfo(const string &suiteName)
-52:     : m_head{}
-53:     , m_tail{}
-54:     , m_next{}
-55:     , m_suiteName{suiteName}
-56: {
-57: }
-58: 
-59: TestSuiteInfo::~TestSuiteInfo()
-60: {
-61:     TestFixtureInfo *testFixture = m_head;
-62:     while (testFixture != nullptr)
-63:     {
-64:         TestFixtureInfo *currentFixture = testFixture;
-65:         testFixture                     = testFixture->m_next;
-66:         delete currentFixture;
-67:     }
-68: }
-69: 
-70: TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
-71: {
-72:     TestFixtureInfo *testFixture = m_head;
-73:     while ((testFixture != nullptr) && (testFixture->Name() != fixtureName))
-74:         testFixture = testFixture->m_next;
-75:     if (testFixture == nullptr)
-76:     {
-77: #ifdef DEBUG_REGISTRY
-78:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? "-" : fixtureName.c_str());
-79: #endif
-80:         testFixture = new TestFixtureInfo(fixtureName);
-81:         AddFixture(testFixture);
-82:     }
-83:     else
-84:     {
-85: #ifdef DEBUG_REGISTRY
-86:         LOG_DEBUG("Fixture %s found", fixtureName.empty() ? "-" : fixtureName.c_str());
-87: #endif
-88:     }
-89:     return testFixture;
-90: }
-91: 
-92: void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
-93: {
-94:     if (m_tail == nullptr)
-95:     {
-96:         assert(m_head == nullptr);
-97:         m_head = testFixture;
-98:         m_tail = testFixture;
-99:     }
-100:     else
-101:     {
-102:         m_tail->m_next = testFixture;
-103:         m_tail         = testFixture;
-104:     }
-105: }
-106: 
-107: TestFixtureInfo *TestSuiteInfo::GetHead() const
-108: {
-109:     return m_head;
-110: }
-111: 
-112: int TestSuiteInfo::CountFixtures()
-113: {
-114:     int              numberOfTestFixtures = 0;
-115:     TestFixtureInfo *testFixture          = m_head;
-116:     while (testFixture != nullptr)
-117:     {
-118:         ++numberOfTestFixtures;
-119:         testFixture = testFixture->m_next;
-120:     }
-121:     return numberOfTestFixtures;
-122: }
-123: 
-124: int TestSuiteInfo::CountTests()
-125: {
-126:     int              numberOfTests = 0;
-127:     TestFixtureInfo *testFixture   = m_head;
-128:     while (testFixture != nullptr)
-129:     {
-130:         numberOfTests += testFixture->CountTests();
-131:         testFixture = testFixture->m_next;
-132:     }
-133:     return numberOfTests;
-134: }
-135: 
-136: } // namespace unittest
+40: #include <unittest/TestSuiteInfo.h>
+41: 
+42: #include <baremetal/Assert.h>
+43: #include <baremetal/Logger.h>
+44: #include <unittest/TestRegistry.h>
+45: 
+46: using namespace baremetal;
+47: 
+48: namespace unittest {
+49: 
+50: LOG_MODULE("TestSuiteInfo");
+51: 
+52: TestSuiteInfo::TestSuiteInfo(const string &suiteName)
+53:     : m_head{}
+54:     , m_tail{}
+55:     , m_next{}
+56:     , m_suiteName{suiteName}
+57: {
+58: }
+59: 
+60: TestSuiteInfo::~TestSuiteInfo()
+61: {
+62:     TestFixtureInfo *testFixture = m_head;
+63:     while (testFixture != nullptr)
+64:     {
+65:         TestFixtureInfo *currentFixture = testFixture;
+66:         testFixture                     = testFixture->m_next;
+67:         delete currentFixture;
+68:     }
+69: }
+70: 
+71: TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
+72: {
+73:     TestFixtureInfo *testFixture = m_head;
+74:     while ((testFixture != nullptr) && (testFixture->Name() != fixtureName))
+75:         testFixture = testFixture->m_next;
+76:     if (testFixture == nullptr)
+77:     {
+78: #ifdef DEBUG_REGISTRY
+79:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+80: #endif
+81:         testFixture = new TestFixtureInfo(fixtureName);
+82:         AddFixture(testFixture);
+83:     }
+84:     else
+85:     {
+86: #ifdef DEBUG_REGISTRY
+87:         LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+88: #endif
+89:     }
+90:     return testFixture;
+91: }
+92: 
+93: void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
+94: {
+95:     if (m_tail == nullptr)
+96:     {
+97:         assert(m_head == nullptr);
+98:         m_head = testFixture;
+99:         m_tail = testFixture;
+100:     }
+101:     else
+102:     {
+103:         m_tail->m_next = testFixture;
+104:         m_tail         = testFixture;
+105:     }
+106: }
+107: 
+108: TestFixtureInfo *TestSuiteInfo::GetHead() const
+109: {
+110:     return m_head;
+111: }
+112: 
+113: int TestSuiteInfo::CountFixtures()
+114: {
+115:     int              numberOfTestFixtures = 0;
+116:     TestFixtureInfo *testFixture          = m_head;
+117:     while (testFixture != nullptr)
+118:     {
+119:         ++numberOfTestFixtures;
+120:         testFixture = testFixture->m_next;
+121:     }
+122:     return numberOfTestFixtures;
+123: }
+124: 
+125: int TestSuiteInfo::CountTests()
+126: {
+127:     int              numberOfTests = 0;
+128:     TestFixtureInfo *testFixture   = m_head;
+129:     while (testFixture != nullptr)
+130:     {
+131:         numberOfTests += testFixture->CountTests();
+132:         testFixture = testFixture->m_next;
+133:     }
+134:     return numberOfTests;
+135: }
+136: 
+137: } // namespace unittest
 ```
 
+- Line 44: We include the header for `TestRegistry` so we can use the default test fixture and test suite names
+- Line 79: We using the default test fixture name instead of "-"
+- Line 87: We using the default test fixture name instead of "-"
 - Line 112: We remove the implementation for the method `Run()`
 
 ### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TESTS_TEST_RUNNER_AND_VISITOR__STEP_5_TESTFIXTUREINFOH}
@@ -3750,8 +3769,6 @@ Update the file `code/libraries/unittest/include/unittest/TestFixtureInfo.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 ...
-40: #pragma once
-41: 
 42: #include <unittest/TestBase.h>
 43: #include <unittest/TestResults.h>
 44: 
@@ -3825,8 +3842,8 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 - Line 43: We include the header for `TestResults`
 - Line 73: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
 - Line 76: We add a template method `CountTestsIf()`
-- Line 80-94: We implement the `RunIf()` template method.
-Note that we call the method `Run()` with a reference to the `TestResults` instance. This method needs to be added
+- Line 81-94: We implement the `RunIf()` template method.
+Note that we call the method `Run()` on `TestBase` with a reference to the `TestResults` instance. This method needs to be added
 - Line 96-107: We implement the `CountTestsIf()` template method
 
 ### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TESTS_TEST_RUNNER_AND_VISITOR__STEP_5_TESTFIXTUREINFOCPP}
@@ -3942,7 +3959,7 @@ File: code/libraries/unittest/include/unittest/TestBase.h
 ```
 
 - Line 47: We forward declare the `TestResults` class
-- Line 73: We add the `Run()` method taking a `TestResults` to fill
+- Line 73: We add the `Run()` method taking a `TestResults` to fill when running the test
 
 ### TestBase.cpp {#TUTORIAL_17_UNIT_TESTS_TEST_RUNNER_AND_VISITOR__STEP_5_TESTBASECPP}
 
@@ -4319,6 +4336,7 @@ Create the file `code/libraries/unittest/src/ConsoleTestReporter.cpp`
 
 ```cpp
 File: code/libraries/unittest/src/ConsoleTestReporter.cpp
+File: d:\Projects\baremetal.github\tutorial\17-unit-tests\code\libraries\unittest\src\ConsoleTestReporter.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -4360,300 +4378,301 @@ File: code/libraries/unittest/src/ConsoleTestReporter.cpp
 39: 
 40: #include <unittest/ConsoleTestReporter.h>
 41: 
-42: #include <unittest/TestDetails.h>
-43: #include <unittest/TestResults.h>
-44: #include <baremetal/Console.h>
-45: #include <baremetal/Format.h>
-46: #include <baremetal/Serialization.h>
-47: 
-48: using namespace baremetal;
-49: 
-50: namespace unittest
-51: {
-52: 
-53: const string ConsoleTestReporter::TestRunSeparator = baremetal::string("[===========]");
-54: const string ConsoleTestReporter::TestSuiteSeparator = baremetal::string("[   SUITE   ]");
-55: const string ConsoleTestReporter::TestFixtureSeparator = baremetal::string("[  FIXTURE  ]");
-56: const string ConsoleTestReporter::TestSuccessSeparator = baremetal::string("[ SUCCEEDED ]");
-57: const string ConsoleTestReporter::TestFailSeparator = baremetal::string("[  FAILED   ]");
-58: 
-59: ConsoleTestReporter::ConsoleTestReporter()
-60: {
-61: }
-62: 
-63: void ConsoleTestReporter::ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-64: {
-65:     GetConsole().SetTerminalColor(ConsoleColor::Green);
-66:     GetConsole().Write(TestRunSeparator);
-67:     GetConsole().ResetTerminalColor();
-68: 
-69:     GetConsole().Write(Format(" %s\n", TestRunStartMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
-70: }
-71: 
-72: void ConsoleTestReporter::ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-73: {
-74:     GetConsole().SetTerminalColor(ConsoleColor::Green);
-75:     GetConsole().Write(TestRunSeparator);
-76:     GetConsole().ResetTerminalColor();
-77: 
-78:     GetConsole().Write(Format(" %s\n", TestRunFinishMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
-79: }
-80: 
-81: void ConsoleTestReporter::ReportTestRunSummary(const TestResults& results)
-82: {
-83:     if (results.GetFailureCount() > 0)
-84:         GetConsole().SetTerminalColor(ConsoleColor::Red);
-85:     else
-86:         GetConsole().SetTerminalColor(ConsoleColor::Green);
-87:     GetConsole().Write(Format("%s\n", TestRunSummaryMessage(results).c_str()));
-88:     GetConsole().ResetTerminalColor();
-89: }
-90: 
-91: void ConsoleTestReporter::ReportTestRunOverview(const TestResults& results)
-92: {
-93:     GetConsole().Write(Format("%s\n", TestRunOverviewMessage(results).c_str()));
-94: }
-95: 
-96: void ConsoleTestReporter::ReportTestSuiteStart(const string& suiteName, int numberOfTestFixtures)
-97: {
-98:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
-99:     GetConsole().Write(TestSuiteSeparator);
-100:     GetConsole().ResetTerminalColor();
-101: 
-102:     GetConsole().Write(Format(" %s\n", TestSuiteStartMessage(suiteName, numberOfTestFixtures).c_str()));
-103: }
-104: 
-105: void ConsoleTestReporter::ReportTestSuiteFinish(const string& suiteName, int numberOfTestFixtures)
-106: {
-107:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
-108:     GetConsole().Write(TestSuiteSeparator);
-109:     GetConsole().ResetTerminalColor();
-110: 
-111:     GetConsole().Write(Format(" %s\n", TestSuiteFinishMessage(suiteName, numberOfTestFixtures).c_str()));
-112: }
-113: 
-114: void ConsoleTestReporter::ReportTestFixtureStart(const string& fixtureName, int numberOfTests)
-115: {
-116:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
-117:     GetConsole().Write(TestFixtureSeparator);
-118:     GetConsole().ResetTerminalColor();
-119: 
-120:     GetConsole().Write(Format(" %s\n", TestFixtureStartMessage(fixtureName, numberOfTests).c_str()));
-121: }
-122: 
-123: void ConsoleTestReporter::ReportTestFixtureFinish(const string& fixtureName, int numberOfTests)
-124: {
-125:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
-126:     GetConsole().Write(TestFixtureSeparator);
-127:     GetConsole().ResetTerminalColor();
-128: 
-129:     GetConsole().Write(Format(" %s\n", TestFixtureFinishMessage(fixtureName, numberOfTests).c_str()));
-130: }
-131: 
-132: void ConsoleTestReporter::ReportTestStart(const TestDetails& /*details*/)
-133: {
-134: }
-135: 
-136: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
-137: {
-138:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
-139:     if (success)
-140:         GetConsole().Write(TestSuccessSeparator);
-141:     else
-142:         GetConsole().Write(TestFailSeparator);
-143:     GetConsole().ResetTerminalColor();
-144: 
-145:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
-146: }
-147: 
-148: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
-149: {
-150:     GetConsole().SetTerminalColor(ConsoleColor::Red);
-151:     GetConsole().Write(Format("%s\n", TestFailureMessage(details, failure).c_str()));
-152:     GetConsole().ResetTerminalColor();
-153: }
-154: 
-155: static string TestLiteral(int numberOfTests)
-156: {
-157:     return baremetal::string((numberOfTests == 1) ? "test" : "tests");
-158: }
-159: 
-160: static string TestFailureLiteral(int numberOfTestFailures)
-161: {
-162:     return baremetal::string((numberOfTestFailures == 1) ? "failure" : "failures");
-163: }
-164: 
-165: static string TestFixtureLiteral(int numberOfTestFixtures)
-166: {
-167:     return baremetal::string((numberOfTestFixtures == 1) ? "test fixture" : "test fixtures");
-168: }
-169: 
-170: static string TestSuiteLiteral(int numberOfTestSuites)
-171: {
-172:     return baremetal::string((numberOfTestSuites == 1) ? "test suite" : "test suites");
-173: }
-174: 
-175: static string TestSuiteName(string name)
-176: {
-177:     return baremetal::string((!name.empty()) ? name : "DefaultSuite");
-178: }
-179: 
-180: static string TestFixtureName(string name)
-181: {
-182:     return baremetal::string((!name.empty()) ? name : "DefaultFixture");
-183: }
-184: 
-185: string ConsoleTestReporter::TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-186: {
-187:     return Format("Running %s %s from %s %s in %s %s.",
-188:         Serialize(numberOfTests).c_str(),
-189:         TestLiteral(numberOfTests).c_str(),
-190:         Serialize(numberOfTestFixtures).c_str(),
-191:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-192:         Serialize(numberOfTestSuites).c_str(),
-193:         TestSuiteLiteral(numberOfTestSuites).c_str());
-194: }
-195: 
-196: string ConsoleTestReporter::TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-197: {
-198:     return Format("%s %s from %s %s in %s %s ran.",
-199:         Serialize(numberOfTests).c_str(),
-200:         TestLiteral(numberOfTests).c_str(),
-201:         Serialize(numberOfTestFixtures).c_str(),
-202:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-203:         Serialize(numberOfTestSuites).c_str(),
-204:         TestSuiteLiteral(numberOfTestSuites).c_str());
-205: }
-206: 
-207: string ConsoleTestReporter::TestRunSummaryMessage(const TestResults& results)
-208: {
-209:     if (results.GetFailureCount() > 0)
-210:     {
-211:         return Format("FAILURE: %s out of %s %s failed (%s %s).\n",
-212:             Serialize(results.GetFailedTestCount()).c_str(),
-213:             Serialize(results.GetTotalTestCount()).c_str(),
-214:             TestLiteral(results.GetTotalTestCount()).c_str(),
-215:             Serialize(results.GetFailureCount()).c_str(),
-216:             TestFailureLiteral(results.GetFailureCount()).c_str());
-217:     }
-218:     return Format("Success: %s %s passed.\n",
-219:             Serialize(results.GetTotalTestCount()).c_str(),
-220:             TestLiteral(results.GetTotalTestCount()).c_str());
-221: }
-222: 
-223: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
-224: {
-225:     if (results.GetFailureCount() > 0)
-226:     {
-227:         return Format("Failures: %d", results.GetFailureCount());
-228:     }
-229:     return "No failures";
-230: }
-231: 
-232: string ConsoleTestReporter::TestSuiteStartMessage(const string& suiteName, int numberOfTestFixtures)
-233: {
-234:     return Format("%s (%s %s)",
-235:         TestSuiteName(suiteName).c_str(),
-236:         Serialize(numberOfTestFixtures).c_str(),
-237:         TestFixtureLiteral(numberOfTestFixtures).c_str());
-238: }
-239: 
-240: string ConsoleTestReporter::TestSuiteFinishMessage(const string& suiteName, int numberOfTestFixtures)
-241: {
-242:     return Format("%s %s from %s",
-243:         Serialize(numberOfTestFixtures).c_str(),
-244:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-245:         TestSuiteName(suiteName).c_str());
-246: }
-247: 
-248: string ConsoleTestReporter::TestFixtureStartMessage(const string& fixtureName, int numberOfTests)
-249: {
-250:     return Format("%s (%s %s)",
-251:         TestFixtureName(fixtureName).c_str(),
-252:         Serialize(numberOfTests).c_str(),
-253:         TestLiteral(numberOfTests).c_str());
-254: }
-255: 
-256: string ConsoleTestReporter::TestFixtureFinishMessage(const string& fixtureName, int numberOfTests)
-257: {
-258:     return Format("%s %s from %s",
-259:         Serialize(numberOfTests).c_str(),
-260:         TestLiteral(numberOfTests).c_str(),
-261:         TestFixtureName(fixtureName).c_str());
-262: }
-263: 
-264: string ConsoleTestReporter::TestFinishMessage(const TestDetails& details, bool /*success*/)
-265: {
-266:     return TestName(details.SuiteName(), details.FixtureName(), details.TestName());
-267: }
-268: 
-269: string ConsoleTestReporter::TestFailureMessage(const TestDetails& details, const string& failure)
-270: {
-271:     return Format("%s failure %s", TestName(details.SuiteName(), details.FixtureName(), details.TestName()).c_str(), failure.c_str());
-272: }
-273: 
-274: string ConsoleTestReporter::TestName(const string& suiteName, const string& fixtureName, const string& testName)
-275: {
-276:     string result;
-277:     if (!suiteName.empty())
-278:     {
-279:         result.append(suiteName);
-280:         result.append("::");
-281:     }
-282:     if (!fixtureName.empty())
-283:     {
-284:         result.append(fixtureName);
-285:         result.append("::");
-286:     }
-287:     result.append(testName);
-288:     return result;
-289: }
-290: 
-291: } // namespace unittest
+42: #include <baremetal/Console.h>
+43: #include <baremetal/Format.h>
+44: #include <baremetal/Serialization.h>
+45: #include <unittest/TestDetails.h>
+46: #include <unittest/TestRegistry.h>
+47: #include <unittest/TestResults.h>
+48: 
+49: using namespace baremetal;
+50: 
+51: namespace unittest
+52: {
+53: 
+54: const string ConsoleTestReporter::TestRunSeparator = baremetal::string("[===========]");
+55: const string ConsoleTestReporter::TestSuiteSeparator = baremetal::string("[   SUITE   ]");
+56: const string ConsoleTestReporter::TestFixtureSeparator = baremetal::string("[  FIXTURE  ]");
+57: const string ConsoleTestReporter::TestSuccessSeparator = baremetal::string("[ SUCCEEDED ]");
+58: const string ConsoleTestReporter::TestFailSeparator = baremetal::string("[  FAILED   ]");
+59: 
+60: ConsoleTestReporter::ConsoleTestReporter()
+61: {
+62: }
+63: 
+64: void ConsoleTestReporter::ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+65: {
+66:     GetConsole().SetTerminalColor(ConsoleColor::Green);
+67:     GetConsole().Write(TestRunSeparator);
+68:     GetConsole().ResetTerminalColor();
+69: 
+70:     GetConsole().Write(Format(" %s\n", TestRunStartMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
+71: }
+72: 
+73: void ConsoleTestReporter::ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+74: {
+75:     GetConsole().SetTerminalColor(ConsoleColor::Green);
+76:     GetConsole().Write(TestRunSeparator);
+77:     GetConsole().ResetTerminalColor();
+78: 
+79:     GetConsole().Write(Format(" %s\n", TestRunFinishMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
+80: }
+81: 
+82: void ConsoleTestReporter::ReportTestRunSummary(const TestResults& results)
+83: {
+84:     if (results.GetFailureCount() > 0)
+85:         GetConsole().SetTerminalColor(ConsoleColor::Red);
+86:     else
+87:         GetConsole().SetTerminalColor(ConsoleColor::Green);
+88:     GetConsole().Write(Format("%s\n", TestRunSummaryMessage(results).c_str()));
+89:     GetConsole().ResetTerminalColor();
+90: }
+91: 
+92: void ConsoleTestReporter::ReportTestRunOverview(const TestResults& results)
+93: {
+94:     GetConsole().Write(Format("%s\n", TestRunOverviewMessage(results).c_str()));
+95: }
+96: 
+97: void ConsoleTestReporter::ReportTestSuiteStart(const string& suiteName, int numberOfTestFixtures)
+98: {
+99:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
+100:     GetConsole().Write(TestSuiteSeparator);
+101:     GetConsole().ResetTerminalColor();
+102: 
+103:     GetConsole().Write(Format(" %s\n", TestSuiteStartMessage(suiteName, numberOfTestFixtures).c_str()));
+104: }
+105: 
+106: void ConsoleTestReporter::ReportTestSuiteFinish(const string& suiteName, int numberOfTestFixtures)
+107: {
+108:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
+109:     GetConsole().Write(TestSuiteSeparator);
+110:     GetConsole().ResetTerminalColor();
+111: 
+112:     GetConsole().Write(Format(" %s\n", TestSuiteFinishMessage(suiteName, numberOfTestFixtures).c_str()));
+113: }
+114: 
+115: void ConsoleTestReporter::ReportTestFixtureStart(const string& fixtureName, int numberOfTests)
+116: {
+117:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
+118:     GetConsole().Write(TestFixtureSeparator);
+119:     GetConsole().ResetTerminalColor();
+120: 
+121:     GetConsole().Write(Format(" %s\n", TestFixtureStartMessage(fixtureName, numberOfTests).c_str()));
+122: }
+123: 
+124: void ConsoleTestReporter::ReportTestFixtureFinish(const string& fixtureName, int numberOfTests)
+125: {
+126:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
+127:     GetConsole().Write(TestFixtureSeparator);
+128:     GetConsole().ResetTerminalColor();
+129: 
+130:     GetConsole().Write(Format(" %s\n", TestFixtureFinishMessage(fixtureName, numberOfTests).c_str()));
+131: }
+132: 
+133: void ConsoleTestReporter::ReportTestStart(const TestDetails& /*details*/)
+134: {
+135: }
+136: 
+137: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
+138: {
+139:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
+140:     if (success)
+141:         GetConsole().Write(TestSuccessSeparator);
+142:     else
+143:         GetConsole().Write(TestFailSeparator);
+144:     GetConsole().ResetTerminalColor();
+145: 
+146:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
+147: }
+148: 
+149: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
+150: {
+151:     GetConsole().SetTerminalColor(ConsoleColor::Red);
+152:     GetConsole().Write(Format("%s\n", TestFailureMessage(details, failure).c_str()));
+153:     GetConsole().ResetTerminalColor();
+154: }
+155: 
+156: static string TestLiteral(int numberOfTests)
+157: {
+158:     return baremetal::string((numberOfTests == 1) ? "test" : "tests");
+159: }
+160: 
+161: static string TestFailureLiteral(int numberOfTestFailures)
+162: {
+163:     return baremetal::string((numberOfTestFailures == 1) ? "failure" : "failures");
+164: }
+165: 
+166: static string TestFixtureLiteral(int numberOfTestFixtures)
+167: {
+168:     return baremetal::string((numberOfTestFixtures == 1) ? "fixture" : "fixtures");
+169: }
+170: 
+171: static string TestSuiteLiteral(int numberOfTestSuites)
+172: {
+173:     return baremetal::string((numberOfTestSuites == 1) ? "suite" : "suites");
+174: }
+175: 
+176: static string TestSuiteName(string name)
+177: {
+178:     return baremetal::string((!name.empty()) ? name : baremetal::string(TestRegistry::DefaultSuiteName));
+179: }
+180: 
+181: static string TestFixtureName(string name)
+182: {
+183:     return baremetal::string((!name.empty()) ? name : baremetal::string(TestRegistry::DefaultFixtureName));
+184: }
+185: 
+186: string ConsoleTestReporter::TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+187: {
+188:     return Format("Running %s %s from %s %s in %s %s.",
+189:         Serialize(numberOfTests).c_str(),
+190:         TestLiteral(numberOfTests).c_str(),
+191:         Serialize(numberOfTestFixtures).c_str(),
+192:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+193:         Serialize(numberOfTestSuites).c_str(),
+194:         TestSuiteLiteral(numberOfTestSuites).c_str());
+195: }
+196: 
+197: string ConsoleTestReporter::TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+198: {
+199:     return Format("%s %s from %s %s in %s %s ran.",
+200:         Serialize(numberOfTests).c_str(),
+201:         TestLiteral(numberOfTests).c_str(),
+202:         Serialize(numberOfTestFixtures).c_str(),
+203:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+204:         Serialize(numberOfTestSuites).c_str(),
+205:         TestSuiteLiteral(numberOfTestSuites).c_str());
+206: }
+207: 
+208: string ConsoleTestReporter::TestRunSummaryMessage(const TestResults& results)
+209: {
+210:     if (results.GetFailureCount() > 0)
+211:     {
+212:         return Format("FAILURE: %s out of %s %s failed (%s %s).\n",
+213:             Serialize(results.GetFailedTestCount()).c_str(),
+214:             Serialize(results.GetTotalTestCount()).c_str(),
+215:             TestLiteral(results.GetTotalTestCount()).c_str(),
+216:             Serialize(results.GetFailureCount()).c_str(),
+217:             TestFailureLiteral(results.GetFailureCount()).c_str());
+218:     }
+219:     return Format("Success: %s %s passed.\n",
+220:             Serialize(results.GetTotalTestCount()).c_str(),
+221:             TestLiteral(results.GetTotalTestCount()).c_str());
+222: }
+223: 
+224: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
+225: {
+226:     if (results.GetFailureCount() > 0)
+227:     {
+228:         return Format("Failures: %d", results.GetFailureCount());
+229:     }
+230:     return "No failures";
+231: }
+232: 
+233: string ConsoleTestReporter::TestSuiteStartMessage(const string& suiteName, int numberOfTestFixtures)
+234: {
+235:     return Format("%s (%s %s)",
+236:         TestSuiteName(suiteName).c_str(),
+237:         Serialize(numberOfTestFixtures).c_str(),
+238:         TestFixtureLiteral(numberOfTestFixtures).c_str());
+239: }
+240: 
+241: string ConsoleTestReporter::TestSuiteFinishMessage(const string& suiteName, int numberOfTestFixtures)
+242: {
+243:     return Format("%s %s from %s",
+244:         Serialize(numberOfTestFixtures).c_str(),
+245:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+246:         TestSuiteName(suiteName).c_str());
+247: }
+248: 
+249: string ConsoleTestReporter::TestFixtureStartMessage(const string& fixtureName, int numberOfTests)
+250: {
+251:     return Format("%s (%s %s)",
+252:         TestFixtureName(fixtureName).c_str(),
+253:         Serialize(numberOfTests).c_str(),
+254:         TestLiteral(numberOfTests).c_str());
+255: }
+256: 
+257: string ConsoleTestReporter::TestFixtureFinishMessage(const string& fixtureName, int numberOfTests)
+258: {
+259:     return Format("%s %s from %s",
+260:         Serialize(numberOfTests).c_str(),
+261:         TestLiteral(numberOfTests).c_str(),
+262:         TestFixtureName(fixtureName).c_str());
+263: }
+264: 
+265: string ConsoleTestReporter::TestFinishMessage(const TestDetails& details, bool /*success*/)
+266: {
+267:     return TestName(details.SuiteName(), details.FixtureName(), details.TestName());
+268: }
+269: 
+270: string ConsoleTestReporter::TestFailureMessage(const TestDetails& details, const string& failure)
+271: {
+272:     return Format("%s failure %s", TestName(details.SuiteName(), details.FixtureName(), details.TestName()).c_str(), failure.c_str());
+273: }
+274: 
+275: string ConsoleTestReporter::TestName(const string& suiteName, const string& fixtureName, const string& testName)
+276: {
+277:     string result;
+278:     if (!suiteName.empty())
+279:     {
+280:         result.append(suiteName);
+281:         result.append("::");
+282:     }
+283:     if (!fixtureName.empty())
+284:     {
+285:         result.append(fixtureName);
+286:         result.append("::");
+287:     }
+288:     result.append(testName);
+289:     return result;
+290: }
+291: 
+292: } // namespace unittest
 ```
 
-- Line 53-57: We initialize the static member variables
-- Line 59-61: We implement the constructor
-- Line 63-70: We implement the method `ReportTestRunStart()`.
+- Line 54-58: We initialize the static member variables
+- Line 60-62: We implement the constructor
+- Line 64-71: We implement the method `ReportTestRunStart()`.
 This prints the run separator in green, and uses the method `TestRunStartMessage()` to format the string to be printed 
-- Line 72-79: We implement the method `ReportTestRunFinish()`.
+- Line 73-80: We implement the method `ReportTestRunFinish()`.
 This prints the run separator in green, and uses the method `TestRunFinishMessage()` to format the string to be printed 
-- Line 81-89: We implement the method `ReportTestRunSummary()`.
+- Line 82-90: We implement the method `ReportTestRunSummary()`.
 This uses the method `TestRunSummaryMessage()` to format the string to be printed, in green if successful, in red if failures occured
-- Line 91-94: We implement the method `ReportTestRunOverview()`.
+- Line 92-95: We implement the method `ReportTestRunOverview()`.
 This uses the method `TestRunOverviewMessage()` to format the string to be printed
-- Line 96-103: We implement the method `ReportTestSuiteStart()`.
+- Line 97-104: We implement the method `ReportTestSuiteStart()`.
 This prints the test suite separator in cyan, and uses the method `TestSuiteStartMessage()` to format the string to be printed
-- Line 105-112: We implement the method `ReportTestSuiteFinish()`.
+- Line 106-113: We implement the method `ReportTestSuiteFinish()`.
 This prints the test suite separator in cyan, and uses the method `TestSuiteFinishMessage()` to format the string to be printed
-- Line 114-121: We implement the method `ReportTestFixtureStart()`.
+- Line 115-122: We implement the method `ReportTestFixtureStart()`.
 This prints the test fixture separator in yellow, and uses the method `TestFixtureStartMessage()` to format the string to be printed
-- Line 123-130: We implement the method `ReportTestFixtureFinish()`.
+- Line 124-131: We implement the method `ReportTestFixtureFinish()`.
 This prints the test fixture separator in yellow, and uses the method `TestFixtureFinishMessage()` to format the string to be printed
-- Line 132-134: We implement the method `ReportTestStart()`.
+- Line 133-135: We implement the method `ReportTestStart()`.
 This prints nothing
-- Line 136-146: We implement the method `ReportTestFinish()`.
+- Line 137-147: We implement the method `ReportTestFinish()`.
 This prints the success separator in green if successful, or the failure separator in red if failures occurred, and uses the method `TestFinishMessage()` to format the string to be printed
-- Line 148-153: We implement the method `ReportTestFailure()`.
+- Line 149-154: We implement the method `ReportTestFailure()`.
 This uses the method `TestFailureMessage()` to format the string to be printed in red
-- Line 155-158: We implement a static function `TestLiteral()`, which returns the string "test" if the number of tests equals 1, and "tests" otherwise
-- Line 160-163: We implement a static function `TestFailureLiteral()`, which returns the string "failure" if the number of failures equals 1, and "failures" otherwise
-- Line 165-168: We implement a static function `TestFixtureLiteral()`, which returns the string "fixture" if the number of test fixtures equals 1, and "fixtures" otherwise
-- Line 170-173: We implement a static function `TestSuiteLiteral()`, which returns the string "suite" if the number of test suites equals 1, and "suites" otherwise
-- Line 175-178: We implement a static function `TestSuiteName()`, which returns the name of the test suite if not empty, and "DefaultSuite" otherwise
-- Line 180-183: We implement a static function `TestFixtureName()`, which returns the name of the test fixture if not empty, and "DefaultFixture" otherwise
-- Line 185-194: We implement a static function `TestRunStartMessage()`, which returns a string in the form "Running 1 test from 2 fixtures in 3 suites"
-- Line 196-205: We implement a static function `TestRunFinishMessage()`, which returns a string in the form "1 test from 2 fixtures in 3 suites ran."
-- Line 207-221: We implement a static function `TestRunSummaryMessage()`, which returns a string in the form "FAILURE: 1 out of 2 tests failed (3 failures).\n" in case of failures, 
+- Line 156-159: We implement a static function `TestLiteral()`, which returns the string "test" if the number of tests equals 1, and "tests" otherwise
+- Line 161-164: We implement a static function `TestFailureLiteral()`, which returns the string "failure" if the number of failures equals 1, and "failures" otherwise
+- Line 166-169: We implement a static function `TestFixtureLiteral()`, which returns the string "fixture" if the number of test fixtures equals 1, and "fixtures" otherwise
+- Line 171-174: We implement a static function `TestSuiteLiteral()`, which returns the string "suite" if the number of test suites equals 1, and "suites" otherwise
+- Line 176-179: We implement a static function `TestSuiteName()`, which returns the name of the test suite if not empty, and "DefaultSuite" otherwise
+- Line 181-184: We implement a static function `TestFixtureName()`, which returns the name of the test fixture if not empty, and "DefaultFixture" otherwise
+- Line 186-195: We implement a static function `TestRunStartMessage()`, which returns a string in the form "Running 1 test from 2 fixtures in 3 suites"
+- Line 197-206: We implement a static function `TestRunFinishMessage()`, which returns a string in the form "1 test from 2 fixtures in 3 suites ran."
+- Line 208-222: We implement a static function `TestRunSummaryMessage()`, which returns a string in the form "FAILURE: 1 out of 2 tests failed (3 failures).\n" in case of failures, 
 and "Success: 2 tests passed.\n" otherwise
-- Line 223-230: We implement a static function `TestRunOverviewMessage()`, which returns a string in the form "Failures: 2" in case of failures, and "No failures" otherwise
-- Line 232-238: We implement a static function `TestSuiteStartMessage()`, which returns a string in the form "2 fixtures from Suite1"
-- Line 240-246: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite (2 fixtures)"
-- Line 248-254: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 test from Fixture1"
-- Line 256-262: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
-- Line 264-267: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
-- Line 232-238: We implement a static function `TestFailureMessage()`, which returns a string in the form "Suite1\:\:Fixture2\:\:Test3 failure failureText"
-- Line 232-238: We implement a static function `TestName()`, which returns the fully qualified test name "Suite1\:\:Fixture2\:\:Test3" if the test suite name is not empty, 
+- Line 224-231: We implement a static function `TestRunOverviewMessage()`, which returns a string in the form "Failures: 2" in case of failures, and "No failures" otherwise
+- Line 233-239: We implement a static function `TestSuiteStartMessage()`, which returns a string in the form "2 fixtures from Suite1"
+- Line 241-247: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite (2 fixtures)"
+- Line 249-255: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 test from Fixture1"
+- Line 257-263: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
+- Line 265-268: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
+- Line 270-273: We implement a static function `TestFailureMessage()`, which returns a string in the form "Suite1\:\:Fixture2\:\:Test3 failure failureText"
+- Line 275-290: We implement a static function `TestName()`, which returns the fully qualified test name "Suite1\:\:Fixture2\:\:Test3" if the test suite name is not empty, 
 "Fixture2\:\:Test3" otherwise if the fixture name is not empty, "Test3" otherwise
 
 ### unittest.h {#TUTORIAL_17_UNIT_TESTS_TEST_RUNNER_AND_VISITOR__STEP_5_UNITTESTH}

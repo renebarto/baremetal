@@ -48,10 +48,10 @@ LOG_MODULE("TestRegistry");
 
 namespace unittest {
 
-const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
-const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
+    const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
+    const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
 
-TestRegistry& TestRegistry::GetTestRegistry()
+    TestRegistry& TestRegistry::GetTestRegistry()
 {
     static TestRegistry s_registry;
     return s_registry;
@@ -114,53 +114,6 @@ void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
 TestSuiteInfo *TestRegistry::GetHead() const
 {
     return m_head;
-}
-
-void TestRegistry::Run()
-{
-    TestSuiteInfo* curTestSuite = GetHead();
-
-    while (curTestSuite != nullptr)
-    {
-        curTestSuite->Run();
-        curTestSuite = curTestSuite->m_next;
-    }
-}
-
-int TestRegistry::CountSuites()
-{
-    int            numberOfTestSuites = 0;
-    TestSuiteInfo *testSuite          = m_head;
-    while (testSuite != nullptr)
-    {
-        ++numberOfTestSuites;
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTestSuites;
-}
-
-int TestRegistry::CountFixtures()
-{
-    int            numberOfTestFixtures = 0;
-    TestSuiteInfo *testSuite            = m_head;
-    while (testSuite != nullptr)
-    {
-        numberOfTestFixtures += testSuite->CountFixtures();
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTestFixtures;
-}
-
-int TestRegistry::CountTests()
-{
-    int            numberOfTests = 0;
-    TestSuiteInfo *testSuite     = m_head;
-    while (testSuite != nullptr)
-    {
-        numberOfTests += testSuite->CountTests();
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTests;
 }
 
 TestRegistrar::TestRegistrar(TestRegistry &registry, TestBase *test)

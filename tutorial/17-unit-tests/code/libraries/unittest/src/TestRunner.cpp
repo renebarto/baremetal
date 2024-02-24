@@ -1,13 +1,14 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestFixtureInfo.cpp
+// File        : TestRunner.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestFixtureInfo
+// Class       : TestRunner
 //
-// Description : Test fixture
+// Description : Test runner
+//
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -36,63 +37,23 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestFixtureInfo.h>
-
-#include <baremetal/Assert.h>
-
-using namespace baremetal;
+#include <unittest/TestRunner.h>
 
 namespace unittest {
 
-TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-    : m_head{}
-    , m_tail{}
-    , m_next{}
-    , m_fixtureName{ fixtureName }
+TestRunner::TestRunner(ITestReporter* reporter)
+    : m_reporter{ reporter }
+    , m_testResults{ reporter }
 {
 }
 
-TestFixtureInfo::~TestFixtureInfo()
+TestRunner::~TestRunner()
 {
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        TestBase* currentTest = test;
-        test = test->m_next;
-        delete currentTest;
-    }
 }
 
-void TestFixtureInfo::AddTest(TestBase* test)
+int RunAllTests(ITestReporter* reporter /*= nullptr*/)
 {
-    if (m_tail == nullptr)
-    {
-        assert(m_head == nullptr);
-        m_head = test;
-        m_tail = test;
-    }
-    else
-    {
-        m_tail->m_next = test;
-        m_tail = test;
-    }
-}
-
-TestBase* TestFixtureInfo::GetHead() const
-{
-    return m_head;
-}
-
-int TestFixtureInfo::CountTests()
-{
-    int numberOfTests = 0;
-    TestBase* test = m_head;
-    while (test != nullptr)
-    {
-        ++numberOfTests;
-        test = test->m_next;
-    }
-    return numberOfTests;
+    return RunSelectedTests(reporter, True());
 }
 
 } // namespace unittest

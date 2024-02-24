@@ -14,12 +14,7 @@
 #include <baremetal/Timer.h>
 #include <baremetal/Util.h>
 
-#include <unittest/TestBase.h>
-#include <unittest/TestFixture.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestSuiteInfo.h>
-#include <unittest/TestSuite.h>
+#include <unittest/unittest.h>
 
 LOG_MODULE("main");
 
@@ -195,6 +190,7 @@ public:
 void FixtureMyTest3Helper::RunImpl() const
 {
     LOG_DEBUG(m_details.FixtureName().c_str());
+    CurrentTest::Results()->OnTestFailure(m_details, "Fail");
 }
 
 class MyTest3
@@ -223,7 +219,8 @@ int main()
     auto& console = GetConsole();
     LOG_DEBUG("Hello World!");
 
-    TestRegistry::GetTestRegistry().Run();
+    ConsoleTestReporter reporter;
+    RunAllTests(&reporter);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2023 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
 // File        : TestResult.cpp
 //
@@ -12,9 +12,9 @@
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-// 
+//
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,7 +34,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 //------------------------------------------------------------------------------
 
 #include <unittest/TestResult.h>
@@ -45,8 +45,8 @@ using namespace baremetal;
 
 namespace unittest {
 
-Failure::Failure(int value, const baremetal::string& text)
-    : m_value{value}
+Failure::Failure(int lineNumber, const baremetal::string& text)
+    : m_lineNumber{lineNumber}
     , m_text{text}
 {
 }
@@ -92,11 +92,7 @@ void FailureList::Add(const Failure& failure)
 }
 
 TestResult::TestResult(const TestDetails& details)
-    : m_suiteName{ details.SuiteName() }
-    , m_fixtureName{ details.FixtureName() }
-    , m_testName{ details.TestName() }
-    , m_fileName{ details.SourceFileName() }
-    , m_lineNumber{ details.SourceFileLineNumber() }
+    : m_details{ details }
     , m_failures{}
     , m_failed{}
 {

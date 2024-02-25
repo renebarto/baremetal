@@ -12,9 +12,9 @@
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-// 
+//
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,7 +34,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 //------------------------------------------------------------------------------
 
 #include <unittest/ITestReporter.h>
@@ -43,23 +43,33 @@
 namespace unittest
 {
 
-struct ResultEntry
+class ResultEntry
 {
+private:
+    friend class ResultList;
     TestResult m_result;
     ResultEntry* m_next;
+
+public:
     explicit ResultEntry(const TestResult& result);
+    TestResult& GetResult() { return m_result; }
+    ResultEntry* GetNext() { return m_next; }
 };
 
 class ResultList
 {
-public:
+private:
     ResultEntry* m_head;
     ResultEntry* m_tail;
+
+public:
 
     ResultList();
     ~ResultList();
 
     void Add(const TestResult& result);
+    ResultEntry* GetHead() const { return m_head; }
+    ResultEntry* GetTail() const { return m_tail; }
 };
 
 class DeferredTestReporter : public ITestReporter

@@ -12,9 +12,9 @@
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-// 
+//
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,7 +34,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 //------------------------------------------------------------------------------
 
 #include <unittest/DeferredTestReporter.h>
@@ -74,7 +74,7 @@ void ResultList::Add(const TestResult& result)
     auto entry = new ResultEntry(result);
     if (m_head == nullptr)
     {
-        m_head = entry; 
+        m_head = entry;
     }
     else
     {
@@ -125,12 +125,11 @@ void DeferredTestReporter::ReportTestStart(const TestDetails& details)
 
 void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
 {
-    TestResult& result = m_results.m_tail->m_result;
 }
 
 void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
 {
-    TestResult& result = m_results.m_tail->m_result;
+    TestResult& result = m_results.GetTail()->GetResult();
     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
 }
 

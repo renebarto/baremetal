@@ -56,11 +56,6 @@ private:
 public:
     TestDetails();
     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
-    TestDetails(const TestDetails&) = delete;
-    TestDetails(TestDetails&&) = delete;
-
-    TestDetails& operator = (const TestDetails&) = delete;
-    TestDetails& operator = (TestDetails&&) = delete;
 
     const baremetal::string& SuiteName() const { return m_suiteName; }
     const baremetal::string& FixtureName() const { return m_fixtureName; }

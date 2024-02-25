@@ -227,20 +227,20 @@ string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
     if (results.GetFailureCount() > 0)
     {
         string result = "Failures:\n";
-        auto testResultPtr = Results().m_head;
+        auto testResultPtr = Results().GetHead();
         while (testResultPtr != nullptr)
         {
-            auto testResult = testResultPtr->m_result;
+            auto const& testResult = testResultPtr->GetResult();
             if (testResult.Failed())
             {
-                auto failuresPtr = testResult.Failures().m_head;
+                auto failuresPtr = testResult.Failures().GetHead();
                 while (failuresPtr != nullptr)
                 {
-                    result.append(TestFailureMessage(testResult, failuresPtr->m_failure));
-                    failuresPtr = failuresPtr->m_next;
+                    result.append(TestFailureMessage(testResult, failuresPtr->GetFailure()));
+                    failuresPtr = failuresPtr->GetNext();
                 }
             }
-            testResultPtr = testResultPtr->m_next;
+            testResultPtr = testResultPtr->GetNext();
         }
         return result;
     }
@@ -250,10 +250,10 @@ string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
 string ConsoleTestReporter::TestFailureMessage(const TestResult& result, const Failure& failure)
 {
     return Format("%s:%d : Failure in %s: %s\n",
-        result.m_fileName.c_str(),
-        failure.m_value, 
-        TestName(result.m_suiteName, result.m_fixtureName, result.m_testName).c_str(),
-        failure.m_text.c_str());
+        result.Details().SourceFileName().c_str(),
+        failure.SourceLineNumber(), 
+        TestName(result.Details().SuiteName(), result.Details().FixtureName(), result.Details().TestName()).c_str(),
+        failure.Text().c_str());
 }
 
 string ConsoleTestReporter::TestSuiteStartMessage(const string& suiteName, int numberOfTestFixtures)

@@ -39,7 +39,8 @@
 
 #pragma once
 
-#include "unittest/TestBase.h"
+#include <unittest/TestBase.h>
+#include <unittest/TestResults.h>
 
 namespace unittest
 {
@@ -50,6 +51,7 @@ class TestFixtureInfo
 {
 private:
     friend class TestSuiteInfo;
+    friend class TestRegistrar;
     TestBase* m_head;
     TestBase* m_tail;
     TestFixtureInfo* m_next;
@@ -69,11 +71,41 @@ public:
 
     const baremetal::string& Name() const { return m_fixtureName; }
 
-    void Run();
+    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
 
     int CountTests();
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
+private:
     void AddTest(TestBase* test);
 };
+
+template <class Predicate> void TestFixtureInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    testResults.OnTestFixtureStart(this);
+
+    TestBase* test = this->GetHead();
+    while (test != nullptr)
+    {
+        if (predicate(test))
+            test->Run(testResults);
+        test = test->m_next;
+    }
+
+    testResults.OnTestFixtureFinish(this);
+}
+
+template <typename Predicate> int TestFixtureInfo::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestBase* test = this->GetHead();
+    while (test != nullptr)
+    {
+        if (predicate(test))
+            numberOfTests++;
+        test = test->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

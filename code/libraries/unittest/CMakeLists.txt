@@ -28,19 +28,37 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResult.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResult.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

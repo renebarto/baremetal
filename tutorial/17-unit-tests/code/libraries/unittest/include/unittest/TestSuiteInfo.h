@@ -52,6 +52,7 @@ class TestSuiteInfo
 {
 private:
     friend class TestRegistry;
+    friend class TestRegistrar;
     TestFixtureInfo* m_head;
     TestFixtureInfo* m_tail;
     TestSuiteInfo* m_next;
@@ -78,8 +79,9 @@ public:
     template <typename Predicate> int CountFixturesIf(Predicate predicate);
     template <typename Predicate> int CountTestsIf(Predicate predicate);
 
-    void AddFixture(TestFixtureInfo* testFixture);
+private:
     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
+    void AddFixture(TestFixtureInfo* testFixture);
 };
 
 template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)

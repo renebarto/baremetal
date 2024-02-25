@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestRunner.cpp
+// File        : ITestReporter.h
 //
 // Namespace   : unittest
 //
-// Class       : TestRunner
+// Class       : ITestReporter
 //
-// Description : Test runner
+// Description : Test reporter abstract class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,32 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestRunner.h>
+#pragma once
 
-namespace unittest {
+#include <baremetal/String.h>
 
-TestRunner::TestRunner(ITestReporter* reporter)
-    : m_reporter{ reporter }
-    , m_testResults{ reporter }
+namespace unittest
 {
-}
 
-TestRunner::~TestRunner()
-{
-}
+class TestDetails;
+class TestResults;
 
-int RunAllTests(ITestReporter* reporter)
+class ITestReporter
 {
-    return RunSelectedTests(reporter, True());
-}
+public:
+    virtual ~ITestReporter() {}
+
+    virtual void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+    virtual void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+    virtual void ReportTestRunSummary(const TestResults& results) = 0;
+    virtual void ReportTestRunOverview(const TestResults& results) = 0;
+    virtual void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTests) = 0;
+    virtual void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTests) = 0;
+    virtual void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) = 0;
+    virtual void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) = 0;
+    virtual void ReportTestStart(const TestDetails& details) = 0;
+    virtual void ReportTestFinish(const TestDetails& details, bool success) = 0;
+    virtual void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) = 0;
+};
 
 } // namespace unittest

@@ -1,20 +1,20 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2023 Rene Barto
 //
-// File        : TestRunner.cpp
+// File        : TestResult.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestRunner
+// Class       : TestResult
 //
-// Description : Test runner
+// Description : Test result
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-//
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-//
+// 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,26 +34,78 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
+// 
 //------------------------------------------------------------------------------
 
-#include <unittest/TestRunner.h>
+#include <unittest/TestResult.h>
+
+#include <unittest/TestDetails.h>
+
+using namespace baremetal;
 
 namespace unittest {
 
-TestRunner::TestRunner(ITestReporter* reporter)
-    : m_reporter{ reporter }
-    , m_testResults{ reporter }
+Failure::Failure(int value, const baremetal::string& text)
+    : m_value{value}
+    , m_text{text}
 {
 }
 
-TestRunner::~TestRunner()
+FailureEntry::FailureEntry(const Failure& failure)
+    : m_failure{ failure }
+    , m_next{}
 {
 }
 
-int RunAllTests(ITestReporter* reporter)
+FailureList::FailureList()
+    : m_head{}
+    , m_tail{}
 {
-    return RunSelectedTests(reporter, True());
+}
+
+FailureList::~FailureList()
+{
+    auto current = m_head;
+    while (current != nullptr)
+    {
+        auto next = current->m_next;
+        delete current;
+        current = next;
+    }
+}
+
+void FailureList::Add(const Failure& failure)
+{
+    auto entry = new FailureEntry(failure);
+    if (m_head == nullptr)
+    {
+        m_head = entry;
+    }
+    else
+    {
+        auto current = m_head;
+        while (current->m_next != nullptr)
+            current = current->m_next;
+        current->m_next = entry;
+    }
+    m_tail = entry;
+}
+
+TestResult::TestResult(const TestDetails& details)
+    : m_suiteName{ details.SuiteName() }
+    , m_fixtureName{ details.FixtureName() }
+    , m_testName{ details.TestName() }
+    , m_fileName{ details.SourceFileName() }
+    , m_lineNumber{ details.SourceFileLineNumber() }
+    , m_failures{}
+    , m_failed{}
+{
+}
+
+void TestResult::AddFailure(const Failure& failure)
+{
+    m_failures.Add(failure);
+    m_failed = true;
 }
 
 } // namespace unittest

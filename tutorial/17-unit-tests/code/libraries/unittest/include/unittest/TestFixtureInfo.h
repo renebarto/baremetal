@@ -51,6 +51,7 @@ class TestFixtureInfo
 {
 private:
     friend class TestSuiteInfo;
+    friend class TestRegistrar;
     TestBase* m_head;
     TestBase* m_tail;
     TestFixtureInfo* m_next;
@@ -75,6 +76,7 @@ public:
     int CountTests();
     template <typename Predicate> int CountTestsIf(Predicate predicate);
 
+private:
     void AddTest(TestBase* test);
 };
 

@@ -41,6 +41,7 @@
 
 #include <baremetal/Assert.h>
 #include <baremetal/Logger.h>
+#include <unittest/TestRegistry.h>
 
 using namespace baremetal;
 
@@ -75,7 +76,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
     if (testFixture == nullptr)
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? "-" : fixtureName);
+        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
 #endif
         testFixture = new TestFixtureInfo(fixtureName);
         AddFixture(testFixture);
@@ -83,7 +84,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
     else
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s found", fixtureName.empty() ? "-" : fixtureName);
+        LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
 #endif
     }
     return testFixture;
@@ -107,16 +108,6 @@ void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
 TestFixtureInfo *TestSuiteInfo::GetHead() const
 {
     return m_head;
-}
-
-void TestSuiteInfo::Run()
-{
-    TestFixtureInfo* testFixture = GetHead();
-    while (testFixture != nullptr)
-    {
-        testFixture->Run();
-        testFixture = testFixture->m_next;
-    }
 }
 
 int TestSuiteInfo::CountFixtures()

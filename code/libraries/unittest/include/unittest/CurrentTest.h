@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestRunner.cpp
+// File        : CurrentTest.h
 //
 // Namespace   : unittest
 //
-// Class       : TestRunner
+// Class       : CurrentTest
 //
-// Description : Test runner
+// Description : Current test info
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,18 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestRunner.h>
+#pragma once
 
-namespace unittest {
-
-TestRunner::TestRunner(ITestReporter* reporter)
-    : m_reporter{ reporter }
-    , m_testResults{ reporter }
+namespace unittest
 {
-}
 
-TestRunner::~TestRunner()
-{
-}
+class TestResults;
+class TestDetails;
 
-int RunAllTests(ITestReporter* reporter)
+namespace CurrentTest
 {
-    return RunSelectedTests(reporter, True());
+    TestResults*& Results();
+    const TestDetails*& Details();
 }
 
 } // namespace unittest

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestRunner.cpp
+// File        : TestResults.h
 //
 // Namespace   : unittest
 //
-// Class       : TestRunner
+// Class       : TestResults
 //
-// Description : Test runner
+// Description : Test results
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,47 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestRunner.h>
+#pragma once
 
-namespace unittest {
+#include <baremetal/String.h>
 
-TestRunner::TestRunner(ITestReporter* reporter)
-    : m_reporter{ reporter }
-    , m_testResults{ reporter }
+namespace unittest
 {
-}
 
-TestRunner::~TestRunner()
-{
-}
+class ITestReporter;
+class TestDetails;
+class TestSuiteInfo;
+class TestFixtureInfo;
 
-int RunAllTests(ITestReporter* reporter)
+class TestResults
 {
-    return RunSelectedTests(reporter, True());
-}
+public:
+    explicit TestResults(ITestReporter* reporter = nullptr);
+    TestResults(const TestResults&) = delete;
+    TestResults(TestResults&&) = delete;
+    virtual ~TestResults();
+
+    TestResults& operator = (const TestResults&) = delete;
+    TestResults& operator = (TestResults&&) = delete;
+
+    void OnTestSuiteStart(TestSuiteInfo* suite);
+    void OnTestSuiteFinish(TestSuiteInfo* suite);
+    void OnTestFixtureStart(TestFixtureInfo* fixture);
+    void OnTestFixtureFinish(TestFixtureInfo* fixture);
+    void OnTestStart(const TestDetails& details);
+    void OnTestFailure(const TestDetails& details, const baremetal::string& message);
+    void OnTestFinish(const TestDetails& details);
+
+    int GetTotalTestCount() const;
+    int GetFailedTestCount() const;
+    int GetFailureCount() const;
+
+private:
+    ITestReporter* m_reporter;
+    int m_totalTestCount;
+    int m_failedTestCount;
+    int m_failureCount;
+    bool m_currentTestFailed;
+};
 
 } // namespace unittest

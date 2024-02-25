@@ -1,20 +1,20 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : DeferredTestReporter.h
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : DeferredTestReporter
 //
-// Description : Testcase
+// Description : Deferred test reporter, which saves test results
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-//
+// 
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-//
+// 
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,46 +34,53 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
+// 
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <unittest/TestDetails.h>
+#include <unittest/ITestReporter.h>
+#include <unittest/TestResult.h>
 
 namespace unittest
 {
 
-class TestResults;
+struct ResultEntry
+{
+    TestResult m_result;
+    ResultEntry* m_next;
+    explicit ResultEntry(const TestResult& result);
+};
 
-class TestBase
+class ResultList
+{
+public:
+    ResultEntry* m_head;
+    ResultEntry* m_tail;
+
+    ResultList();
+    ~ResultList();
+
+    void Add(const TestResult& result);
+};
+
+class DeferredTestReporter : public ITestReporter
 {
 private:
-    friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+    ResultList m_results;
 
 public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+    void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+    void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+    void ReportTestRunSummary(const TestResults& results) override;
+    void ReportTestRunOverview(const TestResults& results) override;
+    void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+    void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+    void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
+    void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
+    void ReportTestStart(const TestDetails& details) override;
+    void ReportTestFinish(const TestDetails& details, bool success) override;
+    void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
-
-    const TestDetails& Details() const { return m_details; }
-
-    void Run(TestResults& testResults);
-    void Run();
-
-    virtual void RunImpl() const;
+    ResultList& Results();
 };
 
 } // namespace unittest

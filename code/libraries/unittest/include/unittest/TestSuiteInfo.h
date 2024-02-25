@@ -40,6 +40,7 @@
 #pragma once
 
 #include <unittest/TestFixtureInfo.h>
+#include <unittest/TestResults.h>
 
 namespace unittest
 {
@@ -50,6 +51,8 @@ class TestFixtureInfo;
 class TestSuiteInfo
 {
 private:
+    friend class TestRegistry;
+    friend class TestRegistrar;
     TestFixtureInfo* m_head;
     TestFixtureInfo* m_tail;
     TestSuiteInfo* m_next;
@@ -69,13 +72,57 @@ public:
 
     const baremetal::string& Name() const { return m_suiteName; }
 
-    void Run();
+    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
 
     int CountFixtures();
     int CountTests();
+    template <typename Predicate> int CountFixturesIf(Predicate predicate);
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
-    void AddFixture(TestFixtureInfo* testFixture);
+private:
     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
+    void AddFixture(TestFixtureInfo* testFixture);
 };
+
+template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    testResults.OnTestSuiteStart(this);
+
+    TestFixtureInfo* testFixture = GetHead();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            testFixture->RunIf(predicate, testResults);
+        testFixture = testFixture->m_next;
+    }
+
+    testResults.OnTestSuiteFinish(this);
+}
+
+template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predicate)
+{
+    int numberOfTestFixtures = 0;
+    TestFixtureInfo* testFixture = GetHead();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            numberOfTestFixtures++;
+        testFixture = testFixture->m_next;
+    }
+    return numberOfTestFixtures;
+}
+
+template <typename Predicate> int TestSuiteInfo::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestFixtureInfo* testFixture = GetHead();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            numberOfTests += testFixture->CountTestsIf(predicate);
+        testFixture = testFixture->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

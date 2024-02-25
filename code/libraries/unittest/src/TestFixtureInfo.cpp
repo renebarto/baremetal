@@ -36,7 +36,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include "unittest/TestFixtureInfo.h"
+#include <unittest/TestFixtureInfo.h>
 
 #include <baremetal/Assert.h>
 
@@ -81,16 +81,6 @@ void TestFixtureInfo::AddTest(TestBase* test)
 TestBase* TestFixtureInfo::GetHead() const
 {
     return m_head;
-}
-
-void TestFixtureInfo::Run()
-{
-    TestBase* test = this->GetHead();
-    while (test != nullptr)
-    {
-        test->Run();
-        test = test->m_next;
-    }
 }
 
 int TestFixtureInfo::CountTests()

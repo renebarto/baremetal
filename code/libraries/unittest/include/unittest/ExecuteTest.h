@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestRunner.cpp
+// File        : ExecuteTest.h
 //
 // Namespace   : unittest
 //
-// Class       : TestRunner
+// Class       : ExecuteTest
 //
-// Description : Test runner
+// Description : Test executor
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,20 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestRunner.h>
+#pragma once
 
-namespace unittest {
+#include <unittest/CurrentTest.h>
+#include <unittest/TestDetails.h>
 
-TestRunner::TestRunner(ITestReporter* reporter)
-    : m_reporter{ reporter }
-    , m_testResults{ reporter }
+namespace unittest
 {
-}
 
-TestRunner::~TestRunner()
+template<typename T>
+void ExecuteTest(T& testObject, const TestDetails& details)
 {
-}
+    CurrentTest::Details() = &details;
 
-int RunAllTests(ITestReporter* reporter)
-{
-    return RunSelectedTests(reporter, True());
+    testObject.RunImpl();
 }
 
 } // namespace unittest

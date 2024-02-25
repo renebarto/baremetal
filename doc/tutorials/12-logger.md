@@ -46,7 +46,7 @@ Were going to add two variables to CMake:
 - BAREMETAL_CONSOLE_UART0
 - BAREMETAL_CONSOLE_UART1
 
-If `BAREMETAL_CONSOLE_UART0` is defined, we'll use UART0 for the console, 
+If `BAREMETAL_CONSOLE_UART0` is defined, we'll use UART0 for the console,
 otherwise if `BAREMETAL_CONSOLE_UART1` is defined, we'll use UART1 for the console.
 If neither is defined, we will set the console to nullptr, or nothing.
 
@@ -122,7 +122,7 @@ File: CMakeLists.txt
 231: message(STATUS "-- Kernel load address: ${BAREMETAL_LOAD_ADDRESS}")
 232: message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
 233: message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
-234: 
+234:
 ...
 ```
 
@@ -177,19 +177,19 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/CharDevice.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: /// @file
 46: /// Console
 47: ///
 48: /// Used to write logging information. Supports use of ANSI color coding
-49: 
+49:
 50: namespace baremetal {
-51: 
+51:
 52: /// @brief  Console color (foreground or background)
 53: enum class ConsoleColor
 54: {
@@ -228,7 +228,7 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 87:     /// @brief White color (light version of LightGray)
 88:     White,
 89: };
-90: 
+90:
 91: /// @brief Class to output to the console.
 92: ///
 93: /// This is a singleton, in that it is not possible to create a default instance (GetConsole() needs to be used for this)
@@ -239,29 +239,29 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 98:     /// </summary>
 99:     /// <returns>Reference to the singleton Console instance</returns>
 100:     friend Console &GetConsole();
-101: 
+101:
 102: private:
 103:     /// @brief Character device to write to
 104:     CharDevice *m_device;
-105: 
+105:
 106:     explicit Console(CharDevice *device);
-107: 
+107:
 108: public:
 109:     void AssignDevice(CharDevice *device);
 110:     void SetTerminalColor(ConsoleColor foregroundColor = ConsoleColor::Default, ConsoleColor backgroundColor = ConsoleColor::Default);
 111:     void ResetTerminalColor();
-112: 
+112:
 113:     void Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor = ConsoleColor::Default);
 114:     void Write(const char *str);
-115: 
+115:
 116:     char ReadChar();
 117:     void WriteChar(char ch);
-118: 
+118:
 119: private:
 120: };
-121: 
+121:
 122: Console &GetConsole();
-123: 
+123:
 124: } // namespace baremetal
 ```
 
@@ -323,17 +323,17 @@ File: code/libraries/baremetal/src/Console.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Console.h>
-41: 
+41:
 42: #include <baremetal/Serialization.h>
 43: #include <baremetal/Timer.h>
 44: #include <baremetal/UART0.h>
 45: #include <baremetal/UART1.h>
 46: #include <baremetal/Util.h>
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: static const char *GetAnsiColorCode(ConsoleColor color)
 51: {
 52:     switch (color)
@@ -366,7 +366,7 @@ File: code/libraries/baremetal/src/Console.cpp
 79:         return 0;
 80:     };
 81: }
-82: 
+82:
 83: /// <summary>
 84: /// Create a console linked to the specified character device. Note that the constructor is private, so GetConsole() is needed to instantiate the console
 85: /// </summary>
@@ -375,7 +375,7 @@ File: code/libraries/baremetal/src/Console.cpp
 88:     : m_device{device}
 89: {
 90: }
-91: 
+91:
 92: /// <summary>
 93: /// Change the attached device
 94: /// </summary>
@@ -384,7 +384,7 @@ File: code/libraries/baremetal/src/Console.cpp
 97: {
 98:     m_device = device;
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Set console foreground and background color (will output ANSI color codes)
 103: /// </summary>
@@ -419,7 +419,7 @@ File: code/libraries/baremetal/src/Console.cpp
 132:     }
 133:     Write("m");
 134: }
-135: 
+135:
 136: /// <summary>
 137: /// Reset console foreground and background back to original (will output ANSI color codes)
 138: /// </summary>
@@ -427,7 +427,7 @@ File: code/libraries/baremetal/src/Console.cpp
 140: {
 141:     SetTerminalColor();
 142: }
-143: 
+143:
 144: /// <summary>
 145: /// Write a string, using the specified foreground and background color
 146: /// </summary>
@@ -437,20 +437,20 @@ File: code/libraries/baremetal/src/Console.cpp
 150: void Console::Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
 151: {
 152:     static volatile bool inUse{};
-153: 
+153:
 154:     while (inUse)
 155:     {
 156:         Timer::WaitMilliSeconds(1);
 157:     }
 158:     inUse = true;
-159: 
+159:
 160:     SetTerminalColor(foregroundColor, backgroundColor);
 161:     Write(str);
 162:     SetTerminalColor();
-163: 
+163:
 164:     inUse = false;
 165: }
-166: 
+166:
 167: /// <summary>
 168: /// Write a string without changing the foreground and background color
 169: /// </summary>
@@ -465,7 +465,7 @@ File: code/libraries/baremetal/src/Console.cpp
 178:         WriteChar(*str++);
 179:     }
 180: }
-181: 
+181:
 182: /// <summary>
 183: /// Read a character
 184: /// </summary>
@@ -479,7 +479,7 @@ File: code/libraries/baremetal/src/Console.cpp
 192:     }
 193:     return ch;
 194: }
-195: 
+195:
 196: /// <summary>
 197: /// Write a single character.
 198: /// </summary>
@@ -491,7 +491,7 @@ File: code/libraries/baremetal/src/Console.cpp
 204:         m_device->Write(ch);
 205:     }
 206: }
-207: 
+207:
 208: /// <summary>
 209: /// Retrieve the singleton console
 210: ///
@@ -511,7 +511,7 @@ File: code/libraries/baremetal/src/Console.cpp
 224: #endif
 225:     return console;
 226: }
-227: 
+227:
 228: } // namespace baremetal
 ```
 
@@ -527,25 +527,26 @@ We'll get to that when we actually start using multiple cores.
 - Line 186-194: Implements the `ReadChar()` method.
 - Line 200-206: Implements the `WriteChar()` method.
 - Line 214-226: Implements the `GetConsole()` function.
-Notice how we define a static UART0 instance when `BAREMETAL_CONSOLE_UART0` is defined, 
-otherwise we define a static UART1 instance when `BAREMETAL_CONSOLE_UART1` is defined, 
+Notice how we define a static UART0 instance when `BAREMETAL_CONSOLE_UART0` is defined,
+otherwise we define a static UART1 instance when `BAREMETAL_CONSOLE_UART1` is defined,
 and if both are not defined, we set the console to a nullptr device.
 
 ### Serialization.h {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_SERIALIZATIONH}
 
 We need to add serialization of an 8 bit unsigned integer.
+
 Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
 
 ```text
 File: code/libraries/baremetal/include/baremetal/Serialization.h
 47: namespace baremetal {
-48: 
+48:
 49: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
 50: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
 51: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
-52: 
+52:
 53: } // namespace baremetal
-54: 
+54:
 ```
 
 - Line 49: Declares a function similar to the existing two, for a 8 bit unsigned integer
@@ -560,11 +561,11 @@ Update the file `code/libraries/baremetal/src/Serialization.cpp`
 File: code/libraries/baremetal/src/Serialization.cpp
 105: /// <summary>
 106: /// Serialize a 8 bit unsigned value to buffer.
-107: /// 
+107: ///
 108: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-109: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned. 
+109: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
 110: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-111: /// 
+111: ///
 112: /// Base is the digit base, which can range from 2 to 36.
 113: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 114: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
@@ -580,7 +581,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 124: {
 125:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 8);
 126: }
-127: 
+127:
 ```
 
 As you can see, it again re-uses the `SerializeInternal()` function.
@@ -603,18 +604,18 @@ File: code/applications/demo/src/main.cpp
 8: #include <baremetal/Serialization.h>
 9: #include <baremetal/System.h>
 10: #include <baremetal/Timer.h>
-11: 
+11:
 12: using namespace baremetal;
-13: 
+13:
 14: int main()
 15: {
 16:     auto& console = GetConsole();
 17:     console.Write("Hello World!\n", ConsoleColor::Yellow);
-18: 
+18:
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIProperties properties(mailbox);
-22: 
+22:
 23:     uint64 serial{};
 24:     if (properties.GetBoardSerial(serial))
 25:     {
@@ -627,10 +628,10 @@ File: code/applications/demo/src/main.cpp
 32:     {
 33:         console.Write("Mailbox call failed\n", ConsoleColor::Red);
 34:     }
-35: 
+35:
 36:     console.Write("Wait 5 seconds\n");
 37:     Timer::WaitMilliSeconds(5000);
-38: 
+38:
 39:     console.Write("Press r to reboot, h to halt\n");
 40:     char ch{};
 41:     while ((ch != 'r') && (ch != 'h'))
@@ -638,7 +639,7 @@ File: code/applications/demo/src/main.cpp
 43:         ch = console.ReadChar();
 44:         console.WriteChar(ch);
 45:     }
-46: 
+46:
 47:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 48: }
 ```
@@ -654,6 +655,7 @@ File: code/applications/demo/src/main.cpp
 ### System.cpp {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_SYSTEMCPP}
 
 As we switch the main application to the console, we should also switch the code in `System.cpp` to the console, otherwise we will be suddenly checking the port over, with strange effects.
+
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp
@@ -673,7 +675,7 @@ File: code/libraries/baremetal/src/System.cpp
 116: {
 117:     GetConsole().Write("Halt\n", ConsoleColor::Cyan);
 118:     Timer::WaitMilliSeconds(WaitTime);
-119: 
+119:
 120:     // power off the SoC (GPU + CPU)
 121:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 122:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
@@ -681,14 +683,14 @@ File: code/libraries/baremetal/src/System.cpp
 124:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
 125:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
 126:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-127: 
+127:
 128:     for (;;) // Satisfy [[noreturn]]
 129:     {
 130:         DataSyncBarrier();
 131:         WaitForInterrupt();
 132:     }
 133: }
-134: 
+134:
 135: /// <summary>
 136: /// Reboots the system. This function will not return
 137: /// </summary>
@@ -696,17 +698,17 @@ File: code/libraries/baremetal/src/System.cpp
 139: {
 140:     GetConsole().Write("Reboot\n", ConsoleColor::Cyan);
 141:     Timer::WaitMilliSeconds(WaitTime);
-142: 
+142:
 143:     DisableIRQs();
 144:     DisableFIQs();
-145: 
+145:
 146:     // power off the SoC (GPU + CPU)
 147:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 148:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
 149:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
 150:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
 151:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-152: 
+152:
 153:     for (;;) // Satisfy [[noreturn]]
 154:     {
 155:         DataSyncBarrier();
@@ -718,19 +720,19 @@ File: code/libraries/baremetal/src/System.cpp
 166: {
 167:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
 168:     EnableIRQs(); // go to TASK_LEVEL
-169: 
+169:
 170:     // clear BSS
 171:     extern unsigned char __bss_start;
 172:     extern unsigned char __bss_end;
 173:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
-174: 
+174:
 175:     // halt, if KERNEL_MAX_SIZE is not properly set
 176:     // cannot inform the user here
 177:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
 178:     {
 179:         GetSystem().Halt();
 180:     }
-181: 
+181:
 182:     // Call constructors of static objects
 183:     extern void (*__init_start)(void);
 184:     extern void (*__init_end)(void);
@@ -738,16 +740,16 @@ File: code/libraries/baremetal/src/System.cpp
 186:     {
 187:         (**func)();
 188:     }
-189: 
+189:
 190:     GetConsole().Write("Starting up\n", ConsoleColor::Cyan);
-191: 
+191:
 192:     extern int main();
-193: 
+193:
 194:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 195:     {
 196:         GetSystem().Reboot();
 197:     }
-198: 
+198:
 199:     GetSystem().Halt();
 200: }
 ...
@@ -763,6 +765,7 @@ Note that line number have changed due to the `Doxygen` comments that were added
 ### Update project configuration {#TUTORIAL_12_LOGGER_CONSOLE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -786,7 +789,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 46:     )
-47: 
+47:
 48: set(PROJECT_INCLUDES_PUBLIC
 49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -827,7 +830,7 @@ The application will now print output in color:
 
 ## Printing a formatted string - Step 2 {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2}
 
-In order to introduce the actual logging functionality, we would like to be able to print using variable arguments, 
+In order to introduce the actual logging functionality, we would like to be able to print using variable arguments,
 much like the standard C `printf()` function.
 
 For variable arguments, we need to be able to handle these. Normally we would have functions or definitions such as `va_start`, `va_end` and `va_arg` for this, by inclusing `stdarg.h`.
@@ -839,6 +842,7 @@ Finally we can then add the logger class.
 ### StdArg.h {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_STDARGH}
 
 So let's add a header to act as the standard C library's `stdarg.h` would.
+
 Create the file `code/libraries/baremetal/include/baremetal/StdArg.h`
 
 ```cpp
@@ -857,9 +861,9 @@ File: code/libraries/baremetal/include/baremetal/StdArg.h
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -879,27 +883,27 @@ File: code/libraries/baremetal/include/baremetal/StdArg.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Standard variable argument list handling using builtin functionality in GCC
-44: 
+44:
 45: // prevent warning, if <stdarg.h> from toolchain is included too
 46: #ifndef _STDARG_H
-47: 
+47:
 48: /// @brief declare standard va_list type
 49: typedef __builtin_va_list va_list;
-50: 
+50:
 51: /// @brief define standard va_start macro
 52: #define va_start(arg, last)     __builtin_va_start (arg, last)
 53: /// @brief define standard va_end macro
 54: #define va_end(arg)             __builtin_va_end (arg)
 55: /// @brief define standard va_arg macro
 56: #define va_arg(arg, type)       __builtin_va_arg (arg, type)
-57: 
+57:
 58: #endif
 ```
 
@@ -913,6 +917,7 @@ File: code/libraries/baremetal/include/baremetal/StdArg.h
 
 We'll define two variants of a formatting function for printing to a string with variable arguments.
 One using the ellipsis argument `...`, the other with a `va_list` argument.
+
 Create the file `code/libraries/baremetal/include/baremetal/Format.h`
 
 ```cpp
@@ -955,24 +960,26 @@ File: code/libraries/baremetal/include/baremetal/Format.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/StdArg.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args);
 48: void Format(char* buffer, size_t bufferSize, const char* format, ...);
-49: 
+49:
 50: } // namespace baremetal
 ```
 
 ### Format.cpp {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING__STEP_2_FORMATCPP}
 
 Now we will implement the formatting functions.
+
 Be aware that this is a poor man's implementation, but it will do for now.
+
 Create the file `code/libraries/baremetal/src/Format.cpp`
 
 ```cpp
@@ -991,9 +998,9 @@ File: code/libraries/baremetal/src/Format.cpp
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -1013,18 +1020,18 @@ File: code/libraries/baremetal/src/Format.cpp
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Format.h>
-41: 
+41:
 42: #include <baremetal/Serialization.h>
 43: #include <baremetal/Util.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: const size_t BufferSize = 1024;
-48: 
+48:
 49: static void Append(char* buffer, size_t bufferSize, char c)
 50: {
 51:     size_t len = strlen(buffer);
@@ -1038,7 +1045,7 @@ File: code/libraries/baremetal/src/Format.cpp
 59:         *p = '\0';
 60:     }
 61: }
-62: 
+62:
 63: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
 64: {
 65:     size_t len = strlen(buffer);
@@ -1053,26 +1060,26 @@ File: code/libraries/baremetal/src/Format.cpp
 74:         *p = '\0';
 75:     }
 76: }
-77: 
+77:
 78: static void Append(char* buffer, size_t bufferSize, const char* str)
 79: {
 80:     strncat(buffer, str, bufferSize);
 81: }
-82: 
+82:
 83: void Format(char* buffer, size_t bufferSize, const char* format, ...)
 84: {
 85:     va_list var;
 86:     va_start(var, format);
-87: 
+87:
 88:     FormatV(buffer, bufferSize, format, var);
-89: 
+89:
 90:     va_end(var);
 91: }
-92: 
+92:
 93: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args)
 94: {
 95:     buffer[0] = '\0';
-96: 
+96:
 97:     while (*format != '\0')
 98:     {
 99:         if (*format == '%')
@@ -1083,35 +1090,35 @@ File: code/libraries/baremetal/src/Format.cpp
 104:                 format++;
 105:                 continue;
 106:             }
-107: 
+107:
 108:             bool alternate = false;
 109:             if (*format == '#')
 110:             {
 111:                 alternate = true;
 112:                 format++;
 113:             }
-114: 
+114:
 115:             bool left = false;
 116:             if (*format == '-')
 117:             {
 118:                 left = true;
 119:                 format++;
 120:             }
-121: 
+121:
 122:             bool leadingZero = false;
 123:             if (*format == '0')
 124:             {
 125:                 leadingZero = true;
 126:                 format++;
 127:             }
-128: 
+128:
 129:             size_t width = 0;
 130:             while (('0' <= *format) && (*format <= '9'))
 131:             {
 132:                 width = width * 10 + (*format - '0');
 133:                 format++;
 134:             }
-135: 
+135:
 136:             unsigned precision = 6;
 137:             if (*format == '.')
 138:             {
@@ -1120,30 +1127,30 @@ File: code/libraries/baremetal/src/Format.cpp
 141:                 while ('0' <= *format && *format <= '9')
 142:                 {
 143:                     precision = precision * 10 + (*format - '0');
-144: 
+144:
 145:                     format++;
 146:                 }
 147:             }
-148: 
+148:
 149:             bool haveLong{};
 150:             bool haveLongLong{};
-151: 
+151:
 152:             if (*format == 'l')
 153:             {
 154:                 if (*(format + 1) == 'l')
 155:                 {
 156:                     haveLongLong = true;
-157: 
+157:
 158:                     format++;
 159:                 }
 160:                 else
 161:                 {
 162:                     haveLong = true;
 163:                 }
-164: 
+164:
 165:                 format++;
 166:             }
-167: 
+167:
 168:             switch (*format)
 169:             {
 170:             case 'c':
@@ -1167,7 +1174,7 @@ File: code/libraries/baremetal/src/Format.cpp
 188:                     }
 189:                 }
 190:                 break;
-191: 
+191:
 192:             case 'd':
 193:             case 'i':
 194:                 if (haveLongLong)
@@ -1189,7 +1196,7 @@ File: code/libraries/baremetal/src/Format.cpp
 210:                     Append(buffer, bufferSize, str);
 211:                 }
 212:                 break;
-213: 
+213:
 214:             case 'f':
 215:                 {
 216:                     char str[BufferSize]{};
@@ -1197,7 +1204,7 @@ File: code/libraries/baremetal/src/Format.cpp
 218:                     Append(buffer, bufferSize, str);
 219:                 }
 220:                 break;
-221: 
+221:
 222:             case 'b':
 223:                 if (alternate)
 224:                 {
@@ -1222,7 +1229,7 @@ File: code/libraries/baremetal/src/Format.cpp
 243:                     Append(buffer, bufferSize, str);
 244:                 }
 245:                 break;
-246: 
+246:
 247:             case 'o':
 248:                 if (alternate)
 249:                 {
@@ -1247,7 +1254,7 @@ File: code/libraries/baremetal/src/Format.cpp
 268:                     Append(buffer, bufferSize, str);
 269:                 }
 270:                 break;
-271: 
+271:
 272:             case 's':
 273:                 {
 274:                     char str[BufferSize]{};
@@ -1255,7 +1262,7 @@ File: code/libraries/baremetal/src/Format.cpp
 276:                     Append(buffer, bufferSize, str);
 277:                 }
 278:                 break;
-279: 
+279:
 280:             case 'u':
 281:                 if (haveLongLong)
 282:                 {
@@ -1276,7 +1283,7 @@ File: code/libraries/baremetal/src/Format.cpp
 297:                     Append(buffer, bufferSize, str);
 298:                 }
 299:                 break;
-300: 
+300:
 301:             case 'x':
 302:             case 'X':
 303:                 if (alternate)
@@ -1302,7 +1309,7 @@ File: code/libraries/baremetal/src/Format.cpp
 323:                     Append(buffer, bufferSize, str);
 324:                 }
 325:                 break;
-326: 
+326:
 327:             case 'p':
 328:                 if (alternate)
 329:                 {
@@ -1314,7 +1321,7 @@ File: code/libraries/baremetal/src/Format.cpp
 335:                     Append(buffer, bufferSize, str);
 336:                 }
 337:                 break;
-338: 
+338:
 339:             default:
 340:                 Append(buffer, bufferSize, '%');
 341:                 Append(buffer, bufferSize, *format);
@@ -1325,11 +1332,11 @@ File: code/libraries/baremetal/src/Format.cpp
 346:         {
 347:             Append(buffer, bufferSize, *format);
 348:         }
-349: 
+349:
 350:         format++;
 351:     }
 352: }
-353: 
+353:
 354: } // namespace baremetal
 ```
 
@@ -1381,22 +1388,22 @@ Update the file `CMakeLists.txt`.
 ```cmake
 File: CMakeLists.txt
 13: include (functions)
-14: 
+14:
 15: get_git_tag(GIT_TAG)
-16: 
+16:
 17: message(STATUS "Tag found: ${GIT_TAG}")
-18: 
+18:
 19: string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
-20: 
+20:
 21: if("${VERSION_NUMBER}" STREQUAL "")
 22:     set(VERSION_NUMBER 0.0.0)
 23: endif()
-24: 
+24:
 25: parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
-26: 
+26:
 27: set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
 28: message(STATUS "Version: ${VERSION_COMPOSED}")
-29: 
+29:
 ...
 61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
@@ -1408,17 +1415,17 @@ File: CMakeLists.txt
 85:     set(BAREMETAL_COLOR_OUTPUT 0)
 86: endif()
 87: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-88: 
+88:
 ...
 89: set(DEFINES_C
 90:     PLATFORM_BAREMETAL
 91:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
 92:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
 93:     USE_PHYSICAL_COUNTER
-94:     BAREMETAL_MAJOR=${VERSION_MAJOR} 
-95:     BAREMETAL_MINOR=${VERSION_MINOR} 
-96:     BAREMETAL_LEVEL=${VERSION_LEVEL} 
-97:     BAREMETAL_BUILD=${VERSION_BUILD} 
+94:     BAREMETAL_MAJOR=${VERSION_MAJOR}
+95:     BAREMETAL_MINOR=${VERSION_MINOR}
+96:     BAREMETAL_LEVEL=${VERSION_LEVEL}
+97:     BAREMETAL_BUILD=${VERSION_BUILD}
 98:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
 99:     )
 ...
@@ -1446,6 +1453,7 @@ The components are stored respectively in variables `VERSION_MAJOR`, `VERSION_MI
 #### Adding functionality to the CMake utility file {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_ADDING_FUNCTIONALITY_TO_THE_CMAKE_UTILITY_FILE}
 
 We just used two utility functions that still need to be defined.
+
 Update the file `cmake/functions.cmake`
 
 ```cmake
@@ -1468,38 +1476,38 @@ File: cmake/functions.cmake
 32:         set(${out} "" PARENT_SCOPE)
 33:     endif()
 34: endfunction()
-35: 
+35:
 36: function(parse_version version_number version_major version_minor version_level version_build)
 37:     if ("${${version_number}}" STREQUAL "")
 38:         set(${version_number} "0.0.0.0" PARENT_SCOPE)
 39:     endif()
 40:     string(REPLACE "." ";" VERSION_PARTS "${${version_number}}")
 41:     LIST(LENGTH VERSION_PARTS VERSION_NUM_PARTS)
-42: 
+42:
 43:     set(VERSION_MAJOR 0)
 44:     if (VERSION_NUM_PARTS GREATER_EQUAL 1)
 45:         list(GET VERSION_PARTS 0 VERSION_MAJOR)
 46:     endif()
 47:     set(${version_major} "${VERSION_MAJOR}" PARENT_SCOPE)
-48: 
+48:
 49:     set(VERSION_MINOR 0)
 50:     if (VERSION_NUM_PARTS GREATER_EQUAL 2)
 51:         list(GET VERSION_PARTS 1 VERSION_MINOR)
 52:     endif()
 53:     set(${version_minor} "${VERSION_MINOR}" PARENT_SCOPE)
-54: 
+54:
 55:     set(VERSION_LEVEL 0)
 56:     if (VERSION_NUM_PARTS GREATER_EQUAL 3)
 57:         list(GET VERSION_PARTS 2 VERSION_LEVEL)
 58:     endif()
 59:     set(${version_level} "${VERSION_LEVEL}" PARENT_SCOPE)
-60: 
+60:
 61:     set(VERSION_BUILD 0)
 62:     if (VERSION_NUM_PARTS GREATER_EQUAL 4)
 63:         list(GET VERSION_PARTS 3 VERSION_BUILD)
 64:     endif()
 65:     set(${version_build} "${VERSION_BUILD}" PARENT_SCOPE)
-66:     
+66:
 67:     if ("${VERSION_MAJOR}" STREQUAL "" OR
 68:         "${VERSION_MINOR}" STREQUAL "" OR
 69:         "${VERSION_LEVEL}" STREQUAL "" OR
@@ -1535,6 +1543,7 @@ If the number of parts is at least 4, we get the fourth item in the list and sto
 #### Version.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_VERSIONH}
 
 Now that we have set compiler definitions for the version, we can use them in code.
+
 Create the file `code/libraries/baremetal/include/baremetal/Version.h`
 
 ```cpp
@@ -1553,9 +1562,9 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -1575,23 +1584,23 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #define BAREMETAL_NAME              "Baremetal"
-43: 
+43:
 44: #define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
 45: #define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
 46: #define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
 47: #define BAREMETAL_VERSION_STRING    GetVersion()
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: void SetupVersion();
 52: const char* GetVersion();
-53: 
+53:
 54: }
 ```
 
@@ -1604,6 +1613,7 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 #### Version.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_VERSIONCPP}
 
 We need to implement the functions we just declared.
+
 Create the file `code/libraries/baremetal/src/Version.cpp`
 
 ```cpp
@@ -1646,16 +1656,16 @@ File: code/libraries/baremetal/src/Version.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Version.h>
-41: 
+41:
 42: #include <baremetal/Format.h>
 43: #include <baremetal/Util.h>
-44: 
+44:
 45: static const size_t BufferSize = 20;
 46: static char s_baremetalVersionString[BufferSize]{};
 47: static bool s_baremetalVersionSetupDone = false;
-48: 
+48:
 49: void baremetal::SetupVersion()
 50: {
 51:     if (!s_baremetalVersionSetupDone)
@@ -1664,7 +1674,7 @@ File: code/libraries/baremetal/src/Version.cpp
 54:         s_baremetalVersionSetupDone = true;
 55:     }
 56: }
-57: 
+57:
 58: const char* baremetal::GetVersion()
 59: {
 60:     return s_baremetalVersionString;
@@ -1678,6 +1688,7 @@ File: code/libraries/baremetal/src/Version.cpp
 #### Logger.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERH}
 
 We'll now add the `Logger` class, which can be used to log to the console, at different log levels.
+
 Create the file `code/libraries/baremetal/include/baremetal/Logger.h`
 
 ```cpp
@@ -1720,18 +1731,18 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Console.h>
 43: #include <baremetal/StdArg.h>
 44: #include <baremetal/Types.h>
-45: 
+45:
 46: /// @file
 47: /// Logger functionality
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: /// <summary>
 52: /// Logging severity classes
 53: /// </summary>
@@ -1748,9 +1759,9 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 64:     /// @brief Message, which is only interesting for debugging this component
 65:     Debug
 66: };
-67: 
+67:
 68: class Timer;
-69: 
+69:
 70: /// <summary>
 71: /// Logger class
 72: /// </summary>
@@ -1761,7 +1772,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 77:     /// </summary>
 78:     /// <returns>Reference to the singleton logger instance</returns>
 79:     friend Logger &GetLogger();
-80: 
+80:
 81: private:
 82:     /// @brief True if class is already initialized
 83:     bool        m_initialized;
@@ -1771,22 +1782,22 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 87:     Console    &m_console;
 88:     /// @brief Currently set logging severity level
 89:     LogSeverity m_level;
-90: 
+90:
 91:     explicit Logger(LogSeverity logLevel, Timer *timer = nullptr, Console &console = GetConsole());
-92: 
+92:
 93: public:
 94:     bool Initialize();
 95:     void SetLogLevel(LogSeverity logLevel);
-96: 
+96:
 97:     void Write(const char *source, int line, LogSeverity severity, const char *message, ...);
 98:     void WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args);
 99: };
-100: 
+100:
 101: Logger &GetLogger();
-102: 
+102:
 103: /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
 104: #define LOG_MODULE(name)       static const char From[] = name
-105: 
+105:
 106: /// @brief Log a panic message
 107: #define LOG_PANIC(...)         GetLogger().Write(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
 108: /// @brief Log an error message
@@ -1797,10 +1808,10 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 113: #define LOG_INFO(...)          GetLogger().Write(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
 114: /// @brief Log a debug message
 115: #define LOG_DEBUG(...)         GetLogger().Write(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
-116: 
+116:
 117: /// @brief Log a message with specified severity and message string
 118: #define LOG(severity, message) GetLogger().Write(From, __LINE__, severity, message);
-119: 
+119:
 120: } // namespace baremetal
 ```
 
@@ -1828,6 +1839,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 #### Logger.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERCPP}
 
 We will add the implementation for the `Logger` class.
+
 Create the file `code/libraries/baremetal/src/Logger.cpp`
 
 ```cpp
@@ -1870,20 +1882,20 @@ File: code/libraries/baremetal/src/Logger.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Logger.h>
-41: 
+41:
 42: #include <baremetal/Console.h>
 43: #include <baremetal/Format.h>
 44: #include <baremetal/System.h>
 45: #include <baremetal/Timer.h>
 46: #include <baremetal/Util.h>
 47: #include <baremetal/Version.h>
-48: 
+48:
 49: using namespace baremetal;
-50: 
+50:
 51: LOG_MODULE("Logger");
-52: 
+52:
 53: /// <summary>
 54: /// Construct a logger
 55: /// </summary>
@@ -1897,7 +1909,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 63:     , m_level{logLevel}
 64: {
 65: }
-66: 
+66:
 67: /// <summary>
 68: /// Initialize logger
 69: /// </summary>
@@ -1909,10 +1921,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 75:     SetupVersion();
 76:     m_initialized = true; // Stop reentrant calls from happening
 77:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi" /*GetMachineInfo().GetName()*/);
-78: 
+78:
 79:     return true;
 80: }
-81: 
+81:
 82: /// <summary>
 83: /// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
 84: /// </summary>
@@ -1921,7 +1933,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 87: {
 88:     m_level = logLevel;
 89: }
-90: 
+90:
 91: /// <summary>
 92: /// Write a string with variable arguments to the logger
 93: /// </summary>
@@ -1936,7 +1948,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 102:     WriteV(source, line, severity, message, var);
 103:     va_end(var);
 104: }
-105: 
+105:
 106: /// <summary>
 107: /// Write a string with variable arguments to the logger
 108: /// </summary>
@@ -1949,16 +1961,16 @@ File: code/libraries/baremetal/src/Logger.cpp
 115: {
 116:     if (static_cast<int>(severity) > static_cast<int>(m_level))
 117:         return;
-118: 
+118:
 119:     static const size_t BufferSize = 1024;
 120:     char buffer[BufferSize]{};
-121: 
+121:
 122:     char sourceString[BufferSize]{};
 123:     Format(sourceString, BufferSize, " (%s:%d)", source, line);
-124: 
+124:
 125:     char messageBuffer[BufferSize]{};
 126:     FormatV(messageBuffer, BufferSize, message, args);
-127: 
+127:
 128:     switch (severity)
 129:     {
 130:     case LogSeverity::Panic:
@@ -1977,7 +1989,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 143:         strncat(buffer, "Debug  ", BufferSize);
 144:         break;
 145:     }
-146: 
+146:
 147:     if (m_timer != nullptr)
 148:     {
 149:         const size_t TimeBufferSize = 32;
@@ -1989,11 +2001,11 @@ File: code/libraries/baremetal/src/Logger.cpp
 155:            strncat(buffer, " ", BufferSize);
 156:         }
 157:     }
-158: 
+158:
 159:     strncat(buffer, messageBuffer, BufferSize);
 160:     strncat(buffer, sourceString, BufferSize);
 161:     strncat(buffer, "\n", BufferSize);
-162: 
+162:
 163: #if BAREMETAL_COLOR_OUTPUT
 164:     switch (severity)
 165:     {
@@ -2019,13 +2031,13 @@ File: code/libraries/baremetal/src/Logger.cpp
 185: #else
 186:     m_console.Write(buffer);
 187: #endif
-188: 
+188:
 189:     if (severity == LogSeverity::Panic)
 190:     {
 191:         GetSystem().Halt();
 192:     }
 193: }
-194: 
+194:
 195: /// <summary>
 196: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
 197: /// </summary>
@@ -2065,6 +2077,7 @@ As a default, we set the maximum log level to `Debug` meaning that everything is
 #### Timer.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS_TIMERH}
 
 We need to add the method `GetTimeString()` to the `Timer` class.
+
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 
 ```cpp
@@ -2072,17 +2085,18 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
 72: public:
 73:     Timer(IMemoryAccess& memoryAccess);
-74: 
+74:
 75:     void GetTimeString(char* buffer, size_t bufferSize);
-76: 
+76:
 77:     static void WaitCycles(uint32 numCycles);
-78: 
+78:
 ...
 ```
 
 #### Timer.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS_TIMERCPP}
 
 We then implement method `GetTimeString()` for the `Timer` class.
+
 Update the file `code/libraries/baremetal/src/Timer.cpp`
 
 ```cpp
@@ -2090,7 +2104,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 ...
 75: /// <summary>
 76: /// Write string representing current time according to our time zone to the buffer.
-77: /// 
+77: ///
 78: /// For now returns an empty string
 79: /// </summary>
 80: /// <param name="buffer">Buffer to receive the time string</param>
@@ -2100,7 +2114,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 84:     if (bufferSize > 0)
 85:         *buffer = '\0';
 86: }
-87: 
+87:
 ...
 ```
 
@@ -2112,6 +2126,7 @@ So for now we simply return an empty string. Updating the clock will take some m
 
 We will be using the logger in the `sysinit()` function, to instanntiate it and print the first log message.
 Also, we will print logging info in `Halt()` and `Reboot()`.
+
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp
@@ -2128,7 +2143,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 56: /// @brief Define log name for this module
 57: LOG_MODULE("System");
-58: 
+58:
 ...
 119: void System::Halt()
 120: {
@@ -2141,10 +2156,10 @@ File: code/libraries/baremetal/src/System.cpp
 145:     Timer::WaitMilliSeconds(WaitTime);
 ...
 194:     SetupVersion();
-195: 
+195:
 196:     GetLogger();
 197:     LOG_INFO("Starting up");
-198: 
+198:
 199:     extern int main();
 ```
 
@@ -2160,6 +2175,7 @@ File: code/libraries/baremetal/src/System.cpp
 ### Update the application code {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATE_THE_APPLICATION_CODE}
 
 We can now also update the application to use the logging macros.
+
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
@@ -2175,20 +2191,20 @@ File: code/applications/demo/src/main.cpp
 9: #include <baremetal/Serialization.h>
 10: #include <baremetal/System.h>
 11: #include <baremetal/Timer.h>
-F2: 
+F2:
 13: LOG_MODULE("main");
-14: 
+14:
 15: using namespace baremetal;
-16: 
+16:
 17: int main()
 18: {
 19:     auto& console = GetConsole();
 20:     LOG_DEBUG("Hello World!");
-21: 
+21:
 22:     char buffer[128];
 23:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 24:     RPIProperties properties(mailbox);
-25: 
+25:
 26:     uint64 serial{};
 27:     if (properties.GetBoardSerial(serial))
 28:     {
@@ -2199,10 +2215,10 @@ F2:
 33:     {
 34:         LOG_ERROR("Mailbox call failed");
 35:     }
-36: 
+36:
 37:     LOG_INFO("Wait 5 seconds");
 38:     Timer::WaitMilliSeconds(5000);
-39: 
+39:
 40:     console.Write("Press r to reboot, h to halt\n");
 41:     char ch{};
 42:     while ((ch != 'r') && (ch != 'h'))
@@ -2210,7 +2226,7 @@ F2:
 44:         ch = console.ReadChar();
 45:         console.WriteChar(ch);
 46:     }
-47: 
+47:
 48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
@@ -2228,6 +2244,7 @@ Notice also that we keep using the console, as we need to read and write charact
 ### Update project configuration {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -2254,7 +2271,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
 49:     )
-50: 
+50:
 51: set(PROJECT_INCLUDES_PUBLIC
 52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -2347,37 +2364,37 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Macros.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: /// @file
 46: /// Assertion functions
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: #ifdef NDEBUG
 51: /// If building for release, assert is replaced by nothing
 52: #define assert(expr) ((void)0)
 53: #else
 54: void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
-55: 
+55:
 56: /// @brief Assertion callback function, which can be installed to handle a failed assertion
 57: using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
-58: 
+58:
 59: void ResetAssertionCallback();
 60: void SetAssertionCallback(AssertionCallback* callback);
-61: 
+61:
 62: /// @brief Assertion. If the assertion fails, AssertionFailed is called.
 63: ///
 64: /// <param name="expression">Expression to evaluate.
 65: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
 66: #define assert(expression) (likely(expression) ? ((void)0) : AssertionFailed(#expression, __FILE__, __LINE__))
-67: 
+67:
 68: #endif
-69: 
+69:
 70: } // namespace baremetal
 ```
 
@@ -2433,20 +2450,20 @@ File: code/libraries/baremetal/src/Assert.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Assert.h>
-41: 
+41:
 42: #include <baremetal/Logger.h>
 43: #include <baremetal/System.h>
-44: 
+44:
 45: LOG_MODULE("Assert");
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
-50: 
+50:
 51: static AssertionCallback *s_callback = AssertionFailedDefault;
-52: 
+52:
 53: /// <summary>
 54: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
 55: /// </summary>
@@ -2458,7 +2475,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 61:     if (s_callback != nullptr)
 62:         s_callback(expression, fileName, lineNumber);
 63: }
-64: 
+64:
 65: /// <summary>
 66: /// Default failed assertion handler
 67: /// </summary>
@@ -2469,7 +2486,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 72: {
 73:     GetLogger().Write(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
 74: }
-75: 
+75:
 76: /// <summary>
 77: /// Reset the assertion failure handler to the default
 78: /// </summary>
@@ -2477,7 +2494,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 80: {
 81:     s_callback = AssertionFailedDefault;
 82: }
-83: 
+83:
 84: /// <summary>
 85: /// Sets up a custom assertion failure handler
 86: /// </summary>
@@ -2486,7 +2503,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 89: {
 90:     s_callback = callback;
 91: }
-92: 
+92:
 93: } // namespace baremetal
 ```
 
@@ -2500,6 +2517,7 @@ This will call the set assertion failure handler function
 ### Macros.h {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_MACROSH}
 
 We use the construct `likely()` in the `assert()` macro. This needs to be defined.
+
 Update the file `code/libraries/baremetal/include/baremetal/Macros.h`
 
 ```cpp
@@ -2510,7 +2528,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 56: /// @brief Make branch prediction expect exp to be false (GCC compiler only)
 57: /// @param exp Expression to be evaluated
 58: #define unlikely(exp)       __builtin_expect (!!(exp), 0)
-59: 
+59:
 ```
 
 These macros make use of builtin functionality in the compiler to influence the branch prediction.
@@ -2518,6 +2536,7 @@ These macros make use of builtin functionality in the compiler to influence the 
 ### Update application code {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_UPDATE_APPLICATION_CODE}
 
 Let us for the sake of demonstration add a failing assertion to the application code.
+
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
@@ -2534,20 +2553,20 @@ File: code/applications/demo/src/main.cpp
 10: #include <baremetal/Serialization.h>
 11: #include <baremetal/System.h>
 12: #include <baremetal/Timer.h>
-13: 
+13:
 14: LOG_MODULE("main");
-15: 
+15:
 16: using namespace baremetal;
-17: 
+17:
 18: int main()
 19: {
 20:     auto& console = GetConsole();
 21:     LOG_DEBUG("Hello World!");
-22: 
+22:
 23:     char buffer[128];
 24:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 25:     RPIProperties properties(mailbox);
-26: 
+26:
 27:     uint64 serial{};
 28:     if (properties.GetBoardSerial(serial))
 29:     {
@@ -2558,10 +2577,10 @@ File: code/applications/demo/src/main.cpp
 34:     {
 35:         LOG_ERROR("Mailbox call failed");
 36:     }
-37: 
+37:
 38:     LOG_INFO("Wait 5 seconds");
 39:     Timer::WaitMilliSeconds(5000);
-40: 
+40:
 41:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 42:     char ch{};
 43:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -2571,7 +2590,7 @@ File: code/applications/demo/src/main.cpp
 47:     }
 48:     if (ch == 'p')
 49:         assert(false);
-50: 
+50:
 51:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 52: }
 ```
@@ -2583,6 +2602,7 @@ File: code/applications/demo/src/main.cpp
 ### Update project configuration {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -2610,7 +2630,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 49:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
 50:     )
-51: 
+51:
 52: set(PROJECT_INCLUDES_PUBLIC
 53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h

@@ -38,6 +38,7 @@ First, let's create the interface.
 ### IMemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_IMEMORYACCESSH}
 
 Let's create the abstract interface first.
+
 Create the file `code/libraries/baremetal/include/baremetal/IMemoryAccess.h`.
 
 ```cpp
@@ -80,18 +81,18 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class IMemoryAccess
 47: {
 48: public:
 49:     virtual ~IMemoryAccess() = default;
-50: 
+50:
 51:     virtual uint8  Read8(regaddr address)                                                    = 0;
 52:     virtual void   Write8(regaddr address, uint8 data)                                       = 0;
 53:     virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)    = 0;
@@ -102,7 +103,7 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 58:     virtual void   Write32(regaddr address, uint32 data)                                     = 0;
 59:     virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
 60: };
-61: 
+61:
 62: } // namespace baremetal
 ```
 
@@ -126,6 +127,7 @@ We have three sets of these methods:
 ### MemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSH}
 
 Next we derive from the abstract `IMemoryAccess` interface.
+
 Create the file `code/libraries/baremetal/include/baremetal/MemoryAccess.h`.
 
 ```cpp
@@ -168,13 +170,13 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IMemoryAccess.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class MemoryAccess : public IMemoryAccess
 47: {
 48: public:
@@ -188,9 +190,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 56:     void   Write32(regaddr address, uint32 data) override;
 57:     void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 58: };
-59: 
+59:
 60: MemoryAccess &GetMemoryAccess();
-61: 
+61:
 62: } // namespace baremetal
 ```
 
@@ -199,6 +201,7 @@ So we create a class `MemoryAccess`, derived from `IMemoryAccess`. Next to this,
 ### MemoryAccess.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSCPP}
 
 Next we implement `MemoryAccess`.
+
 Create the file `code/libraries/baremetal/src/MemoryAccess.cpp`.
 
 ```cpp
@@ -241,21 +244,21 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/MemoryAccess.h>
-41: 
+41:
 42: using namespace baremetal;
-43: 
+43:
 44: uint8 MemoryAccess::Read8(regaddr address)
 45: {
 46:     return *reinterpret_cast<uint8 volatile*>(address);
 47: }
-48: 
+48:
 49: void MemoryAccess::Write8(regaddr address, uint8 data)
 50: {
 51:     *reinterpret_cast<uint8 volatile*>(address) = data;
 52: }
-53: 
+53:
 54: void MemoryAccess::ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)
 55: {
 56:     auto value = Read8(address);
@@ -263,17 +266,17 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 58:     value |= ((data << shift) & mask);
 59:     Write8(address, value);
 60: }
-61: 
+61:
 62: uint16 MemoryAccess::Read16(regaddr address)
 63: {
 64:     return *reinterpret_cast<uint16 volatile*>(address);
 65: }
-66: 
+66:
 67: void MemoryAccess::Write16(regaddr address, uint16 data)
 68: {
 69:     *reinterpret_cast<uint16 volatile*>(address) = data;
 70: }
-71: 
+71:
 72: void MemoryAccess::ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift)
 73: {
 74:     auto value = Read16(address);
@@ -281,17 +284,17 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 76:     value |= ((data << shift) & mask);
 77:     Write16(address, value);
 78: }
-79: 
+79:
 80: uint32 MemoryAccess::Read32(regaddr address)
 81: {
 82:     return *address;
 83: }
-84: 
+84:
 85: void MemoryAccess::Write32(regaddr address, uint32 data)
 86: {
 87:     *address = data;
 88: }
-89: 
+89:
 90: void MemoryAccess::ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift)
 91: {
 92:     auto value = Read32(address);
@@ -299,7 +302,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 94:     value |= ((data << shift) & mask);
 95:     Write32(address, value);
 96: }
-97: 
+97:
 98: MemoryAccess &baremetal::GetMemoryAccess()
 99: {
 100:     static MemoryAccess value;
@@ -316,6 +319,7 @@ We can now start replacing the direct memory access with calls to the methods of
 #### UART1.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1H}
 
 So, we update UART1 to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor:
+
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
 ```cpp
@@ -323,19 +327,19 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 ...
 
 106: class IMemoryAccess;
-107: 
+107:
 108: // Encapsulation for the UART1 device.
 109: class UART1
 110: {
 111:     friend UART1& GetUART1();
-112: 
+112:
 113: private:
 114:     bool            m_initialized;
 115:     IMemoryAccess  &m_memoryAccess;
-116: 
+116:
 117:     // Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
 118:     UART1();
-119: 
+119:
 120: public:
 121:     // Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
 122:     UART1(IMemoryAccess &memoryAccess);
@@ -353,6 +357,7 @@ This can later be used for testing.
 #### UART1.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1CPP}
 
 Let's update the implementation:
+
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
 
 ```cpp
@@ -360,11 +365,11 @@ File: code/libraries/baremetal/src/UART1.cpp
 ...
 
 40: #include <baremetal/UART1.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/MemoryAccess.h>
-45: 
+45:
 
 ...
 
@@ -373,7 +378,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 68:     , m_memoryAccess{GetMemoryAccess()}
 69: {
 70: }
-71: 
+71:
 72: UART1::UART1(IMemoryAccess &memoryAccess)
 73:     : m_initialized{}
 74:     , m_memoryAccess{memoryAccess}
@@ -398,15 +403,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 80: {
 81:     if (m_initialized)
 82:         return;
-83: 
+83:
 84:     // initialize UART
 85:     auto value = m_memoryAccess.Read32(RPI_AUX_ENABLES);
 86:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);    // Disable UART1, AUX mini uart
-87: 
+87:
 88:     SetMode(14, GPIOMode::AlternateFunction5);
-89: 
+89:
 90:     SetMode(15, GPIOMode::AlternateFunction5);
-91: 
+91:
 92:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);     // enable UART1, AUX mini uart
 93:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, 0);                                 // Disable Tx, Rx
 94:     m_memoryAccess.Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);         // 8 bit mode
@@ -419,12 +424,12 @@ File: code/libraries/baremetal/src/UART1.cpp
 101: #else
 102:     m_memoryAccess.Write32(RPI_AUX_MU_BAUD, 541);                               // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
 103: #endif
-104: 
+104:
 105:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
 106:                                                                                 // Enable Tx, Rx
 107:     m_initialized = true;
 108: }
-109: 
+109:
 110: // Write a character
 111: void UART1::Write(char c)
 112: {
@@ -437,7 +442,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 119:     // Write the character to the buffer
 120:     m_memoryAccess.Write32(RPI_AUX_MU_IO, static_cast<unsigned int>(c));
 121: }
-122: 
+122:
 123: // Receive a character
 124: char UART1::Read()
 125: {
@@ -459,30 +464,30 @@ File: code/libraries/baremetal/src/UART1.cpp
 185:         return false;
 186:     if (function >= GPIOFunction::Unknown)
 187:         return false;
-188: 
+188:
 189:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
 190:     uint32  shift = (pinNumber % 10) * 3;
-191: 
+191:
 192:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-193: 
+193:
 194:     uint32 value = m_memoryAccess.Read32(selectRegister);
 195:     value &= ~(7 << shift);
 196:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
 197:     m_memoryAccess.Write32(selectRegister, value);
 198:     return true;
 199: }
-200: 
+200:
 201: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
 202: {
 203:     if (pullMode >= GPIOPullMode::Unknown)
 204:         return false;
-205: 
+205:
 206:     if (pinNumber >= NUM_GPIO)
 207:         return false;
 208: #if BAREMETAL_RPI_TARGET == 3
 209:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
 210:     uint32  shift = pinNumber % 32;
-211: 
+211:
 212:     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 213:     WaitCycles(NumWaitCycles);
 214:     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -491,36 +496,36 @@ File: code/libraries/baremetal/src/UART1.cpp
 217: #else
 218:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 219:     unsigned              shift = (pinNumber % 16) * 2;
-220: 
+220:
 221:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-222: 
+222:
 223:     uint32                value = *(modeReg);
 224:     value &= ~(3 << shift);
 225:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 226:     *(modeReg) = value;
 227: #endif
-228: 
+228:
 229:     return true;
 230: }
-231: 
+231:
 232: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
 233: {
 234:     if (pinNumber >= NUM_GPIO)
 235:         return false;
-236: 
+236:
 237:     // Output level can be set in input mode for subsequent switch to output
 238:     if (mode >= GPIOMode::AlternateFunction0)
 239:         return false;
-240: 
+240:
 241:     unsigned regOffset = (pinNumber / 32);
 242:     uint32 regMask = 1 << (pinNumber % 32);
-243: 
+243:
 244:     bool value = false;
-245: 
+245:
 246:     regaddr regAddress = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-247: 
+247:
 248:     m_memoryAccess.Write32(regAddress, regMask);
-249: 
+249:
 250:     return true;
 251: }
 
@@ -533,6 +538,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 
 We update System to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor.
 Also, we will need to make `Halt()` and `Reboot()` non-static members, as they will need to use the memory access reference.
+
 Update the file `code/libraries/baremetal/include/baremetal/System.h`.
 
 ```cpp
@@ -540,21 +546,21 @@ File: code/libraries/baremetal/include/baremetal/System.h
 ...
 
 46: class IMemoryAccess;
-47: 
+47:
 48: class System
 49: {
 50:     friend System& GetSystem();
-51: 
+51:
 52: private:
 53:     IMemoryAccess  &m_memoryAccess;
-54: 
+54:
 55:     // Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
 56:     System();
-57: 
+57:
 58: public:
 59:     // Constructs a specialized System instance with a custom IMemoryAccess instance. This is intended for testing.
 60:     System(IMemoryAccess &memoryAccess);
-61: 
+61:
 62:     [[noreturn]] static void Halt();
 63:     [[noreturn]] static void Reboot();
 ...
@@ -570,6 +576,7 @@ This can later be used for testing.
 #### System.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMCPP}
 
 Let's update the implementation:
+
 Update the file `code/libraries/baremetal/src/System.cpp`.
 
 ```cpp
@@ -589,7 +596,7 @@ File: code/libraries/baremetal/src/System.cpp
 58:     : m_memoryAccess{GetMemoryAccess()}
 59: {
 60: }
-61: 
+61:
 62: System::System(IMemoryAccess &memoryAccess)
 63:     : m_memoryAccess{memoryAccess}
 64: {
@@ -603,6 +610,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 62-65: The other constructor takes initializes `m_memoryAccess` with the `IMemoryAccess` instance passed as a parameter.
 
 We also need to update the code actually reading and writing registers:
+
 Update the file `code/libraries/baremetal/src/System.cpp`.
 
 ```cpp
@@ -610,7 +618,7 @@ File: code/libraries/baremetal/src/System.cpp
 67: void System::Halt()
 68: {
 69:     GetUART1().WriteString("Halt\n");
-70: 
+70:
 71:     // power off the SoC (GPU + CPU)
 72:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 73:     r &= ~0xFFFFFAAA;
@@ -618,28 +626,28 @@ File: code/libraries/baremetal/src/System.cpp
 75:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
 76:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
 77:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
-78: 
+78:
 79:     for (;;) // Satisfy [[noreturn]]
 80:     {
 81:         DataSyncBarrier();
 82:         WaitForInterrupt();
 83:     }
 84: }
-85: 
+85:
 86: void System::Reboot()
 87: {
 88:     GetUART1().WriteString("Reboot\n");
-89: 
+89:
 90:     DisableIRQs();
 91:     DisableFIQs();
-92: 
+92:
 93:     // power off the SoC (GPU + CPU)
 94:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
 95:     r &= ~0xFFFFFAAA;
 96:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
 97:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
 98:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_FULLRST);
-99: 
+99:
 100:     for (;;) // Satisfy [[noreturn]]
 101:     {
 102:         DataSyncBarrier();
@@ -651,6 +659,7 @@ File: code/libraries/baremetal/src/System.cpp
 ### Update project configuration {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 We need to update the CMake file for baremetal.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`.
 
 ```cpp
@@ -665,7 +674,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 36:     )
-37: 
+37:
 38: set(PROJECT_INCLUDES_PUBLIC
 39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -691,7 +700,7 @@ Building now will result in linker errors:
   [1/4] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_TARGET=RPI3 -DPLATFORM_BAREMETAL -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/MemoryAccess.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\MemoryAccess.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/MemoryAccess.cpp.obj -c ../code/libraries/baremetal/src/MemoryAccess.cpp
   [2/4] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/CXAGuard.cpp.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/MemoryAccess.cpp.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/System.cpp.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Util.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
   [3/4] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
-  FAILED: ../output/Debug/bin/demo.elf 
+  FAILED: ../output/Debug/bin/demo.elf
   cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: ../output/Debug/lib/libbaremetal.a(MemoryAccess.cpp.obj): in function `baremetal::GetMemoryAccess()':
   D:\Projects\baremetal.github\cmake-BareMetal-Debug/../code/libraries/baremetal/src/MemoryAccess.cpp:100:(.text+0x324): undefined reference to `__dso_handle'
@@ -718,7 +727,7 @@ All of these are again caused by variables or functions we should implement.
 The details are not really worthwhile discussing here, we'll get to that later when dealing with memory management.
 
 - __dso_handle is a "guard" that is used to identify DSO (Dynamic Shared Objects) during global destruction. It is a variable of type void*.
-- __cxa_atexit() is a function in C++ that registers a function to be called by exit() or when a shared library is unloaded. 
+- __cxa_atexit() is a function in C++ that registers a function to be called by exit() or when a shared library is unloaded.
 It is used to register a function to be called when the program terminates normally.
 The function is called in reverse order of registration, i.e., the function registered last will be executed first.
 - operator delete(void*, unsigned long) is an operator to deallocate a block of memory. It requires that another operator is defined: `operator delete(void*)`
@@ -727,6 +736,7 @@ In short, all this has to do with application shutdown (which we will not need f
 So for now, simple stub implementations are sufficient.
 
 The first two will be implemented in `System.cpp`.
+
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp
@@ -734,24 +744,24 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 
 49: using namespace baremetal;
-50: 
+50:
 51: #ifdef __cplusplus
 52: extern "C"
 53: {
 54: #endif
-55: 
+55:
 56: void *__dso_handle WEAK;
-57: 
+57:
 58: void __cxa_atexit(void* pThis, void (*func)(void* pThis), void* pHandle) WEAK;
-59: 
+59:
 60: void __cxa_atexit(void* /*pThis*/, void (* /*func*/)(void* pThis), void* /*pHandle*/)
 61: {
 62: }
-63: 
+63:
 64: #ifdef __cplusplus
 65: }
 66: #endif
-67: 
+67:
 68: System& baremetal::GetSystem()
 69: {
 70:     static System value;
@@ -765,6 +775,7 @@ The term WEAK needs to be defined still. This has to do with fallbacks in case t
 As you can see, `__cxa_atexit` is defined as a stub implementation.
 
 We will put this definition in `Macros.h`.
+
 Update the file `code/libraries/baremetal/include/baremetal/Macros.h`
 
 ```cpp
@@ -773,12 +784,13 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 
 42: // Make a variable a weak instance (GCC compiler only)
 43: #define WEAK                __attribute__ ((weak))
-44: 
+44:
 45: // Convert bit index into integer
 46: #define BIT(n)              (1U << (n))
 ```
 
 For the delete operators, we will create a new header and source file, to start preparing for memory management.
+
 Create the file `code/libraries/baremetal/include/baremetal/New.h`
 
 ```cpp
@@ -821,9 +833,9 @@ File: code/libraries/baremetal/include/baremetal/New.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
 ```
 
@@ -869,19 +881,20 @@ File: code/libraries/baremetal/src/New.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/New.h>
-41: 
+41:
 42: void operator delete(void* /*block*/) noexcept
 43: {
 44: }
-45: 
+45:
 46: void operator delete(void* /*block*/, size_t /*size*/) noexcept
 47: {
 48: }
 ```
 
 Again, the delete operators are for now implemented as stubs.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`.
 
 ```cpp
@@ -897,7 +910,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 37:     )
-38: 
+38:
 39: set(PROJECT_INCLUDES_PUBLIC
 40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -975,13 +988,13 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: // GPIO mode
 47: enum class GPIOMode
 48: {
@@ -1007,7 +1020,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 68:     AlternateFunction5,
 69:     Unknown,
 70: };
-71: 
+71:
 72: // GPIO function
 73: enum class GPIOFunction
 74: {
@@ -1029,7 +1042,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 90:     AlternateFunction5,
 91:     Unknown,
 92: };
-93: 
+93:
 94: // GPIO pull mode
 95: enum class GPIOPullMode
 96: {
@@ -1041,18 +1054,18 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 102:     PullUp,
 103:     Unknown,
 104: };
-105: 
+105:
 106: // Abstraction of a GPIO pin
 107: class IGPIOPin
 108: {
 109: public:
 110:     virtual ~IGPIOPin() = default;
-111: 
+111:
 112:     // Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
 113:     virtual uint8 GetPinNumber() const = 0;
 114:     // Assign a GPIO pin
 115:     virtual bool AssignPin(uint8 pinNumber) = 0;
-116: 
+116:
 117:     // Switch GPIO on
 118:     virtual void On() = 0;
 119:     // Switch GPIO off
@@ -1064,7 +1077,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 125:     // Invert GPIO value on->off off->on
 126:     virtual void Invert() = 0;
 127: };
-128: 
+128:
 129: } // namespace baremetal
 ```
 
@@ -1112,14 +1125,14 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IGPIOPin.h>
 43: #include <baremetal/MemoryAccess.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: // Physical GPIO pin (i.e. available on GPIO header)
 48: class PhysicalGPIOPin : public IGPIOPin
 49: {
@@ -1130,19 +1143,19 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 54:     GPIOPullMode          m_pullMode;
 55:     bool                  m_value;
 56:     IMemoryAccess& m_memoryAccess;
-57: 
+57:
 58: public:
 59:     // Creates a virtual GPIO pin
 60:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 61:     // PhysicalGPIOPin(const PhysicalGPIOPin &other);
-62: 
+62:
 63:     // Creates a virtual GPIO pin
 64:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
-65: 
+65:
 66:     uint8 GetPinNumber() const override;
 67:     // Assign a GPIO pin
 68:     bool AssignPin(uint8 pinNumber) override;
-69: 
+69:
 70:     // Switch GPIO on
 71:     void On() override;
 72:     // Switch GPIO off
@@ -1153,7 +1166,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 77:     void Set(bool on) override;
 78:     // Invert GPIO value on->off off->on
 79:     void Invert() override;
-80: 
+80:
 81:     // Get the mode for the GPIO pin
 82:     GPIOMode GetMode();
 83:     // Set the mode for the GPIO pin
@@ -1164,12 +1177,12 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 88:     GPIOPullMode GetPullMode();
 89:     // Set GPIO pin pull mode
 90:     void SetPullMode(GPIOPullMode pullMode);
-91: 
+91:
 92: private:
 93:     // Set GPIO pin function
 94:     void SetFunction(GPIOFunction function);
 95: };
-96: 
+96:
 97: } // namespace baremetal
 ```
 
@@ -1217,21 +1230,21 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/PhysicalGPIOPin.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/MemoryAccess.h>
-45: 
+45:
 46: // Total count of GPIO pins, numbered from 0 through 53
 47: #define NUM_GPIO 54
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: #if BAREMETAL_RPI_TARGET == 3
 52: static const int NumWaitCycles = 150;
-53: 
+53:
 54: static void WaitCycles(uint32 numCycles)
 55: {
 56:     if (numCycles)
@@ -1243,7 +1256,7 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 62:     }
 63: }
 64: #endif // BAREMETAL_RPI_TARGET == 3
-65: 
+65:
 66: PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
 67:     : m_pinNumber{ NUM_GPIO }
 68:     , m_mode{ GPIOMode::Unknown }
@@ -1253,7 +1266,7 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 72:     , m_memoryAccess{ memoryAccess }
 73: {
 74: }
-75: 
+75:
 76: PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
 77:     : m_pinNumber{ NUM_GPIO }
 78:     , m_mode{ GPIOMode::Unknown }
@@ -1263,38 +1276,38 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 82:     AssignPin(pinNumber);
 83:     SetMode(mode);
 84: }
-85: 
+85:
 86: uint8 PhysicalGPIOPin::GetPinNumber() const
 87: {
 88:     return m_pinNumber;
 89: }
-90: 
+90:
 91: bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
 92: {
 93:     // Check if pin already assigned
 94:     if (m_pinNumber != NUM_GPIO)
 95:         return false;
 96:     m_pinNumber = pinNumber;
-97: 
+97:
 98:     return true;
 99: }
-100: 
+100:
 101: void PhysicalGPIOPin::On()
 102: {
 103:     Set(true);
 104: }
-105: 
+105:
 106: void PhysicalGPIOPin::Off()
 107: {
 108:     Set(false);
 109: }
-110: 
+110:
 111: bool PhysicalGPIOPin::Get()
 112: {
 113:     // Check if pin is assigned
 114:     if (m_pinNumber >= NUM_GPIO)
 115:         return false;
-116: 
+116:
 117:     if ((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown))
 118:     {
 119:         uint32 regOffset = (m_pinNumber / 32);
@@ -1303,36 +1316,36 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 122:     }
 123:     return m_value;
 124: }
-125: 
+125:
 126: void PhysicalGPIOPin::Set(bool on)
 127: {
 128:     // Check if pin is assigned
 129:     if (m_pinNumber >= NUM_GPIO)
 130:         return;
-131: 
+131:
 132:     // Check if mode is output
 133:     if (m_mode == GPIOMode::Output)
 134:         return;
-135: 
+135:
 136:     m_value = on;
-137: 
+137:
 138:     uint32 regOffset = (m_pinNumber / 32);
 139:     uint32 regMask = 1 << (m_pinNumber % 32);
 140:     regaddr regAddress = (m_value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-141: 
+141:
 142:     m_memoryAccess.Write32(regAddress, regMask);
 143: }
-144: 
+144:
 145: void PhysicalGPIOPin::Invert()
 146: {
 147:     Set(!Get());
 148: }
-149: 
+149:
 150: GPIOMode PhysicalGPIOPin::GetMode()
 151: {
 152:     return m_mode;
 153: }
-154: 
+154:
 155: static GPIOFunction ConvertGPIOModeToFunction(GPIOMode mode)
 156: {
 157:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
@@ -1346,27 +1359,27 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 165:     }
 166:     return GPIOFunction::Input;
 167: }
-168: 
+168:
 169: bool PhysicalGPIOPin::SetMode(GPIOMode mode)
 170: {
 171:     // Check if pin is assigned
 172:     if (m_pinNumber >= NUM_GPIO)
 173:         return false;
-174: 
+174:
 175:     // Check if mode is valid
 176:     if (mode >= GPIOMode::Unknown)
 177:         return false;
-178: 
+178:
 179:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
 180:     {
 181:         SetPullMode(GPIOPullMode::Off);
-182: 
+182:
 183:         SetFunction(ConvertGPIOModeToFunction(mode));
 184:     }
 185:     else if (GPIOMode::Output == mode)
 186:     {
 187:         SetPullMode(GPIOPullMode::Off);
-188: 
+188:
 189:         SetFunction(ConvertGPIOModeToFunction(mode));
 190:     }
 191:     else
@@ -1379,53 +1392,53 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 198:         Off();
 199:     return true;
 200: }
-201: 
+201:
 202: GPIOFunction PhysicalGPIOPin::GetFunction()
 203: {
 204:     return m_function;
 205: }
-206: 
+206:
 207: GPIOPullMode PhysicalGPIOPin::GetPullMode()
 208: {
 209:     return m_pullMode;
 210: }
-211: 
+211:
 212: void PhysicalGPIOPin::SetFunction(GPIOFunction function)
 213: {
 214:     // Check if pin is assigned
 215:     if (m_pinNumber >= NUM_GPIO)
 216:         return;
-217: 
+217:
 218:     // Check if mode is valid
 219:     if (function >= GPIOFunction::Unknown)
 220:         return;
-221: 
+221:
 222:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10);
 223:     uint32  shift = (m_pinNumber % 10) * 3;
-224: 
+224:
 225:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-226: 
+226:
 227:     uint32 value = m_memoryAccess.Read32(selectRegister);
 228:     value &= ~(7 << shift);
 229:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
 230:     m_memoryAccess.Write32(selectRegister, value);
 231:     m_function = function;
 232: }
-233: 
+233:
 234: void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
 235: {
 236:     // Check if pin is assigned
 237:     if (m_pinNumber >= NUM_GPIO)
 238:         return;
-239: 
+239:
 240:     // Check if mode is valid
 241:     if (pullMode >= GPIOPullMode::Unknown)
 242:         return;
-243: 
+243:
 244: #if BAREMETAL_RPI_TARGET == 3
 245:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (m_pinNumber / 32);
 246:     uint32  shift = m_pinNumber % 32;
-247: 
+247:
 248:     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 249:     WaitCycles(NumWaitCycles);
 250:     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -1434,18 +1447,18 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 253: #else
 254:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16);
 255:     unsigned              shift = (m_pinNumber % 16) * 2;
-256: 
+256:
 257:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-258: 
+258:
 259:     uint32                value = m_memoryAccess.Read32(modeReg);
 260:     value &= ~(3 << shift);
 261:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 262:     m_memoryAccess.Write32(modeReg, value);
 263: #endif
-264: 
+264:
 265:     m_pullMode = pullMode;
 266: }
-267: 
+267:
 268: } // namespace baremetal
 ```
 
@@ -1497,27 +1510,27 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class IMemoryAccess;
-47: 
+47:
 48: // Encapsulation for the UART1 device.
 49: class UART1
 50: {
 51:     friend UART1& GetUART1();
-52: 
+52:
 53: private:
 54:     bool            m_initialized;
 55:     IMemoryAccess  &m_memoryAccess;
-56: 
+56:
 57:     // Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
 58:     UART1();
-59: 
+59:
 60: public:
 61:     // Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
 62:     UART1(IMemoryAccess &memoryAccess);
@@ -1531,9 +1544,9 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 70:     // Write a string
 71:     void WriteString(const char* str);
 72: };
-73: 
+73:
 74: UART1& GetUART1();
-75: 
+75:
 76: } // namespace baremetal
 ```
 
@@ -1584,41 +1597,41 @@ File: code/libraries/baremetal/src/UART1.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/UART1.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/MemoryAccess.h>
 45: #include <baremetal/PhysicalGPIOPin.h>
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: UART1::UART1()
 50:     : m_initialized{}
 51:     , m_memoryAccess{GetMemoryAccess()}
 52: {
 53: }
-54: 
+54:
 55: UART1::UART1(IMemoryAccess &memoryAccess)
 56:     : m_initialized{}
 57:     , m_memoryAccess{memoryAccess}
 58: {
 59: }
-60: 
+60:
 61: // Set baud rate and characteristics (115200 8N1) and map to GPIO
 62: void UART1::Initialize()
 63: {
 64:     if (m_initialized)
 65:         return;
-66: 
+66:
 67:     // initialize UART
 68:     auto value = m_memoryAccess.Read32(RPI_AUX_ENABLES);
 69:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);    // Disable UART1, AUX mini uart
-70: 
+70:
 71:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction5, m_memoryAccess);
 72:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction5, m_memoryAccess);
-73: 
+73:
 74:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);     // enable UART1, AUX mini uart
 75:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, 0);                                 // Disable Tx, Rx
 76:     m_memoryAccess.Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);         // 8 bit mode
@@ -1631,12 +1644,12 @@ File: code/libraries/baremetal/src/UART1.cpp
 83: #else
 84:     m_memoryAccess.Write32(RPI_AUX_MU_BAUD, 541);                               // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
 85: #endif
-86: 
+86:
 87:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
 88:                                                                                 // Enable Tx, Rx
 89:     m_initialized = true;
 90: }
-91: 
+91:
 92: // Write a character
 93: void UART1::Write(char c)
 94: {
@@ -1649,7 +1662,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 101:     // Write the character to the buffer
 102:     m_memoryAccess.Write32(RPI_AUX_MU_IO, static_cast<unsigned int>(c));
 103: }
-104: 
+104:
 105: // Receive a character
 106: char UART1::Read()
 107: {
@@ -1662,7 +1675,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 114:     // Read it and return
 115:     return static_cast<char>(m_memoryAccess.Read32(RPI_AUX_MU_IO));
 116: }
-117: 
+117:
 118: void UART1::WriteString(const char* str)
 119: {
 120:     while (*str)
@@ -1673,15 +1686,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 125:         Write(*str++);
 126:     }
 127: }
-128: 
+128:
 129: UART1& GetUART1()
 130: {
 131:     static UART1 value;
 132:     value.Initialize();
-133: 
+133:
 134:     return value;
 135: }
-136: 
+136:
 137: } // namespace baremetal
 ```
 
@@ -1695,6 +1708,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 ### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -1710,7 +1724,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 38:     )
-39: 
+39:
 40: set(PROJECT_INCLUDES_PUBLIC
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -1748,6 +1762,7 @@ We will create a new class Timer, which fornow will only have one method, but we
 ### Timer.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERH}
 
 Let's create the `Timer` class.
+
 Create the file `code/libraries/baremetal/include/baremetal/Timer.h`.
 
 ```cpp
@@ -1790,13 +1805,13 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45:     
+45:
 46: // For now holds only busy waiting
 47: class Timer
 48: {
@@ -1804,13 +1819,14 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 50:     // Wait for specified number of NOP statements. Busy wait
 51:     static void WaitCycles(uint32 numCycles);
 52: };
-53: 
+53:
 54: } // namespace baremetal
 ```
 
 ### Timer.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERCPP}
 
 Next we implement `Timer`.
+
 Create the file `code/libraries/baremetal/src/Timer.cpp`.
 
 ```cpp
@@ -1853,13 +1869,13 @@ File: code/libraries/baremetal/src/Timer.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Timer.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
-43: 
+43:
 44: using namespace baremetal;
-45: 
+45:
 46: void Timer::WaitCycles(uint32 numCycles)
 47: {
 48:     if (numCycles)
@@ -1888,9 +1904,9 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 ...
 47: // Total count of GPIO pins, numbered from 0 through 53
 48: #define NUM_GPIO 54
-49: 
+49:
 50: namespace baremetal {
-51: 
+51:
 52: #if BAREMETAL_RPI_TARGET == 3
 53: static const int NumWaitCycles = 150;
 54: #endif // BAREMETAL_RPI_TARGET == 3
@@ -1898,7 +1914,7 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 234: #if BAREMETAL_RPI_TARGET == 3
 235:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (m_pinNumber / 32);
 236:     uint32  shift = m_pinNumber % 32;
-237: 
+237:
 238:     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 239:     Timer::WaitCycles(NumWaitCycles);
 240:     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -1907,9 +1923,9 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 243: #else
 244:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16);
 245:     unsigned              shift = (m_pinNumber % 16) * 2;
-246: 
+246:
 247:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-248: 
+248:
 249:     uint32                value = m_memoryAccess.Read32(modeReg);
 250:     value &= ~(3 << shift);
 251:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
@@ -1939,7 +1955,7 @@ File: code/libraries/baremetal/src/System.cpp
 48: #include <baremetal/Util.h>
 ...
 70: static const uint32 NumWaitCycles = 100000000;
-71: 
+71:
 72: System& baremetal::GetSystem()
 73: {
 74:     static System value;
@@ -1966,6 +1982,7 @@ File: code/libraries/baremetal/src/System.cpp
 ### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -1982,7 +1999,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 39:     )
-40: 
+40:
 41: set(PROJECT_INCLUDES_PUBLIC
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h

@@ -26,7 +26,7 @@ File: CMakeLists.txt
 ...
 
 218: option(BUILD_TUTORIALS "Build all tutorials" OFF)
-219: 
+219:
 220: add_subdirectory(code)
 221: if(BUILD_TUTORIALS)
 222:     add_subdirectory(tutorial)
@@ -45,7 +45,7 @@ Update the file `tutorial/CMakeLists.txt`
 File: tutorial/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3: 
+3:
 4: add_subdirectory(05-console-uart1)
 ```
 
@@ -77,15 +77,15 @@ Similarly, the main application's create-image folder will have a project name n
 File: code/applications/demo/create-image/CMakeLists.txt
 1: project(demo-image
 2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
-3: 
+3:
 4: message(STATUS "\n**********************************************************************************\n")
 5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6: 
+6:
 7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8: 
+8:
 9: set(DEPENDENCY demo)
 10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-11: 
+11:
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
@@ -93,15 +93,15 @@ File: code/applications/demo/create-image/CMakeLists.txt
 File: tutorial/05-console-uart1/code/applications/demo/create-image/CMakeLists.txt
 1: project(05-console-uart1-image
 2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
-3: 
+3:
 4: message(STATUS "\n**********************************************************************************\n")
 5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6: 
+6:
 7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8: 
+8:
 9: set(DEPENDENCY 05-console-uart1)
 10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-11: 
+11:
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
@@ -114,7 +114,7 @@ In the same way, we need to make sure the baremetal library project name is not 
 File: code/libraries/baremetal/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3: 
+3:
 4: project(baremetal
 5: 	DESCRIPTION "Bare metal library"
 6: 	LANGUAGES CXX ASM)
@@ -125,7 +125,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 File: tutorial/05-console-uart1/code/libraries/baremetal/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3: 
+3:
 4: project(baremetal-05
 5:     DESCRIPTION "Bare metal library"
 6:     LANGUAGES CXX ASM)
@@ -229,6 +229,7 @@ The first step we'll take is including a header to contain standard ARM instruct
 ### ARMInstructions.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_ARMINSTRUCTIONSH}
 
 We add ARM instructions.
+
 Create the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 
 ```cpp
@@ -247,9 +248,9 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -269,15 +270,15 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: // ARM instructions represented as macros for ease of use.
 43: //
 44: // For specific registers, we also define the fields and their possible values.
-45: 
+45:
 46: // NOP instruction
 47: #define NOP()                           asm volatile("nop")
 ```
@@ -754,6 +755,7 @@ For this header, we also need some standard definitions and types, so we'll add 
 ### Macros.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_MACROSH}
 
 We'll add some basic definitions first.
+
 Create the file `code/libraries/baremetal/include/baremetal/Macros.h`:
 
 ```cpp
@@ -796,9 +798,9 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: // Convert bit index into integer
 43: #define BIT(n)              (1U << (n))
 ```
@@ -808,6 +810,7 @@ For now, we'll define the macro BIT to define the value of a bit index index n, 
 ### Types.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_TYPESH}
 
 Then we define basic standard types.
+
 Create the file `code/libraries/baremetal/include/baremetal/Types.h`:
 
 ```cpp
@@ -850,9 +853,9 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: // Unsigned 8 bit integer
 43: typedef unsigned char uint8;
 44: // Unsigned 16 bit integer
@@ -861,7 +864,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 47: typedef unsigned int uint32;
 48: // Unsigned 64 bit integer
 49: typedef unsigned long uint64;
-50: 
+50:
 51: // Signed 8 bit integer
 52: typedef signed char int8;
 53: // Signed 16 bit integer
@@ -870,7 +873,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 56: typedef signed int int32;
 57: // Signed 64 bit integer
 58: typedef signed long int64;
-59: 
+59:
 60: // Pointer as signed 64 bit integer
 61: typedef int64 intptr;
 62: // Pointer as unsigned 64 bit integer
@@ -879,12 +882,12 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 65: typedef uint64 size_type;
 66: // Signed size type
 67: typedef int64 ssize_type;
-68: 
+68:
 69: // Unsigned size
 70: typedef size_type size_t;
 71: // Signed size
 72: typedef ssize_type ssize_t;
-73: 
+73:
 74: // Unsigned volatile 32 bit integer (for registers)
 75: typedef volatile uint32 reg32;
 76: // Pointer to unsigned volatile 32 bit integer (for registers)
@@ -901,6 +904,7 @@ This header defines the following types:
 
 Now we add some registers of the Broadcom SoC in the Raspberry Pi (specifically those for GPIO and UART1 (mini UART).
 This file will include the two header file defines before.
+
 Create the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 
 ```cpp
@@ -943,12 +947,12 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Macros.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: #if BAREMETAL_RPI_TARGET == 3
 46: // Base address for Raspberry PI BCM I/O
 47: #define RPI_BCM_IO_BASE                 0x3F000000
@@ -958,11 +962,11 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 51: #endif
 52: // End address for Raspberry PI BCM I/O
 53: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
-54: 
+54:
 55: //---------------------------------------------
 56: // Raspberry Pi GPIO
 57: //---------------------------------------------
-58: 
+58:
 59: // Raspberry Pi GPIO registers base address
 60: #define RPI_GPIO_BASE                   RPI_BCM_IO_BASE + 0x00200000
 61: // Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W)
@@ -1031,22 +1035,22 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 124: #define RPI_GPIO_GPPUPPDN2              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000EC)
 125: #define RPI_GPIO_GPPUPPDN3              reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000F0)
 126: #endif
-127: 
+127:
 128: //---------------------------------------------
 129: // Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
 130: //---------------------------------------------
-131: 
+131:
 132: // Raspberry Pi Auxilary registers base address
 133: #define RPI_AUX_BASE                  RPI_BCM_IO_BASE + 0x00215000
 134: // Raspberry Pi Auxiliary IRQ register
 135: #define RPI_AUX_IRQ                   reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
 136: // Raspberry Pi Auxiliary Enable register
 137: #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
-138: 
+138:
 139: //---------------------------------------------
 140: // Raspberry Pi auxilary mini UART registers (UART1)
 141: //---------------------------------------------
-142: 
+142:
 143: // Raspberry Pi Mini UART (UART1) I/O register
 144: #define RPI_AUX_MU_IO                 reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
 145: // Raspberry Pi Mini UART (UART1) Interrupt Enable register
@@ -1069,7 +1073,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 162: #define RPI_AUX_MU_STAT               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
 163: // Raspberry Pi Mini UART (UART1) Baudrate register
 164: #define RPI_AUX_MU_BAUD               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
-165: 
+165:
 166: // Raspberry Pi Auxiliary Enable register values
 167: // Raspberry Pi Auxiliary Enable register Enable SPI2
 168: #define RPI_AUX_ENABLES_SPI2          BIT(2)
@@ -1077,13 +1081,13 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 170: #define RPI_AUX_ENABLES_SPI1          BIT(1)
 171: // Raspberry Pi Auxiliary Enable register Enable UART1
 172: #define RPI_AUX_ENABLES_UART1         BIT(0)
-173: 
+173:
 174: // Raspberry Pi Mini UART (UART1) Interrupt Enable register values
 175: // Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts
 176: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT(1)
 177: // Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts
 178: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT(0)
-179: 
+179:
 180: // Raspberry Pi Mini UART (UART1) Interrupt Identify register values
 181: // Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R)
 182: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT(7)
@@ -1093,19 +1097,19 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 186: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT(2)
 187: // Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W)
 188: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT(1)
-189: 
+189:
 190: // Raspberry Pi Mini UART (UART1) Line Control register values
 191: // Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters
 192: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
 193: // Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters
 194: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT(0) | BIT(1)
-195: 
+195:
 196: // Raspberry Pi Mini UART (UART1) Modem Control register values
 197: // Raspberry Pi Mini UART (UART1) Modem Control register set RTS low
 198: #define RPI_AUX_MU_MCR_RTS_LOW        BIT(1)
 199: // Raspberry Pi Mini UART (UART1) Modem Control register set RTS high
 200: #define RPI_AUX_MU_MCR_RTS_HIGH       0
-201: 
+201:
 202: // Raspberry Pi Mini UART (UART1) Line Status register values
 203: // Raspberry Pi Mini UART (UART1) Line Status register transmit idle
 204: #define RPI_AUX_MU_LST_TX_IDLE        BIT(6)
@@ -1115,7 +1119,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 208: #define RPI_AUX_MU_LST_RX_OVERRUN     BIT(1)
 209: // Raspberry Pi Mini UART (UART1) Line Status register receive ready
 210: #define RPI_AUX_MU_LST_RX_READY       BIT(0)
-211: 
+211:
 212: // Raspberry Pi Mini UART (UART1) Extra Control register values
 213: // Raspberry Pi Mini UART (UART1) Extra Control register enable CTS
 214: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT(3)
@@ -1129,16 +1133,16 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 As said, this header defines the address of the GPIO and UART1 registers, as well as values of fields within these registers.
 We will not go into details here, we'll cover this when we use the registers.
-More information on the GPIO registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-gpio.md), 
-as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 89), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 89), 
+More information on the GPIO registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-gpio.md),
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 89),
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 89),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 65) and
 [Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 14).
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
-More information on the Mini UART (UART1) registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-aux.md), 
-as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 10), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 10) and 
+More information on the Mini UART (UART1) registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-aux.md),
+as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 10),
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 10) and
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 10). Raspberry Pi 5 no longer has a mini UART1.
 
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
@@ -1146,6 +1150,7 @@ The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 ### UART1.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1H}
 
 We need to declare the UART1 functions.
+
 Create the file `code/libraries/baremetal/include/baremetal/UART1.h`:
 
 ```cpp
@@ -1188,13 +1193,13 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: // GPIO mode
 47: enum class GPIOMode
 48: {
@@ -1220,7 +1225,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 68:     AlternateFunction5,
 69:     Unknown,
 70: };
-71: 
+71:
 72: // GPIO function
 73: enum class GPIOFunction
 74: {
@@ -1242,7 +1247,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 90:     AlternateFunction5,
 91:     Unknown,
 92: };
-93: 
+93:
 94: // GPIO pull mode
 95: enum class GPIOPullMode
 96: {
@@ -1254,13 +1259,13 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 102:     PullUp,
 103:     Unknown,
 104: };
-105: 
+105:
 106: // Encapsulation for the UART1 device.
 107: class UART1
 108: {
 109: private:
 110:     bool            m_initialized;
-111: 
+111:
 112: public:
 113:     // Constructs a default UART1 instance.
 114:     UART1();
@@ -1274,7 +1279,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 122:     void Write(char c);
 123:     // Write a string
 124:     void WriteString(const char *str);
-125: 
+125:
 126: private:
 127:     // Set GPIO pin mode
 128:     bool SetMode(uint8 pinNumber, GPIOMode mode);
@@ -1285,7 +1290,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 133:     // Switch GPIO off
 134:     bool Off(uint8 pinNumber, GPIOMode mode);
 135: };
-136: 
+136:
 137: } // namespace baremetal
 ```
 
@@ -1342,20 +1347,20 @@ File: code/libraries/baremetal/src/UART1.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/UART1.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
-44: 
+44:
 45: // Total count of GPIO pins, numbered from 0 through 53
 46: #define NUM_GPIO 54
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: #if BAREMETAL_RPI_TARGET == 3
 51: static const int NumWaitCycles = 150;
-52: 
+52:
 53: static void WaitCycles(uint32 numCycles)
 54: {
 55:     if (numCycles)
@@ -1367,26 +1372,26 @@ File: code/libraries/baremetal/src/UART1.cpp
 61:     }
 62: }
 63: #endif // BAREMETAL_RPI_TARGET == 3
-64: 
+64:
 65: UART1::UART1()
 66:     : m_initialized{}
 67: {
 68: }
-69: 
+69:
 70: // Set baud rate and characteristics (115200 8N1) and map to GPIO
 71: void UART1::Initialize()
 72: {
 73:     if (m_initialized)
 74:         return;
-75: 
+75:
 76:     // initialize UART
 77:     auto value = *(RPI_AUX_ENABLES);
 78:     *(RPI_AUX_ENABLES) = value & ~RPI_AUX_ENABLES_UART1;// Disable UART1, AUX mini uart
-79: 
+79:
 80:     SetMode(14, GPIOMode::AlternateFunction5);
-81: 
+81:
 82:     SetMode(15, GPIOMode::AlternateFunction5);
-83: 
+83:
 84:     *(RPI_AUX_ENABLES) = value | RPI_AUX_ENABLES_UART1;  // enable UART1, AUX mini uart
 85:     *(RPI_AUX_MU_CNTL) = 0;                              // Disable Tx, Rx
 86:     *(RPI_AUX_MU_LCR) = RPI_AUX_MU_LCR_DATA_SIZE_8;      // 8 bit mode
@@ -1399,12 +1404,12 @@ File: code/libraries/baremetal/src/UART1.cpp
 93: #else
 94:     *(RPI_AUX_MU_BAUD) = 541;                            // 500 MHz / (8 * (baud + 1)) = 500000000 / (8 * 542) =  115313 -> 115200 baud
 95: #endif
-96: 
+96:
 97:     *(RPI_AUX_MU_CNTL) = RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX;
 98:     // Enable Tx, Rx
 99:     m_initialized = true;
 100: }
-101: 
+101:
 102: // Write a character
 103: void UART1::Write(char c)
 104: {
@@ -1417,7 +1422,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 111:     // Write the character to the buffer
 112:     *(RPI_AUX_MU_IO) = static_cast<unsigned int>(c);
 113: }
-114: 
+114:
 115: // Receive a character
 116: char UART1::Read()
 117: {
@@ -1430,7 +1435,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 124:     // Read it and return
 125:     return static_cast<char>(*(RPI_AUX_MU_IO));
 126: }
-127: 
+127:
 128: void UART1::WriteString(const char* str)
 129: {
 130:     while (*str)
@@ -1441,7 +1446,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 135:         Write(*str++);
 136:     }
 137: }
-138: 
+138:
 139: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
 140: {
 141:     if (pinNumber >= NUM_GPIO)
@@ -1452,7 +1457,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 146:     {
 147:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 148:             return false;
-149: 
+149:
 150:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
 151:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
 152:             return false;
@@ -1461,7 +1466,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 155:     {
 156:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 157:             return false;
-158: 
+158:
 159:         if (!SetFunction(pinNumber, GPIOFunction::Output))
 160:             return false;
 161:     }
@@ -1476,37 +1481,37 @@ File: code/libraries/baremetal/src/UART1.cpp
 170:         Off(pinNumber, mode);
 171:     return true;
 172: }
-173: 
+173:
 174: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
 175: {
 176:     if (pinNumber >= NUM_GPIO)
 177:         return false;
 178:     if (function >= GPIOFunction::Unknown)
 179:         return false;
-180: 
+180:
 181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
 182:     uint32  shift = (pinNumber % 10) * 3;
-183: 
+183:
 184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-185: 
+185:
 186:     uint32 value = *(selectRegister);
 187:     value &= ~(7 << shift);
 188:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
 189:     *(selectRegister) = value;
 190:     return true;
 191: }
-192: 
+192:
 193: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
 194: {
 195:     if (pullMode >= GPIOPullMode::Unknown)
 196:         return false;
-197: 
+197:
 198:     if (pinNumber >= NUM_GPIO)
 199:         return false;
 200: #if BAREMETAL_RPI_TARGET == 3
 201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
 202:     uint32  shift = pinNumber % 32;
-203: 
+203:
 204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
 205:     WaitCycles(NumWaitCycles);
 206:     *(clkRegister) = static_cast<uint32>(1 << shift);
@@ -1515,43 +1520,43 @@ File: code/libraries/baremetal/src/UART1.cpp
 209: #else
 210:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
-212: 
+212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-214: 
+214:
 215:     uint32                value = *(modeReg);
 216:     value &= ~(3 << shift);
 217:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 218:     *(modeReg) = value;
 219: #endif
-220: 
+220:
 221:     return true;
 222: }
-223: 
+223:
 224: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
 225: {
 226:     if (pinNumber >= NUM_GPIO)
 227:         return false;
-228: 
+228:
 229:     // Output level can be set in input mode for subsequent switch to output
 230:     if (mode >= GPIOMode::AlternateFunction0)
 231:         return false;
-232: 
+232:
 233:     unsigned regOffset = (pinNumber / 32);
 234:     uint32 regMask = 1 << (pinNumber % 32);
-235: 
+235:
 236:     bool value = false;
-237: 
+237:
 238:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-239: 
+239:
 240:     *(setClrReg) = regMask;
-241: 
+241:
 242:     return true;
 243: }
-244: 
+244:
 245: } // namespace baremetal
 ```
 
-For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](pdf/bcm2837-peripherals.pdf) (page 14). 
+For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](pdf/bcm2837-peripherals.pdf) (page 14).
 Be aware that some of the documentation for BCM2835 contains errors, which have been update for BCM2837. The Line Control Register (see below) contains such errors.
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
@@ -1601,7 +1606,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 146:     {
 147:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 148:             return false;
-149: 
+149:
 150:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
 151:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
 152:             return false;
@@ -1610,7 +1615,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 155:     {
 156:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 157:             return false;
-158: 
+158:
 159:         if (!SetFunction(pinNumber, GPIOFunction::Output))
 160:             return false;
 161:     }
@@ -1642,13 +1647,13 @@ File: code/libraries/baremetal/src/UART1.cpp
 194: {
 195:     if (pullMode >= GPIOPullMode::Unknown)
 196:         return false;
-197: 
+197:
 198:     if (pinNumber >= NUM_GPIO)
 199:         return false;
 200: #if BAREMETAL_RPI_TARGET == 3
 201:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32);
 202:     uint32  shift = pinNumber % 32;
-203: 
+203:
 204:     *(RPI_GPIO_GPPUD) = static_cast<uint32>(pullMode);
 205:     WaitCycles(NumWaitCycles);
 206:     *(clkRegister) = static_cast<uint32>(1 << shift);
@@ -1657,15 +1662,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 209: #else
 210:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16);
 211:     unsigned              shift = (pinNumber % 16) * 2;
-212: 
+212:
 213:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-214: 
+214:
 215:     uint32                value = *(modeReg);
 216:     value &= ~(3 << shift);
 217:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 218:     *(modeReg) = value;
 219: #endif
-220: 
+220:
 221:     return true;
 222: }
 ```
@@ -1711,12 +1716,12 @@ File: code/libraries/baremetal/src/UART1.cpp
 177:         return false;
 178:     if (function >= GPIOFunction::Unknown)
 179:         return false;
-180: 
+180:
 181:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10);
 182:     uint32  shift = (pinNumber % 10) * 3;
-183: 
+183:
 184:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-185: 
+185:
 186:     uint32 value = *(selectRegister);
 187:     value &= ~(7 << shift);
 188:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
@@ -1751,20 +1756,20 @@ File: code/libraries/baremetal/src/UART1.cpp
 225: {
 226:     if (pinNumber >= NUM_GPIO)
 227:         return false;
-228: 
+228:
 229:     // Output level can be set in input mode for subsequent switch to output
 230:     if (mode >= GPIOMode::AlternateFunction0)
 231:         return false;
-232: 
+232:
 233:     unsigned regOffset = (pinNumber / 32);
 234:     uint32 regMask = 1 << (pinNumber % 32);
-235: 
+235:
 236:     bool value = false;
-237: 
+237:
 238:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-239: 
+239:
 240:     *(setClrReg) = regMask;
-241: 
+241:
 242:     return true;
 243: }
 ```
@@ -2182,6 +2187,7 @@ As said this is all very intricate and detailed, forcing one to dive into all th
 #### SysConfig.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
 
 We add the system configuration header. This header can be used to set certain system parameters, to override the default.
+
 Create the file `code/libraries/baremetal/include/baremetal/SysConfig.h`:
 
 ```cpp
@@ -2224,29 +2230,29 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: // Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
 43: #define CORES    4
-44: 
+44:
 45: // Size of 1 Megabyte
 46: #define MEGABYTE 0x100000
 47: // Size of 1 Gigabyte
 48: #define GIGABYTE 0x40000000ULL
-49: 
+49:
 50: // KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
 51: // If your kernel image contains big data areas it may be required to
 52: // increase this value. The value must be a multiple of 16 KByte.
 53: #ifndef KERNEL_MAX_SIZE
 54: #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 55: #endif
-56: 
+56:
 57: // Set part to be used by GPU (normally set in config.txt)
 58: #ifndef GPU_MEM_SIZE
 59: #define GPU_MEM_SIZE (64 * MEGABYTE)
 60: #endif
-61: 
+61:
 62: #include <baremetal/MemoryMap.h>
 ```
 
@@ -2267,6 +2273,7 @@ This is all the same thing.
 #### MemoryMap.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH}
 
 We add the defintion of the memory layout for the system. As we are building a baremetal system, we have much more freedom in this, but we also need to take care that the mapping is well defined and complete.
+
 Create the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 
 ```cpp
@@ -2309,9 +2316,9 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\Me
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: // Default RAM memory size (minimum size as of RPI 3)
 43: #define MEM_SIZE (1024 * MEGABYTE)
 44: // Part of RAM mapped to GPU (minimum size is 64Mb)
@@ -2320,13 +2327,13 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\Me
 47: #endif
 48: // Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
 49: #define ARM_MEM_SIZE (MEM_SIZE - GPU_MEM_SIZE) // normally overwritten
-50: 
+50:
 51: // Memory reserved for paging
 52: #define PAGE_RESERVE (16 * MEGABYTE)
-53: 
+53:
 54: // Size of every page
 55: #define PAGE_SIZE    0x10000
-56: 
+56:
 57: // Maximum size of the kernel space (if not already specified in SysConfig.h)
 58: #if !defined(KERNEL_MAX_SIZE)
 59: #define KERNEL_MAX_SIZE (2 * MEGABYTE)

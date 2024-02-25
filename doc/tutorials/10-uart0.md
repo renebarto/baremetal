@@ -70,24 +70,24 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: namespace baremetal {
-43: 
+43:
 44: // Abstract character CharDevice
 45: // Abstraction of a CharDevice that can read and write characters
 46: class CharDevice
 47: {
 48: public:
 49:     virtual ~CharDevice() = default;
-50: 
+50:
 51:     // Read a character
 52:     virtual char Read() = 0;
 53:     // Write a character
 54:     virtual void Write(char c) = 0;
 55: };
-56: 
+56:
 57: } // namespace baremetal
 ```
 
@@ -99,33 +99,34 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 ### UART1.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UART1H}
 
 We will now derive `UART1` from our new `CharDevice` interface.
+
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
 ...
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/CharDevice.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class IMemoryAccess;
-47: 
+47:
 48: // Encapsulation for the UART1 device.
 49: // This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
 50: // but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 51: class UART1 : public CharDevice
 52: {
 53:     friend UART1& GetUART1();
-54: 
+54:
 55: private:
 56:     bool            m_initialized;
 57:     IMemoryAccess  &m_memoryAccess;
-58: 
+58:
 59:     // Constructs a default UART1 instance. Note that the constructor is private, so GetUART1() is needed to instantiate the UART1.
 60:     UART1();
-61: 
+61:
 62: public:
 63:     // Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
 64:     UART1(IMemoryAccess &memoryAccess);
@@ -140,10 +141,10 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 73:     // Write a string
 74:     void WriteString(const char* str);
 75: };
-76: 
+76:
 77: // Constructs the singleton UART1 instance, if needed.
 78: UART1 &GetUART1();
-79: 
+79:
 80: } // namespace baremetal
 ```
 
@@ -157,6 +158,7 @@ The code for UART1 does not need any changes.
 ### Update project configuration {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -202,13 +204,14 @@ In order to set the clock, we need to extend `RPIProperties`.
 ### RPIProperties.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESH}
 
 We add the method `SetClockRate()` as well as the type for the clock to set.
+
 Update the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 ...
 45: namespace baremetal {
-46: 
+46:
 47: enum class ClockID : uint32
 48: {
 49:     EMMC      = 1,
@@ -218,25 +221,26 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 53:     EMMC2     = 12,
 54:     PIXEL_BVB = 14,
 55: };
-56: 
+56:
 57: class RPIProperties
 58: {
 59: private:
 60:     IMailbox &m_mailbox;
-61: 
+61:
 62: public:
 63:     explicit RPIProperties(IMailbox &mailbox);
-64: 
+64:
 65:     bool GetBoardSerial(uint64 &serial);
 66:     bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
 67: };
-68: 
+68:
 69: } // namespace baremetal
 ```
 
 ### RPIProperties.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESCPP}
 
-We implement the new method `SetClockRate()`. 
+We implement the new method `SetClockRate()`.
+
 Update the file `code/libraries/baremetal/src/RPIProperties.cpp`
 
 ```cpp
@@ -247,7 +251,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 50:     Property tag;
 51:     uint32   serial[2];
 52: } PACKED;
-53: 
+53:
 54: struct PropertyClockRate
 55: {
 56:     Property tag;
@@ -260,15 +264,15 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 83: {
 84:     PropertyClockRate      tag{};
 85:     RPIPropertiesInterface interface(m_mailbox);
-86: 
+86:
 87:     tag.clockID   = static_cast<uint32>(clockID);
 88:     tag.rate      = freqHz;
 89:     tag.skipTurbo = skipTurbo;
 90:     auto result   = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
-91: 
+91:
 92:     return result;
 93: }
-94: 
+94:
 95: } // namespace baremetal
 ```
 
@@ -283,6 +287,7 @@ The implementation is comparable to that of `GetBoardSerial()`, we simple create
 ### BCMRegisters.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_BCMREGISTERSH}
 
 We need to add some registers of the Broadcom SoC in the Raspberry Pi for UART0 (or PL011 UART).
+
 Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 
 ```cpp
@@ -291,7 +296,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 183: //---------------------------------------------
 184: // UART0 registers
 185: //---------------------------------------------
-186: 
+186:
 187: // Raspberry Pi UART0 registers base address
 188: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
 189: // Raspberry Pi UART0 data register (R/W)
@@ -318,17 +323,17 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 210: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
 211: // Raspberry Pi UART0 DMA control register (R/W)
 212: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
-213: 
+213:
 214: #define RPI_UART0_FR_RX_READY         BIT(4)
 215: #define RPI_UART0_FR_TX_EMPTY         BIT(5)
-216: 
+216:
 ...
 ```
 
 We will not go into details here, we'll cover this when we use the registers.
-More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_UART0) as well as in the official 
-[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 175), 
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2837-peripherals.pdf) (page 175),  
+More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_UART0) as well as in the official
+[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 175),
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2837-peripherals.pdf) (page 175),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 144) and
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/rp1-peripherals.pdf) (page 34)
 
@@ -337,6 +342,7 @@ The Mini UART or UART1 register addresses are all prefixed with `RPI_UART0_`.
 ### UART0.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0H}
 
 We declare the class `UART0` which derives from `CharDevice`.
+
 Create the file `code/libraries/baremetal/include/baremetal/UART0.h`
 
 ```cpp
@@ -380,29 +386,29 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/CharDevice.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class IMemoryAccess;
-47: 
+47:
 48: // Encapsulation for the UART0 device.
 49: // This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
 50: // but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 51: class UART0 : public CharDevice
 52: {
 53:     friend UART0 &GetUART0();
-54: 
+54:
 55: private:
 56:     bool            m_initialized;
 57:     IMemoryAccess  &m_memoryAccess;
-58: 
+58:
 59:     // Constructs a default UART0 instance. Note that the constructor is private, so GetUART0() is needed to instantiate the UART0.
 60:     UART0();
-61: 
+61:
 62: public:
 63:     // Constructs a specialized UART0 instance with a custom IMemoryAccess instance. This is intended for testing.
 64:     UART0(IMemoryAccess &memoryAccess);
@@ -416,10 +422,10 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 72:     // Write a string
 73:     void WriteString(const char* str);
 74: };
-75: 
+75:
 76: // Constructs the singleton UART0 instance, if needed.
 77: UART0 &GetUART0();
-78: 
+78:
 79: } // namespace baremetal
 ```
 
@@ -427,7 +433,8 @@ The `UART0` class declaration is identical to the `UART1` class.
 
 ### UART0.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0CPP}
 
-We implement the class `UART0`. 
+We implement the class `UART0`.
+
 Create the file `code/libraries/baremetal/src/UART0.cpp`
 
 ```cpp
@@ -470,30 +477,30 @@ File: code/libraries/baremetal/src/UART0.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/UART0.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/Mailbox.h>
 45: #include <baremetal/MemoryAccess.h>
 46: #include <baremetal/PhysicalGPIOPin.h>
 47: #include <baremetal/RPIProperties.h>
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: UART0::UART0()
 52:     : m_initialized{}
 53:     , m_memoryAccess{GetMemoryAccess()}
 54: {
 55: }
-56: 
+56:
 57: UART0::UART0(IMemoryAccess &memoryAccess)
 58:     : m_initialized{}
 59:     , m_memoryAccess{memoryAccess}
 60: {
 61: }
-62: 
+62:
 63: // Set baud rate and characteristics (115200 8N1) and map to GPIO
 64: void UART0::Initialize()
 65: {
@@ -501,12 +508,12 @@ File: code/libraries/baremetal/src/UART0.cpp
 67:         return;
 68:     // initialize UART
 69:     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
-70: 
+70:
 71:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
 72:     RPIProperties properties(mailbox);
 73:     if (!properties.SetClockRate(ClockID::UART, 4000000, false))
 74:         return;
-75: 
+75:
 76:     // map UART0 to GPIO pins
 77:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction0, m_memoryAccess);
 78:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction0, m_memoryAccess);
@@ -517,7 +524,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 83:     m_memoryAccess.Write32(RPI_UART0_CR, 0x301);      // enable Tx, Rx, UART
 84:     m_initialized = true;
 85: }
-86: 
+86:
 87: // Write a character
 88: void UART0::Write(char c)
 89: {
@@ -530,7 +537,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 96:     // Write the character to the buffer
 97:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 98: }
-99: 
+99:
 100: // Receive a character
 101: char UART0::Read()
 102: {
@@ -543,7 +550,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 109:     // Read it and return
 110:     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
 111: }
-112: 
+112:
 113: void UART0::WriteString(const char *str)
 114: {
 115:     while (*str)
@@ -554,14 +561,14 @@ File: code/libraries/baremetal/src/UART0.cpp
 120:         Write(*str++);
 121:     }
 122: }
-123: 
+123:
 124: UART0 &GetUART0()
 125: {
 126:     static UART0 value;
 127:     value.Initialize();
 128:     return value;
 129: }
-130: 
+130:
 131: } // namespace baremetal
 ```
 
@@ -576,7 +583,7 @@ The implementation is very similar to that for `UART1`
   - Line 77: As can be seen in [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO), we need to set the TxD pin GPIO 14 to alternate function 0 to get the UART0 TxD signal
   - Line 78: As can be seen in [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO), we need to set the RxD pin GPIO 15 to alternate function 0 to get the UART0 RxD signal
   - Line 79: Switching off interrupts uses a different register and value
-  - Line 80-81: Setting the baudrate works differently. 
+  - Line 80-81: Setting the baudrate works differently.
 The `RPI_UART0_IBRD` register holds the integral part of a divisor, `RPI_UART0_FBRD` the fractional part. We calculate these part as follows
 
 ```text
@@ -615,18 +622,18 @@ File: code/applications/demo/src/main.cpp
 8: #include <baremetal/System.h>
 9: #include <baremetal/Timer.h>
 10: #include <baremetal/UART0.h>
-11: 
+11:
 12: using namespace baremetal;
-13: 
+13:
 14: int main()
 15: {
 16:     auto& uart = GetUART0();
 17:     uart.WriteString("Hello World!\n");
-18: 
+18:
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIProperties properties(mailbox);
-22: 
+22:
 23:     uint64 serial;
 24:     if (properties.GetBoardSerial(serial))
 25:     {
@@ -640,10 +647,10 @@ File: code/applications/demo/src/main.cpp
 33:     {
 34:         uart.WriteString("Mailbox call failed\n");
 35:     }
-36: 
+36:
 37:     uart.WriteString("Wait 5 seconds\n");
 38:     Timer::WaitMilliSeconds(5000);
-39: 
+39:
 40:     uart.WriteString("Press r to reboot, h to halt\n");
 41:     char ch{};
 42:     while ((ch != 'r') && (ch != 'h'))
@@ -651,7 +658,7 @@ File: code/applications/demo/src/main.cpp
 44:         ch = uart.Read();
 45:         uart.Write(ch);
 46:     }
-47: 
+47:
 48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
@@ -659,6 +666,7 @@ File: code/applications/demo/src/main.cpp
 #### System.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_SYSTEMCPP}
 
 As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly changing the port over, with strange effects.
+
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp
@@ -674,7 +682,7 @@ File: code/libraries/baremetal/src/System.cpp
 109:     GetUART0().WriteString("Reboot\n");
 ...
 158:    GetUART0().WriteString("Starting up\n");
-159: 
+159:
 160:     extern int main();
 ...
 ```
@@ -682,6 +690,7 @@ File: code/libraries/baremetal/src/System.cpp
 ### Update project configuration {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -704,7 +713,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 45:     )
-46: 
+46:
 47: set(PROJECT_INCLUDES_PUBLIC
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h

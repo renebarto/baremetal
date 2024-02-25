@@ -25,6 +25,7 @@ We will introduce a string class, and start using it for e.g. serialization, for
 First we'll declare the `String` class.
 This `String` class mimicks the `std::string` class in the standard C++ library quite closely, to make a later move to the standard C++ library easier.
 This also means this is quite extensive class. As an exception, this class has a lower case name, and lower case methods, due to the mimicking.
+
 Create the file `code/libraries/baremetal/include/baremetal/String.h`
 
 ```cpp
@@ -67,17 +68,17 @@ File: code/libraries/baremetal/include/baremetal/String.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Iterator.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: /// @file
 46: /// string class
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: /// <summary>
 51: /// string class
 52: /// </summary>
@@ -86,7 +87,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 55: public:
 56:     /// @brief Type of value the string contains
 57:     using ValueType = char;
-58: 
+58:
 59: private:
 60:     /// @brief Pointer to start of allocated memory
 61:     ValueType* m_buffer;
@@ -94,11 +95,11 @@ File: code/libraries/baremetal/include/baremetal/String.h
 63:     ValueType* m_end;
 64:     /// @brief Currently allocated size in bytes
 65:     size_t m_allocatedSize;
-66: 
+66:
 67: public:
 68:     /// @brief Signifies the position at the end of the string, e.g. for length
 69:     static const size_t npos;
-70: 
+70:
 71:     string();
 72:     explicit string(const ValueType* str);
 73:     string(const ValueType* str, size_t count);
@@ -107,23 +108,23 @@ File: code/libraries/baremetal/include/baremetal/String.h
 76:     string(string&& other);
 77:     string(const string& other, size_t pos, size_t count = npos);
 78:     ~string();
-79: 
+79:
 80:     operator const ValueType *() const;
 81:     string&     operator=(const ValueType* other);
 82:     string&     operator=(const string& other);
 83:     string&     operator=(string&& other);
-84: 
+84:
 85:     iterator<ValueType>         begin();
 86:     iterator<ValueType>         end();
 87:     const_iterator<ValueType>   begin() const;
 88:     const_iterator<ValueType>   end() const;
-89: 
+89:
 90:     string&                     assign(const ValueType* str);
 91:     string&                     assign(const ValueType* str, size_t count);
 92:     string&                     assign(size_t count, ValueType ch);
 93:     string&                     assign(const string& str);
 94:     string&                     assign(const string& str, size_t pos, size_t count = npos);
-95: 
+95:
 96:     ValueType&                  at(size_t pos);
 97:     const ValueType&            at(size_t pos) const;
 98:     ValueType&                  front();
@@ -135,13 +136,13 @@ File: code/libraries/baremetal/include/baremetal/String.h
 104:     ValueType*                  data();
 105:     const ValueType*            data() const;
 106:     const ValueType*            c_str() const;
-107: 
+107:
 108:     bool                        empty() const;
 109:     size_t                      size() const;
 110:     size_t                      length() const;
 111:     size_t                      capacity() const;
 112:     size_t                      reserve(size_t newCapacity);
-113: 
+113:
 114:     string&                     operator +=(ValueType ch);
 115:     string&                     operator +=(const string& str);
 116:     string&                     operator +=(const ValueType* str);
@@ -151,7 +152,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 120:     void                        append(const ValueType *str);
 121:     void                        append(const ValueType* str, size_t count);
 122:     void                        clear();
-123: 
+123:
 124:     size_t                      find(const string& str, size_t pos = 0) const;
 125:     size_t                      find(const ValueType* str, size_t pos = 0) const;
 126:     size_t                      find(const ValueType* str, size_t pos, size_t count) const;
@@ -166,7 +167,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 135:     bool                        contains(const string& str) const;
 136:     bool                        contains(const ValueType* str) const;
 137:     string                      substr(size_t pos = 0, size_t count = npos) const;
-138: 
+138:
 139:     bool                        equals(const string& other) const;
 140:     bool                        equals(const ValueType* other) const;
 141:     bool                        equals_case_insensitive(const string& other) const;
@@ -177,7 +178,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 146:     int                         compare(const ValueType* str) const;
 147:     int                         compare(size_t pos, size_t count, const ValueType* str) const;
 148:     int                         compare(size_t pos, size_t count, const ValueType* str, size_t strCount) const;
-149: 
+149:
 150:     string&                     replace(size_t pos, size_t count, const string& str);
 151:     string&                     replace(size_t pos, size_t count, const string& str, size_t strPos, size_t strCount = npos);
 152:     string&                     replace(size_t pos, size_t count, const ValueType* str);
@@ -186,17 +187,17 @@ File: code/libraries/baremetal/include/baremetal/String.h
 155:     string&                     replace(size_t pos, size_t count, ValueType ch, size_t chCount);
 156:     int                         replace(const string& oldStr, const string& newStr); // returns number of occurrences
 157:     int                         replace(const ValueType *oldStr, const ValueType *newStr); // returns number of occurrences
-158: 
+158:
 159:     string                      align(int width) const;
-160: 
+160:
 161: private:
 162:     bool        reallocate(size_t requestedLength);
 163:     bool        reallocate_allocation_size(size_t allocationSize);
 164: };
-165: 
+165:
 166: /// <summary>
 167: /// Equality operator
-168: /// 
+168: ///
 169: /// Performs a case sensitive comparison between two strings
 170: /// </summary>
 171: /// <param name="lhs">Left side of comparison</param>
@@ -206,10 +207,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 175: {
 176:     return lhs.equals(rhs);
 177: }
-178: 
+178:
 179: /// <summary>
 180: /// Equality operator
-181: /// 
+181: ///
 182: /// Performs a case sensitive comparison between two strings
 183: /// </summary>
 184: /// <param name="lhs">Left side of comparison</param>
@@ -219,10 +220,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 188: {
 189:     return lhs.equals(rhs);
 190: }
-191: 
+191:
 192: /// <summary>
 193: /// Equality operator
-194: /// 
+194: ///
 195: /// Performs a case sensitive comparison between two strings
 196: /// </summary>
 197: /// <param name="lhs">Left side of comparison</param>
@@ -232,10 +233,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 201: {
 202:     return rhs.equals(lhs);
 203: }
-204: 
+204:
 205: /// <summary>
 206: /// Inequality operator
-207: /// 
+207: ///
 208: /// Performs a case sensitive comparison between two strings
 209: /// </summary>
 210: /// <param name="lhs">Left side of comparison</param>
@@ -245,10 +246,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 214: {
 215:     return !lhs.equals(rhs);
 216: }
-217: 
+217:
 218: /// <summary>
 219: /// Inequality operator
-220: /// 
+220: ///
 221: /// Performs a case sensitive comparison between two strings
 222: /// </summary>
 223: /// <param name="lhs">Left side of comparison</param>
@@ -258,10 +259,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 227: {
 228:     return !lhs.equals(rhs);
 229: }
-230: 
+230:
 231: /// <summary>
 232: /// Inequality operator
-233: /// 
+233: ///
 234: /// Performs a case sensitive comparison between two strings
 235: /// </summary>
 236: /// <param name="lhs">Left side of comparison</param>
@@ -271,10 +272,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 240: {
 241:     return !rhs.equals(lhs);
 242: }
-243: 
+243:
 244: /// <summary>
 245: /// Add two strings
-246: /// 
+246: ///
 247: /// Concatenates two strings and returns the result
 248: /// </summary>
 249: /// <param name="lhs">First part of the resulting string</param>
@@ -286,10 +287,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 255:     result.append(rhs);
 256:     return result;
 257: }
-258: 
+258:
 259: /// <summary>
 260: /// Add two strings
-261: /// 
+261: ///
 262: /// Concatenates two strings and returns the result
 263: /// </summary>
 264: /// <param name="lhs">First part of the resulting string</param>
@@ -301,10 +302,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 270:     result.append(rhs);
 271:     return result;
 272: }
-273: 
+273:
 274: /// <summary>
 275: /// Add two strings
-276: /// 
+276: ///
 277: /// Concatenates two strings and returns the result
 278: /// </summary>
 279: /// <param name="lhs">First part of the resulting string</param>
@@ -316,10 +317,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 285:     result.append(rhs);
 286:     return result;
 287: }
-288: 
+288:
 289: /// <summary>
 290: /// Add character and string
-291: /// 
+291: ///
 292: /// Concatenates the left hand character argument and the right hand string and returns the result
 293: /// </summary>
 294: /// <param name="lhs">First character in the resulting string</param>
@@ -332,10 +333,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 301:     result += rhs;
 302:     return result;
 303: }
-304: 
+304:
 305: /// <summary>
 306: /// Add string and character
-307: /// 
+307: ///
 308: /// Concatenates the left hand string and the right hand character and returns the result
 309: /// </summary>
 310: /// <param name="lhs">First part of the resulting string</param>
@@ -348,7 +349,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 317:     result += rhs;
 318:     return result;
 319: }
-320: 
+320:
 321: } // namespace baremetal
 ```
 
@@ -357,6 +358,7 @@ We'll not go into detail here, most methods should be clear, for the others you 
 ### String.cpp {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_STRINGCPP}
 
 We'll implement the `String` class.
+
 Create the file `code/libraries/baremetal/src/String.cpp`
 
 ```cpp
@@ -399,18 +401,18 @@ File: code/libraries/baremetal/src/String.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/String.h>
-41: 
+41:
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/Util.h>
-45: 
+45:
 46: /// @file
 47: /// string class implementation
-48: 
+48:
 49: using namespace baremetal;
-50: 
+50:
 51: /// @brief Minimum allocation size for any string
 52: static constexpr size_t MinimumAllocationSize = 64;
 53: const size_t string::npos = static_cast<size_t>(-1);
@@ -418,9 +420,9 @@ File: code/libraries/baremetal/src/String.cpp
 55: static const string::ValueType NullCharConst = '\0';
 56: /// @brief Non-constant null character, returned as a reference for const methods where nothing can be returned (always reinitialized before returning)
 57: static string::ValueType NullChar = '\0';
-58: 
+58:
 59: LOG_MODULE("String");
-60: 
+60:
 61: /// <summary>
 62: /// Default constructor
 63: ///
@@ -432,7 +434,7 @@ File: code/libraries/baremetal/src/String.cpp
 69:     , m_allocatedSize{}
 70: {
 71: }
-72: 
+72:
 73: /// <summary>
 74: /// Destructor
 75: ///
@@ -446,7 +448,7 @@ File: code/libraries/baremetal/src/String.cpp
 83: #endif
 84:     delete[] m_buffer;
 85: }
-86: 
+86:
 87: /// <summary>
 88: /// Constructor
 89: ///
@@ -468,7 +470,7 @@ File: code/libraries/baremetal/src/String.cpp
 105:     m_end = m_buffer + size;
 106:     m_buffer[size] = NullCharConst;
 107: }
-108: 
+108:
 109: /// <summary>
 110: /// Constructor
 111: ///
@@ -493,7 +495,7 @@ File: code/libraries/baremetal/src/String.cpp
 130:     m_end = m_buffer + size;
 131:     m_buffer[size] = NullCharConst;
 132: }
-133: 
+133:
 134: /// <summary>
 135: /// Constructor
 136: ///
@@ -514,7 +516,7 @@ File: code/libraries/baremetal/src/String.cpp
 151:     m_end = m_buffer + size;
 152:     m_buffer[size] = NullCharConst;
 153: }
-154: 
+154:
 155: /// <summary>
 156: /// Copy constructor
 157: ///
@@ -534,7 +536,7 @@ File: code/libraries/baremetal/src/String.cpp
 171:     m_end = m_buffer + size;
 172:     m_buffer[size] = NullCharConst;
 173: }
-174: 
+174:
 175: /// <summary>
 176: /// Move constructor
 177: ///
@@ -550,7 +552,7 @@ File: code/libraries/baremetal/src/String.cpp
 187:     other.m_end = nullptr;
 188:     other.m_allocatedSize = 0;
 189: }
-190: 
+190:
 191: /// <summary>
 192: /// Constructor
 193: ///
@@ -574,7 +576,7 @@ File: code/libraries/baremetal/src/String.cpp
 211:     m_end = m_buffer + size;
 212:     m_buffer[size] = NullCharConst;
 213: }
-214: 
+214:
 215: /// <summary>
 216: /// Const character cast operator
 217: ///
@@ -584,7 +586,7 @@ File: code/libraries/baremetal/src/String.cpp
 221: {
 222:     return data();
 223: }
-224: 
+224:
 225: /// <summary>
 226: /// Assignment operator
 227: ///
@@ -596,7 +598,7 @@ File: code/libraries/baremetal/src/String.cpp
 233: {
 234:     return assign(str);
 235: }
-236: 
+236:
 237: /// <summary>
 238: /// Assignment operator
 239: ///
@@ -608,7 +610,7 @@ File: code/libraries/baremetal/src/String.cpp
 245: {
 246:     return assign(str);
 247: }
-248: 
+248:
 249: /// <summary>
 250: /// Move operator
 251: ///
@@ -629,7 +631,7 @@ File: code/libraries/baremetal/src/String.cpp
 266:     }
 267:     return *this;
 268: }
-269: 
+269:
 270: /// <summary>
 271: /// Non-const iterator to the start of the string
 272: ///
@@ -640,7 +642,7 @@ File: code/libraries/baremetal/src/String.cpp
 277: {
 278:     return iterator(m_buffer, m_end);
 279: }
-280: 
+280:
 281: /// <summary>
 282: /// Non-const iterator to the end of the string + 1
 283: ///
@@ -651,7 +653,7 @@ File: code/libraries/baremetal/src/String.cpp
 288: {
 289:     return iterator(m_end, m_end);
 290: }
-291: 
+291:
 292: /// <summary>
 293: /// Const iterator to the start of the string
 294: ///
@@ -662,7 +664,7 @@ File: code/libraries/baremetal/src/String.cpp
 299: {
 300:     return const_iterator(m_buffer, m_end);
 301: }
-302: 
+302:
 303: /// <summary>
 304: /// Const iterator to the end of the string + 1
 305: ///
@@ -673,7 +675,7 @@ File: code/libraries/baremetal/src/String.cpp
 310: {
 311:     return const_iterator(m_end, m_end);
 312: }
-313: 
+313:
 314: /// <summary>
 315: /// assign a string value
 316: ///
@@ -701,7 +703,7 @@ File: code/libraries/baremetal/src/String.cpp
 338:     m_buffer[size] = NullCharConst;
 339:     return *this;
 340: }
-341: 
+341:
 342: /// <summary>
 343: /// assign a string value
 344: ///
@@ -732,7 +734,7 @@ File: code/libraries/baremetal/src/String.cpp
 369:     m_buffer[size] = NullCharConst;
 370:     return *this;
 371: }
-372: 
+372:
 373: /// <summary>
 374: /// assign a string value
 375: ///
@@ -754,7 +756,7 @@ File: code/libraries/baremetal/src/String.cpp
 391:     m_buffer[size] = NullCharConst;
 392:     return *this;
 393: }
-394: 
+394:
 395: /// <summary>
 396: /// assign a string value
 397: ///
@@ -775,7 +777,7 @@ File: code/libraries/baremetal/src/String.cpp
 412:     m_buffer[size] = NullCharConst;
 413:     return *this;
 414: }
-415: 
+415:
 416: /// <summary>
 417: /// assign a string value
 418: ///
@@ -801,7 +803,7 @@ File: code/libraries/baremetal/src/String.cpp
 438:     m_buffer[size] = NullCharConst;
 439:     return *this;
 440: }
-441: 
+441:
 442: /// <summary>
 443: /// Return the character at specified position
 444: /// </summary>
@@ -816,7 +818,7 @@ File: code/libraries/baremetal/src/String.cpp
 453:     }
 454:     return m_buffer[pos];
 455: }
-456: 
+456:
 457: /// <summary>
 458: /// Return the character at specified position
 459: /// </summary>
@@ -828,7 +830,7 @@ File: code/libraries/baremetal/src/String.cpp
 465:         return NullCharConst;
 466:     return m_buffer[pos];
 467: }
-468: 
+468:
 469: /// <summary>
 470: /// Return the first character
 471: /// </summary>
@@ -842,7 +844,7 @@ File: code/libraries/baremetal/src/String.cpp
 479:     }
 480:     return *m_buffer;
 481: }
-482: 
+482:
 483: /// <summary>
 484: /// Return the first character
 485: /// </summary>
@@ -853,7 +855,7 @@ File: code/libraries/baremetal/src/String.cpp
 490:         return NullCharConst;
 491:     return *m_buffer;
 492: }
-493: 
+493:
 494: /// <summary>
 495: /// Return the last character
 496: /// </summary>
@@ -867,7 +869,7 @@ File: code/libraries/baremetal/src/String.cpp
 504:     }
 505:     return *(m_end - 1);
 506: }
-507: 
+507:
 508: /// <summary>
 509: /// Return the last character
 510: /// </summary>
@@ -878,7 +880,7 @@ File: code/libraries/baremetal/src/String.cpp
 515:         return NullCharConst;
 516:     return *(m_end - 1);
 517: }
-518: 
+518:
 519: /// <summary>
 520: /// Return the character at specified position
 521: /// </summary>
@@ -888,7 +890,7 @@ File: code/libraries/baremetal/src/String.cpp
 525: {
 526:     return m_buffer[pos];
 527: }
-528: 
+528:
 529: /// <summary>
 530: /// Return the character at specified position
 531: /// </summary>
@@ -898,7 +900,7 @@ File: code/libraries/baremetal/src/String.cpp
 535: {
 536:     return m_buffer[pos];
 537: }
-538: 
+538:
 539: /// <summary>
 540: /// Return the buffer pointer
 541: /// </summary>
@@ -908,7 +910,7 @@ File: code/libraries/baremetal/src/String.cpp
 545:     NullChar = NullCharConst;
 546:     return (m_buffer == nullptr) ? &NullChar : m_buffer;
 547: }
-548: 
+548:
 549: /// <summary>
 550: /// Return the buffer pointer
 551: /// </summary>
@@ -917,7 +919,7 @@ File: code/libraries/baremetal/src/String.cpp
 554: {
 555:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
 556: }
-557: 
+557:
 558: /// <summary>
 559: /// Return the buffer pointer
 560: /// </summary>
@@ -926,7 +928,7 @@ File: code/libraries/baremetal/src/String.cpp
 563: {
 564:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
 565: }
-566: 
+566:
 567: /// <summary>
 568: /// Determine whether string is empty.
 569: /// </summary>
@@ -935,7 +937,7 @@ File: code/libraries/baremetal/src/String.cpp
 572: {
 573:     return m_end == m_buffer;
 574: }
-575: 
+575:
 576: /// <summary>
 577: /// Return the size of the string
 578: ///
@@ -946,7 +948,7 @@ File: code/libraries/baremetal/src/String.cpp
 583: {
 584:     return m_end - m_buffer;
 585: }
-586: 
+586:
 587: /// <summary>
 588: /// Return the length of the string
 589: ///
@@ -957,7 +959,7 @@ File: code/libraries/baremetal/src/String.cpp
 594: {
 595:     return m_end - m_buffer;
 596: }
-597: 
+597:
 598: /// <summary>
 599: /// Return the capacity of the string
 600: ///
@@ -968,7 +970,7 @@ File: code/libraries/baremetal/src/String.cpp
 605: {
 606:     return m_allocatedSize;
 607: }
-608: 
+608:
 609: /// <summary>
 610: /// Reserved a buffer capacity
 611: ///
@@ -981,7 +983,7 @@ File: code/libraries/baremetal/src/String.cpp
 618:     reallocate_allocation_size(newCapacity);
 619:     return m_allocatedSize;
 620: }
-621: 
+621:
 622: /// <summary>
 623: /// append operator
 624: ///
@@ -994,7 +996,7 @@ File: code/libraries/baremetal/src/String.cpp
 631:     append(1, ch);
 632:     return *this;
 633: }
-634: 
+634:
 635: /// <summary>
 636: /// append operator
 637: ///
@@ -1007,7 +1009,7 @@ File: code/libraries/baremetal/src/String.cpp
 644:     append(str);
 645:     return *this;
 646: }
-647: 
+647:
 648: /// <summary>
 649: /// append operator
 650: ///
@@ -1020,7 +1022,7 @@ File: code/libraries/baremetal/src/String.cpp
 657:     append(str);
 658:     return *this;
 659: }
-660: 
+660:
 661: /// <summary>
 662: /// append operator
 663: ///
@@ -1041,7 +1043,7 @@ File: code/libraries/baremetal/src/String.cpp
 678:     m_end = m_buffer + size;
 679:     m_buffer[size] = NullCharConst;
 680: }
-681: 
+681:
 682: /// <summary>
 683: /// append operator
 684: ///
@@ -1062,7 +1064,7 @@ File: code/libraries/baremetal/src/String.cpp
 699:     m_end = m_buffer + size;
 700:     m_buffer[size] = NullCharConst;
 701: }
-702: 
+702:
 703: /// <summary>
 704: /// append operator
 705: ///
@@ -1090,7 +1092,7 @@ File: code/libraries/baremetal/src/String.cpp
 727:     m_end = m_buffer + size;
 728:     m_buffer[size] = NullCharConst;
 729: }
-730: 
+730:
 731: /// <summary>
 732: /// append operator
 733: ///
@@ -1113,7 +1115,7 @@ File: code/libraries/baremetal/src/String.cpp
 750:     m_end = m_buffer + size;
 751:     m_buffer[size] = NullCharConst;
 752: }
-753: 
+753:
 754: /// <summary>
 755: /// append operator
 756: ///
@@ -1140,7 +1142,7 @@ File: code/libraries/baremetal/src/String.cpp
 777:     m_end = m_buffer + size;
 778:     m_buffer[size] = NullCharConst;
 779: }
-780: 
+780:
 781: /// <summary>
 782: /// clear the string
 783: ///
@@ -1154,7 +1156,7 @@ File: code/libraries/baremetal/src/String.cpp
 791:         m_buffer[0] = NullCharConst;
 792:     }
 793: }
-794: 
+794:
 795: /// <summary>
 796: /// find a substring in the string
 797: ///
@@ -1177,7 +1179,7 @@ File: code/libraries/baremetal/src/String.cpp
 814:     }
 815:     return npos;
 816: }
-817: 
+817:
 818: /// <summary>
 819: /// find a substring in the string
 820: ///
@@ -1205,7 +1207,7 @@ File: code/libraries/baremetal/src/String.cpp
 842:     }
 843:     return npos;
 844: }
-845: 
+845:
 846: /// <summary>
 847: /// find a substring in the string
 848: ///
@@ -1236,7 +1238,7 @@ File: code/libraries/baremetal/src/String.cpp
 873:     }
 874:     return npos;
 875: }
-876: 
+876:
 877: /// <summary>
 878: /// find a character in the string
 879: /// </summary>
@@ -1255,7 +1257,7 @@ File: code/libraries/baremetal/src/String.cpp
 892:     }
 893:     return npos;
 894: }
-895: 
+895:
 896: /// <summary>
 897: /// Check whether string starts with character
 898: /// </summary>
@@ -1267,7 +1269,7 @@ File: code/libraries/baremetal/src/String.cpp
 904:         return false;
 905:     return m_buffer[0] == ch;
 906: }
-907: 
+907:
 908: /// <summary>
 909: /// Check whether string starts with substring
 910: /// </summary>
@@ -1279,10 +1281,10 @@ File: code/libraries/baremetal/src/String.cpp
 916:     auto strLength = str.length();
 917:     if (strLength >= len)
 918:         return false;
-919: 
+919:
 920:     return memcmp(data(), str.data(), strLength) == 0;
 921: }
-922: 
+922:
 923: /// <summary>
 924: /// Check whether string starts with substring
 925: /// </summary>
@@ -1298,10 +1300,10 @@ File: code/libraries/baremetal/src/String.cpp
 935:     auto len = length();
 936:     if (strLength >= len)
 937:         return false;
-938: 
+938:
 939:     return memcmp(data(), str, strLength) == 0;
 940: }
-941: 
+941:
 942: /// <summary>
 943: /// Check whether string ends with character
 944: /// </summary>
@@ -1313,7 +1315,7 @@ File: code/libraries/baremetal/src/String.cpp
 950:         return false;
 951:     return m_buffer[length() - 1] == ch;
 952: }
-953: 
+953:
 954: /// <summary>
 955: /// Check whether string ends with substring
 956: /// </summary>
@@ -1325,10 +1327,10 @@ File: code/libraries/baremetal/src/String.cpp
 962:     auto strLength = str.length();
 963:     if (strLength >= len)
 964:         return false;
-965: 
+965:
 966:     return memcmp(m_end - strLength, str.data(), strLength) == 0;
 967: }
-968: 
+968:
 969: /// <summary>
 970: /// Check whether string ends with substring
 971: /// </summary>
@@ -1344,10 +1346,10 @@ File: code/libraries/baremetal/src/String.cpp
 981:     auto len = length();
 982:     if (strLength >= len)
 983:         return false;
-984: 
+984:
 985:     return memcmp(m_end - strLength, str, strLength) == 0;
 986: }
-987: 
+987:
 988: /// <summary>
 989: /// Check whether string contains character
 990: /// </summary>
@@ -1357,7 +1359,7 @@ File: code/libraries/baremetal/src/String.cpp
 994: {
 995:     return find(ch) != npos;
 996: }
-997: 
+997:
 998: /// <summary>
 999: /// Check whether string contains substring
 1000: /// </summary>
@@ -1367,7 +1369,7 @@ File: code/libraries/baremetal/src/String.cpp
 1004: {
 1005:     return find(str) != npos;
 1006: }
-1007: 
+1007:
 1008: /// <summary>
 1009: /// Check whether string contains substring
 1010: /// </summary>
@@ -1377,7 +1379,7 @@ File: code/libraries/baremetal/src/String.cpp
 1014: {
 1015:     return find(str) != npos;
 1016: }
-1017: 
+1017:
 1018: /// <summary>
 1019: /// Return substring
 1020: /// </summary>
@@ -1397,10 +1399,10 @@ File: code/libraries/baremetal/src/String.cpp
 1034:         memcpy(result.data(), data() + pos, count);
 1035:         result.data()[count] = NullCharConst;
 1036:     }
-1037: 
+1037:
 1038:     return result;
 1039: }
-1040: 
+1040:
 1041: /// <summary>
 1042: /// Case sensitive equality to string
 1043: /// </summary>
@@ -1410,7 +1412,7 @@ File: code/libraries/baremetal/src/String.cpp
 1047: {
 1048:     return compare(other) == 0;
 1049: }
-1050: 
+1050:
 1051: /// <summary>
 1052: /// Case sensitive equality to string
 1053: /// </summary>
@@ -1424,7 +1426,7 @@ File: code/libraries/baremetal/src/String.cpp
 1061:         return false;
 1062:     return strcmp(data(), other) == 0;
 1063: }
-1064: 
+1064:
 1065: /// <summary>
 1066: /// Case insensitive equality to string
 1067: /// </summary>
@@ -1438,7 +1440,7 @@ File: code/libraries/baremetal/src/String.cpp
 1075:         return true;
 1076:     return strcasecmp(data(), other.data()) == 0;
 1077: }
-1078: 
+1078:
 1079: /// <summary>
 1080: /// Case insensitive equality to string
 1081: /// </summary>
@@ -1452,7 +1454,7 @@ File: code/libraries/baremetal/src/String.cpp
 1089:         return false;
 1090:     return strcasecmp(data(), other) == 0;
 1091: }
-1092: 
+1092:
 1093: /// <summary>
 1094: /// Case sensitive compare to string
 1095: ///
@@ -1470,10 +1472,10 @@ File: code/libraries/baremetal/src/String.cpp
 1107:     }
 1108:     if (str.empty())
 1109:         return 1;
-1110: 
+1110:
 1111:     return strcmp(data(), str.data());
 1112: }
-1113: 
+1113:
 1114: /// <summary>
 1115: /// Case sensitive compare to string
 1116: ///
@@ -1487,7 +1489,7 @@ File: code/libraries/baremetal/src/String.cpp
 1124: {
 1125:     return substr(pos, count).compare(str);
 1126: }
-1127: 
+1127:
 1128: /// <summary>
 1129: /// Case sensitive compare to string
 1130: ///
@@ -1503,7 +1505,7 @@ File: code/libraries/baremetal/src/String.cpp
 1140: {
 1141:     return substr(pos, count).compare(str.substr(strPos, strCount));
 1142: }
-1143: 
+1143:
 1144: /// <summary>
 1145: /// Case sensitive compare to string
 1146: ///
@@ -1524,10 +1526,10 @@ File: code/libraries/baremetal/src/String.cpp
 1161:     }
 1162:     if (strLength == 0)
 1163:         return 1;
-1164: 
+1164:
 1165:     return strcmp(data(), str);
 1166: }
-1167: 
+1167:
 1168: /// <summary>
 1169: /// Case sensitive compare to string
 1170: ///
@@ -1542,7 +1544,7 @@ File: code/libraries/baremetal/src/String.cpp
 1179:     size_t strLength{};
 1180:     if (str != nullptr)
 1181:         strLength = strlen(str);
-1182: 
+1182:
 1183:     auto len = length();
 1184:     if (pos >= len)
 1185:         len = 0;
@@ -1557,13 +1559,13 @@ File: code/libraries/baremetal/src/String.cpp
 1194:     }
 1195:     if (strLength == 0)
 1196:         return 1;
-1197: 
+1197:
 1198:     auto maxLen = strLength;
 1199:     if (maxLen < len)
 1200:         maxLen = len;
 1201:     return strncmp(data() + pos, str, maxLen);
 1202: }
-1203: 
+1203:
 1204: /// <summary>
 1205: /// Case sensitive compare to string
 1206: ///
@@ -1579,17 +1581,17 @@ File: code/libraries/baremetal/src/String.cpp
 1216:     size_t strLength{};
 1217:     if (str != nullptr)
 1218:         strLength = strlen(str);
-1219: 
+1219:
 1220:     auto len = length();
 1221:     if (pos >= len)
 1222:         len = 0;
 1223:     len -= pos;
 1224:     if (count < len)
 1225:         len = count;
-1226: 
+1226:
 1227:     if (strCount < strLength)
 1228:         strLength = strCount;
-1229: 
+1229:
 1230:     if (len == 0)
 1231:     {
 1232:         if (strLength == 0)
@@ -1598,13 +1600,13 @@ File: code/libraries/baremetal/src/String.cpp
 1235:     }
 1236:     if (strLength == 0)
 1237:         return 1;
-1238: 
+1238:
 1239:     auto maxLen = strLength;
 1240:     if (maxLen < len)
 1241:         maxLen = len;
 1242:     return strncmp(data() + pos, str, maxLen);
 1243: }
-1244: 
+1244:
 1245: /// <summary>
 1246: /// replace substring
 1247: ///
@@ -1620,7 +1622,7 @@ File: code/libraries/baremetal/src/String.cpp
 1257:     assign(result);
 1258:     return *this;
 1259: }
-1260: 
+1260:
 1261: /// <summary>
 1262: /// replace substring
 1263: ///
@@ -1638,7 +1640,7 @@ File: code/libraries/baremetal/src/String.cpp
 1275:     assign(result);
 1276:     return *this;
 1277: }
-1278: 
+1278:
 1279: /// <summary>
 1280: /// replace substring
 1281: ///
@@ -1654,7 +1656,7 @@ File: code/libraries/baremetal/src/String.cpp
 1291:     assign(result);
 1292:     return *this;
 1293: }
-1294: 
+1294:
 1295: /// <summary>
 1296: /// replace substring
 1297: ///
@@ -1671,7 +1673,7 @@ File: code/libraries/baremetal/src/String.cpp
 1308:     assign(result);
 1309:     return *this;
 1310: }
-1311: 
+1311:
 1312: /// <summary>
 1313: /// replace substring
 1314: ///
@@ -1685,7 +1687,7 @@ File: code/libraries/baremetal/src/String.cpp
 1322: {
 1323:     return replace(pos, count, ch, 1);
 1324: }
-1325: 
+1325:
 1326: /// <summary>
 1327: /// replace substring
 1328: ///
@@ -1702,7 +1704,7 @@ File: code/libraries/baremetal/src/String.cpp
 1339:     assign(result);
 1340:     return *this;
 1341: }
-1342: 
+1342:
 1343: /// <summary>
 1344: /// replace substring
 1345: ///
@@ -1726,7 +1728,7 @@ File: code/libraries/baremetal/src/String.cpp
 1363:     }
 1364:     return count;
 1365: }
-1366: 
+1366:
 1367: /// <summary>
 1368: /// replace substring
 1369: ///
@@ -1752,7 +1754,7 @@ File: code/libraries/baremetal/src/String.cpp
 1389:     }
 1390:     return count;
 1391: }
-1392: 
+1392:
 1393: /// <summary>
 1394: /// Align string
 1395: ///
@@ -1781,7 +1783,7 @@ File: code/libraries/baremetal/src/String.cpp
 1418:         result = *this;
 1419:     return result;
 1420: }
-1421: 
+1421:
 1422: /// <summary>
 1423: /// Allocate or re-allocate string to have a capacity of requestedLength characters
 1424: /// </summary>
@@ -1791,12 +1793,12 @@ File: code/libraries/baremetal/src/String.cpp
 1428: {
 1429:     auto requestedSize = requestedLength;
 1430:     auto allocationSize = NextPowerOf2((requestedSize < MinimumAllocationSize) ? MinimumAllocationSize : requestedSize);
-1431: 
+1431:
 1432:     if (!reallocate_allocation_size(allocationSize))
 1433:         return false;
 1434:     return true;
 1435: }
-1436: 
+1436:
 1437: /// <summary>
 1438: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
 1439: /// </summary>
@@ -1844,6 +1846,7 @@ The compiler however will sometimes use the move constructor to optimize
 
 As said before, we use our own version of const_iterator and iterator to be used in the `string` methods `begin()` and `end()`.
 We'll declare and implement these.
+
 Create the file `code/libraries/baremetal/include/baremetal/Iterator.h`
 
 ```cpp
@@ -1886,12 +1889,12 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// <summary>
 43: /// Const iterator template
-44: /// 
+44: ///
 45: /// Based on arrays of type T pointed to by const pointers.
 46: /// </summary>
 47: /// <typeparam name="T">Value type to iterate through</typeparam>
@@ -1905,7 +1908,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 55:     T const* m_end;
 56:     /// @brief Current position
 57:     T const* m_current;
-58: 
+58:
 59: public:
 60:     /// <summary>
 61:     /// Construct a const_iterator
@@ -1939,7 +1942,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 89:     }
 90:     /// <summary>
 91:     /// Equality comparison
-92:     /// 
+92:     ///
 93:     /// Compares current position with current position in passed iterator
 94:     /// </summary>
 95:     /// <param name="other">const_iterator to compare with</param>
@@ -1950,7 +1953,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 100:     }
 101:     /// <summary>
 102:     /// Inequality comparison
-103:     /// 
+103:     ///
 104:     /// Compares current position with current position in passed iterator
 105:     /// </summary>
 106:     /// <param name="other">const_iterator to compare with</param>
@@ -1968,10 +1971,10 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 118:         return *m_current;
 119:     }
 120: };
-121: 
+121:
 122: /// <summary>
 123: /// Non-const iterator template
-124: /// 
+124: ///
 125: /// Based on arrays of type T pointed to by pointers.
 126: /// </summary>
 127: /// <typeparam name="T">Value type to iterate through</typeparam>
@@ -1985,7 +1988,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 135:     T* m_end;
 136:     /// @brief Current position
 137:     T* m_current;
-138: 
+138:
 139: public:
 140:     /// <summary>
 141:     /// Construct a iterator
@@ -2019,7 +2022,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 169:     }
 170:     /// <summary>
 171:     /// Equality comparison
-172:     /// 
+172:     ///
 173:     /// Compares current position with current position in passed iterator
 174:     /// </summary>
 175:     /// <param name="other">iterator to compare with</param>
@@ -2030,7 +2033,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 180:     }
 181:     /// <summary>
 182:     /// Inequality comparison
-183:     /// 
+183:     ///
 184:     /// Compares current position with current position in passed iterator
 185:     /// </summary>
 186:     /// <param name="other">iterator to compare with</param>
@@ -2048,7 +2051,7 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 198:         return *m_current;
 199:     }
 200: };
-201: 
+201:
 ```
 
 Again, we will not go into any detail, the classes should speak for themselves.
@@ -2056,6 +2059,7 @@ Again, we will not go into any detail, the classes should speak for themselves.
 ### Util.h {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_UTILH}
 
 As our implementation of the `string` class needs some additional string specific functionality, we'll add a number of standard C library functions for this/
+
 Update the file `code/libraries/baremetal/include/baremetal/Util.h`
 
 ```cpp
@@ -2064,7 +2068,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 51: void* memset(void* buffer, int value, size_t length);
 52: void* memcpy(void* dest, const void* src, size_t length);
 53: int memcmp(const void* buffer1, const void* buffer2, size_t length);
-54: 
+54:
 55: int toupper(int c);
 56: int tolower(int c);
 57: size_t strlen(const char* str);
@@ -2076,7 +2080,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 70: #ifdef __cplusplus
 71: }
 72: #endif
-73: 
+73:
 74: /// <summary>
 75: /// Determine the number of bits needed to represent the specified value
 76: /// </summary>
@@ -2093,7 +2097,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 87:     }
 88:     return bitCount;
 89: }
-90: 
+90:
 91: /// <summary>
 92: /// Determine the next power of 2 greater than or equal to the specified value
 93: /// </summary>
@@ -2114,6 +2118,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 ### Util.cpp {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_UTILCPP}
 
 We'll implement the new utility functions.
+
 Update the file `code/libraries/baremetal/src/Util.cpp`
 
 ```cpp
@@ -2125,14 +2130,14 @@ File: code/libraries/baremetal/src/Util.cpp
 87: /// <param name="buffer1">Pointer to first memory buffer</param>
 88: /// <param name="buffer2">Pointer to second memory buffer</param>
 89: /// <param name="length">Number of bytes to compare</param>
-90: /// <returns>Returns 0 if the two regions are equal, 
-91: /// 1 if the values in the first buffer are greater, 
+90: /// <returns>Returns 0 if the two regions are equal,
+91: /// 1 if the values in the first buffer are greater,
 92: /// -1 if the values in the second buffer are greater</returns>
 93: int memcmp(const void* buffer1, const void* buffer2, size_t length)
 94: {
 95:     const unsigned char* p1 = reinterpret_cast<const unsigned char*>(buffer1);
 96:     const unsigned char* p2 = reinterpret_cast<const unsigned char*>(buffer2);
-97: 
+97:
 98:     while (length-- > 0)
 99:     {
 100:         if (*p1 > *p2)
@@ -2143,14 +2148,14 @@ File: code/libraries/baremetal/src/Util.cpp
 105:         {
 106:             return -1;
 107:         }
-108: 
+108:
 109:         p1++;
 110:         p2++;
 111:     }
-112: 
+112:
 113:     return 0;
 114: }
-115: 
+115:
 116: /// <summary>
 117: /// Convert character to upper case
 118: /// </summary>
@@ -2162,10 +2167,10 @@ File: code/libraries/baremetal/src/Util.cpp
 124:     {
 125:         c -= 'a' - 'A';
 126:     }
-127: 
+127:
 128:     return c;
 129: }
-130: 
+130:
 131: /// <summary>
 132: /// Convert character to lower case
 133: /// </summary>
@@ -2177,7 +2182,7 @@ File: code/libraries/baremetal/src/Util.cpp
 139:     {
 140:         c += 'a' - 'A';
 141:     }
-142: 
+142:
 143:     return c;
 144: }
 ...
@@ -2187,8 +2192,8 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 165: /// </summary>
 166: /// <param name="str1">Pointer to first string</param>
 167: /// <param name="str2">Pointer to second string</param>
-168: /// <returns>Returns 0 if the two strings are equal, 
-169: /// 1 if the values in the first string are greater, 
+168: /// <returns>Returns 0 if the two strings are equal,
+169: /// 1 if the values in the first string are greater,
 170: /// -1 if the values in the second string are greater</returns>
 171: int strcmp(const char* str1, const char* str2)
 172: {
@@ -2202,11 +2207,11 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 180:         {
 181:             return -1;
 182:         }
-183: 
+183:
 184:         str1++;
 185:         str2++;
 186:     }
-187: 
+187:
 188:     if (*str1 > *str2)
 189:     {
 190:         return 1;
@@ -2215,22 +2220,22 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 193:     {
 194:         return -1;
 195:     }
-196: 
+196:
 197:     return 0;
 198: }
-199: 
+199:
 200: /// <summary>
 201: /// Compare two strings, case insensitive
 202: /// </summary>
 203: /// <param name="str1">Pointer to first string</param>
 204: /// <param name="str2">Pointer to second string</param>
-205: /// <returns>Returns 0 is the two strings are equal ignoring case, 
-206: /// 1 if the values in the first string are greater, 
+205: /// <returns>Returns 0 is the two strings are equal ignoring case,
+206: /// 1 if the values in the first string are greater,
 207: /// -1 if the values in the second string are greater</returns>
 208: int strcasecmp(const char* str1, const char* str2)
 209: {
 210:     int chr1, chr2;
-211: 
+211:
 212:     while (((chr1 = toupper(*str1)) != '\0') && ((chr2 = toupper(*str2)) != '\0'))
 213:     {
 214:         if (chr1 > chr2)
@@ -2241,13 +2246,13 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 219:         {
 220:             return -1;
 221:         }
-222: 
+222:
 223:         str1++;
 224:         str2++;
 225:     }
-226: 
+226:
 227:     chr2 = toupper(*str2);
-228: 
+228:
 229:     if (chr1 > chr2)
 230:     {
 231:         return 1;
@@ -2256,18 +2261,18 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 234:     {
 235:         return -1;
 236:     }
-237: 
+237:
 238:     return 0;
 239: }
-240: 
+240:
 241: /// <summary>
 242: /// Compare two strings, up to maxLen characters
 243: /// </summary>
 244: /// <param name="str1">Pointer to first string</param>
 245: /// <param name="str2">Pointer to second string</param>
 246: /// <param name="maxLen">Maximum number of characters to compare</param>
-247: /// <returns>Returns 0 is the two strings are equal, 
-248: /// 1 if the values in the first string are greater, 
+247: /// <returns>Returns 0 is the two strings are equal,
+248: /// 1 if the values in the first string are greater,
 249: /// -1 if the values in the second string are greater</returns>
 250: int strncmp(const char* str1, const char* str2, size_t maxLen)
 251: {
@@ -2281,17 +2286,17 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 259:         {
 260:             return -1;
 261:         }
-262: 
+262:
 263:         maxLen--;
 264:         str1++;
 265:         str2++;
 266:     }
-267: 
+267:
 268:     if (maxLen == 0)
 269:     {
 270:         return 0;
 271:     }
-272: 
+272:
 273:     if (*str1 > *str2)
 274:     {
 275:         return 1;
@@ -2300,23 +2305,23 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 278:     {
 279:         return -1;
 280:     }
-281: 
+281:
 282:     return 0;
 283: }
-284: 
+284:
 285: /// <summary>
 286: /// Compare two strings, up to maxLen characters, case insensitive
 287: /// </summary>
 288: /// <param name="str1">Pointer to first string</param>
 289: /// <param name="str2">Pointer to second string</param>
 290: /// <param name="maxLen">Maximum number of characters to compare</param>
-291: /// <returns>Returns 0 is the two strings are equal ignoring case, 
-292: /// 1 if the values in the first string are greater, 
+291: /// <returns>Returns 0 is the two strings are equal ignoring case,
+292: /// 1 if the values in the first string are greater,
 293: /// -1 if the values in the second string are greater</returns>
 294: int strncasecmp(const char* str1, const char* str2, size_t maxLen)
 295: {
 296:     int chr1, chr2;
-297: 
+297:
 298:     while ((maxLen > 0) && ((chr1 = toupper(*str1)) != '\0') && ((chr2 = toupper(*str2)) != '\0'))
 299:     {
 300:         if (chr1 > chr2)
@@ -2327,19 +2332,19 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 305:         {
 306:             return -1;
 307:         }
-308: 
+308:
 309:         maxLen--;
 310:         str1++;
 311:         str2++;
 312:     }
-313: 
+313:
 314:     chr2 = toupper(*str2);
-315: 
+315:
 316:     if (maxLen == 0)
 317:     {
 318:         return 0;
 319:     }
-320: 
+320:
 321:     if (chr1 > chr2)
 322:     {
 323:         return 1;
@@ -2348,7 +2353,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Util.cpp
 326:     {
 327:         return -1;
 328:     }
-329: 
+329:
 330:     return 0;
 331: }
 ```
@@ -2358,6 +2363,7 @@ The new functions added should be self-explanatory.
 ### Update project configuration {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -2387,7 +2393,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 51:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 52:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
 53:     )
-54: 
+54:
 55: set(PROJECT_INCLUDES_PUBLIC
 56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
@@ -2449,16 +2455,16 @@ File: code\applications\demo\src\main.cpp
 13: #include <baremetal/System.h>
 14: #include <baremetal/Timer.h>
 15: #include <baremetal/Util.h>
-16: 
+16:
 17: LOG_MODULE("main");
-18: 
+18:
 19: using namespace baremetal;
-20: 
+20:
 21: int main()
 22: {
 23:     auto& console = GetConsole();
 24:     LOG_DEBUG("Hello World!");
-25: 
+25:
 26:     string s1{ "a" };
 27:     string s2{ "a" };
 28:     string s3{ "aaaa", 3 };
@@ -2469,7 +2475,7 @@ File: code\applications\demo\src\main.cpp
 33:     string s8{ nullptr };
 34:     string s9{ "" };
 35:     string s10{ nullptr, 3 };
-36: 
+36:
 37:     LOG_INFO("s1");
 38:     for (auto ch : s1)
 39:     {
@@ -2485,7 +2491,7 @@ File: code\applications\demo\src\main.cpp
 49:     assert(strcmp(s8, "") == 0);
 50:     assert(strcmp(s9, "") == 0);
 51:     assert(strcmp(s10, "") == 0);
-52: 
+52:
 53:     s7 = "abcde";
 54:     assert(strcmp(s7, "abcde") == 0);
 55:     s7 = nullptr;
@@ -2499,7 +2505,7 @@ File: code\applications\demo\src\main.cpp
 63:         s6 = s99;
 64:     }
 65:     assert(strcmp(s6, "cccc") == 0);
-66: 
+66:
 67:     const char* s = "abcdefghijklmnopqrstuvwxyz";
 68:     s1.assign(s);
 69:     assert(strcmp(s1, "abcdefghijklmnopqrstuvwxyz") == 0);
@@ -2520,7 +2526,7 @@ File: code\applications\demo\src\main.cpp
 84:     assert(strcmp(s1, "efghij") == 0);
 85:     s1.assign(6, 'c');
 86:     assert(strcmp(s1, "cccccc") == 0);
-87: 
+87:
 88:     const string s8c{ s8 };
 89:     assert(s8.at(3) == 'd');
 90:     assert(s8c.at(3) == 'd');
@@ -2533,7 +2539,7 @@ File: code\applications\demo\src\main.cpp
 97:     assert(s8c.capacity() == 64);
 98:     assert(s8.reserve(128) == 128);
 99:     assert(s8.capacity() == 128);
-100: 
+100:
 101:     s1 = "a";
 102:     assert(strcmp(s1, "a") == 0);
 103:     s1 += 'b';
@@ -2548,7 +2554,7 @@ File: code\applications\demo\src\main.cpp
 112:     assert(strcmp(s1, "a") == 0);
 113:     s1 += nullptr;
 114:     assert(strcmp(s1, "a") == 0);
-115: 
+115:
 116:     s3 = "";
 117:     s4 = s1 + s2;
 118:     assert(strcmp(s4, "aa") == 0);
@@ -2566,7 +2572,7 @@ File: code\applications\demo\src\main.cpp
 130:     assert(strcmp(s4, "a") == 0);
 131:     s4 = nullptr + s1;
 132:     assert(strcmp(s4, "a") == 0);
-133: 
+133:
 134:     s1 = "a";
 135:     s1.append(4, 'b');
 136:     assert(strcmp(s1, "abbbb") == 0);
@@ -2588,7 +2594,7 @@ File: code\applications\demo\src\main.cpp
 152:     assert(strcmp(s1, "") == 0);
 153:     s1.append(nullptr, 3);
 154:     assert(strcmp(s1, "") == 0);
-155: 
+155:
 156:     s1 = s;
 157:     s2 = "c";
 158:     auto pos = s1.find(s2);
@@ -2605,7 +2611,7 @@ File: code\applications\demo\src\main.cpp
 169:     s2 = "xyz";
 170:     pos = s1.find(s2);
 171:     assert(pos == 23);
-172: 
+172:
 173:     pos = s1.find("d");
 174:     assert(pos == 3);
 175:     pos = s1.find("d", 1);
@@ -2636,7 +2642,7 @@ File: code\applications\demo\src\main.cpp
 200:     assert(pos == 2);
 201:     pos = s1.find(nullptr, 26, 1);
 202:     assert(pos == string::npos);
-203: 
+203:
 204:     pos = s1.find('d');
 205:     assert(pos == 3);
 206:     pos = s1.find('d', 2);
@@ -2647,7 +2653,7 @@ File: code\applications\demo\src\main.cpp
 211:     assert(pos == string::npos);
 212:     pos = s1.find("z");
 213:     assert(pos == 25);
-214: 
+214:
 215:     s2 = "abc";
 216:     s3 = "xyz";
 217:     auto isTrue = s1.starts_with('a');
@@ -2666,7 +2672,7 @@ File: code\applications\demo\src\main.cpp
 230:     assert(isTrue);
 231:     isTrue = s1.starts_with(s3);
 232:     assert(!isTrue);
-233: 
+233:
 234:     isTrue = s1.ends_with('a');
 235:     assert(!isTrue);
 236:     isTrue = s1.ends_with('z');
@@ -2683,7 +2689,7 @@ File: code\applications\demo\src\main.cpp
 247:     assert(!isTrue);
 248:     isTrue = s1.ends_with(s3);
 249:     assert(isTrue);
-250: 
+250:
 251:     isTrue = s1.contains('a');
 252:     assert(isTrue);
 253:     isTrue = s1.contains('A');
@@ -2700,14 +2706,14 @@ File: code\applications\demo\src\main.cpp
 264:     assert(isTrue);
 265:     isTrue = s1.contains(s3);
 266:     assert(isTrue);
-267: 
+267:
 268:     s2 = s1.substr();
 269:     assert(strcmp(s2, "abcdefghijklmnopqrstuvwxyz") == 0);
 270:     s2 = s1.substr(6);
 271:     assert(strcmp(s2, "ghijklmnopqrstuvwxyz") == 0);
 272:     s2 = s1.substr(6, 6);
 273:     assert(strcmp(s2, "ghijkl") == 0);
-274: 
+274:
 275:     s1 = "abcdefg";
 276:     s2 = "abcdefG";
 277:     s3 = "abcdefg";
@@ -2730,7 +2736,7 @@ File: code\applications\demo\src\main.cpp
 294:     assert(isTrue);
 295:     isTrue = s4.equals(nullptr);
 296:     assert(isTrue);
-297: 
+297:
 298:     isTrue = s1.equals_case_insensitive(s2);
 299:     assert(isTrue);
 300:     isTrue = s1.equals_case_insensitive(s3);
@@ -2750,7 +2756,7 @@ File: code\applications\demo\src\main.cpp
 314:     assert(isTrue);
 315:     isTrue = s4.equals_case_insensitive(nullptr);
 316:     assert(isTrue);
-317: 
+317:
 318:     assert(s1 == s3);
 319:     assert(s1 != s2);
 320:     assert(s1 == "abcdefg");
@@ -2766,7 +2772,7 @@ File: code\applications\demo\src\main.cpp
 330:     assert(s4 == nullptr);
 331:     assert("" == s4);
 332:     assert(nullptr == s4);
-333: 
+333:
 334:     s4 = "bcdefg";
 335:     s5 = "def";
 336:     auto result = s1.compare(s2);
@@ -2787,7 +2793,7 @@ File: code\applications\demo\src\main.cpp
 351:     assert(result == 1);
 352:     result = s1.compare(3, 3, s4, 2, 6);
 353:     assert(result == -1);
-354: 
+354:
 355:     result = s1.compare("a");
 356:     assert(result == 1);
 357:     result = s1.compare("Abcdefg");
@@ -2805,7 +2811,7 @@ File: code\applications\demo\src\main.cpp
 369:     assert(result == 0);
 370:     result = s2.compare(nullptr);
 371:     assert(result == 0);
-372: 
+372:
 373:     s1 = "abcde";
 374:     s2 = "fghijk";
 375:     s3 = s1.replace(0, 1, s2);
@@ -2835,7 +2841,7 @@ File: code\applications\demo\src\main.cpp
 399:     s3 = s1.replace(1, 2, 'x', 3);
 400:     assert(s1.equals("axxxde"));
 401:     assert(s3.equals("axxxde"));
-402: 
+402:
 403:     s1 = "abcde";
 404:     s2 = "cd";
 405:     s3 = "xy";
@@ -2856,7 +2862,7 @@ File: code\applications\demo\src\main.cpp
 420:     count = s1.replace("ab", "cd");
 421:     assert(count == 4);
 422:     assert(s1.equals("cdcdcdcd"));
-423: 
+423:
 424:     s1 = "abcd";
 425:     s2 = s1.align(8);
 426:     assert(s2.equals("    abcd"));
@@ -2864,10 +2870,10 @@ File: code\applications\demo\src\main.cpp
 428:     assert(s2.equals("abcd    "));
 429:     s2 = s1.align(0);
 430:     assert(s2.equals("abcd"));
-431: 
+431:
 432:     LOG_INFO("Wait 5 seconds");
 433:     Timer::WaitMilliSeconds(5000);
-434: 
+434:
 435:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 436:     char ch{};
 437:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -2877,7 +2883,7 @@ File: code\applications\demo\src\main.cpp
 441:     }
 442:     if (ch == 'p')
 443:         assert(false);
-444: 
+444:
 445:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 446: }
 ```

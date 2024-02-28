@@ -61,4 +61,13 @@ TestDetails::TestDetails(const string& testName, const string& fixtureName, cons
 {
 }
 
+TestDetails::TestDetails(const TestDetails& other, int lineNumber)
+    : m_suiteName{ other.m_suiteName }
+    , m_fixtureName{ other.m_fixtureName }
+    , m_testName{ other.m_testName }
+    , m_fileName{ other.m_fileName }
+    , m_lineNumber{ lineNumber }
+{
+}
+
 } // namespace unittest

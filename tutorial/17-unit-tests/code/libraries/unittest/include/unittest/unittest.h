@@ -43,6 +43,7 @@
 #include <unittest/TestSuite.h>
 
 #include <unittest/ITestReporter.h>
+#include <unittest/AssertMacros.h>
 #include <unittest/ConsoleTestReporter.h>
 #include <unittest/ExecuteTest.h>
 #include <unittest/TestBase.h>

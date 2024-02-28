@@ -56,6 +56,7 @@ private:
 public:
     TestDetails();
     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
+    TestDetails(const TestDetails& other, int lineNumber);
 
     const baremetal::string& SuiteName() const { return m_suiteName; }
     const baremetal::string& FixtureName() const { return m_fixtureName; }

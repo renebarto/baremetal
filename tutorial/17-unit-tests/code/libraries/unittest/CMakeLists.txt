@@ -19,7 +19,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal
+    baremetal-17
     )
 
 set(PROJECT_LIBS
@@ -28,9 +28,11 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintValue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
@@ -42,11 +44,14 @@ set(PROJECT_SOURCES
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/PrintValue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h

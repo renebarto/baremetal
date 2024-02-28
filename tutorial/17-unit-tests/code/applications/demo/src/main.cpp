@@ -40,7 +40,7 @@ public:
 
 TEST_FIXTURE(FixtureMyTest1,Test1)
 {
-    LOG_DEBUG(m_details.FixtureName().c_str());
+    FAIL();
 }
 
 } // Suite1
@@ -64,7 +64,10 @@ public:
 
 TEST_FIXTURE(FixtureMyTest2, Test2)
 {
-    LOG_DEBUG(m_details.FixtureName().c_str());
+    EXPECT_TRUE(true);
+    EXPECT_FALSE(false);
+    EXPECT_TRUE(false);
+    EXPECT_FALSE(true);
 }
 
 } // Suite2
@@ -85,15 +88,118 @@ public:
 
 TEST_FIXTURE(FixtureMyTest3, Test3)
 {
-    LOG_DEBUG(m_details.FixtureName().c_str());
-    CurrentTest::Results()->OnTestFailure(m_details, "Fail");
+    int x = 0;
+    int y = 1;
+    int z = 1;
+    EXPECT_EQ(x, y);
+    EXPECT_EQ(y, z);
+    EXPECT_NE(x, y);
+    EXPECT_NE(y, z);
 }
 
 TEST(Test4)
 {
-    LOG_DEBUG(Details().FixtureName().c_str());
-    CurrentTest::Results()->OnTestFailure(Details(), "Fail");
-    CurrentTest::Results()->OnTestFailure(Details(), "FailAgain");
+    int* p = nullptr;
+    int dd = 123;
+    int* q = &dd;
+    int* r = &dd;
+    ASSERT_NULL(p);
+    EXPECT_NULL(p);
+    ASSERT_NULL(q);
+    EXPECT_NULL(q);
+    ASSERT_NOT_NULL(p);
+    EXPECT_NOT_NULL(p);
+    ASSERT_NOT_NULL(q);
+    EXPECT_NOT_NULL(q);
+    baremetal::string s1 = "A";
+    baremetal::string s2 = "B";
+    baremetal::string s3 = "B";
+    baremetal::string s4 = "b";
+    ASSERT_EQ(s1, s2);
+    EXPECT_EQ(s1, s2);
+    ASSERT_EQ(s2, s3);
+    EXPECT_EQ(s2, s3);
+    ASSERT_NE(s1, s2);
+    EXPECT_NE(s1, s2);
+    ASSERT_NE(s2, s3);
+    EXPECT_NE(s2, s3);
+    ASSERT_EQ_IGNORE_CASE(s1, s2);
+    EXPECT_EQ_IGNORE_CASE(s1, s2);
+    ASSERT_EQ_IGNORE_CASE(s2, s3);
+    EXPECT_EQ_IGNORE_CASE(s2, s3);
+    ASSERT_NE_IGNORE_CASE(s1, s2);
+    EXPECT_NE_IGNORE_CASE(s1, s2);
+    ASSERT_NE_IGNORE_CASE(s2, s3);
+    EXPECT_NE_IGNORE_CASE(s2, s3);
+    ASSERT_EQ_IGNORE_CASE(s2, s4);
+    EXPECT_EQ_IGNORE_CASE(s2, s4);
+    ASSERT_NE_IGNORE_CASE(s2, s4);
+    EXPECT_NE_IGNORE_CASE(s2, s4);
+    char t[] = { 'A', '\0' };
+    char u[] = { 'B', '\0' };
+    char v[] = { 'B', '\0' };
+    char w[] = { 'b', '\0' };
+    const char* tC = "A";
+    const char* uC = "B";
+    const char* vC = "B";
+    const char* wC = "b";
+    ASSERT_EQ(t, u);
+    EXPECT_EQ(t, u);
+    ASSERT_EQ(u, v);
+    EXPECT_EQ(u, v);
+    ASSERT_EQ(t, u);
+    EXPECT_EQ(t, uC);
+    ASSERT_EQ(uC, v);
+    EXPECT_EQ(uC, vC);
+    ASSERT_EQ(t, w);
+    EXPECT_EQ(t, wC);
+    ASSERT_EQ(uC, w);
+    EXPECT_EQ(uC, wC);
+    ASSERT_NE(t, u);
+    EXPECT_NE(t, u);
+    ASSERT_NE(u, v);
+    EXPECT_NE(u, v);
+    ASSERT_NE(t, u);
+    EXPECT_NE(t, uC);
+    ASSERT_NE(uC, v);
+    EXPECT_NE(uC, vC);
+    ASSERT_NE(t, w);
+    EXPECT_NE(t, wC);
+    ASSERT_NE(uC, w);
+    EXPECT_NE(uC, wC);
+    ASSERT_EQ_IGNORE_CASE(t, u);
+    EXPECT_EQ_IGNORE_CASE(t, u);
+    ASSERT_EQ_IGNORE_CASE(u, v);
+    EXPECT_EQ_IGNORE_CASE(u, v);
+    ASSERT_EQ_IGNORE_CASE(t, u);
+    EXPECT_EQ_IGNORE_CASE(t, uC);
+    ASSERT_EQ_IGNORE_CASE(uC, v);
+    EXPECT_EQ_IGNORE_CASE(uC, vC);
+    ASSERT_EQ_IGNORE_CASE(t, w);
+    EXPECT_EQ_IGNORE_CASE(t, wC);
+    ASSERT_EQ_IGNORE_CASE(uC, w);
+    EXPECT_EQ_IGNORE_CASE(uC, wC);
+    ASSERT_NE_IGNORE_CASE(t, u);
+    EXPECT_NE_IGNORE_CASE(t, u);
+    ASSERT_NE_IGNORE_CASE(u, v);
+    EXPECT_NE_IGNORE_CASE(u, v);
+    ASSERT_NE_IGNORE_CASE(t, u);
+    EXPECT_NE_IGNORE_CASE(t, uC);
+    ASSERT_NE_IGNORE_CASE(uC, v);
+    EXPECT_NE_IGNORE_CASE(uC, vC);
+    ASSERT_NE_IGNORE_CASE(t, w);
+    EXPECT_NE_IGNORE_CASE(t, wC);
+    ASSERT_NE_IGNORE_CASE(uC, w);
+    EXPECT_NE_IGNORE_CASE(uC, wC);
+
+    double a = 0.123;
+    double b = 0.122;
+    ASSERT_EQ(a, b);
+    EXPECT_EQ(a, b);
+    ASSERT_NEAR(a, b, 0.0001);
+    EXPECT_NEAR(a, b, 0.0001);
+    ASSERT_NEAR(a, b, 0.001);
+    EXPECT_NEAR(a, b, 0.001);
 }
 
 int main()
@@ -102,7 +208,8 @@ int main()
     LOG_DEBUG("Hello World!");
 
     ConsoleTestReporter reporter;
-    RunAllTests(&reporter);
+    auto numFailures = RunAllTests(&reporter);
+    LOG_INFO("Failures found: %d", numFailures);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);

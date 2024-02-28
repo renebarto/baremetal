@@ -63,7 +63,7 @@ void SetAssertionCallback(AssertionCallback* callback);
 ///
 /// <param name="expression">Expression to evaluate.
 /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
-#define assert(expression) (likely(expression) ? ((void)0) : AssertionFailed(#expression, __FILE__, __LINE__))
+#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
 
 #endif
 

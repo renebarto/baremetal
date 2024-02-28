@@ -2391,7 +2391,7 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 63: ///
 64: /// <param name="expression">Expression to evaluate.
 65: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
-66: #define assert(expression) (likely(expression) ? ((void)0) : AssertionFailed(#expression, __FILE__, __LINE__))
+66: #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
 67:
 68: #endif
 69:

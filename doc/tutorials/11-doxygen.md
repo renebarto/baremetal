@@ -90,7 +90,7 @@ Get:1 http://ftp.nl.debian.org/debian bookworm/main amd64 libllvm14 amd64 1:14.0
 Get:2 http://ftp.nl.debian.org/debian bookworm/main amd64 libclang-cpp14 amd64 1:14.0.6-12 [11.1 MB]
 Get:3 http://ftp.nl.debian.org/debian bookworm/main amd64 libclang1-14 amd64 1:14.0.6-12 [6,157 kB]
 Get:4 http://ftp.nl.debian.org/debian bookworm/main amd64 doxygen amd64 1.9.4-4 [4,611 kB]
-Fetched 43.7 MB in 3s (14.3 MB/s)  
+Fetched 43.7 MB in 3s (14.3 MB/s)
 Selecting previously unselected package libllvm14:amd64.
 (Reading database ... 238270 files and directories currently installed.)
 Preparing to unpack .../libllvm14_1%3a14.0.6-12_amd64.deb ...
@@ -310,6 +310,7 @@ This only has to be done once.
 ### Windows {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN_WINDOWS}
 
 Windows 10 and later support this, but you need to run a command a administrator.
+
 Create the file `tools\create-links.bat`
 
 ```bat
@@ -488,18 +489,18 @@ As an example, let's update `code/libraries/baremetal/include/baremetal/Timer.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Raspberry Pi Timer
-44: 
+44:
 45: #include <baremetal/Types.h>
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: class IMemoryAccess;
-50: 
+50:
 51: /// <summary>
 52: /// Timer class. For now only contains busy waiting methods
 53: ///
@@ -508,31 +509,31 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 56: class Timer
 57: {
 58:     friend Timer& GetTimer();
-59: 
+59:
 60: private:
 61:     /// <summary>
 62:     /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
 63:     /// </summary>
 64:     IMemoryAccess& m_memoryAccess;
-65: 
+65:
 66:     /// <summary>
 67:     /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
 68:     /// </summary>
 69:     Timer();
-70: 
+70:
 71: public:
 72:     /// <summary>
 73:     /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
 74:     /// </summary>
 75:     /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
 76:     Timer(IMemoryAccess& memoryAccess);
-77: 
+77:
 78:     /// <summary>
 79:     /// Wait for specified number of NOP statements. Busy wait
 80:     /// </summary>
 81:     /// <param name="numCycles">Number of cycles to wait</param>
 82:     static void WaitCycles(uint32 numCycles);
-83: 
+83:
 84: #if defined(USE_PHYSICAL_COUNTER)
 85:     /// <summary>
 86:     /// Reads the BCM2835 System Timer counter value. See @ref RASPBERRY_PI_SYSTEM_TIMER
@@ -540,31 +541,31 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 88:     /// <returns>System Timer count value</returns>
 89:     uint64 GetSystemTimer();
 90: #endif
-91: 
+91:
 92:     /// <summary>
 93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
-94:     /// 
+94:     ///
 95:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
 96:     /// </summary>
 97:     /// <param name="msec">Wait time in milliseconds</param>
 98:     static void WaitMilliSeconds(uint64 msec);
-99: 
+99:
 100:     /// <summary>
 101:     /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 102:     /// counter). Busy wait
-103:     /// 
+103:     ///
 104:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
 105:     /// </summary>
 106:     /// <param name="usec">Wait time in microseconds</param>
 107:     static void WaitMicroSeconds(uint64 usec);
 108: };
-109: 
+109:
 110: /// <summary>
 111: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
 112: /// </summary>
 113: /// <returns>A reference to the singleton Timer</returns>
 114: Timer& GetTimer();
-115: 
+115:
 116: } // namespace baremetal
 ```
 
@@ -601,7 +602,7 @@ The line after the `@file` tag will be used as a detailed description of the fil
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
-42: /// @file 
+42: /// @file
 43: /// Raspberry Pi Timer
 ...
 ```
@@ -640,7 +641,7 @@ You can see that the `Timer` class is highlighted just like others, meaning ther
 The link will show the information collected for the class:
 - inheritance
 - public members, public static members and private members
-- public and private attributes 
+- public and private attributes
 - friend functions
 - detailed desription
 - detailed documentation on constructors, desctructors, members, friends and attributes
@@ -656,7 +657,7 @@ If the method or function returns a value, a `@return` or `<returns></returns>` 
 ...
 92:     /// <summary>
 93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
-94:     /// 
+94:     ///
 95:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
 96:     /// </summary>
 97:     /// <param name="msec">Wait time in milliseconds</param>
@@ -722,7 +723,7 @@ Both entries mean essentially the same for `Doxygen`, however the first one is m
 ### subpage tag {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_SUBPAGE_TAG}
 
 A subpage tag is used to reference another document.
-This can be used to create a hierarchy of pages. 
+This can be used to create a hierarchy of pages.
 It behaves similar as `\ref` in the sense that it creates a reference to a page labeled `<name>` with the optional link text as specified in the second argument.
 
 ```

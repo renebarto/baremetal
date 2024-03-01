@@ -46,11 +46,14 @@
 
 namespace baremetal {
 
-void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
-void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
-void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
-void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros);
-void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros);
+void Serialize(char* buffer, size_t bufferSize, int8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, uint8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, int16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, uint16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, int32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, uint32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, int64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+void Serialize(char* buffer, size_t bufferSize, uint64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
 /// <summary>
 /// Serialize long long int value, type specific specialization
 /// </summary>

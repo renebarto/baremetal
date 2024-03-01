@@ -55,7 +55,7 @@ File: CMakeLists.txt
 91:     set(BAREMETAL_DEBUG_TRACING 0)
 92: endif()
 93: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-94: 
+94:
 95: set(DEFINES_C
 96:     PLATFORM_BAREMETAL
 97:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
@@ -82,6 +82,7 @@ File: CMakeLists.txt
 ### RPIProperties.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESH}
 
 We will add a few methods to the `RPIProperties` class, to retrieve information about the hardware.
+
 Update the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 
 ```cpp
@@ -135,7 +136,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 95:     /// @brief Model unknown / not set / invalid
 96:     Unknown
 97: };
-98: 
+98:
 99: /// <summary>
 100: /// Raspberry Pi board revision number
 101: /// </summary>
@@ -216,7 +217,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 176:     /// @brief Raspberry Pi 5 Model B Revision 1, code TBD
 177:     RaspberryPi_5B = 0x00000000,
 178: };
-179: 
+179:
 180: /// <summary>
 181: /// Clock ID number. Used to retrieve and set the clock frequency for several clocks
 182: /// </summary>
@@ -235,7 +236,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 195:     /// @brief Pixel clock
 196:     PIXEL_BVB = 14,
 197: };
-198: 
+198:
 199: /// <summary>
 200: /// Top level functionality for requests on Mailbox interface
 201: /// </summary>
@@ -244,10 +245,10 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 204: private:
 205:     /// @brief Reference to mailbox for functions requested
 206:     IMailbox &m_mailbox;
-207: 
+207:
 208: public:
 209:     explicit RPIProperties(IMailbox &mailbox);
-210: 
+210:
 211:     bool GetFirmwareRevision(uint32& revision);
 212:     bool GetBoardModel(BoardModel& model);
 213:     bool GetBoardRevision(BoardRevision& revision);
@@ -276,6 +277,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 ### RPIProperties.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESCPP}
 
 Next we'll implement the new methods for class `RPIProperties`.
+
 Update the file `code/libraries/baremetal/src/RPIProperties.cpp`.
 
 ```cpp
@@ -293,7 +295,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 75:     /// Padding to align to 4 bytes
 76:     uint8    padding[2];
 77: } PACKED;
-78: 
+78:
 79: /// <summary>
 80: /// Mailbox property tag structure for requesting memory information.
 81: /// </summary>
@@ -306,7 +308,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 88:     /// Size in bytes
 89:     uint32   size;
 90: } PACKED;
-91: 
+91:
 ...
 117: /// <summary>
 118: /// Retrieve FW revision number
@@ -317,12 +319,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 123: {
 124:     PropertySimple         tag{};
 125:     RPIPropertiesInterface interface(m_mailbox);
-126: 
+126:
 127:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_FIRMWARE_REVISION, &tag, sizeof(tag));
-128: 
+128:
 129: #if BAREMETAL_DEBUG_TRACING
 130:     LOG_DEBUG("GetFirmwareRevision");
-131: 
+131:
 132:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 133: #endif
 134:     if (result)
@@ -332,10 +334,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 138:         LOG_DEBUG("Revision: %08lx", tag.value);
 139: #endif
 140:     }
-141: 
+141:
 142:     return result;
 143: }
-144: 
+144:
 145: /// <summary>
 146: /// Retrieve Raspberry Pi board model
 147: /// </summary>
@@ -345,12 +347,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 151: {
 152:     PropertySimple         tag{};
 153:     RPIPropertiesInterface interface(m_mailbox);
-154: 
+154:
 155:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_MODEL, &tag, sizeof(tag));
-156: 
+156:
 157: #if BAREMETAL_DEBUG_TRACING
 158:     LOG_DEBUG("GetBoardModel");
-159: 
+159:
 160:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 161: #endif
 162:     if (result)
@@ -360,10 +362,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 166:         LOG_DEBUG("Model: %08lx", tag.value);
 167: #endif
 168:     }
-169: 
+169:
 170:     return result;
 171: }
-172: 
+172:
 173: /// <summary>
 174: /// Retrieve Raspberry Pi board revision
 175: /// </summary>
@@ -373,12 +375,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 179: {
 180:     PropertySimple         tag{};
 181:     RPIPropertiesInterface interface(m_mailbox);
-182: 
+182:
 183:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_REVISION, &tag, sizeof(tag));
-184: 
+184:
 185: #if BAREMETAL_DEBUG_TRACING
 186:     LOG_DEBUG("GetBoardRevision");
-187: 
+187:
 188:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 189: #endif
 190:     if (result)
@@ -388,10 +390,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 194:         LOG_DEBUG("Revision: %08lx", tag.value);
 195: #endif
 196:     }
-197: 
+197:
 198:     return result;
 199: }
-200: 
+200:
 201: /// <summary>
 202: /// Retrieve network MAC address
 203: /// </summary>
@@ -401,12 +403,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 207: {
 208:     PropertyMACAddress     tag{};
 209:     RPIPropertiesInterface interface(m_mailbox);
-210: 
+210:
 211:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_MAC_ADDRESS, &tag, sizeof(tag));
-212: 
+212:
 213: #if BAREMETAL_DEBUG_TRACING
 214:     LOG_DEBUG("GetBoardMACAddress");
-215: 
+215:
 216:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 217: #endif
 218:     if (result)
@@ -417,10 +419,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 223:         GetConsole().Write(address, sizeof(tag.address));
 224: #endif
 225:     }
-226: 
+226:
 227:     return result;
 228: }
-229: 
+229:
 230: /// <summary>
 231: /// Request board serial number
 232: /// </summary>
@@ -430,12 +432,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 236: {
 237:     PropertySerial         tag{};
 238:     RPIPropertiesInterface interface(m_mailbox);
-239: 
+239:
 240:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
-241: 
+241:
 242: #if BAREMETAL_DEBUG_TRACING
 243:     LOG_DEBUG("GetBoardSerial");
-244: 
+244:
 245:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 246: #endif
 247:     if (result)
@@ -445,10 +447,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 251:         LOG_DEBUG("Serial: %016llx", serial);
 252: #endif
 253:     }
-254: 
+254:
 255:     return result;
 256: }
-257: 
+257:
 258: /// <summary>
 259: /// Retrieve ARM assigned memory base address and size
 260: /// </summary>
@@ -459,12 +461,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 265: {
 266:     PropertyMemory         tag{};
 267:     RPIPropertiesInterface interface(m_mailbox);
-268: 
+268:
 269:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_ARM_MEMORY, &tag, sizeof(tag));
-270: 
+270:
 271: #if BAREMETAL_DEBUG_TRACING
 272:     LOG_DEBUG("GetARMMemory");
-273: 
+273:
 274:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 275: #endif
 276:     if (result)
@@ -476,10 +478,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 282:         LOG_DEBUG("Size:         %08lx", size);
 283: #endif
 284:     }
-285: 
+285:
 286:     return result;
 287: }
-288: 
+288:
 289: /// <summary>
 290: /// Retrieve VideoCore assigned memory base address and size
 291: /// </summary>
@@ -490,12 +492,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 296: {
 297:     PropertyMemory         tag{};
 298:     RPIPropertiesInterface interface(m_mailbox);
-299: 
+299:
 300:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_VC_MEMORY, &tag, sizeof(tag));
-301: 
+301:
 302: #if BAREMETAL_DEBUG_TRACING
 303:     LOG_DEBUG("GetARMMemory");
-304: 
+304:
 305:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 306: #endif
 307:     if (result)
@@ -507,10 +509,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 313:         LOG_DEBUG("Size:         %08lx", size);
 314: #endif
 315:     }
-316: 
+316:
 317:     return result;
 318: }
-319: 
+319:
 320: /// <summary>
 321: /// Get clock rate for specified clock
 322: /// </summary>
@@ -521,14 +523,14 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 327: {
 328:     PropertyClockRate      tag{};
 329:     RPIPropertiesInterface interface(m_mailbox);
-330: 
+330:
 331:     tag.clockID = static_cast<uint32>(clockID);
 332:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
-333: 
+333:
 334: #if BAREMETAL_DEBUG_TRACING
 335:     LOG_DEBUG("GetClockRate");
 336:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
-337: 
+337:
 338:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 339: #endif
 340:     if (result)
@@ -538,10 +540,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 344:         LOG_DEBUG("Rate:       %08lx", tag.rate);
 345: #endif
 346:     }
-347: 
+347:
 348:     return result;
 349: }
-350: 
+350:
 351: /// <summary>
 352: /// Get measured clock rate for specified clock
 353: /// </summary>
@@ -552,14 +554,14 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 358: {
 359:     PropertyClockRate      tag{};
 360:     RPIPropertiesInterface interface(m_mailbox);
-361: 
+361:
 362:     tag.clockID = static_cast<uint32>(clockID);
 363:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
-364: 
+364:
 365: #if BAREMETAL_DEBUG_TRACING
 366:     LOG_DEBUG("GetMeasuredClockRate");
 367:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
-368: 
+368:
 369:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
 370: #endif
 371:     if (result)
@@ -569,10 +571,10 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 375:         LOG_DEBUG("Rate:       %08lx", tag.rate);
 376: #endif
 377:     }
-378: 
+378:
 379:     return result;
 380: }
-381: 
+381:
 382: /// <summary>
 383: /// Set clock rate for specified clock
 384: /// </summary>
@@ -585,17 +587,17 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 391: {
 392:     PropertyClockRate      tag{};
 393:     RPIPropertiesInterface interface(m_mailbox);
-394: 
+394:
 395:     tag.clockID   = static_cast<uint32>(clockID);
 396:     tag.rate      = freqHz;
 397:     tag.skipTurbo = skipTurbo;
 398:     auto result   = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
-399: 
+399:
 400:     // Do not write to console here, as this call is needed to set up the console
-401: 
+401:
 402:     return result;
 403: }
-404: 
+404:
 405: } // namespace baremetal
 ...
 ```
@@ -620,6 +622,7 @@ This is because we need to set the clock rate in order to set up UART0
 ### MachineInfo.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOH}
 
 Now we can add the class `MachineInfo` which uses the methods defined in `RPIProperties` to retrieve and process information on the hardware.
+
 Create the file `code/libraries/baremetal/include/baremetal/MachineInfo.h`
 
 ```cpp
@@ -662,14 +665,14 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Mailbox.h>
 43: #include <baremetal/RPIProperties.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: /// <summary>
 48: /// Type of SoC used. See @ref RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
 49: /// </summary>
@@ -688,7 +691,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 62:     /// @brief SoC unknown / not set / invalid
 63:     Unknown,
 64: };
-65: 
+65:
 66: /// <summary>
 67: /// Retrieves system info using the mailbox mechanism
 68: ///
@@ -701,7 +704,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 75:     /// </summary>
 76:     /// <returns>A reference to the singleton MachineInfo</returns>
 77:     friend MachineInfo &GetMachineInfo();
-78: 
+78:
 79: private:
 80:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
 81:     bool          m_initialized;
@@ -733,13 +736,13 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 107:     uint32        m_vcBaseAddress;
 108:     /// @brief VideoCore assigned memory size retrieved through the mailbox
 109:     uint32        m_vcMemorySize;
-110: 
+110:
 111:     MachineInfo();
-112: 
+112:
 113: public:
 114:     MachineInfo(IMemoryAccess& memoryAccess);
 115:     bool          Initialize();
-116: 
+116:
 117:     BoardModel    GetModel();
 118:     const char   *GetName();
 119:     uint32        GetModelMajor();
@@ -755,12 +758,12 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 129:     uint32        GetVCMemoryBaseAddress();
 130:     uint32        GetVCMemorySize();
 131:     unsigned      GetClockRate(ClockID clockID) const; // See RPIPropertiesInterface (PROPTAG_GET_CLOCK_RATE)
-132: 
+132:
 133:     BoardRevision GetBoardRevision();
 134: };
-135: 
+135:
 136: MachineInfo &GetMachineInfo();
-137: 
+137:
 138: } // namespace baremetal
 ```
 
@@ -792,6 +795,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 ### MachineInfo.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOCPP}
 
 We'll implement the method for class `MachineInfo`.
+
 Create the file `code/libraries/baremetal/src/MachineInfo.cpp`
 
 ```cpp
@@ -834,15 +838,15 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/MachineInfo.h>
-41: 
+41:
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Console.h>
 44: #include <baremetal/Util.h>
-45: 
+45:
 46: using namespace baremetal;
-47: 
+47:
 48: /// <summary>
 49: /// Raspberry Pi board information
 50: /// </summary>
@@ -855,7 +859,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 57:     /// @brief Board major revision number
 58:     unsigned   majorRevision;
 59: };
-60: 
+60:
 61: /// @brief Mapping from raw board revision to board model and major revision number
 62: static BoardInfo   s_boardInfo[]{
 63:     {0, BoardModel::RaspberryPi_A, 1},
@@ -878,10 +882,10 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 80:     {21, BoardModel::RaspberryPi_CM4S, 4},
 81:     {99, BoardModel::RaspberryPi_5B, 4}
 82: };
-83: 
+83:
 84: /// <summary>
 85: /// Mapping from BoardModel to board name
-86: /// 
+86: ///
 87: /// Must match BoardModel one to one
 88: /// </summary>
 89: static const char *m_boardName[] =
@@ -909,10 +913,10 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 111:     "Raspberry Pi 5 Model B",
 112:     "Unknown"
 113: };
-114: 
+114:
 115: /// <summary>
 116: /// Mapping from SoC type to SoC name
-117: /// 
+117: ///
 118: /// Must match SoCType one to one
 119: /// </summary>
 120: static const char *s_SoCName[] =
@@ -924,7 +928,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 126:     "BCM2712",
 127:     "Unknown"};
 128: };
-129: 
+129:
 130: /// <summary>
 131: /// Constructs a default MachineInfo instance (a singleton). Note that the constructor is private, so GetMachineInfo() is needed to instantiate the MachineInfo.
 132: /// </summary>
@@ -946,7 +950,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 148:     , m_vcMemorySize{}
 149: {
 150: }
-151: 
+151:
 152: /// <summary>
 153: /// Constructs a specialized MachineInfo instance which injects a custom IMemoryAccess instance. This is intended for testing.
 154: /// </summary>
@@ -969,7 +973,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 171:     , m_vcMemorySize{}
 172: {
 173: }
-174: 
+174:
 175: /// <summary>
 176: /// Initialize a MachineInfo instance
 177: ///
@@ -983,22 +987,22 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 185:     {
 186:         Mailbox       mailbox{MailboxChannel::ARM_MAILBOX_CH_PROP_OUT};
 187:         RPIProperties properties(mailbox);
-188: 
+188:
 189:         if (!properties.GetFirmwareRevision(m_fwRevision))
 190:         {
 191:             GetConsole().Write("Failed to retrieve FW revision\n");
 192:         }
-193: 
+193:
 194:         if (!properties.GetBoardRevision(m_revisionRaw))
 195:         {
 196:             GetConsole().Write("Failed to retrieve board revision\n");
 197:         }
-198: 
+198:
 199:         if (!properties.GetBoardSerial(m_boardSerial))
 200:         {
 201:             GetConsole().Write("Failed to retrieve board serial number\n");
 202:         }
-203: 
+203:
 204:         if (!properties.GetBoardMACAddress(m_macAddress))
 205:         {
 206:             GetConsole().Write("Failed to retrieve MAC address\n");
@@ -1011,7 +1015,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 213:         {
 214:             GetConsole().Write("Failed to retrieve VC memory info\n");
 215:         }
-216: 
+216:
 217:         unsigned type = (static_cast<unsigned>(m_revisionRaw) >> 4) & 0xFF;
 218:         size_t   index{};
 219:         size_t   count = sizeof(s_boardInfo) / sizeof(s_boardInfo[0]);
@@ -1022,12 +1026,12 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 224:                 break;
 225:             }
 226:         }
-227: 
+227:
 228:         if (index >= count)
 229:         {
 230:             return false;
 231:         }
-232: 
+232:
 233:         m_boardModel         = s_boardInfo[index].model;
 234:         m_boardModelMajor    = s_boardInfo[index].majorRevision;
 235:         m_boardModelRevision = (static_cast<unsigned>(m_revisionRaw) & 0xF) + 1;
@@ -1041,12 +1045,12 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 243:         {
 244:             m_SoCType = SoCType::Unknown;
 245:         }
-246: 
+246:
 247:         m_initialized = true;
 248:     }
 249:     return true;
 250: }
-251: 
+251:
 252: /// <summary>
 253: /// Returns board model
 254: /// </summary>
@@ -1055,7 +1059,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 257: {
 258:     return m_boardModel;
 259: }
-260: 
+260:
 261: /// <summary>
 262: /// Returns board name
 263: /// </summary>
@@ -1064,7 +1068,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 266: {
 267:     return m_boardName[static_cast<size_t>(m_boardModel)];
 268: }
-269: 
+269:
 270: /// <summary>
 271: /// Returns the major board model number
 272: /// </summary>
@@ -1073,7 +1077,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 275: {
 276:     return m_boardModelMajor;
 277: }
-278: 
+278:
 279: /// <summary>
 280: /// Returns the board model revision
 281: /// </summary>
@@ -1082,7 +1086,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 284: {
 285:     return m_boardModelRevision;
 286: }
-287: 
+287:
 288: /// <summary>
 289: /// Returns the SoC type
 290: /// </summary>
@@ -1091,7 +1095,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 293: {
 294:     return m_SoCType;
 295: }
-296: 
+296:
 297: /// <summary>
 298: /// Returns the SoC name
 299: /// </summary>
@@ -1100,7 +1104,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 302: {
 303:     return s_SoCName[static_cast<size_t>(m_SoCType)];
 304: }
-305: 
+305:
 306: /// <summary>
 307: /// Returns the amount of RAM on board in Mb
 308: /// </summary>
@@ -1109,7 +1113,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 311: {
 312:     return m_ramSize;
 313: }
-314: 
+314:
 315: /// <summary>
 316: /// Returns the board serial number
 317: /// </summary>
@@ -1118,7 +1122,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 320: {
 321:     return m_boardSerial;
 322: }
-323: 
+323:
 324: /// <summary>
 325: /// Returns the board FW revision
 326: /// </summary>
@@ -1127,7 +1131,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 329: {
 330:     return m_fwRevision;
 331: }
-332: 
+332:
 333: /// <summary>
 334: /// Returns the raw board revision
 335: /// </summary>
@@ -1136,7 +1140,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 338: {
 339:     return m_revisionRaw;
 340: }
-341: 
+341:
 342: /// <summary>
 343: /// Returns the MAC address for the network interface
 344: /// </summary>
@@ -1145,7 +1149,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 347: {
 348:     memcpy(macAddress, m_macAddress, sizeof(m_macAddress));
 349: }
-350: 
+350:
 351: /// <summary>
 352: /// Returns the ARM memory base address
 353: /// </summary>
@@ -1154,7 +1158,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 356: {
 357:     return m_armBaseAddress;
 358: }
-359: 
+359:
 360: /// <summary>
 361: /// Returns the amount of memory assigned to the ARM cores in bytes
 362: /// </summary>
@@ -1163,7 +1167,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 365: {
 366:     return m_armMemorySize;
 367: }
-368: 
+368:
 369: /// <summary>
 370: /// Returns the VideoCore memory base address
 371: /// </summary>
@@ -1172,7 +1176,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 374: {
 375:     return m_vcBaseAddress;
 376: }
-377: 
+377:
 378: /// <summary>
 379: /// Returns the amount of memory assigned to the VideoCore in bytes
 380: /// </summary>
@@ -1181,7 +1185,7 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 383: {
 384:     return m_vcMemorySize;
 385: }
-386: 
+386:
 387: /// <summary>
 388: /// Determine and return the clock rate for a specific clock, or return an estimate
 389: /// </summary>
@@ -1196,36 +1200,36 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 398:         return clockRate;
 399:     if (properties.GetMeasuredClockRate(clockID, clockRate))
 400:         return clockRate;
-401: 
+401:
 402:     // if clock rate can not be requested, use a default rate
 403:     unsigned result = 0;
-404: 
+404:
 405:     switch (clockID)
 406:     {
 407:     case ClockID::EMMC:
 408:     case ClockID::EMMC2:
 409:         result = 100000000;
 410:         break;
-411: 
+411:
 412:     case ClockID::UART:
 413:         result = 48000000;
 414:         break;
-415: 
+415:
 416:     case ClockID::CORE:
 417:         result = 300000000; /// \todo Check this
 418:         break;
-419: 
+419:
 420:     case ClockID::PIXEL_BVB:
 421:         break;
-422: 
+422:
 423:     default:
 424:         assert(0);
 425:         break;
 426:     }
-427: 
+427:
 428:     return result;
 429: }
-430: 
+430:
 431: /// <summary>
 432: /// Create the singleton MachineInfo instance if needed, initialize it, and return a reference
 433: /// </summary>
@@ -1275,13 +1279,14 @@ This is used to map the raw board revision code to a board model
 - Line 364-367: We implement the `GetARMMemorySize()` method which simply returns the saved ARM memory size
 - Line 373-376: We implement the `GetVCMemoryBaseAddress()` method which simply returns the saved VideoCore memory base address
 - Line 382-385: We implement the `GetVCMemorySize()` method which simply returns the saved VideoCore memory size
-- Line 392-429: We implement the `GetClockRate()` method, which tries to request the set clock rate, 
+- Line 392-429: We implement the `GetClockRate()` method, which tries to request the set clock rate,
 if not available the measured clock rate, and if all fails an estimate of the clock frequency
 - Line 435-440: We implement the `GetMachineInfo()` function
 
 ### Logger.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_LOGGERCPP}
 
 We can now make use of information from `MachineInfo` to print where initializing the `Logger` instance.
+
 Update the file `code/libraries/baremetal/src/Logger.cpp`
 
 ```cpp
@@ -1302,7 +1307,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 76:     SetupVersion();
 77:     m_initialized = true; // Stop reentrant calls from happening
 78:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
-79: 
+79:
 80:     return true;
 81: }
 ...
@@ -1314,6 +1319,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 ### Update project configuration {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -1342,7 +1348,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 49:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 50:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
 51:     )
-52: 
+52:
 53: set(PROJECT_INCLUDES_PUBLIC
 54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h

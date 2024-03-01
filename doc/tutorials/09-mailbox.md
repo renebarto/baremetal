@@ -46,7 +46,7 @@ Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 ...
 74: #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
-75: 
+75:
 76: #if BAREMETAL_RPI_TARGET == 3
 77: // Size reserved for coherent memory
 78: #define COHERENT_REGION_SIZE 1 * MEGABYTE
@@ -54,7 +54,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 80: // Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
 81: #define COHERENT_REGION_SIZE 4 * MEGABYTE
 82: #endif
-83: 
+83:
 84: // Region reserved for coherent memory rounded to 1 Mb
 85: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
@@ -71,6 +71,7 @@ So we'll have to write something ourselves. We could simply look around for a `p
 So let's start adding a header for our serialization routines.
 
 For now, we'll simply add one function.
+
 Create the file `code/libraries/baremetal/include/baremetal/Serialization.h`
 
 ```cpp
@@ -113,15 +114,15 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
-47: 
+47:
 48: } // namespace baremetal
 ```
 
@@ -133,6 +134,7 @@ If the size of the type would require more characters than strictly needed for t
 #### Serialization.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
 
 We need to implement the `Serialize` function. As we need to write into a fixed size buffer, we need to check whether what we need to write fits.
+
 Create the file `code/libraries/baremetal/src/Serialization.cpp`
 
 ```cpp
@@ -175,39 +177,39 @@ File: code/libraries/baremetal/src/Serialization.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Serialization.h>
-41: 
+41:
 42: namespace baremetal {
-43: 
+43:
 44: static bool           Uppercase = true;
-45: 
+45:
 46: static constexpr char GetDigit(uint8 value)
 47: {
 48:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 49: }
-50: 
+50:
 51: static constexpr int BitsToDigits(int bits, int base)
 52: {
 53:     int result = 0;
 54:     uint64 value = 0xFFFFFFFFFFFFFFFF;
 55:     if (bits < 64)
 56:         value &= ((1ULL << bits) - 1);
-57: 
+57:
 58:     while (value > 0)
 59:     {
 60:         value /= base;
 61:         result++;
 62:     }
-63: 
+63:
 64:     return result;
 65: }
-66: 
+66:
 67: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
 68: {
 69:     if ((base < 2) || (base > 36))
 70:         return;
-71: 
+71:
 72:     int       numDigits = 0;
 73:     uint64    divisor   = 1;
 74:     uint64    divisorLast = 1;
@@ -221,7 +223,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 82:         ++numDigits;
 83:     }
 84:     divisor = divisorLast;
-85: 
+85:
 86:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 87:     if (showBase)
 88:     {
@@ -231,9 +233,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 92:         numChars = absWidth;
 93:     if (numChars > bufferSize - 1) // Leave one character for \0
 94:         return;
-95: 
+95:
 96:     char* bufferPtr = buffer;
-97: 
+97:
 98:     if (showBase)
 99:     {
 100:         if (base == 2)
@@ -249,7 +251,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 110:         {
 111:             *bufferPtr++ = '0';
 112:             *bufferPtr++ = 'x';
-113: 
+113:
 114:         }
 115:     }
 116:     if (leadingZeros)
@@ -277,7 +279,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 138:     }
 139:     *bufferPtr++ = '\0';
 140: }
-141: 
+141:
 142: } // namespace baremetal
 ```
 
@@ -296,6 +298,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 #### main.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Now we can update the application code and print the memory map.
+
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
@@ -306,130 +309,130 @@ File: code/applications/demo/src/main.cpp
 4: #include <baremetal/System.h>
 5: #include <baremetal/Timer.h>
 6: #include <baremetal/UART1.h>
-7: 
+7:
 8: using namespace baremetal;
-9: 
+9:
 10: int main()
 11: {
 12:     auto& uart = GetUART1();
 13:     uart.WriteString("Hello World!\n");
-14: 
+14:
 15:     char buffer[128];
 16:     uart.WriteString("------------------------------------------------- ");
 17:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_START, 10, 16, true, true);
 18:     uart.WriteString(buffer);
 19:     uart.WriteString(" MEM_KERNEL_START\n");
-20: 
+20:
 21:     uart.WriteString(" Kernel image : Size ");
 22:     Serialize(buffer, sizeof(buffer), KERNEL_MAX_SIZE, 10, 16, true, true);
 23:     uart.WriteString(buffer);
 24:     uart.WriteString("\n");
-25: 
+25:
 26:     uart.WriteString("------------------------------------------------- ");
 27:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_END, 10, 16, true, true);
 28:     uart.WriteString(buffer);
 29:     uart.WriteString(" MEM_KERNEL_END\n");
-30: 
+30:
 31:     uart.WriteString(" Core 0 stack : Size ");
 32:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 33:     uart.WriteString(buffer);
 34:     uart.WriteString("\n");
-35: 
+35:
 36:     uart.WriteString("------------------------------------------------- ");
 37:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK, 10, 16, true, true);
 38:     uart.WriteString(buffer);
 39:     uart.WriteString(" MEM_KERNEL_STACK\n");
-40: 
+40:
 41:     uart.WriteString(" Core 1 stack : Size ");
 42:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 43:     uart.WriteString(buffer);
 44:     uart.WriteString("\n");
-45: 
+45:
 46:     uart.WriteString("------------------------------------------------- ");
 47:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + KERNEL_STACK_SIZE, 10, 16, true, true);
 48:     uart.WriteString(buffer);
 49:     uart.WriteString("\n");
-50: 
+50:
 51:     uart.WriteString(" Core 2 stack : Size ");
 52:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 53:     uart.WriteString(buffer);
 54:     uart.WriteString("\n");
-55: 
+55:
 56:     uart.WriteString("------------------------------------------------- ");
 57:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + 2 * KERNEL_STACK_SIZE, 10, 16, true, true);
 58:     uart.WriteString(buffer);
 59:     uart.WriteString("\n");
-60: 
+60:
 61:     uart.WriteString(" Core 3 stack : Size ");
 62:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 63:     uart.WriteString(buffer);
 64:     uart.WriteString("\n");
-65: 
+65:
 66:     uart.WriteString("------------------------------------------------- ");
 67:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + 3 * KERNEL_STACK_SIZE, 10, 16, true, true);
 68:     uart.WriteString(buffer);
 69:     uart.WriteString("\n");
-70: 
+70:
 71:     uart.WriteString(" Core 0 exception stack : Size ");
 72:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 73:     uart.WriteString(buffer);
 74:     uart.WriteString("\n");
-75: 
+75:
 76:     uart.WriteString("------------------------------------------------- ");
 77:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK, 10, 16, true, true);
 78:     uart.WriteString(buffer);
 79:     uart.WriteString(" MEM_EXCEPTION_STACK\n");
-80: 
+80:
 81:     uart.WriteString(" Core 1 exception stack : Size ");
 82:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 83:     uart.WriteString(buffer);
 84:     uart.WriteString("\n");
-85: 
+85:
 86:     uart.WriteString("------------------------------------------------- ");
 87:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE, 10, 16, true, true);
 88:     uart.WriteString(buffer);
 89:     uart.WriteString("\n");
-90: 
+90:
 91:     uart.WriteString(" Core 2 exception stack : Size ");
 92:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 93:     uart.WriteString(buffer);
 94:     uart.WriteString("\n");
-95: 
+95:
 96:     uart.WriteString("------------------------------------------------- ");
 97:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK + 2 * EXCEPTION_STACK_SIZE, 10, 16, true, true);
 98:     uart.WriteString(buffer);
 99:     uart.WriteString("\n");
-100: 
+100:
 101:     uart.WriteString(" Core 3 exception stack : Size ");
 102:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 103:     uart.WriteString(buffer);
 104:     uart.WriteString("\n");
-105: 
+105:
 106:     uart.WriteString("------------------------------------------------- ");
 107:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK_END, 10, 16, true, true);
 108:     uart.WriteString(buffer);
 109:     uart.WriteString(" MEM_EXCEPTION_STACK_END\n");
-110: 
+110:
 111:     uart.WriteString(" Unused\n");
-112: 
+112:
 113:     uart.WriteString("------------------------------------------------- ");
 114:     Serialize(buffer, sizeof(buffer), MEM_COHERENT_REGION, 10, 16, true, true);
 115:     uart.WriteString(buffer);
 116:     uart.WriteString(" MEM_COHERENT_REGION\n");
-117: 
+117:
 118:     uart.WriteString(" Coherent region : Size ");
 119:     Serialize(buffer, sizeof(buffer), COHERENT_REGION_SIZE, 10, 16, true, true);
 120:     uart.WriteString(buffer);
 121:     uart.WriteString("\n");
-122: 
+122:
 123:     uart.WriteString("------------------------------------------------- ");
 124:     Serialize(buffer, sizeof(buffer), MEM_COHERENT_REGION + COHERENT_REGION_SIZE, 10, 16, true, true);
 125:     uart.WriteString(buffer);
 126:     uart.WriteString(" \n");
-127: 
+127:
 128:     uart.WriteString("Wait 5 seconds\n");
 129:     Timer::WaitMilliSeconds(5000);
-130: 
+130:
 131:     uart.WriteString("Press r to reboot, h to halt\n");
 132:     char ch{};
 133:     while ((ch != 'r') && (ch != 'h'))
@@ -437,7 +440,7 @@ File: code/applications/demo/src/main.cpp
 135:         ch = uart.Read();
 136:         uart.Write(ch);
 137:     }
-138: 
+138:
 139:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 140: }
 ```
@@ -447,6 +450,7 @@ The code should speak for itself.
 ### Update project configuration {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -464,7 +468,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 40:     )
-41: 
+41:
 42: set(PROJECT_INCLUDES_PUBLIC
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -581,9 +585,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -603,27 +607,27 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: enum class CoherentPageSlot
 45: {
 46:     PropertyMailbox = 0,
 47: };
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: // MemoryManager: Handles memory allocation, re-allocation, and de-allocation for heap and paging memory
 52: class MemoryManager
 53: {
 54: public:
 55:     static uintptr GetCoherentPage(CoherentPageSlot slot);
 56: };
-57: 
+57:
 58: } // namespace baremetal
 ```
 
@@ -650,9 +654,9 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -672,21 +676,21 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/MemoryManager.h>
-41: 
+41:
 42: #include <baremetal/SysConfig.h>
-43: 
+43:
 44: using namespace baremetal;
-45: 
+45:
 46: uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 47: {
 48:     uint64 pageAddress = MEM_COHERENT_REGION;
-49: 
+49:
 50:     pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
-51: 
+51:
 52:     return pageAddress;
 53: }
 ```
@@ -694,6 +698,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 ### Update project configuration {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -712,7 +717,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 41:     )
-42: 
+42:
 43: set(PROJECT_INCLUDES_PUBLIC
 44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -758,13 +763,13 @@ UPdate the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`.
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 45: #define GPU_CACHED_BASE                 0x40000000
 46: #define GPU_UNCACHED_BASE               0xC0000000
-47: 
+47:
 48: #define GPU_MEM_BASE                    GPU_UNCACHED_BASE
-49: 
+49:
 50: // Convert ARM address to GPU bus address (also works for aliases)
 51: #define ARM_TO_GPU(addr)                (((addr) & ~0xC0000000) | GPU_MEM_BASE)
 52: #define GPU_TO_ARM(addr)                ((addr) & ~0xC0000000)
-53: 
+53:
 54: #if BAREMETAL_RPI_TARGET == 3
 55: // Base address for Raspberry PI BCM I/O
 56: #define RPI_BCM_IO_BASE                 0x3F000000
@@ -778,7 +783,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 77: //---------------------------------------------
 78: // Mailbox registers
 79: //---------------------------------------------
-80: 
+80:
 81: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
 82: #define RPI_MAILBOX0_READ               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000000)
 83: #define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
@@ -793,7 +798,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 92: #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
 93: #define RPI_MAILBOX_STATUS_FULL         BIT(31)
 94: #define RPI_MAILBOX_REQUEST             0
-95: 
+95:
 ```
 
 - Line 45:  We define the address of the VC mapped to ARM address space for cached usage (we will not use this)
@@ -857,13 +862,13 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: // Mailbox channels
 47: enum class MailboxChannel
 48: {
@@ -878,16 +883,16 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 57:     ARM_MAILBOX_CH_PROP_OUT = 8,    // Properties / tags ARM -> VC
 58:     ARM_MAILBOX_CH_PROP_IN = 9,     // Properties / tags VC -> ARM
 59: };
-60: 
+60:
 61: // IMailbox: Mailbox abstract interface
 62: class IMailbox
 63: {
 64: public:
 65:     virtual ~IMailbox() = default;
-66: 
+66:
 67:     virtual uintptr WriteRead(uintptr address) = 0;
 68: };
-69: 
+69:
 70: } // namespace baremetal
 ```
 
@@ -950,32 +955,32 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IMailbox.h>
 43: #include <baremetal/MemoryAccess.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: // Mailbox: Handles access to system parameters, stored in the VC
 48: class Mailbox : public IMailbox
 49: {
 50: private:
 51:     MailboxChannel m_channel;
 52:     IMemoryAccess &m_memoryAccess;
-53: 
+53:
 54: public:
 55:     Mailbox(MailboxChannel channel, IMemoryAccess &memoryAccess = GetMemoryAccess());
-56: 
+56:
 57:     uintptr WriteRead(uintptr address) override;
-58: 
+58:
 59: private:
 60:     void   Flush();
 61:     uintptr Read();
 62:     void   Write(uintptr data);
 63: };
-64: 
+64:
 65: } // namespace baremetal
 ```
 
@@ -986,7 +991,7 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 - Line 60: We declare a private method to clear the mailbox
 - Line 61: We delcare a private method to read the mailbox
 - Line 62: We delcare a private method to write the mailbox
-- 
+-
 ### Mailbox.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_MAILBOXCPP}
 
 Create the file: `code/libraries/baremetal/src/Mailbox.cpp`
@@ -1031,75 +1036,75 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Mailbox.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/MemoryAccess.h>
 45: #include <baremetal/Timer.h>
-46: 
+46:
 47: using namespace baremetal;
-48: 
+48:
 49: Mailbox::Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
 50:     : m_channel{ channel }
 51:     , m_memoryAccess{ memoryAccess }
 52: {
 53: }
-54: 
+54:
 55: // Perform a write/read cycle to the mailbox for channel m_channel, with mailbox data address converted to VC address space
 56: uintptr Mailbox::WriteRead(uintptr address)
 57: {
 58:     Flush();
-59: 
+59:
 60:     Write(address);
-61: 
+61:
 62:     uint32 result = Read();
-63: 
+63:
 64:     return result;
 65: }
-66: 
+66:
 67: // Flush the mailbox, by reading until it is empty. A short wait is added for synchronization reasons.
 68: void Mailbox::Flush()
 69: {
 70:     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
 71:     {
 72:         m_memoryAccess.Read32(RPI_MAILBOX0_READ);
-73: 
+73:
 74:         Timer::WaitMilliSeconds(20);
 75:     }
 76: }
-77: 
+77:
 78: // Read back the address of the data block to the mailbox
 79: // The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
 80: uintptr Mailbox::Read()
 81: {
 82:     uintptr result;
-83: 
+83:
 84:     do
 85:     {
 86:         while (m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY)
 87:         {
 88:             NOP();
 89:         }
-90: 
+90:
 91:         result = static_cast<uintptr>(m_memoryAccess.Read32(RPI_MAILBOX0_READ));
 92:     } while ((result & 0xF) != static_cast<uint32>(m_channel)); // channel number is in the lower 4 bits
-93: 
+93:
 94:     return result & ~0xF;
 95: }
-96: 
+96:
 97: // Write the address of the data block to the mailbox
 98: void Mailbox::Write(uintptr data)
 99: {
 100:     if ((data & 0xF) != 0)
 101:         return;
-102: 
+102:
 103:     while (m_memoryAccess.Read32(RPI_MAILBOX1_STATUS) & RPI_MAILBOX_STATUS_FULL)
 104:     {
 105:         NOP();
 106:     }
-107: 
+107:
 108:     m_memoryAccess.Write32(RPI_MAILBOX1_WRITE, static_cast<uint32>(m_channel) | static_cast<uint32>(data)); // channel number is in the lower 4 bits
 109: }
 ```
@@ -1109,7 +1114,7 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 - Line 68-76: We implement the `Flush()` method.
 This keeps reading `RPI_MAILBOX0_READ` register while the `RPI_MAILBOX0_STATUS` register signals that it is not empty.
 - Line 80-95: We implement the `Read()` method.
-This waits until the `RPI_MAILBOX0_STATUS` register signals that it is not empty, executing NOP instructions. 
+This waits until the `RPI_MAILBOX0_STATUS` register signals that it is not empty, executing NOP instructions.
 It then reads the mailbox through the `RPI_MAILBOX0_READ` register, and checks whether the result matches the mailbox channel.
 The result is a combination of the address (upper 28 bits, the lower 4 are expected to be 0) and the mailbox channel (lower 4 bits).
 If the mailbox channel is not as expected, it keeps reading.
@@ -1142,127 +1147,127 @@ File: code/applications/demo/src/main.cpp
 7: #include <baremetal/System.h>
 8: #include <baremetal/Timer.h>
 9: #include <baremetal/UART1.h>
-10: 
+10:
 11: using namespace baremetal;
-12: 
+12:
 13: int main()
 14: {
 15:     auto& uart = GetUART1();
 16:     uart.WriteString("Hello World!\n");
-17: 
+17:
 18:     char buffer[128];
 19:     uart.WriteString("------------------------------------------------- ");
 20:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_START, 10, 16, true, true);
 21:     uart.WriteString(buffer);
 22:     uart.WriteString(" MEM_KERNEL_START\n");
-23: 
+23:
 24:     uart.WriteString(" Kernel image : Size ");
 25:     Serialize(buffer, sizeof(buffer), KERNEL_MAX_SIZE, 10, 16, true, true);
 26:     uart.WriteString(buffer);
 27:     uart.WriteString("\n");
-28: 
+28:
 29:     uart.WriteString("------------------------------------------------- ");
 30:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_END, 10, 16, true, true);
 31:     uart.WriteString(buffer);
 32:     uart.WriteString(" MEM_KERNEL_END\n");
-33: 
+33:
 34:     uart.WriteString(" Core 0 stack : Size ");
 35:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 36:     uart.WriteString(buffer);
 37:     uart.WriteString("\n");
-38: 
+38:
 39:     uart.WriteString("------------------------------------------------- ");
 40:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK, 10, 16, true, true);
 41:     uart.WriteString(buffer);
 42:     uart.WriteString(" MEM_KERNEL_STACK\n");
-43: 
+43:
 44:     uart.WriteString(" Core 1 stack : Size ");
 45:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 46:     uart.WriteString(buffer);
 47:     uart.WriteString("\n");
-48: 
+48:
 49:     uart.WriteString("------------------------------------------------- ");
 50:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + KERNEL_STACK_SIZE, 10, 16, true, true);
 51:     uart.WriteString(buffer);
 52:     uart.WriteString("\n");
-53: 
+53:
 54:     uart.WriteString(" Core 2 stack : Size ");
 55:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 56:     uart.WriteString(buffer);
 57:     uart.WriteString("\n");
-58: 
+58:
 59:     uart.WriteString("------------------------------------------------- ");
 60:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + 2 * KERNEL_STACK_SIZE, 10, 16, true, true);
 61:     uart.WriteString(buffer);
 62:     uart.WriteString("\n");
-63: 
+63:
 64:     uart.WriteString(" Core 3 stack : Size ");
 65:     Serialize(buffer, sizeof(buffer), KERNEL_STACK_SIZE, 10, 16, true, true);
 66:     uart.WriteString(buffer);
 67:     uart.WriteString("\n");
-68: 
+68:
 69:     uart.WriteString("------------------------------------------------- ");
 70:     Serialize(buffer, sizeof(buffer), MEM_KERNEL_STACK + 3 * KERNEL_STACK_SIZE, 10, 16, true, true);
 71:     uart.WriteString(buffer);
 72:     uart.WriteString("\n");
-73: 
+73:
 74:     uart.WriteString(" Core 0 exception stack : Size ");
 75:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 76:     uart.WriteString(buffer);
 77:     uart.WriteString("\n");
-78: 
+78:
 79:     uart.WriteString("------------------------------------------------- ");
 80:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK, 10, 16, true, true);
 81:     uart.WriteString(buffer);
 82:     uart.WriteString(" MEM_EXCEPTION_STACK\n");
-83: 
+83:
 84:     uart.WriteString(" Core 1 exception stack : Size ");
 85:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 86:     uart.WriteString(buffer);
 87:     uart.WriteString("\n");
-88: 
+88:
 89:     uart.WriteString("------------------------------------------------- ");
 90:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE, 10, 16, true, true);
 91:     uart.WriteString(buffer);
 92:     uart.WriteString("\n");
-93: 
+93:
 94:     uart.WriteString(" Core 2 exception stack : Size ");
 95:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 96:     uart.WriteString(buffer);
 97:     uart.WriteString("\n");
-98: 
+98:
 99:     uart.WriteString("------------------------------------------------- ");
 100:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK + 2 * EXCEPTION_STACK_SIZE, 10, 16, true, true);
 101:     uart.WriteString(buffer);
 102:     uart.WriteString("\n");
-103: 
+103:
 104:     uart.WriteString(" Core 3 exception stack : Size ");
 105:     Serialize(buffer, sizeof(buffer), EXCEPTION_STACK_SIZE, 10, 16, true, true);
 106:     uart.WriteString(buffer);
 107:     uart.WriteString("\n");
-108: 
+108:
 109:     uart.WriteString("------------------------------------------------- ");
 110:     Serialize(buffer, sizeof(buffer), MEM_EXCEPTION_STACK_END, 10, 16, true, true);
 111:     uart.WriteString(buffer);
 112:     uart.WriteString(" MEM_EXCEPTION_STACK_END\n");
-113: 
+113:
 114:     uart.WriteString(" Unused\n");
-115: 
+115:
 116:     uart.WriteString("----------h--------------------------------------- ");
 117:     Serialize(buffer, sizeof(buffer), MEM_COHERENT_REGION, 10, 16, true, true);
 118:     uart.WriteString(buffer);
 119:     uart.WriteString(" MEM_COHERENT_REGION\n");
-120: 
+120:
 121:     uart.WriteString(" Coherent region : Size ");
 122:     Serialize(buffer, sizeof(buffer), COHERENT_REGION_SIZE, 10, 16, true, true);
 123:     uart.WriteString(buffer);
 124:     uart.WriteString("\n");
-125: 
+125:
 126:     uart.WriteString("------------------------------------------------- ");
 127:     Serialize(buffer, sizeof(buffer), MEM_COHERENT_REGION + COHERENT_REGION_SIZE, 10, 16, true, true);
 128:     uart.WriteString(buffer);
 129:     uart.WriteString(" \n");
-130: 
+130:
 131:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 132:     auto mailboxBuffer = MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox);
 133:     uint32* mailboxData = reinterpret_cast<uint32*>(mailboxBuffer);
@@ -1277,11 +1282,11 @@ File: code/applications/demo/src/main.cpp
 142:     mailboxData[6] = 0; // return value high word
 143:     // Tag end
 144:     mailboxData[7] = 0; // Tag for end of list
-145: 
+145:
 146:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(mailboxBuffer));
-147: 
+147:
 148:     DataSyncBarrier();
-149: 
+149:
 150:     uart.WriteString("Send\n");
 151:     for (int i = 0; i < 8; ++i)
 152:     {
@@ -1310,12 +1315,12 @@ File: code/applications/demo/src/main.cpp
 175:     {
 176:         uart.WriteString("Mailbox call failed\n");
 177:     }
-178: 
+178:
 179:     DataMemBarrier();
-180: 
+180:
 181:     uart.WriteString("Wait 5 seconds\n");
 182:     Timer::WaitMilliSeconds(5000);
-183: 
+183:
 184:     uart.WriteString("Press r to reboot, h to halt\n");
 185:     char ch{};
 186:     while ((ch != 'r') && (ch != 'h'))
@@ -1323,7 +1328,7 @@ File: code/applications/demo/src/main.cpp
 188:         ch = uart.Read();
 189:         uart.Write(ch);
 190:     }
-191: 
+191:
 192:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 193: }
 ```
@@ -1356,13 +1361,14 @@ Bit 31 of request code is set to 1. If all tag requests were handled successfull
 
 Notice that the size in the tag only covers the tag buffer, but the buffer size in the complete block covers everything.
 
-So what it comes down to, is that we fill a buffer, with a 8 byte header, 
+So what it comes down to, is that we fill a buffer, with a 8 byte header,
 followed by all the reqeusts, each having a 12 byte header and then the request specific buffers.
 We end with a special end tag.
 
 #### ARMInstructions.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE_ARMINSTRUCTIONSH}
 
 We used a new instruction `DataMemBarrier()` that needs to be added.
+
 Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 
 ```cpp
@@ -1378,6 +1384,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -1397,7 +1404,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 42:     )
-43: 
+43:
 44: set(PROJECT_INCLUDES_PUBLIC
 45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -1487,6 +1494,7 @@ Let's introduce a class that can handle all this work for us.
 ### RPIPropertiesInterface.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_RPIPROPERTIESINTERFACEH}
 
 First we'll add a new class.
+
 Create the file `code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h`.
 
 ```cpp
@@ -1529,15 +1537,15 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IMailbox.h>
 43: #include <baremetal/Macros.h>
 44: #include <baremetal/MemoryAccess.h>
-45: 
+45:
 46: namespace baremetal {
-47: 
+47:
 48: // Raspberry Pi mailbox property tags
 49: enum class PropertyID : uint32
 50: {
@@ -1590,7 +1598,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 97:     PROPTAG_GET_COMMAND_LINE        = 0x00050001,
 98:     PROPTAG_GET_DMA_CHANNELS        = 0x00060001,
 99: };
-100: 
+100:
 101: struct MailboxBuffer
 102: {
 103:     uint32 bufferSize;      // bytes
@@ -1598,7 +1606,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 105:     uint8  tags[0];
 106:     // end tag follows
 107: } PACKED;
-108: 
+108:
 109: struct Property
 110: {
 111:     uint32 tagID;               // See PropertyID
@@ -1606,29 +1614,29 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 113:     uint32 tagRequestResponse;  // bytes
 114:     uint8  tagBuffer[0];        // must be padded to be 4 byte aligned
 115: } PACKED;
-116: 
+116:
 117: struct PropertySimple
 118: {
 119:     Property tag;
 120:     uint32   value;
 121: } PACKED;
-122: 
+122:
 123: class RPIPropertiesInterface
 124: {
 125: private:
 126:     IMailbox &m_mailbox;
-127: 
+127:
 128: public:
 129:     explicit RPIPropertiesInterface(IMailbox &mailbox);
-130: 
+130:
 131:     bool   GetTag(PropertyID tagID, void *tag, unsigned tagSize);
-132: 
+132:
 133: private:
 134:     size_t FillTag(PropertyID tagID, void *tag, unsigned tagSize);
 135:     bool   CheckTagResult(void *tag);
 136:     bool   GetTags(void *tags, unsigned tagsSize);
 137: };
-138: 
+138:
 139: } // namespace baremetal
 ```
 
@@ -1639,15 +1647,15 @@ This contains the fields for the mailbox buffer shown in the image in [the appli
   - bufferSize: The total buffer size of all tags, and the mailbox buffer header, including padding
   - requestCode: The mailbox request code (always set to 0 on request)
   - tags: The space used for the tags, as a placeholder
-  - Notice that this struct has properties PACKED and ALIGN(16) 
-- Line 109-115: We declare a structure for the property tag `Property`. 
+  - Notice that this struct has properties PACKED and ALIGN(16)
+- Line 109-115: We declare a structure for the property tag `Property`.
 This contains the fields for the tag shown in the image in [the application update section above](#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE):
   - tagID: The property tag id
   - tagBufferSize: The size of the tag buffer
   - tagRequestResponse: The tag request / response code
   - tagBuffer: The tag buffer contents, as a placeholder
   - Notice that this struct has property PACKED
-- Line 117-121: We declare a structure for the a simple property `PropertySimple` which only holds a single 32 bit value. 
+- Line 117-121: We declare a structure for the a simple property `PropertySimple` which only holds a single 32 bit value.
 This will also be used for sanity checks on the tag sizes
 - Line 123-137: We declare the RPIPropertiesInterface class.
   - Line 126: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
@@ -1660,7 +1668,7 @@ We will declare types for this per property
   - Line 134: We declare a private method to fill the tag information
   - Line 135: We declare a private method to check the result of a mailbox call
   - Line 136: We declare a private method to perform the actual call.
-This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page, 
+This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page,
 convert the address, and use the `Mailbox` to perform the call.
 
 You will notice that the structures declared in Line 101-107, 109-115 and 117-121 use the keyword PACKED. We may be using the keyword align as well later.
@@ -1669,6 +1677,7 @@ We will add the definitions for this in `Macros.h`. The reason for a definition 
 ### Macros.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_MACROSH}
 
 Let's add the definitions for PACKED and ALIGN.
+
 Create the file `code/libraries/baremetal/include/baremetal/Macros.h`.
 
 ```cpp
@@ -1677,10 +1686,10 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 43: #define PACKED              __attribute__ ((packed))
 44: // Make a struct have alignment of n bytes (GNU compiler only)
 45: #define ALIGN(n)            __attribute__ ((aligned (n)))
-46: 
+46:
 47: // Make a variable a weak instance (GCC compiler only)
 48: #define WEAK                __attribute__ ((weak))
-49: 
+49:
 50: // Convert bit index into integer
 51: #define BIT(n)              (1U << (n))
 ```
@@ -1688,6 +1697,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 ### RPIPropertiesInterface.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_RPIPROPERTIESINTERFACECPP}
 
 Now we can implement the `RPIPropertiesInterface` class.
+
 Create the file `code/libraries/baremetal/src/RPIPropertiesInterface.cpp`.
 
 ```cpp
@@ -1730,95 +1740,95 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/RPIPropertiesInterface.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/MemoryManager.h>
 45: #include <baremetal/Util.h>
-46: 
+46:
 47: using namespace baremetal;
-48: 
+48:
 49: RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
 50:     : m_mailbox{mailbox}
 51: {
 52: }
-53: 
+53:
 54: bool RPIPropertiesInterface::GetTag(PropertyID tagID, void *tag, unsigned tagSize)
 55: {
 56:     if (FillTag(tagID, tag, tagSize) != tagSize)
 57:         return false;
-58: 
+58:
 59:     auto result = GetTags(tag, tagSize);
-60: 
+60:
 61:     if (!result)
 62:     {
 63:         return false;
 64:     }
-65: 
+65:
 66:     return CheckTagResult(tag);
 67: }
-68: 
+68:
 69: bool RPIPropertiesInterface::CheckTagResult(void *tag)
 70: {
 71:     Property *header = reinterpret_cast<Property *>(tag);
-72: 
+72:
 73:     if ((header->tagRequestResponse & RPI_MAILBOX_TAG_RESPONSE) == 0)
 74:         return false;
-75: 
+75:
 76:     header->tagRequestResponse &= ~RPI_MAILBOX_TAG_RESPONSE;
 77:     return (header->tagRequestResponse != 0);
 78: }
-79: 
+79:
 80: size_t RPIPropertiesInterface::FillTag(PropertyID tagID, void *tag, unsigned tagSize)
 81: {
 82:     if ((tag == nullptr) || (tagSize < sizeof(PropertySimple)))
 83:         return 0;
-84: 
+84:
 85:     Property *header        = reinterpret_cast<Property *>(tag);
 86:     header->tagID           = static_cast<uint32>(tagID);
 87:     header->tagBufferSize   = tagSize - sizeof(Property);
 88:     header->tagRequestResponse = 0;
-89: 
+89:
 90:     return tagSize;
 91: }
-92: 
+92:
 93: bool RPIPropertiesInterface::GetTags(void *tags, unsigned tagsSize)
 94: {
 95:     if ((tags == nullptr) || (tagsSize < sizeof(PropertySimple)))
 96:         return false;
-97: 
+97:
 98:     unsigned bufferSize = sizeof(MailboxBuffer) + tagsSize + sizeof(uint32);
 99:     if ((bufferSize & 3) != 0)
 100:         return false;
-101: 
+101:
 102:     MailboxBuffer *buffer = reinterpret_cast<MailboxBuffer *>(MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox));
-103: 
+103:
 104:     buffer->bufferSize  = bufferSize;
 105:     buffer->requestCode = RPI_MAILBOX_REQUEST;
 106:     memcpy(buffer->tags, tags, tagsSize);
-107: 
+107:
 108:     uint32 *endTag = reinterpret_cast<uint32 *>(buffer->tags + tagsSize);
 109:     *endTag        = static_cast<uint32>(PropertyID::PROPTAG_END);
-110: 
+110:
 111:     DataSyncBarrier();
-112: 
+112:
 113:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(buffer));
 114:     if (m_mailbox.WriteRead(bufferAddress) != bufferAddress)
 115:     {
 116:         return false;
 117:     }
-118: 
+118:
 119:     DataMemBarrier();
-120: 
+120:
 121:     if (buffer->requestCode != RPI_MAILBOX_RESPONSE_SUCCESS)
 122:     {
 123:         return false;
 124:     }
-125: 
+125:
 126:     memcpy(tags, buffer->tags, tagsSize);
-127: 
+127:
 128:     return true;
 129: }
 ```
@@ -1860,6 +1870,7 @@ As you can see, we use a function `memcpy()` here to copy data, which is a stand
 ### Util.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UTILH}
 
 Let's add the `memcpy()` function.
+
 Update the file `code/libraries/baremetal/include/baremetal/Util.h`.
 
 ```cpp
@@ -1868,10 +1879,10 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 44: #ifdef __cplusplus
 45: extern "C" {
 46: #endif
-47: 
+47:
 48: void* memset(void* buffer, int value, size_t length);
 49: void* memcpy(void* dest, const void* src, size_t length);
-50: 
+50:
 51: #ifdef __cplusplus
 52: }
 53: #endif
@@ -1881,6 +1892,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 ### Util.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UTILCPP}
 
 Now we can implement the `memcpy()1 function.
+
 Update the file `code/libraries/baremetal/src/Util.cpp`.
 
 ```cpp
@@ -1890,7 +1902,7 @@ File: code/libraries/baremetal/src/Util.cpp
 54: {
 55:     uint8* dstPtr = reinterpret_cast<uint8*>(dest);
 56:     const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
-57: 
+57:
 58:     while (length-- > 0)
 59:     {
 60:         *dstPtr++ = *srcPtr++;
@@ -1919,24 +1931,24 @@ File: code/applications/demo/src/main.cpp
 8: #include <baremetal/System.h>
 9: #include <baremetal/Timer.h>
 10: #include <baremetal/UART1.h>
-11: 
+11:
 12: using namespace baremetal;
-13: 
+13:
 14: int main()
 15: {
 16:     auto& uart = GetUART1();
 17:     uart.WriteString("Hello World!\n");
-18: 
+18:
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIPropertiesInterface properties(mailbox);
-22: 
+22:
 23:     struct PropertySerial
 24:     {
 25:         Property tag;
 26:         uint32   serial[2];
 27:     } PACKED;
-28: 
+28:
 29:     PropertySerial serialProperty;
 30:     if (properties.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &serialProperty, sizeof(serialProperty)))
 31:     {
@@ -1952,10 +1964,10 @@ File: code/applications/demo/src/main.cpp
 41:     {
 42:         uart.WriteString("Mailbox call failed\n");
 43:     }
-44: 
+44:
 45:     uart.WriteString("Wait 5 seconds\n");
 46:     Timer::WaitMilliSeconds(5000);
-47: 
+47:
 48:     uart.WriteString("Press r to reboot, h to halt\n");
 49:     char ch{};
 50:     while ((ch != 'r') && (ch != 'h'))
@@ -1963,7 +1975,7 @@ File: code/applications/demo/src/main.cpp
 52:         ch = uart.Read();
 53:         uart.Write(ch);
 54:     }
-55: 
+55:
 56:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 57: }
 ```
@@ -1981,6 +1993,7 @@ The code is quite a bit simpler now.
 ### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -2001,7 +2014,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 43:     )
-44: 
+44:
 45: set(PROJECT_INCLUDES_PUBLIC
 46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -2092,25 +2105,25 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IMailbox.h>
 43: #include <baremetal/Types.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: class RPIProperties
 48: {
 49: private:
 50:     IMailbox &m_mailbox;
-51: 
+51:
 52: public:
 53:     explicit RPIProperties(IMailbox &mailbox);
-54: 
+54:
 55:     bool GetBoardSerial(uint64 &serial);
 56: };
-57: 
+57:
 58: } // namespace baremetal
 ```
 
@@ -2119,6 +2132,7 @@ We declare the class `RPIProperties` which has a constructor taking a `Mailbox` 
 ### RPIProperties.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_RPIPROPERTIESCPP}
 
 We'll implement the class `RPIProperties`
+
 Create the file `code/libraries/baremetal/src/RPIProperties.cpp`
 
 ```cpp
@@ -2161,41 +2175,41 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/RPIProperties.h>
-41: 
+41:
 42: #include <baremetal/BCMRegisters.h>
 43: #include <baremetal/RPIPropertiesInterface.h>
 44: #include <baremetal/Util.h>
-45: 
+45:
 46: namespace baremetal {
-47: 
+47:
 48: struct PropertySerial
 49: {
 50:     Property tag;
 51:     uint32   serial[2];
 52: } PACKED;
-53: 
+53:
 54: RPIProperties::RPIProperties(IMailbox &mailbox)
 55:     : m_mailbox{mailbox}
 56: {
 57: }
-58: 
+58:
 59: bool RPIProperties::GetBoardSerial(uint64 &serial)
 60: {
 61:     PropertySerial         tag{};
 62:     RPIPropertiesInterface interface(m_mailbox);
-63: 
+63:
 64:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
-65: 
+65:
 66:     if (result)
 67:     {
 68:         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
 69:     }
-70: 
+70:
 71:     return result;
 72: }
-73: 
+73:
 74: } // namespace baremetal
 ```
 
@@ -2228,6 +2242,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 
 We need to implement the `Serialize` function for two different types. As the behaviour is very similar, we will create a third static function that can handle both 32 and 64 bit unsigned values.
 There is one this a little tricky, as we need to calculate a divisor for 64 bit integers, the divisor can overflow. So we need to add a second variable to keep track of the overflowing.
+
 Create the file `code/libraries/baremetal/src/Serialization.cpp`
 
 ```cpp
@@ -2237,17 +2252,17 @@ File: code/libraries/baremetal/src/Serialization.cpp
 70: {
 71:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 72: }
-73: 
+73:
 74: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
 75: {
 76:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
 77: }
-78: 
+78:
 79: static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
 80: {
 81:     if ((base < 2) || (base > 36))
 82:         return;
-83: 
+83:
 84:     int       numDigits = 0;
 85:     uint64    divisor = 1;
 86:     uint64    divisorLast = 1;
@@ -2262,7 +2277,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 95:         ++numDigits;
 96:     }
 97:     divisor = divisorLast;
-98: 
+98:
 99:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 100:     if (showBase)
 101:     {
@@ -2272,9 +2287,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 105:         numChars = absWidth;
 106:     if (numChars > bufferSize - 1) // Leave one character for \0
 107:         return;
-108: 
+108:
 109:     char* bufferPtr = buffer;
-110: 
+110:
 111:     if (showBase)
 112:     {
 113:         if (base == 2)
@@ -2345,18 +2360,18 @@ File: code/applications/demo/src/main.cpp
 8: #include <baremetal/System.h>
 9: #include <baremetal/Timer.h>
 10: #include <baremetal/UART1.h>
-11: 
+11:
 12: using namespace baremetal;
-13: 
+13:
 14: int main()
 15: {
 16:     auto& uart = GetUART1();
 17:     uart.WriteString("Hello World!\n");
-18: 
+18:
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIProperties properties(mailbox);
-22: 
+22:
 23:     uint64 serial{};
 24:     if (properties.GetBoardSerial(serial))
 25:     {
@@ -2370,10 +2385,10 @@ File: code/applications/demo/src/main.cpp
 33:     {
 34:         uart.WriteString("Mailbox call failed\n");
 35:     }
-36: 
+36:
 37:     uart.WriteString("Wait 5 seconds\n");
 38:     Timer::WaitMilliSeconds(5000);
-39: 
+39:
 40:     uart.WriteString("Press r to reboot, h to halt\n");
 41:     char ch{};
 42:     while ((ch != 'r') && (ch != 'h'))
@@ -2381,7 +2396,7 @@ File: code/applications/demo/src/main.cpp
 44:         ch = uart.Read();
 45:         uart.Write(ch);
 46:     }
-47: 
+47:
 48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
@@ -2392,6 +2407,7 @@ The code is again quite a bit simpler.
 ### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -2413,7 +2429,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 44:     )
-45: 
+45:
 46: set(PROJECT_INCLUDES_PUBLIC
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h

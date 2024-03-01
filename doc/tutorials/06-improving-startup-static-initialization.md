@@ -32,6 +32,7 @@ Please be aware of this when e.g. debugging, the paths in vs.launch.json may not
 ### Update UART1.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_UART1H}
 
 First, we'll add a method to return a global UART1 instance that we will create in UART1.cpp.
+
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
 ```cpp
@@ -41,10 +42,10 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 107: class UART1
 108: {
 109:     friend UART1& GetUART1();
-110: 
+110:
 111: private:
 112:     bool            m_initialized;
-113: 
+113:
 114: public:
 115:     // Constructs a default UART1 instance.
 116:     UART1();
@@ -58,7 +59,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 124:     void Write(char c);
 125:     // Write a string
 126:     void WriteString(const char *str);
-127: 
+127:
 128: private:
 129:     // Set GPIO pin mode
 130:     bool SetMode(uint8 pinNumber, GPIOMode mode);
@@ -69,9 +70,9 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 135:     // Switch GPIO off
 136:     bool Off(uint8 pinNumber, GPIOMode mode);
 137: };
-138: 
+138:
 139: UART1& GetUART1();
-140: 
+140:
 141: } // namespace baremetal
 ```
 
@@ -81,20 +82,21 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 ### Update UART1.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_UART1CPP}
 
 We will implement the new function `GetUART1()`.
+
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
 
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 ...
-244: 
+244:
 245: UART1 s_uart;
-246: 
+246:
 247: UART1& GetUART1()
 248: {
 249:     s_uart.Initialize();
 250:     return s_uart;
 251: }
-252: 
+252:
 253: } // namespace baremetal
 ```
 
@@ -147,42 +149,42 @@ File: code/libraries/baremetal/include/baremetal/System.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: class System
 47: {
 48:     friend System& GetSystem();
-49: 
+49:
 50: public:
 51:     System();
-52: 
+52:
 53:     [[noreturn]] void Halt();
 54:     [[noreturn]] void Reboot();
 55: };
-56: 
+56:
 57: System& GetSystem();
-58: 
+58:
 59: } // namespace baremetal
-60: 
+60:
 61: enum class ReturnCode
 62: {
 63:     ExitHalt,
 64:     ExitReboot,
 65: };
-66: 
+66:
 67: #ifdef __cplusplus
 68: extern "C"
 69: {
 70: #endif
-71: 
+71:
 72: int               main();
 73: [[noreturn]] void sysinit();
-74: 
+74:
 75: #ifdef __cplusplus
 76: }
 77: #endif
@@ -241,87 +243,87 @@ File: code/libraries/baremetal/src/System.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/System.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/SysConfig.h>
 45: #include <baremetal/UART1.h>
 46: #include <baremetal/Util.h>
-47: 
+47:
 48: using namespace baremetal;
-49: 
+49:
 50: System s_system;
-51: 
+51:
 52: System& baremetal::GetSystem()
 53: {
 54:     return s_system;
 55: }
-56: 
+56:
 57: System::System()
 58: {
 59: }
-60: 
+60:
 61: void System::Halt()
 62: {
 63:     GetUART1().WriteString("Halt\n");
-64: 
+64:
 65:     for (;;) // Satisfy [[noreturn]]
 66:     {
 67:         DataSyncBarrier();
 68:         WaitForInterrupt();
 69:     }
 70: }
-71: 
+71:
 72: void System::Reboot()
 73: {
 74:     GetUART1().WriteString("Reboot\n");
-75: 
+75:
 76:     DisableIRQs();
 77:     DisableFIQs();
-78: 
+78:
 79:     for (;;) // Satisfy [[noreturn]]
 80:     {
 81:         DataSyncBarrier();
 82:         WaitForInterrupt();
 83:     }
 84: }
-85: 
+85:
 86: #ifdef __cplusplus
 87: extern "C"
 88: {
 89: #endif
-90: 
+90:
 91: void sysinit()
 92: {
 93:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
 94:     EnableIRQs(); // go to TASK_LEVEL
-95: 
+95:
 96:     // clear BSS
 97:     extern unsigned char __bss_start;
 98:     extern unsigned char __bss_end;
 100:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
-101: 
+101:
 102:     // halt, if KERNEL_MAX_SIZE is not properly set
 103:     // cannot inform the user here
 104:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
 105:     {
 106:         GetSystem().Halt();
 107:     }
-108: 
+108:
 109:     GetUART1().WriteString("Starting up\n");
-110: 
+110:
 111:     extern int main();
-112: 
+112:
 113:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 114:     {
 115:         GetSystem().Reboot();
 116:     }
-117: 
+117:
 118:     GetSystem().Halt();
 119: }
-120: 
+120:
 121: #ifdef __cplusplus
 122: }
 123: #endif
@@ -407,17 +409,17 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: #ifdef __cplusplus
 45: extern "C" {
 46: #endif
-47: 
+47:
 48: void* memset(void* buffer, int value, size_t length);
-49: 
+49:
 50: #ifdef __cplusplus
 51: }
 52: #endif
@@ -472,13 +474,13 @@ File: code/libraries/baremetal/src/Util.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/Util.h>
-41: 
+41:
 42: void* memset(void* buffer, int value, size_t length)
 43: {
 44:     uint8* ptr = reinterpret_cast<uint8*>(buffer);
-45: 
+45:
 46:     while (length-- > 0)
 47:     {
 48:         *ptr++ = static_cast<char>(value);
@@ -498,10 +500,10 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
 49: // Data sync barrier
 50: #define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
-51: 
+51:
 52: // Wait for interrupt
 53: #define WaitForInterrupt()              asm volatile ("wfi")
-54: 
+54:
 55: // Enable IRQss. Clear bit 1 of DAIF register.
 56: #define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
 57: // Disable IRQs. Set bit 1 of DAIF register.
@@ -567,34 +569,34 @@ File: code/libraries/baremetal/src/Startup.S
 38: // DEALINGS IN THE SOFTWARE.
 39: //
 40: //------------------------------------------------------------------------------
-41: 
+41:
 42: #include <baremetal/SysConfig.h>
-43: 
+43:
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
-45: 
+45:
 46:     // Initialize Generic Timers
 47:     mrs \xreg1, cnthctl_el2
 48:     orr \xreg1, \xreg1, #0x3            // Enable EL1 access to timers
 49:     msr cnthctl_el2, \xreg1
 50:     msr cntvoff_el2, xzr
-51: 
+51:
 52:     // Initilize MPID/MPIDR registers
 53:     mrs \xreg1, midr_el1
 54:     mrs \xreg2, mpidr_el1
 55:     msr vpidr_el2, \xreg1
 56:     msr vmpidr_el2, \xreg2
-57: 
+57:
 58:     // Disable coprocessor traps
 59:     mov \xreg1, #0x33ff
 60:     msr cptr_el2, \xreg1                // Disable coprocessor traps to EL2
 61:     msr hstr_el2, xzr                   // Disable coprocessor traps to EL2
 62:     mov \xreg1, #3 << 20
 63:     msr cpacr_el1, \xreg1               // Enable FP/SIMD at EL1
-64: 
+64:
 65:     // Initialize HCR_EL2
 66:     mov \xreg1, #(1 << 31)              // 64bit EL1
 67:     msr hcr_el2, \xreg1
-68: 
+68:
 69:     // SCTLR_EL1 initialization
 70:     //
 71:     // setting RES1 bits (29,28,23,22,20,11) to 1
@@ -604,7 +606,7 @@ File: code/libraries/baremetal/src/Startup.S
 75:     mov \xreg1, #0x0800
 76:     movk \xreg1, #0x30d0, lsl #16
 77:     msr sctlr_el1, \xreg1
-78: 
+78:
 79:     // Return to the EL1_SP1 mode from EL2
 80:     mov \xreg1, #0x3c4
 81:     msr spsr_el2, \xreg1                // EL1_SP0 | D | A | I | F
@@ -613,26 +615,26 @@ File: code/libraries/baremetal/src/Startup.S
 84:     eret
 85: label1:
 86: .endm
-87: 
+87:
 88: .section .init
-89: 
+89:
 90:     .globl _start
 91: _start:                                 // normally entered from armstub8 in EL2 after boot
 92:     mrs x0, CurrentEL                   // check if already in EL1t mode?
 93:     cmp x0, #4
 94:     beq EL1
-95: 
+95:
 96:     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
 97:     msr sp_el1, x0                      // init their stack
-98: 
+98:
 99:     armv8_switch_to_el1_m x0, x1
-100: 
+100:
 101: EL1:
 102:     ldr x0, =MEM_KERNEL_STACK           // main thread runs in EL1t and uses sp_el0
 103:     mov sp, x0                          // init its stack
-104: 
+104:
 105:     b sysinit                           // Jump to main()
-106: 
+106:
 107: // End
 ```
 
@@ -641,6 +643,7 @@ The only difference is that we call `sysinit()` instead of `main()` when startin
 ### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 We need to add the newly created files to the project.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -653,7 +656,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 34:     )
-35: 
+35:
 36: set(PROJECT_INCLUDES_PUBLIC
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
@@ -679,9 +682,9 @@ File: code/applications/demo/src/main.cpp
 1: #include <baremetal/ARMInstructions.h>
 2: #include <baremetal/System.h>
 3: #include <baremetal/UART1.h>
-4: 
+4:
 5: using namespace baremetal;
-6: 
+6:
 7: int main()
 8: {
 9:     GetUART1().WriteString("Hello World!\n");
@@ -726,19 +729,19 @@ File: \code/libraries/baremetal/src/System.cpp
 92: {
 93:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
 94:     EnableIRQs(); // go to TASK_LEVEL
-95: 
+95:
 96:     // clear BSS
 97:     extern unsigned char __bss_start;
 98:     extern unsigned char __bss_end;
 100:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
-101: 
+101:
 102:     // halt, if KERNEL_MAX_SIZE is not properly set
 103:     // cannot inform the user here
 104:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
 105:     {
 106:         GetSystem().Halt();
 107:     }
-108: 
+108:
 109:     // Call constructors of static objects
 110:     extern void (*__init_start)(void);
 111:     extern void (*__init_end)(void);
@@ -746,16 +749,16 @@ File: \code/libraries/baremetal/src/System.cpp
 113:     {
 114:         (**func)();
 115:     }
-116: 
+116:
 117:     GetUART1().WriteString("Starting up\n");
-118: 
+118:
 119:     extern int main();
-120: 
+120:
 121:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 122:     {
 123:         GetSystem().Reboot();
 124:     }
-125: 
+125:
 126:     GetSystem().Halt();
 127: }
 
@@ -770,12 +773,12 @@ File: d:\Projects\baremetal.github\baremetal.ld
 78:     /* Executable static initialization section */
 79:     .init_array : {
 80:         __init_start = .;
-81: 
+81:
 82:         KEEP(*(.init_array*))
-83: 
+83:
 84:         __init_end = .;
 85:     }
-86: 
+86:
 ```
 
 So we simple loop through this array, and call the function pointed to (which has signature `void()`).
@@ -790,17 +793,17 @@ File: code/libraries\baremetal/include/baremetal/System.cpp
 ...
 
 48: using namespace baremetal;
-49: 
+49:
 50: System& baremetal::GetSystem()
 51: {
 52:     static System value;
 53:     return value;
 54: }
-55: 
+55:
 56: System::System()
 57: {
 58: }
-59: 
+59:
 
 ...
 ```
@@ -824,10 +827,10 @@ File: code/libraries/baremetal/src/UART1.cpp
 246: {
 247:     static UART1 value;
 248:     value.Initialize();
-249: 
+249:
 250:     return value;
 251: }
-252: 
+252:
 253: } // namespace baremetal
 ```
 
@@ -900,7 +903,7 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: // The semantic of the functions __cxa_guard_*() herein is based
 41: // on the file cxa_guard.cxx of the LLVM Compiler Infrastructure,
 42: // with this license:
@@ -948,31 +951,31 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 84: // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 85: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE
 86: // SOFTWARE.
-87: 
+87:
 88: #include <baremetal/Types.h>
-89: 
+89:
 90: // byte index into the guard object
 91: #define INDEX_HAS_RUN		0
 92: #define INDEX_IN_USE		1
-93: 
+93:
 94: extern "C" int __cxa_guard_acquire(volatile uint8* guardObject)
 95: {
 96:     if (guardObject[INDEX_HAS_RUN] != 0)
 97:     {
 98:         return 0;                           // Do not run constructor
 99:     }
-100: 
+100:
 101:     guardObject[INDEX_IN_USE] = 1;
-102: 
+102:
 103:     return 1;                               // Run constructor
 104: }
-105: 
+105:
 106: extern "C" void __cxa_guard_release(volatile uint8* guardObject)
 107: {
 108:     guardObject[INDEX_HAS_RUN] = 1;
 109:     guardObject[INDEX_IN_USE] = 0;
 110: }
-111: 
+111:
 112: extern "C" void __cxa_guard_abort(volatile uint8* guardObject)
 113: {
 114:     guardObject[INDEX_IN_USE] = 0;
@@ -1027,6 +1030,7 @@ We will again need to write to some registers to implement halt and reboot funct
 ### BCMRegisters.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT__STEP_3_BCMREGISTERSH}
 
 We need to update the header containing register addresses again.
+
 Update the file code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 ```cpp
@@ -1035,11 +1039,11 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 
 52: // End address for Raspberry PI BCM I/O
 53: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
-54: 
+54:
 55: //---------------------------------------------
 56: // Raspberry Pi Power Management
 57: //---------------------------------------------
-58: 
+58:
 59: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
 60: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
 61: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
@@ -1049,7 +1053,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 65: #define RPI_PWRMGT_RSTC_REBOOT          0x00000020
 66: #define RPI_PWRMGT_RSTC_RESET           0x00000102
 67: #define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
-68: 
+68:
 69: //---------------------------------------------
 70: // Raspberry Pi GPIO
 71: //---------------------------------------------
@@ -1073,7 +1077,7 @@ File: code/libraries/baremetal/src/System.cpp
 60: void System::Halt()
 61: {
 62:     GetUART1().WriteString("Halt\n");
-63: 
+63:
 64:     // power off the SoC (GPU + CPU)
 65:     auto r = *(RPI_PWRMGT_RSTS);
 66:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
@@ -1081,7 +1085,7 @@ File: code/libraries/baremetal/src/System.cpp
 68:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
 69:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
 70:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-71: 
+71:
 72:     for (;;) // Satisfy [[noreturn]]
 73:     {
 74:         DataSyncBarrier();
@@ -1111,17 +1115,17 @@ File: code/libraries/baremetal/src/System.cpp
 79: void System::Reboot()
 80: {
 81:     GetUART1().WriteString("Reboot\n");
-82: 
+82:
 83:     DisableIRQs();
 84:     DisableFIQs();
-85: 
+85:
 86:     // power off the SoC (GPU + CPU)
 87:     auto r = *(RPI_PWRMGT_RSTS);
 88:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
 89:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
 90:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
 91:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-92: 
+92:
 93:     for (;;) // Satisfy [[noreturn]]
 94:     {
 95:         DataSyncBarrier();
@@ -1151,7 +1155,7 @@ File: code/applications/demo/src/main.cpp
 8: {
 9:     auto& uart = GetUART1();
 10:     uart.WriteString("Hello World!\n");
-11: 
+11:
 12:     uart.WriteString("Press r to reboot, h to halt\n");
 13:     char ch{};
 14:     while ((ch != 'r') && (ch != 'h'))
@@ -1159,7 +1163,7 @@ File: code/applications/demo/src/main.cpp
 16:         ch = uart.Read();
 17:         uart.Write(ch);
 18:     }
-19: 
+19:
 20:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 21: }
 
@@ -1199,10 +1203,10 @@ On a physical board, you will see two undesired effects:
 ```text
 Hello World!
 Press r to reboot, h to halt
-þrRÿStarting up
+ï¿½rRï¿½Starting up
 Hello World!
 Press r to reboot, h to halt
-ÀhH
+ï¿½hH
 ```
 
 First, you will see strange characters being written, second, you will see that the string `Reboot` or `Halt` is not fully displayed.

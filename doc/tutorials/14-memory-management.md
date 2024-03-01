@@ -32,6 +32,7 @@ This will depend on a `HeapAllocator` which performs the actual allocation.
 ### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MAIN_CMAKE_FILE}
 
 First let's add some definitions for debugging memory allocation.
+
 Update the file `CMakeLists.txt`
 
 ```cmake
@@ -59,7 +60,7 @@ File: CMakeLists.txt
 104:     set(BAREMETAL_MEMORY_TRACING_DETAIL 0)
 105: endif()
 106: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-107: 
+107:
 108: set(DEFINES_C
 109:     PLATFORM_BAREMETAL
 110:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
@@ -74,7 +75,7 @@ File: CMakeLists.txt
 119:     BAREMETAL_BUILD=${VERSION_BUILD}
 120:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
 121:     )
-122: 
+122:
 ...
 278: message(STATUS "Baremetal settings:")
 279: message(STATUS "-- RPI target:                      ${BAREMETAL_RPI_TARGET}")
@@ -108,6 +109,7 @@ If `BAREMETAL_TRACE_MEMORY_DETAIL` is `ON`, we also set `BAREMETAL_MEMORY_TRACIN
 ### Synchronization.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYNCHRONIZATIONH}
 
 We'll add some definitions need for alignment. These have to do with the length of a cache line.
+
 Create the file `code/libraries/baremetal/include/baremetal/Synchronization.h`
 
 ```cpp
@@ -150,9 +152,9 @@ File: code/libraries/baremetal/include/baremetal/Synchronization.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
 43: #define DATA_CACHE_LINE_LENGTH_MIN  64
 44: /// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
@@ -161,7 +163,8 @@ File: code/libraries/baremetal/include/baremetal/Synchronization.h
 
 ### SysConfig.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSCONFIGH}
 
-Well add some definitions for heap types and bucket size, which will be explained in a minute.
+We'll add some definitions for heap types and bucket size, which will be explained in a minute.
+
 Update the file `code/libraries/baremetal/include/baremetal/SysConfig.h`
 
 ```cpp
@@ -170,7 +173,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 57: #ifndef KERNEL_MAX_SIZE
 58: #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 59: #endif
-60: 
+60:
 61: /// @brief HEAP_DEFAULT_NEW defines the default heap to be used for the "new"
 62: /// operator, if a memory type is not explicitly specified. Possible
 63: /// values are HEAP_LOW (memory below 1 GByte), HEAP_HIGH (memory above
@@ -183,7 +186,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 70: #ifndef HEAP_DEFAULT_NEW
 71: #define HEAP_DEFAULT_NEW HeapType::LOW
 72: #endif
-73: 
+73:
 74: /// @brief HEAP_DEFAULT_MALLOC defines the heap to be used for malloc() and
 75: /// calloc() calls. See the description of HEAP_DEFAULT_NEW for details!
 76: /// Modifying this setting is not recommended, because there are device
@@ -192,7 +195,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 79: #ifndef HEAP_DEFAULT_MALLOC
 80: #define HEAP_DEFAULT_MALLOC HeapType::LOW
 81: #endif
-82: 
+82:
 83: /// @brief HEAP_BLOCK_BUCKET_SIZES configures the heap allocator, which is the
 84: /// base of dynamic memory management ("new" operator and malloc()). The
 85: /// heap allocator manages free memory blocks in a number of free lists
@@ -210,7 +213,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 97: #ifndef HEAP_BLOCK_BUCKET_SIZES
 98: #define HEAP_BLOCK_BUCKET_SIZES 0x40, 0x400, 0x1000, 0x4000, 0x10000, 0x40000, 0x80000
 99: #endif
-100: 
+100:
 101: /// @brief Set part to be used by GPU (normally set in config.txt)
 102: #ifndef GPU_MEM_SIZE
 103: #define GPU_MEM_SIZE (64 * MEGABYTE)
@@ -227,24 +230,25 @@ See below in [MemoryMap.h](#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANA
 ### MemoryMap.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMAPH}
 
 We also need to update the memory map. to point to the heap start and end
+
 Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 90: /// @brief Region reserved for coherent memory rounded up to 1 Mb with 1 Mb extra space
 91: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
-92: 
+92:
 93: /// @brief Start of region reserved for heap
 94: #define MEM_HEAP_START      (MEM_COHERENT_REGION + COHERENT_REGION_SIZE)
-95: 
+95:
 96: #if BAREMETAL_RPI_TARGET >= 4
 97: /// @brief High memory region (above 1 Gb) start.
 98: #define MEM_HIGHMEM_START             GIGABYTE
 99: /// @brief High memory region (above 1 Gb) end. Memory above 3 GB is not safe to be used for DMA and is not used.
 100: #define MEM_HIGHMEM_END               (3 * GIGABYTE - 1)
-101: 
+101:
 102: #endif
-103: 
+103:
 ```
 
 We will define an enum type in a second named `HeapType`, which specifies the heap to be used for a certain function. We distinguish two heap types:
@@ -268,6 +272,7 @@ See also the image below.
 ### HeapAllocator.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_HEAPALLOCATORH}
 
 We will declare a class to handle allocation and freeing of memory for a specific heap (low or high).
+
 Create the file `code/libraries/baremetal/include/baremetal/HeapAllocator.h`
 
 ```cpp
@@ -310,23 +315,23 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Macros.h>
 43: #include <baremetal/Synchronization.h>
 44: #include <baremetal/Types.h>
-45: 
+45:
 46: namespace baremetal {
-47: 
+47:
 48: /// @brief Block alignment
 49: #define HEAP_BLOCK_ALIGN       DATA_CACHE_LINE_LENGTH_MAX
 50: /// @brief Block alignment mask
 51: #define HEAP_ALIGN_MASK        (HEAP_BLOCK_ALIGN - 1)
-52: 
+52:
 53: /// @brief Maximum number of heap buckets used
 54: #define HEAP_BLOCK_MAX_BUCKETS 20
-55: 
+55:
 56: /// <summary>
 57: /// Administration on an allocated block of memory
 58: /// </summary>
@@ -345,7 +350,7 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 71:     /// @brief Start of actual allocated block
 72:     uint8            data[0];
 73: } PACKED;
-74: 
+74:
 75: /// <summary>
 76: /// Bucket containing administration on allocated blocks of memory
 77: /// </summary>
@@ -370,7 +375,7 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 96:     /// @brief List of free blocks in bucket to be re-used
 97:     HeapBlockHeader *freeList;
 98: };
-99: 
+99:
 100: /// <summary>
 101: /// Allocates blocks from a flat memory region
 102: /// </summary>
@@ -387,27 +392,27 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 113:     size_t          m_reserve;
 114:     /// @brief Allocated bucket administration
 115:     HeapBlockBucket m_buckets[HEAP_BLOCK_MAX_BUCKETS + 1];
-116: 
+116:
 117:     /// @brief Sizes of allocation buckets
 118:     static uint32   s_bucketSizes[];
-119: 
+119:
 120: public:
 121:     /// <summary>
 122:     /// Constructs a heap allocator
 123:     /// </summary>
 124:     /// <param name="heapName">Name of the heap for debugging purpose (must be static)</param>
 125:     explicit HeapAllocator(const char *heapName = "heap");
-126: 
+126:
 127:     void Setup(uintptr baseAddress, size_t size, size_t reserve);
-128: 
+128:
 129:     size_t GetFreeSpace() const;
 130:     void *Allocate(size_t size);
 131:     void *ReAllocate(void *block, size_t size);
 132:     void Free(void *block);
-133: 
+133:
 134: #if BAREMETAL_MEMORY_TRACING
 135:     void   DumpStatus();
-136: 
+136:
 137:     uint64 GetCurrentAllocatedBlockCount();
 138:     uint64 GetCurrentAllocationSize();
 139:     uint64 GetMaxAllocatedBlockCount();
@@ -417,7 +422,7 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 143:     uint64 GetTotalFreeSize();
 144: #endif
 145: };
-146: 
+146:
 147: } // namespace baremetal
 ```
 
@@ -478,6 +483,7 @@ It returns the cumulative size of freed memory blocks over time
 ### HeapAllocator.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_HEAPALLOCATORCPP}
 
 We implement the methods of the `HeapAllocator` class.
+
 Create the file `code/libraries/baremetal/src/HeapAllocator.cpp`
 
 ```cpp
@@ -520,21 +526,21 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/HeapAllocator.h>
-41: 
+41:
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/Util.h>
 45: #include <baremetal/SysConfig.h>
-46: 
+46:
 47: using namespace baremetal;
-48: 
+48:
 49: /// @brief Define log name
 50: LOG_MODULE("HeapAllocator");
-51: 
+51:
 52: uint32 HeapAllocator::s_bucketSizes[] = { HEAP_BLOCK_BUCKET_SIZES };
-53: 
+53:
 54: HeapAllocator::HeapAllocator(const char* heapName)
 55:     : m_heapName{ heapName }
 56:     , m_next{}
@@ -543,19 +549,19 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 59:     , m_buckets{}
 60: {
 61:     memset(m_buckets, 0, sizeof(m_buckets));
-62: 
+62:
 63:     size_t numBuckets = sizeof(s_bucketSizes) / sizeof(s_bucketSizes[0]);
 64:     if (numBuckets > HEAP_BLOCK_MAX_BUCKETS)
 65:     {
 66:         numBuckets = HEAP_BLOCK_MAX_BUCKETS;
 67:     }
-68: 
+68:
 69:     for (size_t i = 0; i < numBuckets; ++i)
 70:     {
 71:         m_buckets[i].size = s_bucketSizes[i];
 72:     }
 73: }
-74: 
+74:
 75: /// <summary>
 76: /// Sets up the heap allocator
 77: /// </summary>
@@ -572,7 +578,7 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 88:     DumpStatus();
 89: #endif
 90: }
-91: 
+91:
 92: /// <summary>
 93: /// Calculate and return the amount of free (unallocated) space in all buckets
 94: /// @note Unused blocks on a free list do not count here.
@@ -582,7 +588,7 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 98: {
 99:     return m_limit - m_next;
 100: }
-101: 
+101:
 102: /// <summary>
 103: /// Allocate a block of memory
 104: /// \note Resulting block is always 16 bytes aligned
@@ -596,14 +602,14 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 112:     {
 113:         return nullptr;
 114:     }
-115: 
+115:
 116:     HeapBlockBucket* bucket;
 117:     for (bucket = m_buckets; bucket->size > 0; bucket++)
 118:     {
 119:         if (size <= bucket->size)
 120:         {
 121:             size = bucket->size;
-122: 
+122:
 123: #if BAREMETAL_MEMORY_TRACING
 124:             if (++bucket->count > bucket->maxCount)
 125:             {
@@ -611,12 +617,12 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 127:             }
 128:             ++bucket->totalAllocatedCount;
 129:             bucket->totalAllocated += size;
-130: 
+130:
 131: #endif
 132:             break;
 133:         }
 134:     }
-135: 
+135:
 136:     HeapBlockHeader* blockHeader{ bucket->freeList };
 137:     if ((bucket->size > 0) && (blockHeader != nullptr))
 138:     {
@@ -630,10 +636,10 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 146:     else
 147:     {
 148:         blockHeader = reinterpret_cast<HeapBlockHeader*>(m_next);
-149: 
+149:
 150:         uint8* nextBlock = m_next;
 151:         nextBlock += (sizeof(HeapBlockHeader) + size + HEAP_BLOCK_ALIGN - 1) & ~HEAP_ALIGN_MASK;
-152: 
+152:
 153:         if ((nextBlock <= m_next) ||                    // may have wrapped
 154:             (nextBlock > m_limit - m_reserve))
 155:         {
@@ -644,26 +650,26 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 159:             LOG_ERROR("%s: Out of memory", m_heapName);
 160:             return nullptr;
 161:         }
-162: 
+162:
 163:         m_next = nextBlock;
-164: 
+164:
 165:         blockHeader->magic = HEAP_BLOCK_MAGIC;
 166:         blockHeader->size = static_cast<uint32>(size);
-167: 
+167:
 168: #if BAREMETAL_MEMORY_TRACING_DETAIL
 169:         LOG_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
 170:         LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
 171: #endif
 172:     }
-173: 
+173:
 174:     blockHeader->next = nullptr;
-175: 
+175:
 176:     void* result = blockHeader->data;
 177:     assert((reinterpret_cast<uintptr>(result) & HEAP_ALIGN_MASK) == 0);
-178: 
+178:
 179:     return result;
 180: }
-181: 
+181:
 182: /// <summary>
 183: /// Reallocate block of memory
 184: /// </summary>
@@ -676,34 +682,34 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 191:     {
 192:         return Allocate(size);
 193:     }
-194: 
+194:
 195:     if (size == 0)
 196:     {
 197:         Free(block);
-198: 
+198:
 199:         return nullptr;
 200:     }
-201: 
+201:
 202:     const HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
 203:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
 204:     if (blockHeader->size >= size)
 205:     {
 206:         return block;
 207:     }
-208: 
+208:
 209:     void* newBlock = Allocate(size);
 210:     if (newBlock == nullptr)
 211:     {
 212:         return nullptr;
 213:     }
-214: 
+214:
 215:     memcpy(newBlock, block, blockHeader->size);
-216: 
+216:
 217:     Free(block);
-218: 
+218:
 219:     return newBlock;
 220: }
-221: 
+221:
 222: /// <summary>
 223: /// Free (de-allocate) block of memory.
 224: /// \note Memory space of blocks, which are bigger than the largest bucket size, cannot be returned to a free list and is lost.
@@ -715,17 +721,17 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 230:     {
 231:         return;
 232:     }
-233: 
+233:
 234:     HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
 235:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
-236: 
+236:
 237:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; bucket++)
 238:     {
 239:         if (blockHeader->size == bucket->size)
 240:         {
 241:             blockHeader->next = bucket->freeList;
 242:             bucket->freeList = blockHeader;
-243: 
+243:
 244: #if BAREMETAL_MEMORY_TRACING
 245:             bucket->count--;
 246:             ++bucket->totalFreedCount;
@@ -735,16 +741,16 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 250:             LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
 251: #endif
 252: #endif
-253: 
+253:
 254:             return;
 255:         }
 256:     }
-257: 
+257:
 258: #if BAREMETAL_MEMORY_TRACING
 259:     LOG_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
 260: #endif
 261: }
-262: 
+262:
 263: #if BAREMETAL_MEMORY_TRACING
 264: /// <summary>
 265: /// Display the current status of the heap allocator
@@ -759,14 +765,14 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 274:     LOG_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
 275:     LOG_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
 276:     LOG_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
-277: 
+277:
 278:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
 279:     {
 280:         LOG_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu",
 281:             bucket->size, bucket->count, bucket->maxCount, bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
 282:     }
 283: }
-284: 
+284:
 285: /// <summary>
 286: /// Returns the number of currently allocated memory blocks for this heap allocator.
 287: /// </summary>
@@ -780,7 +786,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 295:     }
 296:     return total;
 297: }
-298: 
+298:
 299: /// <summary>
 300: /// Returns the total size of currently allocated memory blocks for this heap allocator.
 301: /// </summary>
@@ -794,7 +800,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 309:     }
 310:     return total;
 311: }
-312: 
+312:
 313: /// <summary>
 314: /// Returns the maximum number of currently allocated memory blocks for this heap allocator over time.
 315: /// </summary>
@@ -808,7 +814,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 323:     }
 324:     return total;
 325: }
-326: 
+326:
 327: /// <summary>
 328: /// Returns the total number of allocated memory blocks for this heap allocator over time.
 329: /// </summary>
@@ -822,7 +828,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 337:     }
 338:     return total;
 339: }
-340: 
+340:
 341: /// <summary>
 342: /// Returns the total number of freed memory blocks for this heap allocator over time.
 343: /// </summary>
@@ -836,7 +842,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 351:     }
 352:     return total;
 353: }
-354: 
+354:
 355: /// <summary>
 356: /// Returns the total size of allocated memory blocks for this heap allocator over time.
 357: /// </summary>
@@ -850,7 +856,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 365:     }
 366:     return total;
 367: }
-368: 
+368:
 369: /// <summary>
 370: /// Returns the total size of freed memory blocks for this heap allocator over time.
 371: /// </summary>
@@ -864,7 +870,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cp
 379:     }
 380:     return total;
 381: }
-382: 
+382:
 383: #endif
 ```
 
@@ -924,6 +930,7 @@ The default bucket sizes are:
 We will extend the `MemoryManager` class with methods to allocate and free memory, retrieve the amount of free heap left, and dump information on allocated and freed memory.
 This also requires making the `MemoryManager` class instantiable. We again choose to make `MemoryManager` a singleton.
 The `sysinit()` function will create the `MemoryManager` instance, as it will be needed very early in the startup process.
+
 Update the file `code/libraries/baremetal/include/baremetal/MemoryManager.h`
 
 ```cpp
@@ -931,7 +938,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 ...
 42: #include <baremetal/Types.h>
 43: #include <baremetal/HeapAllocator.h>
-44: 
+44:
 ...
 57: /// <summary>
 58: /// Type of heap for requested memory block
@@ -947,9 +954,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 68:     /// @brief 30-bit DMA-able memory
 69:     DMA30 = LOW,
 70: };
-71: 
+71:
 72: namespace baremetal {
-73: 
+73:
 74: /// <summary>
 75: /// Handles memory allocation, re-allocation, and de-allocation for heap and paging memory, as well as assignment of coherent memory slots.
 76: ///
@@ -962,13 +969,13 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 83:     /// </summary>
 84:     /// <returns>Reference to the singleton MemoryManager instance</returns>
 85:     friend MemoryManager& GetMemoryManager();
-86: 
+86:
 87: private:
 88:     /// @brief Total memory size below 1Gb
 89:     size_t                m_memSize;
 90:     /// @brief Total memory size above 1Gb (up to 3 Gb boundary)
 91:     size_t                m_memSizeHigh;
-92: 
+92:
 93:     /// @brief Heap allocator for low memory (below 1Gb)
 94:     HeapAllocator         m_heapLow;
 95: #if BAREMETAL_RPI_TARGET >= 4
@@ -976,20 +983,20 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 97:     HeapAllocator         m_heapHigh;
 98: #endif
 99:     MemoryManager();
-100: 
+100:
 101: public:
-102: 
+102:
 103:     static uintptr GetCoherentPage(CoherentPageSlot slot);
-104: 
+104:
 105:     static void* HeapAllocate(size_t size, HeapType type);
 106:     static void* HeapReAllocate(void* block, size_t size);
 107:     static void HeapFree(void* block);
 108:     static size_t GetHeapFreeSpace(HeapType type);
 109:     static void DumpStatus();
 110: };
-111: 
+111:
 112: MemoryManager& GetMemoryManager();
-113: 
+113:
 114: } // namespace baremetal
 ```
 
@@ -1012,6 +1019,7 @@ This does not take into account the reservations for paging, and the part used f
 ### MemoryManager.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMANAGERCPP}
 
 We will implement the added methods for `MemoryManager`.
+
 Update the file `code/libraries/baremetal/src/MemoryManager.cpp`
 
 ```cpp
@@ -1054,25 +1062,25 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/MemoryManager.h>
-41: 
+41:
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/MachineInfo.h>
 45: #include <baremetal/SysConfig.h>
-46: 
+46:
 47: /// @file
 48: /// Memory management implementation
-49: 
+49:
 50: using namespace baremetal;
-51: 
+51:
 52: /// @brief Define log name
 53: LOG_MODULE("MemoryManager");
-54: 
+54:
 55: /// <summary>
 56: /// Constructs a MemoryManager instance
-57: /// 
+57: ///
 58: /// Retrieves amount of physical RAM available, and sets up heap managers for low (below 1Gb) and high (above 3 Gb, only Raspberry Pi 4 or higher) memory.
 59: /// </summary>
 60: MemoryManager::MemoryManager()
@@ -1092,13 +1100,13 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 74:         baseAddress = 0;
 75:         size = ARM_MEM_SIZE;
 76:     }
-77: 
+77:
 78:     assert(baseAddress == 0);
 79:     m_memSize = size;
-80: 
+80:
 81:     size_t blockReserve = m_memSize - MEM_HEAP_START - PAGE_RESERVE;
 82:     m_heapLow.Setup(MEM_HEAP_START, blockReserve, 0x40000);
-83: 
+83:
 84: #if BAREMETAL_RPI_TARGET >= 4
 85:     auto ramSize = machineInfo.GetRAMSize();
 86:     if (ramSize > 1024)
@@ -1108,14 +1116,14 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 90:         {
 91:             highSize = MEM_HIGHMEM_END + 1 - MEM_HIGHMEM_START;
 92:         }
-93: 
+93:
 94:         m_memSizeHigh = static_cast<size_t>(highSize);
-95: 
+95:
 96:         m_heapHigh.Setup(MEM_HIGHMEM_START, m_memSizeHigh, 0);
 97:     }
 98: #endif
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Return the coherent memory page (allocated with the GPU) for the requested page slot
 103: /// </summary>
@@ -1124,12 +1132,12 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 106: uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 107: {
 108:     uint64 pageAddress = MEM_COHERENT_REGION;
-109: 
+109:
 110:     pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
-111: 
+111:
 112:     return pageAddress;
 113: }
-114: 
+114:
 115: /// <summary>
 116: /// Allocate memory from the specified heap
 117: /// </summary>
@@ -1141,7 +1149,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 123:     auto& memoryManager = GetMemoryManager();
 124: #if BAREMETAL_RPI_TARGET >= 4
 125:     void* block;
-126: 
+126:
 127:     switch (type)
 128:     {
 129:     case HeapType::LOW:	    return memoryManager.m_heapLow.Allocate(size);
@@ -1160,7 +1168,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 142:     }
 143: #endif
 144: }
-145: 
+145:
 146: /// <summary>
 147: /// Reallocate block of memory
 148: /// </summary>
@@ -1183,7 +1191,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 165:     return memoryManager.m_heapLow.ReAllocate(block, size);
 166: #endif
 167: }
-168: 
+168:
 169: /// <summary>
 170: /// Free (de-allocate) block of memory.
 171: /// </summary>
@@ -1204,7 +1212,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 186:     memoryManager.m_heapLow.Free(block);
 187: #endif
 188: }
-189: 
+189:
 190: /// <summary>
 191: /// Calculate and return the amount of free (unallocated) space for the specified heap
 192: /// </summary>
@@ -1230,7 +1238,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 212:     }
 213: #endif
 214: }
-215: 
+215:
 216: /// <summary>
 217: /// Display the current status of all heap allocators
 218: /// </summary>
@@ -1244,7 +1252,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 226:     memoryManager.m_heapHigh.DumpState();
 227: #endif
 228: }
-229: 
+229:
 230: /// <summary>
 231: /// Construct the singleton MemoryManager instance if needed, and return a reference to the instance
 232: /// </summary>
@@ -1293,6 +1301,7 @@ If any heap is selected, the freespace for both heaps is added together
 
 Although not urgently needed yet, we'll need singleton the `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
 So let's go ahead and instantiate the `MemoryManager` there.
+
 Update the file `code/libraries/baremetal/src/System.cpp`
 
 ```cpp
@@ -1308,10 +1317,10 @@ File: code/libraries/baremetal/src/System.cpp
 183:     {
 184:         GetSystem().Halt();
 185:     }
-186: 
+186:
 187:     // We need to create a memory system first, as core 0 needs to be the first to enable the MMU
 188:     GetMemoryManager();
-189: 
+189:
 190:     // Call constructors of static objects
 191:     extern void (*__init_start)(void);
 192:     extern void (*__init_end)(void);
@@ -1319,7 +1328,7 @@ File: code/libraries/baremetal/src/System.cpp
 194:     {
 195:         (**func)();
 196:     }
-197: 
+197:
 ...
 ```
 
@@ -1330,6 +1339,7 @@ File: code/libraries/baremetal/src/System.cpp
 
 Let's use the memory allocation and see how it behaves.
 We've set `BAREMETAL_TRACE_MEMORY` and `BAREMETAL_TRACE_MEMORY_DETAIL` to `ON`, so we will get quite a bit of detail on memory allocations.
+
 Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
@@ -1346,31 +1356,31 @@ File: code\applications\demo\src\main.cpp
 10: #include <baremetal/Serialization.h>
 11: #include <baremetal/System.h>
 12: #include <baremetal/Timer.h>
-13: 
+13:
 14: LOG_MODULE("main");
-15: 
+15:
 16: using namespace baremetal;
-17: 
+17:
 18: int main()
 19: {
 20:     auto& console = GetConsole();
 21:     LOG_DEBUG("Hello World!");
-22: 
+22:
 23:     MemoryManager& memoryManager = GetMemoryManager();
 24:     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
 25:     LOG_INFO("High heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::HIGH));
 26:     LOG_INFO("DMA heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::ANY));
-27: 
+27:
 28:     auto ptr = memoryManager.HeapAllocate(4, HeapType::LOW);
 29:     LOG_INFO("Allocated block %llx", ptr);
 30:     memoryManager.DumpStatus();
-31: 
+31:
 32:     memoryManager.HeapFree(ptr);
 33:     memoryManager.DumpStatus();
-34: 
+34:
 35:     LOG_INFO("Wait 5 seconds");
 36:     Timer::WaitMilliSeconds(5000);
-37: 
+37:
 38:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 39:     char ch{};
 40:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -1380,7 +1390,7 @@ File: code\applications\demo\src\main.cpp
 44:     }
 45:     if (ch == 'p')
 46:         assert(false);
-47: 
+47:
 48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
@@ -1394,6 +1404,7 @@ File: code\applications\demo\src\main.cpp
 ### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
+
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
@@ -1423,7 +1434,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 50:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
 51:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
 52:     )
-53: 
+53:
 54: set(PROJECT_INCLUDES_PUBLIC
 55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
@@ -1539,6 +1550,7 @@ So we'll update `New.h` and `New.cpp` to add functions for C++, and `Util.h` and
 ### Util.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UTILH}
 
 We will declares the memory allocation functions for C.
+
 Update the file `code/libraries/baremetal/include/baremetal/Util.h`
 
 ```cpp
@@ -1547,23 +1559,23 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 47: #ifdef __cplusplus
 48: extern "C" {
 49: #endif
-50: 
+50:
 51: void* memset(void* buffer, int value, size_t length);
 52: void* memcpy(void* dest, const void* src, size_t length);
-53: 
+53:
 54: size_t strlen(const char* str);
 55: char* strncpy(char* dest, const char* src, size_t maxLen);
 56: char* strncat(char* dest, const char* src, size_t maxLen);
-57: 
+57:
 58: void* malloc(size_t size);
 59: void* calloc(size_t num, size_t size);
 60: void* realloc(void* ptr, size_t new_size);
 61: void free(void* ptr);
-62: 
+62:
 63: #ifdef __cplusplus
 64: }
 65: #endif
-66: 
+66:
 ```
 
 Line 58-61: We add the function declarations for `malloc()`, `calloc()`, `realloc()` and `free()`
@@ -1571,12 +1583,13 @@ Line 58-61: We add the function declarations for `malloc()`, `calloc()`, `reallo
 ### Util.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UTILCPP}
 
 We will implement the added functions.
+
 Update the file `code/libraries/baremetal/src/Util.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Util.cpp
 ...
-165: 
+165:
 166: /// <summary>
 167: /// Allocates a block of memory of the desired size.
 168: /// </summary>
@@ -1586,10 +1599,10 @@ File: code/libraries/baremetal/src/Util.cpp
 172: {
 173:     return baremetal::MemoryManager::HeapAllocate(size, HeapType::ANY);
 174: }
-175: 
+175:
 176: /// <summary>
 177: /// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
-178: /// 
+178: ///
 179: /// The memory allocated is num x size bytes
 180: /// </summary>
 181: /// <param name="num">Number of cells to allocate memory for</param>
@@ -1599,7 +1612,7 @@ File: code/libraries/baremetal/src/Util.cpp
 185: {
 186:     return malloc(num * size);
 187: }
-188: 
+188:
 189: /// <summary>
 190: /// Re-allocates memory previously allocated with malloc() or calloc() to a new size
 191: /// </summary>
@@ -1610,7 +1623,7 @@ File: code/libraries/baremetal/src/Util.cpp
 196: {
 197:     return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
 198: }
-199: 
+199:
 200: /// <summary>
 201: /// Frees memory previously allocated with malloc() or calloc()
 202: /// </summary>
@@ -1638,15 +1651,15 @@ File: code/libraries/baremetal/include/baremetal/New.h
 ...
 42: /// @file
 43: /// Basic memory allocation functions
-44: 
+44:
 45: #include <baremetal/MemoryManager.h>
 46: #include <baremetal/Types.h>
-47: 
+47:
 48: void* operator new (size_t size, HeapType type);
 49: void* operator new[](size_t size, HeapType type);
 50: void* operator new (size_t size, void* address);
 51: void* operator new[](size_t size, void* address);
-52: 
+52:
 ```
 
 - Line 48: We declare the new operator for placement using a heap specification.
@@ -1658,13 +1671,14 @@ We can then use e.g. `new (HeapType::LOW) X` to allocate an instance of class X 
 ### New.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_NEWCPP}
 
 We will implement the added `new` and `delete` operators.
+
 Update the file `code/libraries/baremetal/src/New.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/New.cpp
 ...
 48: using namespace baremetal;
-49: 
+49:
 50: /// <summary>
 51: /// Class specific placement allocation for single value.
 52: /// </summary>
@@ -1675,7 +1689,7 @@ File: code/libraries/baremetal/src/New.cpp
 57: {
 58: 	return MemoryManager::HeapAllocate(size, type);
 59: }
-60: 
+60:
 61: /// <summary>
 62: /// Class specific placement allocation for array.
 63: /// </summary>
@@ -1686,7 +1700,7 @@ File: code/libraries/baremetal/src/New.cpp
 68: {
 69: 	return MemoryManager::HeapAllocate(size, type);
 70: }
-71: 
+71:
 72: /// <summary>
 73: /// Non allocating placement allocation for single value.
 74: /// </summary>
@@ -1697,7 +1711,7 @@ File: code/libraries/baremetal/src/New.cpp
 79: {
 80: 	return address;
 81: }
-82: 
+82:
 83: /// <summary>
 84: /// Non allocating placement allocation for array.
 85: /// </summary>
@@ -1708,7 +1722,7 @@ File: code/libraries/baremetal/src/New.cpp
 90: {
 91: 	return address;
 92: }
-93: 
+93:
 94: /// <summary>
 95: /// Standard allocation for single value.
 96: ///
@@ -1720,7 +1734,7 @@ File: code/libraries/baremetal/src/New.cpp
 102: {
 103: 	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
 104: }
-105: 
+105:
 106: /// <summary>
 107: /// Standard allocation for array.
 108: ///
@@ -1732,7 +1746,7 @@ File: code/libraries/baremetal/src/New.cpp
 114: {
 115: 	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
 116: }
-117: 
+117:
 118: /// <summary>
 119: /// Standard de-allocation for single value.
 120: /// </summary>
@@ -1741,7 +1755,7 @@ File: code/libraries/baremetal/src/New.cpp
 123: {
 124: 	MemoryManager::HeapFree(address);
 125: }
-126: 
+126:
 127: /// <summary>
 128: /// Standard de-allocation for array.
 129: /// </summary>
@@ -1750,7 +1764,7 @@ File: code/libraries/baremetal/src/New.cpp
 132: {
 133: 	MemoryManager::HeapFree(address);
 134: }
-135: 
+135:
 136: /// <summary>
 137: /// Standard de-allocation with size for single value.
 138: /// </summary>
@@ -1759,7 +1773,7 @@ File: code/libraries/baremetal/src/New.cpp
 141: {
 142: 	MemoryManager::HeapFree(address);
 143: }
-144: 
+144:
 145: /// <summary>
 146: /// Standard de-allocation for array.
 147: /// </summary>
@@ -1785,6 +1799,7 @@ File: code/libraries/baremetal/src/New.cpp
 ### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_APPLICATION_CODE}
 
 Let's use the `malloc()` function and `new` operator.
+
 Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
@@ -1803,45 +1818,45 @@ File: code\applications\demo\src\main.cpp
 12: #include <baremetal/System.h>
 13: #include <baremetal/Timer.h>
 14: #include <baremetal/Util.h>
-15: 
+15:
 16: LOG_MODULE("main");
-17: 
+17:
 18: using namespace baremetal;
-19: 
+19:
 20: int main()
 21: {
 22:     auto& console = GetConsole();
 23:     LOG_DEBUG("Hello World!");
-24: 
+24:
 25:     MemoryManager& memoryManager = GetMemoryManager();
 26:     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
 27:     LOG_INFO("High heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::HIGH));
 28:     LOG_INFO("DMA heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::ANY));
-29: 
+29:
 30:     auto ptr = memoryManager.HeapAllocate(4, HeapType::LOW);
 31:     LOG_INFO("Allocated block %llx", ptr);
 32:     memoryManager.DumpStatus();
-33: 
+33:
 34:     memoryManager.HeapFree(ptr);
 35:     memoryManager.DumpStatus();
-36: 
+36:
 37:     class X {};
-38: 
+38:
 39:     X* x = new (HeapType::LOW) X;
 40:     LOG_INFO("Allocated block %llx", x);
 41:     memoryManager.DumpStatus();
 42:     delete x;
 43:     memoryManager.DumpStatus();
-44: 
+44:
 45:     void*p = malloc(256);
 46:     LOG_INFO("Allocated block %llx", p);
 47:     memoryManager.DumpStatus();
 48:     free(p);
 49:     memoryManager.DumpStatus();
-50: 
+50:
 51:     LOG_INFO("Wait 5 seconds");
 52:     Timer::WaitMilliSeconds(5000);
-53: 
+53:
 54:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 55:     char ch{};
 56:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -1851,7 +1866,7 @@ File: code\applications\demo\src\main.cpp
 60:     }
 61:     if (ch == 'p')
 62:         assert(false);
-63: 
+63:
 64:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 65: }
 ```

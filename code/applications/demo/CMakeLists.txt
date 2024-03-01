@@ -24,6 +24,7 @@ set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
     baremetal
+    unittest
     )
 
 set(PROJECT_LIBS

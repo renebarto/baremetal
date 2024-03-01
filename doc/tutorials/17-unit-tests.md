@@ -8374,7 +8374,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 - Line 167-182: We declare a template class `UniversalTersePrinter` specialization for type `const char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 - Line 183-192: We declare a template class `UniversalTersePrinter` specialization for type `char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 
-### PrintValue.cpp {#TUTORIAL_17_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_9_PRINTVALUEH}
+### PrintValue.cpp {#TUTORIAL_17_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_9_PRINTVALUECPP}
 
 Some print functions need to be implemented.
 

@@ -665,132 +665,135 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/Mailbox.h>
 43: #include <baremetal/RPIProperties.h>
-44:
-45: namespace baremetal {
-46:
-47: /// <summary>
-48: /// Type of SoC used. See @ref RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
-49: /// </summary>
-50: enum class SoCType
-51: {
-52:     /// @ brief BCM2835 as used in Raspberry Pi Model 1 boards
-53:     BCM2835,
-54:     /// @ brief BCM2835 as used in older Raspberry Pi Model 2 boards
-55:     BCM2836,
-56:     /// @ brief BCM2835 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
-57:     BCM2837,
-58:     /// @ brief BCM2835 as used in Raspberry Pi Model 4 boards
-59:     BCM2711,
-60:     /// @ brief BCM2835 as used in Raspberry Pi Model 5 boards
-61:     BCM2712,
-62:     /// @brief SoC unknown / not set / invalid
-63:     Unknown,
-64: };
-65:
-66: /// <summary>
-67: /// Retrieves system info using the mailbox mechanism
-68: ///
-69: /// Note that this class is created as a singleton, using the GetMachineInfo() function.
-70: /// </summary>
-71: class MachineInfo
-72: {
-73:     /// <summary>
-74:     /// Retrieves the singleton MachineInfo instance. It is created in the first call to this function. This is a friend function of class MachineInfo
-75:     /// </summary>
-76:     /// <returns>A reference to the singleton MachineInfo</returns>
-77:     friend MachineInfo &GetMachineInfo();
-78:
-79: private:
-80:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
-81:     bool          m_initialized;
-82:     /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-83:     IMemoryAccess& m_memoryAccess;
-84:     /// @brief Raw revision code retrieved through the mailbox
-85:     BoardRevision m_revisionRaw;
-86:     /// @brief Board model determined from the raw revision code
-87:     BoardModel    m_boardModel;
-88:     /// @brief Board model major number determined from the raw revision code
-89:     uint32        m_boardModelMajor;
-90:     /// @brief Board model revision number determined from the raw revision code
-91:     uint32        m_boardModelRevision;
-92:     /// @brief Board SoC type determined from the raw revision code
-93:     SoCType       m_SoCType;
-94:     /// @brief Amount of physical RAM determined from the raw revision code
-95:     uint32        m_ramSize;
-96:     /// @brief Board serial number retrieved through the mailbox
-97:     uint64        m_boardSerial;
-98:     /// @brief Board FW revision number retrieved through the mailbox
-99:     uint32        m_fwRevision;
-100:     /// @brief Ethernet MAC address retrieved through the mailbox
-101:     uint8         m_macAddress[6];
-102:     /// @brief ARM assigned memory base address retrieved through the mailbox
-103:     uint32        m_armBaseAddress;
-104:     /// @brief ARM assigned memory size retrieved through the mailbox
-105:     uint32        m_armMemorySize;
-106:     /// @brief VideoCore assigned memory base address retrieved through the mailbox
-107:     uint32        m_vcBaseAddress;
-108:     /// @brief VideoCore assigned memory size retrieved through the mailbox
-109:     uint32        m_vcMemorySize;
-110:
-111:     MachineInfo();
-112:
-113: public:
-114:     MachineInfo(IMemoryAccess& memoryAccess);
-115:     bool          Initialize();
-116:
-117:     BoardModel    GetModel();
-118:     const char   *GetName();
-119:     uint32        GetModelMajor();
-120:     uint32        GetModelRevision();
-121:     SoCType       GetSoCType();
-122:     const char   *GetSoCName();
-123:     uint32        GetRAMSize();
-124:     uint64        GetSerial();
-125:     uint32        GetFWRevision();
-126:     void          GetMACAddress(uint8 macAddress[6]);
-127:     uint32        GetARMMemoryBaseAddress();
-128:     uint32        GetARMMemorySize();
-129:     uint32        GetVCMemoryBaseAddress();
-130:     uint32        GetVCMemorySize();
-131:     unsigned      GetClockRate(ClockID clockID) const; // See RPIPropertiesInterface (PROPTAG_GET_CLOCK_RATE)
-132:
-133:     BoardRevision GetBoardRevision();
-134: };
-135:
-136: MachineInfo &GetMachineInfo();
-137:
-138: } // namespace baremetal
+44: 
+45: /// @file
+46: /// Machine info retrieval
+47: 
+48: namespace baremetal {
+49: 
+50: /// <summary>
+51: /// Type of SoC used. See @ref RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
+52: /// </summary>
+53: enum class SoCType
+54: {
+55:     /// @ brief BCM2835 as used in Raspberry Pi Model 1 boards
+56:     BCM2835,
+57:     /// @ brief BCM2835 as used in older Raspberry Pi Model 2 boards
+58:     BCM2836,
+59:     /// @ brief BCM2835 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
+60:     BCM2837,
+61:     /// @ brief BCM2835 as used in Raspberry Pi Model 4 boards
+62:     BCM2711,
+63:     /// @ brief BCM2835 as used in Raspberry Pi Model 5 boards
+64:     BCM2712,
+65:     /// @brief SoC unknown / not set / invalid
+66:     Unknown,
+67: };
+68: 
+69: /// <summary>
+70: /// Retrieves system info using the mailbox mechanism
+71: ///
+72: /// Note that this class is created as a singleton, using the GetMachineInfo() function.
+73: /// </summary>
+74: class MachineInfo
+75: {
+76:     /// <summary>
+77:     /// Retrieves the singleton MachineInfo instance. It is created in the first call to this function. This is a friend function of class MachineInfo
+78:     /// </summary>
+79:     /// <returns>A reference to the singleton MachineInfo</returns>
+80:     friend MachineInfo &GetMachineInfo();
+81: 
+82: private:
+83:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
+84:     bool          m_initialized;
+85:     /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+86:     IMemoryAccess& m_memoryAccess;
+87:     /// @brief Raw revision code retrieved through the mailbox
+88:     BoardRevision m_revisionRaw;
+89:     /// @brief Board model determined from the raw revision code
+90:     BoardModel    m_boardModel;
+91:     /// @brief Board model major number determined from the raw revision code
+92:     uint32        m_boardModelMajor;
+93:     /// @brief Board model revision number determined from the raw revision code
+94:     uint32        m_boardModelRevision;
+95:     /// @brief Board SoC type determined from the raw revision code
+96:     SoCType       m_SoCType;
+97:     /// @brief Amount of physical RAM determined from the raw revision code (in Mb)
+98:     uint32        m_ramSize;
+99:     /// @brief Board serial number retrieved through the mailbox
+100:     uint64        m_boardSerial;
+101:     /// @brief Board FW revision number retrieved through the mailbox
+102:     uint32        m_fwRevision;
+103:     /// @brief Ethernet MAC address retrieved through the mailbox
+104:     uint8         m_macAddress[6];
+105:     /// @brief ARM assigned memory base address retrieved through the mailbox
+106:     uint32        m_armBaseAddress;
+107:     /// @brief ARM assigned memory size retrieved through the mailbox
+108:     uint32        m_armMemorySize;
+109:     /// @brief VideoCore assigned memory base address retrieved through the mailbox
+110:     uint32        m_vcBaseAddress;
+111:     /// @brief VideoCore assigned memory size retrieved through the mailbox
+112:     uint32        m_vcMemorySize;
+113: 
+114:     MachineInfo();
+115: 
+116: public:
+117:     MachineInfo(IMemoryAccess& memoryAccess);
+118:     bool          Initialize();
+119: 
+120:     BoardModel    GetModel();
+121:     const char   *GetName();
+122:     uint32        GetModelMajor();
+123:     uint32        GetModelRevision();
+124:     SoCType       GetSoCType();
+125:     const char   *GetSoCName();
+126:     uint32        GetRAMSize();
+127:     uint64        GetSerial();
+128:     uint32        GetFWRevision();
+129:     void          GetMACAddress(uint8 macAddress[6]);
+130:     uint32        GetARMMemoryBaseAddress();
+131:     uint32        GetARMMemorySize();
+132:     uint32        GetVCMemoryBaseAddress();
+133:     uint32        GetVCMemorySize();
+134:     unsigned      GetClockRate(ClockID clockID) const; // See RPIPropertiesInterface (PROPTAG_GET_CLOCK_RATE)
+135: 
+136:     BoardRevision GetBoardRevision();
+137: };
+138: 
+139: MachineInfo &GetMachineInfo();
+140: 
+141: } // namespace baremetal
 ```
 
-- Line 50-64: We declare an enum to represent the type of SoC (System-on-Chip) on the board
-- Line 71-134: We declare the class `MachineInfo`
-  - Line 77: We declare the friend function `GetMachineInfo()` which creates, initializes and returns a reference to the singleton `MachineInfo` instance
-  - Line 111: We declare the prive constructor, which is used by `GetMachineInfo()` to instantiate a default version of `MachineInfo`
-  - Line 114: We declare a constructor, which injects a memory access interface for testing purposes
-  - Line 115: We declare the method `Initialize()` which initialized the instance.
+- Line 53-67: We declare an enum to represent the type of SoC (System-on-Chip) on the board
+- Line 74-137: We declare the class `MachineInfo`
+  - Line 80: We declare the friend function `GetMachineInfo()` which creates, initializes and returns a reference to the singleton `MachineInfo` instance
+  - Line 114: We declare the prive constructor, which is used by `GetMachineInfo()` to instantiate a default version of `MachineInfo`
+  - Line 117: We declare a constructor, which injects a memory access interface for testing purposes
+  - Line 118: We declare the method `Initialize()` which initialized the instance.
   This perform the bulk of the work to be done
-  - Line 117: We declare the method `GetModel()` which returns the board model
-  - Line 118: We declare the method `GetName()` which returns the board name
-  - Line 119: We declare the method `GetModelMajor()` which returns the board major model number
-  - Line 120: We declare the method `GetModelRevision()` which returns the board revision number
-  - Line 121: We declare the method `GetSoCType()` which returns the board SoC type
-  - Line 122: We declare the method `GetSoCName()` which returns the board SoC name
-  - Line 123: We declare the method `GetRAMSize()` which returns the physical RAM size in Mb
-  - Line 124: We declare the method `GetSerial()` which returns the board serial number
-  - Line 125: We declare the method `GetFWRevision()` which returns the board firmware revision
-  - Line 126: We declare the method `GetMACAddress()` which returns the ethernet MAC address
-  - Line 127: We declare the method `GetARMMemoryBaseAddress()` which returns the ARM assign memory base address (normally 0)
-  - Line 128: We declare the method `GetARMMemorySize()` which returns the ARM assigned memory size in bytes (up to 1Gb border)
-  - Line 129: We declare the method `GetVCMemoryBaseAddress()` which returns the VideoCore assigned memory base address
-  - Line 130: We declare the method `GetVCMemorySize()` which returns the VideoCore assigned memory size in bytes
-  - Line 131: We declare the method `GetClockRate()` which returns the clock rate for the specified clock ID
-  - Line 133: We declare the method `GetBoardRevision()` which returns the raw board revision
-- We declare the friend function `GetMachineInfo()`
+  - Line 120: We declare the method `GetModel()` which returns the board model
+  - Line 121: We declare the method `GetName()` which returns the board name
+  - Line 122: We declare the method `GetModelMajor()` which returns the board major model number
+  - Line 123: We declare the method `GetModelRevision()` which returns the board revision number
+  - Line 124: We declare the method `GetSoCType()` which returns the board SoC type
+  - Line 125: We declare the method `GetSoCName()` which returns the board SoC name
+  - Line 126: We declare the method `GetRAMSize()` which returns the physical RAM size in Mb
+  - Line 127: We declare the method `GetSerial()` which returns the board serial number
+  - Line 128: We declare the method `GetFWRevision()` which returns the board firmware revision
+  - Line 129: We declare the method `GetMACAddress()` which returns the ethernet MAC address
+  - Line 130: We declare the method `GetARMMemoryBaseAddress()` which returns the ARM assign memory base address (normally 0)
+  - Line 131: We declare the method `GetARMMemorySize()` which returns the ARM assigned memory size in bytes (up to 1Gb border)
+  - Line 132: We declare the method `GetVCMemoryBaseAddress()` which returns the VideoCore assigned memory base address
+  - Line 133: We declare the method `GetVCMemorySize()` which returns the VideoCore assigned memory size in bytes
+  - Line 134: We declare the method `GetClockRate()` which returns the clock rate for the specified clock ID
+  - Line 136: We declare the method `GetBoardRevision()` which returns the raw board revision
+- Line 139: We declare the friend function `GetMachineInfo()`
 
 ### MachineInfo.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOCPP}
 
@@ -838,450 +841,453 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/MachineInfo.h>
-41:
+41: 
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Console.h>
 44: #include <baremetal/Util.h>
-45:
-46: using namespace baremetal;
-47:
-48: /// <summary>
-49: /// Raspberry Pi board information
-50: /// </summary>
-51: struct BoardInfo
-52: {
-53:     /// @brief Board type
-54:     unsigned   type;
-55:     /// @brief Board model
-56:     BoardModel model;
-57:     /// @brief Board major revision number
-58:     unsigned   majorRevision;
-59: };
-60:
-61: /// @brief Mapping from raw board revision to board model and major revision number
-62: static BoardInfo   s_boardInfo[]{
-63:     {0, BoardModel::RaspberryPi_A, 1},
-64:     {1, BoardModel::RaspberryPi_BRelease2MB512, 1}, // can be other revision
-65:     {2, BoardModel::RaspberryPi_APlus, 1},
-66:     {3, BoardModel::RaspberryPi_BPlus, 1},
-67:     {4, BoardModel::RaspberryPi_2B, 2},
-68:     {6, BoardModel::RaspberryPi_CM, 1},
-69:     {8, BoardModel::RaspberryPi_3B, 3},
-70:     {9, BoardModel::RaspberryPi_Zero, 1},
-71:     {10, BoardModel::RaspberryPi_CM3, 3},
-72:     {12, BoardModel::RaspberryPi_ZeroW, 1},
-73:     {13, BoardModel::RaspberryPi_3BPlus, 3},
-74:     {14, BoardModel::RaspberryPi_3APlus, 3},
-75:     {16, BoardModel::RaspberryPi_CM3Plus, 3},
-76:     {17, BoardModel::RaspberryPi_4B, 4},
-77:     {18, BoardModel::RaspberryPi_Zero2W, 3},
-78:     {19, BoardModel::RaspberryPi_400, 4},
-79:     {20, BoardModel::RaspberryPi_CM4, 4},
-80:     {21, BoardModel::RaspberryPi_CM4S, 4},
-81:     {99, BoardModel::RaspberryPi_5B, 4}
-82: };
-83:
-84: /// <summary>
-85: /// Mapping from BoardModel to board name
-86: ///
-87: /// Must match BoardModel one to one
-88: /// </summary>
-89: static const char *m_boardName[] =
-90: {
-91:     "Raspberry Pi Model A",
-92:     "Raspberry Pi Model B R1",
-93:     "Raspberry Pi Model B R2",
-94:     "Raspberry Pi Model B R2",
-95:     "Raspberry Pi Model A+",
-96:     "Raspberry Pi Model B+",
-97:     "Raspberry Pi Zero",
-98:     "Raspberry Pi Zero W",
-99:     "Raspberry Pi Zero 2 W",
-100:     "Raspberry Pi 2 Model B",
-101:     "Raspberry Pi 3 Model B",
-102:     "Raspberry Pi 3 Model A+",
-103:     "Raspberry Pi 3 Model B+",
-104:     "Compute Module",
-105:     "Compute Module 3",
-106:     "Compute Module 3+",
-107:     "Raspberry Pi 4 Model B",
-108:     "Raspberry Pi 400",
-109:     "Compute Module 4",
-110:     "Compute Module 4S",
-111:     "Raspberry Pi 5 Model B",
-112:     "Unknown"
-113: };
-114:
-115: /// <summary>
-116: /// Mapping from SoC type to SoC name
-117: ///
-118: /// Must match SoCType one to one
-119: /// </summary>
-120: static const char *s_SoCName[] =
-121: {
-122:     "BCM2835",
-123:     "BCM2836",
-124:     "BCM2837",
-125:     "BCM2711",
-126:     "BCM2712",
-127:     "Unknown"};
-128: };
-129:
-130: /// <summary>
-131: /// Constructs a default MachineInfo instance (a singleton). Note that the constructor is private, so GetMachineInfo() is needed to instantiate the MachineInfo.
-132: /// </summary>
-133: MachineInfo::MachineInfo()
-134:     : m_initialized{}
-135:     , m_memoryAccess{ GetMemoryAccess() }
-136:     , m_revisionRaw{}
-137:     , m_boardModel{BoardModel::Unknown}
-138:     , m_boardModelMajor{}
-139:     , m_boardModelRevision{}
-140:     , m_SoCType{SoCType::Unknown}
-141:     , m_ramSize{}
-142:     , m_boardSerial{}
-143:     , m_fwRevision{}
-144:     , m_macAddress{}
-145:     , m_armBaseAddress{}
-146:     , m_armMemorySize{}
-147:     , m_vcBaseAddress{}
-148:     , m_vcMemorySize{}
-149: {
-150: }
-151:
-152: /// <summary>
-153: /// Constructs a specialized MachineInfo instance which injects a custom IMemoryAccess instance. This is intended for testing.
-154: /// </summary>
-155: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
-156: MachineInfo::MachineInfo(IMemoryAccess& memoryAccess)
-157:     : m_initialized{}
-158:     , m_memoryAccess{ memoryAccess }
-159:     , m_revisionRaw{}
-160:     , m_boardModel{ BoardModel::Unknown }
-161:     , m_boardModelMajor{}
-162:     , m_boardModelRevision{}
-163:     , m_SoCType{ SoCType::Unknown }
-164:     , m_ramSize{}
-165:     , m_boardSerial{}
-166:     , m_fwRevision{}
-167:     , m_macAddress{}
-168:     , m_armBaseAddress{}
-169:     , m_armMemorySize{}
-170:     , m_vcBaseAddress{}
-171:     , m_vcMemorySize{}
-172: {
-173: }
-174:
-175: /// <summary>
-176: /// Initialize a MachineInfo instance
-177: ///
-178: /// The member variable m_initialized is used to guard against multiple initialization.
-179: /// The initialization will determine information concerning the board as well as memory and division between ARM and VideoCore, and store this for later retrieval
-180: /// </summary>
-181: /// <returns>Returns true on success, false on failure</returns>
-182: bool MachineInfo::Initialize()
-183: {
-184:     if (!m_initialized)
-185:     {
-186:         Mailbox       mailbox{MailboxChannel::ARM_MAILBOX_CH_PROP_OUT};
-187:         RPIProperties properties(mailbox);
-188:
-189:         if (!properties.GetFirmwareRevision(m_fwRevision))
-190:         {
-191:             GetConsole().Write("Failed to retrieve FW revision\n");
-192:         }
-193:
-194:         if (!properties.GetBoardRevision(m_revisionRaw))
-195:         {
-196:             GetConsole().Write("Failed to retrieve board revision\n");
-197:         }
-198:
-199:         if (!properties.GetBoardSerial(m_boardSerial))
-200:         {
-201:             GetConsole().Write("Failed to retrieve board serial number\n");
-202:         }
-203:
-204:         if (!properties.GetBoardMACAddress(m_macAddress))
-205:         {
-206:             GetConsole().Write("Failed to retrieve MAC address\n");
-207:         }
-208:         if (!properties.GetARMMemory(m_armBaseAddress, m_armMemorySize))
-209:         {
-210:             GetConsole().Write("Failed to retrieve ARM memory info\n");
-211:         }
-212:         if (!properties.GetVCMemory(m_vcBaseAddress, m_vcMemorySize))
-213:         {
-214:             GetConsole().Write("Failed to retrieve VC memory info\n");
-215:         }
-216:
-217:         unsigned type = (static_cast<unsigned>(m_revisionRaw) >> 4) & 0xFF;
-218:         size_t   index{};
-219:         size_t   count = sizeof(s_boardInfo) / sizeof(s_boardInfo[0]);
-220:         for (index = 0; index < count; ++index)
-221:         {
-222:             if (s_boardInfo[index].type == type)
-223:             {
-224:                 break;
-225:             }
-226:         }
-227:
-228:         if (index >= count)
-229:         {
-230:             return false;
-231:         }
-232:
-233:         m_boardModel         = s_boardInfo[index].model;
-234:         m_boardModelMajor    = s_boardInfo[index].majorRevision;
-235:         m_boardModelRevision = (static_cast<unsigned>(m_revisionRaw) & 0xF) + 1;
-236:         m_SoCType            = static_cast<SoCType>((static_cast<unsigned>(m_revisionRaw) >> 12) & 0xF);
-237:         m_ramSize            = 256 << ((static_cast<unsigned>(m_revisionRaw) >> 20) & 7);
-238:         if (m_boardModel == BoardModel::RaspberryPi_BRelease2MB512 && m_ramSize == 256)
-239:         {
-240:             m_boardModel = (m_boardModelRevision == 1) ? BoardModel::RaspberryPi_BRelease1MB256 : BoardModel::RaspberryPi_BRelease2MB256;
-241:         }
-242:         if (static_cast<unsigned>(m_SoCType) >= static_cast<unsigned>(SoCType::Unknown))
-243:         {
-244:             m_SoCType = SoCType::Unknown;
-245:         }
-246:
-247:         m_initialized = true;
-248:     }
-249:     return true;
-250: }
-251:
-252: /// <summary>
-253: /// Returns board model
-254: /// </summary>
-255: /// <returns>Board model</returns>
-256: BoardModel MachineInfo::GetModel()
-257: {
-258:     return m_boardModel;
-259: }
-260:
-261: /// <summary>
-262: /// Returns board name
-263: /// </summary>
-264: /// <returns>Board name</returns>
-265: const char *MachineInfo::GetName()
-266: {
-267:     return m_boardName[static_cast<size_t>(m_boardModel)];
-268: }
-269:
-270: /// <summary>
-271: /// Returns the major board model number
-272: /// </summary>
-273: /// <returns>Major board model number</returns>
-274: uint32 MachineInfo::GetModelMajor()
-275: {
-276:     return m_boardModelMajor;
-277: }
-278:
-279: /// <summary>
-280: /// Returns the board model revision
-281: /// </summary>
-282: /// <returns>Board model revision</returns>
-283: uint32 MachineInfo::GetModelRevision()
-284: {
-285:     return m_boardModelRevision;
-286: }
-287:
-288: /// <summary>
-289: /// Returns the SoC type
-290: /// </summary>
-291: /// <returns>SoC type</returns>
-292: SoCType MachineInfo::GetSoCType()
-293: {
-294:     return m_SoCType;
-295: }
-296:
-297: /// <summary>
-298: /// Returns the SoC name
-299: /// </summary>
-300: /// <returns>SoC name</returns>
-301: const char *MachineInfo::GetSoCName()
-302: {
-303:     return s_SoCName[static_cast<size_t>(m_SoCType)];
-304: }
-305:
-306: /// <summary>
-307: /// Returns the amount of RAM on board in Mb
-308: /// </summary>
-309: /// <returns>RAM size in Mb</returns>
-310: uint32 MachineInfo::GetRAMSize()
-311: {
-312:     return m_ramSize;
-313: }
-314:
-315: /// <summary>
-316: /// Returns the board serial number
-317: /// </summary>
-318: /// <returns>Board serial number</returns>
-319: uint64 MachineInfo::GetSerial()
-320: {
-321:     return m_boardSerial;
-322: }
-323:
-324: /// <summary>
-325: /// Returns the board FW revision
-326: /// </summary>
-327: /// <returns>Board FW revision</returns>
-328: uint32 MachineInfo::GetFWRevision()
-329: {
-330:     return m_fwRevision;
-331: }
-332:
-333: /// <summary>
-334: /// Returns the raw board revision
-335: /// </summary>
-336: /// <returns>Raw board revision</returns>
-337: BoardRevision MachineInfo::GetBoardRevision()
-338: {
-339:     return m_revisionRaw;
-340: }
-341:
-342: /// <summary>
-343: /// Returns the MAC address for the network interface
-344: /// </summary>
-345: /// <param name="macAddress">Network MAC address</param>
-346: void MachineInfo::GetMACAddress(uint8 macAddress[6])
-347: {
-348:     memcpy(macAddress, m_macAddress, sizeof(m_macAddress));
-349: }
-350:
-351: /// <summary>
-352: /// Returns the ARM memory base address
-353: /// </summary>
-354: /// <returns>ARM memory base address</returns>
-355: uint32 MachineInfo::GetARMMemoryBaseAddress()
-356: {
-357:     return m_armBaseAddress;
-358: }
-359:
-360: /// <summary>
-361: /// Returns the amount of memory assigned to the ARM cores in bytes
-362: /// </summary>
-363: /// <returns>Amount of memory assigned to the ARM cores in bytes</returns>
-364: uint32 MachineInfo::GetARMMemorySize()
-365: {
-366:     return m_armMemorySize;
-367: }
-368:
-369: /// <summary>
-370: /// Returns the VideoCore memory base address
-371: /// </summary>
-372: /// <returns>VideoCore memory base address</returns>
-373: uint32 MachineInfo::GetVCMemoryBaseAddress()
-374: {
-375:     return m_vcBaseAddress;
-376: }
-377:
-378: /// <summary>
-379: /// Returns the amount of memory assigned to the VideoCore in bytes
-380: /// </summary>
-381: /// <returns>Amount of memory assigned to the VideoCore in bytes</returns>
-382: uint32 MachineInfo::GetVCMemorySize()
-383: {
-384:     return m_vcMemorySize;
-385: }
-386:
-387: /// <summary>
-388: /// Determine and return the clock rate for a specific clock, or return an estimate
-389: /// </summary>
-390: /// <param name="clockID"></param>
-391: /// <returns></returns>
-392: unsigned MachineInfo::GetClockRate(ClockID clockID) const
-393: {
-394:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
-395:     RPIProperties properties(mailbox);
-396:     uint32        clockRate{};
-397:     if (properties.GetClockRate(clockID, clockRate))
-398:         return clockRate;
-399:     if (properties.GetMeasuredClockRate(clockID, clockRate))
-400:         return clockRate;
-401:
-402:     // if clock rate can not be requested, use a default rate
-403:     unsigned result = 0;
-404:
-405:     switch (clockID)
-406:     {
-407:     case ClockID::EMMC:
-408:     case ClockID::EMMC2:
-409:         result = 100000000;
-410:         break;
-411:
-412:     case ClockID::UART:
-413:         result = 48000000;
-414:         break;
-415:
-416:     case ClockID::CORE:
-417:         result = 300000000; /// \todo Check this
-418:         break;
-419:
-420:     case ClockID::PIXEL_BVB:
+45: 
+46: /// @file
+47: /// Machine info retrieval implementation
+48: 
+49: using namespace baremetal;
+50: 
+51: /// <summary>
+52: /// Raspberry Pi board information
+53: /// </summary>
+54: struct BoardInfo
+55: {
+56:     /// @brief Board type
+57:     unsigned   type;
+58:     /// @brief Board model
+59:     BoardModel model;
+60:     /// @brief Board major revision number
+61:     unsigned   majorRevision;
+62: };
+63: 
+64: /// @brief Mapping from raw board revision to board model and major revision number
+65: static BoardInfo   s_boardInfo[]{
+66:     {0, BoardModel::RaspberryPi_A, 1},
+67:     {1, BoardModel::RaspberryPi_BRelease2MB512, 1}, // can be other revision
+68:     {2, BoardModel::RaspberryPi_APlus, 1},
+69:     {3, BoardModel::RaspberryPi_BPlus, 1},
+70:     {4, BoardModel::RaspberryPi_2B, 2},
+71:     {6, BoardModel::RaspberryPi_CM, 1},
+72:     {8, BoardModel::RaspberryPi_3B, 3},
+73:     {9, BoardModel::RaspberryPi_Zero, 1},
+74:     {10, BoardModel::RaspberryPi_CM3, 3},
+75:     {12, BoardModel::RaspberryPi_ZeroW, 1},
+76:     {13, BoardModel::RaspberryPi_3BPlus, 3},
+77:     {14, BoardModel::RaspberryPi_3APlus, 3},
+78:     {16, BoardModel::RaspberryPi_CM3Plus, 3},
+79:     {17, BoardModel::RaspberryPi_4B, 4},
+80:     {18, BoardModel::RaspberryPi_Zero2W, 3},
+81:     {19, BoardModel::RaspberryPi_400, 4},
+82:     {20, BoardModel::RaspberryPi_CM4, 4},
+83:     {21, BoardModel::RaspberryPi_CM4S, 4},
+84:     {99, BoardModel::RaspberryPi_5B, 4}
+85: };
+86: 
+87: /// <summary>
+88: /// Mapping from BoardModel to board name
+89: ///
+90: /// Must match BoardModel one to one
+91: /// </summary>
+92: static const char *m_boardName[] =
+93: {
+94:     "Raspberry Pi Model A",
+95:     "Raspberry Pi Model B R1",
+96:     "Raspberry Pi Model B R2",
+97:     "Raspberry Pi Model B R2",
+98:     "Raspberry Pi Model A+",
+99:     "Raspberry Pi Model B+",
+100:     "Raspberry Pi Zero",
+101:     "Raspberry Pi Zero W",
+102:     "Raspberry Pi Zero 2 W",
+103:     "Raspberry Pi 2 Model B",
+104:     "Raspberry Pi 3 Model B",
+105:     "Raspberry Pi 3 Model A+",
+106:     "Raspberry Pi 3 Model B+",
+107:     "Compute Module",
+108:     "Compute Module 3",
+109:     "Compute Module 3+",
+110:     "Raspberry Pi 4 Model B",
+111:     "Raspberry Pi 400",
+112:     "Compute Module 4",
+113:     "Compute Module 4S",
+114:     "Raspberry Pi 5 Model B",
+115:     "Unknown"
+116: };
+117: 
+118: /// <summary>
+119: /// Mapping from SoC type to SoC name
+120: ///
+121: /// Must match SoCType one to one
+122: /// </summary>
+123: static const char *s_SoCName[] =
+124: {
+125:     "BCM2835",
+126:     "BCM2836",
+127:     "BCM2837",
+128:     "BCM2711",
+129:     "BCM2712",
+130:     "Unknown"
+131: };
+132: 
+133: /// <summary>
+134: /// Constructs a default MachineInfo instance (a singleton). Note that the constructor is private, so GetMachineInfo() is needed to instantiate the MachineInfo.
+135: /// </summary>
+136: MachineInfo::MachineInfo()
+137:     : m_initialized{}
+138:     , m_memoryAccess{ GetMemoryAccess() }
+139:     , m_revisionRaw{}
+140:     , m_boardModel{BoardModel::Unknown}
+141:     , m_boardModelMajor{}
+142:     , m_boardModelRevision{}
+143:     , m_SoCType{SoCType::Unknown}
+144:     , m_ramSize{}
+145:     , m_boardSerial{}
+146:     , m_fwRevision{}
+147:     , m_macAddress{}
+148:     , m_armBaseAddress{}
+149:     , m_armMemorySize{}
+150:     , m_vcBaseAddress{}
+151:     , m_vcMemorySize{}
+152: {
+153: }
+154: 
+155: /// <summary>
+156: /// Constructs a specialized MachineInfo instance which injects a custom IMemoryAccess instance. This is intended for testing.
+157: /// </summary>
+158: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+159: MachineInfo::MachineInfo(IMemoryAccess& memoryAccess)
+160:     : m_initialized{}
+161:     , m_memoryAccess{ memoryAccess }
+162:     , m_revisionRaw{}
+163:     , m_boardModel{ BoardModel::Unknown }
+164:     , m_boardModelMajor{}
+165:     , m_boardModelRevision{}
+166:     , m_SoCType{ SoCType::Unknown }
+167:     , m_ramSize{}
+168:     , m_boardSerial{}
+169:     , m_fwRevision{}
+170:     , m_macAddress{}
+171:     , m_armBaseAddress{}
+172:     , m_armMemorySize{}
+173:     , m_vcBaseAddress{}
+174:     , m_vcMemorySize{}
+175: {
+176: }
+177: 
+178: /// <summary>
+179: /// Initialize a MachineInfo instance
+180: ///
+181: /// The member variable m_initialized is used to guard against multiple initialization.
+182: /// The initialization will determine information concerning the board as well as memory and division between ARM and VideoCore, and store this for later retrieval
+183: /// </summary>
+184: /// <returns>Returns true on success, false on failure</returns>
+185: bool MachineInfo::Initialize()
+186: {
+187:     if (!m_initialized)
+188:     {
+189:         Mailbox       mailbox{MailboxChannel::ARM_MAILBOX_CH_PROP_OUT};
+190:         RPIProperties properties(mailbox);
+191: 
+192:         if (!properties.GetFirmwareRevision(m_fwRevision))
+193:         {
+194:             GetConsole().Write("Failed to retrieve FW revision\n");
+195:         }
+196: 
+197:         if (!properties.GetBoardRevision(m_revisionRaw))
+198:         {
+199:             GetConsole().Write("Failed to retrieve board revision\n");
+200:         }
+201: 
+202:         if (!properties.GetBoardSerial(m_boardSerial))
+203:         {
+204:             GetConsole().Write("Failed to retrieve board serial number\n");
+205:         }
+206: 
+207:         if (!properties.GetBoardMACAddress(m_macAddress))
+208:         {
+209:             GetConsole().Write("Failed to retrieve MAC address\n");
+210:         }
+211:         if (!properties.GetARMMemory(m_armBaseAddress, m_armMemorySize))
+212:         {
+213:             GetConsole().Write("Failed to retrieve ARM memory info\n");
+214:         }
+215:         if (!properties.GetVCMemory(m_vcBaseAddress, m_vcMemorySize))
+216:         {
+217:             GetConsole().Write("Failed to retrieve VC memory info\n");
+218:         }
+219: 
+220:         unsigned type = (static_cast<unsigned>(m_revisionRaw) >> 4) & 0xFF;
+221:         size_t   index{};
+222:         size_t   count = sizeof(s_boardInfo) / sizeof(s_boardInfo[0]);
+223:         for (index = 0; index < count; ++index)
+224:         {
+225:             if (s_boardInfo[index].type == type)
+226:             {
+227:                 break;
+228:             }
+229:         }
+230: 
+231:         if (index >= count)
+232:         {
+233:             return false;
+234:         }
+235: 
+236:         m_boardModel         = s_boardInfo[index].model;
+237:         m_boardModelMajor    = s_boardInfo[index].majorRevision;
+238:         m_boardModelRevision = (static_cast<unsigned>(m_revisionRaw) & 0xF) + 1;
+239:         m_SoCType            = static_cast<SoCType>((static_cast<unsigned>(m_revisionRaw) >> 12) & 0xF);
+240:         m_ramSize            = 256 << ((static_cast<unsigned>(m_revisionRaw) >> 20) & 7);
+241:         if (m_boardModel == BoardModel::RaspberryPi_BRelease2MB512 && m_ramSize == 256)
+242:         {
+243:             m_boardModel = (m_boardModelRevision == 1) ? BoardModel::RaspberryPi_BRelease1MB256 : BoardModel::RaspberryPi_BRelease2MB256;
+244:         }
+245:         if (static_cast<unsigned>(m_SoCType) >= static_cast<unsigned>(SoCType::Unknown))
+246:         {
+247:             m_SoCType = SoCType::Unknown;
+248:         }
+249: 
+250:         m_initialized = true;
+251:     }
+252:     return true;
+253: }
+254: 
+255: /// <summary>
+256: /// Returns board model
+257: /// </summary>
+258: /// <returns>Board model</returns>
+259: BoardModel MachineInfo::GetModel()
+260: {
+261:     return m_boardModel;
+262: }
+263: 
+264: /// <summary>
+265: /// Returns board name
+266: /// </summary>
+267: /// <returns>Board name</returns>
+268: const char *MachineInfo::GetName()
+269: {
+270:     return m_boardName[static_cast<size_t>(m_boardModel)];
+271: }
+272: 
+273: /// <summary>
+274: /// Returns the major board model number
+275: /// </summary>
+276: /// <returns>Major board model number</returns>
+277: uint32 MachineInfo::GetModelMajor()
+278: {
+279:     return m_boardModelMajor;
+280: }
+281: 
+282: /// <summary>
+283: /// Returns the board model revision
+284: /// </summary>
+285: /// <returns>Board model revision</returns>
+286: uint32 MachineInfo::GetModelRevision()
+287: {
+288:     return m_boardModelRevision;
+289: }
+290: 
+291: /// <summary>
+292: /// Returns the SoC type
+293: /// </summary>
+294: /// <returns>SoC type</returns>
+295: SoCType MachineInfo::GetSoCType()
+296: {
+297:     return m_SoCType;
+298: }
+299: 
+300: /// <summary>
+301: /// Returns the SoC name
+302: /// </summary>
+303: /// <returns>SoC name</returns>
+304: const char *MachineInfo::GetSoCName()
+305: {
+306:     return s_SoCName[static_cast<size_t>(m_SoCType)];
+307: }
+308: 
+309: /// <summary>
+310: /// Returns the amount of RAM on board in Mb
+311: /// </summary>
+312: /// <returns>RAM size in Mb</returns>
+313: uint32 MachineInfo::GetRAMSize()
+314: {
+315:     return m_ramSize;
+316: }
+317: 
+318: /// <summary>
+319: /// Returns the board serial number
+320: /// </summary>
+321: /// <returns>Board serial number</returns>
+322: uint64 MachineInfo::GetSerial()
+323: {
+324:     return m_boardSerial;
+325: }
+326: 
+327: /// <summary>
+328: /// Returns the board FW revision
+329: /// </summary>
+330: /// <returns>Board FW revision</returns>
+331: uint32 MachineInfo::GetFWRevision()
+332: {
+333:     return m_fwRevision;
+334: }
+335: 
+336: /// <summary>
+337: /// Returns the raw board revision
+338: /// </summary>
+339: /// <returns>Raw board revision</returns>
+340: BoardRevision MachineInfo::GetBoardRevision()
+341: {
+342:     return m_revisionRaw;
+343: }
+344: 
+345: /// <summary>
+346: /// Returns the MAC address for the network interface
+347: /// </summary>
+348: /// <param name="macAddress">Network MAC address</param>
+349: void MachineInfo::GetMACAddress(uint8 macAddress[6])
+350: {
+351:     memcpy(macAddress, m_macAddress, sizeof(m_macAddress));
+352: }
+353: 
+354: /// <summary>
+355: /// Returns the ARM memory base address
+356: /// </summary>
+357: /// <returns>ARM memory base address</returns>
+358: uint32 MachineInfo::GetARMMemoryBaseAddress()
+359: {
+360:     return m_armBaseAddress;
+361: }
+362: 
+363: /// <summary>
+364: /// Returns the amount of memory assigned to the ARM cores in bytes
+365: /// </summary>
+366: /// <returns>Amount of memory assigned to the ARM cores in bytes</returns>
+367: uint32 MachineInfo::GetARMMemorySize()
+368: {
+369:     return m_armMemorySize;
+370: }
+371: 
+372: /// <summary>
+373: /// Returns the VideoCore memory base address
+374: /// </summary>
+375: /// <returns>VideoCore memory base address</returns>
+376: uint32 MachineInfo::GetVCMemoryBaseAddress()
+377: {
+378:     return m_vcBaseAddress;
+379: }
+380: 
+381: /// <summary>
+382: /// Returns the amount of memory assigned to the VideoCore in bytes
+383: /// </summary>
+384: /// <returns>Amount of memory assigned to the VideoCore in bytes</returns>
+385: uint32 MachineInfo::GetVCMemorySize()
+386: {
+387:     return m_vcMemorySize;
+388: }
+389: 
+390: /// <summary>
+391: /// Determine and return the clock rate for a specific clock, or return an estimate
+392: /// </summary>
+393: /// <param name="clockID"></param>
+394: /// <returns></returns>
+395: unsigned MachineInfo::GetClockRate(ClockID clockID) const
+396: {
+397:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
+398:     RPIProperties properties(mailbox);
+399:     uint32        clockRate{};
+400:     if (properties.GetClockRate(clockID, clockRate))
+401:         return clockRate;
+402:     if (properties.GetMeasuredClockRate(clockID, clockRate))
+403:         return clockRate;
+404: 
+405:     // if clock rate can not be requested, use a default rate
+406:     unsigned result = 0;
+407: 
+408:     switch (clockID)
+409:     {
+410:     case ClockID::EMMC:
+411:     case ClockID::EMMC2:
+412:         result = 100000000;
+413:         break;
+414: 
+415:     case ClockID::UART:
+416:         result = 48000000;
+417:         break;
+418: 
+419:     case ClockID::CORE:
+420:         result = 300000000; /// \todo Check this
 421:         break;
-422:
-423:     default:
-424:         assert(0);
-425:         break;
-426:     }
-427:
-428:     return result;
-429: }
-430:
-431: /// <summary>
-432: /// Create the singleton MachineInfo instance if needed, initialize it, and return a reference
-433: /// </summary>
-434: /// <returns>Singleton MachineInfo reference</returns>
-435: MachineInfo &baremetal::GetMachineInfo()
-436: {
-437:     static MachineInfo machineInfo;
-438:     machineInfo.Initialize();
-439:     return machineInfo;
-440: }
+422: 
+423:     case ClockID::PIXEL_BVB:
+424:         break;
+425: 
+426:     default:
+427:         assert(0);
+428:         break;
+429:     }
+430: 
+431:     return result;
+432: }
+433: 
+434: /// <summary>
+435: /// Create the singleton MachineInfo instance if needed, initialize it, and return a reference
+436: /// </summary>
+437: /// <returns>Singleton MachineInfo reference</returns>
+438: MachineInfo &baremetal::GetMachineInfo()
+439: {
+440:     static MachineInfo machineInfo;
+441:     machineInfo.Initialize();
+442:     return machineInfo;
+443: }
 ```
 
-- Line 51-59: We declare a structure `BoardInfo` to hold information for the different board models.
+- Line 54-62: We declare a structure `BoardInfo` to hold information for the different board models.
 This is used to map the raw board revision code to a board model
-- Line 62-82: We define an array of `BoardInfo` structure for the mapping to board models
-- Line 89-113: We define an array of strings to map board models to names
-- Line 120-128: We define an array of strings to map SoC types to names
-- Line 133-150: We implement the default constructor
-- Line 156-173: We implement the custom constructor
-- Line 182-250: We implement the `Initialize()` method
-  - Line 186-187: We set up the mailbox
-  - Line 189-192: We request the firmware revision number
-  - Line 194-197: We request the board revision number
-  - Line 199-202: We request the board serial number
-  - Line 204-207: We request the MAC address
-  - Line 208-211: We request the ARM assigned memory information
-  - Line 212-215: We request the VideoCore assigned memory information
-  - Line 217-226: We do some trickery to extract a type code (bits 4-11 of the revision number) and look up the board information
-  - Line 233-234: We set the board model and board major revision number from the board information found
-  - Line 235: We extract the board revision number (bits 0 to 3)
-  - Line 236: We extract the SoC type (bit 12 to 15)
-  - Line 237: We extract the RAM size (bits 20-22)
-  - Line 238-241: We adjust for some special cases for Raspberry Pi 1 and 2
-  - Line 242-245: We check whether the SoC type is valid
-- Line 256-259: We implement the `GetModel()` method which simply returns the saved board model
-- Line 265-268: We implement the `GetName()` method which returns the name for the board model
-- Line 274-277: We implement the `GetModelMajor()` method which simply returns the saved board major revision number
-- Line 283-286: We implement the `GetModelRevision()` method which simply returns the saved board revision number
-- Line 292-295: We implement the `GetSoCType()` method which simply returns the saved SoC type
-- Line 301-304: We implement the `GetSoCName()` method which returns the name of the SoC type
-- Line 310-313: We implement the `GetRAMSize()` method which simply returns the saved memory size
-- Line 319-322: We implement the `GetSerial()` method which simply returns the saved board serial number
-- Line 328-331: We implement the `GetFWRevision()` method which simply returns the saved firmware revision number
-- Line 337-340: We implement the `GetBoardRevision()` method which simply returns the saved raw board revision code
-- Line 346-349: We implement the `GetMACAddress()` method which simply returns the saved MAC address
-- Line 355-358: We implement the `GetARMMemoryBaseAddress()` method which simply returns the saved ARM memory base address
-- Line 364-367: We implement the `GetARMMemorySize()` method which simply returns the saved ARM memory size
-- Line 373-376: We implement the `GetVCMemoryBaseAddress()` method which simply returns the saved VideoCore memory base address
-- Line 382-385: We implement the `GetVCMemorySize()` method which simply returns the saved VideoCore memory size
-- Line 392-429: We implement the `GetClockRate()` method, which tries to request the set clock rate,
+- Line 65-85: We define an array of `BoardInfo` structure for the mapping to board models
+- Line 92-116: We define an array of strings to map board models to names
+- Line 123-131: We define an array of strings to map SoC types to names
+- Line 136-153: We implement the default constructor
+- Line 159-176: We implement the custom constructor
+- Line 185-253: We implement the `Initialize()` method
+  - Line 189-190: We set up the mailbox
+  - Line 192-195: We request the firmware revision number
+  - Line 197-200: We request the board revision number
+  - Line 202-205: We request the board serial number
+  - Line 207-210: We request the MAC address
+  - Line 211-214: We request the ARM assigned memory information
+  - Line 215-218: We request the VideoCore assigned memory information
+  - Line 220-229: We do some trickery to extract a type code (bits 4-11 of the revision number) and look up the board information
+  - Line 236-237: We set the board model and board major revision number from the board information found
+  - Line 238: We extract the board revision number (bits 0 to 3)
+  - Line 239: We extract the SoC type (bit 12 to 15)
+  - Line 240: We extract the RAM size (bits 20-22)
+  - Line 241-244: We adjust for some special cases for Raspberry Pi 1 and 2
+  - Line 245-248: We check whether the SoC type is valid
+- Line 259-262: We implement the `GetModel()` method which simply returns the saved board model
+- Line 268-271: We implement the `GetName()` method which returns the name for the board model
+- Line 277-280: We implement the `GetModelMajor()` method which simply returns the saved board major revision number
+- Line 286-289: We implement the `GetModelRevision()` method which simply returns the saved board revision number
+- Line 295-298: We implement the `GetSoCType()` method which simply returns the saved SoC type
+- Line 304-307: We implement the `GetSoCName()` method which returns the name of the SoC type
+- Line 313-316: We implement the `GetRAMSize()` method which simply returns the saved memory size
+- Line 322-325: We implement the `GetSerial()` method which simply returns the saved board serial number
+- Line 331-334: We implement the `GetFWRevision()` method which simply returns the saved firmware revision number
+- Line 340-343: We implement the `GetBoardRevision()` method which simply returns the saved raw board revision code
+- Line 349-352: We implement the `GetMACAddress()` method which simply returns the saved MAC address
+- Line 358-361: We implement the `GetARMMemoryBaseAddress()` method which simply returns the saved ARM memory base address
+- Line 367-370: We implement the `GetARMMemorySize()` method which simply returns the saved ARM memory size
+- Line 376-379: We implement the `GetVCMemoryBaseAddress()` method which simply returns the saved VideoCore memory base address
+- Line 385-388: We implement the `GetVCMemorySize()` method which simply returns the saved VideoCore memory size
+- Line 395-432: We implement the `GetClockRate()` method, which tries to request the set clock rate,
 if not available the measured clock rate, and if all fails an estimate of the clock frequency
-- Line 435-440: We implement the `GetMachineInfo()` function
+- Line 438-443: We implement the `GetMachineInfo()` function
 
 ### Logger.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_LOGGERCPP}
 
@@ -1300,21 +1306,25 @@ File: code/libraries/baremetal/src/Logger.cpp
 47: #include <baremetal/Util.h>
 48: #include <baremetal/Version.h>
 ...
-72: bool Logger::Initialize()
-73: {
-74:     if (m_initialized)
-75:         return true;
-76:     SetupVersion();
-77:     m_initialized = true; // Stop reentrant calls from happening
-78:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
-79:
-80:     return true;
-81: }
+72: /// <summary>
+73: /// Initialize logger
+74: /// </summary>
+75: /// <returns>true on succes, false on failure</returns>
+76: bool Logger::Initialize()
+77: {
+78:     if (m_initialized)
+79:         return true;
+80:     SetupVersion();
+81:     m_initialized = true; // Stop reentrant calls from happening
+82:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
+83: 
+84:     return true;
+85: }
 ...
 ```
 
 - Line 44: We need to include `MachineInfo.h`
-- Line 78: We will now using the methods `GetName()` and `GetSoCName()` from `MachineInfo` to print the board name and the SoC name.
+- Line 82: We will now using the methods `GetName()` and `GetSoCName()` from `MachineInfo` to print the board name and the SoC name.
 
 ### Update project configuration {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_UPDATE_PROJECT_CONFIGURATION}
 

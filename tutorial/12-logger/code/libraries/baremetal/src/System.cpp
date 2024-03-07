@@ -53,7 +53,7 @@
 
 using namespace baremetal;
 
-/// @brief Define log name for this module
+/// @brief Define log name
 LOG_MODULE("System");
 
 #ifdef __cplusplus

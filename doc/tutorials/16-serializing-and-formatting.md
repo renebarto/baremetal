@@ -58,7 +58,6 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 136: #define LOG_NO_ALLOC(severity, message) GetLogger().WriteNoAlloc(From, __LINE__, severity, message);
 137:
 138: } // namespace baremetal
-139:
 ```
 
 ### Logger.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_LOGGERCPP}
@@ -80,222 +79,222 @@ File: code/libraries/baremetal/src/Logger.cpp
 48: #include <baremetal/Util.h>
 49: #include <baremetal/Version.h>
 ...
-70: /// <summary>
-71: /// Initialize logger
-72: /// </summary>
-73: /// <returns>true on succes, false on failure</returns>
-74: bool Logger::Initialize()
-75: {
-76:     if (m_initialized)
-77:         return true;
-78:     SetupVersion();
-79:     m_initialized = true; // Stop reentrant calls from happening
-80:     LOG_NO_ALLOC_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
-81:
-82:     return true;
-83: }
+73: /// <summary>
+74: /// Initialize logger
+75: /// </summary>
+76: /// <returns>true on succes, false on failure</returns>
+77: bool Logger::Initialize()
+78: {
+79:     if (m_initialized)
+80:         return true;
+81:     SetupVersion();
+82:     m_initialized = true; // Stop reentrant calls from happening
+83:     LOG_NO_ALLOC_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
+84: 
+85:     return true;
+86: }
 ...
-109: /// <summary>
-110: /// Write a string with variable arguments to the logger
-111: /// </summary>
-112: /// <param name="source">Source name or file name</param>
-113: /// <param name="line">Source line number</param>
-114: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-115: /// <param name="message">Formatted message string</param>
-116: /// <param name="args">Variable argument list</param>
-117: void Logger::WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args)
-118: {
-119:     if (static_cast<int>(severity) > static_cast<int>(m_level))
-120:         return;
-121:
-122:     string lineBuffer;
-123:
-124:     auto sourceString = Format(" (%s:%d)", source, line);
-125:
-126:     auto messageBuffer = FormatV(message, args);
-127:
-128:     switch (severity)
-129:     {
-130:     case LogSeverity::Panic:
-131:         lineBuffer += "!Panic!";
-132:         break;
-133:     case LogSeverity::Error:
-134:         lineBuffer += "Error  ";
+112: /// <summary>
+113: /// Write a string with variable arguments to the logger
+114: /// </summary>
+115: /// <param name="source">Source name or file name</param>
+116: /// <param name="line">Source line number</param>
+117: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+118: /// <param name="message">Formatted message string</param>
+119: /// <param name="args">Variable argument list</param>
+120: void Logger::WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args)
+121: {
+122:     if (static_cast<int>(severity) > static_cast<int>(m_level))
+123:         return;
+124: 
+125:     string lineBuffer;
+126: 
+127:     auto sourceString = Format(" (%s:%d)", source, line);
+128: 
+129:     auto messageBuffer = FormatV(message, args);
+130: 
+131:     switch (severity)
+132:     {
+133:     case LogSeverity::Panic:
+134:         lineBuffer += "!Panic!";
 135:         break;
-136:     case LogSeverity::Warning:
-137:         lineBuffer += "Warning";
+136:     case LogSeverity::Error:
+137:         lineBuffer += "Error  ";
 138:         break;
-139:     case LogSeverity::Info:
-140:         lineBuffer += "Info   ";
+139:     case LogSeverity::Warning:
+140:         lineBuffer += "Warning";
 141:         break;
-142:     case LogSeverity::Debug:
-143:         lineBuffer += "Debug  ";
+142:     case LogSeverity::Info:
+143:         lineBuffer += "Info   ";
 144:         break;
-145:     }
-146:
-147:     if (m_timer != nullptr)
-148:     {
-149:         const size_t TimeBufferSize = 32;
-150:         char timeBuffer[TimeBufferSize]{};
-151:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-152:         if (strlen(timeBuffer) > 0)
-153:         {
-154:             lineBuffer += timeBuffer;
-155:             lineBuffer += ' ';
-156:         }
-157:     }
-158:
-159:     lineBuffer += messageBuffer;
-160:     lineBuffer += sourceString;
-161:     lineBuffer += "\n";
-162:
-163: #if BAREMETAL_COLOR_OUTPUT
-164:     switch (severity)
-165:     {
-166:     case LogSeverity::Panic:
-167:         m_console.Write(lineBuffer, ConsoleColor::BrightRed);
-168:         break;
-169:     case LogSeverity::Error:
-170:         m_console.Write(lineBuffer, ConsoleColor::Red);
+145:     case LogSeverity::Debug:
+146:         lineBuffer += "Debug  ";
+147:         break;
+148:     }
+149: 
+150:     if (m_timer != nullptr)
+151:     {
+152:         const size_t TimeBufferSize = 32;
+153:         char timeBuffer[TimeBufferSize]{};
+154:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+155:         if (strlen(timeBuffer) > 0)
+156:         {
+157:             lineBuffer += timeBuffer;
+158:             lineBuffer += ' ';
+159:         }
+160:     }
+161: 
+162:     lineBuffer += messageBuffer;
+163:     lineBuffer += sourceString;
+164:     lineBuffer += "\n";
+165: 
+166: #if BAREMETAL_COLOR_OUTPUT
+167:     switch (severity)
+168:     {
+169:     case LogSeverity::Panic:
+170:         m_console.Write(lineBuffer, ConsoleColor::BrightRed);
 171:         break;
-172:     case LogSeverity::Warning:
-173:         m_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+172:     case LogSeverity::Error:
+173:         m_console.Write(lineBuffer, ConsoleColor::Red);
 174:         break;
-175:     case LogSeverity::Info:
-176:         m_console.Write(lineBuffer, ConsoleColor::Cyan);
+175:     case LogSeverity::Warning:
+176:         m_console.Write(lineBuffer, ConsoleColor::BrightYellow);
 177:         break;
-178:     case LogSeverity::Debug:
-179:         m_console.Write(lineBuffer, ConsoleColor::Yellow);
+178:     case LogSeverity::Info:
+179:         m_console.Write(lineBuffer, ConsoleColor::Cyan);
 180:         break;
-181:     default:
-182:         m_console.Write(lineBuffer, ConsoleColor::White);
+181:     case LogSeverity::Debug:
+182:         m_console.Write(lineBuffer, ConsoleColor::Yellow);
 183:         break;
-184:     }
-185: #else
-186:     m_console.Write(lineBuffer);
-187: #endif
-188:
-189:     if (severity == LogSeverity::Panic)
-190:     {
-191:         GetSystem().Halt();
-192:     }
-193: }
-194:
-195: /// <summary>
-196: /// Write a string with variable arguments to the logger
-197: /// </summary>
-198: /// <param name="source">Source name or file name</param>
-199: /// <param name="line">Source line number</param>
-200: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-201: /// <param name="message">Formatted message string, with variable arguments</param>
-202: void Logger::WriteNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
-203: {
-204:     va_list var;
-205:     va_start(var, message);
-206:     WriteNoAllocV(source, line, severity, message, var);
-207:     va_end(var);
-208: }
-209:
-210: /// <summary>
-211: /// Write a string with variable arguments to the logger
-212: /// </summary>
-213: /// <param name="source">Source name or file name</param>
-214: /// <param name="line">Source line number</param>
-215: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-216: /// <param name="message">Formatted message string</param>
-217: /// <param name="args">Variable argument list</param>
-218: void Logger::WriteNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
-219: {
-220:     if (static_cast<int>(severity) > static_cast<int>(m_level))
-221:         return;
-222:
-223:     static const size_t BufferSize = 1024;
-224:     char buffer[BufferSize]{};
-225:
-226:     char sourceString[BufferSize]{};
-227:     FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
-228:
-229:     char messageBuffer[BufferSize]{};
-230:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
-231:
-232:     switch (severity)
-233:     {
-234:     case LogSeverity::Panic:
-235:         strncat(buffer, "!Panic!", BufferSize);
-236:         break;
-237:     case LogSeverity::Error:
-238:         strncat(buffer, "Error  ", BufferSize);
+184:     default:
+185:         m_console.Write(lineBuffer, ConsoleColor::White);
+186:         break;
+187:     }
+188: #else
+189:     m_console.Write(lineBuffer);
+190: #endif
+191: 
+192:     if (severity == LogSeverity::Panic)
+193:     {
+194:         GetSystem().Halt();
+195:     }
+196: }
+197: 
+198: /// <summary>
+199: /// Write a string with variable arguments to the logger
+200: /// </summary>
+201: /// <param name="source">Source name or file name</param>
+202: /// <param name="line">Source line number</param>
+203: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+204: /// <param name="message">Formatted message string, with variable arguments</param>
+205: void Logger::WriteNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
+206: {
+207:     va_list var;
+208:     va_start(var, message);
+209:     WriteNoAllocV(source, line, severity, message, var);
+210:     va_end(var);
+211: }
+212: 
+213: /// <summary>
+214: /// Write a string with variable arguments to the logger
+215: /// </summary>
+216: /// <param name="source">Source name or file name</param>
+217: /// <param name="line">Source line number</param>
+218: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+219: /// <param name="message">Formatted message string</param>
+220: /// <param name="args">Variable argument list</param>
+221: void Logger::WriteNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+222: {
+223:     if (static_cast<int>(severity) > static_cast<int>(m_level))
+224:         return;
+225: 
+226:     static const size_t BufferSize = 1024;
+227:     char buffer[BufferSize]{};
+228: 
+229:     char sourceString[BufferSize]{};
+230:     FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
+231: 
+232:     char messageBuffer[BufferSize]{};
+233:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
+234: 
+235:     switch (severity)
+236:     {
+237:     case LogSeverity::Panic:
+238:         strncat(buffer, "!Panic!", BufferSize);
 239:         break;
-240:     case LogSeverity::Warning:
-241:         strncat(buffer, "Warning", BufferSize);
+240:     case LogSeverity::Error:
+241:         strncat(buffer, "Error  ", BufferSize);
 242:         break;
-243:     case LogSeverity::Info:
-244:         strncat(buffer, "Info   ", BufferSize);
+243:     case LogSeverity::Warning:
+244:         strncat(buffer, "Warning", BufferSize);
 245:         break;
-246:     case LogSeverity::Debug:
-247:         strncat(buffer, "Debug  ", BufferSize);
+246:     case LogSeverity::Info:
+247:         strncat(buffer, "Info   ", BufferSize);
 248:         break;
-249:     }
-250:
-251:     if (m_timer != nullptr)
-252:     {
-253:         const size_t TimeBufferSize = 32;
-254:         char timeBuffer[TimeBufferSize]{};
-255:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-256:         if (strlen(timeBuffer) > 0)
-257:         {
-258:             strncat(buffer, timeBuffer, BufferSize);
-259:             strncat(buffer, " ", BufferSize);
-260:         }
-261:     }
-262:
-263:     strncat(buffer, messageBuffer, BufferSize);
-264:     strncat(buffer, sourceString, BufferSize);
-265:     strncat(buffer, "\n", BufferSize);
-266:
-267: #if BAREMETAL_COLOR_OUTPUT
-268:     switch (severity)
-269:     {
-270:     case LogSeverity::Panic:
-271:         m_console.Write(buffer, ConsoleColor::BrightRed);
-272:         break;
-273:     case LogSeverity::Error:
-274:         m_console.Write(buffer, ConsoleColor::Red);
+249:     case LogSeverity::Debug:
+250:         strncat(buffer, "Debug  ", BufferSize);
+251:         break;
+252:     }
+253: 
+254:     if (m_timer != nullptr)
+255:     {
+256:         const size_t TimeBufferSize = 32;
+257:         char timeBuffer[TimeBufferSize]{};
+258:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+259:         if (strlen(timeBuffer) > 0)
+260:         {
+261:             strncat(buffer, timeBuffer, BufferSize);
+262:             strncat(buffer, " ", BufferSize);
+263:         }
+264:     }
+265: 
+266:     strncat(buffer, messageBuffer, BufferSize);
+267:     strncat(buffer, sourceString, BufferSize);
+268:     strncat(buffer, "\n", BufferSize);
+269: 
+270: #if BAREMETAL_COLOR_OUTPUT
+271:     switch (severity)
+272:     {
+273:     case LogSeverity::Panic:
+274:         m_console.Write(buffer, ConsoleColor::BrightRed);
 275:         break;
-276:     case LogSeverity::Warning:
-277:         m_console.Write(buffer, ConsoleColor::BrightYellow);
+276:     case LogSeverity::Error:
+277:         m_console.Write(buffer, ConsoleColor::Red);
 278:         break;
-279:     case LogSeverity::Info:
-280:         m_console.Write(buffer, ConsoleColor::Cyan);
+279:     case LogSeverity::Warning:
+280:         m_console.Write(buffer, ConsoleColor::BrightYellow);
 281:         break;
-282:     case LogSeverity::Debug:
-283:         m_console.Write(buffer, ConsoleColor::Yellow);
+282:     case LogSeverity::Info:
+283:         m_console.Write(buffer, ConsoleColor::Cyan);
 284:         break;
-285:     default:
-286:         m_console.Write(buffer, ConsoleColor::White);
+285:     case LogSeverity::Debug:
+286:         m_console.Write(buffer, ConsoleColor::Yellow);
 287:         break;
-288:     }
-289: #else
-290:     m_console.Write(buffer);
-291: #endif
-292:
-293:     if (severity == LogSeverity::Panic)
-294:     {
-295:         GetSystem().Halt();
-296:     }
-297: }
+288:     default:
+289:         m_console.Write(buffer, ConsoleColor::White);
+290:         break;
+291:     }
+292: #else
+293:     m_console.Write(buffer);
+294: #endif
+295: 
+296:     if (severity == LogSeverity::Panic)
+297:     {
+298:         GetSystem().Halt();
+299:     }
+300: }
 ...
 ```
 
 - Line 45: As we're going to use the `string` class, we include its header
-- Line 80: We use the macro `LOG_NO_ALLOC_INFO` to make sure the first line printed by the logger does not need memory allocation
-- Line 117-193: The new, memory-allocating version of WriteV will use the `string` class
-  - Line 122: We compose the line in a string
-  - Line 124: We compose the source line information in a string. We use the memory allocating version of `Format()` for this
-  - Line 126: We compose the message in a string. We use the memory allocating version of `FormatV()` for this
-  - Line 128-161: We append to the line using the add operator `+=`
-- Line 202-208: We implement the non memory-allocating `WriteNoAlloc()`. This uses `WriteNoAllocV()` for output
-- Line 218-297: We implement the non memory-allocating `WriteNoAllocV()`. This is the original function, but using `FormatNoAlloc()` and `FormatNoAllocV()`
+- Line 83: We use the macro `LOG_NO_ALLOC_INFO` to make sure the first line printed by the logger does not need memory allocation
+- Line 120-196: The new, memory-allocating version of WriteV will use the `string` class
+  - Line 125: We compose the line in a string
+  - Line 127: We compose the source line information in a string. We use the memory allocating version of `Format()` for this
+  - Line 129: We compose the message in a string. We use the memory allocating version of `FormatV()` for this
+  - Line 131-164: We append to the line using the add operator `+=`
+- Line 205-211: We implement the non memory-allocating `WriteNoAlloc()`. This uses `WriteNoAllocV()` for output
+- Line 221-300: We implement the non memory-allocating `WriteNoAllocV()`. This is the original function, but using `FormatNoAlloc()` and `FormatNoAllocV()`
 
 ### Format.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_FORMATH}
 
@@ -306,16 +305,16 @@ Update the file `code/libraries/baremetal/include/baremetal/Format.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Format.h
 ...
-45: namespace baremetal {
-46:
-47: class string;
-48:
-49: string FormatV(const char* format, va_list args);
-50: string Format(const char* format, ...);
-51: void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args);
-52: void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...);
-53:
-54: } // namespace baremetal
+48: namespace baremetal {
+49: 
+50: class string;
+51: 
+52: string FormatV(const char* format, va_list args);
+53: string Format(const char* format, ...);
+54: void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args);
+55: void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...);
+56: 
+57: } // namespace baremetal
 ```
 
 ### Format.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_FORMATCPP}
@@ -327,1046 +326,1102 @@ Update the file `code/libraries/baremetal/src/Format.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Format.cpp
 ...
-File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Format.cpp
 42: #include <baremetal/Serialization.h>
 43: #include <baremetal/String.h>
 44: #include <baremetal/Util.h>
 45: 
-46: namespace baremetal {
-47: 
-48: /// @brief Write characters with base above 10 as uppercase or not
-49: static bool           Uppercase = true;
+46: /// @file
+47: /// Formatting functionality implementation
+48: 
+49: namespace baremetal {
 50: 
-51: static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
-52: static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+51: /// @brief Write characters with base above 10 as uppercase or not
+52: static bool           Uppercase = true;
 53: 
-54: /// <summary>
-55: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
-56: /// </summary>
-57: /// <param name="value">Digit value</param>
-58: /// <returns>Converted digit character</returns>
-59: static constexpr char GetDigit(uint8 value)
-60: {
-61:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
-62: }
-63: 
-64: /// <summary>
-65: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
-66: /// </summary>
-67: /// <param name="bits">Size of integer in bits</param>
-68: /// <param name="base">Base to be used</param>
-69: /// <returns>Maximum amount of digits needed</returns>
-70: static constexpr int BitsToDigits(int bits, int base)
-71: {
-72:     int result = 0;
-73:     uint64 value = 0xFFFFFFFFFFFFFFFF;
-74:     if (bits < 64)
-75:         value &= ((1ULL << bits) - 1);
-76: 
-77:     while (value > 0)
-78:     {
-79:         value /= base;
-80:         result++;
-81:     }
-82: 
-83:     return result;
-84: }
+54: static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+55: static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+56: 
+57: /// <summary>
+58: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
+59: /// </summary>
+60: /// <param name="value">Digit value</param>
+61: /// <returns>Converted digit character</returns>
+62: static constexpr char GetDigit(uint8 value)
+63: {
+64:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
+65: }
+66: 
+67: /// <summary>
+68: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
+69: /// </summary>
+70: /// <param name="bits">Size of integer in bits</param>
+71: /// <param name="base">Base to be used</param>
+72: /// <returns>Maximum amount of digits needed</returns>
+73: static constexpr int BitsToDigits(int bits, int base)
+74: {
+75:     int result = 0;
+76:     uint64 value = 0xFFFFFFFFFFFFFFFF;
+77:     if (bits < 64)
+78:         value &= ((1ULL << bits) - 1);
+79: 
+80:     while (value > 0)
+81:     {
+82:         value /= base;
+83:         result++;
+84:     }
 85: 
-86: /// <summary>
-87: /// PrintValue a 32 bit signed value to buffer.
-88: ///
-89: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-90: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
-91: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-92: ///
-93: /// Base is the digit base, which can range from 2 to 36.
-94: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-95: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-96: /// </summary>
-97: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-98: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-99: /// <param name="value">Value to be serialized</param>
-100: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-101: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-102: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-103: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-104: static void PrintValue(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros)
-105: {
-106:     PrintValueInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
-107: }
-108: 
-109: /// <summary>
-110: /// PrintValue a 32 bit unsigned value to buffer.
-111: ///
-112: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-113: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
-114: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-115: ///
-116: /// Base is the digit base, which can range from 2 to 36.
-117: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-118: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-119: /// </summary>
-120: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-121: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-122: /// <param name="value">Value to be serialized</param>
-123: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-124: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-125: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-126: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-127: static void PrintValue(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
-128: {
-129:     PrintValueInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
-130: }
-131: 
-132: /// <summary>
-133: /// PrintValue a 64 bit signed value to buffer.
-134: ///
-135: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-136: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
-137: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-138: ///
-139: /// Base is the digit base, which can range from 2 to 36.
-140: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-141: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-142: /// </summary>
-143: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-144: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-145: /// <param name="value">Value to be serialized</param>
-146: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-147: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-148: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-149: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-150: static void PrintValue(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros)
-151: {
-152:     PrintValueInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
-153: }
-154: 
-155: /// <summary>
-156: /// PrintValue a 64 bit unsigned value to buffer.
-157: ///
-158: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-159: /// Width specifies the minimum width in characters. The value is always written right aligned.
-160: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-161: ///
-162: /// Base is the digit base, which can range from 2 to 36.
-163: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-164: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-165: /// </summary>
-166: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-167: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-168: /// <param name="value">Value to be serialized</param>
-169: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-170: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-171: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-172: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-173: static void PrintValue(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
-174: {
-175:     PrintValueInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
-176: }
-177: 
-178: /// <summary>
-179: /// PrintValue long long int value, type specific specialization
-180: /// </summary>
-181: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-182: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-183: /// <param name="value">Value to be serialized</param>
-184: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-185: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-186: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-187: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-188: inline static void PrintValue(char* buffer, size_t bufferSize, long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
-189: {
-190:     PrintValue(buffer, bufferSize, static_cast<int64>(value), width, base, showBase, leadingZeros);
-191: }
-192: /// <summary>
-193: /// PrintValue unsigned long long int value, type specific specialization
-194: /// </summary>
-195: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-196: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-197: /// <param name="value">Value to be serialized</param>
-198: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-199: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-200: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-201: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-202: inline static void PrintValue(char* buffer, size_t bufferSize, unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
-203: {
-204:     PrintValue(buffer, bufferSize, static_cast<uint64>(value), width, base, showBase, leadingZeros);
-205: }
-206: 
-207: /// <summary>
-208: /// PrintValue a double value to buffer. The value will be printed as a fixed point number.
-209: ///
-210: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, the string is terminated to hold maximum bufferSize - 1 characters.
-211: /// Width is currently unused.
-212: /// Precision specifies the number of digits behind the decimal pointer
-213: /// </summary>
-214: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-215: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-216: /// <param name="value">Value to be serialized</param>
-217: /// <param name="width">Unused</param>
-218: /// <param name="precision">Number of digits after the decimal point to use</param>
-219: static void PrintValue(char* buffer, size_t bufferSize, double value, int width, int precision)
-220: {
-221:     bool negative{};
-222:     if (value < 0)
-223:     {
-224:         negative = true;
-225:         value = -value;
-226:     }
-227: 
-228:     if (bufferSize == 0)
-229:         return;
+86:     return result;
+87: }
+88: 
+89: /// <summary>
+90: /// PrintValue a 32 bit signed value to buffer.
+91: ///
+92: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+93: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+94: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+95: ///
+96: /// Base is the digit base, which can range from 2 to 36.
+97: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+98: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+99: /// </summary>
+100: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+101: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+102: /// <param name="value">Value to be serialized</param>
+103: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+104: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+105: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+106: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+107: static void PrintValue(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros)
+108: {
+109:     PrintValueInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+110: }
+111: 
+112: /// <summary>
+113: /// PrintValue a 32 bit unsigned value to buffer.
+114: ///
+115: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+116: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+117: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+118: ///
+119: /// Base is the digit base, which can range from 2 to 36.
+120: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+121: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+122: /// </summary>
+123: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+124: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+125: /// <param name="value">Value to be serialized</param>
+126: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+127: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+128: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+129: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+130: static void PrintValue(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
+131: {
+132:     PrintValueInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+133: }
+134: 
+135: /// <summary>
+136: /// PrintValue a 64 bit signed value to buffer.
+137: ///
+138: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+139: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+140: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+141: ///
+142: /// Base is the digit base, which can range from 2 to 36.
+143: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+144: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+145: /// </summary>
+146: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+147: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+148: /// <param name="value">Value to be serialized</param>
+149: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+150: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+151: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+152: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+153: static void PrintValue(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros)
+154: {
+155:     PrintValueInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+156: }
+157: 
+158: /// <summary>
+159: /// PrintValue a 64 bit unsigned value to buffer.
+160: ///
+161: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+162: /// Width specifies the minimum width in characters. The value is always written right aligned.
+163: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+164: ///
+165: /// Base is the digit base, which can range from 2 to 36.
+166: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+167: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+168: /// </summary>
+169: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+170: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+171: /// <param name="value">Value to be serialized</param>
+172: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+173: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+174: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+175: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+176: static void PrintValue(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+177: {
+178:     PrintValueInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+179: }
+180: 
+181: /// <summary>
+182: /// PrintValue long long int value, type specific specialization
+183: /// </summary>
+184: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+185: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+186: /// <param name="value">Value to be serialized</param>
+187: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+188: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+189: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+190: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+191: inline static void PrintValue(char* buffer, size_t bufferSize, long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+192: {
+193:     PrintValue(buffer, bufferSize, static_cast<int64>(value), width, base, showBase, leadingZeros);
+194: }
+195: /// <summary>
+196: /// PrintValue unsigned long long int value, type specific specialization
+197: /// </summary>
+198: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+199: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+200: /// <param name="value">Value to be serialized</param>
+201: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+202: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+203: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+204: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+205: inline static void PrintValue(char* buffer, size_t bufferSize, unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+206: {
+207:     PrintValue(buffer, bufferSize, static_cast<uint64>(value), width, base, showBase, leadingZeros);
+208: }
+209: 
+210: /// <summary>
+211: /// PrintValue a double value to buffer. The value will be printed as a fixed point number.
+212: ///
+213: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, the string is terminated to hold maximum bufferSize - 1 characters.
+214: /// Width is currently unused.
+215: /// Precision specifies the number of digits behind the decimal pointer
+216: /// </summary>
+217: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+218: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+219: /// <param name="value">Value to be serialized</param>
+220: /// <param name="width">Unused</param>
+221: /// <param name="precision">Number of digits after the decimal point to use</param>
+222: static void PrintValue(char* buffer, size_t bufferSize, double value, int width, int precision)
+223: {
+224:     bool negative{};
+225:     if (value < 0)
+226:     {
+227:         negative = true;
+228:         value = -value;
+229:     }
 230: 
-231:     // We can only print values with integral parts up to what uint64 can hold
-232:     if (value > static_cast<double>(static_cast<uint64>(-1)))
-233:     {
-234:         strncpy(buffer, "overflow", bufferSize);
-235:         return;
-236:     }
-237: 
-238:     *buffer = '\0';
-239:     if (negative)
-240:         strncpy(buffer, "-", bufferSize);
-241: 
-242:     uint64 integralPart = static_cast<uint64>(value);
-243:     const size_t TmpBufferSize = 32;
-244:     char tmpBuffer[TmpBufferSize];
-245:     PrintValue(tmpBuffer, TmpBufferSize, integralPart, 0, 10, false, false);
-246:     strncat(buffer, tmpBuffer, bufferSize);
-247:     const int MaxPrecision = 7;
-248: 
-249:     if (precision != 0)
-250:     {
-251:         strncat(buffer, ".", bufferSize);
-252: 
-253:         if (precision > MaxPrecision)
-254:         {
-255:             precision = MaxPrecision;
-256:         }
-257: 
-258:         uint64 precisionPower10 = 1;
-259:         for (int i = 1; i <= precision; i++)
-260:         {
-261:             precisionPower10 *= 10;
-262:         }
-263: 
-264:         value -= static_cast<double>(integralPart);
-265:         value *= static_cast<double>(precisionPower10);
+231:     if (bufferSize == 0)
+232:         return;
+233: 
+234:     // We can only print values with integral parts up to what uint64 can hold
+235:     if (value > static_cast<double>(static_cast<uint64>(-1)))
+236:     {
+237:         strncpy(buffer, "overflow", bufferSize);
+238:         return;
+239:     }
+240: 
+241:     *buffer = '\0';
+242:     if (negative)
+243:         strncpy(buffer, "-", bufferSize);
+244: 
+245:     uint64 integralPart = static_cast<uint64>(value);
+246:     const size_t TmpBufferSize = 32;
+247:     char tmpBuffer[TmpBufferSize];
+248:     PrintValue(tmpBuffer, TmpBufferSize, integralPart, 0, 10, false, false);
+249:     strncat(buffer, tmpBuffer, bufferSize);
+250:     const int MaxPrecision = 7;
+251: 
+252:     if (precision != 0)
+253:     {
+254:         strncat(buffer, ".", bufferSize);
+255: 
+256:         if (precision > MaxPrecision)
+257:         {
+258:             precision = MaxPrecision;
+259:         }
+260: 
+261:         uint64 precisionPower10 = 1;
+262:         for (int i = 1; i <= precision; i++)
+263:         {
+264:             precisionPower10 *= 10;
+265:         }
 266: 
-267:         PrintValue(tmpBuffer, TmpBufferSize, static_cast<uint64>(value), 0, 10, false, false);
-268:         strncat(buffer, tmpBuffer, bufferSize);
-269:         precision -= strlen(tmpBuffer);
-270:         while (precision--)
-271:         {
-272:             strncat(buffer, "0", bufferSize);
-273:         }
-274:     }
-275: }
-276: 
-277: /// <summary>
-278: /// PrintValue a const char * value to buffer. The value can be quoted.
-279: ///
-280: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-281: /// If quote is true, the string is printed within double quotes (\")
-282: /// </summary>
-283: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-284: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-285: /// <param name="value">String to be serialized</param>
-286: /// <param name="width">Unused</param>
-287: /// <param name="quote">If true, value is printed between double quotes, if false, no quotes are used</param>
-288: static void PrintValue(char* buffer, size_t bufferSize, const char* value, int width, bool quote)
-289: {
-290:     size_t numChars = strlen(value);
-291:     if (quote)
-292:         numChars += 2;
-293: 
-294:     // Leave one character for \0
-295:     if (numChars > bufferSize - 1)
-296:         return;
-297: 
-298:     char* bufferPtr = buffer;
-299: 
-300:     if (quote)
-301:         *bufferPtr++ = '\"';
-302:     while (*value)
-303:     {
-304:         *bufferPtr++ = *value++;
-305:     }
-306:     if (quote)
-307:         *bufferPtr++ = '\"';
-308: }
-309: 
-310: /// <summary>
-311: /// Internal serialization function, to be used for all signed values.
-312: ///
-313: /// PrintValue a signed value to buffer.
-314: ///
-315: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-316: /// Width specifies the minimum width in characters. The value is always written right aligned.
-317: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-318: ///
-319: /// Base is the digit base, which can range from 2 to 36.
-320: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-321: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-322: /// </summary>
-323: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-324: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-325: /// <param name="value">Value to be serialized</param>
-326: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-327: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-328: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-329: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-330: /// <param name="numBits">Specifies the number of bits used for the value</param>
-331: static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-332: {
-333:     if ((base < 2) || (base > 36))
-334:         return;
-335: 
-336:     int       numDigits = 0;
-337:     bool      negative = (value < 0);
-338:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
-339:     uint64    divisor = 1;
-340:     uint64    divisorLast = 1;
-341:     size_t    absWidth = (width < 0) ? -width : width;
-342:     const int maxDigits = BitsToDigits(numBits, base);
-343:     while ((absVal >= divisor) && (numDigits <= maxDigits))
-344:     {
-345:         divisorLast = divisor;
-346:         divisor *= base;
-347:         ++numDigits;
-348:     }
-349:     divisor = divisorLast;
-350: 
-351:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-352:     if (showBase)
-353:     {
-354:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-355:     }
-356:     if (negative)
-357:     {
-358:         numChars++;
-359:     }
-360:     if (absWidth > numChars)
-361:         numChars = absWidth;
-362:     // Leave one character for \0
-363:     if (numChars > bufferSize - 1)
-364:         return;
-365: 
-366:     char* bufferPtr = buffer;
-367:     if (negative)
-368:     {
-369:         *bufferPtr++ = '-';
-370:     }
-371: 
-372:     if (showBase)
-373:     {
-374:         if (base == 2)
-375:         {
-376:             *bufferPtr++ = '0';
-377:             *bufferPtr++ = 'b';
-378:         }
-379:         else if (base == 8)
-380:         {
-381:             *bufferPtr++ = '0';
-382:         }
-383:         else if (base == 16)
-384:         {
-385:             *bufferPtr++ = '0';
-386:             *bufferPtr++ = 'x';
-387:         }
-388:     }
-389:     if (leadingZeros)
-390:     {
-391:         if (absWidth == 0)
-392:             absWidth = maxDigits;
-393:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-394:         {
-395:             *bufferPtr++ = '0';
-396:         }
-397:     }
-398:     else
-399:     {
-400:         if (numDigits == 0)
-401:         {
-402:             *bufferPtr++ = '0';
-403:         }
-404:     }
-405:     while (numDigits > 0)
-406:     {
-407:         int digit = (absVal / divisor) % base;
-408:         *bufferPtr++ = GetDigit(digit);
-409:         --numDigits;
-410:         divisor /= base;
-411:     }
-412:     *bufferPtr++ = '\0';
-413: }
-414: 
-415: /// <summary>
-416: /// Internal serialization function, to be used for all unsigned values.
-417: ///
-418: /// PrintValue a unsigned value to buffer.
-419: ///
-420: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-421: /// Width specifies the minimum width in characters. The value is always written right aligned.
-422: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-423: ///
-424: /// Base is the digit base, which can range from 2 to 36.
-425: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-426: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-427: /// </summary>
-428: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-429: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-430: /// <param name="value">Value to be serialized</param>
-431: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-432: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-433: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-434: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-435: /// <param name="numBits">Specifies the number of bits used for the value</param>
-436: static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-437: {
-438:     if ((base < 2) || (base > 36))
-439:         return;
-440: 
-441:     int       numDigits = 0;
-442:     uint64    divisor = 1;
-443:     uint64    divisorLast = 1;
-444:     uint64    divisorHigh = 0;
-445:     size_t    absWidth = (width < 0) ? -width : width;
-446:     const int maxDigits = BitsToDigits(numBits, base);
-447:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
-448:     {
-449:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
-450:         divisorLast = divisor;
-451:         divisor *= base;
-452:         ++numDigits;
-453:     }
-454:     divisor = divisorLast;
-455: 
-456:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-457:     if (showBase)
-458:     {
-459:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-460:     }
-461:     if (absWidth > numChars)
-462:         numChars = absWidth;
-463:     // Leave one character for \0
-464:     if (numChars > bufferSize - 1)
-465:         return;
-466: 
-467:     char* bufferPtr = buffer;
-468: 
-469:     if (showBase)
-470:     {
-471:         if (base == 2)
-472:         {
-473:             *bufferPtr++ = '0';
-474:             *bufferPtr++ = 'b';
-475:         }
-476:         else if (base == 8)
-477:         {
-478:             *bufferPtr++ = '0';
-479:         }
-480:         else if (base == 16)
-481:         {
-482:             *bufferPtr++ = '0';
-483:             *bufferPtr++ = 'x';
-484:         }
-485:     }
-486:     if (leadingZeros)
-487:     {
-488:         if (absWidth == 0)
-489:             absWidth = maxDigits;
-490:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-491:         {
-492:             *bufferPtr++ = '0';
-493:         }
-494:     }
-495:     else
-496:     {
-497:         if (numDigits == 0)
-498:         {
-499:             *bufferPtr++ = '0';
-500:         }
-501:     }
-502:     while (numDigits > 0)
-503:     {
-504:         int digit = (value / divisor) % base;
-505:         *bufferPtr++ = GetDigit(digit);
-506:         --numDigits;
-507:         divisor /= base;
-508:     }
-509:     *bufferPtr++ = '\0';
-510: }
-511: 
-512: static const size_t BufferSize = 4096;
-513: 
-514: static void Append(char* buffer, size_t bufferSize, char c)
-515: {
-516:     size_t len = strlen(buffer);
-517:     char* p = buffer + len;
-518:     if (static_cast<size_t>(p - buffer) < bufferSize)
-519:     {
-520:         *p++ = c;
-521:     }
-522:     if (static_cast<size_t>(p - buffer) < bufferSize)
-523:     {
-524:         *p = '\0';
-525:     }
-526: }
-527: 
-528: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
-529: {
-530:     size_t len = strlen(buffer);
-531:     char* p = buffer + len;
-532:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
-533:     {
-534:         *p++ = c;
-535:         --count;
-536:     }
-537:     if (static_cast<size_t>(p - buffer) < bufferSize)
-538:     {
-539:         *p = '\0';
-540:     }
-541: }
-542: 
-543: static void Append(char* buffer, size_t bufferSize, const char* str)
-544: {
-545:     strncat(buffer, str, bufferSize);
-546: }
-547: 
-548: string Format(const char* format, ...)
-549: {
-550:     va_list var;
-551:     va_start(var, format);
-552: 
-553:     string result = FormatV(format, var);
-554: 
-555:     va_end(var);
-556: 
-557:     return result;
-558: }
-559: 
-560: string FormatV(const char* format, va_list args)
-561: {
-562:     string result;
-563: 
-564:     while (*format != '\0')
-565:     {
-566:         if (*format == '%')
-567:         {
-568:             if (*++format == '%')
-569:             {
-570:                 result += '%';
-571:                 format++;
-572:                 continue;
-573:             }
-574: 
-575:             bool alternate = false;
-576:             if (*format == '#')
-577:             {
-578:                 alternate = true;
-579:                 format++;
-580:             }
-581: 
-582:             bool left = false;
-583:             if (*format == '-')
-584:             {
-585:                 left = true;
-586:                 format++;
-587:             }
+267:         value -= static_cast<double>(integralPart);
+268:         value *= static_cast<double>(precisionPower10);
+269: 
+270:         PrintValue(tmpBuffer, TmpBufferSize, static_cast<uint64>(value), 0, 10, false, false);
+271:         strncat(buffer, tmpBuffer, bufferSize);
+272:         precision -= strlen(tmpBuffer);
+273:         while (precision--)
+274:         {
+275:             strncat(buffer, "0", bufferSize);
+276:         }
+277:     }
+278: }
+279: 
+280: /// <summary>
+281: /// PrintValue a const char * value to buffer. The value can be quoted.
+282: ///
+283: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+284: /// If quote is true, the string is printed within double quotes (\")
+285: /// </summary>
+286: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+287: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+288: /// <param name="value">String to be serialized</param>
+289: /// <param name="width">Unused</param>
+290: /// <param name="quote">If true, value is printed between double quotes, if false, no quotes are used</param>
+291: static void PrintValue(char* buffer, size_t bufferSize, const char* value, int width, bool quote)
+292: {
+293:     size_t numChars = strlen(value);
+294:     if (quote)
+295:         numChars += 2;
+296: 
+297:     // Leave one character for \0
+298:     if (numChars > bufferSize - 1)
+299:         return;
+300: 
+301:     char* bufferPtr = buffer;
+302: 
+303:     if (quote)
+304:         *bufferPtr++ = '\"';
+305:     while (*value)
+306:     {
+307:         *bufferPtr++ = *value++;
+308:     }
+309:     if (quote)
+310:         *bufferPtr++ = '\"';
+311: }
+312: 
+313: /// <summary>
+314: /// Internal serialization function, to be used for all signed values.
+315: ///
+316: /// PrintValue a signed value to buffer.
+317: ///
+318: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+319: /// Width specifies the minimum width in characters. The value is always written right aligned.
+320: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+321: ///
+322: /// Base is the digit base, which can range from 2 to 36.
+323: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+324: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+325: /// </summary>
+326: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+327: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+328: /// <param name="value">Value to be serialized</param>
+329: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+330: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+331: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+332: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+333: /// <param name="numBits">Specifies the number of bits used for the value</param>
+334: static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+335: {
+336:     if ((base < 2) || (base > 36))
+337:         return;
+338: 
+339:     int       numDigits = 0;
+340:     bool      negative = (value < 0);
+341:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
+342:     uint64    divisor = 1;
+343:     uint64    divisorLast = 1;
+344:     size_t    absWidth = (width < 0) ? -width : width;
+345:     const int maxDigits = BitsToDigits(numBits, base);
+346:     while ((absVal >= divisor) && (numDigits <= maxDigits))
+347:     {
+348:         divisorLast = divisor;
+349:         divisor *= base;
+350:         ++numDigits;
+351:     }
+352:     divisor = divisorLast;
+353: 
+354:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+355:     if (showBase)
+356:     {
+357:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+358:     }
+359:     if (negative)
+360:     {
+361:         numChars++;
+362:     }
+363:     if (absWidth > numChars)
+364:         numChars = absWidth;
+365:     // Leave one character for \0
+366:     if (numChars > bufferSize - 1)
+367:         return;
+368: 
+369:     char* bufferPtr = buffer;
+370:     if (negative)
+371:     {
+372:         *bufferPtr++ = '-';
+373:     }
+374: 
+375:     if (showBase)
+376:     {
+377:         if (base == 2)
+378:         {
+379:             *bufferPtr++ = '0';
+380:             *bufferPtr++ = 'b';
+381:         }
+382:         else if (base == 8)
+383:         {
+384:             *bufferPtr++ = '0';
+385:         }
+386:         else if (base == 16)
+387:         {
+388:             *bufferPtr++ = '0';
+389:             *bufferPtr++ = 'x';
+390:         }
+391:     }
+392:     if (leadingZeros)
+393:     {
+394:         if (absWidth == 0)
+395:             absWidth = maxDigits;
+396:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+397:         {
+398:             *bufferPtr++ = '0';
+399:         }
+400:     }
+401:     else
+402:     {
+403:         if (numDigits == 0)
+404:         {
+405:             *bufferPtr++ = '0';
+406:         }
+407:     }
+408:     while (numDigits > 0)
+409:     {
+410:         int digit = (absVal / divisor) % base;
+411:         *bufferPtr++ = GetDigit(digit);
+412:         --numDigits;
+413:         divisor /= base;
+414:     }
+415:     *bufferPtr++ = '\0';
+416: }
+417: 
+418: /// <summary>
+419: /// Internal serialization function, to be used for all unsigned values.
+420: ///
+421: /// PrintValue a unsigned value to buffer.
+422: ///
+423: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+424: /// Width specifies the minimum width in characters. The value is always written right aligned.
+425: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+426: ///
+427: /// Base is the digit base, which can range from 2 to 36.
+428: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+429: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+430: /// </summary>
+431: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+432: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+433: /// <param name="value">Value to be serialized</param>
+434: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+435: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+436: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+437: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+438: /// <param name="numBits">Specifies the number of bits used for the value</param>
+439: static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+440: {
+441:     if ((base < 2) || (base > 36))
+442:         return;
+443: 
+444:     int       numDigits = 0;
+445:     uint64    divisor = 1;
+446:     uint64    divisorLast = 1;
+447:     uint64    divisorHigh = 0;
+448:     size_t    absWidth = (width < 0) ? -width : width;
+449:     const int maxDigits = BitsToDigits(numBits, base);
+450:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
+451:     {
+452:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+453:         divisorLast = divisor;
+454:         divisor *= base;
+455:         ++numDigits;
+456:     }
+457:     divisor = divisorLast;
+458: 
+459:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+460:     if (showBase)
+461:     {
+462:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+463:     }
+464:     if (absWidth > numChars)
+465:         numChars = absWidth;
+466:     // Leave one character for \0
+467:     if (numChars > bufferSize - 1)
+468:         return;
+469: 
+470:     char* bufferPtr = buffer;
+471: 
+472:     if (showBase)
+473:     {
+474:         if (base == 2)
+475:         {
+476:             *bufferPtr++ = '0';
+477:             *bufferPtr++ = 'b';
+478:         }
+479:         else if (base == 8)
+480:         {
+481:             *bufferPtr++ = '0';
+482:         }
+483:         else if (base == 16)
+484:         {
+485:             *bufferPtr++ = '0';
+486:             *bufferPtr++ = 'x';
+487:         }
+488:     }
+489:     if (leadingZeros)
+490:     {
+491:         if (absWidth == 0)
+492:             absWidth = maxDigits;
+493:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+494:         {
+495:             *bufferPtr++ = '0';
+496:         }
+497:     }
+498:     else
+499:     {
+500:         if (numDigits == 0)
+501:         {
+502:             *bufferPtr++ = '0';
+503:         }
+504:     }
+505:     while (numDigits > 0)
+506:     {
+507:         int digit = (value / divisor) % base;
+508:         *bufferPtr++ = GetDigit(digit);
+509:         --numDigits;
+510:         divisor /= base;
+511:     }
+512:     *bufferPtr++ = '\0';
+513: }
+514: 
+515: /// <summary>
+516: /// Size of buffer used by FormatNoAllocV internally
+517: /// </summary>
+518: static const size_t BufferSize = 4096;
+519: 
+520: /// <summary>
+521: /// Append a character to the buffer
+522: /// </summary>
+523: /// <param name="buffer">Buffer to write to</param>
+524: /// <param name="bufferSize">Size of the buffer</param>
+525: /// <param name="c">Character to append</param>
+526: static void Append(char* buffer, size_t bufferSize, char c)
+527: {
+528:     size_t len = strlen(buffer);
+529:     char* p = buffer + len;
+530:     if (static_cast<size_t>(p - buffer) < bufferSize)
+531:     {
+532:         *p++ = c;
+533:     }
+534:     if (static_cast<size_t>(p - buffer) < bufferSize)
+535:     {
+536:         *p = '\0';
+537:     }
+538: }
+539: 
+540: /// <summary>
+541: /// Append a set of identical characters to the buffer
+542: /// </summary>
+543: /// <param name="buffer">Buffer to write to</param>
+544: /// <param name="bufferSize">Size of the buffer</param>
+545: /// <param name="count">Number of characters to append</param>
+546: /// <param name="c">Character to append</param>
+547: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
+548: {
+549:     size_t len = strlen(buffer);
+550:     char* p = buffer + len;
+551:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
+552:     {
+553:         *p++ = c;
+554:         --count;
+555:     }
+556:     if (static_cast<size_t>(p - buffer) < bufferSize)
+557:     {
+558:         *p = '\0';
+559:     }
+560: }
+561: 
+562: /// <summary>
+563: /// Append a string to the buffer
+564: /// </summary>
+565: /// <param name="buffer">Buffer to write to</param>
+566: /// <param name="bufferSize">Size of the buffer</param>
+567: /// <param name="str">String to append</param>
+568: static void Append(char* buffer, size_t bufferSize, const char* str)
+569: {
+570:     strncat(buffer, str, bufferSize);
+571: }
+572: 
+573: /// <summary>
+574: /// Format a string
+575: ///
+576: /// This version of Format uses the string class, and thus allocates memory
+577: /// </summary>
+578: /// <param name="format">Format string (printf like)</param>
+579: /// <returns>Resulting string</returns>
+580: string Format(const char* format, ...)
+581: {
+582:     va_list var;
+583:     va_start(var, format);
+584: 
+585:     string result = FormatV(format, var);
+586: 
+587:     va_end(var);
 588: 
-589:             bool leadingZero = false;
-590:             if (*format == '0')
-591:             {
-592:                 leadingZero = true;
-593:                 format++;
-594:             }
-595: 
-596:             size_t width = 0;
-597:             while (('0' <= *format) && (*format <= '9'))
-598:             {
-599:                 width = width * 10 + (*format - '0');
-600:                 format++;
-601:             }
-602: 
-603:             unsigned precision = 6;
-604:             if (*format == '.')
-605:             {
-606:                 format++;
-607:                 precision = 0;
-608:                 while ('0' <= *format && *format <= '9')
-609:                 {
-610:                     precision = precision * 10 + (*format - '0');
-611: 
-612:                     format++;
-613:                 }
-614:             }
-615: 
-616:             bool haveLong{};
-617:             bool haveLongLong{};
-618: 
-619:             if (*format == 'l')
-620:             {
-621:                 if (*(format + 1) == 'l')
-622:                 {
-623:                     haveLongLong = true;
-624: 
-625:                     format++;
-626:                 }
-627:                 else
-628:                 {
-629:                     haveLong = true;
-630:                 }
-631: 
-632:                 format++;
-633:             }
-634: 
-635:             switch (*format)
-636:             {
-637:             case 'c':
+589:     return result;
+590: }
+591: 
+592: /// <summary>
+593: /// Format a string
+594: ///
+595: /// This version of FormatV uses the string class, and thus allocates memory
+596: /// </summary>
+597: /// <param name="format">Format string (printf like)</param>
+598: /// <param name="args">Variable argument list</param>
+599: /// <returns>Resulting string</returns>
+600: string FormatV(const char* format, va_list args)
+601: {
+602:     string result;
+603: 
+604:     while (*format != '\0')
+605:     {
+606:         if (*format == '%')
+607:         {
+608:             if (*++format == '%')
+609:             {
+610:                 result += '%';
+611:                 format++;
+612:                 continue;
+613:             }
+614: 
+615:             bool alternate = false;
+616:             if (*format == '#')
+617:             {
+618:                 alternate = true;
+619:                 format++;
+620:             }
+621: 
+622:             bool left = false;
+623:             if (*format == '-')
+624:             {
+625:                 left = true;
+626:                 format++;
+627:             }
+628: 
+629:             bool leadingZero = false;
+630:             if (*format == '0')
+631:             {
+632:                 leadingZero = true;
+633:                 format++;
+634:             }
+635: 
+636:             size_t width = 0;
+637:             while (('0' <= *format) && (*format <= '9'))
 638:             {
-639:                 char ch = static_cast<char>(va_arg(args, int));
-640:                 if (left)
-641:                 {
-642:                     result += ch;
-643:                     if (width > 1)
-644:                     {
-645:                         result.append(width - 1, ' ');
-646:                     }
-647:                 }
-648:                 else
+639:                 width = width * 10 + (*format - '0');
+640:                 format++;
+641:             }
+642: 
+643:             unsigned precision = 6;
+644:             if (*format == '.')
+645:             {
+646:                 format++;
+647:                 precision = 0;
+648:                 while ('0' <= *format && *format <= '9')
 649:                 {
-650:                     if (width > 1)
-651:                     {
-652:                         result.append(width - 1, ' ');
-653:                     }
-654:                     result += ch;
-655:                 }
-656:             }
-657:             break;
+650:                     precision = precision * 10 + (*format - '0');
+651: 
+652:                     format++;
+653:                 }
+654:             }
+655: 
+656:             bool haveLong{};
+657:             bool haveLongLong{};
 658: 
-659:             case 'd':
-660:             case 'i':
-661:                 if (haveLongLong)
+659:             if (*format == 'l')
+660:             {
+661:                 if (*(format + 1) == 'l')
 662:                 {
-663:                     result.append(Serialize(va_arg(args, int64), left ? -width : width, 10, false, leadingZero));
-664:                 }
-665:                 else if (haveLong)
-666:                 {
-667:                     result.append(Serialize(va_arg(args, int32), left ? -width : width, 10, false, leadingZero));
-668:                 }
-669:                 else
-670:                 {
-671:                     result.append(Serialize(va_arg(args, int), left ? -width : width, 10, false, leadingZero));
-672:                 }
-673:                 break;
+663:                     haveLongLong = true;
+664: 
+665:                     format++;
+666:                 }
+667:                 else
+668:                 {
+669:                     haveLong = true;
+670:                 }
+671: 
+672:                 format++;
+673:             }
 674: 
-675:             case 'f':
+675:             switch (*format)
 676:             {
-677:                 result.append(Serialize(va_arg(args, double), left ? -width : width, precision));
-678:             }
-679:             break;
-680: 
-681:             case 'b':
-682:                 if (alternate)
-683:                 {
-684:                     result.append("0b");
-685:                 }
-686:                 if (haveLongLong)
-687:                 {
-688:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 2, false, leadingZero));
-689:                 }
-690:                 else if (haveLong)
-691:                 {
-692:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 2, false, leadingZero));
-693:                 }
-694:                 else
-695:                 {
-696:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero));
-697:                 }
-698:                 break;
-699: 
-700:             case 'o':
-701:                 if (alternate)
+677:             case 'c':
+678:             {
+679:                 char ch = static_cast<char>(va_arg(args, int));
+680:                 if (left)
+681:                 {
+682:                     result += ch;
+683:                     if (width > 1)
+684:                     {
+685:                         result.append(width - 1, ' ');
+686:                     }
+687:                 }
+688:                 else
+689:                 {
+690:                     if (width > 1)
+691:                     {
+692:                         result.append(width - 1, ' ');
+693:                     }
+694:                     result += ch;
+695:                 }
+696:             }
+697:             break;
+698: 
+699:             case 'd':
+700:             case 'i':
+701:                 if (haveLongLong)
 702:                 {
-703:                     result.append("0");
+703:                     result.append(Serialize(va_arg(args, int64), left ? -width : width, 10, false, leadingZero));
 704:                 }
-705:                 if (haveLongLong)
+705:                 else if (haveLong)
 706:                 {
-707:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 8, false, leadingZero));
+707:                     result.append(Serialize(va_arg(args, int32), left ? -width : width, 10, false, leadingZero));
 708:                 }
-709:                 else if (haveLong)
+709:                 else
 710:                 {
-711:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 8, false, leadingZero));
+711:                     result.append(Serialize(va_arg(args, int), left ? -width : width, 10, false, leadingZero));
 712:                 }
-713:                 else
-714:                 {
-715:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero));
-716:                 }
-717:                 break;
-718: 
-719:             case 's':
-720:             {
-721:                 result.append(Serialize(va_arg(args, const char*), left ? -width : width, false));
-722:             }
-723:             break;
-724: 
-725:             case 'u':
+713:                 break;
+714: 
+715:             case 'f':
+716:             {
+717:                 result.append(Serialize(va_arg(args, double), left ? -width : width, precision));
+718:             }
+719:             break;
+720: 
+721:             case 'b':
+722:                 if (alternate)
+723:                 {
+724:                     result.append("0b");
+725:                 }
 726:                 if (haveLongLong)
 727:                 {
-728:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 10, false, leadingZero));
+728:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 2, false, leadingZero));
 729:                 }
 730:                 else if (haveLong)
 731:                 {
-732:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 10, false, leadingZero));
+732:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 2, false, leadingZero));
 733:                 }
 734:                 else
 735:                 {
-736:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero));
+736:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero));
 737:                 }
 738:                 break;
 739: 
-740:             case 'x':
-741:             case 'X':
-742:                 if (alternate)
-743:                 {
-744:                     result.append("0x");
-745:                 }
-746:                 if (haveLongLong)
-747:                 {
-748:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 16, false, leadingZero));
-749:                 }
-750:                 else if (haveLong)
-751:                 {
-752:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 16, false, leadingZero));
-753:                 }
-754:                 else
-755:                 {
-756:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero));
-757:                 }
-758:                 break;
-759: 
-760:             case 'p':
-761:                 if (alternate)
-762:                 {
-763:                     result.append("0x");
-764:                 }
-765:                 {
-766:                     result.append(Serialize(va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero));
-767:                 }
-768:                 break;
-769: 
-770:             default:
-771:                 result += '%';
-772:                 result += *format;
-773:                 break;
-774:             }
-775:         }
-776:         else
-777:         {
-778:             result += *format;
-779:         }
-780: 
-781:         format++;
-782:     }
-783: 
-784:     return result;
-785: }
-786: 
-787: void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
-788: {
-789:     va_list var;
-790:     va_start(var, format);
-791: 
-792:     FormatNoAllocV(buffer, bufferSize, format, var);
-793: 
-794:     va_end(var);
-795: }
-796: 
-797: void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args)
-798: {
-799:     buffer[0] = '\0';
-800: 
-801:     while (*format != '\0')
-802:     {
-803:         if (*format == '%')
-804:         {
-805:             if (*++format == '%')
-806:             {
-807:                 Append(buffer, bufferSize, '%');
-808:                 format++;
-809:                 continue;
-810:             }
-811: 
-812:             bool alternate = false;
-813:             if (*format == '#')
-814:             {
-815:                 alternate = true;
-816:                 format++;
-817:             }
-818: 
-819:             bool left = false;
-820:             if (*format == '-')
-821:             {
-822:                 left = true;
-823:                 format++;
-824:             }
-825: 
-826:             bool leadingZero = false;
-827:             if (*format == '0')
-828:             {
-829:                 leadingZero = true;
-830:                 format++;
-831:             }
-832: 
-833:             size_t width = 0;
-834:             while (('0' <= *format) && (*format <= '9'))
-835:             {
-836:                 width = width * 10 + (*format - '0');
-837:                 format++;
-838:             }
+740:             case 'o':
+741:                 if (alternate)
+742:                 {
+743:                     result.append("0");
+744:                 }
+745:                 if (haveLongLong)
+746:                 {
+747:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 8, false, leadingZero));
+748:                 }
+749:                 else if (haveLong)
+750:                 {
+751:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 8, false, leadingZero));
+752:                 }
+753:                 else
+754:                 {
+755:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero));
+756:                 }
+757:                 break;
+758: 
+759:             case 's':
+760:             {
+761:                 result.append(Serialize(va_arg(args, const char*), left ? -width : width, false));
+762:             }
+763:             break;
+764: 
+765:             case 'u':
+766:                 if (haveLongLong)
+767:                 {
+768:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 10, false, leadingZero));
+769:                 }
+770:                 else if (haveLong)
+771:                 {
+772:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 10, false, leadingZero));
+773:                 }
+774:                 else
+775:                 {
+776:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero));
+777:                 }
+778:                 break;
+779: 
+780:             case 'x':
+781:             case 'X':
+782:                 if (alternate)
+783:                 {
+784:                     result.append("0x");
+785:                 }
+786:                 if (haveLongLong)
+787:                 {
+788:                     result.append(Serialize(va_arg(args, uint64), left ? -width : width, 16, false, leadingZero));
+789:                 }
+790:                 else if (haveLong)
+791:                 {
+792:                     result.append(Serialize(va_arg(args, uint32), left ? -width : width, 16, false, leadingZero));
+793:                 }
+794:                 else
+795:                 {
+796:                     result.append(Serialize(va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero));
+797:                 }
+798:                 break;
+799: 
+800:             case 'p':
+801:                 if (alternate)
+802:                 {
+803:                     result.append("0x");
+804:                 }
+805:                 {
+806:                     result.append(Serialize(va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero));
+807:                 }
+808:                 break;
+809: 
+810:             default:
+811:                 result += '%';
+812:                 result += *format;
+813:                 break;
+814:             }
+815:         }
+816:         else
+817:         {
+818:             result += *format;
+819:         }
+820: 
+821:         format++;
+822:     }
+823: 
+824:     return result;
+825: }
+826: 
+827: /// <summary>
+828: /// Format a string
+829: ///
+830: /// This version of Format writes directly to a buffer, and does not allocate memory
+831: /// </summary>
+832: /// <param name="buffer">Buffer to write to</param>
+833: /// <param name="bufferSize">Size of the buffer</param>
+834: /// <param name="format">Format string (printf like)</param>
+835: void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
+836: {
+837:     va_list var;
+838:     va_start(var, format);
 839: 
-840:             unsigned precision = 6;
-841:             if (*format == '.')
-842:             {
-843:                 format++;
-844:                 precision = 0;
-845:                 while ('0' <= *format && *format <= '9')
-846:                 {
-847:                     precision = precision * 10 + (*format - '0');
-848: 
-849:                     format++;
-850:                 }
-851:             }
-852: 
-853:             bool haveLong{};
-854:             bool haveLongLong{};
-855: 
-856:             if (*format == 'l')
-857:             {
-858:                 if (*(format + 1) == 'l')
-859:                 {
-860:                     haveLongLong = true;
-861: 
-862:                     format++;
-863:                 }
-864:                 else
-865:                 {
-866:                     haveLong = true;
-867:                 }
+840:     FormatNoAllocV(buffer, bufferSize, format, var);
+841: 
+842:     va_end(var);
+843: }
+844: 
+845: /// <summary>
+846: /// Format a string
+847: ///
+848: /// This version of FormatV writes directly to a buffer, and does not allocate memory
+849: /// </summary>
+850: /// <param name="buffer">Buffer to write to</param>
+851: /// <param name="bufferSize">Size of the buffer</param>
+852: /// <param name="format">Format string (printf like)</param>
+853: /// <param name="args">Variable argument list</param>
+854: void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args)
+855: {
+856:     buffer[0] = '\0';
+857: 
+858:     while (*format != '\0')
+859:     {
+860:         if (*format == '%')
+861:         {
+862:             if (*++format == '%')
+863:             {
+864:                 Append(buffer, bufferSize, '%');
+865:                 format++;
+866:                 continue;
+867:             }
 868: 
-869:                 format++;
-870:             }
-871: 
-872:             switch (*format)
-873:             {
-874:             case 'c':
-875:             {
-876:                 char ch = static_cast<char>(va_arg(args, int));
-877:                 if (left)
-878:                 {
-879:                     Append(buffer, bufferSize, ch);
-880:                     if (width > 1)
-881:                     {
-882:                         Append(buffer, bufferSize, width - 1, ' ');
-883:                     }
-884:                 }
-885:                 else
-886:                 {
-887:                     if (width > 1)
-888:                     {
-889:                         Append(buffer, bufferSize, width - 1, ' ');
-890:                     }
-891:                     Append(buffer, bufferSize, ch);
-892:                 }
-893:             }
-894:             break;
-895: 
-896:             case 'd':
-897:             case 'i':
-898:                 if (haveLongLong)
-899:                 {
-900:                     char str[BufferSize]{};
-901:                     PrintValue(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
-902:                     Append(buffer, bufferSize, str);
-903:                 }
-904:                 else if (haveLong)
-905:                 {
-906:                     char str[BufferSize]{};
-907:                     PrintValue(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
-908:                     Append(buffer, bufferSize, str);
-909:                 }
-910:                 else
-911:                 {
-912:                     char str[BufferSize]{};
-913:                     PrintValue(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
-914:                     Append(buffer, bufferSize, str);
-915:                 }
-916:                 break;
-917: 
-918:             case 'f':
-919:             {
-920:                 char str[BufferSize]{};
-921:                 PrintValue(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
-922:                 Append(buffer, bufferSize, str);
-923:             }
-924:             break;
+869:             bool alternate = false;
+870:             if (*format == '#')
+871:             {
+872:                 alternate = true;
+873:                 format++;
+874:             }
+875: 
+876:             bool left = false;
+877:             if (*format == '-')
+878:             {
+879:                 left = true;
+880:                 format++;
+881:             }
+882: 
+883:             bool leadingZero = false;
+884:             if (*format == '0')
+885:             {
+886:                 leadingZero = true;
+887:                 format++;
+888:             }
+889: 
+890:             size_t width = 0;
+891:             while (('0' <= *format) && (*format <= '9'))
+892:             {
+893:                 width = width * 10 + (*format - '0');
+894:                 format++;
+895:             }
+896: 
+897:             unsigned precision = 6;
+898:             if (*format == '.')
+899:             {
+900:                 format++;
+901:                 precision = 0;
+902:                 while ('0' <= *format && *format <= '9')
+903:                 {
+904:                     precision = precision * 10 + (*format - '0');
+905: 
+906:                     format++;
+907:                 }
+908:             }
+909: 
+910:             bool haveLong{};
+911:             bool haveLongLong{};
+912: 
+913:             if (*format == 'l')
+914:             {
+915:                 if (*(format + 1) == 'l')
+916:                 {
+917:                     haveLongLong = true;
+918: 
+919:                     format++;
+920:                 }
+921:                 else
+922:                 {
+923:                     haveLong = true;
+924:                 }
 925: 
-926:             case 'b':
-927:                 if (alternate)
-928:                 {
-929:                     Append(buffer, bufferSize, "0b");
-930:                 }
-931:                 if (haveLongLong)
+926:                 format++;
+927:             }
+928: 
+929:             switch (*format)
+930:             {
+931:             case 'c':
 932:                 {
-933:                     char str[BufferSize]{};
-934:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
-935:                     Append(buffer, bufferSize, str);
-936:                 }
-937:                 else if (haveLong)
-938:                 {
-939:                     char str[BufferSize]{};
-940:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
-941:                     Append(buffer, bufferSize, str);
-942:                 }
-943:                 else
-944:                 {
-945:                     char str[BufferSize]{};
-946:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
-947:                     Append(buffer, bufferSize, str);
-948:                 }
-949:                 break;
-950: 
-951:             case 'o':
-952:                 if (alternate)
-953:                 {
-954:                     Append(buffer, bufferSize, '0');
-955:                 }
-956:                 if (haveLongLong)
-957:                 {
-958:                     char str[BufferSize]{};
-959:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
-960:                     Append(buffer, bufferSize, str);
-961:                 }
-962:                 else if (haveLong)
-963:                 {
-964:                     char str[BufferSize]{};
-965:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
-966:                     Append(buffer, bufferSize, str);
-967:                 }
-968:                 else
-969:                 {
-970:                     char str[BufferSize]{};
-971:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
-972:                     Append(buffer, bufferSize, str);
-973:                 }
-974:                 break;
-975: 
-976:             case 's':
-977:             {
-978:                 char str[BufferSize]{};
-979:                 PrintValue(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
-980:                 Append(buffer, bufferSize, str);
-981:             }
-982:             break;
-983: 
-984:             case 'u':
-985:                 if (haveLongLong)
-986:                 {
-987:                     char str[BufferSize]{};
-988:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
-989:                     Append(buffer, bufferSize, str);
-990:                 }
-991:                 else if (haveLong)
-992:                 {
-993:                     char str[BufferSize]{};
-994:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
-995:                     Append(buffer, bufferSize, str);
-996:                 }
-997:                 else
-998:                 {
-999:                     char str[BufferSize]{};
-1000:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
-1001:                     Append(buffer, bufferSize, str);
-1002:                 }
-1003:                 break;
-1004: 
-1005:             case 'x':
-1006:             case 'X':
-1007:                 if (alternate)
-1008:                 {
-1009:                     Append(buffer, bufferSize, "0x");
-1010:                 }
-1011:                 if (haveLongLong)
-1012:                 {
-1013:                     char str[BufferSize]{};
-1014:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
-1015:                     Append(buffer, bufferSize, str);
-1016:                 }
-1017:                 else if (haveLong)
-1018:                 {
-1019:                     char str[BufferSize]{};
-1020:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
-1021:                     Append(buffer, bufferSize, str);
-1022:                 }
-1023:                 else
-1024:                 {
-1025:                     char str[BufferSize]{};
-1026:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
-1027:                     Append(buffer, bufferSize, str);
-1028:                 }
-1029:                 break;
-1030: 
-1031:             case 'p':
-1032:                 if (alternate)
-1033:                 {
-1034:                     Append(buffer, bufferSize, "0x");
-1035:                 }
-1036:                 {
-1037:                     char str[BufferSize]{};
-1038:                     PrintValue(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
-1039:                     Append(buffer, bufferSize, str);
-1040:                 }
-1041:                 break;
-1042: 
-1043:             default:
-1044:                 Append(buffer, bufferSize, '%');
-1045:                 Append(buffer, bufferSize, *format);
-1046:                 break;
-1047:             }
-1048:         }
-1049:         else
-1050:         {
-1051:             Append(buffer, bufferSize, *format);
-1052:         }
-1053: 
-1054:         format++;
-1055:     }
-1056: }
-1057: 
-1058: } // namespace baremetal
+933:                     char ch = static_cast<char>(va_arg(args, int));
+934:                     if (left)
+935:                     {
+936:                         Append(buffer, bufferSize, ch);
+937:                         if (width > 1)
+938:                         {
+939:                             Append(buffer, bufferSize, width - 1, ' ');
+940:                         }
+941:                     }
+942:                     else
+943:                     {
+944:                         if (width > 1)
+945:                         {
+946:                             Append(buffer, bufferSize, width - 1, ' ');
+947:                         }
+948:                         Append(buffer, bufferSize, ch);
+949:                     }
+950:                 }
+951:                 break;
+952: 
+953:             case 'd':
+954:             case 'i':
+955:                 if (haveLongLong)
+956:                 {
+957:                     char str[BufferSize]{};
+958:                     PrintValue(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
+959:                     Append(buffer, bufferSize, str);
+960:                 }
+961:                 else if (haveLong)
+962:                 {
+963:                     char str[BufferSize]{};
+964:                     PrintValue(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
+965:                     Append(buffer, bufferSize, str);
+966:                 }
+967:                 else
+968:                 {
+969:                     char str[BufferSize]{};
+970:                     PrintValue(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
+971:                     Append(buffer, bufferSize, str);
+972:                 }
+973:                 break;
+974: 
+975:             case 'f':
+976:                 {
+977:                     char str[BufferSize]{};
+978:                     PrintValue(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
+979:                     Append(buffer, bufferSize, str);
+980:                 }
+981:                 break;
+982: 
+983:             case 'b':
+984:                 if (alternate)
+985:                 {
+986:                     Append(buffer, bufferSize, "0b");
+987:                 }
+988:                 if (haveLongLong)
+989:                 {
+990:                     char str[BufferSize]{};
+991:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
+992:                     Append(buffer, bufferSize, str);
+993:                 }
+994:                 else if (haveLong)
+995:                 {
+996:                     char str[BufferSize]{};
+997:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
+998:                     Append(buffer, bufferSize, str);
+999:                 }
+1000:                 else
+1001:                 {
+1002:                     char str[BufferSize]{};
+1003:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
+1004:                     Append(buffer, bufferSize, str);
+1005:                 }
+1006:                 break;
+1007: 
+1008:             case 'o':
+1009:                 if (alternate)
+1010:                 {
+1011:                     Append(buffer, bufferSize, '0');
+1012:                 }
+1013:                 if (haveLongLong)
+1014:                 {
+1015:                     char str[BufferSize]{};
+1016:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
+1017:                     Append(buffer, bufferSize, str);
+1018:                 }
+1019:                 else if (haveLong)
+1020:                 {
+1021:                     char str[BufferSize]{};
+1022:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
+1023:                     Append(buffer, bufferSize, str);
+1024:                 }
+1025:                 else
+1026:                 {
+1027:                     char str[BufferSize]{};
+1028:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
+1029:                     Append(buffer, bufferSize, str);
+1030:                 }
+1031:                 break;
+1032: 
+1033:             case 's':
+1034:                 {
+1035:                     char str[BufferSize]{};
+1036:                     PrintValue(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
+1037:                     Append(buffer, bufferSize, str);
+1038:                 }
+1039:                 break;
+1040: 
+1041:             case 'u':
+1042:                 if (haveLongLong)
+1043:                 {
+1044:                     char str[BufferSize]{};
+1045:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
+1046:                     Append(buffer, bufferSize, str);
+1047:                 }
+1048:                 else if (haveLong)
+1049:                 {
+1050:                     char str[BufferSize]{};
+1051:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
+1052:                     Append(buffer, bufferSize, str);
+1053:                 }
+1054:                 else
+1055:                 {
+1056:                     char str[BufferSize]{};
+1057:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
+1058:                     Append(buffer, bufferSize, str);
+1059:                 }
+1060:                 break;
+1061: 
+1062:             case 'x':
+1063:             case 'X':
+1064:                 if (alternate)
+1065:                 {
+1066:                     Append(buffer, bufferSize, "0x");
+1067:                 }
+1068:                 if (haveLongLong)
+1069:                 {
+1070:                     char str[BufferSize]{};
+1071:                     PrintValue(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
+1072:                     Append(buffer, bufferSize, str);
+1073:                 }
+1074:                 else if (haveLong)
+1075:                 {
+1076:                     char str[BufferSize]{};
+1077:                     PrintValue(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
+1078:                     Append(buffer, bufferSize, str);
+1079:                 }
+1080:                 else
+1081:                 {
+1082:                     char str[BufferSize]{};
+1083:                     PrintValue(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
+1084:                     Append(buffer, bufferSize, str);
+1085:                 }
+1086:                 break;
+1087: 
+1088:             case 'p':
+1089:                 if (alternate)
+1090:                 {
+1091:                     Append(buffer, bufferSize, "0x");
+1092:                 }
+1093:                 {
+1094:                     char str[BufferSize]{};
+1095:                     PrintValue(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
+1096:                     Append(buffer, bufferSize, str);
+1097:                 }
+1098:                 break;
+1099: 
+1100:             default:
+1101:                 Append(buffer, bufferSize, '%');
+1102:                 Append(buffer, bufferSize, *format);
+1103:                 break;
+1104:             }
+1105:         }
+1106:         else
+1107:         {
+1108:             Append(buffer, bufferSize, *format);
+1109:         }
+1110: 
+1111:         format++;
+1112:     }
+1113: }
+1114: 
+1115: } // namespace baremetal
 ```
 
 - Line 43: We need the `string` class, so we'll add its header
-- Line 51-52: We copy the functions `SerializeInteralUInt()` and `SerializeInteralInt()` from `Serialization.cpp` and renamed `Serialization` to `PrintValue`
-- Line 59-62: We also copy the function `GetDigit()`
-- Line 70-84: We also copy the function `BitsToDigits()`
-- Line 10-=107: We also copy the function `Serialize()` for int32, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 127-130: We also copy the function `Serialize()` for uint32, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 150-153: We also copy the function `Serialize()` for int64, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 173-176: We also copy the function `Serialize()` for uint64, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 188-191: We also copy the function `Serialize()` for long long from `Serialization.h`, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 202-205: We also copy the function `Serialize()` for unsigned long long from `Serialization.h`, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 219-275: We also copy the function `Serialize()` for double, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 288-308: We also copy the function `Serialize()` for const char*, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
-- Line 331-413: We also copy the function `SerializeInternalInt()` for int32, and rename it to `PrintValueInternalInt()`
-- Line 436-510: We also copy the function `SerializeInternalUInt()` for int32, and rename it to `PrintValueInternalUInt()`
-- Line 514-546: We leave the `Append` functions as is
-- Line 548-558: We implement the new `Format()` function. This uses `FormatV()`
-- Line 560-785: We implement the new `FormatV()` function. This is a copy of the original `FormatV()`, but appending to a string, instead of into a buffer, and using `Serialize()` calls to serialize data.
+- Line 54-55: We copy the functions `SerializeInteralUInt()` and `SerializeInteralInt()` from `Serialization.cpp` and rename `Serialization` to `PrintValue`
+- Line 62-65: We also copy the function `GetDigit()`
+- Line 73-87: We also copy the function `BitsToDigits()`
+- Line 107-110: We also copy the function `Serialize()` for int32, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 130-133: We also copy the function `Serialize()` for uint32, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 153-156: We also copy the function `Serialize()` for int64, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 176-179: We also copy the function `Serialize()` for uint64, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 191-194: We also copy the function `Serialize()` for long long from `Serialization.h`, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 205-208: We also copy the function `Serialize()` for unsigned long long from `Serialization.h`, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 222-278: We also copy the function `Serialize()` for double, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 291-311: We also copy the function `Serialize()` for const char*, and rename it to `PrintValue()`, we make it static as it it only intended to be used here
+- Line 334-416: We also copy the function `SerializeInternalInt()` for int32, and rename it to `PrintValueInternalInt()`
+- Line 439-513: We also copy the function `SerializeInternalUInt()` for int32, and rename it to `PrintValueInternalUInt()`
+- Line 526-571: We leave the `Append()` functions as is
+- Line 580-590: We implement the new `Format()` function. This uses `FormatV()`
+- Line 600-825: We implement the new `FormatV()` function. This is a copy of the original `FormatV()`, but appending to a string, instead of into a buffer, and using `Serialize()` calls to serialize data.
 The string is finally returned
-- Line 787-795: We rename the old `Format()` to `FormatNoAlloc()` and change the call to `FormatNoAllocV()`
-- Line 797-1056: We rename the old `FormatV()` to `FormatNoAllocV()`. The implementation only changes in the calls to `Serialize()` being replaced with calls to the internal `PrintValue()` functions)
+- Line 835-843: We rename the old `Format()` to `FormatNoAlloc()` and change the call to `FormatNoAllocV()`
+- Line 854-1113: We rename the old `FormatV()` to `FormatNoAllocV()`. The implementation only changes in the calls to `Serialize()` being replaced with calls to the internal `PrintValue()` functions)
 
 ## Updating serializers - Step 2 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2}
 
@@ -1384,80 +1439,84 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 ...
 42: #include <baremetal/String.h>
 43: #include <baremetal/Types.h>
-44:
+44: 
 45: /// @file
 46: /// Type serialization functions
-47:
+47: 
 48: namespace baremetal {
-49:
+49: 
 50: // Specializations
-51:
+51: 
 52: // Every serialization specialization uses a width parameter, which is used for expansion
 53: // width < 0 Left aligned
 54: // width > 0 right aligned
 55: // width < actual length no alignment
-56: inline string Serialize(const bool& value)
-57: {
-58:     return string(value ? "true" : "false");
-59: }
-60:
-61: string Serialize(char value, int width = 0);
-62: string Serialize(int8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-63: string Serialize(uint8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-64: string Serialize(int16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-65: string Serialize(uint16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-66: string Serialize(int32 value, int width= 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-67: string Serialize(uint32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-68: string Serialize(int64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-69: string Serialize(uint64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
-70:
-71: /// <summary>
-72: /// Serialize long long int value, type specific specialization
-73: /// </summary>
-74: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-75: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-76: /// <param name="value">Value to be serialized</param>
-77: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-78: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-79: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-80: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-81: inline string Serialize(long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
-82: {
-83:     return Serialize(static_cast<int64>(value), width, base, showBase, leadingZeros);
-84: }
-85: /// <summary>
-86: /// Serialize unsigned long long int value, type specific specialization
-87: /// </summary>
-88: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
-89: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-90: /// <param name="value">Value to be serialized</param>
-91: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-92: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-93: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-94: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-95: inline string Serialize(unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
-96: {
-97:     return Serialize(static_cast<uint64>(value), width, base, showBase, leadingZeros);
-98: }
-99: string Serialize(float value, int width = 0, int precision = 16);
-100: string Serialize(double value, int width = 0, int precision = 16);
-101: string Serialize(const string& value, int width = 0, bool quote = false);
-102: string Serialize(const char* value, int width = 0, bool quote = false);
-103: string Serialize(const void* value, int width = 0);
-104: string Serialize(void* value, int width = 0);
-105:
-106: } // namespace baremetal
+56: 
+57: /// <summary>
+58: /// Serialize boolean
+59: /// </summary>
+60: /// <param name="value">Value</param>
+61: /// <returns>Resulting string</returns>
+62: inline string Serialize(const bool& value)
+63: {
+64:     return string(value ? "true" : "false");
+65: }
+66: 
+67: string Serialize(char value, int width = 0);
+68: string Serialize(int8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+69: string Serialize(uint8 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+70: string Serialize(int16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+71: string Serialize(uint16 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+72: string Serialize(int32 value, int width= 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+73: string Serialize(uint32 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+74: string Serialize(int64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+75: string Serialize(uint64 value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false);
+76: 
+77: /// <summary>
+78: /// Serialize long long int value, type specific specialization
+79: /// </summary>
+80: /// <param name="value">Value to be serialized</param>
+81: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+82: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+83: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+84: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+85: /// <returns>Resulting string</returns>
+86: inline string Serialize(long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+87: {
+88:     return Serialize(static_cast<int64>(value), width, base, showBase, leadingZeros);
+89: }
+90: /// <summary>
+91: /// Serialize unsigned long long int value, type specific specialization
+92: /// </summary>
+93: /// <param name="value">Value to be serialized</param>
+94: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+95: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+96: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+97: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+98: /// <returns>Resulting string</returns>
+99: inline string Serialize(unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+100: {
+101:     return Serialize(static_cast<uint64>(value), width, base, showBase, leadingZeros);
+102: }
+103: string Serialize(float value, int width = 0, int precision = 16);
+104: string Serialize(double value, int width = 0, int precision = 16);
+105: string Serialize(const string& value, int width = 0, bool quote = false);
+106: string Serialize(const char* value, int width = 0, bool quote = false);
+107: string Serialize(const void* value, int width = 0);
+108: string Serialize(void* value, int width = 0);
+109: 
+110: } // namespace baremetal
 ```
 
 - Line 42: We need to include the header for the `string` class, as we will also be implementing some inline functions returning a string
-- Line 56-59: We implement the specialization to serialize a boolean as an inline function
-- Line 61: We declare the specialization for char
-- Line 62-69: We declare the specializations for all integer types. Note that we've added some more to make the list complete
-- Line 81-84: We implement the specialization for long long as a inline function. Notice that as before, we simply re-use the version for int64
-- Line 95-98: We implement the specialization for unsigned long long as a inline function. Notice that as before, we simply re-use the version for uint64
-- Line 99-100: We declare the specializations for floating point types. Note that we've added float here as well
-- Line 101-102: We declare the specializations for strings. Note that we've added a serialization for `string` here as well as the `const char*` version
-- Line 103-104: We declare the specializations for pointers. Any pointer can be simply cast to either `void*` or `const void*`. Pointers will simply be serialized by printing their address as a hexadecimal value
+- Line 62-65: We implement the specialization to serialize a boolean as an inline function
+- Line 67: We declare the specialization for char
+- Line 68-75: We declare the specializations for all integer types. Note that we've added some more to make the list complete
+- Line 86-89: We implement the specialization for long long as a inline function. Notice that as before, we simply re-use the version for int64
+- Line 99-102: We implement the specialization for unsigned long long as a inline function. Notice that as before, we simply re-use the version for uint64
+- Line 103-104: We declare the specializations for floating point types. Note that we've added float here as well
+- Line 105-106: We declare the specializations for strings. Note that we've added a serialization for `string` here as well as the `const char*` version
+- Line 107-108: We declare the specializations for pointers. Any pointer can be simply cast to either `void*` or `const void*`. Pointers will simply be serialized by printing their address as a hexadecimal value
 
 ### Serialization.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_SERIALIZATIONCPP}
 
@@ -1467,60 +1526,22 @@ Update the file `code/libraries/baremetal/src/Serialization.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Serialization.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : Serialization.cpp
-5: //
-6: // Namespace   : serialization
-7: //
-8: // Class       : -
-9: //
-10: // Description : Serialization of types to character buffer
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
+...
 40: #include <baremetal/Serialization.h>
-41:
+41: 
 42: #include <baremetal/Util.h>
-43:
+43: 
 44: /// @file
 45: /// Type serialization functions implementation
-46:
+46: 
 47: namespace baremetal {
-48:
+48: 
 49: /// @brief Write characters with base above 10 as uppercase or not
 50: static bool           Uppercase = true;
-51:
+51: 
 52: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 53: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
-54:
+54: 
 55: /// <summary>
 56: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
 57: /// </summary>
@@ -1530,7 +1551,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 61: {
 62:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 63: }
-64:
+64: 
 65: /// <summary>
 66: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
 67: /// </summary>
@@ -1543,16 +1564,16 @@ File: code/libraries/baremetal/src/Serialization.cpp
 74:     uint64 value = 0xFFFFFFFFFFFFFFFF;
 75:     if (bits < 64)
 76:         value &= ((1ULL << bits) - 1);
-77:
+77: 
 78:     while (value > 0)
 79:     {
 80:         value /= base;
 81:         result++;
 82:     }
-83:
+83: 
 84:     return result;
 85: }
-86:
+86: 
 87: /// <summary>
 88: /// Serialize a character value to string.
 89: ///
@@ -1562,11 +1583,11 @@ File: code/libraries/baremetal/src/Serialization.cpp
 93: /// <param name="value">Value to be serialized</param>
 94: /// <param name="width">Minimum width in characters, if negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 95: /// <returns>Serialized string value</returns>
-96:
+96: 
 97: string Serialize(char value, int width)
 98: {
 99:     string result;
-100:
+100: 
 101:     int    numDigits = 0;
 102:     bool   negative = (value < 0);
 103:     uint64 absVal = static_cast<uint64>(negative ? -value : value);
@@ -1577,7 +1598,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 108:         divisor *= 10;
 109:         ++numDigits;
 110:     }
-111:
+111: 
 112:     if (numDigits == 0)
 113:     {
 114:         result = "0";
@@ -1597,7 +1618,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 128:     }
 129:     return result.align(width);
 130: }
-131:
+131: 
 132: /// <summary>
 133: /// Serialize a 8 bit signed value to string.
 134: ///
@@ -1618,7 +1639,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 149: {
 150:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 8);
 151: }
-152:
+152: 
 153: /// <summary>
 154: /// Serialize a 8 bit unsigned value to string.
 155: ///
@@ -1639,7 +1660,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 170: {
 171:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 8);
 172: }
-173:
+173: 
 174: /// <summary>
 175: /// Serialize a 16 bit signed value to string.
 176: ///
@@ -1660,7 +1681,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 191: {
 192:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 16);
 193: }
-194:
+194: 
 195: /// <summary>
 196: /// Serialize a 16 bit unsigned value to string.
 197: ///
@@ -1681,7 +1702,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 212: {
 213:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 16);
 214: }
-215:
+215: 
 216: /// <summary>
 217: /// Serialize a 32 bit signed value to string.
 218: ///
@@ -1702,7 +1723,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 233: {
 234:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 32);
 235: }
-236:
+236: 
 237: /// <summary>
 238: /// Serialize a 32 bit unsigned value to string.
 239: ///
@@ -1723,7 +1744,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 254: {
 255:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 32);
 256: }
-257:
+257: 
 258: /// <summary>
 259: /// Serialize a 64 bit signed value to string.
 260: ///
@@ -1744,7 +1765,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 275: {
 276:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 64);
 277: }
-278:
+278: 
 279: /// <summary>
 280: /// Serialize a 64 bit unsigned value to string.
 281: ///
@@ -1765,7 +1786,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 296: {
 297:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 64);
 298: }
-299:
+299: 
 300: /// <summary>
 301: /// Serialize a float value to string. The value will be printed as a fixed point number.
 302: ///
@@ -1786,39 +1807,39 @@ File: code/libraries/baremetal/src/Serialization.cpp
 317:         negative = true;
 318:         value = -value;
 319:     }
-320:
+320: 
 321:     // We can only print values with integral parts up to what uint64 can hold
 322:     if (value > static_cast<float>(static_cast<uint64>(-1)))
 323:     {
 324:         return string("overflow");
 325:     }
-326:
+326: 
 327:     string result;
 328:     if (negative)
 329:         result += '-';
-330:
+330: 
 331:     uint64 integralPart = static_cast<uint64>(value);
 332:     result += Serialize(integralPart, 0, 10, false, false);
 333:     const int MaxPrecision = 7;
-334:
+334: 
 335:     if (precision != 0)
 336:     {
 337:         result += '.';
-338:
+338: 
 339:         if (precision > MaxPrecision)
 340:         {
 341:             precision = MaxPrecision;
 342:         }
-343:
+343: 
 344:         uint64 precisionPower10 = 1;
 345:         for (int i = 1; i <= precision; i++)
 346:         {
 347:             precisionPower10 *= 10;
 348:         }
-349:
+349: 
 350:         value -= static_cast<float>(integralPart);
 351:         value *= static_cast<float>(precisionPower10);
-352:
+352: 
 353:         string fractional = Serialize(static_cast<uint64>(value + 0.5F), 0, 10, false, false);
 354:         result += fractional;
 355:         precision -= fractional.length();
@@ -1829,7 +1850,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 360:     }
 361:     return result.align(width);
 362: }
-363:
+363: 
 364: /// <summary>
 365: /// Serialize a double value to string. The value will be printed as a fixed point number.
 366: ///
@@ -1850,39 +1871,39 @@ File: code/libraries/baremetal/src/Serialization.cpp
 381:         negative = true;
 382:         value = -value;
 383:     }
-384:
+384: 
 385:     // We can only print values with integral parts up to what uint64 can hold
 386:     if (value > static_cast<double>(static_cast<uint64>(-1)))
 387:     {
 388:         return string("overflow");
 389:     }
-390:
+390: 
 391:     string result;
 392:     if (negative)
 393:         result += '-';
-394:
+394: 
 395:     uint64 integralPart = static_cast<uint64>(value);
 396:     result += Serialize(integralPart, 0, 10, false, false);
 397:     const int MaxPrecision = 14;
-398:
+398: 
 399:     if (precision != 0)
 400:     {
 401:         result += '.';
-402:
+402: 
 403:         if (precision > MaxPrecision)
 404:         {
 405:             precision = MaxPrecision;
 406:         }
-407:
+407: 
 408:         uint64 precisionPower10 = 1;
 409:         for (int i = 1; i <= precision; i++)
 410:         {
 411:             precisionPower10 *= 10;
 412:         }
-413:
+413: 
 414:         value -= static_cast<double>(integralPart);
 415:         value *= static_cast<double>(precisionPower10);
-416:
+416: 
 417:         string fractional = Serialize(static_cast<uint64>(value + 0.5), 0, 10, false, false);
 418:         result += fractional;
 419:         precision -= fractional.length();
@@ -1893,302 +1914,297 @@ File: code/libraries/baremetal/src/Serialization.cpp
 424:     }
 425:     return result.align(width);
 426: }
-427:
+427: 
 428: /// <summary>
 429: /// Serialize a string to string.
-430: ///
-431: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-432: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-433: ///
-434: /// If requested, the string is placed between double quotes (").
-435: /// </summary>
-436: /// <param name="value">Value to be serialized</param>
-437: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-438: /// <param name="quote">If true places string between double quotes</param>
-439: /// <returns>Serialized string value</returns>
-440: string Serialize(const string& value, int width, bool quote)
-441: {
-442:     string result;
-443:
-444:     if (quote)
-445:         result += '\"';
-446:     result += value;
-447:     if (quote)
-448:         result += '\"';
-449:
-450:     return result.align(width);
-451: }
-452:
-453: /// <summary>
-454: /// Serialize a string to string.
-455: ///
-456: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-457: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-458: ///
-459: /// If requested, the string is placed between double quotes (").
-460: /// </summary>
-461: /// <param name="value">Value to be serialized</param>
-462: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-463: /// <param name="quote">If true places string between double quotes</param>
-464: /// <returns>Serialized string value</returns>
-465: string Serialize(const char* value, int width, bool quote)
-466: {
-467:     return Serialize(string(value), width, quote);
-468: }
-469:
-470: /// <summary>
-471: /// Serialize a const void pointer to string.
-472: ///
-473: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-474: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-475: /// </summary>
-476: /// <param name="value">Value to be serialized</param>
-477: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-478: /// <returns>Serialized string value</returns>
-479: string Serialize(const void* value, int width)
-480: {
-481:     string result;
-482:
-483:     if (value != nullptr)
+430: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+431: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+432: /// If requested, the string is placed between double quotes (").
+433: /// </summary>
+434: /// <param name="value">Value to be serialized</param>
+435: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+436: /// <param name="quote">If true places string between double quotes</param>
+437: /// <returns>Serialized string value</returns>
+438: string Serialize(const string& value, int width, bool quote)
+439: {
+440:     string result;
+441: 
+442:     if (quote)
+443:         result += '\"';
+444:     result += value;
+445:     if (quote)
+446:         result += '\"';
+447: 
+448:     return result.align(width);
+449: }
+450: 
+451: /// <summary>
+452: /// Serialize a string to string
+453: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+454: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+455: /// If requested, the string is placed between double quotes (").
+456: /// </summary>
+457: /// <param name="value">Value to be serialized</param>
+458: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+459: /// <param name="quote">If true places string between double quotes</param>
+460: /// <returns>Serialized string value</returns>
+461: string Serialize(const char* value, int width, bool quote)
+462: {
+463:     return Serialize(string(value), width, quote);
+464: }
+465: 
+466: /// <summary>
+467: /// Serialize a const void pointer to string
+468: ///
+469: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+470: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+471: /// </summary>
+472: /// <param name="value">Value to be serialized</param>
+473: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+474: /// <returns>Serialized string value</returns>
+475: string Serialize(const void* value, int width)
+476: {
+477:     string result;
+478: 
+479:     if (value != nullptr)
+480:     {
+481:         result = Serialize(reinterpret_cast<uintptr>(value), 16, 16, true, true);
+482:     }
+483:     else
 484:     {
-485:         result = Serialize(reinterpret_cast<uintptr>(value), 16, 16, true, true);
+485:         result = "null";
 486:     }
-487:     else
-488:     {
-489:         result = "null";
-490:     }
-491:
-492:     return result.align(width);
-493: }
-494:
-495: /// <summary>
-496: /// Serialize a void pointer to string.
-497: ///
-498: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-499: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-500: /// </summary>
-501: /// <param name="value">Value to be serialized</param>
-502: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-503: /// <returns>Serialized string value</returns>
-504: string Serialize(void* value, int width)
-505: {
-506:     return Serialize(const_cast<const void*>(value), width);
-507: }
-508:
-509: /// <summary>
-510: /// Internal serialization function returning string, to be used for all signed values.
-511: ///
-512: /// Serialize a signed value to string.
-513: ///
-514: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-515: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-516: ///
-517: /// Base is the digit base, which can range from 2 to 36.
-518: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-519: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-520: /// </summary>
-521: /// <param name="value">Value to be serialized</param>
-522: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-523: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-524: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-525: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-526: /// <param name="numBits">Specifies the number of bits used for the value</param>
-527: /// <returns>Serialized stirng</returns>
-528: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-529: {
-530:     if ((base < 2) || (base > 36))
-531:         return {};
-532:
-533:     int       numDigits = 0;
-534:     bool      negative = (value < 0);
-535:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
-536:     uint64    divisor = 1;
-537:     uint64    divisorHigh = 0;
-538:     uint64    divisorLast = 1;
-539:     size_t    absWidth = (width < 0) ? -width : width;
-540:     const int maxDigits = BitsToDigits(numBits, base);
-541:     while ((divisorHigh == 0) && (absVal >= divisor) && (numDigits <= maxDigits))
-542:     {
-543:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
-544:         divisorLast = divisor;
-545:         divisor *= base;
-546:         ++numDigits;
-547:     }
-548:     divisor = divisorLast;
-549:
-550:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-551:     if (showBase)
+487: 
+488:     return result.align(width);
+489: }
+490: 
+491: /// <summary>
+492: /// Serialize a void pointer to string.
+493: ///
+494: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+495: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+496: /// </summary>
+497: /// <param name="value">Value to be serialized</param>
+498: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+499: /// <returns>Serialized string value</returns>
+500: string Serialize(void* value, int width)
+501: {
+502:     return Serialize(const_cast<const void*>(value), width);
+503: }
+504: 
+505: /// <summary>
+506: /// Internal serialization function returning string, to be used for all signed values.
+507: ///
+508: /// Serialize a signed value to string.
+509: ///
+510: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+511: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+512: ///
+513: /// Base is the digit base, which can range from 2 to 36.
+514: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+515: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+516: /// </summary>
+517: /// <param name="value">Value to be serialized</param>
+518: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+519: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+520: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+521: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+522: /// <param name="numBits">Specifies the number of bits used for the value</param>
+523: /// <returns>Serialized stirng</returns>
+524: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+525: {
+526:     if ((base < 2) || (base > 36))
+527:         return {};
+528: 
+529:     int       numDigits = 0;
+530:     bool      negative = (value < 0);
+531:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
+532:     uint64    divisor = 1;
+533:     uint64    divisorHigh = 0;
+534:     uint64    divisorLast = 1;
+535:     size_t    absWidth = (width < 0) ? -width : width;
+536:     const int maxDigits = BitsToDigits(numBits, base);
+537:     while ((divisorHigh == 0) && (absVal >= divisor) && (numDigits <= maxDigits))
+538:     {
+539:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+540:         divisorLast = divisor;
+541:         divisor *= base;
+542:         ++numDigits;
+543:     }
+544:     divisor = divisorLast;
+545: 
+546:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+547:     if (showBase)
+548:     {
+549:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+550:     }
+551:     if (negative)
 552:     {
-553:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+553:         numChars++;
 554:     }
-555:     if (negative)
-556:     {
-557:         numChars++;
-558:     }
-559:     if (absWidth > numChars)
-560:         numChars = absWidth;
-561:     // Leave one character for \0
-562:     string result;
-563:     result.reserve(numChars + 1);
-564:
-565:     if (negative)
-566:     {
-567:         result += '-';
-568:     }
-569:
-570:     if (showBase)
-571:     {
-572:         if (base == 2)
+555:     if (absWidth > numChars)
+556:         numChars = absWidth;
+557:     // Leave one character for \0
+558:     string result;
+559:     result.reserve(numChars + 1);
+560: 
+561:     if (negative)
+562:     {
+563:         result += '-';
+564:     }
+565: 
+566:     if (showBase)
+567:     {
+568:         if (base == 2)
+569:         {
+570:             result += "0b";
+571:         }
+572:         else if (base == 8)
 573:         {
-574:             result += "0b";
+574:             result += '0';
 575:         }
-576:         else if (base == 8)
+576:         else if (base == 16)
 577:         {
-578:             result += '0';
+578:             result += "0x";
 579:         }
-580:         else if (base == 16)
-581:         {
-582:             result += "0x";
-583:         }
-584:     }
-585:     if (leadingZeros)
-586:     {
-587:         if (absWidth == 0)
-588:             absWidth = maxDigits;
-589:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-590:         {
-591:             result += '0';
-592:         }
-593:     }
-594:     else
-595:     {
-596:         if (numDigits == 0)
-597:         {
-598:             result += '0';
-599:         }
-600:     }
-601:     while (numDigits > 0)
-602:     {
-603:         int digit = (absVal / divisor) % base;
-604:         result += GetDigit(digit);
-605:         --numDigits;
-606:         divisor /= base;
-607:     }
-608:     return result.align(width);
-609: }
-610:
-611: /// <summary>
-612: /// Internal serialization function returning string, to be used for all unsigned values.
-613: ///
-614: /// Serialize a unsigned value to string.
-615: ///
-616: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-617: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-618: ///
-619: /// Base is the digit base, which can range from 2 to 36.
-620: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-621: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-622: /// </summary>
-623: /// <param name="value">Value to be serialized</param>
-624: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-625: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-626: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-627: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-628: /// <param name="numBits">Specifies the number of bits used for the value</param>
-629: /// <returns>Serialized stirng</returns>
-630: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-631: {
-632:     if ((base < 2) || (base > 36))
-633:         return {};
-634:
-635:     int       numDigits = 0;
-636:     uint64    divisor = 1;
-637:     uint64    divisorLast = 1;
-638:     uint64    divisorHigh = 0;
-639:     size_t    absWidth = (width < 0) ? -width : width;
-640:     const int maxDigits = BitsToDigits(numBits, base);
-641:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
-642:     {
-643:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
-644:         divisorLast = divisor;
-645:         divisor *= base;
-646:         ++numDigits;
-647:     }
-648:     divisor = divisorLast;
-649:
-650:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-651:     if (showBase)
-652:     {
-653:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-654:     }
-655:     if (absWidth > numChars)
-656:         numChars = absWidth;
-657:     // Leave one character for \0
-658:     string result;
-659:     result.reserve(numChars + 1);
-660:
-661:     if (showBase)
-662:     {
-663:         if (base == 2)
+580:     }
+581:     if (leadingZeros)
+582:     {
+583:         if (absWidth == 0)
+584:             absWidth = maxDigits;
+585:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+586:         {
+587:             result += '0';
+588:         }
+589:     }
+590:     else
+591:     {
+592:         if (numDigits == 0)
+593:         {
+594:             result += '0';
+595:         }
+596:     }
+597:     while (numDigits > 0)
+598:     {
+599:         int digit = (absVal / divisor) % base;
+600:         result += GetDigit(digit);
+601:         --numDigits;
+602:         divisor /= base;
+603:     }
+604:     return result.align(width);
+605: }
+606: 
+607: /// <summary>
+608: /// Internal serialization function returning string, to be used for all unsigned values.
+609: ///
+610: /// Serialize a unsigned value to string.
+611: ///
+612: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+613: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+614: ///
+615: /// Base is the digit base, which can range from 2 to 36.
+616: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+617: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+618: /// </summary>
+619: /// <param name="value">Value to be serialized</param>
+620: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+621: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+622: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+623: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+624: /// <param name="numBits">Specifies the number of bits used for the value</param>
+625: /// <returns>Serialized stirng</returns>
+626: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+627: {
+628:     if ((base < 2) || (base > 36))
+629:         return {};
+630: 
+631:     int       numDigits = 0;
+632:     uint64    divisor = 1;
+633:     uint64    divisorLast = 1;
+634:     uint64    divisorHigh = 0;
+635:     size_t    absWidth = (width < 0) ? -width : width;
+636:     const int maxDigits = BitsToDigits(numBits, base);
+637:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
+638:     {
+639:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+640:         divisorLast = divisor;
+641:         divisor *= base;
+642:         ++numDigits;
+643:     }
+644:     divisor = divisorLast;
+645: 
+646:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+647:     if (showBase)
+648:     {
+649:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+650:     }
+651:     if (absWidth > numChars)
+652:         numChars = absWidth;
+653:     // Leave one character for \0
+654:     string result;
+655:     result.reserve(numChars + 1);
+656: 
+657:     if (showBase)
+658:     {
+659:         if (base == 2)
+660:         {
+661:             result += "0b";
+662:         }
+663:         else if (base == 8)
 664:         {
-665:             result += "0b";
+665:             result += '0';
 666:         }
-667:         else if (base == 8)
+667:         else if (base == 16)
 668:         {
-669:             result += '0';
+669:             result += "0x";
 670:         }
-671:         else if (base == 16)
-672:         {
-673:             result += "0x";
-674:         }
-675:     }
-676:     if (leadingZeros)
-677:     {
-678:         if (absWidth == 0)
-679:             absWidth = maxDigits;
-680:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-681:         {
-682:             result += '0';
-683:         }
-684:     }
-685:     else
-686:     {
-687:         if (numDigits == 0)
-688:         {
-689:             result += '0';
-690:         }
-691:     }
-692:     while (numDigits > 0)
-693:     {
-694:         int digit = (value / divisor) % base;
-695:         result += GetDigit(digit);
-696:         --numDigits;
-697:         divisor /= base;
-698:     }
-699:     return result.align(width);
-700: }
-701:
-702: } // namespace baremetal
+671:     }
+672:     if (leadingZeros)
+673:     {
+674:         if (absWidth == 0)
+675:             absWidth = maxDigits;
+676:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+677:         {
+678:             result += '0';
+679:         }
+680:     }
+681:     else
+682:     {
+683:         if (numDigits == 0)
+684:         {
+685:             result += '0';
+686:         }
+687:     }
+688:     while (numDigits > 0)
+689:     {
+690:         int digit = (value / divisor) % base;
+691:         result += GetDigit(digit);
+692:         --numDigits;
+693:         divisor /= base;
+694:     }
+695:     return result.align(width);
+696: }
+697: 
+698: } // namespace baremetal
 ```
 
-- Line 97-130: We implement the char specialization
+- Line 96-129: We implement the char specialization
 - Line 147-150: We implement the int8 specialization
-- Line 169-172: We implement the uint8 specialization
-- Line 190-193: We implement the int16 specialization
-- Line 211-214: We implement the uint16 specialization
-- Line 232-235: We implement the int32 specialization
-- Line 253-256: We implement the uint32 specialization
-- Line 274-277: We implement the int64 specialization
-- Line 295-298: We implement the uint64 specialization
-- Line 312-362: We implement the float specialization
-- Line 376-426: We implement the double specialization
-- Line 440-451: We implement the string specialization
-- Line 465-467: We implement the const char* specialization
-- Line 479-493: We implement the const void* specialization
-- Line 504-507: We implement the const char* specialization
-- Line 504-507: We implement the const char* specialization
-- Line 528-609: We implement internal `SerializeInternalInt()` function
-- Line 630-700: We implement internal `SerializeInternalUInt()` function
+- Line 168-171: We implement the uint8 specialization
+- Line 189-192: We implement the int16 specialization
+- Line 210-213: We implement the uint16 specialization
+- Line 231-234: We implement the int32 specialization
+- Line 252-255: We implement the uint32 specialization
+- Line 273-276: We implement the int64 specialization
+- Line 294-297: We implement the uint64 specialization
+- Line 311-361: We implement the float specialization
+- Line 375-425: We implement the double specialization
+- Line 437-448: We implement the string specialization
+- Line 460-463: We implement the const char* specialization
+- Line 474-488: We implement the const void* specialization
+- Line 499-502: We implement the void* specialization
+- Line 523-604: We implement internal `SerializeInternalInt()` function
+- Line 625-695: We implement internal `SerializeInternalUInt()` function
 
 ### HeapAllocator.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_HEAPALLOCATORCPP}
 
@@ -2199,74 +2215,74 @@ Update the file `code/libraries/baremetal/src/HeapAllocator.cpp`
 ```cpp
 File: code/libraries/baremetal/src/HeapAllocator.cpp
 ...
-109: void* HeapAllocator::Allocate(size_t size)
-110: {
+112: void* HeapAllocator::Allocate(size_t size)
+113: {
 ...
-141: #if BAREMETAL_MEMORY_TRACING_DETAIL
-142:         LOG_NO_ALLOC_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-143:         LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-144: #endif
+144: #if BAREMETAL_MEMORY_TRACING_DETAIL
+145:         LOG_NO_ALLOC_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+146:         LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+147: #endif
 ...
-153:         if ((nextBlock <= m_next) ||                    // may have wrapped
-154:             (nextBlock > m_limit - m_reserve))
-155:         {
-156: #if BAREMETAL_MEMORY_TRACING
-157:             DumpStatus();
-158: #endif
-159:             LOG_NO_ALLOC_ERROR("%s: Out of memory", m_heapName);
-160:             return nullptr;
-161:         }
-162:
+156:         if ((nextBlock <= m_next) ||                    // may have wrapped
+157:             (nextBlock > m_limit - m_reserve))
+158:         {
+159: #if BAREMETAL_MEMORY_TRACING
+160:             DumpStatus();
+161: #endif
+162:             LOG_NO_ALLOC_ERROR("%s: Out of memory", m_heapName);
+163:             return nullptr;
+164:         }
+165: 
 ...
-168: #if BAREMETAL_MEMORY_TRACING_DETAIL
-169:         LOG_NO_ALLOC_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-170:         LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-171: #endif
+171: #if BAREMETAL_MEMORY_TRACING_DETAIL
+172:         LOG_NO_ALLOC_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+173:         LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+174: #endif
 ...
-180: }
+183: }
 ...
-227: void HeapAllocator::Free(void* block)
-228: {
+230: void HeapAllocator::Free(void* block)
+231: {
 ...
-248: #if BAREMETAL_MEMORY_TRACING_DETAIL
-249:             LOG_NO_ALLOC_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-250:             LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-251: #endif
-252: #endif
-253:
-254:             return;
-255:         }
-256:     }
-257:
-258: #if BAREMETAL_MEMORY_TRACING
-259:     LOG_NO_ALLOC_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
-260: #endif
-261: }
-262:
-263: #if BAREMETAL_MEMORY_TRACING
-264: /// <summary>
-265: /// Display the current status of the heap allocator
-266: /// </summary>
-267: void HeapAllocator::DumpStatus()
-268: {
-269:     LOG_NO_ALLOC_DEBUG("Heap allocator info:     %s", m_heapName);
-270:     LOG_NO_ALLOC_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
-271:     LOG_NO_ALLOC_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
-272:     LOG_NO_ALLOC_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
-273:     LOG_NO_ALLOC_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
-274:     LOG_NO_ALLOC_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
-275:     LOG_NO_ALLOC_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
-276:     LOG_NO_ALLOC_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
-277:
-278:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-279:     {
-280:         LOG_NO_ALLOC_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu",
-281:             bucket->size, bucket->count, bucket->maxCount, bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
-282:     }
-283: }
+251: #if BAREMETAL_MEMORY_TRACING_DETAIL
+252:             LOG_NO_ALLOC_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+253:             LOG_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+254: #endif
+255: #endif
+256: 
+257:             return;
+258:         }
+259:     }
+260: 
+261: #if BAREMETAL_MEMORY_TRACING
+262:     LOG_NO_ALLOC_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
+263: #endif
+264: }
+265: 
+266: #if BAREMETAL_MEMORY_TRACING
+267: /// <summary>
+268: /// Display the current status of the heap allocator
+269: /// </summary>
+270: void HeapAllocator::DumpStatus()
+271: {
+272:     LOG_NO_ALLOC_DEBUG("Heap allocator info:     %s", m_heapName);
+273:     LOG_NO_ALLOC_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
+274:     LOG_NO_ALLOC_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
+275:     LOG_NO_ALLOC_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
+276:     LOG_NO_ALLOC_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
+277:     LOG_NO_ALLOC_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
+278:     LOG_NO_ALLOC_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
+279:     LOG_NO_ALLOC_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
+280: 
+281:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+282:     {
+283:         LOG_NO_ALLOC_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu",
+284:             bucket->size, bucket->count, bucket->maxCount, bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
+285:     }
+286: }
 ...
-383: #endif
-384:
+386: #endif
+387:
 ```
 
 ### String.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_STRINGCPP}
@@ -2281,53 +2297,59 @@ File: code/libraries/baremetal/src/String.cpp
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/Util.h>
 ...
-59: LOG_MODULE("String");
-60:
-61: /// <summary>
-62: /// Default constructor
-63: ///
-64: /// Constructs an empty string.
-65: /// </summary>
-66: string::string()
-67:     : m_buffer{}
-68:     , m_end{}
-69:     , m_allocatedSize{}
-70: {
-71: }
-72:
-73: /// <summary>
-74: /// Destructor
-75: ///
-76: /// Frees any allocated memory.
-77: /// </summary>
-78: string::~string()
-79: {
-80: #if BAREMETAL_MEMORY_TRACING_DETAIL
-81:     if (m_buffer != nullptr)
-82:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
-83: #endif
-84:     delete[] m_buffer;
-85: }
+59: /// @brief Define log name
+60: LOG_MODULE("String");
+61: 
+62: /// <summary>
+63: /// Default constructor
+64: ///
+65: /// Constructs an empty string.
+66: /// </summary>
+67: string::string()
+68:     : m_buffer{}
+69:     , m_end{}
+70:     , m_allocatedSize{}
+71: {
+72: }
+73: 
+74: /// <summary>
+75: /// Destructor
+76: ///
+77: /// Frees any allocated memory.
+78: /// </summary>
+79: string::~string()
+80: {
+81: #if BAREMETAL_MEMORY_TRACING_DETAIL
+82:     if (m_buffer != nullptr)
+83:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+84: #endif
+85:     delete[] m_buffer;
+86: }
 ...
-1433: bool string::reallocate_allocation_size(size_t allocationSize)
-1434: {
-1435:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
-1436:     if (newBuffer == nullptr)
-1437:     {
-1438:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
-1439:         return false;
-1440:     }
-1441:     m_buffer = newBuffer;
-1442: #if BAREMETAL_MEMORY_TRACING_DETAIL
-1443:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
-1444: #endif
-1445:     if (m_end == nullptr)
-1446:         m_end = m_buffer;
-1447:     if (m_end > m_buffer + allocationSize)
-1448:         m_end = m_buffer + allocationSize;
-1449:     m_allocatedSize = allocationSize;
-1450:     return true;
-1451: }
+1438: /// <summary>
+1439: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
+1440: /// </summary>
+1441: /// <param name="allocationSize">Amount of bytes to allocate space for</param>
+1442: /// <returns>True if successful, false otherwise</returns>
+1443: bool string::reallocate_allocation_size(size_t allocationSize)
+1444: {
+1445:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
+1446:     if (newBuffer == nullptr)
+1447:     {
+1448:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
+1449:         return false;
+1450:     }
+1451:     m_buffer = newBuffer;
+1452: #if BAREMETAL_MEMORY_TRACING_DETAIL
+1453:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+1454: #endif
+1455:     if (m_end == nullptr)
+1456:         m_end = m_buffer;
+1457:     if (m_end > m_buffer + allocationSize)
+1458:         m_end = m_buffer + allocationSize;
+1459:     m_allocatedSize = allocationSize;
+1460:     return true;
+1461: }
 ```
 
 ### System.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_SYSTEMCPP}
@@ -2369,29 +2391,45 @@ Update the file `code/libraries/baremetal/src/Version.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Version.cpp
+File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Version.cpp
 40: #include <baremetal/Version.h>
-41:
+41: 
 42: #include <baremetal/Format.h>
-43: #include <baremetal/String.h>
-44: #include <baremetal/Util.h>
-45:
-46: static const size_t BufferSize = 20;
-47: static char s_baremetalVersionString[BufferSize]{};
-48: static bool s_baremetalVersionSetupDone = false;
-49:
-50: void baremetal::SetupVersion()
-51: {
-52:     if (!s_baremetalVersionSetupDone)
-53:     {
-54:         FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-55:         s_baremetalVersionSetupDone = true;
-56:     }
-57: }
-58:
-59: const char* baremetal::GetVersion()
-60: {
-61:     return s_baremetalVersionString;
-62: }
+43: #include <baremetal/Util.h>
+44: 
+45: /// @file
+46: /// Build version implementation
+47: 
+48: /// @brief Buffer size of version string buffer
+49: static const size_t BufferSize = 20;
+50: /// @brief Version string buffer
+51: static char s_baremetalVersionString[BufferSize]{};
+52: /// @brief Flag to check if version set up was already done
+53: static bool s_baremetalVersionSetupDone = false;
+54: 
+55: /// <summary>
+56: /// Set up version string
+57: ///
+58: /// The version string is written into a buffer without allocating memory.
+59: /// This is important, as we may be logging before memory management is set up.
+60: /// </summary>
+61: void baremetal::SetupVersion()
+62: {
+63:     if (!s_baremetalVersionSetupDone)
+64:     {
+65:         FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+66:         s_baremetalVersionSetupDone = true;
+67:     }
+68: }
+69: 
+70: /// <summary>
+71: /// Return version string
+72: /// </summary>
+73: /// <returns>Version string</returns>
+74: const char* baremetal::GetVersion()
+75: {
+76:     return s_baremetalVersionString;
+77: }
 ```
 
 ## Application code {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_APPLICATION_CODE}
@@ -2595,5 +2633,5 @@ Info   Halt (System:122)
 As you can see we performeed a total of 276 allocations, all blocks were freed again, and all block were 64 bytes max in size.
 At any moment, there were a maximum of 5 blocks allocated.
 
-Next: [17-unit-tests](17-unit-tests.md)
+Next: [17-unit-test-infrastructure](17-unit-test-infrastructure.md)
 

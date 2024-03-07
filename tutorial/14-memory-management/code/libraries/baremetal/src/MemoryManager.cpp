@@ -224,7 +224,7 @@ void MemoryManager::DumpStatus()
     memoryManager.m_heapLow.DumpStatus();
 #if BAREMETAL_RPI_TARGET >= 4
     LOG_DEBUG("High heap:");
-    memoryManager.m_heapHigh.DumpState();
+    memoryManager.m_heapHigh.DumpStatus();
 #endif
 #endif
 }

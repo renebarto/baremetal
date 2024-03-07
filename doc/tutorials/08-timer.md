@@ -259,11 +259,11 @@ It would be more accurate to first multiply, however we might get an overflow
 
 You will have noticed that we use two "function calls" which are actually reading ARM registers. We need to add them.
 
-Update the file `code/libraries/baremetal/include/baremetal/ASMInstructions.h`.
+Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 
 ```cpp
 ...
-File: code/libraries/baremetal/include/baremetal/ASMInstructions.h
+File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
 64: // Get counter timer frequency.
 65: #define GetTimerFrequency(freq)         asm volatile ("mrs %0, CNTFRQ_EL0" : "=r"(freq))

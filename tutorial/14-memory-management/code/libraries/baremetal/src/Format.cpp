@@ -42,10 +42,19 @@
 #include <baremetal/Serialization.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Formatting functionality implementation
+
 namespace baremetal {
 
 const size_t BufferSize = 1024;
 
+/// <summary>
+/// Append a character to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="c">Character to append</param>
 static void Append(char* buffer, size_t bufferSize, char c)
 {
     size_t len = strlen(buffer);
@@ -60,6 +69,13 @@ static void Append(char* buffer, size_t bufferSize, char c)
     }
 }
 
+/// <summary>
+/// Append a set of identical characters to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="count">Number of characters to append</param>
+/// <param name="c">Character to append</param>
 static void Append(char* buffer, size_t bufferSize, size_t count, char c)
 {
     size_t len = strlen(buffer);
@@ -75,6 +91,12 @@ static void Append(char* buffer, size_t bufferSize, size_t count, char c)
     }
 }
 
+/// <summary>
+/// Append a string to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="str">String to append</param>
 static void Append(char* buffer, size_t bufferSize, const char* str)
 {
     strncat(buffer, str, bufferSize);

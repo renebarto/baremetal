@@ -39,6 +39,9 @@
 
 #pragma once
 
+/// @file
+/// Synchronization functionality
+
 /// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
 #define DATA_CACHE_LINE_LENGTH_MIN  64
 /// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS

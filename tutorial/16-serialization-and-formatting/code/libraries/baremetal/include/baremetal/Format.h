@@ -39,6 +39,9 @@
 
 #pragma once
 
+/// @file
+/// Formatting functionality
+
 #include <baremetal/StdArg.h>
 #include <baremetal/Types.h>
 

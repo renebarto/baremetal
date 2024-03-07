@@ -39,6 +39,9 @@
 
 #pragma once
 
+/// @file
+/// Iterator classes
+
 /// <summary>
 /// Const iterator template
 ///

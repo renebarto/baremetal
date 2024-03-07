@@ -42,6 +42,9 @@
 #include <baremetal/Mailbox.h>
 #include <baremetal/RPIProperties.h>
 
+/// @file
+/// Machine info retrieval
+
 namespace baremetal {
 
 /// <summary>

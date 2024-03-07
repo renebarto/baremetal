@@ -99,7 +99,6 @@ private:
     MemoryManager();
 
 public:
-
     static uintptr GetCoherentPage(CoherentPageSlot slot);
 
     static void* HeapAllocate(size_t size, HeapType type);

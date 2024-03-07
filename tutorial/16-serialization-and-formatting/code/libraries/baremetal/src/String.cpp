@@ -56,6 +56,7 @@ static const string::ValueType NullCharConst = '\0';
 /// @brief Non-constant null character, returned as a reference for const methods where nothing can be returned (always reinitialized before returning)
 static string::ValueType NullChar = '\0';
 
+/// @brief Define log name
 LOG_MODULE("String");
 
 /// <summary>

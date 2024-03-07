@@ -204,9 +204,15 @@ void sysinit()
 
     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
     {
+#if BAREMETAL_MEMORY_TRACING
+        GetMemoryManager().DumpStatus();
+#endif
         GetSystem().Reboot();
     }
 
+#if BAREMETAL_MEMORY_TRACING
+    GetMemoryManager().DumpStatus();
+#endif
     GetSystem().Halt();
 }
 

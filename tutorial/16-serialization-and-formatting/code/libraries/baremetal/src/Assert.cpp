@@ -42,6 +42,9 @@
 #include <baremetal/Logger.h>
 #include <baremetal/System.h>
 
+/// @file
+/// Assertion functions implementation
+
 /// @brief Define log name
 LOG_MODULE("Assert");
 
@@ -49,6 +52,9 @@ namespace baremetal {
 
 static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
 
+/// @brief Assertion callback function
+///
+/// Set to the default assertion handler function at startup, but can be overriden
 static AssertionCallback *s_callback = AssertionFailedDefault;
 
 /// <summary>

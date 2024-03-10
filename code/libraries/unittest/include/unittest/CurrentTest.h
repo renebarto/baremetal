@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.h
+// File        : CurrentTest.h
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : CurrentTest
 //
-// Description : Testcase
+// Description : Current test info
 //
 //------------------------------------------------------------------------------
 //
@@ -39,54 +39,23 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
-
 /// @file
-/// Test administration
+/// Current test information
 
 namespace unittest
 {
 
-class Test;
 class TestResults;
+class TestDetails;
 
 /// <summary>
-/// Test administration class
+/// Container class for current test administration
 /// </summary>
-class TestInfo
+class CurrentTest
 {
-private:
-    friend class TestFixtureInfo;
-    /// @brief Test details
-    const TestDetails m_details;
-    /// @brief Pointer to actual test
-    Test* m_testInstance;
-    /// @brief Pointer to next test case in list
-    TestInfo* m_next;
-
 public:
-    TestInfo();
-    TestInfo(const TestInfo&) = delete;
-    TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-
-    TestInfo& operator = (const TestInfo&) = delete;
-    TestInfo& operator = (TestInfo&&) = delete;
-
-    /// <summary>
-    /// Returns the test details
-    /// </summary>
-    /// <returns>Test details</returns>
-    const TestDetails& Details() const { return m_details; }
-
-    void SetTest(Test* test);
-
-    void Run(TestResults& testResults);
+    static TestResults*& Results();
+    static const TestDetails*& Details();
 };
 
 } // namespace unittest

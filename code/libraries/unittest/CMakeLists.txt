@@ -28,16 +28,25 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

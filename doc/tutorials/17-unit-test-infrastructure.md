@@ -671,6 +671,232 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 69-76: We implement the non default constructor
 - Line 83-90: We implement the "copy" constructor
 
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTRESULTSH}
+
+In order to use the `TestInfo` class, we need to declare `TestResults`.
+For now we'll simply declare a simple class with a default constructor.
+We'll fill in the details later.
+
+Create the file `code/libraries/unittest/include/unittest/TestResults.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/TestResults.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : TestResults.h
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : TestResults
+9: //
+10: // Description : Test run results
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: /// @file
+43: /// Test run results
+44: 
+45: namespace unittest
+46: {
+47: 
+48: /// <summary>
+49: /// Test results class
+50: /// </summary>
+51: class TestResults
+52: {
+53: public:
+54:     TestResults() = default;
+55: };
+56: 
+57: } // namespace unittest
+```
+
+### CurrentTest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTRESULTSH}
+
+When running tests, we need a way to keep track of the details for the current test, as well as the test run results.
+We therefore introduce a simple class `CurrentTest` that holds pointers to both.
+
+Create the file `code/libraries/unittest/include/unittest/CurrentTest.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/CurrentTest.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : CurrentTest.h
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : CurrentTest
+9: //
+10: // Description : Current test info
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: /// @file
+43: /// Current test information
+44: 
+45: namespace unittest
+46: {
+47: 
+48: class TestResults;
+49: class TestDetails;
+50: 
+51: class CurrentTest
+52: {
+53: public:
+54:     static TestResults*& Results();
+55:     static const TestDetails*& Details();
+56: };
+57: 
+58: } // namespace unittest
+```
+
+### CurrentTest.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTINFOCPP}
+
+We'll implement the `CurrentTest` class.
+
+Create the file `code/libraries/unittest/src/CurrentTest.cpp`
+
+```cpp
+File: code/libraries/unittest/src/CurrentTest.cpp
+File: d:\Projects\baremetal.github\code\libraries\unittest\src\CurrentTest.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : CurrentTest.cpp
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : CurrentTest
+9: //
+10: // Description : Current test info
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <unittest/CurrentTest.h>
+41: 
+42: /// @file
+43: /// Current test information implementation
+44: 
+45: namespace unittest
+46: {
+47: 
+48: /// <summary>
+49: /// Returns reference to static test results pointer
+50: ///
+51: /// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test results during the test run.
+52: /// </summary>
+53: /// <returns>A reference to the current test results pointer</returns>
+54: TestResults *& CurrentTest::Results()
+55: {
+56:     static TestResults* testResults = nullptr;
+57:     return testResults;
+58: }
+59: 
+60: /// <summary>
+61: /// Returns reference to static test details pointer
+62: ///
+63: /// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test details during the test run.
+64: /// </summary>
+65: /// <returns>A reference to the current test details pointer</returns>
+66: const TestDetails *& CurrentTest::Details()
+67: {
+68:     static const TestDetails* testDetails = nullptr;
+69:     return testDetails;
+70: }
+71: 
+72: } // namespace unittest
+```
+
+- Line 54-58: We implement the `Results()` method.
+This simply returns a pointer to the static variable inside the function, which can the be set and used
+- Line 66-70: We implement the `Details()` method.
+This simply returns a pointer to the static variable inside the function, which can the be set and used
+
 ### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTINFOH}
 
 Next we will add the test administration class `TestInfo`.
@@ -739,7 +965,7 @@ File: code/libraries/unittest/include/unittest/TestInfo.h
 57: {
 58: private:
 59:     /// @brief Test details
-60:     TestDetails const m_details;
+60:     const TestDetails m_details;
 61:     /// @brief Pointer to actual test
 62:     Test* m_testInstance;
 63:     /// @brief Pointer to next test case in list
@@ -839,122 +1065,69 @@ File: code/libraries/unittest/src/TestInfo.cpp
 39: 
 40: #include <unittest/TestInfo.h>
 41: 
-42: /// @file
-43: /// Test case administration implementation
+42: #include <unittest/CurrentTest.h>
+43: #include <unittest/Test.h>
 44: 
-45: using namespace baremetal;
-46: 
-47: namespace unittest {
-48: 
-49: /// <summary>
-50: /// Default constructor
-51: /// </summary>
-52: TestInfo::TestInfo()
-53:     : m_details{}
-54:     , m_testInstance{}
-55:     , m_next{}
-56: {
-57: }
-58: 
-59: /// <summary>
-60: /// Explicit constructor
-61: /// </summary>
-62: /// <param name="testName">Name of test</param>
-63: /// <param name="fixtureName">Name of test fixture test is part of</param>
-64: /// <param name="suiteName">Name of test suite test is part of</param>
-65: /// <param name="fileName">Source file name of test</param>
-66: /// <param name="lineNumber">Source line number of test</param>
-67: TestInfo::TestInfo(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-68:     : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-69:     , m_testInstance{}
-70:     , m_next{}
-71: {
-72: }
-73: 
-74: /// <summary>
-75: /// Set test instance to link to test administration
-76: /// </summary>
-77: /// <param name="test">Test instance to link</param>
-78: void TestInfo::SetTest(Test* test)
-79: {
-80:     m_testInstance = test;
-81: }
-82: 
-83: } // namespace unittest
-```
-
-- Line 52-57: We implement the default constructor
-- Line 67-72: We implement the non default constructor
-- Line 78-81: We implement the `SetTest()` method
-
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTRESULTSH}
-
-In order to use the `TestInfo` class, we need to declare `TestResults`.
-For now we'll simply declare a simple class with a default constructor.
-We'll fill in the details later.
-
-Create the file `code/libraries/unittest/include/unittest/TestResults.h`
-
-```cpp
-File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\TestResults.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestResults.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestResults
-9: //
-10: // Description : Test run results
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: /// @file
-43: /// Test run results
-44: 
-45: namespace unittest
-46: {
+45: /// @file
+46: /// Test case administration implementation
 47: 
-48: /// <summary>
-49: /// Test results class
-50: /// </summary>
-51: class TestResults
-52: {
-53: public:
-54:     TestResults() = default;
-55: };
-56: 
-57: } // namespace unittest
+48: using namespace baremetal;
+49: 
+50: namespace unittest {
+51: 
+52: /// <summary>
+53: /// Default constructor
+54: /// </summary>
+55: TestInfo::TestInfo()
+56:     : m_details{}
+57:     , m_testInstance{}
+58:     , m_next{}
+59: {
+60: }
+61: 
+62: /// <summary>
+63: /// Explicit constructor
+64: /// </summary>
+65: /// <param name="testName">Name of test</param>
+66: /// <param name="fixtureName">Name of test fixture test is part of</param>
+67: /// <param name="suiteName">Name of test suite test is part of</param>
+68: /// <param name="fileName">Source file name of test</param>
+69: /// <param name="lineNumber">Source line number of test</param>
+70: TestInfo::TestInfo(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
+71:     : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
+72:     , m_testInstance{}
+73:     , m_next{}
+74: {
+75: }
+76: 
+77: /// <summary>
+78: /// Set test instance to link to test administration
+79: /// </summary>
+80: /// <param name="test">Test instance to link</param>
+81: void TestInfo::SetTest(Test* test)
+82: {
+83:     m_testInstance = test;
+84: }
+85: 
+86: /// <summary>
+87: /// Run the test instance, and update the test results
+88: /// </summary>
+89: /// <param name="testResults"></param>
+90: void TestInfo::Run(TestResults& testResults)
+91: {
+92:     CurrentTest::Details() = &Details();
+93:     CurrentTest::Results() = &testResults;
+94:     if (m_testInstance != nullptr)
+95:         m_testInstance->RunImpl();
+96: }
+97: 
+98: } // namespace unittest
 ```
+
+- Line 55-60: We implement the default constructor
+- Line 70-75: We implement the non default constructor
+- Line 81-84: We implement the `SetTest()` method
+- Line 90-96: We implement the `Run()` method
 
 ### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_UPDATE_CMAKE_FILE}
 
@@ -966,19 +1139,20 @@ Update the file `code/libraries/unitttest/CMakeLists.txt`
 File: code/libraries/unitttest/CMakeLists.txt
 ...
 30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
-34:     )
-35: 
-36: set(PROJECT_INCLUDES_PUBLIC
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
-41:     )
-42: set(PROJECT_INCLUDES_PRIVATE )
-43: 
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
+35:     )
+36: 
+37: set(PROJECT_INCLUDES_PUBLIC
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+43:     )
+44: set(PROJECT_INCLUDES_PRIVATE )
 ...
 ```
 
@@ -1072,7 +1246,7 @@ Now that we have a test we can run, let's add the test fixture, to hold multiple
 Test fixtures are slightly different from tests in their structure.
 - A `Test` only has a `RunImpl()` method which can be overridden.
 A `Test` class is overridden by a test implementation
-- A `TestFixture` class adds the `SetUp()` and `TearDown()` methods.
+- A `TestFixture` class has a `RunImpl()` method which can be overridden, as well as a `SetUp()` and `TearDown()` method.
 These methods can be overridden to implement setting up and tearing down context for all tests that are part of the test fixture.
 The `TestFixture` class is inherited by a fixture helper class for each test in the fixture, that acts a test, but is constructed before running the test, and destructed afterwards.
 The inheriting class will have a `RunImpl()` method that will run the actual test. Its constructor will run the `SetUp()` method, the destructor will run the `TearDown()` method
@@ -1134,33 +1308,49 @@ File: code/libraries/unittest/include/unittest/TestFixture.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: namespace unittest {
-43:
-44: class TestFixture
-45: {
-46: protected:
-47:     TestFixture() = default;
-48:     TestFixture(const TestFixture&) = delete;
-49:     ~TestFixture() = default;
-50:
-51:     TestFixture& operator = (const TestFixture&) = delete;
-52:
-53:     virtual void SetUp() {};
-54:     virtual void TearDown() {};
-55: };
-56:
-57: } // namespace unittest
+41: 
+42: /// @file
+43: /// Test fixture
+44: 
+45: namespace unittest {
+46: 
+47: /// <summary>
+48: /// Test fixture
+49: /// 
+50: /// Forms a replacement of a test, with the addition of SetUp/TearDown functionality
+51: /// </summary>
+52: class TestFixture
+53: {
+54: protected:
+55:     TestFixture() = default;
+56:     TestFixture(const TestFixture&) = delete;
+57:     TestFixture(TestFixture&&) = delete;
+58:     virtual ~TestFixture() = default;
+59: 
+60:     TestFixture& operator = (const TestFixture&) = delete;
+61:     TestFixture& operator = (TestFixture&&) = delete;
+62: 
+63:     /// <summary>
+64:     /// Default setup function
+65:     /// </summary>
+66:     virtual void SetUp() {};
+67:     /// <summary>
+68:     /// Default teardown function
+69:     /// </summary>
+70:     virtual void TearDown() {};
+71: };
+72: 
+73: } // namespace unittest
 ```
 
-- Line 44-57: We declare the `TestFixture` class
-  - Line 47: We make the default constructor a default implementation
-  - Line 48: We remove the copy constructor
-  - Line 49: We make the destructor a default implementation
-  - Line 51: We remove the assignment operator
-  - Line 53-54: We declare and implement the virtual `SetUp()` and `TearDown()` methods
+- Line 52-71: We declare the `TestFixture` class
+  - Line 55: We make the default constructor a default implementation
+  - Line 56-57: We remove the copy and move constructor
+  - Line 58: We make the destructor a default implementation
+  - Line 60-61: We remove the assignment and move assignment operator
+  - Line 66-70: We declare and implement the virtual `SetUp()` and `TearDown()` methods
 
 As can be seen, nothing else needs to be added for implementation.
 
@@ -1181,7 +1371,7 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 7: //
 8: // Class       : TestFixtureInfo
 9: //
-10: // Description : Test fixture info
+10: // Description : TestInfo fixture info
 11: //
 12: //------------------------------------------------------------------------------
 13: //
@@ -1210,80 +1400,103 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: #include <unittest/TestBase.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class TestBase;
-48:
-49: class TestFixtureInfo
-50: {
-51: private:
-52:     TestBase* m_head;
-53:     TestBase* m_tail;
-54:     TestFixtureInfo* m_next;
-55:     baremetal::string m_fixtureName;
-56:
-57: public:
-58:     TestFixtureInfo() = delete;
-59:     TestFixtureInfo(const TestFixtureInfo&) = delete;
-60:     TestFixtureInfo(TestFixtureInfo&&) = delete;
-61:     explicit TestFixtureInfo(const baremetal::string& fixtureName);
-62:     virtual ~TestFixtureInfo();
-63:
-64:     TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
-65:     TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
-66:
-67:     TestBase* GetHead() const { return m_head; }
-68:
-69:     const baremetal::string& Name() const { return m_fixtureName; }
-70:
-71:     void Run();
-72:
-73:     int CountTests();
-74:
-75:     void AddTest(TestBase* test);
-76: };
-77:
-78: } // namespace unittest
+41: 
+42: #include <unittest/TestInfo.h>
+43: #include <unittest/TestResults.h>
+44: 
+45: /// @file
+46: /// Test fixture administration
+47: 
+48: namespace unittest
+49: {
+50: 
+51: class TestInfo;
+52: 
+53: /// <summary>
+54: /// Test fixture administration
+55: /// 
+56: /// Holds information on a test fixture, which includes its name and the list of tests that are part of it
+57: /// </summary>
+58: class TestFixtureInfo
+59: {
+60: private:
+61:     /// @brief Pointer to first test in the list
+62:     TestInfo* m_head;
+63:     /// @brief Pointer to last test in the list
+64:     TestInfo* m_tail;
+65:     /// @brief Pointer to next test fixture info in the list
+66:     TestFixtureInfo* m_next;
+67:     /// @brief Test fixture name
+68:     baremetal::string m_fixtureName;
+69: 
+70: public:
+71:     TestFixtureInfo() = delete;
+72:     TestFixtureInfo(const TestFixtureInfo&) = delete;
+73:     TestFixtureInfo(TestFixtureInfo&&) = delete;
+74:     explicit TestFixtureInfo(const baremetal::string& fixtureName);
+75:     virtual ~TestFixtureInfo();
+76: 
+77:     TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
+78:     TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
+79: 
+80:     /// <summary>
+81:     /// Returns the pointer to the first test in the list for this test fixture
+82:     /// </summary>
+83:     /// <returns>Pointer to the first test in the list for this test fixture</returns>
+84:     TestInfo* Head() const {  return m_head; }
+85: 
+86:     /// <summary>
+87:     /// Returns the test fixture name
+88:     /// </summary>
+89:     /// <returns>Test fixture name</returns>
+90:     const baremetal::string& Name() const { return m_fixtureName; }
+91: 
+92:     void Run(TestResults& testResults);
+93: 
+94:     int CountTests();
+95: 
+96:     void AddTest(TestInfo* test);
+97: };
+98: 
+99: } // namespace unittest
 ```
 
-- Line 52-53: The member variables `m_head` and `m_tail` store the pointer to the first and last test in the fixture
-- Line 54: The member variable `m_next` is the pointer to the next test fixture. Again, test fixtures are stored in linked list
-- Line 55: The member variable `m_fixtureName` holds the name of the test fixture
-- Line 58: We remove the default constructor
-- Line 59-60: We remove the copy and move constructors
-- Line 61: We declare the only usable constructor which receives the test fixture name
-- Line 62: We declare the destructor
-- Line 64-65: We remove the assignment and move assignment operators
-- Line 67: The method `GetHead()` returns the pointer to the first test in the list
-- Line 69: The method `Name()` returns the test fixture name
-- Line 71: The method `Run()` runs all tests in the test fixture. We'll be revisiting this later
-- Line 73: The method `CountTests()` counts and returns the number of tests in the test fixture
-- Line 75: The method `AddTest()` adds a test to the list for the test fixture
+- Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test in the fixture
+- Line 66: The member variable `m_next` is the pointer to the next test fixture. Again, test fixtures are stored in linked list
+- Line 68: The member variable `m_fixtureName` holds the name of the test fixture
+- Line 71: We remove the default constructor
+- Line 72-73 We remove the copy and move constructors
+- Line 74: We declare the only usable constructor which receives the test fixture name
+- Line 75: We declare the destructor
+- Line 77-78: We remove the assignment and move assignment operators
+- Line 84: The method `Head()` returns the pointer to the first test in the list
+- Line 90: The method `Name()` returns the test fixture name
+- Line 92: The method `Run()` runs all tests in the test fixture. We'll be revisiting this later
+- Line 94: The method `CountTests()` counts and returns the number of tests in the test fixture
+- Line 96: The method `AddTest()` adds a test to the list for the test fixture
 
-### TestBase.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTBASEH}
+### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTINFOH}
 
-As the `TestFixtureInfo` class needs access to the `TestBase` class in order to access the `m_next` pointer, we need to make it a friend class.
+As the `TestFixtureInfo` class needs access to the `TestInfo` class in order to access the `m_next` pointer, we need to make it a friend class.
 
-Update the file `code/libraries/unittest/include/unittest/TestBase.h`
+Update the file `code/libraries/unittest/include/unittest/TestInfo.h`
 
 ```cpp
-File: code/libraries/unittest/include/unittest/TestBase.h
+File: code/libraries/unittest/include/unittest/TestInfo.h
 ...
-47: class TestBase
-48: {
-49: private:
-50:     friend class TestFixtureInfo;
-51:     TestDetails const m_details;
-52:     TestBase* m_next;
-53:
-54: public:
-55:     TestBase();
+56: class TestInfo
+57: {
+58: private:
+59:     friend class TestFixtureInfo;
+60:     /// @brief Test details
+61:     TestDetails const m_details;
+62:     /// @brief Pointer to actual test
+63:     Test* m_testInstance;
+64:     /// @brief Pointer to next test case in list
+65:     TestInfo* m_next;
+66: 
 ...
 ```
 
@@ -1332,80 +1545,286 @@ File: code/libraries/unittest/src/TestFixtureInfo.cpp
 35: // DEALINGS IN THE SOFTWARE.
 36: //
 37: //------------------------------------------------------------------------------
-38:
+38: 
 39: #include <unittest/TestFixtureInfo.h>
-40:
+40: 
 41: #include <baremetal/Assert.h>
-42:
-43: using namespace baremetal;
-44:
-45: namespace unittest {
-46:
-47: TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-48:     : m_head{}
-49:     , m_tail{}
-50:     , m_next{}
-51:     , m_fixtureName{ fixtureName }
-52: {
-53: }
-54:
-55: TestFixtureInfo::~TestFixtureInfo()
-56: {
-57:     TestBase* test = m_head;
-58:     while (test != nullptr)
-59:     {
-60:         TestBase* currentTest = test;
-61:         test = test->m_next;
-62:         delete currentTest;
-63:     }
-64: }
-65:
-66: void TestFixtureInfo::AddTest(TestBase* test)
-67: {
-68:     if (m_tail == nullptr)
-69:     {
-70:         assert(m_head == nullptr);
-71:         m_head = test;
-72:         m_tail = test;
-73:     }
-74:     else
-75:     {
-76:         m_tail->m_next = test;
-77:         m_tail = test;
-78:     }
-79: }
-80:
-81: void TestFixtureInfo::Run()
-82: {
-83:     TestBase* test = this->GetHead();
-84:     while (test != nullptr)
-85:     {
-86:         test->Run();
-87:         test = test->m_next;
-88:     }
-89: }
-90:
-91: int TestFixtureInfo::CountTests()
-92: {
-93:     int numberOfTests = 0;
-94:     TestBase* test = m_head;
-95:     while (test != nullptr)
-96:     {
-97:         ++numberOfTests;
-98:         test = test->m_next;
-99:     }
-100:     return numberOfTests;
-101: }
-102:
-103: } // namespace unittest
+42: 
+43: /// @file
+44: /// Test fixture administration implementation
+45: 
+46: using namespace baremetal;
+47: 
+48: namespace unittest {
+49: 
+50: /// <summary>
+51: /// Constructor
+52: /// </summary>
+53: /// <param name="fixtureName">Test fixture name</param>
+54: TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
+55:     : m_head{}
+56:     , m_tail{}
+57:     , m_next{}
+58:     , m_fixtureName{ fixtureName }
+59: {
+60: }
+61: 
+62: /// <summary>
+63: /// Destructor
+64: /// 
+65: /// Cleans up all registered tests for this test fixture
+66: /// </summary>
+67: TestFixtureInfo::~TestFixtureInfo()
+68: {
+69:     TestInfo* test = m_head;
+70:     while (test != nullptr)
+71:     {
+72:         TestInfo* currentTest = test;
+73:         test = test->m_next;
+74:         delete currentTest;
+75:     }
+76: }
+77: 
+78: /// <summary>
+79: /// Add a test to the list
+80: /// 
+81: /// This method is called at static initialization time to register tests
+82: /// </summary>
+83: /// <param name="test">Test to register</param>
+84: void TestFixtureInfo::AddTest(TestInfo* test)
+85: {
+86:     if (m_tail == nullptr)
+87:     {
+88:         assert(m_head == nullptr);
+89:         m_head = test;
+90:         m_tail = test;
+91:     }
+92:     else
+93:     {
+94:         m_tail->m_next = test;
+95:         m_tail = test;
+96:     }
+97: }
+98: 
+99: /// <summary>
+100: /// Run tests in test fixture, updating the test results
+101: /// </summary>
+102: /// <param name="testResults">Test results to use and update</param>
+103: void TestFixtureInfo::Run(TestResults& testResults)
+104: {
+105:     TestInfo* test = Head();
+106:     while (test != nullptr)
+107:     {
+108:         test->Run(testResults);
+109:         test = test->m_next;
+110:     }
+111: }
+112: 
+113: 
+114: /// <summary>
+115: /// Count the number of tests in the test fixture
+116: /// </summary>
+117: /// <returns>Number of tests in the test fixture</returns>
+118: int TestFixtureInfo::CountTests()
+119: {
+120:     int numberOfTests = 0;
+121:     TestInfo* test = Head();
+122:     while (test != nullptr)
+123:     {
+124:         ++numberOfTests;
+125:         test = test->m_next;
+126:     }
+127:     return numberOfTests;
+128: }
+129: 
+130: } // namespace unittest
 ```
 
-- Line 47-53: We implement the constructor
-- Line 55-64: We implement the destructor. This goes through the list of tests, and deletes every one of these. Note that we will therefore need to create the tests on the heap.
-- Line 66-79: We implement the `AddTest()` method. This will add the test passed in at the end of the list
-- Line 81-84: We implement the `GetHead()` method
-- Line 86-94: We implement the `Run()` method. This goes through the list of tests, and calls `Run()` on each
-- Line 96-106: We implement the `CountTests()` method. This goes through the list of tests, and counts them
+- Line 54-60: We implement the constructor
+- Line 67-76: We implement the destructor. This goes through the list of tests, and deletes every one of these. Note that we will therefore need to create the tests on the heap.
+- Line 84-97: We implement the `AddTest()` method. This will add the test passed in at the end of the list
+- Line 103-111: We implement the `Run()` method. This goes through the list of tests, and calls `Run()` on each
+- Line 118-128: We implement the `CountTests()` method. This goes through the list of tests, and counts them
+
+### TestResults.h
+
+We will add some methods to the `TestResults` class to indicate what we're moving towards.
+
+Update the file `code/libraries/unittest/include/unittest/TestResults.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/TestResults.h
+...
+45: namespace baremetal {
+46: 
+47: class string;
+48: 
+49: }
+50: 
+51: namespace unittest
+52: {
+53: 
+54: class TestDetails;
+55: 
+56: /// <summary>
+57: /// Test results class
+58: /// </summary>
+59: class TestResults
+60: {
+61: public:
+62:     TestResults() = default;
+63: 
+64:     void OnTestStart(const TestDetails& details);
+65:     void OnTestRun(const TestDetails& details, const baremetal::string& message);
+66:     void OnTestFinish(const TestDetails& details);
+67: };
+...
+```
+
+- Line 64: We declare the method `OnTestStart()` to indicate the start of a test
+- Line 65: We declare the method 'OnTestRun()` to indicate we're running a test (this will be changed later)
+- Line 66: We declare the method `OnTestFinish()` to indicate the end of a test
+
+### TestResults.cpp
+
+Let's implement the new methods in the `Testresults` class.
+
+Create the file `code/libraries/unittest/src/TestResults.cpp`
+
+```cpp
+File: code/libraries/unittest/src/TestResults.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : TestResults.cpp
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : TestResults
+9: //
+10: // Description : Test run results
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <unittest/TestResults.h>
+41: 
+42: #include <baremetal/Format.h>
+43: #include <baremetal/Logger.h>
+44: #include <baremetal/String.h>
+45: #include <unittest/TestDetails.h>
+46: 
+47: /// @file
+48: /// Test results implementation
+49: 
+50: using namespace baremetal;
+51: 
+52: /// @brief Define log name
+53: LOG_MODULE("TestResults");
+54: 
+55: namespace unittest
+56: {
+57: 
+58: static string QualifiedTestName(const TestDetails& details)
+59: {
+60:     return Format("%s::%s::%s",
+61:         details.SuiteName().empty() ? "DefaultSuite" : details.SuiteName().c_str(),
+62:         details.FixtureName().empty() ? "DefaultFixture" : details.FixtureName().c_str(),
+63:         details.TestName().c_str());
+64: }
+65: 
+66: void TestResults::OnTestStart(const TestDetails& details)
+67: {
+68:     LOG_INFO(QualifiedTestName(details) + " Start test");
+69: }
+70: 
+71: void TestResults::OnTestRun(const TestDetails& details, const string& message)
+72: {
+73:     string fullMessage = QualifiedTestName(details) + Format(" (%s:%d)",
+74:         details.SourceFileName().c_str(),
+75:         details.SourceFileLineNumber()) + " --> " + message;
+76:     LOG_DEBUG(fullMessage);
+77: }
+78: 
+79: void TestResults::OnTestFinish(const TestDetails& details)
+80: {
+81:     LOG_INFO(QualifiedTestName(details) + " Finish test");
+82: }
+83: 
+84: } // namespace unittest
+```
+
+- Line 58-64: We create a static function to format the fully qualified name of a test (\<suite\>::\<fixture\>::\<test\>)
+- Line 66-69: We implement the methos `OnTestStart()`
+- Line 71-77: We implement the methos `OnTestRun()`
+- Line 79-82: We implement the methos `OnTestFinish()`
+
+As this code will change soon, it's not documented now.
+
+### TestInfo.cpp
+
+As we have added some methods to `TestResults`, we'll update the `Run()` method in `TestInfo` to call these.
+
+Update the file `code/libraries/unittest/src/TestInfo.cpp`
+
+```cpp
+File: code/libraries/unittest/src/TestInfo.cpp
+...
+40: #include <unittest/TestInfo.h>
+41: 
+42: #include <unittest/CurrentTest.h>
+43: #include <unittest/Test.h>
+44: #include <unittest/TestResults.h>
+...
+File: d:\Projects\baremetal.github\code\libraries\unittest\src\TestInfo.cpp
+87: /// <summary>
+88: /// Run the test instance, and update the test results
+89: /// </summary>
+90: /// <param name="testResults"></param>
+91: void TestInfo::Run(TestResults& testResults)
+92: {
+93:     CurrentTest::Details() = &Details();
+94:     CurrentTest::Results() = &testResults;
+95: 
+96:     if (m_testInstance != nullptr)
+97:     {
+98:         testResults.OnTestStart(m_details);
+99: 
+100:         m_testInstance->RunImpl();
+101: 
+102:         testResults.OnTestFinish(m_details);
+103:     }
+104: }
+105: 
+```
+
+- Line 44: We need to include the header for `TestResults`
+- Line 96-103: Next to calling the `RunImpl()` method on the test, we also call the `OnTestStart()` and `OnTestFinish()` methods on the `TestResults` class
 
 ### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_UPDATE_CMAKE_FILE}
 
@@ -1417,18 +1836,24 @@ Update the file `code/libraries/unitttest/CMakeLists.txt`
 File: code/libraries/unitttest/CMakeLists.txt
 ...
 30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-34:     )
-35:
-36: set(PROJECT_INCLUDES_PUBLIC
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
-41:     )
-42: set(PROJECT_INCLUDES_PRIVATE )
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+37:     )
+38: 
+39: set(PROJECT_INCLUDES_PUBLIC
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+47:     )
+48: set(PROJECT_INCLUDES_PRIVATE )
 ...
 ```
 
@@ -1442,213 +1867,257 @@ Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16:
-17: #include <unittest/TestBase.h>
-18: #include <unittest/TestFixture.h>
-19: #include <unittest/TestFixtureInfo.h>
-20:
-21: LOG_MODULE("main");
-22:
-23: using namespace baremetal;
-24: using namespace unittest;
-25:
-26: class FixtureMyTest
-27:     : public TestFixture
-28: {
-29: public:
-30:     void SetUp() override
-31:     {
-32:         LOG_DEBUG("MyTest SetUp");
-33:     }
-34:     void TearDown() override
-35:     {
-36:         LOG_DEBUG("MyTest TearDown");
-37:     }
-38: };
-39:
-40: class FixtureMyTest1Helper
-41:     : public FixtureMyTest
-42: {
-43: public:
-44:     FixtureMyTest1Helper(const FixtureMyTest1Helper&) = delete;
-45:     explicit FixtureMyTest1Helper(const TestDetails& details)
-46:         : m_details{ details }
-47:     {
-48:         SetUp();
-49:     }
-50:     virtual ~FixtureMyTest1Helper()
-51:     {
-52:         TearDown();
-53:     }
-54:     void RunImpl() const;
-55:     const TestDetails& m_details;
-56: };
-57: void FixtureMyTest1Helper::RunImpl() const
-58: {
-59:     LOG_DEBUG("MyTestHelper 1");
-60: }
-61:
-62: class FixtureMyTest2Helper
-63:     : public FixtureMyTest
-64: {
-65: public:
-66:     FixtureMyTest2Helper(const FixtureMyTest2Helper&) = delete;
-67:     explicit FixtureMyTest2Helper(const TestDetails& details)
-68:         : m_details{ details }
-69:     {
-70:         SetUp();
-71:     }
-72:     virtual ~FixtureMyTest2Helper()
-73:     {
-74:         TearDown();
-75:     }
-76:     void RunImpl() const;
-77:     const TestDetails& m_details;
-78: };
-79: void FixtureMyTest2Helper::RunImpl() const
-80: {
-81:     LOG_DEBUG("MyTestHelper 2");
-82: }
-83:
-84: class FixtureMyTest3Helper
-85:     : public FixtureMyTest
-86: {
-87: public:
-88:     FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
-89:     explicit FixtureMyTest3Helper(const TestDetails& details)
-90:         : m_details{ details }
-91:     {
-92:         SetUp();
-93:     }
-94:     virtual ~FixtureMyTest3Helper()
-95:     {
-96:         TearDown();
-97:     }
-98:     void RunImpl() const;
-99:     const TestDetails& m_details;
-100: };
-101: void FixtureMyTest3Helper::RunImpl() const
-102: {
-103:     LOG_DEBUG("MyTestHelper 3");
-104: }
-105:
-106: class MyTest1
-107:     : public TestBase
-108: {
-109: public:
-110:     MyTest1()
-111:         : TestBase("MyTest1", "MyFixture", "", __FILE__, __LINE__)
-112:     {
-113:
-114:     }
-115:     void RunImpl() const override
-116:     {
-117:         LOG_DEBUG("Test 1");
-118:         FixtureMyTest1Helper fixtureHelper(Details());
-119:         fixtureHelper.RunImpl();
-120:     }
-121: };
-122:
-123: class MyTest2
-124:     : public TestBase
-125: {
-126: public:
-127:     MyTest2()
-128:         : TestBase("MyTest2", "MyFixture", "", __FILE__, __LINE__)
-129:     {
-130:
-131:     }
-132:     void RunImpl() const override
-133:     {
-134:         LOG_DEBUG("Test 2");
-135:         FixtureMyTest2Helper fixtureHelper(Details());
-136:         fixtureHelper.RunImpl();
-137:     }
-138: };
-139:
-140: class MyTest3
-141:     : public TestBase
-142: {
-143: public:
-144:     MyTest3()
-145:         : TestBase("MyTest3", "MyFixture", "", __FILE__, __LINE__)
-146:     {
-147:
-148:     }
-149:     void RunImpl() const override
-150:     {
-151:         LOG_DEBUG("Test 3");
-152:         FixtureMyTest3Helper fixtureHelper(Details());
-153:         fixtureHelper.RunImpl();
-154:     }
-155: };
-156:
-157: int main()
-158: {
-159:     auto& console = GetConsole();
-160:     LOG_DEBUG("Hello World!");
-161:
-162:     TestBase* test1 = new MyTest1;
-163:     TestBase* test2 = new MyTest2;
-164:     TestBase* test3 = new MyTest3;
-165:     TestFixtureInfo* fixture = new TestFixtureInfo("MyFixture");
-166:     fixture->AddTest(test1);
-167:     fixture->AddTest(test2);
-168:     fixture->AddTest(test3);
-169:     fixture->Run();
-170:     delete fixture;
-171:
-172:     LOG_INFO("Wait 5 seconds");
-173:     Timer::WaitMilliSeconds(5000);
-174:
-175:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-176:     char ch{};
-177:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-178:     {
-179:         ch = console.ReadChar();
-180:         console.WriteChar(ch);
-181:     }
-182:     if (ch == 'p')
-183:         assert(false);
-184:
-185:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-186: }
+1: #include <baremetal/Assert.h>
+2: #include <baremetal/Console.h>
+3: #include <baremetal/Logger.h>
+4: #include <baremetal/System.h>
+5: #include <baremetal/Timer.h>
+6: 
+7: #include <unittest/CurrentTest.h>
+8: #include <unittest/Test.h>
+9: #include <unittest/TestFixture.h>
+10: #include <unittest/TestFixtureInfo.h>
+11: #include <unittest/TestInfo.h>
+12: #include <unittest/TestResults.h>
+13: 
+14: LOG_MODULE("main");
+15: 
+16: using namespace baremetal;
+17: using namespace unittest;
+18: 
+19: class FixtureMyTest
+20:     : public TestFixture
+21: {
+22: public:
+23:     void SetUp() override
+24:     {
+25:         LOG_DEBUG("MyTest SetUp");
+26:     }
+27:     void TearDown() override
+28:     {
+29:         LOG_DEBUG("MyTest TearDown");
+30:     }
+31: };
+32: 
+33: class FixtureMyTest1Helper
+34:     : public FixtureMyTest
+35: {
+36: public:
+37:     FixtureMyTest1Helper(const FixtureMyTest1Helper&) = delete;
+38:     explicit FixtureMyTest1Helper(const TestDetails& details)
+39:         : m_details{ details }
+40:     {
+41:         SetUp();
+42:     }
+43:     virtual ~FixtureMyTest1Helper()
+44:     {
+45:         TearDown();
+46:     }
+47:     void RunImpl() const;
+48:     const TestDetails& m_details;
+49: };
+50: void FixtureMyTest1Helper::RunImpl() const
+51: {
+52:     CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 1");
+53: }
+54: 
+55: class MyTest1
+56:     : public Test
+57: {
+58:     void RunImpl() const override
+59:     {
+60:         LOG_DEBUG("Test 1");
+61:         FixtureMyTest1Helper fixtureHelper(*CurrentTest::Details());
+62:         fixtureHelper.RunImpl();
+63:     }
+64: } myTest1;
+65: class MyTestInfo1
+66:     : public TestInfo
+67: {
+68: public:
+69:     MyTestInfo1(Test* testInstance)
+70:         : TestInfo("MyTest1", "MyFixture", "", __FILE__, __LINE__)
+71:     {
+72:         SetTest(testInstance);
+73:     }
+74: };
+75: 
+76: class FixtureMyTest2Helper
+77:     : public FixtureMyTest
+78: {
+79: public:
+80:     FixtureMyTest2Helper(const FixtureMyTest2Helper&) = delete;
+81:     explicit FixtureMyTest2Helper(const TestDetails& details)
+82:         : m_details{ details }
+83:     {
+84:         SetUp();
+85:     }
+86:     virtual ~FixtureMyTest2Helper()
+87:     {
+88:         TearDown();
+89:     }
+90:     void RunImpl() const;
+91:     const TestDetails& m_details;
+92: };
+93: void FixtureMyTest2Helper::RunImpl() const
+94: {
+95:     CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 2");
+96: }
+97: 
+98: class MyTest2
+99:     : public Test
+100: {
+101:     void RunImpl() const override
+102:     {
+103:         LOG_DEBUG("Test 2");
+104:         FixtureMyTest2Helper fixtureHelper(*CurrentTest::Details());
+105:         fixtureHelper.RunImpl();
+106:     }
+107: } myTest2;
+108: class MyTestInfo2
+109:     : public TestInfo
+110: {
+111: public:
+112:     MyTestInfo2(Test* testInstance)
+113:         : TestInfo("MyTest2", "MyFixture", "", __FILE__, __LINE__)
+114:     {
+115:         SetTest(testInstance);
+116:     }
+117: };
+118: 
+119: class FixtureMyTest3Helper
+120:     : public FixtureMyTest
+121: {
+122: public:
+123:     FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
+124:     explicit FixtureMyTest3Helper(const TestDetails& details)
+125:         : m_details{ details }
+126:     {
+127:         SetUp();
+128:     }
+129:     virtual ~FixtureMyTest3Helper()
+130:     {
+131:         TearDown();
+132:     }
+133:     void RunImpl() const;
+134:     const TestDetails& m_details;
+135: };
+136: void FixtureMyTest3Helper::RunImpl() const
+137: {
+138:     CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 3");
+139: }
+140: 
+141: class MyTest3
+142:     : public Test
+143: {
+144:     void RunImpl() const override
+145:     {
+146:         LOG_DEBUG("Test 3");
+147:         FixtureMyTest3Helper fixtureHelper(*CurrentTest::Details());
+148:         fixtureHelper.RunImpl();
+149:     }
+150: } myTest3;
+151: class MyTestInfo3
+152:     : public TestInfo
+153: {
+154: public:
+155:     MyTestInfo3(Test* testInstance)
+156:         : TestInfo("MyTest3", "MyFixture", "", __FILE__, __LINE__)
+157:     {
+158:         SetTest(testInstance);
+159:     }
+160: };
+161: 
+162: 
+163: class MyTest
+164:     : public Test
+165: {
+166: public:
+167:     void RunImpl() const override;
+168: } myTest;
+169: class MyTestInfo
+170:     : public TestInfo
+171: {
+172: public:
+173:     MyTestInfo(Test* testInstance)
+174:         : TestInfo("MyTest3", "MyFixture", "", __FILE__, __LINE__)
+175:     {
+176:         SetTest(testInstance);
+177:     }
+178: };
+179: 
+180: void MyTest::RunImpl() const
+181: {
+182:     CurrentTest::Results()->OnTestRun(*CurrentTest::Details(), "Running test");
+183: }
+184: 
+185: int main()
+186: {
+187:     auto& console = GetConsole();
+188: 
+189:     TestInfo* test1 = new MyTestInfo1(&myTest1);
+190:     TestInfo* test2 = new MyTestInfo2(&myTest2);
+191:     TestInfo* test3 = new MyTestInfo3(&myTest3);
+192:     TestFixtureInfo* fixture = new TestFixtureInfo("MyFixture");
+193:     unittest::TestResults results;
+194:     fixture->AddTest(test1);
+195:     fixture->AddTest(test2);
+196:     fixture->AddTest(test3);
+197:     fixture->Run(results);
+198:     delete fixture;
+199:     unittest::TestInfo myTestInfo("MyTest", "", "", __FILE__, __LINE__);
+200:     myTestInfo.SetTest(&myTest);
+201: 
+202:     myTestInfo.Run(results);
+203: 
+204:     LOG_INFO("Wait 5 seconds");
+205:     Timer::WaitMilliSeconds(5000);
+206: 
+207:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
+208:     char ch{};
+209:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+210:     {
+211:         ch = console.ReadChar();
+212:         console.WriteChar(ch);
+213:     }
+214:     if (ch == 'p')
+215:         assert(false);
+216: 
+217:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+218: }
 ```
 
-- Line 18: We include the header for `TestFixture`
-- Line 19: We include the header for `TestFixtureInfo`
+- Line 7: We include the header for `CurrentTest`
+- Line 9: We include the header for `TestFixture`
+- Line 10: We include the header for `TestFixtureInfo`
+- Line 12: We include the header for `TestResults`
 
-- Line 26-38: We declare and implement a class `FixtureMyTest` which derives from `TestFixture` and implements the `SetUp()` and `TearDown()` methods.
-- Line 40-60: We declare and implement a class `FixtureMyTest1Helper` which derives from the class `FixtureMyTest` just defined, and implements the constructor and destructor, calling resp. `SetUp()` and `TearDown()`.
-This class also defines a `RunImpl()` method, which forms the actual test body for the test MyTest1
-- Line 62-82:: We do the similar thing for `FixtureTest2Helper`
-- Line 84-104: We do the similar thing for `FixtureTest3Helper`
-- Line 106-121: We declare and implement the class `MyTest1`, which derives from `TestBase`, and acts as the placeholders for the fixture test.
-Its `RunImpl()` method instantiates `FixtureMyTest1Helper`, and runs its `RunImpl()` method
-- Line 123-138: We do the similar thing for `MyTest2`
-- Line 140-155: We do the similar thing for `MyTest3`
-- Line 162-164: We instantiate each of `MyTest1`, `MyTest2` and `MyTest3`
-- Line 165: We instantiate `TestFixtureInfo` as our test fixture
-- Line 166-168: We add the three tests to the test fixture
-- Line 169: We run the test fixture
-- Line 170: We clean up the test fixture. Note that the test fixture desctructor deletes all tests, so we don't need to (and shouldn't) do that
+- Line 19-31: We declare and implement the class `FixtureMyTest` which derives from `TestFixture` and implements the `SetUp()` and `TearDown()` methods, simply by logging a message
+- Line 33-53: We declare and implement the class `FixtureMyTest1Helper` which derives from the class `FixtureMyTest` just defined, and implements the constructor and destructor, calling resp. `SetUp()` and `TearDown()`
+This class also defines a `RunImpl()` method, which forms the actual test body for the test MyTest1.
+It is implemented as a call to the `OnTestRun()` method on the `TestResults` instance
+- Line 55-64: We declare and implement the class `MyTest1`, which derives from `Test`, and acts as the placeholders for the fixture test.
+We instantiate it as `myTest1`. Its `RunImpl()` method instantiates `FixtureMyTest1Helper`, and runs its `RunImpl()` method
+- Line 65-74: We declare and implement the class `MyTestInfo1`, which derives from `TestInfo`. Its constructor links the test instance
+- Line 76-96: We declare and implement the class `FixtureTest2Helper` in a similar way as `FixtureMyTest1Helper`
+- Line 98-107: We declare and implement the class `MyTest2` in a similar way as `MyTest1`, and instantiate it as `myTest2`
+- Line 108-117: We declare and implement the class `MyTestInfo2` in a similar way as `MyTestInfo1`
+- Line 119-139: We declare and implement the class `FixtureTest3Helper` in a similar way `FixtureMyTest1Helper`
+- Line 141-150: We declare and implement the class `MyTest3` in a similar way as `MyTest1`, and instantiate it as `myTest3`
+- Line 151-160: We declare and implement the class `MyTestInfo3` in a similar way as `MyTestInfo1`
+- Line 163-168: We declare the class `MyTest`, which derives from `Test`
+- Line 169-178: We declare and implement the class `MyTestInfo` in a similar way as `MyTestInfo1`
+- Line 180-183: We implement the `RunImpl()` method for `MyTest` as a call to the `OnTestRun()` method on the `TestResults` instance
+- Line 189-191: We instantiate each of `MyTestInfo1`, `MyTestInfo2` and `MyTestInfo3`, passing in the instance of the corresponding test
+- Line 192: We instantiate `TestFixtureInfo` as our test fixture
+- Line 194-196: We add the three tests to the test fixture
+- Line 197: We run the test fixture
+- Line 198: We clean up the test fixture. Note that the test fixture desctructor deletes all test administration instances, so we don't need to (and shouldn't) do that.
+The tests themselves are normally instantiated at static initialization time, so will never be destructed
+- Line 199-200: We instantiate a `TestInfo`, and call its `SetTest()` method to link it to the `myTest` instance
+- Line 202: We run the test
 
-This all seems like quite a bit of plumbing just to run three tests.
+This all seems like quite a bit of plumbing just to run three tests in a test fixture and one single test.
 That is why we'll create macros later to do this work for us.
 But it's good to understand what is happening underneath the hood.
 
@@ -1662,34 +2131,42 @@ This then instantiates the `FixtureTest<x>Helper`, and its constructor runs the 
 Then the `RunImpl()` of `FixtureTest<x>Helper` is run, and finally the class is destructed again, leading to the `FixtureMyTest` method `TearDown()` begin run.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
 Info   Starting up (System:201)
-Debug  Hello World! (main:160)
-Debug  Test 1 (main:117)
-Debug  MyTest SetUp (main:32)
-Debug  MyTestHelper 1 (main:59)
-Debug  MyTest TearDown (main:36)
-Debug  Test 2 (main:134)
-Debug  MyTest SetUp (main:32)
-Debug  MyTestHelper 2 (main:81)
-Debug  MyTest TearDown (main:36)
-Debug  Test 3 (main:151)
-Debug  MyTest SetUp (main:32)
-Debug  MyTestHelper 3 (main:103)
-Debug  MyTest TearDown (main:36)
-Info   Wait 5 seconds (main:172)
+Info   DefaultSuite::MyFixture::MyTest1 Start test (TestResults:68)
+Debug  Test 1 (main:60)
+Debug  MyTest SetUp (main:25)
+Debug  DefaultSuite::MyFixture::MyTest1 (../code/applications/demo/src/main.cpp:70) --> MyTestHelper 1 (TestResults:76)
+Debug  MyTest TearDown (main:29)
+Info   DefaultSuite::MyFixture::MyTest1 Finish test (TestResults:81)
+Info   DefaultSuite::MyFixture::MyTest2 Start test (TestResults:68)
+Debug  Test 2 (main:103)
+Debug  MyTest SetUp (main:25)
+Debug  DefaultSuite::MyFixture::MyTest2 (../code/applications/demo/src/main.cpp:113) --> MyTestHelper 2 (TestResults:76)
+Debug  MyTest TearDown (main:29)
+Info   DefaultSuite::MyFixture::MyTest2 Finish test (TestResults:81)
+Info   DefaultSuite::MyFixture::MyTest3 Start test (TestResults:68)
+Debug  Test 3 (main:146)
+Debug  MyTest SetUp (main:25)
+Debug  DefaultSuite::MyFixture::MyTest3 (../code/applications/demo/src/main.cpp:156) --> MyTestHelper 3 (TestResults:76)
+Debug  MyTest TearDown (main:29)
+Info   DefaultSuite::MyFixture::MyTest3 Finish test (TestResults:81)
+Info   DefaultSuite::DefaultFixture::MyTest Start test (TestResults:68)
+Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:199) --> Running test (TestResults:76)
+Info   DefaultSuite::DefaultFixture::MyTest Finish test (TestResults:81)
+Info   Wait 5 seconds (main:204)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Adding test suites - Step 3 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_3}
+## Adding test suites - Step 5 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_3}
 
-The final step is collecting test fixtures in test suites.
+The final step in building infrasturcture for unit tests is collecting test fixtures in test suites.
 Test suites are again different from tests and test fixtures in their structure.
 
-- A TestSuite is actually nothing more than a function returning the suite name. The trick is that the function will be placed inside a namespace, as well as all the test fixtures that belong inside it
-- The `TestSuiteInfo` class holds the actual test suite information, such as the pointer to the next test suite, and the pointers to the first and last test fixture in the suite.
+- A TestSuite is actually nothing more than a function returning the suite name. The trick is that the function will be placed inside a namespace, as well as all the test fixtures and tests that belong inside it
+- The `TestSuiteInfo` class holds the actual test suite information, such as the pointer to the next test suite, and the pointers to the first and last test fixture in the suite
 
-So the `TestSuiteInfo` class holds the administration of the test suite, like `TestFixtureInfo` and `TestBase` do for test fixtures and tests.
+So the `TestSuiteInfo` class holds the administration of the test suite, like `TestFixtureInfo` and `TestInfo` do for test fixtures and tests.
 
 ### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_3_TESTSUITEINFOH}
 

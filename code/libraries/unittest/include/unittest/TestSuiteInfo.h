@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.h
+// File        : TestSuiteInfo.h
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : TestSuiteInfo
 //
-// Description : Testcase
+// Description : Test suite info
 //
 //------------------------------------------------------------------------------
 //
@@ -39,54 +39,63 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
+#include <unittest/TestFixtureInfo.h>
+#include <unittest/TestResults.h>
 
 /// @file
-/// Test administration
+/// Test suite administration
 
 namespace unittest
 {
 
-class Test;
-class TestResults;
+class TestFixtureInfo;
 
 /// <summary>
-/// Test administration class
+/// Test suite administration
+///
+/// Holds information on a test suite, which includes its name and the list of test fixtures that are part of it
 /// </summary>
-class TestInfo
+class TestSuiteInfo
 {
 private:
-    friend class TestFixtureInfo;
-    /// @brief Test details
-    const TestDetails m_details;
-    /// @brief Pointer to actual test
-    Test* m_testInstance;
-    /// @brief Pointer to next test case in list
-    TestInfo* m_next;
+    /// @brief Pointer to first test fixture in the list
+    TestFixtureInfo* m_head;
+    /// @brief Pointer to last test fixture in the list
+    TestFixtureInfo* m_tail;
+    /// @brief Pointer to next test suite info in the list
+    TestSuiteInfo* m_next;
+    /// @brief Test suite name
+    baremetal::string m_suiteName;
 
 public:
-    TestInfo();
-    TestInfo(const TestInfo&) = delete;
-    TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
+    TestSuiteInfo() = delete;
+    TestSuiteInfo(const TestSuiteInfo&) = delete;
+    TestSuiteInfo(TestSuiteInfo&&) = delete;
+    explicit TestSuiteInfo(const baremetal::string& suiteName);
+    virtual ~TestSuiteInfo();
 
-    TestInfo& operator = (const TestInfo&) = delete;
-    TestInfo& operator = (TestInfo&&) = delete;
+    TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
+    TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
 
     /// <summary>
-    /// Returns the test details
+    /// Returns the pointer to the first test fixture in the list for this test suite
     /// </summary>
-    /// <returns>Test details</returns>
-    const TestDetails& Details() const { return m_details; }
+    /// <returns>Pointer to the first test fixture in the list for this test suite</returns>
+    TestFixtureInfo* Head() const { return m_head; }
 
-    void SetTest(Test* test);
+    /// <summary>
+    /// Returns the test suite name
+    /// </summary>
+    /// <returns>Test suite name</returns>
+    const baremetal::string& Name() const { return m_suiteName; }
 
     void Run(TestResults& testResults);
+
+    int CountFixtures();
+    int CountTests();
+
+    TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
+    void AddFixture(TestFixtureInfo* testFixture);
 };
 
 } // namespace unittest

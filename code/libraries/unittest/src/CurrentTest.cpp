@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.h
+// File        : CurrentTest.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : CurrentTest
 //
-// Description : Testcase
+// Description : Current test info
 //
 //------------------------------------------------------------------------------
 //
@@ -37,56 +37,36 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <unittest/TestDetails.h>
+#include <unittest/CurrentTest.h>
 
 /// @file
-/// Test administration
+/// Current test information implementation
 
 namespace unittest
 {
 
-class Test;
-class TestResults;
+/// <summary>
+/// Returns reference to static test results pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test results during the test run.
+/// </summary>
+/// <returns>A reference to the current test results pointer</returns>
+TestResults *& CurrentTest::Results()
+{
+    static TestResults* testResults = nullptr;
+    return testResults;
+}
 
 /// <summary>
-/// Test administration class
+/// Returns reference to static test details pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test details during the test run.
 /// </summary>
-class TestInfo
+/// <returns>A reference to the current test details pointer</returns>
+const TestDetails *& CurrentTest::Details()
 {
-private:
-    friend class TestFixtureInfo;
-    /// @brief Test details
-    const TestDetails m_details;
-    /// @brief Pointer to actual test
-    Test* m_testInstance;
-    /// @brief Pointer to next test case in list
-    TestInfo* m_next;
-
-public:
-    TestInfo();
-    TestInfo(const TestInfo&) = delete;
-    TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-
-    TestInfo& operator = (const TestInfo&) = delete;
-    TestInfo& operator = (TestInfo&&) = delete;
-
-    /// <summary>
-    /// Returns the test details
-    /// </summary>
-    /// <returns>Test details</returns>
-    const TestDetails& Details() const { return m_details; }
-
-    void SetTest(Test* test);
-
-    void Run(TestResults& testResults);
-};
+    static const TestDetails* testDetails = nullptr;
+    return testDetails;
+}
 
 } // namespace unittest

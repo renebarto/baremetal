@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.h
+// File        : TestSuite.h
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : -
 //
-// Description : Testcase
+// Description : Test suite functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,54 +39,14 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
-
 /// @file
-/// Test administration
-
-namespace unittest
-{
-
-class Test;
-class TestResults;
+/// Test suite
 
 /// <summary>
-/// Test administration class
+/// Return the default test suite name (which will be converted to the actual default name by the test reporter)
 /// </summary>
-class TestInfo
+/// <returns></returns>
+inline char const* GetSuiteName()
 {
-private:
-    friend class TestFixtureInfo;
-    /// @brief Test details
-    const TestDetails m_details;
-    /// @brief Pointer to actual test
-    Test* m_testInstance;
-    /// @brief Pointer to next test case in list
-    TestInfo* m_next;
-
-public:
-    TestInfo();
-    TestInfo(const TestInfo&) = delete;
-    TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-
-    TestInfo& operator = (const TestInfo&) = delete;
-    TestInfo& operator = (TestInfo&&) = delete;
-
-    /// <summary>
-    /// Returns the test details
-    /// </summary>
-    /// <returns>Test details</returns>
-    const TestDetails& Details() const { return m_details; }
-
-    void SetTest(Test* test);
-
-    void Run(TestResults& testResults);
-};
-
-} // namespace unittest
+    return "";
+}

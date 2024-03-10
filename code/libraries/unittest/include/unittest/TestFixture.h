@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.h
+// File        : TestFixture.h
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : TestFixture
 //
-// Description : Testcase
+// Description : Test fixture functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,54 +39,35 @@
 
 #pragma once
 
-#include <unittest/TestDetails.h>
-
 /// @file
-/// Test administration
+/// Test fixture
 
-namespace unittest
-{
-
-class Test;
-class TestResults;
+namespace unittest {
 
 /// <summary>
-/// Test administration class
+/// Test fixture
+/// 
+/// Forms a replacement of a test, with the addition of SetUp/TearDown functionality
 /// </summary>
-class TestInfo
+class TestFixture
 {
-private:
-    friend class TestFixtureInfo;
-    /// @brief Test details
-    const TestDetails m_details;
-    /// @brief Pointer to actual test
-    Test* m_testInstance;
-    /// @brief Pointer to next test case in list
-    TestInfo* m_next;
+protected:
+    TestFixture() = default;
+    TestFixture(const TestFixture&) = delete;
+    TestFixture(TestFixture&&) = delete;
+    virtual ~TestFixture() = default;
 
-public:
-    TestInfo();
-    TestInfo(const TestInfo&) = delete;
-    TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-
-    TestInfo& operator = (const TestInfo&) = delete;
-    TestInfo& operator = (TestInfo&&) = delete;
+    TestFixture& operator = (const TestFixture&) = delete;
+    TestFixture& operator = (TestFixture&&) = delete;
 
     /// <summary>
-    /// Returns the test details
+    /// Default setup function
     /// </summary>
-    /// <returns>Test details</returns>
-    const TestDetails& Details() const { return m_details; }
-
-    void SetTest(Test* test);
-
-    void Run(TestResults& testResults);
+    virtual void SetUp() {};
+    /// <summary>
+    /// Default teardown function
+    /// </summary>
+    virtual void TearDown() {};
 };
 
 } // namespace unittest

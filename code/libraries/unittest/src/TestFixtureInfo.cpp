@@ -1,14 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestInfo.cpp
+// File        : TestFixtureInfo.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestInfo
+// Class       : TestFixtureInfo
 //
-// Description : Testcase base class
-//
+// Description : Test fixture
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -37,70 +36,98 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestInfo.h>
+#include <unittest/TestFixtureInfo.h>
 
-#include <unittest/CurrentTest.h>
-#include <unittest/Test.h>
-#include <unittest/TestResults.h>
+#include <baremetal/Assert.h>
 
 /// @file
-/// Test case administration implementation
+/// Test fixture administration implementation
 
 using namespace baremetal;
 
 namespace unittest {
 
 /// <summary>
-/// Default constructor
+/// Constructor
 /// </summary>
-TestInfo::TestInfo()
-    : m_details{}
-    , m_testInstance{}
+/// <param name="fixtureName">Test fixture name</param>
+TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
+    : m_head{}
+    , m_tail{}
     , m_next{}
+    , m_fixtureName{ fixtureName }
 {
 }
 
 /// <summary>
-/// Explicit constructor
+/// Destructor
+///
+/// Cleans up all registered tests for this test fixture
 /// </summary>
-/// <param name="testName">Name of test</param>
-/// <param name="fixtureName">Name of test fixture test is part of</param>
-/// <param name="suiteName">Name of test suite test is part of</param>
-/// <param name="fileName">Source file name of test</param>
-/// <param name="lineNumber">Source line number of test</param>
-TestInfo::TestInfo(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-    : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-    , m_testInstance{}
-    , m_next{}
+TestFixtureInfo::~TestFixtureInfo()
 {
-}
-
-/// <summary>
-/// Set test instance to link to test administration
-/// </summary>
-/// <param name="test">Test instance to link</param>
-void TestInfo::SetTest(Test* test)
-{
-    m_testInstance = test;
-}
-
-/// <summary>
-/// Run the test instance, and update the test results
-/// </summary>
-/// <param name="testResults"></param>
-void TestInfo::Run(TestResults& testResults)
-{
-    CurrentTest::Details() = &Details();
-    CurrentTest::Results() = &testResults;
-
-    if (m_testInstance != nullptr)
+    TestInfo* test = m_head;
+    while (test != nullptr)
     {
-        testResults.OnTestStart(m_details);
-
-        m_testInstance->RunImpl();
-
-        testResults.OnTestFinish(m_details);
+        TestInfo* currentTest = test;
+        test = test->m_next;
+        delete currentTest;
     }
+}
+
+/// <summary>
+/// Add a test to the list
+///
+/// This method is called at static initialization time to register tests
+/// </summary>
+/// <param name="test">Test to register</param>
+void TestFixtureInfo::AddTest(TestInfo* test)
+{
+    if (m_tail == nullptr)
+    {
+        assert(m_head == nullptr);
+        m_head = test;
+        m_tail = test;
+    }
+    else
+    {
+        m_tail->m_next = test;
+        m_tail = test;
+    }
+}
+
+/// <summary>
+/// Run tests in test fixture, updating the test results
+/// </summary>
+/// <param name="testResults">Test results to use and update</param>
+void TestFixtureInfo::Run(TestResults& testResults)
+{
+    testResults.OnTestFixtureStart(this);
+
+    TestInfo* test = Head();
+    while (test != nullptr)
+    {
+        test->Run(testResults);
+        test = test->m_next;
+    }
+
+    testResults.OnTestFixtureFinish(this);
+}
+
+/// <summary>
+/// Count the number of tests in the test fixture
+/// </summary>
+/// <returns>Number of tests in the test fixture</returns>
+int TestFixtureInfo::CountTests()
+{
+    int numberOfTests = 0;
+    TestInfo* test = Head();
+    while (test != nullptr)
+    {
+        ++numberOfTests;
+        test = test->m_next;
+    }
+    return numberOfTests;
 }
 
 } // namespace unittest

@@ -42,8 +42,18 @@
 /// @file
 /// Test run results
 
+namespace baremetal {
+
+class string;
+
+}
+
 namespace unittest
 {
+
+class TestSuiteInfo;
+class TestFixtureInfo;
+class TestDetails;
 
 /// <summary>
 /// Test results class
@@ -52,6 +62,14 @@ class TestResults
 {
 public:
     TestResults() = default;
+
+    void OnTestSuiteStart(TestSuiteInfo* suite);
+    void OnTestSuiteFinish(TestSuiteInfo* suite);
+    void OnTestFixtureStart(TestFixtureInfo* fixture);
+    void OnTestFixtureFinish(TestFixtureInfo* fixture);
+    void OnTestStart(const TestDetails& details);
+    void OnTestRun(const TestDetails& details, const baremetal::string& message);
+    void OnTestFinish(const TestDetails& details);
 };
 
 } // namespace unittest

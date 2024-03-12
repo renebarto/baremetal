@@ -44,6 +44,7 @@
 #include <baremetal/String.h>
 #include <unittest/TestDetails.h>
 #include <unittest/TestFixtureInfo.h>
+#include <unittest/TestRegistry.h>
 #include <unittest/TestSuiteInfo.h>
 
 /// @file
@@ -58,6 +59,26 @@ namespace unittest
 {
 
 /// <summary>
+/// Return test suite name, of default name if empty
+/// </summary>
+/// <param name="details"></param>
+/// <returns></returns>
+static string SuiteName(const string& suiteName)
+{
+    return suiteName.empty() ? string(TestRegistry::DefaultSuiteName) : suiteName;
+}
+
+/// <summary>
+/// Return test fixture name, of default name if empty
+/// </summary>
+/// <param name="details"></param>
+/// <returns></returns>
+static string FixtureName(const string& fixtureName)
+{
+    return fixtureName.empty() ? string(TestRegistry::DefaultFixtureName) : fixtureName;
+}
+
+/// <summary>
 /// Return fully qualified test name in format [suite]::[fixture]::[test]
 /// </summary>
 /// <param name="details">Test details</param>
@@ -65,8 +86,8 @@ namespace unittest
 static string QualifiedTestName(const TestDetails& details)
 {
     return Format("%s::%s::%s",
-        details.SuiteName().empty() ? "DefaultSuite" : details.SuiteName().c_str(),
-        details.FixtureName().empty() ? "DefaultFixture" : details.FixtureName().c_str(),
+        SuiteName(details.SuiteName()).c_str(),
+        FixtureName(details.FixtureName()).c_str(),
         details.TestName().c_str());
 }
 
@@ -76,7 +97,7 @@ static string QualifiedTestName(const TestDetails& details)
 /// <param name="suite">Test suite to start</param>
 void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 {
-    LOG_INFO(suite->Name() + " Start suite");
+    LOG_INFO(SuiteName(suite->Name()) + " Start suite");
 }
 
 /// <summary>
@@ -85,7 +106,7 @@ void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 /// <param name="suite">Test suite to finish</param>
 void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
 {
-    LOG_INFO(suite->Name() + " Finish suite");
+    LOG_INFO(SuiteName(suite->Name()) + " Finish suite");
 }
 
 /// <summary>
@@ -94,7 +115,7 @@ void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
 /// <param name="fixture">Test fixture to start</param>
 void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
 {
-    LOG_INFO(fixture->Name() + " Start fixture");
+    LOG_INFO(FixtureName(fixture->Name()) + " Start fixture");
 }
 
 /// <summary>
@@ -103,7 +124,7 @@ void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
 /// <param name="fixture">Test fixture to finish</param>
 void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
 {
-    LOG_INFO(fixture->Name() + " Finish fixture");
+    LOG_INFO(FixtureName(fixture->Name()) + " Finish fixture");
 }
 
 /// <summary>

@@ -9,6 +9,7 @@
 #include <unittest/TestFixture.h>
 #include <unittest/TestFixtureInfo.h>
 #include <unittest/TestInfo.h>
+#include <unittest/TestRegistry.h>
 #include <unittest/TestResults.h>
 #include <unittest/TestSuite.h>
 #include <unittest/TestSuiteInfo.h>
@@ -64,23 +65,17 @@ void FixtureMyTest1Helper::RunImpl() const
 class MyTest1
     : public Test
 {
-    void RunImpl() const override
-    {
-        LOG_DEBUG("Test 1");
-        FixtureMyTest1Helper fixtureHelper(*CurrentTest::Details());
-        fixtureHelper.RunImpl();
-    }
+    void RunImpl() const override;
 } myTest1;
-class MyTestInfo1
-    : public TestInfo
+
+TestRegistrar registrarFixtureMyTest1(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest1", "FixtureMyTest1", GetSuiteName(), __FILE__, __LINE__));
+
+void MyTest1::RunImpl() const
 {
-public:
-    MyTestInfo1(Test* testInstance)
-        : TestInfo("MyTest1", "FixtureMyTest1", GetSuiteName(), __FILE__, __LINE__)
-    {
-        SetTest(testInstance);
-    }
-};
+    LOG_DEBUG("Test 1");
+    FixtureMyTest1Helper fixtureHelper(*CurrentTest::Details());
+    fixtureHelper.RunImpl();
+}
 
 } // namespace Suite1
 
@@ -130,23 +125,17 @@ void FixtureMyTest2Helper::RunImpl() const
 class MyTest2
     : public Test
 {
-    void RunImpl() const override
-    {
-        LOG_DEBUG("Test 2");
-        FixtureMyTest2Helper fixtureHelper(*CurrentTest::Details());
-        fixtureHelper.RunImpl();
-    }
-} myTest2;
-class MyTestInfo2
-    : public TestInfo
+    void RunImpl() const override;
+} myTest1;
+
+TestRegistrar registrarFixtureMyTest2(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest2", "FixtureMyTest2", GetSuiteName(), __FILE__, __LINE__));
+
+void MyTest2::RunImpl() const
 {
-public:
-    MyTestInfo2(Test* testInstance)
-        : TestInfo("MyTest2", "FixtureMyTest2", GetSuiteName(), __FILE__, __LINE__)
-    {
-        SetTest(testInstance);
-    }
-};
+    LOG_DEBUG("Test 2");
+    FixtureMyTest2Helper fixtureHelper(*CurrentTest::Details());
+    fixtureHelper.RunImpl();
+}
 
 } // namespace Suite2
 
@@ -189,24 +178,17 @@ void FixtureMyTest3Helper::RunImpl() const
 class MyTest3
     : public Test
 {
-    void RunImpl() const override
-    {
-        LOG_DEBUG("Test 3");
-        FixtureMyTest3Helper fixtureHelper(*CurrentTest::Details());
-        fixtureHelper.RunImpl();
-    }
+    void RunImpl() const override;
 } myTest3;
-class MyTestInfo3
-    : public TestInfo
-{
-public:
-    MyTestInfo3(Test* testInstance)
-        : TestInfo("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__)
-    {
-        SetTest(testInstance);
-    }
-};
 
+TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &myTest3, TestDetails("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__));
+
+void MyTest3::RunImpl() const
+{
+    LOG_DEBUG("Test 3");
+    FixtureMyTest3Helper fixtureHelper(*CurrentTest::Details());
+    fixtureHelper.RunImpl();
+}
 
 class MyTest
     : public Test
@@ -214,16 +196,8 @@ class MyTest
 public:
     void RunImpl() const override;
 } myTest;
-class MyTestInfo
-    : public TestInfo
-{
-public:
-    MyTestInfo(Test* testInstance)
-        : TestInfo("MyTest3", "", "", __FILE__, __LINE__)
-    {
-        SetTest(testInstance);
-    }
-};
+
+TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
 
 void MyTest::RunImpl() const
 {
@@ -234,32 +208,8 @@ int main()
 {
     auto& console = GetConsole();
 
-    TestInfo* test1 = new Suite1::MyTestInfo1(&Suite1::myTest1);
-    TestInfo* test2 = new Suite2::MyTestInfo2(&Suite2::myTest2);
-    TestInfo* test3 = new MyTestInfo3(&myTest3);
-    TestFixtureInfo* fixture1 = new TestFixtureInfo("MyFixture1");
-    fixture1->AddTest(test1);
-    TestFixtureInfo* fixture2 = new TestFixtureInfo("MyFixture2");
-    fixture2->AddTest(test2);
-    TestFixtureInfo* fixture3 = new TestFixtureInfo("MyFixture3");
-    fixture3->AddTest(test3);
     unittest::TestResults results;
-    TestSuiteInfo* suite1 = new TestSuiteInfo("MySuite1");
-    suite1->AddFixture(fixture1);
-    TestSuiteInfo* suite2 = new TestSuiteInfo("MySuite2");
-    suite2->AddFixture(fixture2);
-    TestSuiteInfo* suiteDefault = new TestSuiteInfo("");
-    suiteDefault->AddFixture(fixture3);
-    suite1->Run(results);
-    suite2->Run(results);
-    suiteDefault->Run(results);
-    delete suite1;
-    delete suite2;
-    delete suiteDefault;
-    unittest::TestInfo myTestInfo("MyTest", "", "", __FILE__, __LINE__);
-    myTestInfo.SetTest(&myTest);
-
-    myTestInfo.Run(results);
+    TestRegistry::GetTestRegistry().Run(results);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);

@@ -68,12 +68,7 @@ public:
     TestInfo();
     TestInfo(const TestInfo&) = delete;
     TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
+    explicit TestInfo(Test* testInstance, const TestDetails& details);
 
     TestInfo& operator = (const TestInfo&) = delete;
     TestInfo& operator = (TestInfo&&) = delete;
@@ -83,8 +78,6 @@ public:
     /// </summary>
     /// <returns>Test details</returns>
     const TestDetails& Details() const { return m_details; }
-
-    void SetTest(Test* test);
 
     void Run(TestResults& testResults);
 };

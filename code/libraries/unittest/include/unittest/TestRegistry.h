@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestFixtureInfo.h
+// File        : TestRegistry.h
 //
 // Namespace   : unittest
 //
-// Class       : TestFixtureInfo
+// Class       : TestRegistry, TestRegistrar
 //
-// Description : TestInfo fixture info
+// Description : Test registration
 //
 //------------------------------------------------------------------------------
 //
@@ -39,63 +39,71 @@
 
 #pragma once
 
-#include <unittest/TestInfo.h>
-#include <unittest/TestResults.h>
+#include <unittest/TestSuiteInfo.h>
 
 /// @file
-/// Test fixture administration
+/// Test registry
 
 namespace unittest
 {
 
-class TestInfo;
+class Test;
+class TestSuiteInfo;
+class TestResults;
 
 /// <summary>
-/// Test fixture administration
-///
-/// Holds information on a test fixture, which includes its name and the list of tests that are part of it
+/// Test registry
 /// </summary>
-class TestFixtureInfo
+class TestRegistry
 {
 private:
-    friend class TestSuiteInfo;
-    /// @brief Pointer to first test in the list
-    TestInfo* m_head;
-    /// @brief Pointer to last test in the list
-    TestInfo* m_tail;
-    /// @brief Pointer to next test fixture info in the list
-    TestFixtureInfo* m_next;
-    /// @brief Test fixture name
-    baremetal::string m_fixtureName;
+    friend class TestRegistrar;
+    /// @brief Pointer to first test suite in the list
+    TestSuiteInfo* m_head;
+    /// @brief Pointer to last test suite in the list
+    TestSuiteInfo* m_tail;
 
 public:
-    TestFixtureInfo() = delete;
-    TestFixtureInfo(const TestFixtureInfo&) = delete;
-    TestFixtureInfo(TestFixtureInfo&&) = delete;
-    explicit TestFixtureInfo(const baremetal::string& fixtureName);
-    virtual ~TestFixtureInfo();
+    /// @brief Name of default test fixture. Used for tests that are not in a test fixture
+    static const char* DefaultFixtureName;
+    /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
+    static const char* DefaultSuiteName;
 
-    TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
-    TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
+    TestRegistry();
+    TestRegistry(const TestRegistry&) = delete;
+    TestRegistry(TestRegistry&&) = delete;
+    virtual ~TestRegistry();
 
-    /// <summary>
-    /// Returns the pointer to the first test in the list for this test fixture
-    /// </summary>
-    /// <returns>Pointer to the first test in the list for this test fixture</returns>
-    TestInfo* Head() const {  return m_head; }
+    TestRegistry& operator = (const TestRegistry&) = delete;
+    TestRegistry& operator = (TestRegistry&&) = delete;
 
     /// <summary>
-    /// Returns the test fixture name
+    /// Returns a pointer to the first test suite in the list
     /// </summary>
-    /// <returns>Test fixture name</returns>
-    const baremetal::string& Name() const { return m_fixtureName; }
+    /// <returns>Pointer to the first test suite in the list</returns>
+    TestSuiteInfo* Head() const { return m_head; }
 
     void Run(TestResults& testResults);
-
+    int CountSuites();
+    int CountFixtures();
     int CountTests();
 
-//private:
-    void AddTest(TestInfo* test);
+    static TestRegistry& GetTestRegistry();
+
+private:
+    TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
+    void AddSuite(TestSuiteInfo* testSuite);
+};
+
+/// <summary>
+/// Test registrar
+///
+/// This is a utility class to register a test to the registry, as part of a test declaration
+/// </summary>
+class TestRegistrar
+{
+public:
+    TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 };
 
 } // namespace unittest

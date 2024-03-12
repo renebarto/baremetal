@@ -63,25 +63,13 @@ TestInfo::TestInfo()
 /// <summary>
 /// Explicit constructor
 /// </summary>
-/// <param name="testName">Name of test</param>
-/// <param name="fixtureName">Name of test fixture test is part of</param>
-/// <param name="suiteName">Name of test suite test is part of</param>
-/// <param name="fileName">Source file name of test</param>
-/// <param name="lineNumber">Source line number of test</param>
-TestInfo::TestInfo(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-    : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-    , m_testInstance{}
+/// <param name="testInstance">Test instance</param>
+/// <param name="details">Test details</param>
+TestInfo::TestInfo(Test* testInstance, const TestDetails& details)
+    : m_details{ details }
+    , m_testInstance{ testInstance }
     , m_next{}
 {
-}
-
-/// <summary>
-/// Set test instance to link to test administration
-/// </summary>
-/// <param name="test">Test instance to link</param>
-void TestInfo::SetTest(Test* test)
-{
-    m_testInstance = test;
 }
 
 /// <summary>

@@ -58,6 +58,7 @@ class TestFixtureInfo;
 class TestSuiteInfo
 {
 private:
+    friend class TestRegistry;
     /// @brief Pointer to first test fixture in the list
     TestFixtureInfo* m_head;
     /// @brief Pointer to last test fixture in the list
@@ -94,6 +95,7 @@ public:
     int CountFixtures();
     int CountTests();
 
+//private:
     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
     void AddFixture(TestFixtureInfo* testFixture);
 };

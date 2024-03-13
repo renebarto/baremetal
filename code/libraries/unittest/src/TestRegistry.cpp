@@ -53,9 +53,6 @@ LOG_MODULE("TestRegistry");
 
 namespace unittest {
 
-const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
-const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
-
 /// <summary>
 /// Returns the test registry (singleton)
 /// </summary>
@@ -92,71 +89,6 @@ TestRegistry::~TestRegistry()
 }
 
 /// <summary>
-/// Run tests, updating the test results
-/// </summary>
-/// <param name="testResults">Test results to use and update</param>
-void TestRegistry::Run(TestResults& testResults)
-{
-    TestSuiteInfo* testSuite = Head();
-
-    while (testSuite != nullptr)
-    {
-        testSuite->Run(testResults);
-        testSuite = testSuite->m_next;
-    }
-}
-
-/// <summary>
-/// Count the number of test suites selected by the predicate
-/// </summary>
-/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
-/// <param name="predicate">Test selection predicate</param>
-/// <returns>Number of test suites selected by the predicate</returns>
-int TestRegistry::CountSuites()
-{
-    int numberOfTestSuites = 0;
-    TestSuiteInfo* testSuite = Head();
-    while (testSuite != nullptr)
-    {
-        ++numberOfTestSuites;
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTestSuites;
-}
-
-/// <summary>
-/// Count the number of tests
-/// </summary>
-/// <returns>Number of test fixtures</returns>
-int TestRegistry::CountFixtures()
-{
-    int numberOfTestFixtures = 0;
-    TestSuiteInfo* testSuite = Head();
-    while (testSuite != nullptr)
-    {
-        numberOfTestFixtures += testSuite->CountFixtures();
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTestFixtures;
-}
-
-/// <summary>
-/// Count the number of tests
-/// </summary>
-/// <returns>Number of tests</returns>
-int TestRegistry::CountTests()
-{
-    int numberOfTests = 0;
-    TestSuiteInfo* testSuite = Head();
-    while (testSuite != nullptr)
-    {
-        numberOfTests += testSuite->CountTests();
-        testSuite = testSuite->m_next;
-    }
-    return numberOfTests;
-}
-
-/// <summary>
 /// Find a test suite with specified name, register a new one if not found
 /// </summary>
 /// <param name="suiteName">Test suite name to search for</param>
@@ -169,7 +101,7 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
     if (testSuite == nullptr)
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+        LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
 #endif
         testSuite = new TestSuiteInfo(suiteName);
         AddSuite(testSuite);
@@ -177,7 +109,7 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
     else
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+        LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
 #endif
     }
     return testSuite;
@@ -217,8 +149,8 @@ TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const T
 #ifdef DEBUG_REGISTRY
     LOG_DEBUG("Register test %s in fixture %s in suite %s",
         details.TestName().c_str(),
-        (details.FixtureName().empty() ? TestRegistry::DefaultFixtureName : details.FixtureName().c_str()),
-        (details.SuiteName().empty() ? TestRegistry::DefaultSuiteName : details.SuiteName().c_str()));
+        (details.FixtureName().c_str()),
+        (details.SuiteName().c_str()));
 #endif
     TestSuiteInfo   *testSuite   = registry.GetTestSuite(details.SuiteName());
     TestFixtureInfo *testFixture = testSuite->GetTestFixture(details.FixtureName());

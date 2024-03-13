@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestDetails.h
+// File        : unittest.h
 //
-// Namespace   : unittest
+// Namespace   : -
 //
-// Class       : TestDetails
+// Class       : -
 //
-// Description : Test detail
+// Description : unittest general include file, with functions to start tests
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,20 @@
 
 #pragma once
 
-#include <baremetal/String.h>
-
 /// @file
-/// Test details
+/// Unit test generic header
 
-namespace unittest
-{
+#include <unittest/TestFixture.h>
+#include <unittest/TestSuite.h>
 
-/// <summary>
-/// Details of a test
-/// </summary>
-class TestDetails
-{
-private:
-    /// @brief Name of test suite test is part of
-    const baremetal::string m_suiteName;
-    /// @brief Name of test fixture test is part of
-    const baremetal::string m_fixtureName;
-    /// @brief Test name
-    const baremetal::string m_testName;
-    /// @brief Source file name of test
-    const baremetal::string m_fileName;
-    /// @brief Source line number of test
-    const int m_lineNumber;
-
-public:
-    /// @brief Name of default test fixture. Used for tests that are not in a test fixture
-    static const char* DefaultFixtureName;
-    /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
-    static const char* DefaultSuiteName;
-
-    TestDetails();
-    TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
-    TestDetails(const TestDetails& other, int lineNumber);
-
-    baremetal::string SuiteName() const;
-    baremetal::string FixtureName() const;
-    baremetal::string TestName() const;
-    baremetal::string QualifiedTestName() const;
-    baremetal::string SourceFileName() const;
-    int SourceFileLineNumber() const;
-};
-
-} // namespace unittest
+#include <unittest/ITestReporter.h>
+#include <unittest/ConsoleTestReporter.h>
+#include <unittest/CurrentTest.h>
+#include <unittest/Test.h>
+#include <unittest/TestInfo.h>
+#include <unittest/TestDetails.h>
+#include <unittest/TestFixtureInfo.h>
+#include <unittest/TestRegistry.h>
+#include <unittest/TestResults.h>
+#include <unittest/TestRunner.h>
+#include <unittest/TestSuiteInfo.h>

@@ -4,15 +4,7 @@
 #include <baremetal/System.h>
 #include <baremetal/Timer.h>
 
-#include <unittest/CurrentTest.h>
-#include <unittest/Test.h>
-#include <unittest/TestFixture.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestSuite.h>
-#include <unittest/TestSuiteInfo.h>
+#include <unittest/unittest.h>
 
 LOG_MODULE("main");
 
@@ -59,7 +51,7 @@ public:
 };
 void FixtureMyTest1Helper::RunImpl() const
 {
-    CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 1");
+    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 1");
 }
 
 class MyTest1
@@ -119,7 +111,7 @@ public:
 };
 void FixtureMyTest2Helper::RunImpl() const
 {
-    CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 2");
+    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 2");
 }
 
 class MyTest2
@@ -172,7 +164,7 @@ public:
 };
 void FixtureMyTest3Helper::RunImpl() const
 {
-    CurrentTest::Results()->OnTestRun(m_details, "MyTestHelper 3");
+    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 3");
 }
 
 class MyTest3
@@ -201,15 +193,16 @@ TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, T
 
 void MyTest::RunImpl() const
 {
-    CurrentTest::Results()->OnTestRun(*CurrentTest::Details(), "Running test");
+    LOG_DEBUG("Running test");
+    CurrentTest::Results()->OnTestFailure(*CurrentTest::Details(), "Failure");
 }
 
 int main()
 {
     auto& console = GetConsole();
 
-    unittest::TestResults results;
-    TestRegistry::GetTestRegistry().Run(results);
+    ConsoleTestReporter reporter;
+    RunAllTests(&reporter);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);

@@ -2391,7 +2391,6 @@ Update the file `code/libraries/baremetal/src/Version.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Version.cpp
-File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Version.cpp
 40: #include <baremetal/Version.h>
 41: 
 42: #include <baremetal/Format.h>

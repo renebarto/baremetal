@@ -39,9 +39,7 @@
 
 #include <unittest/TestResults.h>
 
-#include <baremetal/Format.h>
-#include <baremetal/Logger.h>
-#include <baremetal/String.h>
+#include <unittest/ITestReporter.h>
 #include <unittest/TestDetails.h>
 #include <unittest/TestFixtureInfo.h>
 #include <unittest/TestRegistry.h>
@@ -52,43 +50,27 @@
 
 using namespace baremetal;
 
-/// @brief Define log name
-LOG_MODULE("TestResults");
-
 namespace unittest
 {
 
 /// <summary>
-/// Return test suite name, of default name if empty
+/// Constructor
 /// </summary>
-/// <param name="details"></param>
-/// <returns></returns>
-static string SuiteName(const string& suiteName)
+/// <param name="testReporter">Test reporter to use</param>
+TestResults::TestResults(ITestReporter* testReporter)
+    : m_reporter{ testReporter }
+    , m_totalTestCount{}
+    , m_failedTestCount{}
+    , m_failureCount{}
+    , m_currentTestFailed{}
 {
-    return suiteName.empty() ? string(TestRegistry::DefaultSuiteName) : suiteName;
 }
 
 /// <summary>
-/// Return test fixture name, of default name if empty
+/// Destructor
 /// </summary>
-/// <param name="details"></param>
-/// <returns></returns>
-static string FixtureName(const string& fixtureName)
+TestResults::~TestResults()
 {
-    return fixtureName.empty() ? string(TestRegistry::DefaultFixtureName) : fixtureName;
-}
-
-/// <summary>
-/// Return fully qualified test name in format [suite]::[fixture]::[test]
-/// </summary>
-/// <param name="details">Test details</param>
-/// <returns>Resulting string</returns>
-static string QualifiedTestName(const TestDetails& details)
-{
-    return Format("%s::%s::%s",
-        SuiteName(details.SuiteName()).c_str(),
-        FixtureName(details.FixtureName()).c_str(),
-        details.TestName().c_str());
 }
 
 /// <summary>
@@ -97,7 +79,8 @@ static string QualifiedTestName(const TestDetails& details)
 /// <param name="suite">Test suite to start</param>
 void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 {
-    LOG_INFO(SuiteName(suite->Name()) + " Start suite");
+    if (m_reporter)
+        m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
 }
 
 /// <summary>
@@ -106,7 +89,8 @@ void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 /// <param name="suite">Test suite to finish</param>
 void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
 {
-    LOG_INFO(SuiteName(suite->Name()) + " Finish suite");
+    if (m_reporter)
+        m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
 }
 
 /// <summary>
@@ -115,7 +99,8 @@ void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
 /// <param name="fixture">Test fixture to start</param>
 void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
 {
-    LOG_INFO(FixtureName(fixture->Name()) + " Start fixture");
+    if (m_reporter)
+        m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
 }
 
 /// <summary>
@@ -124,7 +109,8 @@ void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
 /// <param name="fixture">Test fixture to finish</param>
 void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
 {
-    LOG_INFO(FixtureName(fixture->Name()) + " Finish fixture");
+    if (m_reporter)
+        m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
 }
 
 /// <summary>
@@ -133,15 +119,27 @@ void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
 /// <param name="details">Test details of test to start</param>
 void TestResults::OnTestStart(const TestDetails& details)
 {
-    LOG_INFO(QualifiedTestName(details) + " Start test");
+    ++m_totalTestCount;
+    m_currentTestFailed = false;
+    if (m_reporter)
+        m_reporter->ReportTestStart(details);
 }
 
-void TestResults::OnTestRun(const TestDetails& details, const string& message)
+/// <summary>
+/// Add a test failure
+/// </summary>
+/// <param name="details"></param>
+/// <param name="message">Test failure string</param>
+void TestResults::OnTestFailure(const TestDetails& details, const string& message)
 {
-    string fullMessage = QualifiedTestName(details) + Format(" (%s:%d)",
-        details.SourceFileName().c_str(),
-        details.SourceFileLineNumber()) + " --> " + message;
-    LOG_DEBUG(fullMessage);
+    ++m_failureCount;
+    if (!m_currentTestFailed)
+    {
+        ++m_failedTestCount;
+        m_currentTestFailed = true;
+    }
+    if (m_reporter)
+        m_reporter->ReportTestFailure(details, message);
 }
 
 /// <summary>
@@ -150,7 +148,8 @@ void TestResults::OnTestRun(const TestDetails& details, const string& message)
 /// <param name="details">Test details of test to finish</param>
 void TestResults::OnTestFinish(const TestDetails& details)
 {
-    LOG_INFO(QualifiedTestName(details) + " Finish test");
+    if (m_reporter)
+        m_reporter->ReportTestFinish(details, !m_currentTestFailed);
 }
 
 } // namespace unittest

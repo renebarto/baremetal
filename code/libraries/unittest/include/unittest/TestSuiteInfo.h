@@ -59,6 +59,7 @@ class TestSuiteInfo
 {
 private:
     friend class TestRegistry;
+    friend class TestRegistrar;
     /// @brief Pointer to first test fixture in the list
     TestFixtureInfo* m_head;
     /// @brief Pointer to last test fixture in the list
@@ -90,14 +91,75 @@ public:
     /// <returns>Test suite name</returns>
     const baremetal::string& Name() const { return m_suiteName; }
 
-    void Run(TestResults& testResults);
+    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
 
     int CountFixtures();
     int CountTests();
+    template <typename Predicate> int CountFixturesIf(Predicate predicate);
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
-//private:
+private:
     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
     void AddFixture(TestFixtureInfo* testFixture);
 };
+
+/// <summary>
+/// Run tests in test suite using the selection predicate, updating the test results
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <param name="testResults">Test results to use and update</param>
+template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    testResults.OnTestSuiteStart(this);
+
+    TestFixtureInfo* testFixture = Head();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            testFixture->RunIf(predicate, testResults);
+        testFixture = testFixture->m_next;
+    }
+
+    testResults.OnTestSuiteFinish(this);
+}
+
+/// <summary>
+/// Count the number of tests fixtures in the test suite selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test fixtures in the test suite selected by the predicate</returns>
+template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predicate)
+{
+    int numberOfTestFixtures = 0;
+    TestFixtureInfo* testFixture = Head();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            numberOfTestFixtures++;
+        testFixture = testFixture->m_next;
+    }
+    return numberOfTestFixtures;
+}
+
+/// <summary>
+/// Count the number of tests in the test suite selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of tests in the test suite selected by the predicate</returns>
+template <typename Predicate> int TestSuiteInfo::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestFixtureInfo* testFixture = Head();
+    while (testFixture != nullptr)
+    {
+        if (predicate(testFixture))
+            numberOfTests += testFixture->CountTestsIf(predicate);
+        testFixture = testFixture->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

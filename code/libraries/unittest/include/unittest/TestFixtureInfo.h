@@ -59,6 +59,7 @@ class TestFixtureInfo
 {
 private:
     friend class TestSuiteInfo;
+    friend class TestRegistrar;
     /// @brief Pointer to first test in the list
     TestInfo* m_head;
     /// @brief Pointer to last test in the list
@@ -90,12 +91,53 @@ public:
     /// <returns>Test fixture name</returns>
     const baremetal::string& Name() const { return m_fixtureName; }
 
-    void Run(TestResults& testResults);
+    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
 
     int CountTests();
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
-//private:
+private:
     void AddTest(TestInfo* test);
 };
+
+/// <summary>
+/// Run tests in test fixture using the selection predicate, updating the test results
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <param name="testResults">Test results to use and update</param>
+template <class Predicate> void TestFixtureInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    testResults.OnTestFixtureStart(this);
+
+    TestInfo* test = this->Head();
+    while (test != nullptr)
+    {
+        if (predicate(test))
+            test->Run(testResults);
+        test = test->m_next;
+    }
+
+    testResults.OnTestFixtureFinish(this);
+}
+
+/// <summary>
+/// Count the number of tests in the test fixture selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of tests in the test fixture selected by the predicate</returns>
+template <typename Predicate> int TestFixtureInfo::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestInfo* test = this->Head();
+    while (test != nullptr)
+    {
+        if (predicate(test))
+            numberOfTests++;
+        test = test->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

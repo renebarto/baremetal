@@ -64,11 +64,6 @@ private:
     TestSuiteInfo* m_tail;
 
 public:
-    /// @brief Name of default test fixture. Used for tests that are not in a test fixture
-    static const char* DefaultFixtureName;
-    /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
-    static const char* DefaultSuiteName;
-
     TestRegistry();
     TestRegistry(const TestRegistry&) = delete;
     TestRegistry(TestRegistry&&) = delete;
@@ -83,10 +78,10 @@ public:
     /// <returns>Pointer to the first test suite in the list</returns>
     TestSuiteInfo* Head() const { return m_head; }
 
-    void Run(TestResults& testResults);
-    int CountSuites();
-    int CountFixtures();
-    int CountTests();
+    template <typename Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+    template <typename Predicate> int CountSuitesIf(Predicate predicate);
+    template <typename Predicate> int CountFixturesIf(Predicate predicate);
+    template <typename Predicate> int CountTestsIf(Predicate predicate);
 
     static TestRegistry& GetTestRegistry();
 
@@ -105,5 +100,56 @@ class TestRegistrar
 public:
     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 };
+
+template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+{
+    TestSuiteInfo* testSuite = Head();
+
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            testSuite->RunIf(predicate, testResults);
+        testSuite = testSuite->m_next;
+    }
+}
+
+template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
+{
+    int numberOfTestSuites = 0;
+    TestSuiteInfo* testSuite = Head();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            ++numberOfTestSuites;
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTestSuites;
+}
+
+template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
+{
+    int numberOfTestFixtures = 0;
+    TestSuiteInfo* testSuite = Head();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTestFixtures;
+}
+
+template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
+{
+    int numberOfTests = 0;
+    TestSuiteInfo* testSuite = Head();
+    while (testSuite != nullptr)
+    {
+        if (predicate(testSuite))
+            numberOfTests += testSuite->CountTestsIf(predicate);
+        testSuite = testSuite->m_next;
+    }
+    return numberOfTests;
+}
 
 } // namespace unittest

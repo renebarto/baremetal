@@ -2468,7 +2468,6 @@ Create the file `code/libraries/baremetal/src/Assert.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Assert.cpp
-File: d:\Projects\baremetal.github\tutorial\12-logger\code\libraries\baremetal\src\Assert.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //

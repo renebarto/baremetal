@@ -1279,7 +1279,6 @@ File: CMakeLists.txt
 
 ```cmake
 File: CMakeLists.txt
-File: d:\Projects\baremetal.github\CMakeLists.txt
 179: set(LINKER_OPTIONS_DEBUG ${LINK_FLAGS} ${LINK_FLAGS_DEBUG})
 180: set(LINKER_OPTIONS_RELEASE ${LINK_FLAGS} ${LINK_FLAGS_RELEASE})
 181: set(LINKER_OPTIONS_MINSIZEREL ${LINK_FLAGS} ${LINK_FLAGS_MINSIZEREL})

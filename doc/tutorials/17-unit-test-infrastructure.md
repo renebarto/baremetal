@@ -50,7 +50,7 @@ We need to create the unittest project CMake file
 Create the file `code/libraries/unittest/CMakeLists.txt`.
 
 ```cmake
-File: d:\Projects\baremetal.github\code\libraries\unittest\CMakeLists.txt
+File: code/libraries/unittest/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 3:
@@ -820,7 +820,6 @@ Create the file `code/libraries/unittest/src/CurrentTest.cpp`
 
 ```cpp
 File: code/libraries/unittest/src/CurrentTest.cpp
-File: d:\Projects\baremetal.github\code\libraries\unittest\src\CurrentTest.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1071,7 +1070,6 @@ File: code/libraries/unittest/src/TestInfo.cpp
 49: 
 50: namespace unittest {
 51: 
-File: d:\Projects\baremetal.github\code\libraries\unittest\src\TestInfo.cpp
 52: /// <summary>
 53: /// Default constructor
 54: /// </summary>
@@ -3162,6 +3160,131 @@ Now that we have all the classes defined to run tests, we still need to find a w
 For this we will define a class `TestRegistry`, which will keep administration at the top level (the list of all test suites).
 We will also define a class `TestRegistrar` which is used to register tests statically, so that before the application runs, the tests have already been registered.
 
+### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTDETAILSH}
+
+We'll define some constants to identify the default test fixture and default test suite.
+Then we'll update the methods to retrieve the test suite name and test fixture name.
+We'll also add a methods to return the fully qualified test name, i.e. \<suite\>::\<fixture\>::\<test\>
+
+Update the file `code/libraries/unittest/include/unittest/TestDetails.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/TestDetails.h
+...
+67: public:
+68:     /// @brief Name of default test fixture. Used for tests that are not in a test fixture
+69:     static const char* DefaultFixtureName;
+70:     /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
+71:     static const char* DefaultSuiteName;
+72: 
+73:     TestDetails();
+74:     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
+75:     TestDetails(const TestDetails& other, int lineNumber);
+76: 
+77:     baremetal::string SuiteName() const;
+78:     baremetal::string FixtureName() const;
+79:     baremetal::string TestName() const;
+80:     baremetal::string QualifiedTestName() const;
+81:     baremetal::string SourceFileName() const;
+82:     int SourceFileLineNumber() const;
+83: };
+...
+```
+
+- Line 69-71: We declare constants to name default test fixture and default test suite
+- Line 77: We remove the implementation for the method `SuiteName`, and change it to return a string, instead of a const string reference
+- Line 78: We remove the implementation for the method `FixtureName`, and change it to return a string, instead of a const string reference
+- Line 79: We remove the implementation for the method `TestName`, and change it to return a string, instead of a const string reference
+- Line 80: We declare the method `QualifiedTestName`
+- Line 81: We remove the implementation for the method `SourceFileName`, and change it to return a string, instead of a const string reference
+- Line 82: We remove the implementation for the method `SourceFileLineNumber`
+
+### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTDETAILSCPP}
+
+Let's update the implementation of `TestDetails`.
+
+Update the file `code/libraries/unittest/src/TestDetails.cpp`
+
+```cpp
+File: code/libraries/unittest/src/TestDetails.cpp
+...
+40: #include <unittest/TestDetails.h>
+41: 
+42: #include <baremetal/Format.h>
+...
+51: const char* TestDetails::DefaultFixtureName = "DefaultFixture";
+52: const char* TestDetails::DefaultSuiteName = "DefaultSuite";
+...
+97: /// <summary>
+98: /// Returns test suite name
+99: /// </summary>
+100: /// <returns>Test suite name</returns>
+101: string TestDetails::SuiteName() const
+102: {
+103:     return m_suiteName.empty() ? string(DefaultSuiteName) : m_suiteName;
+104: }
+105: 
+106: /// <summary>
+107: /// Returns test fixture name
+108: /// </summary>
+109: /// <returns>Test fixture name</returns>
+110: string TestDetails::FixtureName() const
+111: {
+112:     return m_fixtureName.empty() ? string(DefaultFixtureName) : m_fixtureName;
+113: }
+114: 
+115: /// <summary>
+116: /// Returns test name
+117: /// </summary>
+118: /// <returns>Test name</returns>
+119: string TestDetails::TestName() const
+120: {
+121:     return m_testName;
+122: }
+123: 
+124: /// <summary>
+125: /// Return fully qualified test name in format [suite]::[fixture]::[test]
+126: /// </summary>
+127: /// <param name="details">Test details</param>
+128: /// <returns>Resulting string</returns>
+129: string TestDetails::QualifiedTestName() const
+130: {
+131:     return Format("%s::%s::%s",
+132:         SuiteName().c_str(),
+133:         FixtureName().c_str(),
+134:         TestName().c_str());
+135: }
+136: 
+137: /// <summary>
+138: /// Returns test source file name
+139: /// </summary>
+140: /// <returns>Test source file name</returns>
+141: string TestDetails::SourceFileName() const
+142: {
+143:     return m_fileName;
+144: }
+145: 
+146: 
+147: /// <summary>
+148: /// Returns test source line number
+149: /// </summary>
+150: /// <returns>Test source line number</returns>
+151: int TestDetails::SourceFileLineNumber() const
+152: {
+153:     return m_lineNumber;
+154: }
+...
+```
+
+- Line 42: We include the header for `Format()`
+- Line 51-52: We define the constants for the default text fixture name and test suite name
+- Line 101-104: We implement the method `SuiteName()`, now using the default suite name if the name is empty
+- Line 110-113: We implement the method `FixtureName()`, now using the default fixture name if the name is empty
+- Line 119-122: We implement the method `TestName()`
+- Line 129-135: We implement the method `QualifiedTestName()`
+- Line 141-144: We implement the method `SourceFileName()`
+- Line 151-154: We implement the method `SourceFileLineNumber()`
+
 ### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYH}
 
 So let's declare the `TestRegistry` and `TestRegistrar` classes.
@@ -3236,69 +3359,65 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 64:     TestSuiteInfo* m_tail;
 65: 
 66: public:
-67:     /// @brief Name of default test fixture. Used for tests that are not in a test fixture
-68:     static const char* DefaultFixtureName;
-69:     /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
-70:     static const char* DefaultSuiteName;
+67:     TestRegistry();
+68:     TestRegistry(const TestRegistry&) = delete;
+69:     TestRegistry(TestRegistry&&) = delete;
+70:     virtual ~TestRegistry();
 71: 
-72:     TestRegistry();
-73:     TestRegistry(const TestRegistry&) = delete;
-74:     TestRegistry(TestRegistry&&) = delete;
-75:     virtual ~TestRegistry();
-76: 
-77:     TestRegistry& operator = (const TestRegistry&) = delete;
-78:     TestRegistry& operator = (TestRegistry&&) = delete;
-79: 
-80:     /// <summary>
-81:     /// Returns a pointer to the first test suite in the list
-82:     /// </summary>
-83:     /// <returns>Pointer to the first test suite in the list</returns>
-84:     TestSuiteInfo* Head() const { return m_head; }
+72:     TestRegistry& operator = (const TestRegistry&) = delete;
+73:     TestRegistry& operator = (TestRegistry&&) = delete;
+74: 
+75:     /// <summary>
+76:     /// Returns a pointer to the first test suite in the list
+77:     /// </summary>
+78:     /// <returns>Pointer to the first test suite in the list</returns>
+79:     TestSuiteInfo* Head() const { return m_head; }
+80: 
+81:     void Run(TestResults& testResults);
+82:     int CountSuites();
+83:     int CountFixtures();
+84:     int CountTests();
 85: 
-86:     void Run(TestResults& testResults);
-87:     int CountSuites();
-88:     int CountFixtures();
-89:     int CountTests();
-90: 
-91:     static TestRegistry& GetTestRegistry();
+86:     static TestRegistry& GetTestRegistry();
+87: 
+88: private:
+89:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
+90:     void AddSuite(TestSuiteInfo* testSuite);
+91: };
 92: 
-93: private:
-94:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
-95:     void AddSuite(TestSuiteInfo* testSuite);
-96: };
-97: 
-98: /// <summary>
-99: /// Test registrar
-100: ///
-101: /// This is a utility class to register a test to the registry, as part of a test declaration
-102: /// </summary>
-103: class TestRegistrar
-104: {
-105: public:
-106:     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
-107: };
-108: 
-109: } // namespace unittest
+93: /// <summary>
+94: /// Test registrar
+95: ///
+96: /// This is a utility class to register a test to the registry, as part of a test declaration
+97: /// </summary>
+98: class TestRegistrar
+99: {
+100: public:
+101:     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
+102: };
+103: 
+104: } // namespace unittest
 ```
 
-- Line 57-96: We declare the `Testregistry` class
+- Line 57-91: We declare the `Testregistry` class
   - Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test suite
-  - Line 68-70: We declare constants to name default test fixture and default test suite
-  - Line 72: We declare the default constructor
-  - Line 73-74: We remove the copy and move constructors
-  - Line 75: We declare the destructor
-  - Line 77-78: We remove the assignment and move assignment operators
-  - Line 84: The method `Head()` returns the pointer to the first test suite in the list
-  - Line 86: The method `Run()` runs all test suites. We'll be revisiting this later
-  - Line 87: The method `CountSuites()` counts and returns the number of test suites in the test suite
-  - Line 88: The method `CountFixtures()` counts and returns the number of test fixtures in all test suites
-  - Line 89: The method `CountTests()` counts and returns the number of tests in all test fixtures in all test suites
-  - Line 91: The static method `GetTestRegistry()` returns the singleton test registry
-  - Line 94: The method `GetTestSuite()` finds and returns a test suite in the list, or if not found, creates a new test suite with the specified name
-  - Line 95: The method `AddSuite()` adds a test suite to the list
+  - Line 67: We declare the default constructor
+  - Line 68-69: We remove the copy and move constructors
+  - Line 70: We declare the destructor
+  - Line 72-73: We remove the assignment and move assignment operators
+  - Line 79: The method `Head()` returns the pointer to the first test suite in the list
+  - Line 81: The method `Run()` runs all test suites. We'll be revisiting this later
+  - Line 82: The method `CountSuites()` counts and returns the number of test suites in the test suite
+  - Line 83: The method `CountFixtures()` counts and returns the number of test fixtures in all test suites
+  - Line 84: The method `CountTests()` counts and returns the number of tests in all test fixtures in all test suites
+  - Line 86: The static method `GetTestRegistry()` returns the singleton test registry
+  - Line 89: The method `GetTestSuite()` finds and returns a test suite in the list, or if not found, creates a new test suite with the specified name.
+  Note that this method is private, as the `TestRegistrar` can access it as a friend class
+  - Line 90: The method `AddSuite()` adds a test suite to the list.
+  Note that this method is private, as the `TestRegistrar` can access it as a friend class
 
-- Line 103-107: We declare the `TestRegistrar` class
-  - Line 106: We declare the only method in the class, the constructor
+- Line 98-102: We declare the `TestRegistrar` class
+  - Line 101: We declare the only method in the class, the constructor
 
 ### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTSUITEINFOH}
 
@@ -3387,199 +3506,195 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 53: 
 54: namespace unittest {
 55: 
-56: const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
-57: const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
-58: 
-59: /// <summary>
-60: /// Returns the test registry (singleton)
-61: /// </summary>
-62: /// <returns>Test registry reference</returns>
-63: TestRegistry& TestRegistry::GetTestRegistry()
-64: {
-65:     static TestRegistry s_registry;
-66:     return s_registry;
-67: }
-68: 
-69: /// <summary>
-70: /// Constructor
-71: /// </summary>
-72: TestRegistry::TestRegistry()
-73:     : m_head{}
-74:     , m_tail{}
-75: {
-76: }
-77: 
-78: /// <summary>
-79: /// Destructor
-80: ///
-81: /// Cleans up all registered test suites, test fixtures and tests
-82: /// </summary>
-83: TestRegistry::~TestRegistry()
-84: {
-85:     TestSuiteInfo *testSuite = m_head;
-86:     while (testSuite != nullptr)
-87:     {
-88:         TestSuiteInfo *currentSuite = testSuite;
-89:         testSuite = testSuite->m_next;
-90:         delete currentSuite;
-91:     }
-92: }
-93: 
-94: /// <summary>
-95: /// Run tests, updating the test results
-96: /// </summary>
-97: /// <param name="testResults">Test results to use and update</param>
-98: void TestRegistry::Run(TestResults& testResults)
-99: {
-100:     TestSuiteInfo* testSuite = Head();
-101: 
-102:     while (testSuite != nullptr)
-103:     {
-104:         testSuite->Run(testResults);
-105:         testSuite = testSuite->m_next;
-106:     }
-107: }
-108: 
-109: /// <summary>
-110: /// Count the number of test suites selected by the predicate
-111: /// </summary>
-112: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
-113: /// <param name="predicate">Test selection predicate</param>
-114: /// <returns>Number of test suites selected by the predicate</returns>
-115: int TestRegistry::CountSuites()
-116: {
-117:     int numberOfTestSuites = 0;
-118:     TestSuiteInfo* testSuite = Head();
-119:     while (testSuite != nullptr)
-120:     {
-121:         ++numberOfTestSuites;
-122:         testSuite = testSuite->m_next;
-123:     }
-124:     return numberOfTestSuites;
-125: }
-126: 
-127: /// <summary>
-128: /// Count the number of tests
-129: /// </summary>
-130: /// <returns>Number of test fixtures</returns>
-131: int TestRegistry::CountFixtures()
-132: {
-133:     int numberOfTestFixtures = 0;
-134:     TestSuiteInfo* testSuite = Head();
-135:     while (testSuite != nullptr)
-136:     {
-137:         numberOfTestFixtures += testSuite->CountFixtures();
-138:         testSuite = testSuite->m_next;
-139:     }
-140:     return numberOfTestFixtures;
-141: }
-142: 
-143: /// <summary>
-144: /// Count the number of tests
-145: /// </summary>
-146: /// <returns>Number of tests</returns>
-147: int TestRegistry::CountTests()
-148: {
-149:     int numberOfTests = 0;
-150:     TestSuiteInfo* testSuite = Head();
-151:     while (testSuite != nullptr)
-152:     {
-153:         numberOfTests += testSuite->CountTests();
-154:         testSuite = testSuite->m_next;
-155:     }
-156:     return numberOfTests;
-157: }
-158: 
-159: /// <summary>
-160: /// Find a test suite with specified name, register a new one if not found
-161: /// </summary>
-162: /// <param name="suiteName">Test suite name to search for</param>
-163: /// <returns>Found or created test suite</returns>
-164: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
-165: {
-166:     TestSuiteInfo *testSuite = m_head;
-167:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
-168:         testSuite = testSuite->m_next;
-169:     if (testSuite == nullptr)
-170:     {
-171: #ifdef DEBUG_REGISTRY
-172:         LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
-173: #endif
-174:         testSuite = new TestSuiteInfo(suiteName);
-175:         AddSuite(testSuite);
-176:     }
-177:     else
-178:     {
-179: #ifdef DEBUG_REGISTRY
-180:         LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
-181: #endif
-182:     }
-183:     return testSuite;
-184: }
-185: 
-186: /// <summary>
-187: /// Add a test suite
-188: /// </summary>
-189: /// <param name="testSuite">Test suite to add</param>
-190: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
-191: {
-192:     if (m_tail == nullptr)
-193:     {
-194:         assert(m_head == nullptr);
-195:         m_head = testSuite;
-196:         m_tail = testSuite;
-197:     }
-198:     else
-199:     {
-200:         m_tail->m_next = testSuite;
-201:         m_tail = testSuite;
-202:     }
-203: }
-204: 
-205: /// <summary>
-206: /// Constructor
-207: ///
-208: /// Finds or registers the test suite specified in the test details of the test.
-209: /// Finds or registers the test fixture specified in the test details of the test.
-210: /// Adds the test to the fixture found or created.
-211: /// </summary>
-212: /// <param name="registry">Test registry</param>
-213: /// <param name="testInstance">Test instance to link to</param>
-214: /// <param name="details">Test details</param>
-215: TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
-216: {
-217: #ifdef DEBUG_REGISTRY
-218:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
-219:         details.TestName().c_str(),
-220:         (details.FixtureName().empty() ? TestRegistry::DefaultFixtureName : details.FixtureName().c_str()),
-221:         (details.SuiteName().empty() ? TestRegistry::DefaultSuiteName : details.SuiteName().c_str()));
-222: #endif
-223:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(details.SuiteName());
-224:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(details.FixtureName());
-225:     TestInfo        *test = new TestInfo(testInstance, details);
-226:     testFixture->AddTest(test);
-227: }
-228: 
-229: } // namespace unittest
+56: /// <summary>
+57: /// Returns the test registry (singleton)
+58: /// </summary>
+59: /// <returns>Test registry reference</returns>
+60: TestRegistry& TestRegistry::GetTestRegistry()
+61: {
+62:     static TestRegistry s_registry;
+63:     return s_registry;
+64: }
+65: 
+66: /// <summary>
+67: /// Constructor
+68: /// </summary>
+69: TestRegistry::TestRegistry()
+70:     : m_head{}
+71:     , m_tail{}
+72: {
+73: }
+74: 
+75: /// <summary>
+76: /// Destructor
+77: ///
+78: /// Cleans up all registered test suites, test fixtures and tests
+79: /// </summary>
+80: TestRegistry::~TestRegistry()
+81: {
+82:     TestSuiteInfo *testSuite = m_head;
+83:     while (testSuite != nullptr)
+84:     {
+85:         TestSuiteInfo *currentSuite = testSuite;
+86:         testSuite = testSuite->m_next;
+87:         delete currentSuite;
+88:     }
+89: }
+90: 
+91: /// <summary>
+92: /// Run tests, updating the test results
+93: /// </summary>
+94: /// <param name="testResults">Test results to use and update</param>
+95: void TestRegistry::Run(TestResults& testResults)
+96: {
+97:     TestSuiteInfo* testSuite = Head();
+98: 
+99:     while (testSuite != nullptr)
+100:     {
+101:         testSuite->Run(testResults);
+102:         testSuite = testSuite->m_next;
+103:     }
+104: }
+105: 
+106: /// <summary>
+107: /// Count the number of test suites selected by the predicate
+108: /// </summary>
+109: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+110: /// <param name="predicate">Test selection predicate</param>
+111: /// <returns>Number of test suites selected by the predicate</returns>
+112: int TestRegistry::CountSuites()
+113: {
+114:     int numberOfTestSuites = 0;
+115:     TestSuiteInfo* testSuite = Head();
+116:     while (testSuite != nullptr)
+117:     {
+118:         ++numberOfTestSuites;
+119:         testSuite = testSuite->m_next;
+120:     }
+121:     return numberOfTestSuites;
+122: }
+123: 
+124: /// <summary>
+125: /// Count the number of tests
+126: /// </summary>
+127: /// <returns>Number of test fixtures</returns>
+128: int TestRegistry::CountFixtures()
+129: {
+130:     int numberOfTestFixtures = 0;
+131:     TestSuiteInfo* testSuite = Head();
+132:     while (testSuite != nullptr)
+133:     {
+134:         numberOfTestFixtures += testSuite->CountFixtures();
+135:         testSuite = testSuite->m_next;
+136:     }
+137:     return numberOfTestFixtures;
+138: }
+139: 
+140: /// <summary>
+141: /// Count the number of tests
+142: /// </summary>
+143: /// <returns>Number of tests</returns>
+144: int TestRegistry::CountTests()
+145: {
+146:     int numberOfTests = 0;
+147:     TestSuiteInfo* testSuite = Head();
+148:     while (testSuite != nullptr)
+149:     {
+150:         numberOfTests += testSuite->CountTests();
+151:         testSuite = testSuite->m_next;
+152:     }
+153:     return numberOfTests;
+154: }
+155: 
+156: /// <summary>
+157: /// Find a test suite with specified name, register a new one if not found
+158: /// </summary>
+159: /// <param name="suiteName">Test suite name to search for</param>
+160: /// <returns>Found or created test suite</returns>
+161: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
+162: {
+163:     TestSuiteInfo *testSuite = m_head;
+164:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
+165:         testSuite = testSuite->m_next;
+166:     if (testSuite == nullptr)
+167:     {
+168: #ifdef DEBUG_REGISTRY
+169:         LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
+170: #endif
+171:         testSuite = new TestSuiteInfo(suiteName);
+172:         AddSuite(testSuite);
+173:     }
+174:     else
+175:     {
+176: #ifdef DEBUG_REGISTRY
+177:         LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
+178: #endif
+179:     }
+180:     return testSuite;
+181: }
+182: 
+183: /// <summary>
+184: /// Add a test suite
+185: /// </summary>
+186: /// <param name="testSuite">Test suite to add</param>
+187: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
+188: {
+189:     if (m_tail == nullptr)
+190:     {
+191:         assert(m_head == nullptr);
+192:         m_head = testSuite;
+193:         m_tail = testSuite;
+194:     }
+195:     else
+196:     {
+197:         m_tail->m_next = testSuite;
+198:         m_tail = testSuite;
+199:     }
+200: }
+201: 
+202: /// <summary>
+203: /// Constructor
+204: ///
+205: /// Finds or registers the test suite specified in the test details of the test.
+206: /// Finds or registers the test fixture specified in the test details of the test.
+207: /// Adds the test to the fixture found or created.
+208: /// </summary>
+209: /// <param name="registry">Test registry</param>
+210: /// <param name="testInstance">Test instance to link to</param>
+211: /// <param name="details">Test details</param>
+212: TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
+213: {
+214: #ifdef DEBUG_REGISTRY
+215:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
+216:         details.TestName().c_str(),
+217:         (details.FixtureName().c_str()),
+218:         (details.SuiteName().c_str()));
+219: #endif
+220:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(details.SuiteName());
+221:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(details.FixtureName());
+222:     TestInfo        *test = new TestInfo(testInstance, details);
+223:     testFixture->AddTest(test);
+224: }
+225: 
+226: } // namespace unittest
 ```
 
-- Line 56-57: We define the constants for the default text fixture name and test suite name
-- Line 63-67: We implement the static method `GetTestRegistry()`
-- Line 72-76: We implement the constructor
-- Line 83-92: We implement the destructor. This goes through the list of test suites, and deletes every one of these. Note that we will therefore need to create the test suites on the heap.
-- Line 98-107: We implement the `Run()` method. This goes through the list of test suites, and calls `Run()` on each
-- Line 115-125: We implement the `CountSuites()` method. This goes through the list of test suites, and counts them
-- Line 131-141: We implement the `CountFixtures()` method. This goes through the list of test suites, and counts the test fixtures in each of them
-- Line 147-157: We implement the `CountTests()` method. This goes through the list of test suites, and counts the tests in each of them
-- Line 164-184: We implement the `GetTestSuite()` method. This will try to find the test suite with the specified name. If it is found, the pointer is returned, if not, a new instance iscreated
-- Line 190-203: We implement the `AddSuite()` method. This will add the test suite passed in at the end of the list
-- Line 215-226: We implement `TestRegistrar` contructor. This is intended for the macros we will get to next.
+- Line 60-64: We implement the static method `GetTestRegistry()`
+- Line 69-73: We implement the constructor
+- Line 80-89: We implement the destructor. This goes through the list of test suites, and deletes every one of these. Note that we will therefore need to create the test suites on the heap.
+- Line 95-104: We implement the `Run()` method. This goes through the list of test suites, and calls `Run()` on each
+- Line 112-122: We implement the `CountSuites()` method. This goes through the list of test suites, and counts them
+- Line 128-138: We implement the `CountFixtures()` method. This goes through the list of test suites, and counts the test fixtures in each of them
+- Line 144-154: We implement the `CountTests()` method. This goes through the list of test suites, and counts the tests in each of them
+- Line 161-181: We implement the `GetTestSuite()` method. This will try to find the test suite with the specified name. If it is found, the pointer is returned, if not, a new instance iscreated
+- Line 187-200: We implement the `AddSuite()` method. This will add the test suite passed in at the end of the list
+- Line 212-224: We implement `TestRegistrar` contructor. This is intended for the macros we will get to next.
 The constructor receives a reference to the test registry, as well as a pointer to a test to link to (derived from `Test`) and test details, and adds the test to the registry.
 The `TestDetails` are used to create a test administraton instance, and lookup and if needed create the surrounding test fixture and test suite
 
-### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYCPP}
+### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTSUITEINFOCPP}
 
-Now that we have a `TestRegistry`, we can update the method `GetTestFixture` in `TestSuiteInfo`.
+Now that we have a `TestRegistry`, we can update the method `GetTestFixture` in `TestSuiteInfo` to add some debug info.
 
 Update the file `code/libraries/unittest/src/TestSuiteInfo.cpp`
 
@@ -3599,7 +3714,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 94:     if (testFixture == nullptr)
 95:     {
 96: #ifdef DEBUG_REGISTRY
-97:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+97:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 98: #endif
 99:         testFixture = new TestFixtureInfo(fixtureName);
 100:         AddFixture(testFixture);
@@ -3607,91 +3722,11 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 102:     else
 103:     {
 104: #ifdef DEBUG_REGISTRY
-105:         LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+105:         LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 106: #endif
 107:     }
 108:     return testFixture;
 109: }
-...
-```
-
-### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYCPP}
-
-Similarly, we can use the default test fixture and test suite names from `TestRegistry` in the `TestResults` class.
-
-Update the file `code/libraries/unittest/src/TestResults.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestResults.cpp
-...
-61: /// <summary>
-62: /// Return test suite name, of default name if empty
-63: /// </summary>
-64: /// <param name="details"></param>
-65: /// <returns></returns>
-66: static string SuiteName(const string& suiteName)
-67: {
-68:     return suiteName.empty() ? string(TestRegistry::DefaultSuiteName) : suiteName;
-69: }
-70: 
-71: /// <summary>
-72: /// Return test fixture name, of default name if empty
-73: /// </summary>
-74: /// <param name="details"></param>
-75: /// <returns></returns>
-76: static string FixtureName(const string& fixtureName)
-77: {
-78:     return fixtureName.empty() ? string(TestRegistry::DefaultFixtureName) : fixtureName;
-79: }
-80: 
-81: /// <summary>
-82: /// Return fully qualified test name in format [suite]::[fixture]::[test]
-83: /// </summary>
-84: /// <param name="details">Test details</param>
-85: /// <returns>Resulting string</returns>
-86: static string QualifiedTestName(const TestDetails& details)
-87: {
-88:     return Format("%s::%s::%s",
-89:         SuiteName(details.SuiteName()).c_str(),
-90:         FixtureName(details.FixtureName()).c_str(),
-91:         details.TestName().c_str());
-92: }
-93: 
-94: /// <summary>
-95: /// Start a test suite run
-96: /// </summary>
-97: /// <param name="suite">Test suite to start</param>
-98: void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
-99: {
-100:     LOG_INFO(SuiteName(suite->Name()) + " Start suite");
-101: }
-102: 
-103: /// <summary>
-104: /// Finish a test suite run
-105: /// </summary>
-106: /// <param name="suite">Test suite to finish</param>
-107: void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
-108: {
-109:     LOG_INFO(SuiteName(suite->Name()) + " Finish suite");
-110: }
-111: 
-112: /// <summary>
-113: /// Start a test fixture run
-114: /// </summary>
-115: /// <param name="fixture">Test fixture to start</param>
-116: void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
-117: {
-118:     LOG_INFO(FixtureName(fixture->Name()) + " Start fixture");
-119: }
-120: 
-121: /// <summary>
-122: /// Finish a test fixture run
-123: /// </summary>
-124: /// <param name="fixture">Test fixture to finish</param>
-125: void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
-126: {
-127:     LOG_INFO(FixtureName(fixture->Name()) + " Finish fixture");
-128: }
 ...
 ```
 
@@ -4106,11 +4141,9 @@ Info   Wait 5 seconds (main:214)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Test runner and visitor - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5}
+## Test runner and visitor - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7}
 
-\todo
-
-### ITestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_ITESTREPORTERH}
+### ITestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_ITESTREPORTERH}
 
 We'll add a visitor interface, which we'll implement later on as a test reporter, which will print the progress and results of the tests.
 
@@ -4156,306 +4189,350 @@ File: code/libraries/unittest/include/unittest/ITestReporter.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/String.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class TestDetails;
-48: class TestResults;
-49:
-50: class ITestReporter
-51: {
-52: public:
-53:     virtual ~ITestReporter() {}
-54:
-55:     virtual void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
-56:     virtual void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
-57:     virtual void ReportTestRunSummary(const TestResults& results) = 0;
-58:     virtual void ReportTestRunOverview(const TestResults& results) = 0;
-59:     virtual void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTests) = 0;
-60:     virtual void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTests) = 0;
-61:     virtual void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) = 0;
-62:     virtual void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) = 0;
-63:     virtual void ReportTestStart(const TestDetails& details) = 0;
-64:     virtual void ReportTestFinish(const TestDetails& details, bool success) = 0;
-65:     virtual void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) = 0;
-66: };
-67:
-68: } // namespace unittest
+43: 
+44: /// @file
+45: /// Abstract test reporter interface
+46: 
+47: namespace unittest
+48: {
+49: 
+50: class TestDetails;
+51: class TestResults;
+52: 
+53: /// <summary>
+54: /// Test reporter abstract interface
+55: /// </summary>
+56: class ITestReporter
+57: {
+58: public:
+59:     /// <summary>
+60:     /// Destructor
+61:     /// </summary>
+62:     virtual ~ITestReporter() {}
+63: 
+64:     /// <summary>
+65:     /// Start of test run callback
+66:     /// </summary>
+67:     /// <param name="numberOfTestSuites">Number of test suites to be run</param>
+68:     /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+69:     /// <param name="numberOfTests">Number of tests to be run</param>
+70:     virtual void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+71:     /// <summary>
+72:     /// Finish of test run callback
+73:     /// </summary>
+74:     /// <param name="numberOfTestSuites">Number of test suites run</param>
+75:     /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+76:     /// <param name="numberOfTests">Number of tests run</param>
+77:     virtual void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) = 0;
+78:     /// <summary>
+79:     /// Test summary callback
+80:     /// </summary>
+81:     /// <param name="results">Test run results</param>
+82:     virtual void ReportTestRunSummary(const TestResults& results) = 0;
+83:     /// <summary>
+84:     /// Test run overview callback
+85:     /// </summary>
+86:     /// <param name="results">Test run results</param>
+87:     virtual void ReportTestRunOverview(const TestResults& results) = 0;
+88:     /// <summary>
+89:     /// Test suite start callback
+90:     /// </summary>
+91:     /// <param name="suiteName">Test suite name</param>
+92:     /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+93:     virtual void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) = 0;
+94:     /// <summary>
+95:     /// Test suite finish callback
+96:     /// </summary>
+97:     /// <param name="suiteName">Test suite name</param>
+98:     /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+99:     virtual void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) = 0;
+100:     /// <summary>
+101:     /// Test fixture start callback
+102:     /// </summary>
+103:     /// <param name="fixtureName">Test fixture name</param>
+104:     /// <param name="numberOfTests">Number of tests within test fixture</param>
+105:     virtual void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) = 0;
+106:     /// <summary>
+107:     /// Test fixture finish callback
+108:     /// </summary>
+109:     /// <param name="fixtureName">Test fixture name</param>
+110:     /// <param name="numberOfTests">Number of tests within test fixture</param>
+111:     virtual void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) = 0;
+112:     /// <summary>
+113:     /// Test start callback
+114:     /// </summary>
+115:     /// <param name="details">Test details</param>
+116:     virtual void ReportTestStart(const TestDetails& details) = 0;
+117:     /// <summary>
+118:     /// Test finish callback
+119:     /// </summary>
+120:     /// <param name="details">Test details</param>
+121:     /// <param name="success">Test result, true is successful, false is failed</param>
+122:     virtual void ReportTestFinish(const TestDetails& details, bool success) = 0;
+123:     /// <summary>
+124:     /// Test failure callback
+125:     /// </summary>
+126:     /// <param name="details">Test details</param>
+127:     /// <param name="failure">Test failure message</param>
+128:     virtual void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) = 0;
+129: };
+130: 
+131: } // namespace unittest
 ```
 
-- Line 50-68: We declare the abstract interface class ITestReporter
-  - Line 55: The method `ReportTestRunStart()` will be called before any tests are run, to give an overview of the number of test suites, test fixtures and tests
-  - Line 56: The method `ReportTestRunStart()` will be called just after the tests are run, to again give an overview of the number of test suites, test fixtures and tests
-  - Line 57: The method `ReportTestSummary()` will be called after all tests are finished, to show a summary of the number of tests run, and the number of failing tests
-  - Line 58: The method `ReportTestRunOverview()` will print the list of failed tests, with information of why they failed
-  - Line 59: The method `ReportTestSuiteStart()` will print a marker for the start of a test suite run
-  - Line 60: The method `ReportTestSuiteFinish()` will print a marker for the end of a test suite run
-  - Line 61: The method `ReportTestFixtureStart()` will print a marker for the start of a test fixture run
-  - Line 62: The method `ReportTestFixtureFinish()` will print a marker for the end of a test fixture run
-  - Line 63: The method `ReportTestStart()` will print a marker for the start of a test run
-  - Line 64: The method `ReportTestFinish()` will print a marker for the end of a test run
-  - Line 65: The method `ReportTestFailure()` will print a statement that a failure was found, with information
+- Line 56-129: We declare the abstract interface class ITestReporter
+  - Line 70: The method `ReportTestRunStart()` will be called before any tests are run, to give an overview of the number of test suites, test fixtures and tests
+  - Line 77: The method `ReportTestRunStart()` will be called just after the tests are run, to again give an overview of the number of test suites, test fixtures and tests
+  - Line 82: The method `ReportTestSummary()` will be called after all tests are finished, to show a summary of the number of tests run, and the number of failing tests
+  - Line 87: The method `ReportTestRunOverview()` will print the list of failed tests, with information of why they failed
+  - Line 93: The method `ReportTestSuiteStart()` will print a marker for the start of a test suite run
+  - Line 99: The method `ReportTestSuiteFinish()` will print a marker for the end of a test suite run
+  - Line 105: The method `ReportTestFixtureStart()` will print a marker for the start of a test fixture run
+  - Line 111: The method `ReportTestFixtureFinish()` will print a marker for the end of a test fixture run
+  - Line 116: The method `ReportTestStart()` will print a marker for the start of a test run
+  - Line 122: The method `ReportTestFinish()` will print a marker for the end of a test run
+  - Line 128: The method `ReportTestFailure()` will print a statement that a failure was found, with information
 
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTRESULTSH}
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRESULTSH}
 
-When running tests, we need to keep track of which tests were run, and which failures occurred.
-We will use the class `TestResults` for this purpose.
+We introduced the `TestResults` class before, we will now extend it to keep hold of the test reporter, and to count tests, test fixtures and test suites.
 
-Create the file `code/libraries/unittest/include/unittest/TestResults.h`
+Update the file `code/libraries/unittest/include/unittest/TestResults.h`
 
 ```cpp
 File: code/libraries/unittest/include/unittest/TestResults.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestResults.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestResults
-9: //
-10: // Description : Test results
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/String.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class ITestReporter;
-48: class TestDetails;
-49: class TestSuiteInfo;
-50: class TestFixtureInfo;
-51:
-52: class TestResults
-53: {
-54: public:
-55:     explicit TestResults(ITestReporter* reporter = nullptr);
-56:     TestResults(const TestResults&) = delete;
-57:     TestResults(TestResults&&) = delete;
-58:     virtual ~TestResults();
-59:
-60:     TestResults& operator = (const TestResults&) = delete;
-61:     TestResults& operator = (TestResults&&) = delete;
-62:
-63:     void OnTestSuiteStart(TestSuiteInfo* suite);
-64:     void OnTestSuiteFinish(TestSuiteInfo* suite);
-65:     void OnTestFixtureStart(TestFixtureInfo* fixture);
-66:     void OnTestFixtureFinish(TestFixtureInfo* fixture);
-67:     void OnTestStart(const TestDetails& details);
-68:     void OnTestFailure(const TestDetails& details, const baremetal::string& message);
-69:     void OnTestFinish(const TestDetails& details);
-70:
-71:     int GetTotalTestCount() const;
-72:     int GetFailedTestCount() const;
-73:     int GetFailureCount() const;
-74:
-75: private:
-76:     ITestReporter* m_reporter;
-77:     int m_totalTestCount;
-78:     int m_failedTestCount;
-79:     int m_failureCount;
-80:     bool m_currentTestFailed;
-81: };
-82:
-83: } // namespace unittest
+43: 
+44: /// @file
+45: /// Test results
+46: ///
+47: /// Results for a complete test run
+48: 
+49: namespace unittest
+50: {
+51: 
+52: class ITestReporter;
+53: class TestDetails;
+54: class TestSuiteInfo;
+55: class TestFixtureInfo;
+56: 
+57: /// <summary>
+58: /// Test results
+59: ///
+60: /// Holds the test results for a complete test run
+61: /// </summary>
+62: class TestResults
+63: {
+64: private:
+65:     /// @brief Selected test reporter
+66:     ITestReporter* m_reporter;
+67:     /// @brief Total count fo tests in test run
+68:     int m_totalTestCount;
+69:     /// @brief Total count of failed tests in test run
+70:     int m_failedTestCount;
+71:     /// @brief Total count of failures in test run
+72:     int m_failureCount;
+73:     /// @brief Flag for failure in current test, set to true if at least one failure occurred in the current test
+74:     bool m_currentTestFailed;
+75: 
+76: public:
+77:     explicit TestResults(ITestReporter* reporter = nullptr);
+78:     TestResults(const TestResults&) = delete;
+79:     TestResults(TestResults&&) = delete;
+80:     virtual ~TestResults();
+81: 
+82:     TestResults& operator = (const TestResults&) = delete;
+83:     TestResults& operator = (TestResults&&) = delete;
+84: 
+85:     void OnTestSuiteStart(TestSuiteInfo* suite);
+86:     void OnTestSuiteFinish(TestSuiteInfo* suite);
+87:     void OnTestFixtureStart(TestFixtureInfo* fixture);
+88:     void OnTestFixtureFinish(TestFixtureInfo* fixture);
+89:     void OnTestStart(const TestDetails& details);
+90:     void OnTestFailure(const TestDetails& details, const baremetal::string& message);
+91:     void OnTestFinish(const TestDetails& details);
+92: 
+93:     /// <summary>
+94:     /// Returns the number of tests in the test run
+95:     /// </summary>
+96:     /// <returns>Number of tests in the test run</returns>
+97:     int GetTotalTestCount() const { return m_totalTestCount; }
+98:     /// <summary>
+99:     /// Returns the number of failed tests in the test run
+100:     /// </summary>
+101:     /// <returns>Number of failed tests in the test run</returns>
+102:     int GetFailedTestCount() const { return m_failedTestCount; }
+103:     /// <summary>
+104:     /// Returns the number of failures in the test run
+105:     /// </summary>
+106:     /// <returns>Number of failures in the test run</returns>
+107:     int GetFailureCount() const { return m_failureCount; }
+108: 
+109: };
+110: 
+111: } // namespace unittest
 ```
 
-- Line 52-81: We declare the class `TestResults`
-  - Line 55: We declare an explicit constructor taking a pointer to a test reporter interface
-  - Line 56-57: We remove the copy and move constructors
-  - Line 58: We declare the constructor
-  - Line 60-61: We remove the assignment and move assignment operators
-  - Line 63: The method `OnTestSuiteStart()` marks the start of a test suite run. This will also call `ReportTestSuiteStart()` on the test reporter
-  - Line 64: The method `OnTestSuiteFinish()` marks the end of a test suite run. This will also call `ReportTestSuiteFinish()` on the test reporter
-  - Line 65: The method `OnTestFixtureStart()` marks the start of a test fixture run. This will also call `ReportTestFixtureStart()` on the test reporter
-  - Line 66: The method `OnTestFixtureFinish()` marks the end of a test fixture run. This will also call `ReportTestFixtureFinish()` on the test reporter
-  - Line 67: The method `OnTestStart()` marks the start of a test run. This will also call `ReportTestStart()` on the test reporter
-  - Line 68: The method `OnTestFailure()` marks the failure in a test run. This will also call `ReportTestFailure()` on the test reporter
-  - Line 69: The method `OnTestFinish()` marks the end of a test run. This will also call `ReportTestFinish()` on the test reporter
-  - Line 71: The method `GetTotalTestCount()` returns the total number of tests run
-  - Line 72: The method `GetFailedTestCount()` returns the total number of tests that failed
-  - Line 73: The method `GetFailureCount()` returns the total number of failures found. A test can have more than one failure
+- Line 66: The member `m_reporter` holds the pointer to the test reporter interface being used
+- Line 68: The member `m_failedTestCount` holds the total failed test count
+- Line 70: The member `m_failureCount` holds the total failure count. A test can have multiple failures
+- Line 72: The member `m_currentTestFailed` is true if any test case for the current test failed
+- Line 77: We declare an explicit constructor taking a pointer to a test reporter interface
+- Line 78-79: We remove the copy and move constructors
+- Line 80: We declare the destructor
+- Line 82-83: We remove the assignment and move assignment operators
+- Line 85: The method `OnTestSuiteStart()` marks the start of a test suite run. This will also call `ReportTestSuiteStart()` on the test reporter
+- Line 86: The method `OnTestSuiteFinish()` marks the end of a test suite run. This will also call `ReportTestSuiteFinish()` on the test reporter
+- Line 87: The method `OnTestFixtureStart()` marks the start of a test fixture run. This will also call `ReportTestFixtureStart()` on the test reporter
+- Line 88: The method `OnTestFixtureFinish()` marks the end of a test fixture run. This will also call `ReportTestFixtureFinish()` on the test reporter
+- Line 89: The method `OnTestStart()` marks the start of a test run. This will also call `ReportTestStart()` on the test reporter
+- Line 90: The method `OnTestFailure()` marks the failure in a test run.
+This will also call `ReportTestFailure()` on the test reporter. This is the only method from the previous declaration that changed
+- Line 91: The method `OnTestFinish()` marks the end of a test run. This will also call `ReportTestFinish()` on the test reporter
+- Line 97: The method `GetTotalTestCount()` returns the total number of tests run
+- Line 102: The method `GetFailedTestCount()` returns the total number of tests that failed
+- Line 107: The method `GetFailureCount()` returns the total number of failures found. A test can have more than one failure
 
-### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTRESULTSCPP}
+### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRESULTSCPP}
 
-Let's implement the `TestResults` class.
+Let's implement additional methods of the `TestResults` class.
 
-Create the file `code/libraries/unittest/src/TestResults.cpp`
+Update the file `code/libraries/unittest/src/TestResults.cpp`
 
 ```cpp
 File: code/libraries/unittest/src/TestResults.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestResults.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestResults
-9: //
-10: // Description : Test results
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
 40: #include <unittest/TestResults.h>
-41:
+41: 
 42: #include <unittest/ITestReporter.h>
-43: #include <unittest/TestSuiteInfo.h>
-44:
-45: using namespace baremetal;
-46:
-47: namespace unittest {
-48:
-49: TestResults::TestResults(ITestReporter* testReporter)
-50:     : m_reporter{ testReporter }
-51:     , m_totalTestCount{}
-52:     , m_failedTestCount{}
-53:     , m_failureCount{}
-54:     , m_currentTestFailed{}
-55: {
-56: }
-57:
-58: TestResults::~TestResults()
-59: {
-60: }
-61:
-62: void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
-63: {
-64:     if (m_reporter)
-65:         m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
-66: }
-67:
-68: void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
-69: {
-70:     if (m_reporter)
-71:         m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
-72: }
-73:
-74: void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
-75: {
-76:     if (m_reporter)
-77:         m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
-78: }
-79:
-80: void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
+43: #include <unittest/TestDetails.h>
+44: #include <unittest/TestFixtureInfo.h>
+45: #include <unittest/TestRegistry.h>
+46: #include <unittest/TestSuiteInfo.h>
+47: 
+48: /// @file
+49: /// Test results implementation
+50: 
+51: using namespace baremetal;
+52: 
+53: namespace unittest
+54: {
+55: 
+56: /// <summary>
+57: /// Constructor
+58: /// </summary>
+59: /// <param name="testReporter">Test reporter to use</param>
+60: TestResults::TestResults(ITestReporter* testReporter)
+61:     : m_reporter{ testReporter }
+62:     , m_totalTestCount{}
+63:     , m_failedTestCount{}
+64:     , m_failureCount{}
+65:     , m_currentTestFailed{}
+66: {
+67: }
+68: 
+69: /// <summary>
+70: /// Destructor
+71: /// </summary>
+72: TestResults::~TestResults()
+73: {
+74: }
+75: 
+76: /// <summary>
+77: /// Start a test suite run
+78: /// </summary>
+79: /// <param name="suite">Test suite to start</param>
+80: void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 81: {
 82:     if (m_reporter)
-83:         m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
+83:         m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
 84: }
-85:
-86: void TestResults::OnTestStart(const TestDetails& details)
-87: {
-88:     ++m_totalTestCount;
-89:     m_currentTestFailed = false;
-90:     if (m_reporter)
-91:         m_reporter->ReportTestStart(details);
-92: }
-93:
-94: void TestResults::OnTestFailure(const TestDetails& details, const string& result)
-95: {
-96:     ++m_failureCount;
-97:     if (!m_currentTestFailed)
-98:     {
-99:         ++m_failedTestCount;
-100:         m_currentTestFailed = true;
-101:     }
+85: 
+86: /// <summary>
+87: /// Finish a test suite run
+88: /// </summary>
+89: /// <param name="suite">Test suite to finish</param>
+90: void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
+91: {
+92:     if (m_reporter)
+93:         m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
+94: }
+95: 
+96: /// <summary>
+97: /// Start a test fixture run
+98: /// </summary>
+99: /// <param name="fixture">Test fixture to start</param>
+100: void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
+101: {
 102:     if (m_reporter)
-103:         m_reporter->ReportTestFailure(details, result);
+103:         m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
 104: }
-105:
-106: void TestResults::OnTestFinish(const TestDetails& details)
-107: {
-108:     if (m_reporter)
-109:         m_reporter->ReportTestFinish(details, !m_currentTestFailed);
-110: }
-111:
-112: int TestResults::GetTotalTestCount() const
-113: {
-114:     return m_totalTestCount;
-115: }
-116:
-117: int TestResults::GetFailedTestCount() const
-118: {
-119:     return m_failedTestCount;
-120: }
-121:
-122: int TestResults::GetFailureCount() const
-123: {
-124:     return m_failureCount;
-125: }
-126:
-127: } // namespace unittest
+105: 
+106: /// <summary>
+107: /// Finish a test fixture run
+108: /// </summary>
+109: /// <param name="fixture">Test fixture to finish</param>
+110: void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
+111: {
+112:     if (m_reporter)
+113:         m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
+114: }
+115: 
+116: /// <summary>
+117: /// Start a test
+118: /// </summary>
+119: /// <param name="details">Test details of test to start</param>
+120: void TestResults::OnTestStart(const TestDetails& details)
+121: {
+122:     ++m_totalTestCount;
+123:     m_currentTestFailed = false;
+124:     if (m_reporter)
+125:         m_reporter->ReportTestStart(details);
+126: }
+127: 
+128: /// <summary>
+129: /// Add a test failure
+130: /// </summary>
+131: /// <param name="details"></param>
+132: /// <param name="message">Test failure string</param>
+133: void TestResults::OnTestFailure(const TestDetails& details, const string& message)
+134: {
+135:     ++m_failureCount;
+136:     if (!m_currentTestFailed)
+137:     {
+138:         ++m_failedTestCount;
+139:         m_currentTestFailed = true;
+140:     }
+141:     if (m_reporter)
+142:         m_reporter->ReportTestFailure(details, message);
+143: }
+144: 
+145: /// <summary>
+146: /// Finish a test
+147: /// </summary>
+148: /// <param name="details">Test details of test to finish</param>
+149: void TestResults::OnTestFinish(const TestDetails& details)
+150: {
+151:     if (m_reporter)
+152:         m_reporter->ReportTestFinish(details, !m_currentTestFailed);
+153: }
+154: 
+155: } // namespace unittest
 ```
 
 Most methods are quite straightforward.
 
-- Line 86-92: The `OnTestStart()` method also counts the tests run, and resets the flag whether the test failed
-- Line 94-104: The `OnTestFailure()` method increments the failure count, and if this is the first failure in the test, also increments the failed test count
+- Line 120-126: The `OnTestStart()` method also counts the tests run, and resets the flag whether the test failed
+- Line 133-143: The `OnTestFailure()` method increments the failure count, and if this is the first failure in the test, also increments the failed test count
 
-### TestRunner.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTRUNNERH}
+### TestRunner.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRUNNERH}
 
-Now that we have registered tests, we can define a class `TestRunner` that can run the registered tests.
+Next we define a class `TestRunner` that can run the registered tests.
 This will introduce a method for filtering which tests to run.
 
 Create the file `code/libraries/unittest/include/unittest/TestRunner.h`
@@ -4511,14 +4588,14 @@ File: code/libraries/unittest/include/unittest/TestRunner.h
 47: {
 48:
 49: class ITestReporter;
-50: class Test;
+50: class TestInfo;
 51: class TestFixtureInfo;
 52: class TestResults;
 53: class TestSuiteInfo;
 54:
 55: struct True
 56: {
-57:     bool operator()(const TestBase* const ) const
+57:     bool operator()(const TestInfo* const ) const
 58:     {
 59:         return true;
 60:     }
@@ -4546,7 +4623,7 @@ File: code/libraries/unittest/include/unittest/TestRunner.h
 82:         , m_testName{ testName }
 83:     {
 84:     }
-85:     bool operator()(const TestBase* const test) const;
+85:     bool operator()(const TestInfo* const test) const;
 86:     bool operator()(const TestFixtureInfo* const fixture) const;
 87:     bool operator()(const TestSuiteInfo* const suite) const;
 88: };
@@ -4622,43 +4699,43 @@ File: code/libraries/unittest/include/unittest/TestRunner.h
 158: } // namespace unittest
 ```
 
-- Line 55-69: We declare a struct `True` the holds three operators, that all return true. This isused for filtering test suites, test fixtures and tests
-  - Line 57-60: The operator `(const TestBase*)` will match to any test
-  - Line 61-64: The operator `(const TestFixtureInfo*)` will match to any test fixture
-  - Line 65-68: The operator `(const TestSuiteInfo*)` will match to any test suite
-- Line 71-88: We declare a similar struct `InSelection` that hold the same three operators.
+- Line 62-88: We declare a struct `True` the holds three operators, that all return true. This isused for filtering test suites, test fixtures and tests
+  - Line 68-71: The operator `(const TestInfo*)` will match to any test
+  - Line 76-79: The operator `(const TestFixtureInfo*)` will match to any test fixture
+  - Line 84-87: The operator `(const TestSuiteInfo*)` will match to any test suite
+- Line 95-121: We declare a similar struct `InSelection` that holds the same three operators.
 This one however will returns true for a method, if the corresponding test name, test fixture name or test suite name is equal to a set value
-  - Line 74-76: We declare class variables `m_suitename`, `m_fixtureName` and `m_testName` as a pointer to a string to contain the  test suite name, test fixture name, and test name to use as a filter
-  - Line 77-84: We define a constructor, which takes a test suite name, a test fixture name, and a test name, each as a character pointer, which may be nullptr.
+  - Line 99-103: We declare class variables `m_suitename`, `m_fixtureName` and `m_testName` as a pointer to a string to contain the  test suite name, test fixture name, and test name to use as a filter
+  - Line 112-117: We define a constructor, which takes a test suite name, a test fixture name, and a test name, each as a character pointer, which may be nullptr.
 The corresponding values are saved as the test suite name, a test fixture name, and a test name to filter on
-  - Line 85: We declare the operator `(const TestBase*)` which will return true if the test name is equal to the set filter value `m_testName`
-  - Line 86: We declare the operator `(const TestFixtureInfo*)` which will return true if the test fixture name is equal to the set filter value `m_fixtureName`
-  - Line 87: We declare the operator `(const TestSuiteInfo*)` which will return true if the test suite name is equal to the set filter value `m_suiteName`
-- Line 90-112: We declare the class `TestRunner` which allows to run tests with a set filter, which will use a test reporter instance for reporting
-  - Line 93: `m_reporter` stores the passed test reporter instance pointer
-  - Line 94: `m_testResults` stores a pointer to the test results
-  - Line 97: We remove the copy constructor
-  - Line 98: We declare an explicit constructor taking a test reporter instance pointer
-  - Line 99: We declare a destructor
-  - Line 101: We remove the assignment operator
-  - Line 103: We declare a template method `RunTestsIf()` that takes a predicate (which could be the an instance of the `True` class or an instance or the `InSelection` class, or any other class that supportes the same three `()` operators).
+  - Line 118: We declare the operator `(const TestInfo*)` which will return true if the test name is equal to the set filter value `m_testName`
+  - Line 119: We declare the operator `(const TestFixtureInfo*)` which will return true if the test fixture name is equal to the set filter value `m_fixtureName`
+  - Line 120: We declare the operator `(const TestSuiteInfo*)` which will return true if the test suite name is equal to the set filter value `m_suiteName`
+- Line 128-152: We declare the class `TestRunner` which allows to run tests with a set filter, which will use a test reporter instance for reporting
+  - Line 132: `m_reporter` stores the passed test reporter instance pointer
+  - Line 134: `m_testResults` stores a pointer to the test results
+  - Line 137: We remove the copy constructor
+  - Line 138: We declare an explicit constructor taking a test reporter instance pointer
+  - Line 139: We declare a destructor
+  - Line 141: We remove the assignment operator
+  - Line 144: We declare a template method `RunTestsIf()` that takes a predicate (which could be an instance of the `True` class or an instance or the `InSelection` class, or any other class that supportes the same three `()` operators).
 This method will run any test that matches the predicate passed
-  - Line 107-108: We declare a private template method `Start()` that takes a predicate.
+  - Line 147-148: We declare a private template method `Start()` that takes a predicate.
 This collects information on the number of test suites, test fixtures and tests, and report the start of the test run
-  - Line 110-111: We declare a private template method `Finish()` that takes a predicate.
+  - Line 150-151: We declare a private template method `Finish()` that takes a predicate.
 This reports a test run summary and overview, and reports the end of the test run
-- Line 114-122: We implement the `RunTestsIf()` template method.
+- Line 163-171: We implement the `RunTestsIf()` template method.
 This will use the method `RunIf()` to run tests matching the predicate, with the test results passed to fill
-- Line 124-132: We implement the `Start()` template method.
+- Line 178-186: We implement the `Start()` template method.
 Note that it runs methods `CountSuitesIf()`, `CountFixturesIf()` and `CountTestsIf()` to count test suites, test fixtures and test, using the predicate.
 We will need to implement those in the `TestRegistry` class
-- Line 134-147: We implement the `Finish()` template method.
+- Line 194-207: We implement the `Finish()` template method.
 Again, the methods `CountSuitesIf()`, `CountFixturesIf()` and `CountTestsIf()` are used to count tests, etc.
 The method returns the number of failures, which is reported back by the `RunTestsIf()` template method
-- Line 149: We declare a function `RunAllTests()` which will simply run all tests and use the passed test reporter for reporting
-- Line 151-156: We define a template function `RunSelectedTests()` which will run all tests matching a predicate and use the passed test reporter for reporting
+- Line 209: We declare a function `RunAllTests()` which will simply run all tests and use the passed test reporter for reporting
+- Line 218-223: We define a template function `RunSelectedTests()` which will run all tests matching a predicate and use the passed test reporter for reporting
 
-### TestRunner.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTRUNNERCPP}
+### TestRunner.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRUNNERCPP}
 
 Let's implement the `TestRunner` class. Most of the methods are template methods, so we will only need to imlement part here.
 
@@ -4704,34 +4781,82 @@ File: code/libraries/unittest/src/TestRunner.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <unittest/TestRunner.h>
-41:
-42: namespace unittest {
-43:
-44: TestRunner::TestRunner(ITestReporter* reporter)
-45:     : m_reporter{ reporter }
-46:     , m_testResults{ reporter }
-47: {
-48: }
-49:
-50: TestRunner::~TestRunner()
-51: {
-52: }
-53:
-54: int RunAllTests(ITestReporter* reporter)
-55: {
-56:     return RunSelectedTests(reporter, True());
-57: }
-58:
-59: } // namespace unittest
+41: 
+42: /// @file
+43: /// Test runner implementation
+44: 
+45: namespace unittest {
+46: 
+47: /// <summary>
+48: /// Returns test selection value
+49: /// </summary>
+50: /// <param name="test">Test to check against selection</param>
+51: /// <returns>Returns true if the test name selection is set to nullptr, or the test name matches the selection</returns>
+52: bool InSelection::operator()(const TestInfo* const test) const
+53: {
+54:     return (m_testName == nullptr) || (test->Details().TestName() == m_testName);
+55: }
+56: 
+57: /// <summary>
+58: /// Returns test fixture selection value
+59: /// </summary>
+60: /// <param name="fixture">Test fixture to check against selection</param>
+61: /// <returns>Returns true if the test fixture name selection is set to nullptr, or the test fixture name matches the selection</returns>
+62: bool InSelection::operator()(const TestFixtureInfo* const fixture) const
+63: {
+64:     return (m_fixtureName == nullptr) || (fixture->Name() == m_fixtureName);
+65: }
+66: 
+67: /// <summary>
+68: /// Returns test suite selection value
+69: /// </summary>
+70: /// <param name="suite">Test suite to check against selection</param>
+71: /// <returns>Returns true if the test suite name selection is set to nullptr, or the test suite name matches the selection</returns>
+72: bool InSelection::operator()(const TestSuiteInfo* const suite) const
+73: {
+74:     return (m_suiteName == nullptr) || (suite->Name() == m_suiteName);
+75: }
+76: 
+77: /// <summary>
+78: /// Constructor
+79: /// </summary>
+80: /// <param name="reporter">Test reporter to use, can be nullptr, in which case no reporting is done</param>
+81: TestRunner::TestRunner(ITestReporter* reporter)
+82:     : m_reporter{ reporter }
+83:     , m_testResults{ reporter }
+84: {
+85: }
+86: 
+87: /// <summary>
+88: /// Destructor
+89: /// </summary>
+90: TestRunner::~TestRunner()
+91: {
+92: }
+93: 
+94: /// <summary>
+95: /// Run all tests with specified test reporter
+96: /// </summary>
+97: /// <param name="reporter">Test reporter to use</param>
+98: /// <returns></returns>
+99: int RunAllTests(ITestReporter* reporter)
+100: {
+101:     return RunSelectedTests(reporter, True());
+102: }
+103: 
+104: } // namespace unittest
 ```
 
-- Line 44-48: We define the constructor
-- Line 50-53: We define the destructor
-- Line 54-57: We implement the function `RunAllTests()`
+- Line 52-55: We implement the operator `(const TestInfo*)` for `InSelection`. This will return true if the test name matches the filter
+- Line 62-65: We implement the operator `(const TestFixtureInfo*)` for `InSelection`. This will return true if the test fixture name matches the filter
+- Line 72-75: We implement the operator `(const TestSuiteInfo*)` for `InSelection`. This will return true if the test suite name matches the filter
+- Line 81-85: We define the constructor for `TestRunner`
+- Line 90-92: We define the destructor for `TestRunner`
+- Line 99-102: We implement the function `RunAllTests()`
 
-### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTREGISTRYH}
+### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTREGISTRYH}
 
 In order to be able to run tests with a predicate, we need to update the `TestRegistry` class.
 
@@ -4740,118 +4865,119 @@ Update the file `code/libraries/unittest/include/unittest/TestRegistry.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestRegistry.h
 ...
-44: namespace unittest
-45: {
-46:
-47: class TestBase;
-48: class TestSuiteInfo;
-49: class TestResults;
-50:
-51: class TestRegistry
-52: {
-53: private:
-54:     TestSuiteInfo* m_head;
-55:     TestSuiteInfo* m_tail;
-56:
-57: public:
-58:     static const char* DefaultFixtureName;
-59:     static const char* DefaultSuiteName;
-60:
-61:     TestRegistry();
-62:     TestRegistry(const TestRegistry&) = delete;
-63:     TestRegistry(TestRegistry&&) = delete;
-64:     virtual ~TestRegistry();
-65:
-66:     TestRegistry& operator = (const TestRegistry&) = delete;
-67:     TestRegistry& operator = (TestRegistry&&) = delete;
-68:
-69:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
-70:     TestSuiteInfo* GetHead() const;
-71:
-72:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-73:     template <typename Predicate> int CountSuitesIf(Predicate predicate);
-74:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
-75:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-76:
-77:     static TestRegistry& GetTestRegistry();
-78:
-79:     void AddSuite(TestSuiteInfo* testSuite);
-80: };
-81:
-82: class TestRegistrar
-83: {
-84: public:
-85:     TestRegistrar(TestRegistry& registry, TestBase* test);
-86: };
-87:
-88: template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
-89: {
-90:     TestSuiteInfo* testSuite = GetHead();
-91:
-92:     while (testSuite != nullptr)
-93:     {
-94:         if (predicate(testSuite))
-95:             testSuite->RunIf(predicate, testResults);
-96:         testSuite = testSuite->m_next;
-97:     }
-98: }
-99:
-100: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
-101: {
-102:     int numberOfTestSuites = 0;
-103:     TestSuiteInfo* testSuite = GetHead();
-104:     while (testSuite != nullptr)
-105:     {
-106:         if (predicate(testSuite))
-107:             ++numberOfTestSuites;
-108:         testSuite = testSuite->m_next;
-109:     }
-110:     return numberOfTestSuites;
-111: }
-112:
-113: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
-114: {
-115:     int numberOfTestFixtures = 0;
-116:     TestSuiteInfo* testSuite = GetHead();
-117:     while (testSuite != nullptr)
-118:     {
-119:         if (predicate(testSuite))
-120:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
-121:         testSuite = testSuite->m_next;
-122:     }
-123:     return numberOfTestFixtures;
-124: }
-125:
-126: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
-127: {
-128:     int numberOfTests = 0;
-129:     TestSuiteInfo* testSuite = GetHead();
-130:     while (testSuite != nullptr)
-131:     {
-132:         if (predicate(testSuite))
-133:             numberOfTests += testSuite->CountTestsIf(predicate);
-134:         testSuite = testSuite->m_next;
-135:     }
-136:     return numberOfTests;
-137: }
-138:
-139: } // namespace unittest
+57: class TestRegistry
+58: {
+59: private:
+60:     friend class TestRegistrar;
+61:     /// @brief Pointer to first test suite in the list
+62:     TestSuiteInfo* m_head;
+63:     /// @brief Pointer to last test suite in the list
+64:     TestSuiteInfo* m_tail;
+65: 
+66: public:
+67:     TestRegistry();
+68:     TestRegistry(const TestRegistry&) = delete;
+69:     TestRegistry(TestRegistry&&) = delete;
+70:     virtual ~TestRegistry();
+71: 
+72:     TestRegistry& operator = (const TestRegistry&) = delete;
+73:     TestRegistry& operator = (TestRegistry&&) = delete;
+74: 
+75:     /// <summary>
+76:     /// Returns a pointer to the first test suite in the list
+77:     /// </summary>
+78:     /// <returns>Pointer to the first test suite in the list</returns>
+79:     TestSuiteInfo* Head() const { return m_head; }
+80: 
+81:     template <typename Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+82:     template <typename Predicate> int CountSuitesIf(Predicate predicate);
+83:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
+84:     template <typename Predicate> int CountTestsIf(Predicate predicate);
+85: 
+86:     static TestRegistry& GetTestRegistry();
+87: 
+88: private:
+89:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
+90:     void AddSuite(TestSuiteInfo* testSuite);
+91: };
+92: 
+93: /// <summary>
+94: /// Test registrar
+95: ///
+96: /// This is a utility class to register a test to the registry, as part of a test declaration
+97: /// </summary>
+98: class TestRegistrar
+99: {
+100: public:
+101:     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
+102: };
+103: 
+104: template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+105: {
+106:     TestSuiteInfo* testSuite = Head();
+107: 
+108:     while (testSuite != nullptr)
+109:     {
+110:         if (predicate(testSuite))
+111:             testSuite->RunIf(predicate, testResults);
+112:         testSuite = testSuite->m_next;
+113:     }
+114: }
+115: 
+116: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
+117: {
+118:     int numberOfTestSuites = 0;
+119:     TestSuiteInfo* testSuite = Head();
+120:     while (testSuite != nullptr)
+121:     {
+122:         if (predicate(testSuite))
+123:             ++numberOfTestSuites;
+124:         testSuite = testSuite->m_next;
+125:     }
+126:     return numberOfTestSuites;
+127: }
+128: 
+129: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
+130: {
+131:     int numberOfTestFixtures = 0;
+132:     TestSuiteInfo* testSuite = Head();
+133:     while (testSuite != nullptr)
+134:     {
+135:         if (predicate(testSuite))
+136:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
+137:         testSuite = testSuite->m_next;
+138:     }
+139:     return numberOfTestFixtures;
+140: }
+141: 
+142: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
+143: {
+144:     int numberOfTests = 0;
+145:     TestSuiteInfo* testSuite = Head();
+146:     while (testSuite != nullptr)
+147:     {
+148:         if (predicate(testSuite))
+149:             numberOfTests += testSuite->CountTestsIf(predicate);
+150:         testSuite = testSuite->m_next;
+151:     }
+152:     return numberOfTests;
+153: }
+...
 ```
 
-- Line 49: We forward declare the `TestResults` class
-- Line 72: We replace the `Run()` method with a template version `RunIf()`, which takes a predicate, as well as a `TestResults` reference
-- Line 73: We replace then `CountSuites()` method with a template version `CountSuitesIf()`
-- Line 74: We replace then `CountFixtures()` method with a template version `CountFixturesIf()`
-- Line 75: We replace then `CountTests()` method with a template version `CountTestsIf()`
-- Line 88-98: We implement the `RunIf()` template method.
+- Line 81: We replace the `Run()` method with a template version `RunIf()`, which takes a predicate, as well as a `TestResults` reference
+- Line 82: We replace then `CountSuites()` method with a template version `CountSuitesIf()`
+- Line 83: We replace then `CountFixtures()` method with a template version `CountFixturesIf()`
+- Line 84: We replace then `CountTests()` method with a template version `CountTestsIf()`
+- Line 104-114: We implement the `RunIf()` template method.
 Note that we use the `RunIf()` method on the test suite. We'll need to implement this
-- Line 100-111: We implement the `CountSuitesIf()` template method
-- Line 113-124: We implement the `CountFixturesIf()` template method.
+- Line 116-127: We implement the `CountSuitesIf()` template method
+- Line 129-140: We implement the `CountFixturesIf()` template method.
 Note that we use the `CountFixturesIf()` method on the test suite. We'll need to implement this
-- Line 126-137: We implement the `CountTestsIf()` template method.
+- Line 142-153: We implement the `CountTestsIf()` template method.
 Note that we use the `CountTestsIf()` method on the test suite. We'll need to implement this
 
-### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTREGISTRYCPP}
+### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTREGISTRYCPP}
 
 We'll also need to update the `TestRegistry` implementation.
 
@@ -4861,103 +4987,132 @@ Update the file `code/libraries/unittest/src/TestRegistry.cpp`
 File: code/libraries/unittest/src/TestRegistry.cpp
 ...
 40: #include <unittest/TestRegistry.h>
-41:
+41: 
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
-44:
-45: using namespace baremetal;
-46:
-47: LOG_MODULE("TestRegistry");
-48:
-49: namespace unittest {
-50:
-51: const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
-52: const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
-53:
-54: TestRegistry& TestRegistry::GetTestRegistry()
-55: {
-56:     static TestRegistry s_registry;
-57:     return s_registry;
-58: }
-59:
-60: TestRegistry::TestRegistry()
-61:     : m_head{}
-62:     , m_tail{}
-63: {
+44: #include <unittest/TestInfo.h>
+45: 
+46: /// @file
+47: /// Test registry implementation
+48: 
+49: using namespace baremetal;
+50: 
+51: /// @brief Define log name
+52: LOG_MODULE("TestRegistry");
+53: 
+54: namespace unittest {
+55: 
+56: /// <summary>
+57: /// Returns the test registry (singleton)
+58: /// </summary>
+59: /// <returns>Test registry reference</returns>
+60: TestRegistry& TestRegistry::GetTestRegistry()
+61: {
+62:     static TestRegistry s_registry;
+63:     return s_registry;
 64: }
-65:
-66: TestRegistry::~TestRegistry()
-67: {
-68:     TestSuiteInfo *testSuite = m_head;
-69:     while (testSuite != nullptr)
-70:     {
-71:         TestSuiteInfo *currentSuite = testSuite;
-72:         testSuite = testSuite->m_next;
-73:         delete currentSuite;
-74:     }
-75: }
-76:
-77: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
-78: {
-79:     TestSuiteInfo *testSuite = m_head;
-80:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
-81:         testSuite = testSuite->m_next;
-82:     if (testSuite == nullptr)
-83:     {
-84: #ifdef DEBUG_REGISTRY
-85:         LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
-86: #endif
-87:         testSuite = new TestSuiteInfo(suiteName);
-88:         AddSuite(testSuite);
-89:     }
-90:     else
-91:     {
-92: #ifdef DEBUG_REGISTRY
-93:         LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
-94: #endif
-95:     }
-96:     return testSuite;
-97: }
-98:
-99: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
-100: {
-101:     if (m_tail == nullptr)
+65: 
+66: /// <summary>
+67: /// Constructor
+68: /// </summary>
+69: TestRegistry::TestRegistry()
+70:     : m_head{}
+71:     , m_tail{}
+72: {
+73: }
+74: 
+75: /// <summary>
+76: /// Destructor
+77: ///
+78: /// Cleans up all registered test suites, test fixtures and tests
+79: /// </summary>
+80: TestRegistry::~TestRegistry()
+81: {
+82:     TestSuiteInfo *testSuite = m_head;
+83:     while (testSuite != nullptr)
+84:     {
+85:         TestSuiteInfo *currentSuite = testSuite;
+86:         testSuite = testSuite->m_next;
+87:         delete currentSuite;
+88:     }
+89: }
+90: 
+91: /// <summary>
+92: /// Find a test suite with specified name, register a new one if not found
+93: /// </summary>
+94: /// <param name="suiteName">Test suite name to search for</param>
+95: /// <returns>Found or created test suite</returns>
+96: TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
+97: {
+98:     TestSuiteInfo *testSuite = m_head;
+99:     while ((testSuite != nullptr) && (testSuite->Name() != suiteName))
+100:         testSuite = testSuite->m_next;
+101:     if (testSuite == nullptr)
 102:     {
-103:         assert(m_head == nullptr);
-104:         m_head = testSuite;
-105:         m_tail = testSuite;
-106:     }
-107:     else
-108:     {
-109:         m_tail->m_next = testSuite;
-110:         m_tail = testSuite;
-111:     }
-112: }
-113:
-114: TestSuiteInfo *TestRegistry::GetHead() const
-115: {
-116:     return m_head;
-117: }
-118:
-119: TestRegistrar::TestRegistrar(TestRegistry &registry, TestBase *test)
-120: {
-121: #ifdef DEBUG_REGISTRY
-122:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
-123:         test->Details().TestName().c_str(),
-124:         (test->Details().FixtureName().empty() ? TestRegistry::DefaultFixtureName : test->Details().FixtureName().c_str()),
-125:         (test->Details().SuiteName().empty() ? TestRegistry::DefaultSuiteName : test->Details().SuiteName().c_str()));
-126: #endif
-127:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(test->Details().SuiteName());
-128:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(test->Details().FixtureName());
-129:     testFixture->AddTest(test);
-130: }
-131:
-132: } // namespace unittest
+103: #ifdef DEBUG_REGISTRY
+104:         LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
+105: #endif
+106:         testSuite = new TestSuiteInfo(suiteName);
+107:         AddSuite(testSuite);
+108:     }
+109:     else
+110:     {
+111: #ifdef DEBUG_REGISTRY
+112:         LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
+113: #endif
+114:     }
+115:     return testSuite;
+116: }
+117: 
+118: /// <summary>
+119: /// Add a test suite
+120: /// </summary>
+121: /// <param name="testSuite">Test suite to add</param>
+122: void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
+123: {
+124:     if (m_tail == nullptr)
+125:     {
+126:         assert(m_head == nullptr);
+127:         m_head = testSuite;
+128:         m_tail = testSuite;
+129:     }
+130:     else
+131:     {
+132:         m_tail->m_next = testSuite;
+133:         m_tail = testSuite;
+134:     }
+135: }
+136: 
+137: /// <summary>
+138: /// Constructor
+139: ///
+140: /// Finds or registers the test suite specified in the test details of the test.
+141: /// Finds or registers the test fixture specified in the test details of the test.
+142: /// Adds the test to the fixture found or created.
+143: /// </summary>
+144: /// <param name="registry">Test registry</param>
+145: /// <param name="testInstance">Test instance to link to</param>
+146: /// <param name="details">Test details</param>
+147: TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
+148: {
+149: #ifdef DEBUG_REGISTRY
+150:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
+151:         details.TestName().c_str(),
+152:         (details.FixtureName().c_str()),
+153:         (details.SuiteName().c_str()));
+154: #endif
+155:     TestSuiteInfo   *testSuite   = registry.GetTestSuite(details.SuiteName());
+156:     TestFixtureInfo *testFixture = testSuite->GetTestFixture(details.FixtureName());
+157:     TestInfo        *test = new TestInfo(testInstance, details);
+158:     testFixture->AddTest(test);
+159: }
+160: 
+161: } // namespace unittest
 ```
 
-- Line 116: We remove the implementation for the methods `Run()`, `CountSuites()`, `CountFixtures()` and `CountTests()`.
+- Line 91: We remove the implementation for the methods `Run()`, `CountSuites()`, `CountFixtures()` and `CountTests()`.
 
-### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTSUITEINFOH}
+### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTSUITEINFOH}
 
 We also need to update the `TestSuiteInfo` class.
 
@@ -4966,104 +5121,129 @@ Update the file `code/libraries/unittest/include/unittest/TestSuiteInfo.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 ...
-42: #include <unittest/TestFixtureInfo.h>
-43: #include <unittest/TestResults.h>
-44:
-45: namespace unittest
-46: {
-47:
-48: class TestBase;
-49: class TestFixtureInfo;
-50:
-51: class TestSuiteInfo
-52: {
-53: private:
-54:     friend class TestRegistry;
-55:     TestFixtureInfo* m_head;
-56:     TestFixtureInfo* m_tail;
-57:     TestSuiteInfo* m_next;
-58:     baremetal::string m_suiteName;
-59:
-60: public:
-61:     TestSuiteInfo() = delete;
-62:     TestSuiteInfo(const TestSuiteInfo&) = delete;
-63:     TestSuiteInfo(TestSuiteInfo&&) = delete;
-64:     explicit TestSuiteInfo(const baremetal::string& suiteName);
-65:     virtual ~TestSuiteInfo();
-66:
-67:     TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
-68:     TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
-69:
-70:     TestFixtureInfo* GetHead() const;
-71:
-72:     const baremetal::string& Name() const { return m_suiteName; }
-73:
-74:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-75:
-76:     int CountFixtures();
-77:     int CountTests();
-78:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
-79:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-80:
-81:     void AddFixture(TestFixtureInfo* testFixture);
-82:     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
-83: };
-84:
-85: template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)
-86: {
-87:     testResults.OnTestSuiteStart(this);
-88:
-89:     TestFixtureInfo* testFixture = GetHead();
-90:     while (testFixture != nullptr)
-91:     {
-92:         if (predicate(testFixture))
-93:             testFixture->RunIf(predicate, testResults);
-94:         testFixture = testFixture->m_next;
-95:     }
-96:
-97:     testResults.OnTestSuiteFinish(this);
-98: }
-99:
-100: template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predicate)
-101: {
-102:     int numberOfTestFixtures = 0;
-103:     TestFixtureInfo* testFixture = GetHead();
-104:     while (testFixture != nullptr)
-105:     {
-106:         if (predicate(testFixture))
-107:             numberOfTestFixtures++;
-108:         testFixture = testFixture->m_next;
-109:     }
-110:     return numberOfTestFixtures;
-111: }
-112:
-113: template <typename Predicate> int TestSuiteInfo::CountTestsIf(Predicate predicate)
-114: {
-115:     int numberOfTests = 0;
-116:     TestFixtureInfo* testFixture = GetHead();
+58: class TestSuiteInfo
+59: {
+60: private:
+61:     friend class TestRegistry;
+62:     friend class TestRegistrar;
+63:     /// @brief Pointer to first test fixture in the list
+64:     TestFixtureInfo* m_head;
+65:     /// @brief Pointer to last test fixture in the list
+66:     TestFixtureInfo* m_tail;
+67:     /// @brief Pointer to next test suite info in the list
+68:     TestSuiteInfo* m_next;
+69:     /// @brief Test suite name
+70:     baremetal::string m_suiteName;
+71: 
+72: public:
+73:     TestSuiteInfo() = delete;
+74:     TestSuiteInfo(const TestSuiteInfo&) = delete;
+75:     TestSuiteInfo(TestSuiteInfo&&) = delete;
+76:     explicit TestSuiteInfo(const baremetal::string& suiteName);
+77:     virtual ~TestSuiteInfo();
+78: 
+79:     TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
+80:     TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
+81: 
+82:     /// <summary>
+83:     /// Returns the pointer to the first test fixture in the list for this test suite
+84:     /// </summary>
+85:     /// <returns>Pointer to the first test fixture in the list for this test suite</returns>
+86:     TestFixtureInfo* Head() const { return m_head; }
+87: 
+88:     /// <summary>
+89:     /// Returns the test suite name
+90:     /// </summary>
+91:     /// <returns>Test suite name</returns>
+92:     const baremetal::string& Name() const { return m_suiteName; }
+93: 
+94:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+95: 
+96:     int CountFixtures();
+97:     int CountTests();
+98:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
+99:     template <typename Predicate> int CountTestsIf(Predicate predicate);
+100: 
+101: private:
+102:     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
+103:     void AddFixture(TestFixtureInfo* testFixture);
+104: };
+105: 
+106: /// <summary>
+107: /// Run tests in test suite using the selection predicate, updating the test results
+108: /// </summary>
+109: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+110: /// <param name="predicate">Test selection predicate</param>
+111: /// <param name="testResults">Test results to use and update</param>
+112: template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+113: {
+114:     testResults.OnTestSuiteStart(this);
+115: 
+116:     TestFixtureInfo* testFixture = Head();
 117:     while (testFixture != nullptr)
 118:     {
 119:         if (predicate(testFixture))
-120:             numberOfTests += testFixture->CountTestsIf(predicate);
+120:             testFixture->RunIf(predicate, testResults);
 121:         testFixture = testFixture->m_next;
 122:     }
-123:     return numberOfTests;
-124: }
-125:
-126: } // namespace unittest
+123: 
+124:     testResults.OnTestSuiteFinish(this);
+125: }
+126: 
+127: /// <summary>
+128: /// Count the number of tests fixtures in the test suite selected by the predicate
+129: /// </summary>
+130: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+131: /// <param name="predicate">Test selection predicate</param>
+132: /// <returns>Number of test fixtures in the test suite selected by the predicate</returns>
+133: template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predicate)
+134: {
+135:     int numberOfTestFixtures = 0;
+136:     TestFixtureInfo* testFixture = Head();
+137:     while (testFixture != nullptr)
+138:     {
+139:         if (predicate(testFixture))
+140:             numberOfTestFixtures++;
+141:         testFixture = testFixture->m_next;
+142:     }
+143:     return numberOfTestFixtures;
+144: }
+145: 
+146: /// <summary>
+147: /// Count the number of tests in the test suite selected by the predicate
+148: /// </summary>
+149: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+150: /// <param name="predicate">Test selection predicate</param>
+151: /// <returns>Number of tests in the test suite selected by the predicate</returns>
+152: template <typename Predicate> int TestSuiteInfo::CountTestsIf(Predicate predicate)
+153: {
+154:     int numberOfTests = 0;
+155:     TestFixtureInfo* testFixture = Head();
+156:     while (testFixture != nullptr)
+157:     {
+158:         if (predicate(testFixture))
+159:             numberOfTests += testFixture->CountTestsIf(predicate);
+160:         testFixture = testFixture->m_next;
+161:     }
+162:     return numberOfTests;
+163: }
+164: 
+165: } // namespace unittest
 ```
 
-- Line 43: We include the header for the `TestResults` class as we will need to use it
-- Line 74: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
-- Line 78: We add a template method `CountFixturesIf()`
-- Line 79: We add a template method `CountTestsIf()`
-- Line 85-98: We implement the `RunIf()` template method.
+- Line 62: We make `TestRegistrar` a friend class
+- Line 94: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
+- Line 98: We add a template method `CountFixturesIf()`
+- Line 99: We add a template method `CountTestsIf()`
+- Line 102: We make the method `GetTestFixture` private, this is why `TestRegistrar` has to become a friend class
+- Line 103: We also make the method `AddFixture` private
+- Line 112-125: We implement the `RunIf()` template method.
 Note that we use the method `RunIf()` in the `TestFixtureInfo` class. We'll need to implement it
-- Line 100-111: We implement the `CountFixturesIf()` template method
-- Line 113-124: We implement the `CountTestsIf()` template method.
+- Line 133-144: We implement the `CountFixturesIf()` template method
+- Line 152-163: We implement the `CountTestsIf()` template method.
 Note that we use the method `CountTestsIf()` in the `TestFixtureInfo` class. We'll need to implement it
 
-### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTSUITEINFOCPP}
+### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTSUITEINFOCPP}
 
 We'll also need to update the `TestSuiteInfo` implementation.
 
@@ -5073,111 +5253,133 @@ Update the file `code/libraries/unittest/src/TestSuiteInfo.cpp`
 File: code/libraries/unittest/src/TestSuiteInfo.cpp
 ...
 40: #include <unittest/TestSuiteInfo.h>
-41:
+41: 
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <unittest/TestRegistry.h>
-45:
-46: using namespace baremetal;
-47:
-48: namespace unittest {
-49:
-50: LOG_MODULE("TestSuiteInfo");
-51:
-52: TestSuiteInfo::TestSuiteInfo(const string &suiteName)
-53:     : m_head{}
-54:     , m_tail{}
-55:     , m_next{}
-56:     , m_suiteName{suiteName}
-57: {
-58: }
-59:
-60: TestSuiteInfo::~TestSuiteInfo()
-61: {
-62:     TestFixtureInfo *testFixture = m_head;
-63:     while (testFixture != nullptr)
-64:     {
-65:         TestFixtureInfo *currentFixture = testFixture;
-66:         testFixture                     = testFixture->m_next;
-67:         delete currentFixture;
-68:     }
-69: }
-70:
-71: TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
-72: {
-73:     TestFixtureInfo *testFixture = m_head;
-74:     while ((testFixture != nullptr) && (testFixture->Name() != fixtureName))
-75:         testFixture = testFixture->m_next;
-76:     if (testFixture == nullptr)
+45: 
+46: /// @file
+47: /// Test suite administration implementation
+48: 
+49: using namespace baremetal;
+50: 
+51: namespace unittest {
+52: 
+53: /// @brief Define log name
+54: LOG_MODULE("TestSuiteInfo");
+55: 
+56: /// <summary>
+57: /// Constructor
+58: /// </summary>
+59: /// <param name="suiteName">Test suite name</param>
+60: TestSuiteInfo::TestSuiteInfo(const string &suiteName)
+61:     : m_head{}
+62:     , m_tail{}
+63:     , m_next{}
+64:     , m_suiteName{suiteName}
+65: {
+66: }
+67: 
+68: /// <summary>
+69: /// Destructor
+70: ///
+71: /// Cleans up all registered tests and test fixtures for this test suite
+72: /// </summary>
+73: TestSuiteInfo::~TestSuiteInfo()
+74: {
+75:     TestFixtureInfo *testFixture = m_head;
+76:     while (testFixture != nullptr)
 77:     {
-78: #ifdef DEBUG_REGISTRY
-79:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
-80: #endif
-81:         testFixture = new TestFixtureInfo(fixtureName);
-82:         AddFixture(testFixture);
-83:     }
-84:     else
-85:     {
-86: #ifdef DEBUG_REGISTRY
-87:         LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
-88: #endif
-89:     }
-90:     return testFixture;
-91: }
-92:
-93: void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
-94: {
-95:     if (m_tail == nullptr)
-96:     {
-97:         assert(m_head == nullptr);
-98:         m_head = testFixture;
-99:         m_tail = testFixture;
-100:     }
-101:     else
-102:     {
-103:         m_tail->m_next = testFixture;
-104:         m_tail         = testFixture;
-105:     }
-106: }
-107:
-108: TestFixtureInfo *TestSuiteInfo::GetHead() const
-109: {
-110:     return m_head;
-111: }
-112:
-113: int TestSuiteInfo::CountFixtures()
-114: {
-115:     int              numberOfTestFixtures = 0;
-116:     TestFixtureInfo *testFixture          = m_head;
-117:     while (testFixture != nullptr)
+78:         TestFixtureInfo *currentFixture = testFixture;
+79:         testFixture                     = testFixture->m_next;
+80:         delete currentFixture;
+81:     }
+82: }
+83: 
+84: /// <summary>
+85: /// Find a test fixture with specified name, register a new one if not found
+86: /// </summary>
+87: /// <param name="fixtureName">Test fixture name to search for</param>
+88: /// <returns>Found or created test fixture</returns>
+89: TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
+90: {
+91:     TestFixtureInfo *testFixture = m_head;
+92:     while ((testFixture != nullptr) && (testFixture->Name() != fixtureName))
+93:         testFixture = testFixture->m_next;
+94:     if (testFixture == nullptr)
+95:     {
+96: #ifdef DEBUG_REGISTRY
+97:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
+98: #endif
+99:         testFixture = new TestFixtureInfo(fixtureName);
+100:         AddFixture(testFixture);
+101:     }
+102:     else
+103:     {
+104: #ifdef DEBUG_REGISTRY
+105:         LOG_DEBUG("Fixture %s found", fixtureName.c_str());
+106: #endif
+107:     }
+108:     return testFixture;
+109: }
+110: 
+111: /// <summary>
+112: /// Add a test fixture
+113: /// </summary>
+114: /// <param name="testFixture">Test fixture to add</param>
+115: void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
+116: {
+117:     if (m_tail == nullptr)
 118:     {
-119:         ++numberOfTestFixtures;
-120:         testFixture = testFixture->m_next;
-121:     }
-122:     return numberOfTestFixtures;
-123: }
-124:
-125: int TestSuiteInfo::CountTests()
-126: {
-127:     int              numberOfTests = 0;
-128:     TestFixtureInfo *testFixture   = m_head;
-129:     while (testFixture != nullptr)
-130:     {
-131:         numberOfTests += testFixture->CountTests();
-132:         testFixture = testFixture->m_next;
-133:     }
-134:     return numberOfTests;
-135: }
-136:
-137: } // namespace unittest
+119:         assert(m_head == nullptr);
+120:         m_head = testFixture;
+121:         m_tail = testFixture;
+122:     }
+123:     else
+124:     {
+125:         m_tail->m_next = testFixture;
+126:         m_tail         = testFixture;
+127:     }
+128: }
+129: 
+130: /// <summary>
+131: /// Count the number of test fixtures in the test suite
+132: /// </summary>
+133: /// <returns>Number of test fixtures in the test suite</returns>
+134: int TestSuiteInfo::CountFixtures()
+135: {
+136:     int numberOfTestFixtures = 0;
+137:     TestFixtureInfo *testFixture = Head();
+138:     while (testFixture != nullptr)
+139:     {
+140:         ++numberOfTestFixtures;
+141:         testFixture = testFixture->m_next;
+142:     }
+143:     return numberOfTestFixtures;
+144: }
+145: 
+146: /// <summary>
+147: /// Count the number of tests in the test suite
+148: /// </summary>
+149: /// <returns>Number of tests in the test suite</returns>
+150: int TestSuiteInfo::CountTests()
+151: {
+152:     int numberOfTests = 0;
+153:     TestFixtureInfo *testFixture = Head();
+154:     while (testFixture != nullptr)
+155:     {
+156:         numberOfTests += testFixture->CountTests();
+157:         testFixture = testFixture->m_next;
+158:     }
+159:     return numberOfTests;
+160: }
+161: 
+162: } // namespace unittest
 ```
 
-- Line 44: We include the header for `TestRegistry` so we can use the default test fixture and test suite names
-- Line 79: We using the default test fixture name instead of "-"
-- Line 87: We using the default test fixture name instead of "-"
-- Line 112: We remove the implementation for the method `Run()`
+- Line 130: We remove the implementation for the method `Run()`
 
-### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTFIXTUREINFOH}
+### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTFIXTUREINFOH}
 
 We also need to update the `TestFixtureInfo` class.
 
@@ -5186,84 +5388,102 @@ Update the file `code/libraries/unittest/include/unittest/TestFixtureInfo.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 ...
-42: #include <unittest/TestBase.h>
-43: #include <unittest/TestResults.h>
-44:
-45: namespace unittest
-46: {
-47:
-48: class TestBase;
-49:
-50: class TestFixtureInfo
-51: {
-52: private:
-53:     friend class TestSuiteInfo;
-54:     TestBase* m_head;
-55:     TestBase* m_tail;
-56:     TestFixtureInfo* m_next;
-57:     baremetal::string m_fixtureName;
-58:
-59: public:
-60:     TestFixtureInfo() = delete;
-61:     TestFixtureInfo(const TestFixtureInfo&) = delete;
-62:     TestFixtureInfo(TestFixtureInfo&&) = delete;
-63:     explicit TestFixtureInfo(const baremetal::string& fixtureName);
-64:     virtual ~TestFixtureInfo();
-65:
-66:     TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
-67:     TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
-68:
-69:     TestBase* GetHead() const;
-70:
-71:     const baremetal::string& Name() const { return m_fixtureName; }
-72:
-73:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-74:
-75:     int CountTests();
-76:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-77:
-78:     void AddTest(TestBase* test);
-79: };
-80:
-81: template <class Predicate> void TestFixtureInfo::RunIf(const Predicate& predicate, TestResults& testResults)
-82: {
-83:     testResults.OnTestFixtureStart(this);
-84:
-85:     TestBase* test = this->GetHead();
-86:     while (test != nullptr)
-87:     {
-88:         if (predicate(test))
-89:             test->Run(testResults);
-90:         test = test->m_next;
-91:     }
-92:
-93:     testResults.OnTestFixtureFinish(this);
-94: }
-95:
-96: template <typename Predicate> int TestFixtureInfo::CountTestsIf(Predicate predicate)
-97: {
-98:     int numberOfTests = 0;
-99:     TestBase* test = this->GetHead();
-100:     while (test != nullptr)
-101:     {
-102:         if (predicate(test))
-103:             numberOfTests++;
-104:         test = test->m_next;
-105:     }
-106:     return numberOfTests;
-107: }
-108:
-109: } // namespace unittest
+58: class TestFixtureInfo
+59: {
+60: private:
+61:     friend class TestSuiteInfo;
+62:     friend class TestRegistrar;
+63:     /// @brief Pointer to first test in the list
+64:     TestInfo* m_head;
+65:     /// @brief Pointer to last test in the list
+66:     TestInfo* m_tail;
+67:     /// @brief Pointer to next test fixture info in the list
+68:     TestFixtureInfo* m_next;
+69:     /// @brief Test fixture name
+70:     baremetal::string m_fixtureName;
+71: 
+72: public:
+73:     TestFixtureInfo() = delete;
+74:     TestFixtureInfo(const TestFixtureInfo&) = delete;
+75:     TestFixtureInfo(TestFixtureInfo&&) = delete;
+76:     explicit TestFixtureInfo(const baremetal::string& fixtureName);
+77:     virtual ~TestFixtureInfo();
+78: 
+79:     TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
+80:     TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
+81: 
+82:     /// <summary>
+83:     /// Returns the pointer to the first test in the list for this test fixture
+84:     /// </summary>
+85:     /// <returns>Pointer to the first test in the list for this test fixture</returns>
+86:     TestInfo* Head() const {  return m_head; }
+87: 
+88:     /// <summary>
+89:     /// Returns the test fixture name
+90:     /// </summary>
+91:     /// <returns>Test fixture name</returns>
+92:     const baremetal::string& Name() const { return m_fixtureName; }
+93: 
+94:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+95: 
+96:     int CountTests();
+97:     template <typename Predicate> int CountTestsIf(Predicate predicate);
+98: 
+99: private:
+100:     void AddTest(TestInfo* test);
+101: };
+102: 
+103: /// <summary>
+104: /// Run tests in test fixture using the selection predicate, updating the test results
+105: /// </summary>
+106: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+107: /// <param name="predicate">Test selection predicate</param>
+108: /// <param name="testResults">Test results to use and update</param>
+109: template <class Predicate> void TestFixtureInfo::RunIf(const Predicate& predicate, TestResults& testResults)
+110: {
+111:     testResults.OnTestFixtureStart(this);
+112: 
+113:     TestInfo* test = this->Head();
+114:     while (test != nullptr)
+115:     {
+116:         if (predicate(test))
+117:             test->Run(testResults);
+118:         test = test->m_next;
+119:     }
+120: 
+121:     testResults.OnTestFixtureFinish(this);
+122: }
+123: 
+124: /// <summary>
+125: /// Count the number of tests in the test fixture selected by the predicate
+126: /// </summary>
+127: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+128: /// <param name="predicate">Test selection predicate</param>
+129: /// <returns>Number of tests in the test fixture selected by the predicate</returns>
+130: template <typename Predicate> int TestFixtureInfo::CountTestsIf(Predicate predicate)
+131: {
+132:     int numberOfTests = 0;
+133:     TestInfo* test = this->Head();
+134:     while (test != nullptr)
+135:     {
+136:         if (predicate(test))
+137:             numberOfTests++;
+138:         test = test->m_next;
+139:     }
+140:     return numberOfTests;
+141: }
+142: 
+143: } // namespace unittest
 ```
 
-- Line 43: We include the header for `TestResults`
-- Line 73: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
-- Line 76: We add a template method `CountTestsIf()`
-- Line 81-94: We implement the `RunIf()` template method.
-Note that we call the method `Run()` on `TestBase` with a reference to the `TestResults` instance. This method needs to be added
-- Line 96-107: We implement the `CountTestsIf()` template method
+- Line 62: We make `TestRegistrar` a friend class
+- Line 94: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
+- Line 97: We add a template method `CountTestsIf()`
+- Line 100: We make the method `AddTest()` private. This is the reason `TestRegistrar` needs to become a friend class
+- Line 109-122: We implement the `RunIf()` template method
+- Line 130-141: We implement the `CountTestsIf()` template method
 
-### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTFIXTUREINFOCPP}
+### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTFIXTUREINFOCPP}
 
 We'll also need to update the `TestFixtureInfo` implementation.
 
@@ -5272,389 +5492,90 @@ Update the file `code/libraries/unittest/src/TestFixtureInfo.cpp`
 ```cpp
 File: code/libraries/unittest/src/TestFixtureInfo.cpp
 ...
-45: namespace unittest {
-46:
-47: TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
-48:     : m_head{}
-49:     , m_tail{}
-50:     , m_next{}
-51:     , m_fixtureName{ fixtureName }
-52: {
-53: }
-54:
-55: TestFixtureInfo::~TestFixtureInfo()
-56: {
-57:     TestBase* test = m_head;
-58:     while (test != nullptr)
-59:     {
-60:         TestBase* currentTest = test;
-61:         test = test->m_next;
-62:         delete currentTest;
-63:     }
-64: }
-65:
-66: void TestFixtureInfo::AddTest(TestBase* test)
-67: {
-68:     if (m_tail == nullptr)
-69:     {
-70:         assert(m_head == nullptr);
-71:         m_head = test;
-72:         m_tail = test;
-73:     }
-74:     else
-75:     {
-76:         m_tail->m_next = test;
-77:         m_tail = test;
-78:     }
-79: }
-80:
-81: TestBase* TestFixtureInfo::GetHead() const
-82: {
-83:     return m_head;
-84: }
-85:
-86: int TestFixtureInfo::CountTests()
-87: {
-88:     int numberOfTests = 0;
-89:     TestBase* test = m_head;
-90:     while (test != nullptr)
-91:     {
-92:         ++numberOfTests;
-93:         test = test->m_next;
-94:     }
-95:     return numberOfTests;
-96: }
-97:
-98: } // namespace unittest
-```
-
-- Line 86: We remove the implementation for the method `Run()`
-
-### TestBase.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTBASEH}
-
-We also need to update the `TestBase` class.
-
-Update the file `code/libraries/unittest/include/unittest/TestBase.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestBase.h
-...
-44: namespace unittest
-45: {
-46:
-47: class TestResults;
-48:
-49: class TestBase
-50: {
-51: private:
-52:     friend class TestFixtureInfo;
-53:     TestDetails const m_details;
-54:     TestBase* m_next;
-55:
-56: public:
-57:     TestBase();
-58:     TestBase(const TestBase&) = delete;
-59:     TestBase(TestBase&&) = delete;
-60:     explicit TestBase(
-61:         const baremetal::string& testName,
-62:         const baremetal::string& fixtureName = {},
-63:         const baremetal::string& suiteName = {},
-64:         const baremetal::string& fileName = {},
-65:         int lineNumber = {});
-66:     virtual ~TestBase();
-67:
-68:     TestBase& operator = (const TestBase&) = delete;
-69:     TestBase& operator = (TestBase&&) = delete;
-70:
-71:     const TestDetails& Details() const { return m_details; }
-72:
-73:     void Run(TestResults& testResults);
-74:     void Run();
-75:
-76:     virtual void RunImpl() const;
-77: };
-78:
-79: } // namespace unittest
-```
-
-- Line 47: We forward declare the `TestResults` class
-- Line 73: We add the `Run()` method taking a `TestResults` to fill when running the test
-
-### TestBase.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_TESTBASECPP}
-
-We'll also need to update the `TestBase` implementation.
-
-Update the file `code/libraries/unittest/src/TestBase.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestBase.cpp
-...
-40: #include <unittest/TestBase.h>
-41:
-42: #include <unittest/CurrentTest.h>
-43: #include <unittest/ExecuteTest.h>
-44: #include <unittest/TestResults.h>
-45:
+39: #include <unittest/TestFixtureInfo.h>
+40: 
+41: #include <baremetal/Assert.h>
+42: 
+43: /// @file
+44: /// Test fixture administration implementation
+45: 
 46: using namespace baremetal;
-47:
+47: 
 48: namespace unittest {
-49:
-50: TestBase::TestBase()
-51:     : m_details{}
-52:     , m_next{}
-53: {
-54: }
-55:
-56: TestBase::TestBase(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-57:     : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-58:     , m_next{}
+49: 
+50: /// <summary>
+51: /// Constructor
+52: /// </summary>
+53: /// <param name="fixtureName">Test fixture name</param>
+54: TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
+55:     : m_head{}
+56:     , m_tail{}
+57:     , m_next{}
+58:     , m_fixtureName{ fixtureName }
 59: {
 60: }
-61:
-62: TestBase::~TestBase()
-63: {
-64: }
-65:
-66: void TestBase::Run(TestResults& testResults)
-67: {
-68:     CurrentTest::Results() = &testResults;
-69:
-70:     testResults.OnTestStart(m_details);
-71:
-72:     Run();
-73:
-74:     testResults.OnTestFinish(m_details);
-75: }
-76:
-77: void TestBase::Run()
-78: {
-79:     ExecuteTest(*this, m_details);
-80: }
-81:
-82: void TestBase::RunImpl() const
-83: {
-84: }
-85:
-86: } // namespace unittest
+61: 
+62: /// <summary>
+63: /// Destructor
+64: ///
+65: /// Cleans up all registered tests for this test fixture
+66: /// </summary>
+67: TestFixtureInfo::~TestFixtureInfo()
+68: {
+69:     TestInfo* test = m_head;
+70:     while (test != nullptr)
+71:     {
+72:         TestInfo* currentTest = test;
+73:         test = test->m_next;
+74:         delete currentTest;
+75:     }
+76: }
+77: 
+78: /// <summary>
+79: /// Add a test to the list
+80: ///
+81: /// This method is called at static initialization time to register tests
+82: /// </summary>
+83: /// <param name="test">Test to register</param>
+84: void TestFixtureInfo::AddTest(TestInfo* test)
+85: {
+86:     if (m_tail == nullptr)
+87:     {
+88:         assert(m_head == nullptr);
+89:         m_head = test;
+90:         m_tail = test;
+91:     }
+92:     else
+93:     {
+94:         m_tail->m_next = test;
+95:         m_tail = test;
+96:     }
+97: }
+98: 
+99: /// <summary>
+100: /// Count the number of tests in the test fixture
+101: /// </summary>
+102: /// <returns>Number of tests in the test fixture</returns>
+103: int TestFixtureInfo::CountTests()
+104: {
+105:     int numberOfTests = 0;
+106:     TestInfo* test = Head();
+107:     while (test != nullptr)
+108:     {
+109:         ++numberOfTests;
+110:         test = test->m_next;
+111:     }
+112:     return numberOfTests;
+113: }
+114: 
+115: } // namespace unittest
 ```
 
-- Line 42: We include the header for `CurrentTest`, a set of utility functions which we'll need. We'll declare and define it next
-- Line 43: We include the header for `ExecuteTest`, a utility function which we'll need. We'll declare and define it next
-- Line 66-75: We implement the variant of the `Run()` method taking a `TestResults` instance.
-This will store a pointer the current `TestResults` instance using the utility function `CurrentTest::Results()`.
-This will be needed when we wish to actually perofrm test statements.
-- Line 79: We now use the `ExecuteTest` utility function to run the actual test. We'll get to that in a minute
+- Line 99: We remove the implementation for the method `Run()`
 
-### CurrentTest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_CURRENTTESTH}
+### ConsoleTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONSOLETESTREPORTERH}
 
-We will now declare the utility functions for `CurrentTest`. `CurrentTest` is actually a namespace inside the `unittest` namespace.
-
-Create the file `code/libraries/unittest/include/unittest/CurrentTest.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/CurrentTest.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : CurrentTest.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : CurrentTest
-9: //
-10: // Description : Current test info
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #pragma once
-41:
-42: namespace unittest
-43: {
-44:
-45: class TestResults;
-46: class TestDetails;
-47:
-48: namespace CurrentTest
-49: {
-50:     TestResults*& Results();
-51:     const TestDetails*& Details();
-52: }
-53:
-54: } // namespace unittest
-```
-
-- Line 50: We declare function name `Results() which used to store the current `TestResults` instance
-- Line 51: We declare function name `Details() which used to store the current `TestDetails` instance
-
-### CurrentTest.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_CURRENTTESTCPP}
-
-We'll implement the functions for for `CurrentTest`.
-
-Create the file `code/libraries/unittest/src/CurrentTest.cpp`
-
-```cpp
-File: code/libraries/unittest/src/CurrentTest.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : CurrentTest.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : CurrentTest
-9: //
-10: // Description : Current test info
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #include <unittest/CurrentTest.h>
-41:
-42: namespace unittest
-43: {
-44:
-45: TestResults *& CurrentTest::Results()
-46: {
-47:     static TestResults* testResults = nullptr;
-48:     return testResults;
-49: }
-50:
-51: const TestDetails *& CurrentTest::Details()
-52: {
-53:     static const TestDetails* testDetails = nullptr;
-54:     return testDetails;
-55: }
-56:
-57: } // namespace unittest
-```
-
-- Line 45-49: We implement the `Results()` method. It keeps a static pointer to a `TestResults` instance, and returns a reference to that pointer
-- Line 51-55: We implement the `Details()` method. It keeps a static pointer to a `TestDetails` instance, and returns a const reference to that pointer
-
-### ExecuteTest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_EXECUTETESTH}
-
-We will now declare the utility function `ExecuteTest`.
-
-Create the file `code/libraries/unittest/include/unittest/ExecuteTest.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/ExecuteTest.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : ExecuteTest.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : ExecuteTest
-9: //
-10: // Description : Test executor
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #pragma once
-41:
-42: #include <unittest/CurrentTest.h>
-43: #include <unittest/TestDetails.h>
-44:
-45: namespace unittest
-46: {
-47:
-48: template<typename T>
-49: void ExecuteTest(T& testObject, const TestDetails& details)
-50: {
-51:     CurrentTest::Details() = &details;
-52:
-53:     testObject.RunImpl();
-54: }
-55:
-56: } // namespace unittest
-```
-
-Line 48-54: We define the template function `ExecuteTest`.
-This function is a template function to allow both `TestBase` and `TestFixture` instances to be run.
-The function stores the current test details using `CurrentTest::Details(), and then call `RunImpl()` on the test object
-
-### ConsoleTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_CONSOLETESTREPORTERH}
-
-We still need to instance the abstract interface `ITestReporter` to actuall report information.
+We still need to implement the abstract interface `ITestReporter` to actually report information.
 We'll create a console test reporter class `ConsoleTestReporter` for this purpose, which leans on the `baremetal::Console` class.
 
 Create the file `code/libraries/unittest/include/unittest/ConsoleTestReporter.h`
@@ -5699,61 +5620,74 @@ File: code/libraries/unittest/include/unittest/ConsoleTestReporter.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <unittest/ITestReporter.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class ConsoleTestReporter : public ITestReporter
-48: {
-49: public:
-50:     static const baremetal::string TestRunSeparator;
-51:     static const baremetal::string TestFixtureSeparator;
-52:     static const baremetal::string TestSuiteSeparator;
-53:     static const baremetal::string TestSuccessSeparator;
-54:     static const baremetal::string TestFailSeparator;
-55:
-56:     ConsoleTestReporter();
-57:
-58: private:
-59:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-60:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-61:     void ReportTestRunSummary(const TestResults& results) override;
-62:     void ReportTestRunOverview(const TestResults& results) override;
-63:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-64:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-65:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
-66:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
-67:     void ReportTestStart(const TestDetails& details) override;
-68:     void ReportTestFinish(const TestDetails& details, bool success) override;
-69:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
-70:
-71:     baremetal::string TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
-72:     baremetal::string TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
-73:     baremetal::string TestSuiteStartMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
-74:     baremetal::string TestSuiteFinishMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
-75:     baremetal::string TestFixtureStartMessage(const baremetal::string& fixtureName, int numberOfTests);
-76:     baremetal::string TestFixtureFinishMessage(const baremetal::string& fixtureName, int numberOfTests);
-77:     baremetal::string TestFailureMessage(const TestDetails& details, const baremetal::string& failure);
-78:     baremetal::string TestFinishMessage(const TestDetails& test, bool success);
-79:     baremetal::string TestRunSummaryMessage(const TestResults& results);
-80:     baremetal::string TestRunOverviewMessage(const TestResults& results);
-81:     baremetal::string TestName(const baremetal::string& suiteName, const baremetal::string& fixtureName, const baremetal::string& testName);
-82:
-83: };
-84:
-85: } // namespace unittest
+43: 
+44: /// @file
+45: /// Console test reporter
+46: ///
+47: /// Prints test information to the console, using color.
+48: /// Uses DeferredTestReporter to save failures so they can be printed after running the test, as an overview
+49: 
+50: namespace unittest
+51: {
+52: 
+53: /// <summary>
+54: /// Console test reporter
+55: /// </summary>
+56: class ConsoleTestReporter
+57:     : public ITestReporter
+58: {
+59: public:
+60:     /// @brief Separator for complete test run
+61:     static const baremetal::string TestRunSeparator;
+62:     /// @brief Separator for test fixture
+63:     static const baremetal::string TestFixtureSeparator;
+64:     /// @brief Separator for test suite
+65:     static const baremetal::string TestSuiteSeparator;
+66:     /// @brief Indicator for successful test
+67:     static const baremetal::string TestSuccessSeparator;
+68:     /// @brief Indicator for failed test
+69:     static const baremetal::string TestFailSeparator;
+70: 
+71:     ConsoleTestReporter();
+72: 
+73: private:
+74:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+75:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+76:     void ReportTestRunSummary(const TestResults& results) override;
+77:     void ReportTestRunOverview(const TestResults& results) override;
+78:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+79:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+80:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
+81:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
+82:     void ReportTestStart(const TestDetails& details) override;
+83:     void ReportTestFinish(const TestDetails& details, bool success) override;
+84:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
+85: 
+86:     baremetal::string TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
+87:     baremetal::string TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
+88:     baremetal::string TestSuiteStartMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
+89:     baremetal::string TestSuiteFinishMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
+90:     baremetal::string TestFixtureStartMessage(const baremetal::string& fixtureName, int numberOfTests);
+91:     baremetal::string TestFixtureFinishMessage(const baremetal::string& fixtureName, int numberOfTests);
+92:     baremetal::string TestFailureMessage(const TestDetails& details, const baremetal::string& failure);
+93:     baremetal::string TestFinishMessage(const TestDetails& test, bool success);
+94:     baremetal::string TestRunSummaryMessage(const TestResults& results);
+95:     baremetal::string TestRunOverviewMessage(const TestResults& results);
+96: };
+97: 
+98: } // namespace unittest
 ```
 
-- Line 50-54: We declare some statis constant strings to use as separators in our output
-- Line 56: We declare a default constructor
-- Line 59-69: We declare the overrides for the `ITestReporter` abstract interface
-- Line 71:81: We declare some utility functions to build strings for output
+- Line 61-69: We declare some static constant strings to use as separators in our output
+- Line 71: We declare a default constructor
+- Line 74-84: We declare the overrides for the `ITestReporter` abstract interface
+- Line 86-95: We declare some utility functions to build strings for output
 
-### ConsoleTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_CONSOLETESTREPORTERCPP}
+### ConsoleTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONSOLETESTREPORTERCPP}
 
 We'll implement the class `ConsoleTestReporter`.
 
@@ -5761,7 +5695,6 @@ Create the file `code/libraries/unittest/src/ConsoleTestReporter.cpp`
 
 ```cpp
 File: code/libraries/unittest/src/ConsoleTestReporter.cpp
-File: d:\Projects\baremetal.github\tutorial\17-unit-tests\code\libraries\unittest\src\ConsoleTestReporter.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -5800,307 +5733,416 @@ File: d:\Projects\baremetal.github\tutorial\17-unit-tests\code\libraries\unittes
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <unittest/ConsoleTestReporter.h>
-41:
+41: 
 42: #include <baremetal/Console.h>
 43: #include <baremetal/Format.h>
 44: #include <baremetal/Serialization.h>
 45: #include <unittest/TestDetails.h>
 46: #include <unittest/TestRegistry.h>
 47: #include <unittest/TestResults.h>
-48:
-49: using namespace baremetal;
-50:
-51: namespace unittest
-52: {
-53:
-54: const string ConsoleTestReporter::TestRunSeparator = baremetal::string("[===========]");
-55: const string ConsoleTestReporter::TestSuiteSeparator = baremetal::string("[   SUITE   ]");
-56: const string ConsoleTestReporter::TestFixtureSeparator = baremetal::string("[  FIXTURE  ]");
-57: const string ConsoleTestReporter::TestSuccessSeparator = baremetal::string("[ SUCCEEDED ]");
-58: const string ConsoleTestReporter::TestFailSeparator = baremetal::string("[  FAILED   ]");
-59:
-60: ConsoleTestReporter::ConsoleTestReporter()
-61: {
-62: }
-63:
-64: void ConsoleTestReporter::ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-65: {
-66:     GetConsole().SetTerminalColor(ConsoleColor::Green);
-67:     GetConsole().Write(TestRunSeparator);
-68:     GetConsole().ResetTerminalColor();
-69:
-70:     GetConsole().Write(Format(" %s\n", TestRunStartMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
-71: }
-72:
-73: void ConsoleTestReporter::ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-74: {
-75:     GetConsole().SetTerminalColor(ConsoleColor::Green);
-76:     GetConsole().Write(TestRunSeparator);
-77:     GetConsole().ResetTerminalColor();
-78:
-79:     GetConsole().Write(Format(" %s\n", TestRunFinishMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
-80: }
-81:
-82: void ConsoleTestReporter::ReportTestRunSummary(const TestResults& results)
-83: {
-84:     if (results.GetFailureCount() > 0)
-85:         GetConsole().SetTerminalColor(ConsoleColor::Red);
-86:     else
-87:         GetConsole().SetTerminalColor(ConsoleColor::Green);
-88:     GetConsole().Write(Format("%s\n", TestRunSummaryMessage(results).c_str()));
-89:     GetConsole().ResetTerminalColor();
-90: }
-91:
-92: void ConsoleTestReporter::ReportTestRunOverview(const TestResults& results)
-93: {
-94:     GetConsole().Write(Format("%s\n", TestRunOverviewMessage(results).c_str()));
-95: }
-96:
-97: void ConsoleTestReporter::ReportTestSuiteStart(const string& suiteName, int numberOfTestFixtures)
-98: {
-99:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
-100:     GetConsole().Write(TestSuiteSeparator);
-101:     GetConsole().ResetTerminalColor();
-102:
-103:     GetConsole().Write(Format(" %s\n", TestSuiteStartMessage(suiteName, numberOfTestFixtures).c_str()));
-104: }
-105:
-106: void ConsoleTestReporter::ReportTestSuiteFinish(const string& suiteName, int numberOfTestFixtures)
-107: {
-108:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
-109:     GetConsole().Write(TestSuiteSeparator);
-110:     GetConsole().ResetTerminalColor();
-111:
-112:     GetConsole().Write(Format(" %s\n", TestSuiteFinishMessage(suiteName, numberOfTestFixtures).c_str()));
-113: }
-114:
-115: void ConsoleTestReporter::ReportTestFixtureStart(const string& fixtureName, int numberOfTests)
-116: {
-117:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
-118:     GetConsole().Write(TestFixtureSeparator);
-119:     GetConsole().ResetTerminalColor();
-120:
-121:     GetConsole().Write(Format(" %s\n", TestFixtureStartMessage(fixtureName, numberOfTests).c_str()));
-122: }
-123:
-124: void ConsoleTestReporter::ReportTestFixtureFinish(const string& fixtureName, int numberOfTests)
-125: {
-126:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
-127:     GetConsole().Write(TestFixtureSeparator);
-128:     GetConsole().ResetTerminalColor();
-129:
-130:     GetConsole().Write(Format(" %s\n", TestFixtureFinishMessage(fixtureName, numberOfTests).c_str()));
-131: }
-132:
-133: void ConsoleTestReporter::ReportTestStart(const TestDetails& /*details*/)
-134: {
+48: 
+49: /// @file
+50: /// Console test reporter implementation
+51: 
+52: using namespace baremetal;
+53: 
+54: namespace unittest
+55: {
+56: 
+57: const string ConsoleTestReporter::TestRunSeparator = baremetal::string("[===========]");
+58: const string ConsoleTestReporter::TestSuiteSeparator = baremetal::string("[   SUITE   ]");
+59: const string ConsoleTestReporter::TestFixtureSeparator = baremetal::string("[  FIXTURE  ]");
+60: const string ConsoleTestReporter::TestSuccessSeparator = baremetal::string("[ SUCCEEDED ]");
+61: const string ConsoleTestReporter::TestFailSeparator = baremetal::string("[  FAILED   ]");
+62: 
+63: /// <summary>
+64: /// Constructor
+65: /// </summary>
+66: ConsoleTestReporter::ConsoleTestReporter()
+67: {
+68: }
+69: 
+70: /// <summary>
+71: /// Start of test run callback
+72: /// </summary>
+73: /// <param name="numberOfTestSuites">Number of test suites to be run</param>
+74: /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+75: /// <param name="numberOfTests">Number of tests to be run</param>
+76: void ConsoleTestReporter::ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+77: {
+78:     GetConsole().SetTerminalColor(ConsoleColor::Green);
+79:     GetConsole().Write(TestRunSeparator);
+80:     GetConsole().ResetTerminalColor();
+81: 
+82:     GetConsole().Write(Format(" %s\n", TestRunStartMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
+83: }
+84: 
+85: /// <summary>
+86: /// Finish of test run callback
+87: /// </summary>
+88: /// <param name="numberOfTestSuites">Number of test suites run</param>
+89: /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+90: /// <param name="numberOfTests">Number of tests run</param>
+91: void ConsoleTestReporter::ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+92: {
+93:     GetConsole().SetTerminalColor(ConsoleColor::Green);
+94:     GetConsole().Write(TestRunSeparator);
+95:     GetConsole().ResetTerminalColor();
+96: 
+97:     GetConsole().Write(Format(" %s\n", TestRunFinishMessage(numberOfTestSuites, numberOfTestFixtures, numberOfTests).c_str()));
+98: }
+99: 
+100: /// <summary>
+101: /// Test summary callback
+102: /// </summary>
+103: /// <param name="results">Test run results</param>
+104: void ConsoleTestReporter::ReportTestRunSummary(const TestResults& results)
+105: {
+106:     if (results.GetFailureCount() > 0)
+107:         GetConsole().SetTerminalColor(ConsoleColor::Red);
+108:     else
+109:         GetConsole().SetTerminalColor(ConsoleColor::Green);
+110:     GetConsole().Write(Format("%s\n", TestRunSummaryMessage(results).c_str()));
+111:     GetConsole().ResetTerminalColor();
+112: }
+113: 
+114: /// <summary>
+115: /// Test run overview callback
+116: /// </summary>
+117: /// <param name="results">Test run results</param>
+118: void ConsoleTestReporter::ReportTestRunOverview(const TestResults& results)
+119: {
+120:     GetConsole().Write(Format("%s\n", TestRunOverviewMessage(results).c_str()));
+121: }
+122: 
+123: /// <summary>
+124: /// Test suite start callback
+125: /// </summary>
+126: /// <param name="suiteName">Test suite name</param>
+127: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+128: void ConsoleTestReporter::ReportTestSuiteStart(const string& suiteName, int numberOfTestFixtures)
+129: {
+130:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
+131:     GetConsole().Write(TestSuiteSeparator);
+132:     GetConsole().ResetTerminalColor();
+133: 
+134:     GetConsole().Write(Format(" %s\n", TestSuiteStartMessage(suiteName, numberOfTestFixtures).c_str()));
 135: }
-136:
-137: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
-138: {
-139:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
-140:     if (success)
-141:         GetConsole().Write(TestSuccessSeparator);
-142:     else
-143:         GetConsole().Write(TestFailSeparator);
-144:     GetConsole().ResetTerminalColor();
-145:
-146:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
-147: }
-148:
-149: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
-150: {
-151:     GetConsole().SetTerminalColor(ConsoleColor::Red);
-152:     GetConsole().Write(Format("%s\n", TestFailureMessage(details, failure).c_str()));
-153:     GetConsole().ResetTerminalColor();
-154: }
-155:
-156: static string TestLiteral(int numberOfTests)
+136: 
+137: /// <summary>
+138: /// Test suite finish callback
+139: /// </summary>
+140: /// <param name="suiteName">Test suite name</param>
+141: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+142: void ConsoleTestReporter::ReportTestSuiteFinish(const string& suiteName, int numberOfTestFixtures)
+143: {
+144:     GetConsole().SetTerminalColor(ConsoleColor::Cyan);
+145:     GetConsole().Write(TestSuiteSeparator);
+146:     GetConsole().ResetTerminalColor();
+147: 
+148:     GetConsole().Write(Format(" %s\n", TestSuiteFinishMessage(suiteName, numberOfTestFixtures).c_str()));
+149: }
+150: 
+151: /// <summary>
+152: /// Test fixture start callback
+153: /// </summary>
+154: /// <param name="fixtureName">Test fixture name</param>
+155: /// <param name="numberOfTests">Number of tests within test fixture</param>
+156: void ConsoleTestReporter::ReportTestFixtureStart(const string& fixtureName, int numberOfTests)
 157: {
-158:     return baremetal::string((numberOfTests == 1) ? "test" : "tests");
-159: }
-160:
-161: static string TestFailureLiteral(int numberOfTestFailures)
-162: {
-163:     return baremetal::string((numberOfTestFailures == 1) ? "failure" : "failures");
-164: }
-165:
-166: static string TestFixtureLiteral(int numberOfTestFixtures)
-167: {
-168:     return baremetal::string((numberOfTestFixtures == 1) ? "fixture" : "fixtures");
-169: }
-170:
-171: static string TestSuiteLiteral(int numberOfTestSuites)
-172: {
-173:     return baremetal::string((numberOfTestSuites == 1) ? "suite" : "suites");
-174: }
-175:
-176: static string TestSuiteName(string name)
-177: {
-178:     return baremetal::string((!name.empty()) ? name : baremetal::string(TestRegistry::DefaultSuiteName));
-179: }
-180:
-181: static string TestFixtureName(string name)
-182: {
-183:     return baremetal::string((!name.empty()) ? name : baremetal::string(TestRegistry::DefaultFixtureName));
-184: }
-185:
-186: string ConsoleTestReporter::TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-187: {
-188:     return Format("Running %s %s from %s %s in %s %s.",
-189:         Serialize(numberOfTests).c_str(),
-190:         TestLiteral(numberOfTests).c_str(),
-191:         Serialize(numberOfTestFixtures).c_str(),
-192:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-193:         Serialize(numberOfTestSuites).c_str(),
-194:         TestSuiteLiteral(numberOfTestSuites).c_str());
-195: }
-196:
-197: string ConsoleTestReporter::TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
-198: {
-199:     return Format("%s %s from %s %s in %s %s ran.",
-200:         Serialize(numberOfTests).c_str(),
-201:         TestLiteral(numberOfTests).c_str(),
-202:         Serialize(numberOfTestFixtures).c_str(),
-203:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-204:         Serialize(numberOfTestSuites).c_str(),
-205:         TestSuiteLiteral(numberOfTestSuites).c_str());
-206: }
-207:
-208: string ConsoleTestReporter::TestRunSummaryMessage(const TestResults& results)
-209: {
-210:     if (results.GetFailureCount() > 0)
-211:     {
-212:         return Format("FAILURE: %s out of %s %s failed (%s %s).\n",
-213:             Serialize(results.GetFailedTestCount()).c_str(),
-214:             Serialize(results.GetTotalTestCount()).c_str(),
-215:             TestLiteral(results.GetTotalTestCount()).c_str(),
-216:             Serialize(results.GetFailureCount()).c_str(),
-217:             TestFailureLiteral(results.GetFailureCount()).c_str());
-218:     }
-219:     return Format("Success: %s %s passed.\n",
-220:             Serialize(results.GetTotalTestCount()).c_str(),
-221:             TestLiteral(results.GetTotalTestCount()).c_str());
-222: }
-223:
-224: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
-225: {
-226:     if (results.GetFailureCount() > 0)
-227:     {
-228:         return Format("Failures: %d", results.GetFailureCount());
-229:     }
-230:     return "No failures";
-231: }
-232:
-233: string ConsoleTestReporter::TestSuiteStartMessage(const string& suiteName, int numberOfTestFixtures)
-234: {
-235:     return Format("%s (%s %s)",
-236:         TestSuiteName(suiteName).c_str(),
-237:         Serialize(numberOfTestFixtures).c_str(),
-238:         TestFixtureLiteral(numberOfTestFixtures).c_str());
-239: }
-240:
-241: string ConsoleTestReporter::TestSuiteFinishMessage(const string& suiteName, int numberOfTestFixtures)
+158:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
+159:     GetConsole().Write(TestFixtureSeparator);
+160:     GetConsole().ResetTerminalColor();
+161: 
+162:     GetConsole().Write(Format(" %s\n", TestFixtureStartMessage(fixtureName, numberOfTests).c_str()));
+163: }
+164: 
+165: /// <summary>
+166: /// Test fixture finish callback
+167: /// </summary>
+168: /// <param name="fixtureName">Test fixture name</param>
+169: /// <param name="numberOfTests">Number of tests within test fixture</param>
+170: void ConsoleTestReporter::ReportTestFixtureFinish(const string& fixtureName, int numberOfTests)
+171: {
+172:     GetConsole().SetTerminalColor(ConsoleColor::Yellow);
+173:     GetConsole().Write(TestFixtureSeparator);
+174:     GetConsole().ResetTerminalColor();
+175: 
+176:     GetConsole().Write(Format(" %s\n", TestFixtureFinishMessage(fixtureName, numberOfTests).c_str()));
+177: }
+178: 
+179: /// <summary>
+180: /// Test start callback
+181: /// </summary>
+182: /// <param name="details">Test details</param>
+183: void ConsoleTestReporter::ReportTestStart(const TestDetails& /*details*/)
+184: {
+185: }
+186: 
+187: /// <summary>
+188: /// Test finish callback
+189: /// </summary>
+190: /// <param name="details">Test details</param>
+191: /// <param name="success">Test result, true is successful, false is failed</param>
+192: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
+193: {
+194:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
+195:     if (success)
+196:         GetConsole().Write(TestSuccessSeparator);
+197:     else
+198:         GetConsole().Write(TestFailSeparator);
+199:     GetConsole().ResetTerminalColor();
+200: 
+201:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
+202: }
+203: 
+204: /// <summary>
+205: /// Test failure callback
+206: /// </summary>
+207: /// <param name="details">Test details</param>
+208: /// <param name="failure">Test failure message</param>
+209: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
+210: {
+211:     GetConsole().SetTerminalColor(ConsoleColor::Red);
+212:     GetConsole().Write(Format("%s\n", TestFailureMessage(details, failure).c_str()));
+213:     GetConsole().ResetTerminalColor();
+214: }
+215: 
+216: /// <summary>
+217: /// Return the correct singular or plural form for "test"
+218: /// </summary>
+219: /// <param name="numberOfTests">Number of tests</param>
+220: /// <returns></returns>
+221: static string TestLiteral(int numberOfTests)
+222: {
+223:     return baremetal::string((numberOfTests == 1) ? "test" : "tests");
+224: }
+225: 
+226: /// <summary>
+227: /// Return the correct singular or plural form for "failure"
+228: /// </summary>
+229: /// <param name="numberOfTestFailures">Number of test failures</param>
+230: /// <returns></returns>
+231: static string TestFailureLiteral(int numberOfTestFailures)
+232: {
+233:     return baremetal::string((numberOfTestFailures == 1) ? "failure" : "failures");
+234: }
+235: 
+236: /// <summary>
+237: /// Return the correct singular or plural form for "fixture"
+238: /// </summary>
+239: /// <param name="numberOfTestFixtures">Number of test fixtures</param>
+240: /// <returns></returns>
+241: static string TestFixtureLiteral(int numberOfTestFixtures)
 242: {
-243:     return Format("%s %s from %s",
-244:         Serialize(numberOfTestFixtures).c_str(),
-245:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
-246:         TestSuiteName(suiteName).c_str());
-247: }
-248:
-249: string ConsoleTestReporter::TestFixtureStartMessage(const string& fixtureName, int numberOfTests)
-250: {
-251:     return Format("%s (%s %s)",
-252:         TestFixtureName(fixtureName).c_str(),
-253:         Serialize(numberOfTests).c_str(),
-254:         TestLiteral(numberOfTests).c_str());
-255: }
-256:
-257: string ConsoleTestReporter::TestFixtureFinishMessage(const string& fixtureName, int numberOfTests)
-258: {
-259:     return Format("%s %s from %s",
-260:         Serialize(numberOfTests).c_str(),
-261:         TestLiteral(numberOfTests).c_str(),
-262:         TestFixtureName(fixtureName).c_str());
-263: }
-264:
-265: string ConsoleTestReporter::TestFinishMessage(const TestDetails& details, bool /*success*/)
-266: {
-267:     return TestName(details.SuiteName(), details.FixtureName(), details.TestName());
-268: }
-269:
-270: string ConsoleTestReporter::TestFailureMessage(const TestDetails& details, const string& failure)
-271: {
-272:     return Format("%s failure %s", TestName(details.SuiteName(), details.FixtureName(), details.TestName()).c_str(), failure.c_str());
-273: }
-274:
-275: string ConsoleTestReporter::TestName(const string& suiteName, const string& fixtureName, const string& testName)
-276: {
-277:     string result;
-278:     if (!suiteName.empty())
-279:     {
-280:         result.append(suiteName);
-281:         result.append("::");
-282:     }
-283:     if (!fixtureName.empty())
-284:     {
-285:         result.append(fixtureName);
-286:         result.append("::");
-287:     }
-288:     result.append(testName);
-289:     return result;
+243:     return baremetal::string((numberOfTestFixtures == 1) ? "fixture" : "fixtures");
+244: }
+245: 
+246: /// <summary>
+247: /// Return the correct singular or plural form for "suite"
+248: /// </summary>
+249: /// <param name="numberOfTestSuites">Number of test suites</param>
+250: /// <returns></returns>
+251: static string TestSuiteLiteral(int numberOfTestSuites)
+252: {
+253:     return baremetal::string((numberOfTestSuites == 1) ? "suite" : "suites");
+254: }
+255: 
+256: /// <summary>
+257: /// Create a message for test run start
+258: /// </summary>
+259: /// <param name="numberOfTestSuites">Number of test suites to be run</param>
+260: /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+261: /// <param name="numberOfTests">Number of tests to be run</param>
+262: /// <returns>Resulting message</returns>
+263: string ConsoleTestReporter::TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+264: {
+265:     return Format("Running %s %s from %s %s in %s %s.",
+266:         Serialize(numberOfTests).c_str(),
+267:         TestLiteral(numberOfTests).c_str(),
+268:         Serialize(numberOfTestFixtures).c_str(),
+269:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+270:         Serialize(numberOfTestSuites).c_str(),
+271:         TestSuiteLiteral(numberOfTestSuites).c_str());
+272: }
+273: 
+274: /// <summary>
+275: /// Create a message for test run finish
+276: /// </summary>
+277: /// <param name="numberOfTestSuites">Number of test suites run</param>
+278: /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+279: /// <param name="numberOfTests">Number of tests run</param>
+280: /// <returns>Resulting message</returns>
+281: string ConsoleTestReporter::TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests)
+282: {
+283:     return Format("%s %s from %s %s in %s %s ran.",
+284:         Serialize(numberOfTests).c_str(),
+285:         TestLiteral(numberOfTests).c_str(),
+286:         Serialize(numberOfTestFixtures).c_str(),
+287:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+288:         Serialize(numberOfTestSuites).c_str(),
+289:         TestSuiteLiteral(numberOfTestSuites).c_str());
 290: }
-291:
-292: } // namespace unittest
+291: 
+292: /// <summary>
+293: /// Create a message for test run summary
+294: /// </summary>
+295: /// <param name="results">Test run results</param>
+296: /// <returns>Resulting message</returns>
+297: string ConsoleTestReporter::TestRunSummaryMessage(const TestResults& results)
+298: {
+299:     if (results.GetFailureCount() > 0)
+300:     {
+301:         return Format("FAILURE: %s out of %s %s failed (%s %s).\n",
+302:             Serialize(results.GetFailedTestCount()).c_str(),
+303:             Serialize(results.GetTotalTestCount()).c_str(),
+304:             TestLiteral(results.GetTotalTestCount()).c_str(),
+305:             Serialize(results.GetFailureCount()).c_str(),
+306:             TestFailureLiteral(results.GetFailureCount()).c_str());
+307:     }
+308:     return Format("Success: %s %s passed.\n",
+309:             Serialize(results.GetTotalTestCount()).c_str(),
+310:             TestLiteral(results.GetTotalTestCount()).c_str());
+311: }
+312: 
+313: /// <summary>
+314: /// Create a message for test run overview
+315: /// </summary>
+316: /// <param name="results">Test run results</param>
+317: /// <returns>Resulting message</returns>
+318: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
+319: {
+320:     if (results.GetFailureCount() > 0)
+321:     {
+322:         return Format("Failures: %d", results.GetFailureCount());
+323:     }
+324:     return "No failures";
+325: }
+326: 
+327: /// <summary>
+328: /// Create a message for test failure
+329: /// </summary>
+330: /// <param name="result">Test run results</param>
+331: /// <param name="failure">Failure that occurred</param>
+332: /// <returns>Resulting message</returns>
+333: string ConsoleTestReporter::TestFailureMessage(const TestDetails& details, const string& failure)
+334: {
+335:     return Format("%s failure %s", details.QualifiedTestName().c_str(), failure.c_str());
+336: }
+337: 
+338: /// <summary>
+339: /// Create a message for test suite start
+340: /// </summary>
+341: /// <param name="suiteName">Name of test suite</param>
+342: /// <param name="numberOfTestFixtures">Number of test fixtures within test suite</param>
+343: /// <returns>Resulting message</returns>
+344: string ConsoleTestReporter::TestSuiteStartMessage(const string& suiteName, int numberOfTestFixtures)
+345: {
+346:     return Format("%s (%s %s)",
+347:         suiteName.c_str(),
+348:         Serialize(numberOfTestFixtures).c_str(),
+349:         TestFixtureLiteral(numberOfTestFixtures).c_str());
+350: }
+351: 
+352: /// <summary>
+353: /// Create a message for test suite finish
+354: /// </summary>
+355: /// <param name="suiteName">Name of test suite</param>
+356: /// <param name="numberOfTestFixtures">Number of test fixtures within test suite</param>
+357: /// <returns>Resulting message</returns>
+358: string ConsoleTestReporter::TestSuiteFinishMessage(const string& suiteName, int numberOfTestFixtures)
+359: {
+360:     return Format("%s %s from %s",
+361:         Serialize(numberOfTestFixtures).c_str(),
+362:         TestFixtureLiteral(numberOfTestFixtures).c_str(),
+363:         suiteName.c_str());
+364: }
+365: 
+366: /// <summary>
+367: /// Create a message for test fixture start
+368: /// </summary>
+369: /// <param name="fixtureName">Test fixture name</param>
+370: /// <param name="numberOfTests">Number of tests within test fixture</param>
+371: /// <returns>Resulting message</returns>
+372: string ConsoleTestReporter::TestFixtureStartMessage(const string& fixtureName, int numberOfTests)
+373: {
+374:     return Format("%s (%s %s)",
+375:         fixtureName.c_str(),
+376:         Serialize(numberOfTests).c_str(),
+377:         TestLiteral(numberOfTests).c_str());
+378: }
+379: 
+380: /// <summary>
+381: /// Create a message for test fixture finish
+382: /// </summary>
+383: /// <param name="fixtureName">Test fixture name</param>
+384: /// <param name="numberOfTests">Number of tests within test fixture</param>
+385: /// <returns>Resulting message</returns>
+386: string ConsoleTestReporter::TestFixtureFinishMessage(const string& fixtureName, int numberOfTests)
+387: {
+388:     return Format("%s %s from %s",
+389:         Serialize(numberOfTests).c_str(),
+390:         TestLiteral(numberOfTests).c_str(),
+391:         fixtureName.c_str());
+392: }
+393: 
+394: /// <summary>
+395: /// Create a message for test finish
+396: /// </summary>
+397: /// <param name="details">Test details</param>
+398: /// <param name="success">Test result, true is successful, false is failed</param>
+399: /// <returns>Resulting message</returns>
+400: string ConsoleTestReporter::TestFinishMessage(const TestDetails& details, bool /*success*/)
+401: {
+402:     return details.QualifiedTestName();
+403: }
+404: 
+405: } // namespace unittest
 ```
 
-- Line 54-58: We initialize the static member variables
-- Line 60-62: We implement the constructor
-- Line 64-71: We implement the method `ReportTestRunStart()`.
+- Line 57-61: We initialize the static member variables
+- Line 66-68: We implement the constructor
+- Line 76-83: We implement the method `ReportTestRunStart()`.
 This prints the run separator in green, and uses the method `TestRunStartMessage()` to format the string to be printed
-- Line 73-80: We implement the method `ReportTestRunFinish()`.
+- Line 91-98: We implement the method `ReportTestRunFinish()`.
 This prints the run separator in green, and uses the method `TestRunFinishMessage()` to format the string to be printed
-- Line 82-90: We implement the method `ReportTestRunSummary()`.
+- Line 104-112: We implement the method `ReportTestRunSummary()`.
 This uses the method `TestRunSummaryMessage()` to format the string to be printed, in green if successful, in red if failures occured
-- Line 92-95: We implement the method `ReportTestRunOverview()`.
+- Line 118-121: We implement the method `ReportTestRunOverview()`.
 This uses the method `TestRunOverviewMessage()` to format the string to be printed
-- Line 97-104: We implement the method `ReportTestSuiteStart()`.
+- Line 128-135: We implement the method `ReportTestSuiteStart()`.
 This prints the test suite separator in cyan, and uses the method `TestSuiteStartMessage()` to format the string to be printed
-- Line 106-113: We implement the method `ReportTestSuiteFinish()`.
+- Line 142-149: We implement the method `ReportTestSuiteFinish()`.
 This prints the test suite separator in cyan, and uses the method `TestSuiteFinishMessage()` to format the string to be printed
-- Line 115-122: We implement the method `ReportTestFixtureStart()`.
+- Line 156-163: We implement the method `ReportTestFixtureStart()`.
 This prints the test fixture separator in yellow, and uses the method `TestFixtureStartMessage()` to format the string to be printed
-- Line 124-131: We implement the method `ReportTestFixtureFinish()`.
+- Line 170-177: We implement the method `ReportTestFixtureFinish()`.
 This prints the test fixture separator in yellow, and uses the method `TestFixtureFinishMessage()` to format the string to be printed
-- Line 133-135: We implement the method `ReportTestStart()`.
+- Line 183-185: We implement the method `ReportTestStart()`.
 This prints nothing
-- Line 137-147: We implement the method `ReportTestFinish()`.
+- Line 192-202: We implement the method `ReportTestFinish()`.
 This prints the success separator in green if successful, or the failure separator in red if failures occurred, and uses the method `TestFinishMessage()` to format the string to be printed
-- Line 149-154: We implement the method `ReportTestFailure()`.
+- Line 209-214: We implement the method `ReportTestFailure()`.
 This uses the method `TestFailureMessage()` to format the string to be printed in red
-- Line 156-159: We implement a static function `TestLiteral()`, which returns the string "test" if the number of tests equals 1, and "tests" otherwise
-- Line 161-164: We implement a static function `TestFailureLiteral()`, which returns the string "failure" if the number of failures equals 1, and "failures" otherwise
-- Line 166-169: We implement a static function `TestFixtureLiteral()`, which returns the string "fixture" if the number of test fixtures equals 1, and "fixtures" otherwise
-- Line 171-174: We implement a static function `TestSuiteLiteral()`, which returns the string "suite" if the number of test suites equals 1, and "suites" otherwise
-- Line 176-179: We implement a static function `TestSuiteName()`, which returns the name of the test suite if not empty, and "DefaultSuite" otherwise
-- Line 181-184: We implement a static function `TestFixtureName()`, which returns the name of the test fixture if not empty, and "DefaultFixture" otherwise
-- Line 186-195: We implement a static function `TestRunStartMessage()`, which returns a string in the form "Running 1 test from 2 fixtures in 3 suites"
-- Line 197-206: We implement a static function `TestRunFinishMessage()`, which returns a string in the form "1 test from 2 fixtures in 3 suites ran."
-- Line 208-222: We implement a static function `TestRunSummaryMessage()`, which returns a string in the form "FAILURE: 1 out of 2 tests failed (3 failures).\n" in case of failures,
+- Line 221-224: We implement a static function `TestLiteral()`, which returns the string "test" if the number of tests equals 1, and "tests" otherwise
+- Line 231-234: We implement a static function `TestFailureLiteral()`, which returns the string "failure" if the number of failures equals 1, and "failures" otherwise
+- Line 241-244: We implement a static function `TestFixtureLiteral()`, which returns the string "fixture" if the number of test fixtures equals 1, and "fixtures" otherwise
+- Line 251-254: We implement a static function `TestSuiteLiteral()`, which returns the string "suite" if the number of test suites equals 1, and "suites" otherwise
+- Line 263-272: We implement a static function `TestRunStartMessage()`, which returns a string in the form "Running 1 test from 2 fixtures in 3 suites"
+- Line 281-290: We implement a static function `TestRunFinishMessage()`, which returns a string in the form "1 test from 2 fixtures in 3 suites ran."
+- Line 297-311: We implement a static function `TestRunSummaryMessage()`, which returns a string in the form "FAILURE: 1 out of 2 tests failed (3 failures).\n" in case of failures,
 and "Success: 2 tests passed.\n" otherwise
-- Line 224-231: We implement a static function `TestRunOverviewMessage()`, which returns a string in the form "Failures: 2" in case of failures, and "No failures" otherwise
-- Line 233-239: We implement a static function `TestSuiteStartMessage()`, which returns a string in the form "2 fixtures from Suite1"
-- Line 241-247: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite (2 fixtures)"
-- Line 249-255: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 test from Fixture1"
-- Line 257-263: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
-- Line 265-268: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
-- Line 270-273: We implement a static function `TestFailureMessage()`, which returns a string in the form "Suite1\:\:Fixture2\:\:Test3 failure failureText"
-- Line 275-290: We implement a static function `TestName()`, which returns the fully qualified test name "Suite1\:\:Fixture2\:\:Test3" if the test suite name is not empty,
-"Fixture2\:\:Test3" otherwise if the fixture name is not empty, "Test3" otherwise
+- Line 318-325: We implement a static function `TestRunOverviewMessage()`, which returns a string in the form "Failures: 2" in case of failures, and "No failures" otherwise
+- Line 333-336: We implement a static function `TestFailureMessage()`, which returns a string in the form "Suite1\:\:Fixture2\:\:Test3 failure failureText"
+- Line 344-350: We implement a static function `TestSuiteStartMessage()`, which returns a string in the form "2 fixtures from Suite1"
+- Line 358-364: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite (2 fixtures)"
+- Line 372-378: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 test from Fixture1"
+- Line 386-392: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
+- Line 400-403: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
 
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_UNITTESTH}
+### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UNITTESTH}
 
 As we now need to include quite a few header files to set up and run our tests, let create a single include header that includes everything needed.
 
@@ -6146,25 +6188,29 @@ File: code/libraries/unittest/include/unittest/unittest.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: #include <unittest/TestFixture.h>
-43: #include <unittest/TestSuite.h>
-44:
-45: #include <unittest/ITestReporter.h>
-46: #include <unittest/ConsoleTestReporter.h>
-47: #include <unittest/ExecuteTest.h>
-48: #include <unittest/TestBase.h>
-49: #include <unittest/TestDetails.h>
-50: #include <unittest/TestFixtureInfo.h>
-51: #include <unittest/TestRegistry.h>
-52: #include <unittest/TestResults.h>
-53: #include <unittest/TestRunner.h>
-54: #include <unittest/TestSuiteInfo.h>
+41: 
+42: /// @file
+43: /// Unit test generic header
+44: 
+45: #include <unittest/TestFixture.h>
+46: #include <unittest/TestSuite.h>
+47: 
+48: #include <unittest/ITestReporter.h>
+49: #include <unittest/ConsoleTestReporter.h>
+50: #include <unittest/CurrentTest.h>
+51: #include <unittest/Test.h>
+52: #include <unittest/TestInfo.h>
+53: #include <unittest/TestDetails.h>
+54: #include <unittest/TestFixtureInfo.h>
+55: #include <unittest/TestRegistry.h>
+56: #include <unittest/TestResults.h>
+57: #include <unittest/TestRunner.h>
+58: #include <unittest/TestSuiteInfo.h>
 ```
 
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -6175,35 +6221,34 @@ File: code/libraries/unittest/CMakeLists.txt
 30: set(PROJECT_SOURCES
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
 34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
 35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
-40:     )
-41:
-42: set(PROJECT_INCLUDES_PUBLIC
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
-44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
-46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
+41:     )
+42: 
+43: set(PROJECT_INCLUDES_PUBLIC
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
 51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
 52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
 53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
 54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
 55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
-57:     )
-58: set(PROJECT_INCLUDES_PRIVATE )
+56:     )
+57: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_APPLICATION_CODE}
+### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_APPLICATION_CODE}
 
 Now that we have added a test runner and a test report, we can use these to make running the tests even simpler.
 
@@ -6211,253 +6256,234 @@ Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
 File: code\applications\demo\src\main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16:
-17: #include <unittest/unittest.h>
-18:
-19: LOG_MODULE("main");
-20:
-21: using namespace baremetal;
-22: using namespace unittest;
-23:
-24: namespace Suite1 {
-25:
-26: inline char const* GetSuiteName()
-27: {
-28:     return baremetal::string("Suite1");
-29: }
-30:
-31: class FixtureMyTest1
-32:     : public TestFixture
-33: {
-34: public:
-35:     void SetUp() override
-36:     {
-37:         LOG_DEBUG("FixtureMyTest1 SetUp");
-38:     }
-39:     void TearDown() override
-40:     {
-41:         LOG_DEBUG("FixtureMyTest1 TearDown");
-42:     }
-43: };
-44:
-45: class FixtureMyTest1Helper
-46:     : public FixtureMyTest1
-47: {
-48: public:
-49:     FixtureMyTest1Helper(const FixtureMyTest1Helper&) = delete;
-50:     explicit FixtureMyTest1Helper(const TestDetails& details)
-51:         : m_details{ details }
-52:     {
-53:         SetUp();
-54:     }
-55:     virtual ~FixtureMyTest1Helper()
-56:     {
-57:         TearDown();
-58:     }
-59:     FixtureMyTest1Helper& operator = (const FixtureMyTest1Helper&) = delete;
-60:     void RunImpl() const;
-61:     const TestDetails& m_details;
-62: };
-63: void FixtureMyTest1Helper::RunImpl() const
-64: {
-65:     LOG_DEBUG(m_details.FixtureName().c_str());
-66: }
-67:
-68: class MyTest1
-69:     : public TestBase
-70: {
-71: public:
-72:     MyTest1()
-73:         : TestBase("MyTest1", "FixtureMyTest1", GetSuiteName(), __FILE__, __LINE__)
-74:     {
-75:
-76:     }
-77:     void RunImpl() const override;
-78: } MyTest1Instance;
-79:
-80: TestRegistrar registrarFixtureMyTest1(TestRegistry::GetTestRegistry(), &MyTest1Instance);
-81:
-82: void MyTest1::RunImpl() const
+1: #include <baremetal/Assert.h>
+2: #include <baremetal/Console.h>
+3: #include <baremetal/Logger.h>
+4: #include <baremetal/System.h>
+5: #include <baremetal/Timer.h>
+6: 
+7: #include <unittest/unittest.h>
+8: 
+9: LOG_MODULE("main");
+10: 
+11: using namespace baremetal;
+12: using namespace unittest;
+13: 
+14: namespace Suite1 {
+15: 
+16: inline char const* GetSuiteName()
+17: {
+18:     return baremetal::string("Suite1");
+19: }
+20: 
+21: class FixtureMyTest1
+22:     : public TestFixture
+23: {
+24: public:
+25:     void SetUp() override
+26:     {
+27:         LOG_DEBUG("MyTest SetUp");
+28:     }
+29:     void TearDown() override
+30:     {
+31:         LOG_DEBUG("MyTest TearDown");
+32:     }
+33: };
+34: 
+35: class FixtureMyTest1Helper
+36:     : public FixtureMyTest1
+37: {
+38: public:
+39:     FixtureMyTest1Helper(const FixtureMyTest1Helper&) = delete;
+40:     explicit FixtureMyTest1Helper(const TestDetails& details)
+41:         : m_details{ details }
+42:     {
+43:         SetUp();
+44:     }
+45:     virtual ~FixtureMyTest1Helper()
+46:     {
+47:         TearDown();
+48:     }
+49:     void RunImpl() const;
+50:     const TestDetails& m_details;
+51: };
+52: void FixtureMyTest1Helper::RunImpl() const
+53: {
+54:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 1");
+55: }
+56: 
+57: class MyTest1
+58:     : public Test
+59: {
+60:     void RunImpl() const override;
+61: } myTest1;
+62: 
+63: TestRegistrar registrarFixtureMyTest1(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest1", "FixtureMyTest1", GetSuiteName(), __FILE__, __LINE__));
+64: 
+65: void MyTest1::RunImpl() const
+66: {
+67:     LOG_DEBUG("Test 1");
+68:     FixtureMyTest1Helper fixtureHelper(*CurrentTest::Details());
+69:     fixtureHelper.RunImpl();
+70: }
+71: 
+72: } // namespace Suite1
+73: 
+74: namespace Suite2 {
+75: 
+76: inline char const* GetSuiteName()
+77: {
+78:     return baremetal::string("Suite2");
+79: }
+80: 
+81: class FixtureMyTest2
+82:     : public TestFixture
 83: {
-84:     LOG_DEBUG("Running %s in fixture %s in suite %s", Details().TestName().c_str(), Details().FixtureName().c_str(), Details().SuiteName().empty() ? "default" : Details().SuiteName().c_str());
-85:     FixtureMyTest1Helper fixtureHelper(Details());
-86:     fixtureHelper.RunImpl();
-87: }
-88:
-89: } // namespace Suite1
-90:
-91: namespace Suite2 {
-92:
-93: inline char const* GetSuiteName()
-94: {
-95:     return baremetal::string("Suite2");
-96: }
-97:
-98: class FixtureMyTest2
-99:     : public TestFixture
-100: {
-101: public:
-102:     void SetUp() override
-103:     {
-104:         LOG_DEBUG("FixtureMyTest2 SetUp");
-105:     }
-106:     void TearDown() override
-107:     {
-108:         LOG_DEBUG("FixtureMyTest2 TearDown");
-109:     }
-110: };
-111:
-112: class FixtureMyTest2Helper
-113:     : public FixtureMyTest2
-114: {
-115: public:
-116:     FixtureMyTest2Helper(const FixtureMyTest2Helper&) = delete;
-117:     explicit FixtureMyTest2Helper(const TestDetails& details)
-118:         : m_details{ details }
-119:     {
-120:         SetUp();
-121:     }
-122:     virtual ~FixtureMyTest2Helper()
-123:     {
-124:         TearDown();
-125:     }
-126:     FixtureMyTest2Helper& operator = (const FixtureMyTest2Helper&) = delete;
-127:     void RunImpl() const;
-128:     const TestDetails& m_details;
-129: };
-130: void FixtureMyTest2Helper::RunImpl() const
-131: {
-132:     LOG_DEBUG(m_details.FixtureName().c_str());
-133: }
-134:
-135: class MyTest2
-136:     : public TestBase
-137: {
-138: public:
-139:     MyTest2()
-140:         : TestBase("MyTest2", "FixtureMyTest2", GetSuiteName(), __FILE__, __LINE__)
-141:     {
-142:
-143:     }
-144:     void RunImpl() const override;
-145: } MyTest2Instance;
-146:
-147: TestRegistrar registrarFixtureMyTest2(TestRegistry::GetTestRegistry(), &MyTest2Instance);
-148:
-149: void MyTest2::RunImpl() const
+84: public:
+85:     void SetUp() override
+86:     {
+87:         LOG_DEBUG("FixtureMyTest2 SetUp");
+88:     }
+89:     void TearDown() override
+90:     {
+91:         LOG_DEBUG("FixtureMyTest2 TearDown");
+92:     }
+93: };
+94: 
+95: class FixtureMyTest2Helper
+96:     : public FixtureMyTest2
+97: {
+98: public:
+99:     FixtureMyTest2Helper(const FixtureMyTest2Helper&) = delete;
+100:     explicit FixtureMyTest2Helper(const TestDetails& details)
+101:         : m_details{ details }
+102:     {
+103:         SetUp();
+104:     }
+105:     virtual ~FixtureMyTest2Helper()
+106:     {
+107:         TearDown();
+108:     }
+109:     void RunImpl() const;
+110:     const TestDetails& m_details;
+111: };
+112: void FixtureMyTest2Helper::RunImpl() const
+113: {
+114:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 2");
+115: }
+116: 
+117: class MyTest2
+118:     : public Test
+119: {
+120:     void RunImpl() const override;
+121: } myTest1;
+122: 
+123: TestRegistrar registrarFixtureMyTest2(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest2", "FixtureMyTest2", GetSuiteName(), __FILE__, __LINE__));
+124: 
+125: void MyTest2::RunImpl() const
+126: {
+127:     LOG_DEBUG("Test 2");
+128:     FixtureMyTest2Helper fixtureHelper(*CurrentTest::Details());
+129:     fixtureHelper.RunImpl();
+130: }
+131: 
+132: } // namespace Suite2
+133: 
+134: class FixtureMyTest3
+135:     : public TestFixture
+136: {
+137: public:
+138:     void SetUp() override
+139:     {
+140:         LOG_DEBUG("FixtureMyTest3 SetUp");
+141:     }
+142:     void TearDown() override
+143:     {
+144:         LOG_DEBUG("FixtureMyTest3 TearDown");
+145:     }
+146: };
+147: 
+148: class FixtureMyTest3Helper
+149:     : public FixtureMyTest3
 150: {
-151:     LOG_DEBUG("Running %s in fixture %s in suite %s", Details().TestName().c_str(), Details().FixtureName().c_str(), Details().SuiteName().empty() ? "default" : Details().SuiteName().c_str());
-152:     FixtureMyTest2Helper fixtureHelper(Details());
-153:     fixtureHelper.RunImpl();
-154: }
-155:
-156: } // namespace Suite2
-157:
-158: class FixtureMyTest3
-159:     : public TestFixture
-160: {
-161: public:
-162:     void SetUp() override
-163:     {
-164:         LOG_DEBUG("FixtureMyTest3 SetUp");
-165:     }
-166:     void TearDown() override
-167:     {
-168:         LOG_DEBUG("FixtureMyTest3 TearDown");
-169:     }
-170: };
-171:
-172: class FixtureMyTest3Helper
-173:     : public FixtureMyTest3
-174: {
-175: public:
-176:     FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
-177:     explicit FixtureMyTest3Helper(const TestDetails& details)
-178:         : m_details{ details }
-179:     {
-180:         SetUp();
-181:     }
-182:     virtual ~FixtureMyTest3Helper()
-183:     {
-184:         TearDown();
-185:     }
-186:     FixtureMyTest3Helper& operator = (const FixtureMyTest3Helper&) = delete;
-187:     void RunImpl() const;
-188:     const TestDetails& m_details;
-189: };
-190: void FixtureMyTest3Helper::RunImpl() const
-191: {
-192:     LOG_DEBUG(m_details.FixtureName().c_str());
-193:     CurrentTest::Results()->OnTestFailure(m_details, "Fail");
-194: }
-195:
-196: class MyTest3
-197:     : public TestBase
-198: {
-199: public:
-200:     MyTest3()
-201:         : TestBase("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__)
-202:     {
-203:
-204:     }
-205:     void RunImpl() const override;
-206: } MyTest3Instance;
-207:
-208: TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &MyTest3Instance);
-209:
-210: void MyTest3::RunImpl() const
-211: {
-212:     LOG_DEBUG("Running %s in fixture %s in suite %s", Details().TestName().c_str(), Details().FixtureName().c_str(), Details().SuiteName().empty() ? "default" : Details().SuiteName().c_str());
-213:     FixtureMyTest3Helper fixtureHelper(Details());
-214:     fixtureHelper.RunImpl();
-215: }
-216:
-217: int main()
-218: {
-219:     auto& console = GetConsole();
-220:     LOG_DEBUG("Hello World!");
-221:
-222:     ConsoleTestReporter reporter;
-223:     RunAllTests(&reporter);
-224:
-225:     LOG_INFO("Wait 5 seconds");
-226:     Timer::WaitMilliSeconds(5000);
-227:
-228:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-229:     char ch{};
-230:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-231:     {
-232:         ch = console.ReadChar();
-233:         console.WriteChar(ch);
-234:     }
-235:     if (ch == 'p')
-236:         assert(false);
-237:
-238:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-239: }
+151: public:
+152:     FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
+153:     explicit FixtureMyTest3Helper(const TestDetails& details)
+154:         : m_details{ details }
+155:     {
+156:         SetUp();
+157:     }
+158:     virtual ~FixtureMyTest3Helper()
+159:     {
+160:         TearDown();
+161:     }
+162:     void RunImpl() const;
+163:     const TestDetails& m_details;
+164: };
+165: void FixtureMyTest3Helper::RunImpl() const
+166: {
+167:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 3");
+168: }
+169: 
+170: class MyTest3
+171:     : public Test
+172: {
+173:     void RunImpl() const override;
+174: } myTest3;
+175: 
+176: TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &myTest3, TestDetails("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__));
+177: 
+178: void MyTest3::RunImpl() const
+179: {
+180:     LOG_DEBUG("Test 3");
+181:     FixtureMyTest3Helper fixtureHelper(*CurrentTest::Details());
+182:     fixtureHelper.RunImpl();
+183: }
+184: 
+185: class MyTest
+186:     : public Test
+187: {
+188: public:
+189:     void RunImpl() const override;
+190: } myTest;
+191: 
+192: TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
+193: 
+194: void MyTest::RunImpl() const
+195: {
+196:     LOG_DEBUG("Running test");
+197: }
+198: 
+199: int main()
+200: {
+201:     auto& console = GetConsole();
+202: 
+203:     ConsoleTestReporter reporter;
+204:     RunAllTests(&reporter);
+205: 
+206:     LOG_INFO("Wait 5 seconds");
+207:     Timer::WaitMilliSeconds(5000);
+208: 
+209:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
+210:     char ch{};
+211:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+212:     {
+213:         ch = console.ReadChar();
+214:         console.WriteChar(ch);
+215:     }
+216:     if (ch == 'p')
+217:         assert(false);
+218: 
+219:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+220: }
 ```
 
-- Line 17: We replace all unit test includes by a single one
-- Line 193: We inject a failure to get a failing result
-- Line 222: We instantiate a test reporter throug the `ConsoleTestReporter` class
-- Line 223: We run all tests using the test reporter
+- Line 7: We replace all unit test includes by a single one
+- Line 197: We inject a failure to get a failing result
+- Line 204: We instantiate a test reporter throug the `ConsoleTestReporter` class
+- Line 205: We run all tests using the test reporter using the `RunAllTests()` function
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -6465,3965 +6491,7 @@ You will see all the output being generared by the console test reported using c
 
 <img src="images/demo-output-unit-test.png" alt="Tree view" width="800"/>
 
-## Adding macros - Step 6 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6}
-
-### TestMacros.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_TESTMACROSH}
-
-The most cumbersome about the current implementation is that we need to be very verbose when writing tests, test fixture and test suites.
-We can easily solve this by creating some macros.
-
-Create the file `code/libraries/unittest/include/unittest/TestMacros.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestMacros.h
-File: d:\Projects\baremetal.github\tutorial\17-unit-tests\code\libraries\unittest\include\unittest\TestMacros.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
-3: //
-4: // File        : TestMacros.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : -
-9: //
-10: // Description : Macros for specifyig tests
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #pragma once
-41:
-42: #define TEST_EX(TestName, Registry)                                                                         \
-43: class Test##TestName : public unittest::TestBase                                                            \
-44: {                                                                                                           \
-45: public:                                                                                                     \
-46:     Test##TestName() : TestBase(baremetal::string(#TestName), baremetal::string(""), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__) {} \
-47: private:                                                                                                    \
-48:     virtual void RunImpl() const override;                                                                  \
-49: } test##TestName##Instance;                                                                                 \
-50:                                                                                                             \
-51: static unittest::TestRegistrar registrar##TestName(Registry, &test##TestName##Instance);                    \
-52:                                                                                                             \
-53: void Test##TestName::RunImpl() const
-54:
-55: #define TEST(TestName) TEST_EX(TestName, unittest::TestRegistry::GetTestRegistry())
-56:
-57: #define TEST_FIXTURE_EX(FixtureClass,TestName,Registry) \
-58: class FixtureClass##TestName##Helper : public FixtureClass                                                  \
-59: {                                                                                                           \
-60: public:                                                                                                     \
-61:     FixtureClass##TestName##Helper(const FixtureClass##TestName##Helper &) = delete;                        \
-62:     explicit FixtureClass##TestName##Helper(unittest::TestDetails const & details) :                        \
-63:         m_details{ details }                                                                                \
-64:     {                                                                                                       \
-65:         SetUp();                                                                                            \
-66:     }                                                                                                       \
-67:     virtual ~FixtureClass##TestName##Helper()                                                               \
-68:     {                                                                                                       \
-69:         TearDown();                                                                                         \
-70:     }                                                                                                       \
-71:     FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
-72:     virtual void SetUp() {}                                                                                 \
-73:     virtual void TearDown() {}                                                                              \
-74:     void RunImpl() const;                                                                                   \
-75:     unittest::TestDetails const & m_details;                                                                \
-76: };                                                                                                          \
-77:                                                                                                             \
-78: class Test##FixtureClass##TestName : public unittest::TestBase                                              \
-79: {                                                                                                           \
-80: public:                                                                                                     \
-81:     Test##FixtureClass##TestName() :                                                                        \
-82:         TestBase(baremetal::string(#TestName), baremetal::string(#FixtureClass), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__) \
-83:     {                                                                                                       \
-84:     }                                                                                                       \
-85: private:                                                                                                    \
-86:     void RunImpl() const override;                                                                          \
-87: } test##FixtureClass##TestName##Instance;                                                                   \
-88:                                                                                                             \
-89: unittest::TestRegistrar registrar##FixtureClass##TestName(Registry, &test##FixtureClass##TestName##Instance); \
-90:                                                                                                             \
-91: void Test##FixtureClass##TestName::RunImpl() const                                                          \
-92: {                                                                                                           \
-93:     bool ctorOk = false;                                                                                    \
-94:     FixtureClass##TestName##Helper fixtureHelper(Details());                                                \
-95:     unittest::ExecuteTest(fixtureHelper, Details());                                                        \
-96: }                                                                                                           \
-97: void FixtureClass##TestName##Helper::RunImpl() const
-98:
-99: #define TEST_FIXTURE(FixtureClass,TestName) TEST_FIXTURE_EX(FixtureClass,TestName,unittest::TestRegistry::GetTestRegistry())
-100:
-101: #define TEST_SUITE(SuiteName)                                                                               \
-102:     namespace Suite##SuiteName                                                                              \
-103:     {                                                                                                       \
-104:         inline char const* GetSuiteName()                                                                   \
-105:         {                                                                                                   \
-106:             return baremetal::string(#SuiteName);                                                           \
-107:         }                                                                                                   \
-108:     }                                                                                                       \
-109:     namespace Suite##SuiteName
-```
-
-- Line 42-53: We define the macro `TEST_EX`. This is used by macro `TEST`,
-The parameters are the name of the test `TestName` and the reference to the singleton `TestRegistery` instance `Registry`.
-It declare the class `Test<TestName>`, which inherits from `TestBase`, and defines an instance named `test<TestName>Instance`.
-It then defines a `TestRegistrar` instance named `registrar<TestName>` which register the instance `test<TestName>Instance`.
-It then starts the definition of the `RunImpl()` which is expected to be follow by the actual implementation of the test.
-Compare this to the application code we wrote before:
-```cpp
-File: code/applications/demo/src/main.cpp
-196: class MyTest3
-197:     : public TestBase
-198: {
-199: public:
-200:     MyTest3()
-201:         : TestBase("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__)
-202:     {
-203:
-204:     }
-205:     void RunImpl() const override;
-206: } MyTest3Instance;
-207:
-208: TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &MyTest3Instance);
-209:
-210: void MyTest3::RunImpl() const
-211: {
-212:     LOG_DEBUG("Running %s in fixture %s in suite %s", Details().TestName().c_str(), Details().FixtureName().c_str(), Details().SuiteName().empty() ? "default" : Details().SuiteName().c_str());
-213:     FixtureMyTest3Helper fixtureHelper(Details());
-214:     fixtureHelper.RunImpl();
-215: }
-```
-
-- Line 55: We define the macro `TEST` which uses `TEST_EX` to register the test named `TestName`.
-The only parameter for `TEST` is `TestName`, the name of the test.
-The `TEST` macro is intended for tests that do not belong to a test fixture.
-The way this macro can be used is as follow:
-
-```cpp
-TEST(MyTest)
-{
-    // Test implementation
-}
-```
-
-- Line 57-97: We define the macro `TEST_FIXTURE_EX`. This is used by macro `TEST_FIXTURE`,
-The parameters are the name of the fixture class `FixtureClass`, the name of the test `TestName` and the reference to the singleton `TestRegistery` instance `Registry`.
-It declare the class `<FixtureClass><TestName>Helper`, which inherits from the `FixtureClass`, the class we defined for the fixture.
-It then declares a class `Test<FixtureClass><TestName>`, which inherits from `TestBase`, and defines an instance named `test<FixtureClass><TestName>Instance`.
-It then defines a `TestRegistrar` instance named `registrar<FixtureClass><TestName>` which register the instance `test<FixtureClass><TestName>Instance`.
-It then defines the implement of `RunImpl()` for the class `Test<FixtureClass><TestName>`. This creates and instance of class `<FixtureClass><TestName>Helper`, and then uses the `ExecuteTest()` function to run the test.
-Finally, it then starts the definition of the `RunImpl()` for the class `<FixtureClass><TestName>Helper` which is expected to be follow by the actual implementation of the test.
-Compare this to the application code we wrote before:
-
-```cpp
-File: code/applications/demo/src/main.cpp
-172: class FixtureMyTest3Helper
-173:     : public FixtureMyTest3
-174: {
-175: public:
-176:     FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
-177:     explicit FixtureMyTest3Helper(const TestDetails& details)
-178:         : m_details{ details }
-179:     {
-180:         SetUp();
-181:     }
-182:     virtual ~FixtureMyTest3Helper()
-183:     {
-184:         TearDown();
-185:     }
-186:     FixtureMyTest3Helper& operator = (const FixtureMyTest3Helper&) = delete;
-187:     void RunImpl() const;
-188:     const TestDetails& m_details;
-189: };
-190: void FixtureMyTest3Helper::RunImpl() const
-191: {
-192:     LOG_DEBUG(m_details.FixtureName().c_str());
-193:     CurrentTest::Results()->OnTestFailure(m_details, "Fail");
-194: }
-195:
-196: class MyTest3
-197:     : public TestBase
-198: {
-199: public:
-200:     MyTest3()
-201:         : TestBase("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__)
-202:     {
-203:
-204:     }
-205:     void RunImpl() const override;
-206: } MyTest3Instance;
-207:
-208: TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &MyTest3Instance);
-209:
-210: void MyTest3::RunImpl() const
-211: {
-212:     LOG_DEBUG("Running %s in fixture %s in suite %s", Details().TestName().c_str(), Details().FixtureName().c_str(), Details().SuiteName().empty() ? "default" : Details().SuiteName().c_str());
-213:     FixtureMyTest3Helper fixtureHelper(Details());
-214:     fixtureHelper.RunImpl();
-215: }
-```
-
-- Line 99: We define the macro `TEST_FIXTURE` which uses `TEST_FIXTURE_EX` to register the test named `TestName` for test firture class `FixtureClass`.
-The parameters are the name of the fixture class `FixtureClass`, the name of the test `TestName`.
-The `TEST_FIXTURE` macro is intended for tests that do belong to a test fixture.
-The way this macro can be used is as follow:
-
-```cpp
-class MyFixture
-    : public TestFixture
-{
-public:
-    void SetUp() override
-    {
-        // Setup code
-    }
-    void TearDown() override
-    {
-        // Teardown code
-    }
-};
-
-TEST_FIXTURE(MyFixture, MyTest)
-{
-    // Test implementation
-}
-```
-
-Of course there can be multiple tests in a fixture, so the `TEST_FIXTURE` macro can be repeated
-
-- Line 101-109: We define the macro `TEST_SUITE` which defined a test suite. It create a namespace for the test suite named `SuiteName`.
-The only parameter is the name of the test suite `SuiteName`.
-The `TEST_SUITE` macro is intended for create a test suite around tests and test fixtures.
-The way this macro can be used is as follow:
-
-```cpp
-TEST_SUITE(MySuite)
-{
-
-TEST(MyTest)
-{
-    // Test implementation
-}
-
-or
-
-TEST_FIXTURE(MyFixture, MyTest)
-{
-    // Test implementation
-}
-
-}
-```
-
-Compare the defintion of this macro to the application code we wrote before:
-
-```cpp
-File: code/applications/demo/src/main.cpp
-24: namespace Suite1 {
-25:
-26: inline char const* GetSuiteName()
-27: {
-28:     return baremetal::string("Suite1");
-29: }
-...
-89: } // namespace Suite1
-```
-
-### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_TESTREGISTRYH}
-
-Now that we are using macros to define test suite, test fixture and tests, we can make some of the methods private.
-Let's start at the top level with the `TestRegistry` class.
-
-Update the file `code/libraries/unittest/include/unittest/TestRegistry.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestRegistry.h
-...
-51: class TestRegistry
-52: {
-53: private:
-54:     friend class TestRegistrar;
-55:     TestSuiteInfo* m_head;
-56:     TestSuiteInfo* m_tail;
-57:
-58: public:
-59:     static const char* DefaultFixtureName;
-60:     static const char* DefaultSuiteName;
-61:
-62:     TestRegistry();
-63:     TestRegistry(const TestRegistry&) = delete;
-64:     TestRegistry(TestRegistry&&) = delete;
-65:     virtual ~TestRegistry();
-66:
-67:     TestRegistry& operator = (const TestRegistry&) = delete;
-68:     TestRegistry& operator = (TestRegistry&&) = delete;
-69:
-70:     TestSuiteInfo* GetHead() const;
-71:
-72:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-73:     template <typename Predicate> int CountSuitesIf(Predicate predicate);
-74:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
-75:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-76:
-77:     static TestRegistry& GetTestRegistry();
-78:
-79: private:
-80:     TestSuiteInfo* GetTestSuite(const baremetal::string& suiteName);
-81:     void AddSuite(TestSuiteInfo* testSuite);
-82: };
-```
-
-- Line 54: We make `TestRegistrar` a friend class
-- Line 80: We move the method `GetTestSuite() to make it private
-- Line 81: We make the method `AddSuite()` private
-
-### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_TESTSUITEINFOH}
-
-We will also make similar methods in the `TestSuiteInfo` class private.
-
-Update the file `code/libraries/unittest/include/unittest/TestSuiteInfo.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
-...
-51: class TestSuiteInfo
-52: {
-53: private:
-54:     friend class TestRegistry;
-55:     friend class TestRegistrar;
-56:     TestFixtureInfo* m_head;
-57:     TestFixtureInfo* m_tail;
-58:     TestSuiteInfo* m_next;
-59:     baremetal::string m_suiteName;
-60:
-61: public:
-62:     TestSuiteInfo() = delete;
-63:     TestSuiteInfo(const TestSuiteInfo&) = delete;
-64:     TestSuiteInfo(TestSuiteInfo&&) = delete;
-65:     explicit TestSuiteInfo(const baremetal::string& suiteName);
-66:     virtual ~TestSuiteInfo();
-67:
-68:     TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
-69:     TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
-70:
-71:     TestFixtureInfo* GetHead() const;
-72:
-73:     const baremetal::string& Name() const { return m_suiteName; }
-74:
-75:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-76:
-77:     int CountFixtures();
-78:     int CountTests();
-79:     template <typename Predicate> int CountFixturesIf(Predicate predicate);
-80:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-81:
-82: private:
-83:     TestFixtureInfo* GetTestFixture(const baremetal::string& fixtureName);
-84:     void AddFixture(TestFixtureInfo* testFixture);
-85: };
-```
-
-- Line 55: We make `TestRegistrar` a friend class
-- Line 83: We move the method `GetTestFixture() to make it private
-- Line 84: We make the method `AddFixture()` private
-
-### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_TESTFIXTUREINFOH}
-
-We will also make similar methods in the `TestFixtureInfo` class private.
-
-Update the file `code/libraries/unittest/include/unittest/TestFixtureInfo.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
-...
-50: class TestFixtureInfo
-51: {
-52: private:
-53:     friend class TestSuiteInfo;
-54:     friend class TestRegistrar;
-55:     TestBase* m_head;
-56:     TestBase* m_tail;
-57:     TestFixtureInfo* m_next;
-58:     baremetal::string m_fixtureName;
-59:
-60: public:
-61:     TestFixtureInfo() = delete;
-62:     TestFixtureInfo(const TestFixtureInfo&) = delete;
-63:     TestFixtureInfo(TestFixtureInfo&&) = delete;
-64:     explicit TestFixtureInfo(const baremetal::string& fixtureName);
-65:     virtual ~TestFixtureInfo();
-66:
-67:     TestFixtureInfo & operator = (const TestFixtureInfo &) = delete;
-68:     TestFixtureInfo& operator = (TestFixtureInfo&&) = delete;
-69:
-70:     TestBase* GetHead() const;
-71:
-72:     const baremetal::string& Name() const { return m_fixtureName; }
-73:
-74:     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
-75:
-76:     int CountTests();
-77:     template <typename Predicate> int CountTestsIf(Predicate predicate);
-78:
-79: private:
-80:     void AddTest(TestBase* test);
-81: };
-```
-
-- Line 54: We make `TestRegistrar` a friend class
-- Line 80: We make the method `AddTest()` private
-
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_UNITTESTH}
-
-We added a header file, so we'll update the `unittest.h` header
-
-Update the file `code/libraries/unittest/include/unittest/unittest.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/unittest.h
-...
-42: #include <unittest/TestFixture.h>
-43: #include <unittest/TestSuite.h>
-44:
-45: #include <unittest/ITestReporter.h>
-46: #include <unittest/ConsoleTestReporter.h>
-47: #include <unittest/ExecuteTest.h>
-48: #include <unittest/TestBase.h>
-49: #include <unittest/TestDetails.h>
-50: #include <unittest/TestFixtureInfo.h>
-51: #include <unittest/TestMacros.h>
-52: #include <unittest/TestRegistry.h>
-53: #include <unittest/TestResults.h>
-54: #include <unittest/TestRunner.h>
-55: #include <unittest/TestSuiteInfo.h>
-```
-
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_UPDATE_PROJECT_CONFIGURATION}
-
-As we added some files, we need to update the CMake file.
-
-Update the file `code/libraries/unittest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unittest/CMakeLists.txt
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
-40:     )
-41:
-42: set(PROJECT_INCLUDES_PUBLIC
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
-44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
-46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
-51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
-52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
-58:     )
-59: set(PROJECT_INCLUDES_PRIVATE )
-```
-
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_APPLICATION_CODE}
-
-Now that we have added a test runner and a test report, we can use these to make running the tests even simpler.
-
-Update the file `code\applications\demo\src\main.cpp`
-
-```cpp
-File: code\applications\demo\src\main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16:
-17: #include <unittest/unittest.h>
-18:
-19: LOG_MODULE("main");
-20:
-21: using namespace baremetal;
-22: using namespace unittest;
-23:
-24: TEST_SUITE(Suite1)
-25: {
-26:
-27: class FixtureMyTest1
-28:     : public TestFixture
-29: {
-30: public:
-31:     void SetUp() override
-32:     {
-33:         LOG_DEBUG("FixtureMyTest1 SetUp");
-34:     }
-35:     void TearDown() override
-36:     {
-37:         LOG_DEBUG("FixtureMyTest1 TearDown");
-38:     }
-39: };
-40:
-41: TEST_FIXTURE(FixtureMyTest1,Test1)
-42: {
-43:     LOG_DEBUG(m_details.FixtureName().c_str());
-44: }
-45:
-46: } // Suite1
-47:
-48: TEST_SUITE(Suite2)
-49: {
-50:
-51: class FixtureMyTest2
-52:     : public TestFixture
-53: {
-54: public:
-55:     void SetUp() override
-56:     {
-57:         LOG_DEBUG("FixtureMyTest2 SetUp");
-58:     }
-59:     void TearDown() override
-60:     {
-61:         LOG_DEBUG("FixtureMyTest2 TearDown");
-62:     }
-63: };
-64:
-65: TEST_FIXTURE(FixtureMyTest2, Test2)
-66: {
-67:     LOG_DEBUG(m_details.FixtureName().c_str());
-68: }
-69:
-70: } // Suite2
-71:
-72: class FixtureMyTest3
-73:     : public TestFixture
-74: {
-75: public:
-76:     void SetUp() override
-77:     {
-78:         LOG_DEBUG("FixtureMyTest3 SetUp");
-79:     }
-80:     void TearDown() override
-81:     {
-82:         LOG_DEBUG("FixtureMyTest3 TearDown");
-83:     }
-84: };
-85:
-86: TEST_FIXTURE(FixtureMyTest3, Test3)
-87: {
-88:     LOG_DEBUG(m_details.FixtureName().c_str());
-89:     CurrentTest::Results()->OnTestFailure(m_details, "Fail");
-90: }
-91:
-92: TEST(Test4)
-93: {
-94:     LOG_DEBUG(Details().FixtureName().c_str());
-95:     CurrentTest::Results()->OnTestFailure(Details(), "Fail");
-96:     CurrentTest::Results()->OnTestFailure(Details(), "FailAgain");
-97: }
-98:
-99: int main()
-100: {
-101:     auto& console = GetConsole();
-102:     LOG_DEBUG("Hello World!");
-103:
-104:     ConsoleTestReporter reporter;
-105:     RunAllTests(&reporter);
-106:
-107:     LOG_INFO("Wait 5 seconds");
-108:     Timer::WaitMilliSeconds(5000);
-109:
-110:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-111:     char ch{};
-112:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-113:     {
-114:         ch = console.ReadChar();
-115:         console.WriteChar(ch);
-116:     }
-117:     if (ch == 'p')
-118:         assert(false);
-119:
-120:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-121: }
-```
-
-- Line 24: We replace the namespace Suite1 and its `GetSuiteName()` function by the macro `TEST_SUITE`
-- Line 41: We replace the declaration and definition of classes `FixtureMyTest1Helper` and `MyTest1` by the macro `TEST_FIXTURE`.
-Note that we still need to defined the class `FixtureMyTest1` as it defines common behaviour for all tests in the test fixture
-- Line 48: We replace the namespace Suite2 and its `GetSuiteName()` function by the macro `TEST_SUITE`
-- Line 65: We replace the declaration and definition of classes `FixtureMyTest2Helper` and `MyTest2` by the macro `TEST_FIXTURE`.
-Note that we still need to defined the class `FixtureMyTest2` as it defines common behaviour for all tests in the test fixture
-- Line 86: We replace the declaration and definition of classes `FixtureMyTest3Helper` and `MyTest3` by the macro `TEST_FIXTURE`.
-Note that we still need to defined the class `FixtureMyTest3` as it defines common behaviour for all tests in the test fixture
-- Line 92-97: We define a test outside of a fixture using the `TEST` macro. Note that its implementation generates two failures
-
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_MACROS__STEP_6_CONFIGURING_BUILDING_AND_DEBUGGING}
-
-We can now configure and build our code, and start debugging.
-
-The application will run the tests. As we have one failure in `Test3`, and two in `Test4`, we expect to see two failing tests, and three failures in total.
-
-```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Debug  Register test Test1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:122)
-Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:122)
-Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test4 in fixture DefaultFixture in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... found (TestRegistry:93)
-Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:79)
-Info   Starting up (System:201)
-Debug  Hello World! (main:102)
-[===========] Running 4 tests from 4 fixtures in 3 suites.
-[   SUITE   ] Suite1 (1 fixture)
-[  FIXTURE  ] FixtureMyTest1 (1 test)
-Debug  FixtureMyTest1 (main:43)
-[ SUCCEEDED ] Suite1::FixtureMyTest1::Test1
-[  FIXTURE  ] 1 test from FixtureMyTest1
-[   SUITE   ] 1 fixture from Suite1
-[   SUITE   ] Suite2 (1 fixture)
-[  FIXTURE  ] FixtureMyTest2 (1 test)
-Debug  FixtureMyTest2 (main:67)
-[ SUCCEEDED ] Suite2::FixtureMyTest2::Test2
-[  FIXTURE  ] 1 test from FixtureMyTest2
-[   SUITE   ] 1 fixture from Suite2
-[   SUITE   ] DefaultSuite (2 fixtures)
-[  FIXTURE  ] FixtureMyTest3 (1 test)
-Debug  FixtureMyTest3 (main:88)
-FixtureMyTest3::Test3 failure Fail
-[  FAILED   ] FixtureMyTest3::Test3
-[  FIXTURE  ] 1 test from FixtureMyTest3
-[  FIXTURE  ] DefaultFixture (1 test)
-Debug   (main:94)
-Test4 failure Fail
-Test4 failure FailAgain
-[  FAILED   ] Test4
-[  FIXTURE  ] 1 test from DefaultFixture
-[   SUITE   ] 2 fixtures from DefaultSuite
-FAILURE: 2 out of 4 tests failed (3 failures).
-
-Failures: 3
-[===========] 4 tests from 4 fixtures in 3 suites ran.
-Info   Wait 5 seconds (main:107)
-Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
-```
-
-## Collecting test information - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7}
-
-So far we have been focussing on the structure for running tests, but not on the actual tests.
-It would be nice to be able to check using simple statements such as:
-
-```cpp
-TEST(MyTest)
-{
-    bool b{};
-    EXPECT_FALSE(b);
-    ASSERT_TRUE(!b);
-    ASSERT_EQ(b, false);
-}
-```
-
-Let's create macros to perform these checks, and and a mechanisn to trace back the reason for a failure, for example when we expect to have a certain value, what the expected and actual values were.
-Before we do that, let's upgrade our ConsoleTestReporter, such that it keeps the results of the test run, so we can print the information on failures as part of the summary.
-That way the test run output itself we be more clean, and we have a simple summary of all failures. For this, we'll introduce a new class `DeferredTestReporter`.
-
-### TestResult.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_TESTRESULTH}
-
-The `DeferredTestReporter` will use a list of entries holding a `TestResult` to keep track of the results during the test run.
-The `TestResult` class will hold the information and result for a single test, which is extracted initially from `TestDetails`.
-If a test failure occures, the failure information is attached to the `TestResult`.
-We need to declare this class.
-
-Create the file `code/libraries/unittest/include/unittest/TestResult.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestResult.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestResult.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestResult
-9: //
-10: // Description : Test result
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: #include <unittest/TestDetails.h>
-44: 
-45: namespace unittest
-46: {
-47: 
-48: class Failure
-49: {
-50: private:
-51:     int m_lineNumber;
-52:     baremetal::string m_text;
-53: 
-54: public:
-55:     Failure(int lineNumber, const baremetal::string& text);
-56:     int SourceLineNumber() const { return m_lineNumber; }
-57:     const baremetal::string& Text() const { return m_text; }
-58: };
-59: 
-60: class FailureEntry
-61: {
-62: private:
-63:     friend class FailureList;
-64:     Failure m_failure;
-65:     FailureEntry* m_next;
-66: 
-67: public:
-68:     explicit FailureEntry(const Failure& failure);
-69:     const Failure& GetFailure() const { return m_failure; }
-70:     const FailureEntry* GetNext() const { return m_next; }
-71: };
-72: 
-73: class FailureList
-74: {
-75: private:
-76:     FailureEntry* m_head;
-77:     FailureEntry* m_tail;
-78: 
-79: public:
-80:     FailureList();
-81:     ~FailureList();
-82: 
-83:     const FailureEntry* GetHead() const { return m_head; }
-84:     void Add(const Failure& failure);
-85: };
-86: 
-87: class TestResult
-88: {
-89: private:
-90:     TestDetails m_details;
-91:     FailureList m_failures;
-92:     bool m_failed;
-93: 
-94: public:
-95:     TestResult() = delete;
-96:     explicit TestResult(const TestDetails & details);
-97: 
-98:     void AddFailure(const Failure& failure);
-99:     const FailureList & Failures() const { return m_failures; }
-100:     bool Failed() const { return m_failed; }
-101:     const TestDetails& Details() const { return m_details; }
-102: };
-103: 
-104: } // namespace unittest
-```
-
-- Line 48-58: We declare a class `Failure` to hold a single failure
-  - Line 51: The member variable `m_lineNumber` holds the line number in the source file where the failure occurred
-  - Line 52: The member variable `m_text` holds the failure message
-  - Line 55: We declare the constructor
-  - Line 56: We declare and define the method `SourceLineNumber()` which returns the line number
-  - Line 57: We declare and define the method `Text()` which returns the failure message
-- Line 60-71: We declare a class `FailureEntry` which holds a failure, and a pointer to the next failure
-  - Line 64: The member variable `m_failure` holds the failure
-  - Line 65: The member variable `m_next` holds a pointer to the next `FailureEntry` in the list
-  - Line 68: We declare the constructor
-  - Line 69: We declare and define the method `GetFailure()` which returns a const reference to the failure
-  - Line 70: We declare and define the method `GetNext()` which returns a const pointer to the next `FailureEntry` in the list
-- Line 73-85: We declare a class `FailureList` which holds a pointer to the beginning and the end of a `FailureEntry` list
-  - Line 76-77: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
-  - Line 80: We declare the constructor
-  - Line 81: We declare the destructor, which will clean up the list of `FailureEntry` instances
-  - Line 83: We declare and define the method `GetHead()` which returns a const pointer to the first `FailureEntry` in the list
-  - Line 84: We declare and define the method `Add()` which adds a failure to the list (embedded in a `FailureEntry` instance)
-- Line 87-104: We declare the class `TestResult`
-  - Line 90: The member variable `m_details` holds the test details
-  - Line 91: The member variable `m_failures` holds the failure list
-  - Line 92: The member variable `m_failed` holds true if at least one failure occurred for this test
-  - Line 95: We remove the default constructor
-  - Line 96: We declare an explicit constructor
-  - Line 98: We declare the method `AddFailure()` which adds a failure to the list
-  - Line 99: We declare and define the method `Failures()` which returns a const reference to the failure list
-  - Line 100: We declare and define the method `Failed()` which returns true if a failure occurred
-  - Line 101: We declare and define the method `Details()` which returns the test details
-
-### TestResult.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_TESTRESULTCPP}
-
-Let's implement the `TestResult` class.
-
-Create the file `code/libraries/unittest/src/TestResult.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestResult.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestResult.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestResult
-9: //
-10: // Description : Test result
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: // 
-38: //------------------------------------------------------------------------------
-39: 
-40: #include <unittest/TestResult.h>
-41: 
-42: #include <unittest/TestDetails.h>
-43: 
-44: using namespace baremetal;
-45: 
-46: namespace unittest {
-47: 
-48: Failure::Failure(int lineNumber, const baremetal::string& text)
-49:     : m_lineNumber{lineNumber}
-50:     , m_text{text}
-51: {
-52: }
-53: 
-54: FailureEntry::FailureEntry(const Failure& failure)
-55:     : m_failure{ failure }
-56:     , m_next{}
-57: {
-58: }
-59: 
-60: FailureList::FailureList()
-61:     : m_head{}
-62:     , m_tail{}
-63: {
-64: }
-65: 
-66: FailureList::~FailureList()
-67: {
-68:     auto current = m_head;
-69:     while (current != nullptr)
-70:     {
-71:         auto next = current->m_next;
-72:         delete current;
-73:         current = next;
-74:     }
-75: }
-76: 
-77: void FailureList::Add(const Failure& failure)
-78: {
-79:     auto entry = new FailureEntry(failure);
-80:     if (m_head == nullptr)
-81:     {
-82:         m_head = entry;
-83:     }
-84:     else
-85:     {
-86:         auto current = m_head;
-87:         while (current->m_next != nullptr)
-88:             current = current->m_next;
-89:         current->m_next = entry;
-90:     }
-91:     m_tail = entry;
-92: }
-93: 
-94: TestResult::TestResult(const TestDetails& details)
-95:     : m_details{ details }
-96:     , m_failures{}
-97:     , m_failed{}
-98: {
-99: }
-100: 
-101: void TestResult::AddFailure(const Failure& failure)
-102: {
-103:     m_failures.Add(failure);
-104:     m_failed = true;
-105: }
-106: 
-107: } // namespace unittest
-```
-
-- Line 48-52: We implement the `Failure` constructor
-- Line 54-58: We implement the `FailureEntry` constructor
-- Line 60-64: We implement the `FailureList` constructor
-- Line 66-75: We implement the `FailureList` destructor. This will delete all `FailureEntry` instances in the list
-- Line 77-92: We implement the method `Add()` for `FailureList`. This will create a new `FailureEntry` with the `Failure` in it, and insert at the end of the list
-- Line 94-99: We implement the `TestResult` constructor
-- Line 101-105: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
-
-### DeferredTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_DEFERREDTESTREPORTH}
-
-Let's declare the `DeferredTestReporter` class.
-
-Create the file `code/libraries/unittest/include/unittest/DeferredTestReporter.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : DeferredTestReporter.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : DeferredTestReporter
-9: //
-10: // Description : Deferred test reporter, which saves test results
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #include <unittest/ITestReporter.h>
-41: #include <unittest/TestResult.h>
-42: 
-43: namespace unittest
-44: {
-45: 
-46: class ResultEntry
-47: {
-48: private:
-49:     friend class ResultList;
-50:     TestResult m_result;
-51:     ResultEntry* m_next;
-52: 
-53: public:
-54:     explicit ResultEntry(const TestResult& result);
-55:     TestResult& GetResult() { return m_result; }
-56:     ResultEntry* GetNext() { return m_next; }
-57: };
-58: 
-59: class ResultList
-60: {
-61: private:
-62:     ResultEntry* m_head;
-63:     ResultEntry* m_tail;
-64: 
-65: public:
-66: 
-67:     ResultList();
-68:     ~ResultList();
-69: 
-70:     void Add(const TestResult& result);
-71:     ResultEntry* GetHead() const { return m_head; }
-72:     ResultEntry* GetTail() const { return m_tail; }
-73: };
-74: 
-75: class DeferredTestReporter : public ITestReporter
-76: {
-77: private:
-78:     ResultList m_results;
-79: 
-80: public:
-81:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-82:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-83:     void ReportTestRunSummary(const TestResults& results) override;
-84:     void ReportTestRunOverview(const TestResults& results) override;
-85:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-86:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-87:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
-88:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
-89:     void ReportTestStart(const TestDetails& details) override;
-90:     void ReportTestFinish(const TestDetails& details, bool success) override;
-91:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
-92: 
-93:     ResultList& Results();
-94: };
-95: 
-96: } // namespace unittest
-```
-
-- Line 46-57: We declare the struct `ResultEntry`, which holds a `TestResult`, which we'll declare later, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
-  - Line 50: The member variable `m_result` holds the test result
-  - Line 51: The member variable `m_next` holds the pointer to the next `ResultEntry` in the list
-  - Line 54: We declare the constructor
-  - Line 55: We declare and define the method `GetResult()` which returns the test result
-  - Line 56: We declare and define the method `GetNext()` which returns the pointer to the next `ResultEntry` in the list
-- Line 59-73: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
-  - Line 62-63-77: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
-  - Line 67: We declare the constructor
-  - Line 68: We declare the destructor, which will clean up the list of `ResultEntry` instances
-  - Line 70: We declare and define the method `Add()` which adds a test result to the list (embedded in a `ResultEntry` instance)
-  - Line 71: We declare and define the method `GetHead()` which returns a const pointer to the first `ResultEntry` in the list
-  - Line 72: We declare and define the method `GetTail()` which returns a const pointer to the last `ResultEntry` in the list
-- Line 75-94: We declare the class `DeferredTestReporter`, which implements the abstract interface `ITestReporter`
-  - Line 78: The class variable `m_results` holds the list of test results saved during the test run
-  - Line 81-91: We implement the `ITestReporter` interface
-  - Line 93: We declare the method `Results()` which returns the `ResultList`
-
-### DeferredTestReport.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_DEFERREDTESTREPORTCPP}
-
-Let's implement the `DeferredTestReport` class.
-
-Create the file `code/libraries/unittest/src/DeferredTestReport.cpp`
-
-```cpp
-File: code/libraries/unittest/src/DeferredTestReport.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : DeferredTestReporter.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : DeferredTestReporter
-9: //
-10: // Description : Test detail
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: // 
-38: //------------------------------------------------------------------------------
-39: 
-40: #include <unittest/DeferredTestReporter.h>
-41: 
-42: #include <unittest/TestDetails.h>
-43: 
-44: using namespace baremetal;
-45: 
-46: namespace unittest
-47: {
-48: 
-49: ResultEntry::ResultEntry(const TestResult& result)
-50:     : m_result{ result }
-51:     , m_next{}
-52: {
-53: }
-54: 
-55: ResultList::ResultList()
-56:     : m_head{}
-57:     , m_tail{}
-58: {
-59: }
-60: 
-61: ResultList::~ResultList()
-62: {
-63:     auto current = m_head;
-64:     while (current != nullptr)
-65:     {
-66:         auto next = current->m_next;
-67:         delete current;
-68:         current = next;
-69:     }
-70: }
-71: 
-72: void ResultList::Add(const TestResult& result)
-73: {
-74:     auto entry = new ResultEntry(result);
-75:     if (m_head == nullptr)
-76:     {
-77:         m_head = entry; 
-78:     }
-79:     else
-80:     {
-81:         auto current = m_head;
-82:         while (current->m_next != nullptr)
-83:             current = current->m_next;
-84:         current->m_next = entry;
-85:     }
-86:     m_tail = entry;
-87: }
-88: 
-89: void DeferredTestReporter::ReportTestRunStart(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
-90: {
-91: }
-92: 
-93: void DeferredTestReporter::ReportTestRunFinish(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
-94: {
-95: }
-96: 
-97: void DeferredTestReporter::ReportTestRunSummary(const TestResults& /*results*/)
-98: {
-99: }
-100: 
-101: void DeferredTestReporter::ReportTestRunOverview(const TestResults& /*results*/)
-102: {
-103: }
-104: 
-105: void DeferredTestReporter::ReportTestSuiteStart(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
-106: {
-107: }
-108: 
-109: void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTests*/)
-110: {
-111: }
-112: 
-113: void DeferredTestReporter::ReportTestFixtureStart(const string& /*fixtureName*/, int /*numberOfTests*/)
-114: {
-115: }
-116: 
-117: void DeferredTestReporter::ReportTestFixtureFinish(const string& /*fixtureName*/, int /*numberOfTests*/)
-118: {
-119: }
-120: 
-121: void DeferredTestReporter::ReportTestStart(const TestDetails& details)
-122: {
-123:     m_results.Add(TestResult(details));
-124: }
-125: 
-126: void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
-127: {
-128:     TestResult& result = m_results.GetTail()->GetResult();
-129: }
-130: 
-131: void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
-132: {
-133:     TestResult& result = m_results.GetTail()->GetResult();
-134:     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
-135: }
-136: 
-137: ResultList& DeferredTestReporter::Results()
-138: {
-139:     return m_results;
-140: }
-141: 
-142: } // namespace unittest
-```
-
-- Line 49-53: We implement the `ResultEntry` constructor
-- Line 55-59: We implement the `ResultList` constructor
-- Line 72-87: We implement the method `Add` for `ResultList`. This will create a new `ResultEntry` and insert it at the end of the list
-- Line 89-91: We implement the method `ReportTestRunStart` for `DeferredTestReporter`.
-This does nothing, as `DeferredTestReporter` does not report anything in itself. It simply stores test results 
-- Line 93-95: We implement the method `ReportTestRunFinish` for `DeferredTestReporter`. This again does nothing
-- Line 97-99: We implement the method `ReportTestRunSummary` for `DeferredTestReporter`. This again does nothing
-- Line 101-103: We implement the method `ReportTestRunOverview` for `DeferredTestReporter`. This again does nothing
-- Line 105-107: We implement the method `ReportTestSuiteStart` for `DeferredTestReporter`. This again does nothing
-- Line 109-111: We implement the method `ReportTestSuiteFinish` for `DeferredTestReporter`. This again does nothing
-- Line 113-115: We implement the method `ReportTestFixtureStart` for `DeferredTestReporter`. This again does nothing
-- Line 117-119: We implement the method `ReportTestFixtureFinish` for `DeferredTestReporter`. This again does nothing
-- Line 117-119: We implement the method `ReportTestStart` for `DeferredTestReporter`. This adds a new result to the list
-- Line 117-119: We implement the method `ReportTestFinish` for `DeferredTestReporter`. This again does nothing
-- Line 117-119: We implement the method `ReportTestFailure` for `DeferredTestReporter`. This adds a failure to the list for the current result
-- Line 117-119: We implement the method `Results` for `DeferredTestReporter`
-
-### ConsoleTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_CONSOLETESTREPORTH}
-
-We need to update the class `ConsoleTestReporter` to derive from `DeferredTestReporter`.
-
-Update the file  `code/libraries/unittest/include/unittest/ConsoleTestReport.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/ConsoleTestReport.h
-...
-42: #include <unittest/DeferredTestReporter.h>
-43: 
-...
-47: class ConsoleTestReporter : public DeferredTestReporter
-48: {
-...
-77:     baremetal::string TestFailureMessage(const TestResult& result, const Failure& failure);
-...
-```
-
-- Line 42: We need to include the header for `DeferredTestReporter` instead of for the interface
-- Line 47: We inherit from `DeferredTestReporter`
-- Line 77: We replace the method `TestFailureMessage()` with a version taking a `TestResult` and a `Failure`
-
-### ConsoleTestReport.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_CONSOLETESTREPORTCPP}
-
-Let's update the implementation for `ConsoleTestReport`.
-
-Update the file `code/libraries/unittest/src/ConsoleTestReport.cpp`
-
-```cpp
-File: code/libraries/unittest/src/ConsoleTestReport.cpp
-...
-133: void ConsoleTestReporter::ReportTestStart(const TestDetails& details)
-134: {
-135:     DeferredTestReporter::ReportTestStart(details);
-136: }
-137: 
-138: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
-139: {
-140:     DeferredTestReporter::ReportTestFinish(details, success);
-141:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
-142:     if (success)
-143:         GetConsole().Write(TestSuccessSeparator);
-144:     else
-145:         GetConsole().Write(TestFailSeparator);
-146:     GetConsole().ResetTerminalColor();
-147: 
-148:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
-149: }
-150: 
-151: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
-152: {
-153:     DeferredTestReporter::ReportTestFailure(details, failure);
-154: }
-...
-224: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
-225: {
-226: 
-227:     if (results.GetFailureCount() > 0)
-228:     {
-229:         string result = "Failures:\n";
-230:         auto testResultPtr = Results().GetHead();
-231:         while (testResultPtr != nullptr)
-232:         {
-233:             auto const& testResult = testResultPtr->GetResult();
-234:             if (testResult.Failed())
-235:             {
-236:                 auto failuresPtr = testResult.Failures().GetHead();
-237:                 while (failuresPtr != nullptr)
-238:                 {
-239:                     result.append(TestFailureMessage(testResult, failuresPtr->GetFailure()));
-240:                     failuresPtr = failuresPtr->GetNext();
-241:                 }
-242:             }
-243:             testResultPtr = testResultPtr->GetNext();
-244:         }
-245:         return result;
-246:     }
-247:     return "No failures";
-248: }
-249: 
-250: string ConsoleTestReporter::TestFailureMessage(const TestResult& result, const Failure& failure)
-251: {
-252:     return Format("%s:%d : Failure in %s: %s\n",
-253:         result.Details().SourceFileName().c_str(),
-254:         failure.SourceLineNumber(), 
-255:         TestName(result.Details().SuiteName(), result.Details().FixtureName(), result.Details().TestName()).c_str(),
-256:         failure.Text().c_str());
-257: }
-...
-296: string ConsoleTestReporter::TestName(const string& suiteName, const string& fixtureName, const string& testName)
-297: {
-298:     string result;
-299:     if (!suiteName.empty())
-300:     {
-301:         result.append(suiteName);
-302:         result.append("::");
-303:     }
-304:     if (!fixtureName.empty())
-305:     {
-306:         result.append(fixtureName);
-307:         result.append("::");
-308:     }
-309:     result.append(testName);
-310:     return result;
-311: }
-...
-```
-
-- Line 133-136: We implement the method `ReportTestStart` by calling the same method in `DeferredTestReporter`
-- Line 138-149: We implement the method `ReportTestFinish` by first calling the same method in `DeferredTestReporter`
-- Line 151-154: We implement the method `ReportTestFailure` by calling the same method in `DeferredTestReporter`
-- Line 224-248: We implement the method `TestRunOverviewMessage` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
-- Line 250-257: We implement the method `TestFailureMessage` to print a correct failure message
-- Line 296: We remove the old implementation for `TestFailureMessage`
-
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_UPDATE_PROJECT_CONFIGURATION}
-
-As we added some files, we need to update the CMake file.
-
-Update the file `code/libraries/unittest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unittest/CMakeLists.txt
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
-34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResult.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
-42:     )
-43: 
-44: set(PROJECT_INCLUDES_PUBLIC
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
-46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResult.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
-58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
-59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
-60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
-61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
-62:     )
-63: set(PROJECT_INCLUDES_PRIVATE )
-```
-
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_APPLICATION_CODE}
-
-We will keep the application code unchanged for now.
-
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_7_CONFIGURING_BUILDING_AND_DEBUGGING}
-
-We can now configure and build our code, and start debugging.
-
-The application will run the tests. The reporting will be slightly different, as we now will see a summary of all failures.
-
-```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Debug  Register test Test1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:122)
-Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:122)
-Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test4 in fixture DefaultFixture in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... found (TestRegistry:93)
-Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:79)
-Info   Starting up (System:201)
-Debug  Hello World! (main:102)
-[===========] Running 4 tests from 4 fixtures in 3 suites.
-[   SUITE   ] Suite1 (1 fixture)
-[  FIXTURE  ] FixtureMyTest1 (1 test)
-Debug  FixtureMyTest1 (main:43)
-[ SUCCEEDED ] Suite1::FixtureMyTest1::Test1
-[  FIXTURE  ] 1 test from FixtureMyTest1
-[   SUITE   ] 1 fixture from Suite1
-[   SUITE   ] Suite2 (1 fixture)
-[  FIXTURE  ] FixtureMyTest2 (1 test)
-Debug  FixtureMyTest2 (main:67)
-[ SUCCEEDED ] Suite2::FixtureMyTest2::Test2
-[  FIXTURE  ] 1 test from FixtureMyTest2
-[   SUITE   ] 1 fixture from Suite2
-[   SUITE   ] DefaultSuite (2 fixtures)
-[  FIXTURE  ] FixtureMyTest3 (1 test)
-Debug  FixtureMyTest3 (main:88)
-[  FAILED   ] FixtureMyTest3::Test3
-[  FIXTURE  ] 1 test from FixtureMyTest3
-[  FIXTURE  ] DefaultFixture (1 test)
-Debug   (main:94)
-[  FAILED   ] Test4
-[  FIXTURE  ] 1 test from DefaultFixture
-[   SUITE   ] 2 fixtures from DefaultSuite
-FAILURE: 2 out of 4 tests failed (3 failures).
-
-Failures:
-../code/applications/demo/src/main.cpp:86 : Failure in FixtureMyTest3::Test3: Fail
-../code/applications/demo/src/main.cpp:92 : Failure in Test4: Fail
-../code/applications/demo/src/main.cpp:92 : Failure in Test4: FailAgain
-
-[===========] 4 tests from 4 fixtures in 3 suites ran.
-Info   Wait 5 seconds (main:107)
-Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
-```
-
-## Test assert macros - Step 8 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8}
-
-Now that we have a test reporter that can summarize the test results, let's move on to the actual tests.
-We'll define a set of macros, and we'll need to do some trickery to get it all to work well. So bare with me.
-
-We'll start with simple boolean tests, and equality / inequality of integral types. The rest will follow in the next and final step.
-
-### Checks.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_CHECKSH}
-
-We'll start with some utility functions and classes.
-
-Create the file `code/libraries/unittest/include/unittest/Checks.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/Checks.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : Checks.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : AssertionResult
-9: //
-10: // Description : Check functions
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: 
-44: #include <unittest/PrintValue.h>
-45: 
-46: namespace unittest
-47: {
-48: 
-49: class TestResults;
-50: class TestDetails;
-51: 
-52: struct AssertionResult
-53: {
-54:     AssertionResult(bool failed, const baremetal::string& message)
-55:         : failed(failed)
-56:         , message(message)
-57:     {
-58:     }
-59:     const bool failed;
-60:     const baremetal::string message;
-61:     operator bool() const { return failed; }
-62: };
-63: 
-64: extern AssertionResult AssertionSuccess();
-65: extern AssertionResult BooleanFailure(const baremetal::string& valueExpression,
-66:                                       const baremetal::string& expectedValue,
-67:                                       const baremetal::string& actualValue);
-68: extern AssertionResult EqFailure(const baremetal::string& expectedExpression,
-69:                                  const baremetal::string& actualExpression,
-70:                                  const baremetal::string& expectedValue,
-71:                                  const baremetal::string& actualValue);
-72: extern AssertionResult InEqFailure(const baremetal::string& expectedExpression,
-73:                                    const baremetal::string& actualExpression,
-74:                                    const baremetal::string& expectedValue,
-75:                                    const baremetal::string& actualValue);
-76: 
-77: template<typename Value>
-78: bool CheckTrue(const Value value)
-79: {
-80:     return !!value;
-81: }
-82: 
-83: template<typename Value>
-84: bool CheckFalse(const Value value)
-85: {
-86:     return !value;
-87: }
-88: 
-89: template <typename ToPrint>
-90: class FormatForComparison
-91: {
-92: public:
-93:     static baremetal::string Format(const ToPrint& value)
-94:     {
-95:         return PrintToString(value);
-96:     }
-97: };
-98: 
-99: template <typename T1>
-100: baremetal::string FormatForComparisonFailureMessage(const T1& value)
-101: {
-102:     return FormatForComparison<T1>::Format(value);
-103: }
-104: 
-105: template<typename Value>
-106: AssertionResult CheckTrue(const baremetal::string& valueName, const Value& value)
-107: {
-108:     if (!CheckTrue(value))
-109:     {
-110:         return BooleanFailure(valueName,
-111:                               baremetal::string("true"),
-112:                               PrintToString(value));
-113:     }
-114:     return AssertionSuccess();
-115: }
-116: 
-117: template< typename Value >
-118: AssertionResult CheckFalse(const baremetal::string& valueName, const Value& value)
-119: {
-120:     if (!CheckFalse(value))
-121:     {
-122:         return BooleanFailure(valueName,
-123:                               baremetal::string("false"),
-124:                               PrintToString(value));
-125:     }
-126:     return AssertionSuccess();
-127: }
-128: 
-129: template<typename Expected, typename Actual>
-130: bool AreEqual(const Expected& expected, const Actual& actual)
-131: {
-132:     return (expected == actual);
-133: }
-134: 
-135: template< typename Expected, typename Actual >
-136: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-137:                                    const Expected& expected, const Actual& actual)
-138: {
-139:     if (!AreEqual(expected, actual))
-140:     {
-141:         return EqFailure(expectedExpression, actualExpression,
-142:                          FormatForComparisonFailureMessage(expected),
-143:                          FormatForComparisonFailureMessage(actual));
-144:     }
-145:     return AssertionSuccess();
-146: }
-147: 
-148: template< typename Expected, typename Actual >
-149: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-150:                                       const Expected& expected, const Actual& actual)
-151: {
-152:     if (AreEqual(expected, actual))
-153:     {
-154:         return InEqFailure(expectedExpression, actualExpression,
-155:                            FormatForComparisonFailureMessage(expected),
-156:                            FormatForComparisonFailureMessage(actual));
-157:     }
-158:     return AssertionSuccess();
-159: }
-160: 
-161: class EqHelper
-162: {
-163: public:
-164:     // This templatized version is for the general case.
-165:     template <typename Expected, typename Actual>
-166:     static AssertionResult CheckEqual(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-167:                                       const Expected& expected, const Actual& actual)
-168:     {
-169:         return CheckEqualInternal(expectedExpression, actualExpression, expected, actual);
-170:     }
-171: 
-172:     template <typename Expected, typename Actual>
-173:     static AssertionResult CheckNotEqual(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-174:                                          const Expected& expected, const Actual& actual)
-175:     {
-176:         return CheckNotEqualInternal(expectedExpression, actualExpression, expected, actual);
-177:     }
-178: };
-179: 
-180: } // namespace unittest
-```
-
-- Line 52-62: We define a struct `AssertionResult` which holds the status for a single assertion.
-  - Line 54-58: We define the constructor
-  - Line 59: The member variable `failed` flags whether the assertion failed
-  - Line 60: The member vairbale `message` holds the failure message, if any
-  - Line 61: The `bool()` operator returns the value of `failed`
-- Line 64: We declare a function `AssertionSuccess()` to signify a successful assert
-- Line 65-67: We declare a function `BooleanFailure()` to signify a assertion failure on a boolean expression (e.g. `ASSERT_FALSE`, `EXPECT_TRUE`)
-- Line 68-71: We declare a function `EqFailure()` to signify a assertion failure on a equality expression (e.g. `EXPECT_EQ`)
-- Line 72-75: We declare a function `InEqFailure()` to signify a assertion failure on a inequality expression (e.g. `EXPECT_NE`)
-- Line 77-81: We declare a template function `CheckTrue()` to convert a value to a boolean, returning true if the value is true, or not equal to 0
-- Line 83-87: We define a template function `CheckFalse()` to convert a value to a boolean, returning true if the value is false, or equal to 0
-- Line 89-97: We define a template class `FormatForComparison` which has a single method `Format`, which prints the value passed to a string.
-The printing is done using functionality in the header `PrintValue.h` which we'll get to in a minute
-- Line 99-103: We define a template function `FormatForComparisonFailureMessage()` which uses the `FormatForComparison` class to print the value passed
-- Line 105-115: We define a template function `CheckTrue()` which takes a value and its stringified version, and uses the `CheckTrue()` defined before to check whether the value is seen as true.
-If so, `AssertionSuccess()` is returned, otherwise, `BooleanFailure()` is returned
-- Line 117-127: We define a template function `CheckFalse()` which takes a value and its stringified version, and uses the `CheckFalse()` defined before to check whether the value is seen as false.
-If so, `AssertionSuccess()` is returned, otherwise, `BooleanFailure()` is returned
-- Line 129-133: We define a template function `AreEqual()` to compare two values `expected` and `actual`, which can have different types.
-The function uses the equality operator to determine if the two values are equal
-- Line 135-146: We define a template function `CheckEqualInternal()`, which uses `AreEqual()` to compare two values `expected` and `actual`. Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 148-159: We define a template function `CheckNotEqualInternal()`, which uses `AreEqual()` to compare two values `expected` and `actual`. Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered inequal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 161-178: We declare a class `EqHelper` which has two methods `CheckEqual()` (which uses `CheckEqualInternal()`) and `CheckNotEqual()` (which uses `CheckNotEqualInternal()`)
-
-### Checks.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_CHECKSCPP}
-
-Let's implement the functions for the checks.
-
-Create the file `code/libraries/unittest/src/Checks.cpp`
-
-```cpp
-File: code/libraries/unittest/src/Checks.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : Checks.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : Checks
-9: //
-10: // Description : Check functions
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #include "unittest/Checks.h"
-41: 
-42: #include <baremetal/Format.h>
-43: #include <baremetal/Util.h>
-44: 
-45: using namespace baremetal;
-46: 
-47: namespace unittest {
-48: 
-49: AssertionResult AssertionSuccess()
-50: {
-51:     return AssertionResult(false, string());
-52: }
-53: 
-54: AssertionResult BooleanFailure(const string& valueExpression, const string& expectedValue, const string& actualValue)
-55: {
-56:     string result = Format("Value of: %s", valueExpression.c_str());
-57:     if (actualValue != valueExpression)
-58:     {
-59:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
-60:     }
-61: 
-62:     result.append(Format("\n  Expected: %s\n", expectedValue.c_str()));
-63: 
-64:     return AssertionResult(true, result);
-65: }
-66: 
-67: AssertionResult EqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
-68: {
-69:     string result = Format("Value of: %s", actualExpression.c_str());
-70:     if (actualValue != actualExpression)
-71:     {
-72:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
-73:     }
-74: 
-75:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
-76:     if (expectedValue != expectedExpression)
-77:     {
-78:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
-79:     }
-80:     result.append("\n");
-81: 
-82:     return AssertionResult(true, result);
-83: }
-84: 
-85: AssertionResult InEqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
-86: {
-87:     string result = Format("Value of: %s", actualExpression.c_str());
-88:     if (actualValue != actualExpression)
-89:     {
-90:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
-91:     }
-92: 
-93:     result.append(Format("\n  Expected not equal to: %s", expectedExpression.c_str()));
-94:     if (expectedValue != expectedExpression)
-95:     {
-96:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
-97:     }
-98:     result.append("\n");
-99: 
-100:     return AssertionResult(true, result);
-101: }
-102: 
-103: } // namespace unittest
-```
-
-- Line 49-52: We implement the function `AssertionSuccess()`. It will return an assertion result flagging no failure
-- Line 54-65: We implement the function `BooleanFailure()`. This will return an assertion result flagging a failure, with a string explaining that the actual value does not match the expected value
-- Line 67-83: We implement the function `EqFailure()`. This will return an assertion result flagging a failure, with a string explaining that the actual value is not equal to the expected value
-- Line 85-101: We implement the function `InEqFailure()`. This will return an assertion result flagging a failure, with a string explaining that the actual value is equal to the expected value
-
-### PrintValue.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_PRINTVALUEH}
-
-The `PrintValue` header contains a lot of template magic to print a value of any type. It is simplified for now, but will be extended in the next step.
-I'll try to explain as much as possible. Part of this code is based on how Google Test prints values.
-
-Create the file `code/libraries/unittest/include/unittest/PrintValue.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/PrintValue.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
-3: //
-4: // File        : PrintValue.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : -
-9: //
-10: // Description : Value printer
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: #include <baremetal/Serialization.h>
-44: 
-45: template <typename T>
-46: void PrintTo(const T& value, baremetal::string& s)
-47: {
-48:     s = baremetal::Serialize(value);
-49: }
-50: 
-51: inline void PrintTo(bool x, baremetal::string& s)
-52: {
-53:     s = (x ? "true" : "false");
-54: }
-55: 
-56: template <typename T>
-57: class UniversalPrinter
-58: {
-59: public:
-60:     // Note: we deliberately don't call this PrintTo(), as that name
-61:     // conflicts with ::testing::internal::PrintTo in the body of the
-62:     // function.
-63:     static void Print(const T& value, baremetal::string& s)
-64:     {
-65:         // By default, ::testing::internal::PrintTo() is used for printing
-66:         // the value.
-67:         //
-68:         // Thanks to Koenig look-up, if T is a class and has its own
-69:         // PrintTo() function defined in its namespace, that function will
-70:         // be visible here.  Since it is more specific than the generic ones
-71:         // in ::testing::internal, it will be picked by the compiler in the
-72:         // following statement - exactly what we want.
-73:         PrintTo(value, s);
-74:     }
-75: };
-76: 
-77: template <typename T>
-78: void UniversalPrint(const T& value, baremetal::string& s)
-79: {
-80:     typedef T T1;
-81:     UniversalPrinter<T1>::Print(value, s);
-82: }
-83: 
-84: template <typename T>
-85: class UniversalTersePrinter
-86: {
-87: public:
-88:     static void Print(const T& value, baremetal::string& s)
-89:     {
-90:         UniversalPrint(value, s);
-91:     }
-92: };
-93: template <typename T>
-94: class UniversalTersePrinter<T&>
-95: {
-96: public:
-97:     static void Print(const T& value, baremetal::string& s)
-98:     {
-99:         UniversalPrint(value, s);
-100:     }
-101: };
-102: 
-103: template <typename T>
-104: inline baremetal::string PrintToString(const T& value)
-105: {
-106:     baremetal::string s;
-107:     UniversalTersePrinter<T>::Print(value, s);
-108:     return s;
-109: }
-```
-
-- Line 46-49: We define a template function `PrintTo()` which is a fallback to print any value to a string using a serializer. This uses the polymorphism of the `Serialize` functions.
-- Line 51-54: We define a specialization to `PrintTo()` for boolean values
-- Line 56-75: We declare a template class `UniversalPrinter` that has a single method `Print()` which calls any defined `PrintTo()` function for the value passed to a string
-- Line 84-82: We define a template function `UniversalPrint` which uses the `Print()` method in the `UniversalPrinter` class
-- Line 84-92: We declare a template class `UniversalTersePrinter` for type `T` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-- Line 93-101: We declare a template class `UniversalTersePrinter` for type `T&` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-- Line 103-109: We define a template function `PrintToString()` which uses the `Print()` method of any matching class `UniversalTersePrinter`
-
-### AssertMacros.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_ASSERTMACROSH}
-
-Let's define the test macros.
-
-Create the file `code/libraries/unittest/include/unittest/AssertMacros.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/AssertMacros.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2023 Rene Barto
-3: //
-4: // File        : AssertMacros.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : Assertion macros
-9: //
-10: // Description : Test evaluation & assertion macros
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include "unittest/Checks.h"
-43: #include "unittest/CurrentTest.h"
-44: 
-45: #ifdef ASSERT_TRUE
-46:     #error unittest redefines ASSERT_TRUE
-47: #endif
-48: 
-49: #ifdef ASSERT_FALSE
-50:     #error unittest redefines ASSERT_FALSE
-51: #endif
-52: 
-53: #ifdef ASSERT_EQ
-54:     #error unittest redefines ASSERT_EQ
-55: #endif
-56: 
-57: #ifdef ASSERT_NE
-58:     #error unittest redefines ASSERT_NE
-59: #endif
-60: 
-61: #ifdef EXPECT_TRUE
-62:     #error unittest redefines EXPECT_TRUE
-63: #endif
-64: 
-65: #ifdef EXPECT_FALSE
-66:     #error unittest redefines EXPECT_FALSE
-67: #endif
-68: 
-69: #ifdef EXPECT_EQ
-70:     #error unittest redefines EXPECT_EQ
-71: #endif
-72: 
-73: #ifdef EXPECT_NE
-74:     #error unittest redefines EXPECT_NE
-75: #endif
-76: 
-77: #define UT_EXPECT_RESULT(value) \
-78:     do \
-79:     { \
-80:         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
-81:             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
-82:     } while (0)
-83: #define UT_ASSERT_RESULT(value) \
-84:     do \
-85:     { \
-86:         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
-87:         { \
-88:             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
-89:             /*throw ::unittest::AssertionFailedException(__FILE__, __LINE__);*/ \
-90:         } \
-91:     } while (0)
-92: 
-93: 
-94: #define EXPECT_PRED_FORMAT1(pred_format, v1) \
-95:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), v1))
-96: #define ASSERT_PRED_FORMAT1(pred_format, v1) \
-97:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), v1))
-98: 
-99: #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
-100:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-101: #define ASSERT_PRED_FORMAT2(pred_format, v1, v2) \
-102:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-103: 
-104: #define FAIL() EXPECT_TRUE(false)
-105: #define ASSERT_TRUE(value) \
-106:     do \
-107:     { \
-108:         ASSERT_PRED_FORMAT1(::unittest::CheckTrue, value); \
-109:     } while (0)
-110: #define EXPECT_TRUE(value) \
-111:     do \
-112:     { \
-113:         EXPECT_PRED_FORMAT1(::unittest::CheckTrue, value); \
-114:     } while (0)
-115: 
-116: #define ASSERT_FALSE(value) \
-117:     do \
-118:     { \
-119:         ASSERT_PRED_FORMAT1(::unittest::CheckFalse, value); \
-120:     } while (0)
-121: #define EXPECT_FALSE(value) \
-122:     do \
-123:     { \
-124:         EXPECT_PRED_FORMAT1(::unittest::CheckFalse, value); \
-125:     } while (0)
-126: 
-127: #define ASSERT_EQ(expected, actual) \
-128:     do \
-129:     { \
-130:         ASSERT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
-131:     } while (0)
-132: #define EXPECT_EQ(expected, actual) \
-133:     do \
-134:     { \
-135:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
-136:     } while (0)
-137: 
-138: #define ASSERT_NE(expected, actual) \
-139:     do \
-140:     { \
-141:         ASSERT_PRED_FORMAT2(::unittest::EqHelper::CheckNotEqual, expected, actual); \
-142:     } while (0)
-143: #define EXPECT_NE(expected, actual) \
-144:     do \
-145:     { \
-146:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckNotEqual, expected, actual); \
-147:     } while (0)
-```
-
-- Line 45-75: We check whether any of the defines defined in this header are already defined. If so compilation ends with an error
-- Line 77-82: We define a macro `UT_EXPECT_RESULT` which checks if the parameter passed (which is of type `AssertionResult`) has a failure (using the `bool()` method).
-If there is a failure, a test failure is added to the current result
-- Line 83-91: We define a macro `UT_ASSERT_RESULT` which checks if the parameter passed (which is of type `AssertionResult`) has a failure (using the `bool()` method).
-If there is a failure, a test failure is added to the current result. Normally an exception would be thrown, however as we don't have exceptions enabled yet, that will wait until later
-- Line 94-95: We define a macro `EXPECT_PRED_FORMAT1` which is passed a check function and a single parameter.
-The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
-The single parameter version is used with `CheckTrue()` or `CheckFalse` to check the result of a boolean expression
-- Line 96-97: We define a macro `ASSERT_PRED_FORMAT1` which is passed a check function and a single parameter.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The single parameter version is used with `CheckTrue()` or `CheckFalse` to check the result of a boolean expression
-- Line 99-100: We define a macro `EXPECT_PRED_FORMAT2` which is passed a check function and two parameters.
-The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
-The two parameter version is used with `EqHelper::CheckEqual()` or `EqHelper::CheckNotEqual()` to check the result of a comparison expression
-- Line 99-100: We define a macro `ASSERT_PRED_FORMAT2` which is passed a check function and two parameters.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The two parameter version is used with `EqHelper::CheckEqual()` or `EqHelper::CheckNotEqual()` to check the result of a comparison expression
-- Line 104: We define a macro `FAIL` which returns a simple failure
-- Line 105-109: We define a macro `ASSERT_TRUE` which uses `ASSERT_PRED_FORMAT1` with `CheckTrue` to check if the parameter is true, and generate a failure if the check fails
-- Line 110-114: We define a macro `EXPECT_TRUE` which uses `EXPECT_PRED_FORMAT1` with `CheckTrue` to check if the parameter is true, and generate a failure if the check fails
-- Line 116-120: We define a macro `ASSERT_FALSE` which uses `ASSERT_PRED_FORMAT1` with `CheckFalse` to check if the parameter is false, and generate a failure if the check fails
-- Line 121-125: We define a macro `EXPECT_FALSE` which uses `EXPECT_PRED_FORMAT1` with `CheckFalse` to check if the parameter is false, and generate a failure if the check fails
-- Line 127-131: We define a macro `ASSERT_EQ` which uses `ASSERT_PRED_FORMAT2` with `EqHelper::CheckEqual` to check if the parameters are equal, and generate a failure if the check fails
-- Line 132-136: We define a macro `EXPECT_EQ` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckEqual` to check if the parameters are equal, and generate a failure if the check fails
-- Line 138-142: We define a macro `ASSERT_NE` which uses `ASSERT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are notequal, and generate a failure if the check fails
-- Line 143-147: We define a macro `EXPECT_NE` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a failure if the check fails
-
-### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_TESTDETAILSH}
-
-We need to add a new constructor for the test macros. In lines 81 and 88 of `AssertMacros.h` we use a constructor which resembles a copy constructor, but which also takes the line number of the assertion 
-
-Update the file `code/libraries/unittest/include/unittest/TestDetails.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestDetails.h
-...
-47: class TestDetails
-48: {
-...
-56: public:
-57:     TestDetails();
-58:     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
-59:     TestDetails(const TestDetails& other, int lineNumber);
-...
-66: };
-67: 
-68: } // namespace unittest
-```
-
-- Line 59: We declare the new constructor which take an existing `TestDetails` instance as well as a line number
-
-### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_TESTDETAILSCPP}
-
-We'll implement the new constructor.
-
-Create the file `code/libraries/unittest/src/TestDetails.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestDetails.cpp
-File: d:\Projects\baremetal.github\code\libraries\unittest\src\TestDetails.cpp
-...
-55: TestDetails::TestDetails(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-56:     : m_suiteName{ suiteName }
-57:     , m_fixtureName{ fixtureName }
-58:     , m_testName{ testName }
-59:     , m_fileName{ fileName }
-60:     , m_lineNumber{ lineNumber }
-61: {
-62: }
-63: 
-64: TestDetails::TestDetails(const TestDetails& other, int lineNumber)
-65:     : m_suiteName{ other.m_suiteName }
-66:     , m_fixtureName{ other.m_fixtureName }
-67:     , m_testName{ other.m_testName }
-68:     , m_fileName{ other.m_fileName }
-69:     , m_lineNumber{ lineNumber }
-70: {
-71: }
-72: 
-73: } // namespace unittest
-```
-
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_UNITTESTH}
-
-We added a header file, so we'll update the `unittest.h` header
-
-Update the file `code/libraries/unittest/include/unittest/unittest.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/unittest.h
-...
-42: #include <unittest/TestFixture.h>
-43: #include <unittest/TestSuite.h>
-44: 
-45: #include <unittest/ITestReporter.h>
-46: #include <unittest/AssertMacros.h>
-47: #include <unittest/ConsoleTestReporter.h>
-48: #include <unittest/ExecuteTest.h>
-49: #include <unittest/TestBase.h>
-50: #include <unittest/TestDetails.h>
-51: #include <unittest/TestFixtureInfo.h>
-52: #include <unittest/TestMacros.h>
-53: #include <unittest/TestRegistry.h>
-54: #include <unittest/TestResults.h>
-55: #include <unittest/TestRunner.h>
-56: #include <unittest/TestSuiteInfo.h>
-```
-
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_UPDATE_PROJECT_CONFIGURATION}
-
-As we added some files, we need to update the CMake file.
-
-Update the file `code/libraries/unittest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unittest/CMakeLists.txt
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
-34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
-35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResult.cpp
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
-42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
-43:     )
-44: 
-45: set(PROJECT_INCLUDES_PUBLIC
-46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
-51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
-52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/PrintValue.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
-58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
-59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
-60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResult.h
-61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
-62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
-63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
-64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
-65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
-66:     )
-67: set(PROJECT_INCLUDES_PRIVATE )
-```
-
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_APPLICATION_CODE}
-
-Now let's start using the macros we defined.
-
-Update the file `code\applications\demo\src\main.cpp`
-
-```cpp
-File: code\applications\demo\src\main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16: 
-17: #include <unittest/unittest.h>
-18: 
-19: LOG_MODULE("main");
-20: 
-21: using namespace baremetal;
-22: using namespace unittest;
-23: 
-24: TEST_SUITE(Suite1)
-25: {
-26: 
-27: class FixtureMyTest1
-28:     : public TestFixture
-29: {
-30: public:
-31:     void SetUp() override
-32:     {
-33:         LOG_DEBUG("FixtureMyTest1 SetUp");
-34:     }
-35:     void TearDown() override
-36:     {
-37:         LOG_DEBUG("FixtureMyTest1 TearDown");
-38:     }
-39: };
-40: 
-41: TEST_FIXTURE(FixtureMyTest1,Test1)
-42: {
-43:     FAIL();
-44: }
-45: 
-46: } // Suite1
-47: 
-48: TEST_SUITE(Suite2)
-49: {
-50: 
-51: class FixtureMyTest2
-52:     : public TestFixture
-53: {
-54: public:
-55:     void SetUp() override
-56:     {
-57:         LOG_DEBUG("FixtureMyTest2 SetUp");
-58:     }
-59:     void TearDown() override
-60:     {
-61:         LOG_DEBUG("FixtureMyTest2 TearDown");
-62:     }
-63: };
-64: 
-65: TEST_FIXTURE(FixtureMyTest2, Test2)
-66: {
-67:     EXPECT_TRUE(true);
-68:     EXPECT_FALSE(false);
-69:     EXPECT_TRUE(false);
-70:     EXPECT_FALSE(true);
-71: }
-72: 
-73: } // Suite2
-74: 
-75: class FixtureMyTest3
-76:     : public TestFixture
-77: {
-78: public:
-79:     void SetUp() override
-80:     {
-81:         LOG_DEBUG("FixtureMyTest3 SetUp");
-82:     }
-83:     void TearDown() override
-84:     {
-85:         LOG_DEBUG("FixtureMyTest3 TearDown");
-86:     }
-87: };
-88: 
-89: TEST_FIXTURE(FixtureMyTest3, Test3)
-90: {
-91:     int x = 0;
-92:     int y = 1;
-93:     int z = 1;
-94:     EXPECT_EQ(x, y);
-95:     EXPECT_EQ(y, z);
-96:     EXPECT_NE(x, y);
-97:     EXPECT_NE(y, z);
-98: }
-99: 
-100: TEST(Test4)
-101: {
-102:     ASSERT_TRUE(false);
-103: }
-104: 
-105: int main()
-106: {
-107:     auto& console = GetConsole();
-108:     LOG_DEBUG("Hello World!");
-109: 
-110:     ConsoleTestReporter reporter;
-111:     auto numFailures = RunAllTests(&reporter);
-112:     LOG_INFO("Failures found: %d", numFailures);
-113: 
-114:     LOG_INFO("Wait 5 seconds");
-115:     Timer::WaitMilliSeconds(5000);
-116: 
-117:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-118:     char ch{};
-119:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-120:     {
-121:         ch = console.ReadChar();
-122:         console.WriteChar(ch);
-123:     }
-124:     if (ch == 'p')
-125:         assert(false);
-126: 
-127:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-128: }
-```
-
-- Line 41-44: We change the `Test1` function to a call to `FAIL()` this will generate a simple failure
-- Line 65-71: We change the `Test2` function to boolean checks. Obviously, `EXPECT_TRUE(false)` and `EXPECT_FALSE(true)` will fail.
-- Line 89-98: We change the `Test3` function to equality checks. Obviously, `EXPECT_EQ(x, y)` and ` EXPECT_NE(y, z)` will fail.
-- Line 100-103: We change the `Test4` function to a failed assertion.
-As said before, this should throw an exception, but for now this is commented out, so it will result in a normal failure, and the test run will continue
-
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACROS__STEP_8_CONFIGURING_BUILDING_AND_DEBUGGING}
-
-We can now configure and build our code, and start debugging.
-
-The application will run the tests.
-
-```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Debug  Register test Test1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:122)
-Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:122)
-Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test4 in fixture DefaultFixture in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... found (TestRegistry:93)
-Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:79)
-Info   Starting up (System:201)
-Debug  Hello World! (main:108)
-[===========] Running 4 tests from 4 fixtures in 3 suites.
-[   SUITE   ] Suite1 (1 fixture)
-[  FIXTURE  ] FixtureMyTest1 (1 test)
-[  FAILED   ] Suite1::FixtureMyTest1::Test1
-[  FIXTURE  ] 1 test from FixtureMyTest1
-[   SUITE   ] 1 fixture from Suite1
-[   SUITE   ] Suite2 (1 fixture)
-[  FIXTURE  ] FixtureMyTest2 (1 test)
-[  FAILED   ] Suite2::FixtureMyTest2::Test2
-[  FIXTURE  ] 1 test from FixtureMyTest2
-[   SUITE   ] 1 fixture from Suite2
-[   SUITE   ] DefaultSuite (2 fixtures)
-[  FIXTURE  ] FixtureMyTest3 (1 test)
-[  FAILED   ] FixtureMyTest3::Test3
-[  FIXTURE  ] 1 test from FixtureMyTest3
-[  FIXTURE  ] DefaultFixture (1 test)
-[  FAILED   ] Test4
-[  FIXTURE  ] 1 test from DefaultFixture
-[   SUITE   ] 2 fixtures from DefaultSuite
-FAILURE: 4 out of 4 tests failed (6 failures).
-
-Failures:
-../code/applications/demo/src/main.cpp:43 : Failure in Suite1::FixtureMyTest1::Test1: Value of: false
-  Expected: true
-
-../code/applications/demo/src/main.cpp:69 : Failure in Suite2::FixtureMyTest2::Test2: Value of: false
-  Expected: true
-
-../code/applications/demo/src/main.cpp:70 : Failure in Suite2::FixtureMyTest2::Test2: Value of: true
-  Expected: false
-
-../code/applications/demo/src/main.cpp:94 : Failure in FixtureMyTest3::Test3: Value of: y
-  Actual: 1
-  Expected: x
-  Which is: 0
-
-../code/applications/demo/src/main.cpp:97 : Failure in FixtureMyTest3::Test3: Value of: z
-  Actual: 1
-  Expected not equal to: y
-  Which is: 1
-
-../code/applications/demo/src/main.cpp:102 : Failure in Test4: Value of: false
-  Expected: true
-
-
-[===========] 4 tests from 4 fixtures in 3 suites ran.
-Info   Failures found: 6 (main:112)
-Info   Wait 5 seconds (main:114)
-Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
-```
-
-## Test assert macro extension - Step 9 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9}
-
-We can now perform boolean checks and compare integers, but we would also like to be able to compare pointers and strings.
-So we'll extend the macros a bit.
-
-### Checks.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_CHECKSH}
-
-We need to extend the utility functions a bit.
-
-Update the file `code/libraries/unittest/include/unittest/Checks.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/Checks.h
-...
-76: extern AssertionResult CloseFailure(const baremetal::string& expectedExpression,
-77:                                     const baremetal::string& actualExpression,
-78:                                     const baremetal::string& toleranceExpression,
-79:                                     const baremetal::string& expectedValue,
-80:                                     const baremetal::string& actualValue,
-81:                                     const baremetal::string& toleranceValue);
-82: 
-...
-167: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-168:                                    char const* expected, char const* actual);
-169: 
-170: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-171:                                    char* expected, char* actual);
-172: 
-173: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-174:                                    char* expected, char const* actual);
-175: 
-176: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-177:                                    char const* expected, char* actual);
-178: 
-179: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-180:                                       char const* expected, char const* actual);
-181: 
-182: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-183:                                       char* expected, char* actual);
-184: 
-185: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-186:                                       char* expected, char const* actual);
-187: 
-188: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-189:                                       char const* expected, char* actual);
-190: 
-191: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-192:                                    const baremetal::string& actualExpression,
-193:                                    const baremetal::string& expected,
-194:                                    const baremetal::string& actual);
-195: 
-196: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-197:                                    const baremetal::string& actualExpression,
-198:                                    const baremetal::string& expected,
-199:                                    const char* actual);
-200: 
-201: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-202:                                    const baremetal::string& actualExpression,
-203:                                    const char* expected,
-204:                                    const baremetal::string& actual);
-205: 
-206: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-207:                                       const baremetal::string& actualExpression,
-208:                                       const baremetal::string& expected,
-209:                                       const baremetal::string& actual);
-210: 
-211: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-212:                                       const baremetal::string& actualExpression,
-213:                                       const baremetal::string& expected,
-214:                                       const char* actual);
-215: 
-216: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-217:                                       const baremetal::string& actualExpression,
-218:                                       const char* expected,
-219:                                       const baremetal::string& actual);
-220: 
-221: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-222:                                              char const* expected, char const* actual);
-223: 
-224: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-225:                                              char* expected, char* actual);
-226: 
-227: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-228:                                              char* expected, char const* actual);
-229: 
-230: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-231:                                              char const* expected, char* actual);
-232: 
-233: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-234:                                                 char const* expected, char const* actual);
-235: 
-236: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-237:                                                 char* expected, char* actual);
-238: 
-239: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-240:                                                 char* expected, char const* actual);
-241: 
-242: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-243:                                                 char const* expected, char* actual);
-244: 
-245: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-246:                                              const baremetal::string& actualExpression,
-247:                                              const baremetal::string& expected,
-248:                                              const baremetal::string& actual);
-249: 
-250: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-251:                                              const baremetal::string& actualExpression,
-252:                                              const baremetal::string& expected,
-253:                                              const char* actual);
-254: 
-255: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-256:                                              const baremetal::string& actualExpression,
-257:                                              const char* expected,
-258:                                              const baremetal::string& actual);
-259: 
-260: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-261:                                                 const baremetal::string& actualExpression,
-262:                                                 const baremetal::string& expected,
-263:                                                 const baremetal::string& actual);
-264: 
-265: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-266:                                                 const baremetal::string& actualExpression,
-267:                                                 const baremetal::string& expected,
-268:                                                 const char* actual);
-269: 
-270: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-271:                                                 const baremetal::string& actualExpression,
-272:                                                 const char* expected,
-273:                                                 const baremetal::string& actual);
-274: 
-275: // The helper class for {ASSERT|EXPECT}_EQ.  The template argument
-276: // lhs_is_null_literal is true iff the first argument to ASSERT_EQ()
-277: // is a null pointer literal.  The following default implementation is
-278: // for lhs_is_null_literal being false.
-279: template <bool lhs_is_null_literal>
-280: class EqHelper
-281: {
-282: public:
-283:     // This templatized version is for the general case.
-284:     template <typename Expected, typename Actual>
-285:     static AssertionResult CheckEqual(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-286:                                       const Expected& expected, const Actual& actual)
-287:     {
-288:         return CheckEqualInternal(expectedExpression, actualExpression, expected, actual);
-289:     }
-290: 
-291:     template <typename Expected, typename Actual>
-292:     static AssertionResult CheckNotEqual(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-293:                                          const Expected& expected, const Actual& actual)
-294:     {
-295:         return CheckNotEqualInternal(expectedExpression, actualExpression, expected, actual);
-296:     }
-297: };
-298: 
-299: class EqHelperStringCaseInsensitive
-300: {
-301: public:
-302:     template <typename Expected, typename Actual>
-303:     static AssertionResult CheckEqualIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-304:                                                 const Expected& expected, const Actual& actual)
-305:     {
-306:         return CheckEqualInternalIgnoreCase(expectedExpression, actualExpression, expected, actual);
-307:     }
-308: 
-309:     template <typename Expected, typename Actual>
-310:     static AssertionResult CheckNotEqualIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-311:                                                    const Expected& expected, const Actual& actual)
-312:     {
-313:         return CheckNotEqualInternalIgnoreCase(expectedExpression, actualExpression, expected, actual);
-314:     }
-315: };
-316: 
-317: template< typename Expected, typename Actual, typename Tolerance >
-318: bool AreClose(const Expected& expected, const Actual& actual, Tolerance const& tolerance)
-319: {
-320:     return (actual >= (expected - tolerance)) && (actual <= (expected + tolerance));
-321: }
-322: 
-323: template< typename Expected, typename Actual, typename Tolerance >
-324: AssertionResult CheckClose(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-325:                            const baremetal::string& toleranceExpression,
-326:                            const Expected& expected, const Actual& actual, Tolerance const& tolerance)
-327: {
-328:     if (!AreClose(expected, actual, tolerance))
-329:     {
-330:         return CloseFailure(expectedExpression, actualExpression, toleranceExpression,
-331:                             FormatForComparisonFailureMessage(expected),
-332:                             FormatForComparisonFailureMessage(actual),
-333:                             FormatForComparisonFailureMessage(tolerance));
-334:     }
-335:     return AssertionSuccess();
-336: }
-337: 
-338: } // namespace unittest
-```
-
-- Line 76-81: We declare a function `CloseFailure()` to signify a assertion failure on comparison between numbers with a fault tolerance
-- Line 167-168: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 170-171: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 173-174: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` of type char * and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 176-177: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` of type const char * and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 179-180: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 182-183: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 185-186: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` of type char * and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 188-189: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` of type const char * and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 191-194: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 196-199: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` of type string and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 201-204: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` of type const char* and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 206-209: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 211-214: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` of type string and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 216-219: We declare a new variant of the function `CheckNotEqualInternal()`, which compares two values `expected` of type const char* and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 221-222: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 224-225: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 227-228: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type char * and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 230-231: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char * and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 233-234: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 236-237: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 239-240: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type char * and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 242-243: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char * and `actual` of type char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 245-248: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 250-253: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type string and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 255-258: We declare a new variant of the function `CheckEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char* and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 260-263: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 265-268: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type string and `actual` of type const char*.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 270-273: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char* and `actual` of type string.
-Their stringified versions are passed as `expectedExpression` and `actualExpression`.
-If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 279: We change the class `EqHelper` into a template class that receives a template parameter signifying whether the expected value is a null pointer
-- Line 299-315: We declare a class `EqHelperCaseInsensitive` which has two methods `CheckEqualIgnoreCase()` (which uses `CheckEqualInternalIgnoreCase()`) and `CheckNotEqualIgnoreCase()` (which uses `CheckNotEqualInternalIgnoreCase()`)
-- Line 318-321: We define a template function `AreClose()` to compare two values `expected` and `actual`, with a tolerance `tolerance`, which can have different types.
-The function compares the absolute difference between `expected` and `actual` with the given tolerance, It returns true of the difference is smaller or equal to the tolerance, false otherwise
-- Line 323-336: We define a template function `CheckClose()`, which uses `AreClose()` to compare two values `expected` and `actual`. Their stringified versions are passed as `expectedExpression` and `actualExpression` with tolerance `tolerance`.
-If the absolute difference between `expected` and `actual` is smaller or equal to `tolerance`, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-
-### Checks.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_CHECKSCPP}
-
-Let's implement the new functions for the checks.
-
-Update the file `code/libraries/unittest/src/Checks.cpp`
-
-```cpp
-File: code/libraries/unittest/src/Checks.cpp
-...
-47: namespace unittest {
-48: 
-49: static bool EqualCaseInsensitive(const string& a, const string& b)
-50: {
-51:     if (a.length() != b.length())
-52:         return false;
-53:     return strcasecmp(a.data(), b.data()) == 0;
-54: }
-55: 
-...
-110: AssertionResult CloseFailure(const string& expectedExpression,
-111:                              const string& actualExpression,
-112:                              const string& toleranceExpression,
-113:                              const string& expectedValue,
-114:                              const string& actualValue,
-115:                              const string& toleranceValue)
-116: {
-117:     string result = Format("Value of: %s", actualExpression.c_str());
-118:     if (actualValue != actualExpression)
-119:     {
-120:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
-121:     }
-122: 
-123:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
-124:     if (expectedValue != expectedExpression)
-125:     {
-126:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
-127:     }
-128:     result.append(Format("\n  Tolerance: %s", toleranceExpression.c_str()));
-129:     if (toleranceValue != toleranceExpression)
-130:     {
-131:         result.append(Format("\n  (+/-) %s", toleranceValue.c_str()));
-132:     }
-133: 
-134:     return AssertionResult(true, result);
-135: }
-136: 
-137: namespace internal {
-138: 
-139: AssertionResult CheckStringsEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-140: {
-141:     if (expected == actual)
-142:         return AssertionSuccess();
-143: 
-144:     if (strcmp(expected, actual))
-145:     {
-146:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-147:     }
-148:     return AssertionSuccess();
-149: }
-150: 
-151: AssertionResult CheckStringsNotEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-152: {
-153:     if (expected == actual)
-154:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-155: 
-156:     if (!strcmp(expected, actual))
-157:     {
-158:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-159:     }
-160:     return AssertionSuccess();
-161: }
-162: 
-163: AssertionResult CheckStringsEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-164: {
-165:     if (expected == actual)
-166:         return AssertionSuccess();
-167: 
-168:     if (!EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
-169:     {
-170:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-171:     }
-172:     return AssertionSuccess();
-173: }
-174: 
-175: AssertionResult CheckStringsNotEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-176: {
-177:     if (expected == actual)
-178:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-179: 
-180:     if (EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
-181:     {
-182:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-183:     }
-184:     return AssertionSuccess();
-185: }
-186: 
-187: } // namespace internal
-188: 
-189: AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-190: {
-191:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-192: }
-193: 
-194: AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
-195:                                    char *actual) // cppcheck-suppress constParameterPointer
-196: {
-197:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-198: }
-199: 
-200: AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
-201:                                    char const *actual) // cppcheck-suppress constParameterPointer
-202: {
-203:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-204: }
-205: 
-206: AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected,
-207:                                    char *actual) // cppcheck-suppress constParameterPointer
-208: {
-209:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-210: }
-211: 
-212: AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-213: {
-214:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-215: }
-216: 
-217: AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
-218:                                       char *actual) // cppcheck-suppress constParameterPointer
-219: {
-220:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-221: }
-222: 
-223: AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
-224:                                       char const *actual) // cppcheck-suppress constParameterPointer
-225: {
-226:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-227: }
-228: 
-229: AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected,
-230:                                       char *actual) // cppcheck-suppress constParameterPointer
-231: {
-232:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-233: }
-234: 
-235: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-236:                                    const baremetal::string& actualExpression,
-237:                                    const baremetal::string& expected,
-238:                                    const baremetal::string& actual)
-239: {
-240:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-241: }
-242: 
-243: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-244:                                    const baremetal::string& actualExpression,
-245:                                    const baremetal::string& expected,
-246:                                    const char* actual)
-247: {
-248:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-249: }
-250: 
-251: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-252:                                    const baremetal::string& actualExpression,
-253:                                    const char* expected,
-254:                                    const baremetal::string& actual)
-255: {
-256:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-257: }
-258: 
-259: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-260:                                       const baremetal::string& actualExpression,
-261:                                       const baremetal::string& expected,
-262:                                       const baremetal::string& actual)
-263: {
-264:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-265: }
-266: 
-267: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-268:                                       const baremetal::string& actualExpression,
-269:                                       const baremetal::string& expected,
-270:                                       const char* actual)
-271: {
-272:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-273: }
-274: 
-275: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-276:                                       const baremetal::string& actualExpression,
-277:                                       const char* expected,
-278:                                       const baremetal::string& actual)
-279: {
-280:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-281: }
-282: 
-283: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-284:                                              char const* expected, char const* actual)
-285: {
-286:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-287: }
-288: 
-289: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-290:                                              char* expected, char* actual)
-291: {
-292:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-293: }
-294: 
-295: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-296:                                              char* expected, char const* actual)
-297: {
-298:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-299: }
-300: 
-301: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-302:                                              char const* expected, char* actual)
-303: {
-304:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-305: }
-306: 
-307: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-308:                                                 char const* expected, char const* actual)
-309: {
-310:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-311: }
-312: 
-313: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-314:                                                 char* expected, char* actual)
-315: {
-316:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-317: }
-318: 
-319: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-320:                                                 char* expected, char const* actual)
-321: {
-322:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-323: }
-324: 
-325: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-326:                                                 char const* expected, char* actual)
-327: {
-328:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-329: }
-330: 
-331: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-332:                                              const baremetal::string& actualExpression,
-333:                                              const baremetal::string& expected,
-334:                                              const baremetal::string& actual)
-335: {
-336:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-337: }
-338: 
-339: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-340:                                              const baremetal::string& actualExpression,
-341:                                              const baremetal::string& expected,
-342:                                              const char* actual)
-343: {
-344:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-345: }
-346: 
-347: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-348:                                              const baremetal::string& actualExpression,
-349:                                              const char* expected,
-350:                                              const baremetal::string& actual)
-351: {
-352:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-353: }
-354: 
-355: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-356:                                                 const baremetal::string& actualExpression,
-357:                                                 const baremetal::string& expected,
-358:                                                 const baremetal::string& actual)
-359: {
-360:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-361: }
-362: 
-363: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-364:                                                 const baremetal::string& actualExpression,
-365:                                                 const baremetal::string& expected,
-366:                                                 const char* actual)
-367: {
-368:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-369: }
-370: 
-371: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-372:                                                 const baremetal::string& actualExpression,
-373:                                                 const char* expected,
-374:                                                 const baremetal::string& actual)
-375: {
-376:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-377: }
-378: 
-379: } // namespace unittest
-```
-
-- Line 49-54: We define a local function `EqualCaseInsensitive` which compares two strings in a case insensitive way, and returns true if they are considered equal, false otherwise
-- Line 110-135: We implement the function `CloseFailure()`. This will return an assertion result flagging a failure, with a string explaining that the absolute difference between the actual value and the expected value is larger than the tolerance
-- Line 139-149: We define a function `CheckStringsEqual()` in a local namespace `internal`.
-If the two values of type const char* are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 151-161: We define a function `CheckStringsNotEqual()` in a local namespace `internal`.
-If the two values of type const char* are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 139-149: We define a function `CheckStringsEqualIgnoreCase()` in a local namespace `internal`.
-If the two values of type const char* are considered equal ignoring case, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 151-161: We define a function `CheckStringsNotEqualIgnoreCase()` in a local namespace `internal`.
-If the two values of type const char* are considered not equal ignoring case, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 189-192: We implement the function `CheckEqualInternal()` for two value of type const char*.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 194-198: We implement the function `CheckEqualInternal()` for two value of type char*.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 200-204: We implement the function `CheckEqualInternal()` for two value of type char* and const char*.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 206-210: We implement the function `CheckEqualInternal()` for two value of type const char* and char*.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 212-215: We implement the function `CheckNotEqualInternal()` for two value of type const char*.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 217-221: We implement the function `CheckNotEqualInternal()` for two value of type char*.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 223-227: We implement the function `CheckNotEqualInternal()` for two value of type char* and const char*.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 229-233: We implement the function `CheckNotEqualInternal()` for two value of type const char* and char*.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 235-241: We implement the function `CheckEqualInternal()` for two value of type string.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 243-249: We implement the function `CheckEqualInternal()` for two value of type char* and string.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 251-257: We implement the function `CheckEqualInternal()` for two value of type string and const char*.
-This uses the function `CheckStringsEqual()` to compare the strings
-- Line 259-265: We implement the function `CheckNotEqualInternal()` for two value of type string.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 267-273: We implement the function `CheckNotEqualInternal()` for two value of type char* and string.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 275-281: We implement the function `CheckNotEqualInternal()` for two value of type string and const char*.
-This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 283-287: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char*.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 289-293: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char*.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 295-299: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and const char*.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 301-305: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char* and char*.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 307-311: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char*.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 313-317: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char*.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 319-323: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and const char*.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 325-329: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char* and char*.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 331-337: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 339-345: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and string.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 347-353: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string and const char*.
-This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 355-361: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 363-369: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and string.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 371-377: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string and const char*.
-This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-
-### PrintValue.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_PRINTVALUEH}
-
-The `PrintValue` header contains a lot of template magic to print a value of any type. It is simplified for now, but will be extended in the next step.
-I'll try to explain as much as possible. Part of this code is based on how Google Test prints values.
-
-Update the file `code/libraries/unittest/include/unittest/PrintValue.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/PrintValue.h
-...
-45: using nullptr_t = decltype(nullptr);
-46: 
-47: template<typename To>
-48: inline To ImplicitCast_(To x) { return x; }
-49: 
-50: template <typename T>
-51: void PrintTo(const T& value, baremetal::string& s)
-52: {
-53:     s = baremetal::Serialize(value);
-54: }
-55: void PrintTo(unsigned char c, baremetal::string& s);
-56: void PrintTo(signed char c, baremetal::string& s);
-57: inline void PrintTo(char c, baremetal::string& s)
-58: {
-59:     PrintTo(static_cast<unsigned char>(c), s);
-60: }
-61: 
-62: inline void PrintTo(bool x, baremetal::string& s)
-63: {
-64:     s = (x ? "true" : "false");
-65: }
-66: 
-67: void PrintTo(const char* str, baremetal::string& s);
-68: inline void PrintTo(char* str, baremetal::string& s)
-69: {
-70:     PrintTo(ImplicitCast_<const char*>(str), s);
-71: }
-72: 
-73: // signed/unsigned char is often used for representing binary data, so
-74: // we print pointers to it as void* to be safe.
-75: inline void PrintTo(const signed char* str, baremetal::string& s)
-76: {
-77:     PrintTo(ImplicitCast_<const void*>(str), s);
-78: }
-79: inline void PrintTo(signed char* str, baremetal::string& s)
-80: {
-81:     PrintTo(ImplicitCast_<const void*>(str), s);
-82: }
-83: inline void PrintTo(const unsigned char* str, baremetal::string& s)
-84: {
-85:     PrintTo(ImplicitCast_<const void*>(str), s);
-86: }
-87: inline void PrintTo(unsigned char* str, baremetal::string& s)
-88: {
-89:     PrintTo(ImplicitCast_<const void*>(str), s);
-90: }
-91: 
-92: void PrintStringTo(const baremetal::string& str, baremetal::string& s);
-93: inline void PrintTo(const baremetal::string& str, baremetal::string& s)
-94: {
-95:     PrintStringTo(str, s);
-96: }
-97: 
-98: inline void PrintTo(nullptr_t /*p*/, baremetal::string& s)
-99: {
-100:     PrintStringTo(baremetal::string("null"), s);
-101: }
-102: 
-...
-124: // Implements printing a reference type T&.
-125: template <typename T>
-126: class UniversalPrinter<T&>
-127: {
-128: public:
-129:     static void Print(const T& value, baremetal::string& s)
-130:     {
-131:         // Prints the address of the value.  We use reinterpret_cast here
-132:         // as static_cast doesn't compile when T is a function type.
-133:         s = "@";
-134:         s.append(baremetal::Serialize(reinterpret_cast<const void*>(&value)));
-135:         s.append(" ");
-136: 
-137:         // Then prints the value itself.
-138:         PrintTo(value, s);
-139:     }
-140: };
-141: 
-142: template <typename T>
-143: void UniversalPrint(const T& value, baremetal::string& s)
-144: {
-145:     typedef T T1;
-146:     UniversalPrinter<T1>::Print(value, s);
-147: }
-148: 
-149: template <typename T>
-150: class UniversalTersePrinter
-151: {
-152: public:
-153:     static void Print(const T& value, baremetal::string& s)
-154:     {
-155:         UniversalPrint(value, s);
-156:     }
-157: };
-158: template <typename T>
-159: class UniversalTersePrinter<T&>
-160: {
-161: public:
-162:     static void Print(const T& value, baremetal::string& s)
-163:     {
-164:         UniversalPrint(value, s);
-165:     }
-166: };
-167: template <>
-168: class UniversalTersePrinter<const char*>
-169: {
-170: public:
-171:     static void Print(const char* str, baremetal::string& s)
-172:     {
-173:         if (str == nullptr)
-174:         {
-175:             s = "null";
-176:         }
-177:         else
-178:         {
-179:             UniversalPrint(baremetal::string(str), s);
-180:         }
-181:     }
-182: };
-183: template <>
-184: class UniversalTersePrinter<char*>
-185: {
-186: public:
-187:     // cppcheck-suppress constParameterPointer
-188:     static void Print(char* str, baremetal::string& s)
-189:     {
-190:         UniversalTersePrinter<const char*>::Print(str, s);
-191:     }
-192: };
-193: 
-...
-```
-
-- Line 45: We define a type `nullptr_t` to be used to check for nullptr
-- Line 47-48: We define a template function `ImplicitCast_` that casts any type to itself
-- Line 55: We declare a function `PrintTo()` to print an unsigned char to string
-- Line 56: We declare a function `PrintTo()` to print a signed char to string
-- Line 57: We define a function `PrintTo()` to print a character to string using the function for unsigned char
-- Line 67: We declare a function `PrintTo()` to print a const char* string to string
-- Line 68-71: We define a function `PrintTo()` to print a char* string to string using the print function for const char*
-- Line 75-78: We define a function `PrintTo()` to print a const signed char* pointer to string using the print function for const void*
-- Line 79-82: We define a function `PrintTo()` to print a signed char* pointer to string using the print function for const void*
-- Line 83-86: We define a function `PrintTo()` to print a const unsigned char* pointer to string using the print function for const void*
-- Line 87-90: We define a function `PrintTo()` to print a unsigned char* pointer to string using the print function for const void*
-- Line 92: We declare a function `PrintStringTo()` to print a string to a string
-- Line 93-96: We define a function `PrintTo()` to print a string to a string
-- Line 98-101: We define a function `PrintTo()` to print a nullptr to a string
-- Line 125-140: We declare a template class `UniversalPrinter` for type `T&` that has a single method `Print()` which calls any defined `PrintTo()` function for the value passed to a string, with a prefix to display the address of the string
-- Line 167-182: We declare a template class `UniversalTersePrinter` specialization for type `const char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-- Line 183-192: We declare a template class `UniversalTersePrinter` specialization for type `char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-
-### PrintValue.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_PRINTVALUECPP}
-
-Some print functions need to be implemented.
-
-Create the file `code/libraries/unittest/src/PrintValue.cpp`
-
-```cpp
-File: code/libraries/unittest/src/PrintValue.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : PrintValue.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : -
-9: //
-10: // Description : Print values
-11: //------------------------------------------------------------------------------
-12: //
-13: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-14: //
-15: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-16: //
-17: // Permission is hereby granted, free of charge, to any person
-18: // obtaining a copy of this software and associated documentation
-19: // files(the "Software"), to deal in the Software without
-20: // restriction, including without limitation the rights to use, copy,
-21: // modify, merge, publish, distribute, sublicense, and /or sell copies
-22: // of the Software, and to permit persons to whom the Software is
-23: // furnished to do so, subject to the following conditions :
-24: //
-25: // The above copyright notice and this permission notice shall be
-26: // included in all copies or substantial portions of the Software.
-27: //
-28: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-29: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-30: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-31: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-32: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-33: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-34: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-35: // DEALINGS IN THE SOFTWARE.
-36: //
-37: //------------------------------------------------------------------------------
-38: 
-39: #include <unittest/PrintValue.h>
-40: 
-41: using namespace baremetal;
-42: 
-43: void PrintStringTo(const baremetal::string& str, baremetal::string& s)
-44: {
-45:     s = str;
-46: }
-47: 
-48: void PrintTo(unsigned char ch, baremetal::string &s)
-49: {
-50:     s += ch;
-51: }
-```
-
-The functions speak for themselves.
-
-### AssertMacros.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_ASSERTMACROSH}
-
-We need to extend the assertion macros a bit.
-
-Update the file `code/libraries/unittest/include/unittest/AssertMacros.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/AssertMacros.h
-...
-61: #ifdef ASSERT_NEAR
-62:     #error unittest redefines ASSERT_NEAR
-63: #endif
-64: 
-...
-81: #ifdef EXPECT_NEAR
-82:     #error unittest redefines EXPECT_NEAR
-83: #endif
-84: 
-85: namespace unittest
-86: {
-87: 
-88: namespace internal
-89: {
-90: 
-91: // Two overloaded helpers for checking at compile time whether an
-92: // expression is a null pointer literal (i.e. nullptr or any 0-valued
-93: // compile-time integral constant).  Their return values have
-94: // different sizes, so we can use sizeof() to test which version is
-95: // picked by the compiler.  These helpers have no implementations, as
-96: // we only need their signatures.
-97: //
-98: // Given IsNullLiteralHelper(x), the compiler will pick the first
-99: // version if x can be implicitly converted to Secret*, and pick the
-100: // second version otherwise.  Since Secret is a secret and incomplete
-101: // type, the only expression a user can write that has type Secret* is
-102: // a null pointer literal.  Therefore, we know that x is a null
-103: // pointer literal if and only if the first version is picked by the
-104: // compiler.
-105: class Secret;
-106: char IsNullLiteralHelper(Secret* p);
-107: char (&IsNullLiteralHelper(...))[2];
-108: 
-109: } // namespace internal
-110: 
-111: } // namespace unittest
-112: 
-113: #define IS_NULL_LITERAL(x) \
-114:      (sizeof(::unittest::internal::IsNullLiteralHelper(x)) == 1)
-115: 
-...
-143: #define EXPECT_PRED_FORMAT3(pred_format, v1, v2, v3) \
-144:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-145: #define ASSERT_PRED_FORMAT3(pred_format, v1, v2, v3) \
-146:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-147: 
-...
-File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\AssertMacros.h
-171: #define ASSERT_EQ(expected, actual) \
-172:     do \
-173:     { \
-174:         ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
-175:     } while (0)
-176: #define EXPECT_EQ(expected, actual) \
-177:     do \
-178:     { \
-179:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
-180:     } while (0)
-181: 
-182: #define ASSERT_NE(expected, actual) \
-183:     do \
-184:     { \
-185:         ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
-186:     } while (0)
-187: #define EXPECT_NE(expected, actual) \
-188:     do \
-189:     { \
-190:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
-191:     } while (0)
-192: 
-193: #define ASSERT_EQ_IGNORE_CASE(expected, actual) \
-194:     do \
-195:     { \
-196:         ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
-197:     } while (0)
-198: #define EXPECT_EQ_IGNORE_CASE(expected, actual) \
-199:     do \
-200:     { \
-201:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
-202:     } while (0)
-203: 
-204: #define ASSERT_NE_IGNORE_CASE(expected, actual) \
-205:     do \
-206:     { \
-207:         ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
-208:     } while (0)
-209: #define EXPECT_NE_IGNORE_CASE(expected, actual) \
-210:     do \
-211:     { \
-212:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
-213:     } while (0)
-214: 
-215: #define ASSERT_NEAR(expected, actual, tolerance) \
-216:     do \
-217:     { \
-218:         ASSERT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
-219:     } while (0)
-220: #define EXPECT_NEAR(expected, actual, tolerance) \
-221:     do \
-222:     { \
-223:         EXPECT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
-224:     } while (0)
-225: 
-226: #define ASSERT_NULL(value) ASSERT_EQ(nullptr, value)
-227: #define EXPECT_NULL(value) EXPECT_EQ(nullptr, value)
-228: #define ASSERT_NOT_NULL(value) ASSERT_NE(nullptr, value)
-229: #define EXPECT_NOT_NULL(value) EXPECT_NE(nullptr, value)
-```
-
-- Line 61-63: We check whether the define `ASSERT_NEAR` is already defined. If so compilation ends with an error
-- Line 81-83: We check whether the define `EXPECT_NEAR` is already defined. If so compilation ends with an error
-- Line 85-111: We declare two functions `IsNullLiteralHelper()`, of which one takes a pointer, and the other takes a variable argument list.
-This is some trickery, to determine if the parameter passed is a nullptr. The first returns a single character, the other a pointer to a char array, resulting in different return types and thus sizes
-- Line 114-115: We define a macro `IS_NULL_LITERAL` which is used to check if a pointer is a null pointer
-- Line 143-144: We define a macro `EXPECT_PRED_FORMAT3` which is passed a check function and three parameters.
-The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
-The three parameter version is used with `CheckClose()` to check the result of comparison with a tolerance
-- Line 145-146: We define a macro `ASSERT_PRED_FORMAT3` which is passed a check function and three parameters.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The three parameter version is used with `CheckClose()` to check the result of comparison with a tolerance
-- Line 171-175: We change the macro `ASSERT_EQ` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 176-180: We change the macro `EXPECT_EQ` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 182-186: We change the macro `ASSERT_NE` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 187-191: We change the macro `EXPECT_NE` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 193-197: We define a macro `ASSERT_EQ_IGNORE_CASE` which uses `ASSERT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckEqualIgnoreCase` to check if the parameters are not equal, and generate a failure if the check fails
-- Line 198-202: We define a macro `EXPECT_EQ_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckEqualIgnoreCase` to check if the parameters are not equal, and generate a failure if the check fails
-- Line 204-208: We define a macro `ASSERT_NE_IGNORE_CASE` which uses `ASSERT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase` to check if the parameters are not equal, and generate a failure if the check fails
-- Line 209-213: We define a macro `EXPECT_NE_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase` to check if the parameters are not equal, and generate a failure if the check fails
-- Line 215-219: We define a macro `ASSERT_NEAR` which uses `ASSERT_PRED_FORMAT3` with `CheckClose` to check if the absolute difference of compared values is within tolerance, and generate a failure if the check fails
-- Line 220-224: We define a macro `EXPECT_NEAR` which uses `EXPECT_PRED_FORMAT3` with `CheckClose` to check if the absolute difference of compared values is within tolerance, and generate a failure if the check fails
-- Line 226: We define a macro `ASSERT_NULL` to check if the parameter is a null pointer, and generate a failure if the check fails
-- Line 227: We define a macro `EXPECT_NULL` to check if the parameter is a null pointer, and generate a failure if the check fails
-- Line 228: We define a macro `ASSERT_NOT_NULL` to check if the parameter is not a null pointer, and generate a failure if the check fails
-- Line 229: We define a macro `EXPECT_NOT_NULL` to check if the parameter is not a null pointer, and generate a failure if the check fails
-
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_UPDATE_PROJECT_CONFIGURATION}
-
-As we added some files, we need to update the CMake file.
-
-Update the file `code/libraries/unittest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unittest/CMakeLists.txt
-File: d:\Projects\baremetal.github\code\libraries\unittest\CMakeLists.txt
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
-33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
-34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
-35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintValue.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResult.cpp
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
-42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
-44:     )
-45: 
-46: set(PROJECT_INCLUDES_PUBLIC
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
-51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
-52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ExecuteTest.h
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ITestReporter.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/PrintValue.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
-58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
-59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestMacros.h
-60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
-61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResult.h
-62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
-63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
-64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
-65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
-66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/unittest.h
-67:     )
-68: set(PROJECT_INCLUDES_PRIVATE )
-```
-
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_APPLICATION_CODE}
-
-We'll use `Test4` to use the new macros defined.
-
-Update the file `code\applications\demo\src\main.cpp`
-
-```cpp
-File: code\applications\demo\src\main.cpp
-...
-100: TEST(Test4)
-101: {
-102:     int* p = nullptr;
-103:     int dd = 123;
-104:     int* q = &dd;
-105:     int* r = &dd;
-106:     ASSERT_NULL(p);
-107:     EXPECT_NULL(p);
-108:     ASSERT_NULL(q);
-109:     EXPECT_NULL(q);
-110:     ASSERT_NOT_NULL(p);
-111:     EXPECT_NOT_NULL(p);
-112:     ASSERT_NOT_NULL(q);
-113:     EXPECT_NOT_NULL(q);
-114:     baremetal::string s1 = "A";
-115:     baremetal::string s2 = "B";
-116:     baremetal::string s3 = "B";
-117:     baremetal::string s4 = "b";
-118:     ASSERT_EQ(s1, s2);
-119:     EXPECT_EQ(s1, s2);
-120:     ASSERT_EQ(s2, s3);
-121:     EXPECT_EQ(s2, s3);
-122:     ASSERT_NE(s1, s2);
-123:     EXPECT_NE(s1, s2);
-124:     ASSERT_NE(s2, s3);
-125:     EXPECT_NE(s2, s3);
-126:     ASSERT_EQ_IGNORE_CASE(s1, s2);
-127:     EXPECT_EQ_IGNORE_CASE(s1, s2);
-128:     ASSERT_EQ_IGNORE_CASE(s2, s3);
-129:     EXPECT_EQ_IGNORE_CASE(s2, s3);
-130:     ASSERT_NE_IGNORE_CASE(s1, s2);
-131:     EXPECT_NE_IGNORE_CASE(s1, s2);
-132:     ASSERT_NE_IGNORE_CASE(s2, s3);
-133:     EXPECT_NE_IGNORE_CASE(s2, s3);
-134:     ASSERT_EQ_IGNORE_CASE(s2, s4);
-135:     EXPECT_EQ_IGNORE_CASE(s2, s4);
-136:     ASSERT_NE_IGNORE_CASE(s2, s4);
-137:     EXPECT_NE_IGNORE_CASE(s2, s4);
-138:     char t[] = { 'A', '\0' };
-139:     char u[] = { 'B', '\0' };
-140:     char v[] = { 'B', '\0' };
-141:     char w[] = { 'b', '\0' };
-142:     const char* tC = "A";
-143:     const char* uC = "B";
-144:     const char* vC = "B";
-145:     const char* wC = "b";
-146:     ASSERT_EQ(t, u);
-147:     EXPECT_EQ(t, u);
-148:     ASSERT_EQ(u, v);
-149:     EXPECT_EQ(u, v);
-150:     ASSERT_EQ(t, u);
-151:     EXPECT_EQ(t, uC);
-152:     ASSERT_EQ(uC, v);
-153:     EXPECT_EQ(uC, vC);
-154:     ASSERT_EQ(t, w);
-155:     EXPECT_EQ(t, wC);
-156:     ASSERT_EQ(uC, w);
-157:     EXPECT_EQ(uC, wC);
-158:     ASSERT_NE(t, u);
-159:     EXPECT_NE(t, u);
-160:     ASSERT_NE(u, v);
-161:     EXPECT_NE(u, v);
-162:     ASSERT_NE(t, u);
-163:     EXPECT_NE(t, uC);
-164:     ASSERT_NE(uC, v);
-165:     EXPECT_NE(uC, vC);
-166:     ASSERT_NE(t, w);
-167:     EXPECT_NE(t, wC);
-168:     ASSERT_NE(uC, w);
-169:     EXPECT_NE(uC, wC);
-170:     ASSERT_EQ_IGNORE_CASE(t, u);
-171:     EXPECT_EQ_IGNORE_CASE(t, u);
-172:     ASSERT_EQ_IGNORE_CASE(u, v);
-173:     EXPECT_EQ_IGNORE_CASE(u, v);
-174:     ASSERT_EQ_IGNORE_CASE(t, u);
-175:     EXPECT_EQ_IGNORE_CASE(t, uC);
-176:     ASSERT_EQ_IGNORE_CASE(uC, v);
-177:     EXPECT_EQ_IGNORE_CASE(uC, vC);
-178:     ASSERT_EQ_IGNORE_CASE(t, w);
-179:     EXPECT_EQ_IGNORE_CASE(t, wC);
-180:     ASSERT_EQ_IGNORE_CASE(uC, w);
-181:     EXPECT_EQ_IGNORE_CASE(uC, wC);
-182:     ASSERT_NE_IGNORE_CASE(t, u);
-183:     EXPECT_NE_IGNORE_CASE(t, u);
-184:     ASSERT_NE_IGNORE_CASE(u, v);
-185:     EXPECT_NE_IGNORE_CASE(u, v);
-186:     ASSERT_NE_IGNORE_CASE(t, u);
-187:     EXPECT_NE_IGNORE_CASE(t, uC);
-188:     ASSERT_NE_IGNORE_CASE(uC, v);
-189:     EXPECT_NE_IGNORE_CASE(uC, vC);
-190:     ASSERT_NE_IGNORE_CASE(t, w);
-191:     EXPECT_NE_IGNORE_CASE(t, wC);
-192:     ASSERT_NE_IGNORE_CASE(uC, w);
-193:     EXPECT_NE_IGNORE_CASE(uC, wC);
-194: 
-195:     double a = 0.123;
-196:     double b = 0.122;
-197:     ASSERT_EQ(a, b);
-198:     EXPECT_EQ(a, b);
-199:     ASSERT_NEAR(a, b, 0.0001);
-200:     EXPECT_NEAR(a, b, 0.0001);
-201:     ASSERT_NEAR(a, b, 0.001);
-202:     EXPECT_NEAR(a, b, 0.001);
-203: }
-...
-```
-
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ASSERT_MACRO_EXTENSION__STEP_9_CONFIGURING_BUILDING_AND_DEBUGGING}
-
-We can now configure and build our code, and start debugging.
-
-The application will run the tests.
-
-```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Debug  Register test Test1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:122)
-Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:122)
-Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:85)
-Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:79)
-Debug  Register test Test4 in fixture DefaultFixture in suite DefaultSuite (TestRegistry:122)
-Debug  Find suite DefaultSuite ... found (TestRegistry:93)
-Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:79)
-Info   Starting up (System:201)
-Debug  Hello World! (main:208)
-[===========] Running 4 tests from 4 fixtures in 3 suites.
-[   SUITE   ] Suite1 (1 fixture)
-[  FIXTURE  ] FixtureMyTest1 (1 test)
-[  FAILED   ] Suite1::FixtureMyTest1::Test1
-[  FIXTURE  ] 1 test from FixtureMyTest1
-[   SUITE   ] 1 fixture from Suite1
-[   SUITE   ] Suite2 (1 fixture)
-[  FIXTURE  ] FixtureMyTest2 (1 test)
-[  FAILED   ] Suite2::FixtureMyTest2::Test2
-[  FIXTURE  ] 1 test from FixtureMyTest2
-[   SUITE   ] 1 fixture from Suite2
-[   SUITE   ] DefaultSuite (2 fixtures)
-[  FIXTURE  ] FixtureMyTest3 (1 test)
-[  FAILED   ] FixtureMyTest3::Test3
-[  FIXTURE  ] 1 test from FixtureMyTest3
-[  FIXTURE  ] DefaultFixture (1 test)
-[  FAILED   ] Test4
-[  FIXTURE  ] 1 test from DefaultFixture
-[   SUITE   ] 2 fixtures from DefaultSuite
-FAILURE: 4 out of 4 tests failed (47 failures).
-
-Failures:
-../code/applications/demo/src/main.cpp:43 : Failure in Suite1::FixtureMyTest1::Test1: Value of: false
-  Expected: true
-
-../code/applications/demo/src/main.cpp:69 : Failure in Suite2::FixtureMyTest2::Test2: Value of: false
-  Expected: true
-
-../code/applications/demo/src/main.cpp:70 : Failure in Suite2::FixtureMyTest2::Test2: Value of: true
-  Expected: false
-
-../code/applications/demo/src/main.cpp:94 : Failure in FixtureMyTest3::Test3: Value of: y
-  Actual: 1
-  Expected: x
-  Which is: 0
-
-../code/applications/demo/src/main.cpp:97 : Failure in FixtureMyTest3::Test3: Value of: z
-  Actual: 1
-  Expected not equal to: y
-  Which is: 1
-
-../code/applications/demo/src/main.cpp:108 : Failure in Test4: Value of: q
-  Actual: 0x000000000029CC04
-  Expected: nullptr
-  Which is: null
-
-../code/applications/demo/src/main.cpp:109 : Failure in Test4: Value of: q
-  Actual: 0x000000000029CC04
-  Expected: nullptr
-  Which is: null
-
-../code/applications/demo/src/main.cpp:110 : Failure in Test4: Value of: p
-  Actual: null
-  Expected not equal to: nullptr
-  Which is: null
-
-../code/applications/demo/src/main.cpp:111 : Failure in Test4: Value of: p
-  Actual: null
-  Expected not equal to: nullptr
-  Which is: null
-
-../code/applications/demo/src/main.cpp:118 : Failure in Test4: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:119 : Failure in Test4: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:124 : Failure in Test4: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:125 : Failure in Test4: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:126 : Failure in Test4: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:127 : Failure in Test4: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:132 : Failure in Test4: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:133 : Failure in Test4: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:136 : Failure in Test4: Value of: s4
-  Actual: b
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:137 : Failure in Test4: Value of: s4
-  Actual: b
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:146 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:147 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:150 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:151 : Failure in Test4: Value of: uC
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:154 : Failure in Test4: Value of: w
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:155 : Failure in Test4: Value of: wC
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:156 : Failure in Test4: Value of: w
-  Actual: b
-  Expected: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:157 : Failure in Test4: Value of: wC
-  Actual: b
-  Expected: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:160 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:161 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:164 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:165 : Failure in Test4: Value of: vC
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:170 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:171 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:174 : Failure in Test4: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:175 : Failure in Test4: Value of: uC
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:178 : Failure in Test4: Value of: w
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:179 : Failure in Test4: Value of: wC
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:184 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:185 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:188 : Failure in Test4: Value of: v
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:189 : Failure in Test4: Value of: vC
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:192 : Failure in Test4: Value of: w
-  Actual: b
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:193 : Failure in Test4: Value of: wC
-  Actual: b
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:197 : Failure in Test4: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-
-../code/applications/demo/src/main.cpp:198 : Failure in Test4: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-
-../code/applications/demo/src/main.cpp:199 : Failure in Test4: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-  Tolerance: 0.0001
-  (+/-) 0.10000000000000
-../code/applications/demo/src/main.cpp:200 : Failure in Test4: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-  Tolerance: 0.0001
-  (+/-) 0.10000000000000
-
-[===========] 4 tests from 4 fixtures in 3 suites ran.
-Info   Failures found: 47 (main:212)
-Info   Wait 5 seconds (main:214)Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
-```
+\todo Add DeferreTestReporter
 
 Next: [18-writing-unit-tests](18-writing-unit-tests.md)
 

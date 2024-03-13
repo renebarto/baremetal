@@ -94,7 +94,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
     if (testFixture == nullptr)
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 #endif
         testFixture = new TestFixtureInfo(fixtureName);
         AddFixture(testFixture);
@@ -102,7 +102,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
     else
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+        LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 #endif
     }
     return testFixture;
@@ -125,24 +125,6 @@ void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
         m_tail->m_next = testFixture;
         m_tail         = testFixture;
     }
-}
-
-/// <summary>
-/// Run tests in test suite, updating the test results
-/// </summary>
-/// <param name="testResults">Test results to use and update</param>
-void TestSuiteInfo::Run(TestResults& testResults)
-{
-    testResults.OnTestSuiteStart(this);
-
-    TestFixtureInfo* testFixture = Head();
-    while (testFixture != nullptr)
-    {
-        testFixture->Run(testResults);
-        testFixture = testFixture->m_next;
-    }
-
-    testResults.OnTestSuiteFinish(this);
 }
 
 /// <summary>

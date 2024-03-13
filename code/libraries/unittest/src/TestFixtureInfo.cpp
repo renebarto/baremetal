@@ -97,24 +97,6 @@ void TestFixtureInfo::AddTest(TestInfo* test)
 }
 
 /// <summary>
-/// Run tests in test fixture, updating the test results
-/// </summary>
-/// <param name="testResults">Test results to use and update</param>
-void TestFixtureInfo::Run(TestResults& testResults)
-{
-    testResults.OnTestFixtureStart(this);
-
-    TestInfo* test = Head();
-    while (test != nullptr)
-    {
-        test->Run(testResults);
-        test = test->m_next;
-    }
-
-    testResults.OnTestFixtureFinish(this);
-}
-
-/// <summary>
 /// Count the number of tests in the test fixture
 /// </summary>
 /// <returns>Number of tests in the test fixture</returns>

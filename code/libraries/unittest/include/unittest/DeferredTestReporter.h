@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ConsoleTestReporter.h
+// File        : DeferredTestReporter.h
 //
 // Namespace   : unittest
 //
-// Class       : ConsoleTestReporter
+// Class       : DeferredTestReporter
 //
-// Description : Console test reporter
+// Description : Deferred test reporter, which saves test results
 //
 //------------------------------------------------------------------------------
 //
@@ -37,40 +37,83 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <unittest/DeferredTestReporter.h>
+#include <unittest/ITestReporter.h>
+#include <unittest/TestResult.h>
 
 /// @file
-/// Console test reporter
-///
-/// Prints test information to the console, using color.
-/// Uses DeferredTestReporter to save failures so they can be printed after running the test, as an overview
+/// Deferred test reporter
+/// 
+/// Saves failures during the test run, so they can be sown in the overview after the complete test run
 
 namespace unittest
 {
 
 /// <summary>
-/// Console test reporter
+/// Test result entry
 /// </summary>
-class ConsoleTestReporter
-    : public DeferredTestReporter
+class ResultEntry
 {
-public:
-    /// @brief Separator for complete test run
-    static const baremetal::string TestRunSeparator;
-    /// @brief Separator for test fixture
-    static const baremetal::string TestFixtureSeparator;
-    /// @brief Separator for test suite
-    static const baremetal::string TestSuiteSeparator;
-    /// @brief Indicator for successful test
-    static const baremetal::string TestSuccessSeparator;
-    /// @brief Indicator for failed test
-    static const baremetal::string TestFailSeparator;
-
-    ConsoleTestReporter();
-
 private:
+    friend class ResultList;
+    /// @brief Test result
+    TestResult m_result;
+    /// @brief Pointer to next entry in list
+    ResultEntry* m_next;
+
+public:
+    explicit ResultEntry(const TestResult& result);
+    /// <summary>
+    /// Return test result
+    /// </summary>
+    /// <returns>Test result</returns>
+    TestResult& GetResult() { return m_result; }
+    /// <summary>
+    /// Return next entry pointer
+    /// </summary>
+    /// <returns>Next entry pointer</returns>
+    ResultEntry* GetNext() { return m_next; }
+};
+
+/// <summary>
+/// Test result entry list
+/// </summary>
+class ResultList
+{
+private:
+    /// @brief Start of list
+    ResultEntry* m_head;
+    /// @brief End of list
+    ResultEntry* m_tail;
+
+public:
+    ResultList();
+    ~ResultList();
+
+    void Add(const TestResult& result);
+    /// <summary>
+    /// Return start of list pointer
+    /// </summary>
+    /// <returns>Start of list pointer</returns>
+    ResultEntry* GetHead() const { return m_head; }
+    /// <summary>
+    /// Return end of list pointer
+    /// </summary>
+    /// <returns>End of list pointer</returns>
+    ResultEntry* GetTail() const { return m_tail; }
+};
+
+/// <summary>
+/// Deferred test reporter
+/// 
+/// Implements abstract ITestReporter interface
+/// </summary>
+class DeferredTestReporter : public ITestReporter
+{
+private:
+    /// @brief Test result list for current test run
+    ResultList m_results;
+
+public:
     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
     void ReportTestRunSummary(const TestResults& results) override;
@@ -83,16 +126,7 @@ private:
     void ReportTestFinish(const TestDetails& details, bool success) override;
     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
 
-    baremetal::string TestRunStartMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
-    baremetal::string TestRunFinishMessage(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests);
-    baremetal::string TestSuiteStartMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
-    baremetal::string TestSuiteFinishMessage(const baremetal::string& suiteName, int numberOfTestFixtures);
-    baremetal::string TestFixtureStartMessage(const baremetal::string& fixtureName, int numberOfTests);
-    baremetal::string TestFixtureFinishMessage(const baremetal::string& fixtureName, int numberOfTests);
-    baremetal::string TestFailureMessage(const TestResult& result, const Failure& failure);
-    baremetal::string TestFinishMessage(const TestDetails& test, bool success);
-    baremetal::string TestRunSummaryMessage(const TestResults& results);
-    baremetal::string TestRunOverviewMessage(const TestResults& results);
+    ResultList& Results();
 };
 
 } // namespace unittest

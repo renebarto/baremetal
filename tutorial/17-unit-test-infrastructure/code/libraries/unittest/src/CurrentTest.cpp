@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : CurrentTest.cpp
 //
-// Namespace   : -
+// Namespace   : unittest
 //
-// Class       : -
+// Class       : CurrentTest
 //
-// Description : unittest general include file, with functions to start tests
+// Description : Current test info
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,36 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <unittest/CurrentTest.h>
 
 /// @file
-/// Unit test generic header
+/// Current test information implementation
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
+namespace unittest
+{
 
-#include <unittest/ITestReporter.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+/// <summary>
+/// Returns reference to static test results pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test results during the test run.
+/// </summary>
+/// <returns>A reference to the current test results pointer</returns>
+TestResults *& CurrentTest::Results()
+{
+    static TestResults* testResults = nullptr;
+    return testResults;
+}
+
+/// <summary>
+/// Returns reference to static test details pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test details during the test run.
+/// </summary>
+/// <returns>A reference to the current test details pointer</returns>
+const TestDetails *& CurrentTest::Details()
+{
+    static const TestDetails* testDetails = nullptr;
+    return testDetails;
+}
+
+} // namespace unittest

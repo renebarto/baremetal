@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : TestSuite.h
 //
-// Namespace   : -
+// Namespace   : unittest
 //
 // Class       : -
 //
-// Description : unittest general include file, with functions to start tests
+// Description : Test suite functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -40,20 +40,13 @@
 #pragma once
 
 /// @file
-/// Unit test generic header
+/// Test suite
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
-
-#include <unittest/ITestReporter.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+/// <summary>
+/// Return the default test suite name (which will be converted to the actual default name by the test reporter)
+/// </summary>
+/// <returns></returns>
+inline char const* GetSuiteName()
+{
+    return "";
+}

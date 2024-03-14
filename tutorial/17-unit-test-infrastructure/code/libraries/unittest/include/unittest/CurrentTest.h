@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : CurrentTest.h
 //
-// Namespace   : -
+// Namespace   : unittest
 //
-// Class       : -
+// Class       : CurrentTest
 //
-// Description : unittest general include file, with functions to start tests
+// Description : Current test info
 //
 //------------------------------------------------------------------------------
 //
@@ -40,20 +40,22 @@
 #pragma once
 
 /// @file
-/// Unit test generic header
+/// Current test information
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
+namespace unittest
+{
 
-#include <unittest/ITestReporter.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+class TestResults;
+class TestDetails;
+
+/// <summary>
+/// Container class for current test administration
+/// </summary>
+class CurrentTest
+{
+public:
+    static TestResults*& Results();
+    static const TestDetails*& Details();
+};
+
+} // namespace unittest

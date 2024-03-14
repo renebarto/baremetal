@@ -65,35 +65,21 @@ private:
     const int m_lineNumber;
 
 public:
+    /// @brief Name of default test fixture. Used for tests that are not in a test fixture
+    static const char* DefaultFixtureName;
+    /// @brief Name of default test suite. Used for tests and test fixtures that are not in a test suite
+    static const char* DefaultSuiteName;
+
     TestDetails();
     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
     TestDetails(const TestDetails& other, int lineNumber);
 
-    /// <summary>
-    /// Returns test suite name
-    /// </summary>
-    /// <returns>Test suite name</returns>
-    const baremetal::string& SuiteName() const { return m_suiteName; }
-    /// <summary>
-    /// Returns test fixture name
-    /// </summary>
-    /// <returns>Test fixture name</returns>
-    const baremetal::string& FixtureName() const { return m_fixtureName; }
-    /// <summary>
-    /// Returns test name
-    /// </summary>
-    /// <returns>Test name</returns>
-    const baremetal::string& TestName() const { return m_testName; }
-    /// <summary>
-    /// Returns test source file name
-    /// </summary>
-    /// <returns>Test source file name</returns>
-    const baremetal::string& SourceFileName() const { return m_fileName; }
-    /// <summary>
-    /// Returns test source line number
-    /// </summary>
-    /// <returns>Test source line number</returns>
-    int SourceFileLineNumber() const { return m_lineNumber; }
+    baremetal::string SuiteName() const;
+    baremetal::string FixtureName() const;
+    baremetal::string TestName() const;
+    baremetal::string QualifiedTestName() const;
+    baremetal::string SourceFileName() const;
+    int SourceFileLineNumber() const;
 };
 
 } // namespace unittest

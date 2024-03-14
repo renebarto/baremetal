@@ -4,15 +4,15 @@
 
 ## New tutorial setup {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_NEW_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/17-unit-tests`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/17-unit-test-infrastructure`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-17.a`
-- an application `output/Debug/bin/17-unit-tests.elf`
-- an image in `deploy/Debug/17-unit-tests-image`
+- an application `output/Debug/bin/17-unit-test-infrastructure.elf`
+- an image in `deploy/Debug/17-unit-test-infrastructure-image`
 
 ## Creating a framework for unit testing {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_A_FRAMEWORK_FOR_UNIT_TESTING}
 
@@ -6491,7 +6491,1042 @@ You will see all the output being generared by the console test reported using c
 
 <img src="images/demo-output-unit-test.png" alt="Tree view" width="800"/>
 
-\todo Add DeferreTestReporter
+## Collecting test information - Step 8 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8}
+
+So far, we can run tests, but the output is written immediately as we run. A better way would be to collect information and print it after the test run has completed.
+That way the test run output itself will be more clean, and we have a simple summary of all failures.
+For this, we'll introduce the `DeferredTestReporter` class, and make `ConsoleTestReporter` inherit from this.
+
+### TestResult.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_TESTRESULTH}
+
+The `DeferredTestReporter` will use a list of entries holding a `TestResult` to keep track of the results during the test run.
+The `TestResult` class will hold the information and result for a single test, which is extracted initially from `TestDetails`.
+If a test failure occures, the failure information is attached to the `TestResult`.
+We need to declare this class.
+
+Create the file `code/libraries/unittest/include/unittest/TestResult.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/TestResult.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : TestResult.h
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : TestResult
+9: //
+10: // Description : Test result
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: #include <baremetal/String.h>
+43: #include <unittest/TestDetails.h>
+44: 
+45: /// @file
+46: /// Test result
+47: /// 
+48: /// Result of a single test
+49: 
+50: namespace unittest
+51: {
+52: 
+53: /// <summary>
+54: /// Failure
+55: /// 
+56: /// Holds information on an occurrred test failure
+57: /// </summary>
+58: class Failure
+59: {
+60: private:
+61:     /// @brief Line number on which failure occurred
+62:     int m_lineNumber;
+63:     /// @brief Failure message
+64:     baremetal::string m_text;
+65: 
+66: public:
+67:     /// <summary>
+68:     /// Constructor
+69:     /// </summary>
+70:     /// <param name="lineNumber">Line number on which failure occurred</param>
+71:     /// <param name="text">Failure message, can be empty</param>
+72:     Failure(int lineNumber, const baremetal::string& text);
+73:     /// <summary>
+74:     /// Return line number on which failure occurred
+75:     /// </summary>
+76:     /// <returns>Line number on which failure occurred</returns>
+77:     int SourceLineNumber() const { return m_lineNumber; }
+78:     /// <summary>
+79:     /// Returns failure message
+80:     /// </summary>
+81:     /// <returns>Failure message</returns>
+82:     const baremetal::string& Text() const { return m_text; }
+83: };
+84: 
+85: /// <summary>
+86: /// Container for failure
+87: /// </summary>
+88: class FailureEntry
+89: {
+90: private:
+91:     friend class FailureList;
+92:     /// @brief Failure information
+93:     Failure m_failure;
+94:     /// @brief Pointer to next failure entry in the list
+95:     FailureEntry* m_next;
+96: 
+97: public:
+98:     /// <summary>
+99:     /// Constructor
+100:     /// </summary>
+101:     /// <param name="failure">Failure information to set</param>
+102:     explicit FailureEntry(const Failure& failure);
+103:     /// <summary>
+104:     /// Returns failure information
+105:     /// </summary>
+106:     /// <returns>Failure information</returns>
+107:     const Failure& GetFailure() const { return m_failure; }
+108:     /// <summary>
+109:     /// Return pointer to next failure entry
+110:     /// </summary>
+111:     /// <returns>Pointer to next failure entry</returns>
+112:     const FailureEntry* GetNext() const { return m_next; }
+113: };
+114: 
+115: /// <summary>
+116: /// List of failures
+117: /// </summary>
+118: class FailureList
+119: {
+120: private:
+121:     /// @brief Pointer to first failure entry in the list
+122:     FailureEntry* m_head;
+123:     /// @brief Pointer to last failure entry in the list
+124:     FailureEntry* m_tail;
+125: 
+126: public:
+127:     /// <summary>
+128:     /// Constructor
+129:     /// </summary>
+130:     FailureList();
+131:     /// <summary>
+132:     /// Destructor
+133:     /// </summary>
+134:     ~FailureList();
+135: 
+136:     /// <summary>
+137:     /// Returns pointer to first failure in the list
+138:     /// </summary>
+139:     /// <returns>Pointer to first failure in the list</returns>
+140:     const FailureEntry* GetHead() const { return m_head; }
+141:     /// <summary>
+142:     /// Add a failure to the list
+143:     /// </summary>
+144:     /// <param name="failure">Failure information to add</param>
+145:     void Add(const Failure& failure);
+146: };
+147: 
+148: /// <summary>
+149: /// Results for a single test
+150: /// </summary>
+151: class TestResult
+152: {
+153: private:
+154:     /// @brief Details of the test
+155:     TestDetails m_details;
+156:     /// @brief List of failure for the test
+157:     FailureList m_failures;
+158:     /// @brief Failure flag, true if at least one failure occurred
+159:     bool m_failed;
+160: 
+161: public:
+162:     TestResult() = delete;
+163:     /// <summary>
+164:     /// Constructor
+165:     /// </summary>
+166:     /// <param name="details">Test details</param>
+167:     explicit TestResult(const TestDetails & details);
+168: 
+169:     /// <summary>
+170:     /// Add a failure to the list for this test
+171:     /// </summary>
+172:     /// <param name="failure">Failure information</param>
+173:     void AddFailure(const Failure& failure);
+174:     /// <summary>
+175:     /// Return the list of failures for this test
+176:     /// </summary>
+177:     /// <returns>List of failures for this test</returns>
+178:     const FailureList & Failures() const { return m_failures; }
+179:     /// <summary>
+180:     /// Returns failure flag
+181:     /// </summary>
+182:     /// <returns>Failure flag, true if at least one failure occurred</returns>
+183:     bool Failed() const { return m_failed; }
+184:     /// <summary>
+185:     /// Returns the test details
+186:     /// </summary>
+187:     /// <returns>Test details</returns>
+188:     const TestDetails& Details() const { return m_details; }
+189: };
+190: 
+191: } // namespace unittest
+```
+
+- Line 58-83: We declare a class `Failure` to hold a single failure
+  - Line 62: The member variable `m_lineNumber` holds the line number in the source file where the failure occurred
+  - Line 64: The member variable `m_text` holds the failure message
+  - Line 72: We declare the constructor
+  - Line 77: We declare and define the method `SourceLineNumber()` which returns the line number
+  - Line 82: We declare and define the method `Text()` which returns the failure message
+- Line 88-113: We declare a class `FailureEntry` which holds a failure, and a pointer to the next failure
+  - Line 93: The member variable `m_failure` holds the failure
+  - Line 95: The member variable `m_next` holds a pointer to the next `FailureEntry` in the list
+  - Line 102: We declare the constructor
+  - Line 107: We declare and define the method `GetFailure()` which returns a const reference to the failure
+  - Line 112: We declare and define the method `GetNext()` which returns a const pointer to the next `FailureEntry` in the list
+- Line 118-146: We declare a class `FailureList` which holds a pointer to the beginning and the end of a `FailureEntry` list
+  - Line 122-124: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
+  - Line 130: We declare the constructor
+  - Line 134: We declare the destructor, which will clean up the list of `FailureEntry` instances
+  - Line 140: We declare and define the method `GetHead()` which returns a const pointer to the first `FailureEntry` in the list
+  - Line 145: We declare and define the method `Add()` which adds a failure to the list (embedded in a `FailureEntry` instance)
+- Line 151-189: We declare the class `TestResult`
+  - Line 155: The member variable `m_details` holds the test details
+  - Line 157: The member variable `m_failures` holds the failure list
+  - Line 159: The member variable `m_failed` holds true if at least one failure occurred for this test
+  - Line 162: We remove the default constructor
+  - Line 167: We declare an explicit constructor
+  - Line 173: We declare the method `AddFailure()` which adds a failure to the list
+  - Line 178: We declare and define the method `Failures()` which returns a const reference to the failure list
+  - Line 183: We declare and define the method `Failed()` which returns true if a failure occurred
+  - Line 188: We declare and define the method `Details()` which returns the test details
+
+### TestResult.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_TESTRESULTCPP}
+
+Let's implement the `TestResult` class.
+
+Create the file `code/libraries/unittest/src/TestResult.cpp`
+
+```cpp
+File: code/libraries/unittest/src/TestResult.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : TestResult.cpp
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : TestResult
+9: //
+10: // Description : Test result
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <unittest/TestResult.h>
+41: 
+42: #include <unittest/TestDetails.h>
+43: 
+44: /// @file
+45: /// Test result implementation
+46: /// 
+47: /// Result of a single test
+48: 
+49: using namespace baremetal;
+50: 
+51: namespace unittest {
+52: 
+53: Failure::Failure(int lineNumber, const baremetal::string& text)
+54:     : m_lineNumber{lineNumber}
+55:     , m_text{text}
+56: {
+57: }
+58: 
+59: FailureEntry::FailureEntry(const Failure& failure)
+60:     : m_failure{ failure }
+61:     , m_next{}
+62: {
+63: }
+64: 
+65: FailureList::FailureList()
+66:     : m_head{}
+67:     , m_tail{}
+68: {
+69: }
+70: 
+71: FailureList::~FailureList()
+72: {
+73:     auto current = m_head;
+74:     while (current != nullptr)
+75:     {
+76:         auto next = current->m_next;
+77:         delete current;
+78:         current = next;
+79:     }
+80: }
+81: 
+82: void FailureList::Add(const Failure& failure)
+83: {
+84:     auto entry = new FailureEntry(failure);
+85:     if (m_head == nullptr)
+86:     {
+87:         m_head = entry;
+88:     }
+89:     else
+90:     {
+91:         auto current = m_head;
+92:         while (current->m_next != nullptr)
+93:             current = current->m_next;
+94:         current->m_next = entry;
+95:     }
+96:     m_tail = entry;
+97: }
+98: 
+99: TestResult::TestResult(const TestDetails& details)
+100:     : m_details{ details }
+101:     , m_failures{}
+102:     , m_failed{}
+103: {
+104: }
+105: 
+106: void TestResult::AddFailure(const Failure& failure)
+107: {
+108:     m_failures.Add(failure);
+109:     m_failed = true;
+110: }
+111: 
+112: } // namespace unittest
+```
+
+- Line 53-57: We implement the `Failure` constructor
+- Line 59-63: We implement the `FailureEntry` constructor
+- Line 65-69: We implement the `FailureList` constructor
+- Line 71-80: We implement the `FailureList` destructor. This will delete all `FailureEntry` instances in the list
+- Line 82-97: We implement the method `Add()` for `FailureList`. This will create a new `FailureEntry` with the `Failure` in it, and insert at the end of the list
+- Line 99-104: We implement the `TestResult` constructor
+- Line 106-110: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
+
+### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTH}
+
+Let's declare the `DeferredTestReporter` class.
+
+Create the file `code/libraries/unittest/include/unittest/DeferredTestReporter.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : DeferredTestReporter.h
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : DeferredTestReporter
+9: //
+10: // Description : Deferred test reporter, which saves test results
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <unittest/ITestReporter.h>
+41: #include <unittest/TestResult.h>
+42: 
+43: /// @file
+44: /// Deferred test reporter
+45: /// 
+46: /// Saves failures during the test run, so they can be sown in the overview after the complete test run
+47: 
+48: namespace unittest
+49: {
+50: 
+51: /// <summary>
+52: /// Test result entry
+53: /// </summary>
+54: class ResultEntry
+55: {
+56: private:
+57:     friend class ResultList;
+58:     /// @brief Test result
+59:     TestResult m_result;
+60:     /// @brief Pointer to next entry in list
+61:     ResultEntry* m_next;
+62: 
+63: public:
+64:     explicit ResultEntry(const TestResult& result);
+65:     /// <summary>
+66:     /// Return test result
+67:     /// </summary>
+68:     /// <returns>Test result</returns>
+69:     TestResult& GetResult() { return m_result; }
+70:     /// <summary>
+71:     /// Return next entry pointer
+72:     /// </summary>
+73:     /// <returns>Next entry pointer</returns>
+74:     ResultEntry* GetNext() { return m_next; }
+75: };
+76: 
+77: /// <summary>
+78: /// Test result entry list
+79: /// </summary>
+80: class ResultList
+81: {
+82: private:
+83:     /// @brief Start of list
+84:     ResultEntry* m_head;
+85:     /// @brief End of list
+86:     ResultEntry* m_tail;
+87: 
+88: public:
+89:     ResultList();
+90:     ~ResultList();
+91: 
+92:     void Add(const TestResult& result);
+93:     /// <summary>
+94:     /// Return start of list pointer
+95:     /// </summary>
+96:     /// <returns>Start of list pointer</returns>
+97:     ResultEntry* GetHead() const { return m_head; }
+98:     /// <summary>
+99:     /// Return end of list pointer
+100:     /// </summary>
+101:     /// <returns>End of list pointer</returns>
+102:     ResultEntry* GetTail() const { return m_tail; }
+103: };
+104: 
+105: /// <summary>
+106: /// Deferred test reporter
+107: /// 
+108: /// Implements abstract ITestReporter interface
+109: /// </summary>
+110: class DeferredTestReporter : public ITestReporter
+111: {
+112: private:
+113:     /// @brief Test result list for current test run
+114:     ResultList m_results;
+115: 
+116: public:
+117:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+118:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+119:     void ReportTestRunSummary(const TestResults& results) override;
+120:     void ReportTestRunOverview(const TestResults& results) override;
+121:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+122:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+123:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
+124:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
+125:     void ReportTestStart(const TestDetails& details) override;
+126:     void ReportTestFinish(const TestDetails& details, bool success) override;
+127:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
+128: 
+129:     ResultList& Results();
+130: };
+131: 
+132: } // namespace unittest
+```
+
+- Line 54-75: We declare the struct `ResultEntry`, which holds a `TestResult`, which we'll declare later, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
+  - Line 59: The member variable `m_result` holds the test result
+  - Line 61: The member variable `m_next` holds the pointer to the next `ResultEntry` in the list
+  - Line 64: We declare the constructor
+  - Line 69: We declare and define the method `GetResult()` which returns the test result
+  - Line 74: We declare and define the method `GetNext()` which returns the pointer to the next `ResultEntry` in the list
+- Line 77-103: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
+  - Line 84-86: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
+  - Line 89: We declare the constructor
+  - Line 90: We declare the destructor, which will clean up the list of `ResultEntry` instances
+  - Line 92: We declare and define the method `Add()` which adds a test result to the list (embedded in a `ResultEntry` instance)
+  - Line 97: We declare and define the method `GetHead()` which returns a const pointer to the first `ResultEntry` in the list
+  - Line 102: We declare and define the method `GetTail()` which returns a const pointer to the last `ResultEntry` in the list
+- Line 110-130: We declare the class `DeferredTestReporter`, which implements the abstract interface `ITestReporter`
+  - Line 114: The class variable `m_results` holds the list of test results saved during the test run
+  - Line 117-127: We implement the `ITestReporter` interface
+  - Line 129: We declare the method `Results()` which returns the `ResultList`
+
+### DeferredTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTCPP}
+
+Let's implement the `DeferredTestReporter` class.
+
+Create the file `code/libraries/unittest/src/DeferredTestReporter.cpp`
+
+```cpp
+File: code/libraries/unittest/src/DeferredTestReporter.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : DeferredTestReporter.cpp
+5: //
+6: // Namespace   : unittest
+7: //
+8: // Class       : DeferredTestReporter
+9: //
+10: // Description : Test detail
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <unittest/DeferredTestReporter.h>
+41: 
+42: #include <unittest/TestDetails.h>
+43: 
+44: /// @file
+45: /// Deferred test reporter implementation
+46: 
+47: using namespace baremetal;
+48: 
+49: namespace unittest
+50: {
+51: 
+52: /// <summary>
+53: /// Constructor
+54: /// </summary>
+55: /// <param name="result">Test result to be stored</param>
+56: ResultEntry::ResultEntry(const TestResult& result)
+57:     : m_result{ result }
+58:     , m_next{}
+59: {
+60: }
+61: 
+62: /// <summary>
+63: /// Constructor
+64: /// </summary>
+65: ResultList::ResultList()
+66:     : m_head{}
+67:     , m_tail{}
+68: {
+69: }
+70: 
+71: /// <summary>
+72: /// Destructor
+73: /// </summary>
+74: ResultList::~ResultList()
+75: {
+76:     auto current = m_head;
+77:     while (current != nullptr)
+78:     {
+79:         auto next = current->m_next;
+80:         delete current;
+81:         current = next;
+82:     }
+83: }
+84: 
+85: /// <summary>
+86: /// Add a test result to the list
+87: /// </summary>
+88: /// <param name="result">Test result to add</param>
+89: void ResultList::Add(const TestResult& result)
+90: {
+91:     auto entry = new ResultEntry(result);
+92:     if (m_head == nullptr)
+93:     {
+94:         m_head = entry;
+95:     }
+96:     else
+97:     {
+98:         auto current = m_head;
+99:         while (current->m_next != nullptr)
+100:             current = current->m_next;
+101:         current->m_next = entry;
+102:     }
+103:     m_tail = entry;
+104: }
+105: 
+106: /// <summary>
+107: /// Start of test run callback (empty)
+108: /// </summary>
+109: /// <param name="numberOfTestSuites">Number of test suites to be run</param>
+110: /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+111: /// <param name="numberOfTests">Number of tests to be run</param>
+112: void DeferredTestReporter::ReportTestRunStart(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
+113: {
+114: }
+115: 
+116: /// <summary>
+117: /// Finish of test run callback (empty)
+118: /// </summary>
+119: /// <param name="numberOfTestSuites">Number of test suites run</param>
+120: /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+121: /// <param name="numberOfTests">Number of tests run</param>
+122: void DeferredTestReporter::ReportTestRunFinish(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
+123: {
+124: }
+125: 
+126: /// <summary>
+127: /// Test summary callback (empty)
+128: /// </summary>
+129: /// <param name="results">Test run results</param>
+130: void DeferredTestReporter::ReportTestRunSummary(const TestResults& /*results*/)
+131: {
+132: }
+133: 
+134: /// <summary>
+135: /// Test run overview callback (empty)
+136: /// </summary>
+137: /// <param name="results">Test run results</param>
+138: void DeferredTestReporter::ReportTestRunOverview(const TestResults& /*results*/)
+139: {
+140: }
+141: 
+142: /// <summary>
+143: /// Test suite start callback (empty)
+144: /// </summary>
+145: /// <param name="suiteName">Test suite name</param>
+146: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+147: void DeferredTestReporter::ReportTestSuiteStart(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
+148: {
+149: }
+150: 
+151: /// <summary>
+152: /// Test suite finish callback (empty)
+153: /// </summary>
+154: /// <param name="suiteName">Test suite name</param>
+155: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+156: void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
+157: {
+158: }
+159: 
+160: /// <summary>
+161: /// Test fixture start callback (empty)
+162: /// </summary>
+163: /// <param name="fixtureName">Test fixture name</param>
+164: /// <param name="numberOfTests">Number of tests within test fixture</param>
+165: void DeferredTestReporter::ReportTestFixtureStart(const string& /*fixtureName*/, int /*numberOfTests*/)
+166: {
+167: }
+168: 
+169: /// <summary>
+170: /// Test fixture finish callback (empty)
+171: /// </summary>
+172: /// <param name="fixtureName">Test fixture name</param>
+173: /// <param name="numberOfTests">Number of tests within test fixture</param>
+174: void DeferredTestReporter::ReportTestFixtureFinish(const string& /*fixtureName*/, int /*numberOfTests*/)
+175: {
+176: }
+177: 
+178: /// <summary>
+179: /// Test start callback
+180: /// </summary>
+181: /// <param name="details">Test details</param>
+182: void DeferredTestReporter::ReportTestStart(const TestDetails& details)
+183: {
+184:     m_results.Add(TestResult(details));
+185: }
+186: 
+187: /// <summary>
+188: /// Test finish callback (empty)
+189: /// </summary>
+190: /// <param name="details">Test details</param>
+191: /// <param name="success">Test result, true is successful, false is failed</param>
+192: void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
+193: {
+194: }
+195: 
+196: /// <summary>
+197: /// Test failure callback
+198: /// </summary>
+199: /// <param name="details">Test details</param>
+200: /// <param name="failure">Test failure message</param>
+201: void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
+202: {
+203:     TestResult& result = m_results.GetTail()->GetResult();
+204:     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
+205: }
+206: 
+207: /// <summary>
+208: /// Return test result list
+209: /// </summary>
+210: /// <returns>Test result list</returns>
+211: ResultList& DeferredTestReporter::Results()
+212: {
+213:     return m_results;
+214: }
+215: 
+216: } // namespace unittest
+```
+
+- Line 56-60: We implement the `ResultEntry` constructor
+- Line 65-69: We implement the `ResultList` constructor
+- Line 74-83: We implement the `ResultList` denstructor
+- Line 89-104: We implement the method `Add` for `ResultList`. This will create a new `ResultEntry` and insert it at the end of the list
+- Line 112-114: We implement the method `ReportTestRunStart` for `DeferredTestReporter`.
+This does nothing, as `DeferredTestReporter` does not report anything in itself. It simply stores test results 
+- Line 122-124: We implement the method `ReportTestRunFinish` for `DeferredTestReporter`. This again does nothing
+- Line 130-132: We implement the method `ReportTestRunSummary` for `DeferredTestReporter`. This again does nothing
+- Line 138-140: We implement the method `ReportTestRunOverview` for `DeferredTestReporter`. This again does nothing
+- Line 147-149: We implement the method `ReportTestSuiteStart` for `DeferredTestReporter`. This again does nothing
+- Line 156-158: We implement the method `ReportTestSuiteFinish` for `DeferredTestReporter`. This again does nothing
+- Line 165-167: We implement the method `ReportTestFixtureStart` for `DeferredTestReporter`. This again does nothing
+- Line 174-176: We implement the method `ReportTestFixtureFinish` for `DeferredTestReporter`. This again does nothing
+- Line 182-184: We implement the method `ReportTestStart` for `DeferredTestReporter`. This adds a new result to the list
+- Line 192-194: We implement the method `ReportTestFinish` for `DeferredTestReporter`. This again does nothing
+- Line 201-205: We implement the method `ReportTestFailure` for `DeferredTestReporter`. This adds a failure to the list for the current result
+- Line 211-214: We implement the method `Results` for `DeferredTestReporter`
+
+### ConsoleTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONSOLETESTREPORTH}
+
+We need to update the class `ConsoleTestReporter` to derive from `DeferredTestReporter`.
+
+Update the file  `code/libraries/unittest/include/unittest/ConsoleTestReport.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/ConsoleTestReport.h
+...
+File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\ConsoleTestReporter.h
+42: #include <unittest/DeferredTestReporter.h>
+...
+53: /// <summary>
+54: /// Console test reporter
+55: /// </summary>
+56: class ConsoleTestReporter
+57:     : public DeferredTestReporter
+...
+92:     baremetal::string TestFailureMessage(const TestResult& result, const Failure& failure);
+...
+```
+
+- Line 42: We need to include the header for `DeferredTestReporter` instead of for the interface
+- Line 56-57: We inherit from `DeferredTestReporter`
+- Line 77: We replace the method `TestFailureMessage()` with a version taking a `TestResult` and a `Failure`
+
+### ConsoleTestReport.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONSOLETESTREPORTCPP}
+
+Let's update the implementation for `ConsoleTestReport`.
+
+Update the file `code/libraries/unittest/src/ConsoleTestReport.cpp`
+
+```cpp
+File: code/libraries/unittest/src/ConsoleTestReport.cpp
+...
+179: /// <summary>
+180: /// Test start callback
+181: /// </summary>
+182: /// <param name="details">Test details</param>
+183: void ConsoleTestReporter::ReportTestStart(const TestDetails& details)
+184: {
+185:     DeferredTestReporter::ReportTestStart(details);
+186: }
+187: 
+188: /// <summary>
+189: /// Test finish callback
+190: /// </summary>
+191: /// <param name="details">Test details</param>
+192: /// <param name="success">Test result, true is successful, false is failed</param>
+193: void ConsoleTestReporter::ReportTestFinish(const TestDetails& details, bool success)
+194: {
+195:     DeferredTestReporter::ReportTestFinish(details, success);
+196:     GetConsole().SetTerminalColor(success ? ConsoleColor::Green : ConsoleColor::Red);
+197:     if (success)
+198:         GetConsole().Write(TestSuccessSeparator);
+199:     else
+200:         GetConsole().Write(TestFailSeparator);
+201:     GetConsole().ResetTerminalColor();
+202: 
+203:     GetConsole().Write(Format(" %s\n", TestFinishMessage(details, success).c_str()));
+204: }
+205: 
+206: /// <summary>
+207: /// Test failure callback
+208: /// </summary>
+209: /// <param name="details">Test details</param>
+210: /// <param name="failure">Test failure message</param>
+211: void ConsoleTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
+212: {
+213:     DeferredTestReporter::ReportTestFailure(details, failure);
+214: }
+...
+313: /// <summary>
+314: /// Create a message for test run overview
+315: /// </summary>
+316: /// <param name="results">Test run results</param>
+317: /// <returns>Resulting message</returns>
+318: string ConsoleTestReporter::TestRunOverviewMessage(const TestResults& results)
+319: {
+320: 
+321:     if (results.GetFailureCount() > 0)
+322:     {
+323:         string result = "Failures:\n";
+324:         auto testResultPtr = Results().GetHead();
+325:         while (testResultPtr != nullptr)
+326:         {
+327:             auto const& testResult = testResultPtr->GetResult();
+328:             if (testResult.Failed())
+329:             {
+330:                 auto failuresPtr = testResult.Failures().GetHead();
+331:                 while (failuresPtr != nullptr)
+332:                 {
+333:                     result.append(TestFailureMessage(testResult, failuresPtr->GetFailure()));
+334:                     failuresPtr = failuresPtr->GetNext();
+335:                 }
+336:             }
+337:             testResultPtr = testResultPtr->GetNext();
+338:         }
+339:         return result;
+340:     }
+341:     return "No failures";
+342: }
+343: 
+344: /// <summary>
+345: /// Create a message for test failure
+346: /// </summary>
+347: /// <param name="result">Test run results</param>
+348: /// <param name="failure">Failure that occurred</param>
+349: /// <returns>Resulting message</returns>
+350: string ConsoleTestReporter::TestFailureMessage(const TestResult& result, const Failure& failure)
+351: {
+352:     return Format("%s:%d : Failure in %s: %s\n",
+353:         result.Details().SourceFileName().c_str(),
+354:         failure.SourceLineNumber(),
+355:         result.Details().QualifiedTestName().c_str(),
+356:         failure.Text().c_str());
+357: }
+...
+```
+
+- Line 183-186: We reimplement the method `ReportTestStart` by calling the same method in `DeferredTestReporter`
+- Line 193-204: We reimplement the method `ReportTestFinish` by first calling the same method in `DeferredTestReporter`
+- Line 211-214: We reimplement the method `ReportTestFailure` by calling the same method in `DeferredTestReporter`
+- Line 318-342: We reimplement the method `TestRunOverviewMessage` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
+- Line 350-357: We reimplement the method `TestFailureMessage` to print a correct failure message
+
+### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UNITTESTH}
+
+We've added a header, so let's include that in the common header as well.
+
+Update the file `code/libraries/unittest/include/unittest/unittest.h`
+
+```cpp
+File: code/libraries/unittest/include/unittest/unittest.h
+45: #include <unittest/TestFixture.h>
+46: #include <unittest/TestSuite.h>
+47: 
+48: #include <unittest/ITestReporter.h>
+49: #include <unittest/ConsoleTestReporter.h>
+50: #include <unittest/CurrentTest.h>
+51: #include <unittest/DeferredTestReporter.h>
+52: #include <unittest/Test.h>
+53: #include <unittest/TestInfo.h>
+54: #include <unittest/TestDetails.h>
+55: #include <unittest/TestFixtureInfo.h>
+56: #include <unittest/TestRegistry.h>
+57: #include <unittest/TestResults.h>
+58: #include <unittest/TestRunner.h>
+59: #include <unittest/TestSuiteInfo.h>
+```
+
+### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_UPDATE_PROJECT_CONFIGURATION}
+
+As we added some files, we need to update the CMake file.
+
+Update the file `code/libraries/unittest/CMakeLists.txt`
+
+```cmake
+File: code/libraries/unittest/CMakeLists.txt
+30: set(PROJECT_SOURCES
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestInfo.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRegistry.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResult.cpp
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestResults.cpp
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
+43:     )
+44: 
+45: set(PROJECT_INCLUDES_PUBLIC
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h
+52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixtureInfo.h
+53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestInfo.h
+54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRegistry.h
+55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResult.h
+56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestResults.h
+57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestRunner.h
+58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuite.h
+59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestSuiteInfo.h
+60:     )
+61: set(PROJECT_INCLUDES_PRIVATE )
+```
+
+### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_APPLICATION_CODE}
+
+We will keep the application code unchanged for now.
+
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and start debugging.
+
+The application will run the tests. The reporting will be slightly different, as we now will see a summary of all failures.
+The debug logging will still show, but normally test cases do not log.
+
+```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Debug  Register test MyTest1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:150)
+Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:104)
+Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:97)
+Debug  Register test MyTest2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:150)
+Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:104)
+Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:97)
+Debug  Register test MyTest3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:150)
+Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:104)
+Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:97)
+Debug  Register test MyTest in fixture DefaultFixture in suite DefaultSuite (TestRegistry:150)
+Debug  Find suite DefaultSuite ... found (TestRegistry:112)
+Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:97)
+Info   Starting up (System:201)
+[===========] Running 4 tests from 4 fixtures in 3 suites.
+[   SUITE   ] Suite1 (1 fixture)
+[  FIXTURE  ] FixtureMyTest1 (1 test)
+Debug  Test 1 (main:67)
+Debug  MyTest SetUp (main:27)
+Debug  Suite1::FixtureMyTest1::MyTest1MyTestHelper 1 (main:54)
+Debug  MyTest TearDown (main:31)
+[ SUCCEEDED ] Suite1::FixtureMyTest1::MyTest1
+[  FIXTURE  ] 1 test from FixtureMyTest1
+[   SUITE   ] 1 fixture from Suite1
+[   SUITE   ] Suite2 (1 fixture)
+[  FIXTURE  ] FixtureMyTest2 (1 test)
+Debug  Test 2 (main:127)
+Debug  FixtureMyTest2 SetUp (main:87)
+Debug  Suite2::FixtureMyTest2::MyTest2MyTestHelper 2 (main:114)
+Debug  FixtureMyTest2 TearDown (main:91)
+[ SUCCEEDED ] Suite2::FixtureMyTest2::MyTest2
+[  FIXTURE  ] 1 test from FixtureMyTest2
+[   SUITE   ] 1 fixture from Suite2
+[   SUITE   ] DefaultSuite (2 fixtures)
+[  FIXTURE  ] FixtureMyTest3 (1 test)
+Debug  Test 3 (main:180)
+Debug  FixtureMyTest3 SetUp (main:140)
+Debug  DefaultSuite::FixtureMyTest3::MyTest3MyTestHelper 3 (main:167)
+Debug  FixtureMyTest3 TearDown (main:144)
+[ SUCCEEDED ] DefaultSuite::FixtureMyTest3::MyTest3
+[  FIXTURE  ] 1 test from FixtureMyTest3
+[  FIXTURE  ] DefaultFixture (1 test)
+Debug  Running test (main:196)
+[  FAILED   ] DefaultSuite::DefaultFixture::MyTest
+[  FIXTURE  ] 1 test from DefaultFixture
+[   SUITE   ] 2 fixtures from DefaultSuite
+FAILURE: 1 out of 4 tests failed (1 failure).
+
+Failures:
+../code/applications/demo/src/main.cpp:192 : Failure in DefaultSuite::DefaultFixture::MyTest: Failure
+
+[===========] 4 tests from 4 fixtures in 3 suites ran.
+Info   Wait 5 seconds (main:207)
+Press r to reboot, h to halt, p to fail assertion and panic
+```
+
+In the next tutorial we'll start replacing the very verbose code for setting up tests, test fixtures and test suites with macros.
+We'll also introduce macros for the actual test cases, and we'll convert the test we made before for strings and serialization into proper class tests.
 
 Next: [18-writing-unit-tests](18-writing-unit-tests.md)
 

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : TestResult.cpp
 //
-// Namespace   : -
+// Namespace   : unittest
 //
-// Class       : -
+// Class       : TestResult
 //
-// Description : unittest general include file, with functions to start tests
+// Description : Test result
 //
 //------------------------------------------------------------------------------
 //
@@ -37,23 +37,76 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <unittest/TestResult.h>
+
+#include <unittest/TestDetails.h>
 
 /// @file
-/// Unit test generic header
+/// Test result implementation
+/// 
+/// Result of a single test
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
+using namespace baremetal;
 
-#include <unittest/ITestReporter.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+namespace unittest {
+
+Failure::Failure(int lineNumber, const baremetal::string& text)
+    : m_lineNumber{lineNumber}
+    , m_text{text}
+{
+}
+
+FailureEntry::FailureEntry(const Failure& failure)
+    : m_failure{ failure }
+    , m_next{}
+{
+}
+
+FailureList::FailureList()
+    : m_head{}
+    , m_tail{}
+{
+}
+
+FailureList::~FailureList()
+{
+    auto current = m_head;
+    while (current != nullptr)
+    {
+        auto next = current->m_next;
+        delete current;
+        current = next;
+    }
+}
+
+void FailureList::Add(const Failure& failure)
+{
+    auto entry = new FailureEntry(failure);
+    if (m_head == nullptr)
+    {
+        m_head = entry;
+    }
+    else
+    {
+        auto current = m_head;
+        while (current->m_next != nullptr)
+            current = current->m_next;
+        current->m_next = entry;
+    }
+    m_tail = entry;
+}
+
+TestResult::TestResult(const TestDetails& details)
+    : m_details{ details }
+    , m_failures{}
+    , m_failed{}
+{
+}
+
+void TestResult::AddFailure(const Failure& failure)
+{
+    m_failures.Add(failure);
+    m_failed = true;
+}
+
+} // namespace unittest

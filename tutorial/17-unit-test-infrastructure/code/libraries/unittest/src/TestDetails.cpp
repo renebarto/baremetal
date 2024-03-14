@@ -39,12 +39,17 @@
 
 #include <unittest/TestDetails.h>
 
+#include <baremetal/Format.h>
+
 /// @file
 /// Test details implementation
 
 using namespace baremetal;
 
 namespace unittest {
+
+const char* TestDetails::DefaultFixtureName = "DefaultFixture";
+const char* TestDetails::DefaultSuiteName = "DefaultSuite";
 
 /// <summary>
 /// Default constructor
@@ -87,6 +92,65 @@ TestDetails::TestDetails(const TestDetails& other, int lineNumber)
     , m_fileName{ other.m_fileName }
     , m_lineNumber{ lineNumber }
 {
+}
+
+/// <summary>
+/// Returns test suite name
+/// </summary>
+/// <returns>Test suite name</returns>
+string TestDetails::SuiteName() const
+{
+    return m_suiteName.empty() ? string(DefaultSuiteName) : m_suiteName;
+}
+
+/// <summary>
+/// Returns test fixture name
+/// </summary>
+/// <returns>Test fixture name</returns>
+string TestDetails::FixtureName() const
+{
+    return m_fixtureName.empty() ? string(DefaultFixtureName) : m_fixtureName;
+}
+
+/// <summary>
+/// Returns test name
+/// </summary>
+/// <returns>Test name</returns>
+string TestDetails::TestName() const
+{
+    return m_testName;
+}
+
+/// <summary>
+/// Return fully qualified test name in format [suite]::[fixture]::[test]
+/// </summary>
+/// <param name="details">Test details</param>
+/// <returns>Resulting string</returns>
+string TestDetails::QualifiedTestName() const
+{
+    return Format("%s::%s::%s",
+        SuiteName().c_str(),
+        FixtureName().c_str(),
+        TestName().c_str());
+}
+
+/// <summary>
+/// Returns test source file name
+/// </summary>
+/// <returns>Test source file name</returns>
+string TestDetails::SourceFileName() const
+{
+    return m_fileName;
+}
+
+
+/// <summary>
+/// Returns test source line number
+/// </summary>
+/// <returns>Test source line number</returns>
+int TestDetails::SourceFileLineNumber() const
+{
+    return m_lineNumber;
 }
 
 } // namespace unittest

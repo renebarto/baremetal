@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : TestFixture.h
 //
-// Namespace   : -
+// Namespace   : unittest
 //
-// Class       : -
+// Class       : TestFixture
 //
-// Description : unittest general include file, with functions to start tests
+// Description : Test fixture functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -40,20 +40,34 @@
 #pragma once
 
 /// @file
-/// Unit test generic header
+/// Test fixture
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
+namespace unittest {
 
-#include <unittest/ITestReporter.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+/// <summary>
+/// Test fixture
+/// 
+/// Forms a replacement of a test, with the addition of SetUp/TearDown functionality
+/// </summary>
+class TestFixture
+{
+protected:
+    TestFixture() = default;
+    TestFixture(const TestFixture&) = delete;
+    TestFixture(TestFixture&&) = delete;
+    virtual ~TestFixture() = default;
+
+    TestFixture& operator = (const TestFixture&) = delete;
+    TestFixture& operator = (TestFixture&&) = delete;
+
+    /// <summary>
+    /// Default setup function
+    /// </summary>
+    virtual void SetUp() {};
+    /// <summary>
+    /// Default teardown function
+    /// </summary>
+    virtual void TearDown() {};
+};
+
+} // namespace unittest

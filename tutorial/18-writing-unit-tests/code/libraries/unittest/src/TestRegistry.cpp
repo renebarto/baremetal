@@ -41,28 +41,42 @@
 
 #include <baremetal/Assert.h>
 #include <baremetal/Logger.h>
+#include <unittest/TestInfo.h>
+
+/// @file
+/// Test registry implementation
 
 using namespace baremetal;
 
+/// @brief Define log name
 LOG_MODULE("TestRegistry");
 
 namespace unittest {
 
-const char* TestRegistry::DefaultFixtureName = "DefaultFixture";
-const char* TestRegistry::DefaultSuiteName = "DefaultSuite";
-
+/// <summary>
+/// Returns the test registry (singleton)
+/// </summary>
+/// <returns>Test registry reference</returns>
 TestRegistry& TestRegistry::GetTestRegistry()
 {
     static TestRegistry s_registry;
     return s_registry;
 }
 
+/// <summary>
+/// Constructor
+/// </summary>
 TestRegistry::TestRegistry()
     : m_head{}
     , m_tail{}
 {
 }
 
+/// <summary>
+/// Destructor
+///
+/// Cleans up all registered test suites, test fixtures and tests
+/// </summary>
 TestRegistry::~TestRegistry()
 {
     TestSuiteInfo *testSuite = m_head;
@@ -74,6 +88,11 @@ TestRegistry::~TestRegistry()
     }
 }
 
+/// <summary>
+/// Find a test suite with specified name, register a new one if not found
+/// </summary>
+/// <param name="suiteName">Test suite name to search for</param>
+/// <returns>Found or created test suite</returns>
 TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
 {
     TestSuiteInfo *testSuite = m_head;
@@ -82,7 +101,7 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
     if (testSuite == nullptr)
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Find suite %s ... not found, creating new object", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+        LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
 #endif
         testSuite = new TestSuiteInfo(suiteName);
         AddSuite(testSuite);
@@ -90,12 +109,16 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
     else
     {
 #ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Find suite %s ... found", (suiteName.empty() ? DefaultSuiteName : suiteName.c_str()));
+        LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
 #endif
     }
     return testSuite;
 }
 
+/// <summary>
+/// Add a test suite
+/// </summary>
+/// <param name="testSuite">Test suite to add</param>
 void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
 {
     if (m_tail == nullptr)
@@ -111,21 +134,27 @@ void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
     }
 }
 
-TestSuiteInfo *TestRegistry::GetHead() const
-{
-    return m_head;
-}
-
-TestRegistrar::TestRegistrar(TestRegistry &registry, TestBase *test)
+/// <summary>
+/// Constructor
+///
+/// Finds or registers the test suite specified in the test details of the test.
+/// Finds or registers the test fixture specified in the test details of the test.
+/// Adds the test to the fixture found or created.
+/// </summary>
+/// <param name="registry">Test registry</param>
+/// <param name="testInstance">Test instance to link to</param>
+/// <param name="details">Test details</param>
+TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
 {
 #ifdef DEBUG_REGISTRY
     LOG_DEBUG("Register test %s in fixture %s in suite %s",
-        test->Details().TestName().c_str(),
-        (test->Details().FixtureName().empty() ? TestRegistry::DefaultFixtureName : test->Details().FixtureName().c_str()),
-        (test->Details().SuiteName().empty() ? TestRegistry::DefaultSuiteName : test->Details().SuiteName().c_str()));
+        details.TestName().c_str(),
+        (details.FixtureName().c_str()),
+        (details.SuiteName().c_str()));
 #endif
-    TestSuiteInfo   *testSuite   = registry.GetTestSuite(test->Details().SuiteName());
-    TestFixtureInfo *testFixture = testSuite->GetTestFixture(test->Details().FixtureName());
+    TestSuiteInfo   *testSuite   = registry.GetTestSuite(details.SuiteName());
+    TestFixtureInfo *testFixture = testSuite->GetTestFixture(details.FixtureName());
+    TestInfo        *test = new TestInfo(testInstance, details);
     testFixture->AddTest(test);
 }
 

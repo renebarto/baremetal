@@ -1,13 +1,14 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : PrintValue.cpp
+// File        : Test.cpp
 //
 // Namespace   : unittest
 //
-// Class       : -
+// Class       : Test
 //
-// Description : Print values
+// Description : Test class
+//
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -36,16 +37,18 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/PrintValue.h>
+#include <unittest/Test.h>
 
-using namespace baremetal;
+/// @file
+/// Test implementation
 
-void PrintStringTo(const baremetal::string& str, baremetal::string& s)
+namespace unittest {
+
+/// <summary>
+/// Actual test implementation
+/// </summary>
+void Test::RunImpl() const
 {
-    s = str;
 }
 
-void PrintTo(unsigned char ch, baremetal::string &s)
-{
-    s += ch;
-}
+} // namespace unittest

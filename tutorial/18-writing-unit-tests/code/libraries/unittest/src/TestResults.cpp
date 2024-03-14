@@ -7,7 +7,7 @@
 //
 // Class       : TestResults
 //
-// Description : Test results
+// Description : Test run results
 //
 //------------------------------------------------------------------------------
 //
@@ -40,12 +40,23 @@
 #include <unittest/TestResults.h>
 
 #include <unittest/ITestReporter.h>
+#include <unittest/TestDetails.h>
+#include <unittest/TestFixtureInfo.h>
+#include <unittest/TestRegistry.h>
 #include <unittest/TestSuiteInfo.h>
+
+/// @file
+/// Test results implementation
 
 using namespace baremetal;
 
-namespace unittest {
+namespace unittest
+{
 
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="testReporter">Test reporter to use</param>
 TestResults::TestResults(ITestReporter* testReporter)
     : m_reporter{ testReporter }
     , m_totalTestCount{}
@@ -55,34 +66,57 @@ TestResults::TestResults(ITestReporter* testReporter)
 {
 }
 
+/// <summary>
+/// Destructor
+/// </summary>
 TestResults::~TestResults()
 {
 }
 
+/// <summary>
+/// Start a test suite run
+/// </summary>
+/// <param name="suite">Test suite to start</param>
 void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
 {
     if (m_reporter)
         m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
 }
 
+/// <summary>
+/// Finish a test suite run
+/// </summary>
+/// <param name="suite">Test suite to finish</param>
 void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
 {
     if (m_reporter)
         m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
 }
 
+/// <summary>
+/// Start a test fixture run
+/// </summary>
+/// <param name="fixture">Test fixture to start</param>
 void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
 {
     if (m_reporter)
         m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
 }
 
+/// <summary>
+/// Finish a test fixture run
+/// </summary>
+/// <param name="fixture">Test fixture to finish</param>
 void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
 {
     if (m_reporter)
         m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
 }
 
+/// <summary>
+/// Start a test
+/// </summary>
+/// <param name="details">Test details of test to start</param>
 void TestResults::OnTestStart(const TestDetails& details)
 {
     ++m_totalTestCount;
@@ -91,7 +125,12 @@ void TestResults::OnTestStart(const TestDetails& details)
         m_reporter->ReportTestStart(details);
 }
 
-void TestResults::OnTestFailure(const TestDetails& details, const string& result)
+/// <summary>
+/// Add a test failure
+/// </summary>
+/// <param name="details"></param>
+/// <param name="message">Test failure string</param>
+void TestResults::OnTestFailure(const TestDetails& details, const string& message)
 {
     ++m_failureCount;
     if (!m_currentTestFailed)
@@ -100,28 +139,17 @@ void TestResults::OnTestFailure(const TestDetails& details, const string& result
         m_currentTestFailed = true;
     }
     if (m_reporter)
-        m_reporter->ReportTestFailure(details, result);
+        m_reporter->ReportTestFailure(details, message);
 }
 
+/// <summary>
+/// Finish a test
+/// </summary>
+/// <param name="details">Test details of test to finish</param>
 void TestResults::OnTestFinish(const TestDetails& details)
 {
     if (m_reporter)
         m_reporter->ReportTestFinish(details, !m_currentTestFailed);
-}
-
-int TestResults::GetTotalTestCount() const
-{
-    return m_totalTestCount;
-}
-
-int TestResults::GetFailedTestCount() const
-{
-    return m_failedTestCount;
-}
-
-int TestResults::GetFailureCount() const
-{
-    return m_failureCount;
 }
 
 } // namespace unittest

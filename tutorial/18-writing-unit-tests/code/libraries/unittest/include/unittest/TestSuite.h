@@ -39,6 +39,13 @@
 
 #pragma once
 
+/// @file
+/// Test suite
+
+/// <summary>
+/// Return the default test suite name (which will be converted to the actual default name by the test reporter)
+/// </summary>
+/// <returns></returns>
 inline char const* GetSuiteName()
 {
     return "";

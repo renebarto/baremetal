@@ -39,18 +39,63 @@
 
 #include <unittest/TestRunner.h>
 
+/// @file
+/// Test runner implementation
+
 namespace unittest {
 
+/// <summary>
+/// Returns test selection value
+/// </summary>
+/// <param name="test">Test to check against selection</param>
+/// <returns>Returns true if the test name selection is set to nullptr, or the test name matches the selection</returns>
+bool InSelection::operator()(const TestInfo* const test) const
+{
+    return (m_testName == nullptr) || (test->Details().TestName() == m_testName);
+}
+
+/// <summary>
+/// Returns test fixture selection value
+/// </summary>
+/// <param name="fixture">Test fixture to check against selection</param>
+/// <returns>Returns true if the test fixture name selection is set to nullptr, or the test fixture name matches the selection</returns>
+bool InSelection::operator()(const TestFixtureInfo* const fixture) const
+{
+    return (m_fixtureName == nullptr) || (fixture->Name() == m_fixtureName);
+}
+
+/// <summary>
+/// Returns test suite selection value
+/// </summary>
+/// <param name="suite">Test suite to check against selection</param>
+/// <returns>Returns true if the test suite name selection is set to nullptr, or the test suite name matches the selection</returns>
+bool InSelection::operator()(const TestSuiteInfo* const suite) const
+{
+    return (m_suiteName == nullptr) || (suite->Name() == m_suiteName);
+}
+
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="reporter">Test reporter to use, can be nullptr, in which case no reporting is done</param>
 TestRunner::TestRunner(ITestReporter* reporter)
     : m_reporter{ reporter }
     , m_testResults{ reporter }
 {
 }
 
+/// <summary>
+/// Destructor
+/// </summary>
 TestRunner::~TestRunner()
 {
 }
 
+/// <summary>
+/// Run all tests with specified test reporter
+/// </summary>
+/// <param name="reporter">Test reporter to use</param>
+/// <returns></returns>
 int RunAllTests(ITestReporter* reporter)
 {
     return RunSelectedTests(reporter, True());

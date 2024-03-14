@@ -39,18 +39,34 @@
 
 #pragma once
 
+/// @file
+/// Test fixture
+
 namespace unittest {
 
+/// <summary>
+/// Test fixture
+/// 
+/// Forms a replacement of a test, with the addition of SetUp/TearDown functionality
+/// </summary>
 class TestFixture
 {
 protected:
     TestFixture() = default;
     TestFixture(const TestFixture&) = delete;
-    ~TestFixture() = default;
+    TestFixture(TestFixture&&) = delete;
+    virtual ~TestFixture() = default;
 
     TestFixture& operator = (const TestFixture&) = delete;
+    TestFixture& operator = (TestFixture&&) = delete;
 
+    /// <summary>
+    /// Default setup function
+    /// </summary>
     virtual void SetUp() {};
+    /// <summary>
+    /// Default teardown function
+    /// </summary>
     virtual void TearDown() {};
 };
 

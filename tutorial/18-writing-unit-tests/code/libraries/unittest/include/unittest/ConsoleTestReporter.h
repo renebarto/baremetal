@@ -41,16 +41,31 @@
 
 #include <unittest/DeferredTestReporter.h>
 
+/// @file
+/// Console test reporter
+///
+/// Prints test information to the console, using color.
+/// Uses DeferredTestReporter to save failures so they can be printed after running the test, as an overview
+
 namespace unittest
 {
 
-class ConsoleTestReporter : public DeferredTestReporter
+/// <summary>
+/// Console test reporter
+/// </summary>
+class ConsoleTestReporter
+    : public DeferredTestReporter
 {
 public:
+    /// @brief Separator for complete test run
     static const baremetal::string TestRunSeparator;
+    /// @brief Separator for test fixture
     static const baremetal::string TestFixtureSeparator;
+    /// @brief Separator for test suite
     static const baremetal::string TestSuiteSeparator;
+    /// @brief Indicator for successful test
     static const baremetal::string TestSuccessSeparator;
+    /// @brief Indicator for failed test
     static const baremetal::string TestFailSeparator;
 
     ConsoleTestReporter();
@@ -78,8 +93,6 @@ private:
     baremetal::string TestFinishMessage(const TestDetails& test, bool success);
     baremetal::string TestRunSummaryMessage(const TestResults& results);
     baremetal::string TestRunOverviewMessage(const TestResults& results);
-    baremetal::string TestName(const baremetal::string& suiteName, const baremetal::string& fixtureName, const baremetal::string& testName);
-
 };
 
 } // namespace unittest

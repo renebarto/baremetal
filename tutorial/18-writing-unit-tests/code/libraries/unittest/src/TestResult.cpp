@@ -41,6 +41,11 @@
 
 #include <unittest/TestDetails.h>
 
+/// @file
+/// Test result implementation
+/// 
+/// Result of a single test
+
 using namespace baremetal;
 
 namespace unittest {

@@ -42,20 +42,31 @@
 #include <unittest/TestFixtureInfo.h>
 #include <unittest/TestResults.h>
 
+/// @file
+/// Test suite administration
+
 namespace unittest
 {
 
-class TestBase;
 class TestFixtureInfo;
 
+/// <summary>
+/// Test suite administration
+///
+/// Holds information on a test suite, which includes its name and the list of test fixtures that are part of it
+/// </summary>
 class TestSuiteInfo
 {
 private:
     friend class TestRegistry;
     friend class TestRegistrar;
+    /// @brief Pointer to first test fixture in the list
     TestFixtureInfo* m_head;
+    /// @brief Pointer to last test fixture in the list
     TestFixtureInfo* m_tail;
+    /// @brief Pointer to next test suite info in the list
     TestSuiteInfo* m_next;
+    /// @brief Test suite name
     baremetal::string m_suiteName;
 
 public:
@@ -68,8 +79,16 @@ public:
     TestSuiteInfo& operator = (const TestSuiteInfo&) = delete;
     TestSuiteInfo& operator = (TestSuiteInfo&&) = delete;
 
-    TestFixtureInfo* GetHead() const;
+    /// <summary>
+    /// Returns the pointer to the first test fixture in the list for this test suite
+    /// </summary>
+    /// <returns>Pointer to the first test fixture in the list for this test suite</returns>
+    TestFixtureInfo* Head() const { return m_head; }
 
+    /// <summary>
+    /// Returns the test suite name
+    /// </summary>
+    /// <returns>Test suite name</returns>
     const baremetal::string& Name() const { return m_suiteName; }
 
     template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
@@ -84,11 +103,17 @@ private:
     void AddFixture(TestFixtureInfo* testFixture);
 };
 
+/// <summary>
+/// Run tests in test suite using the selection predicate, updating the test results
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <param name="testResults">Test results to use and update</param>
 template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate, TestResults& testResults)
 {
     testResults.OnTestSuiteStart(this);
 
-    TestFixtureInfo* testFixture = GetHead();
+    TestFixtureInfo* testFixture = Head();
     while (testFixture != nullptr)
     {
         if (predicate(testFixture))
@@ -99,10 +124,16 @@ template <class Predicate> void TestSuiteInfo::RunIf(const Predicate& predicate,
     testResults.OnTestSuiteFinish(this);
 }
 
+/// <summary>
+/// Count the number of tests fixtures in the test suite selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test fixtures in the test suite selected by the predicate</returns>
 template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predicate)
 {
     int numberOfTestFixtures = 0;
-    TestFixtureInfo* testFixture = GetHead();
+    TestFixtureInfo* testFixture = Head();
     while (testFixture != nullptr)
     {
         if (predicate(testFixture))
@@ -112,10 +143,16 @@ template <typename Predicate> int TestSuiteInfo::CountFixturesIf(Predicate predi
     return numberOfTestFixtures;
 }
 
+/// <summary>
+/// Count the number of tests in the test suite selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of tests in the test suite selected by the predicate</returns>
 template <typename Predicate> int TestSuiteInfo::CountTestsIf(Predicate predicate)
 {
     int numberOfTests = 0;
-    TestFixtureInfo* testFixture = GetHead();
+    TestFixtureInfo* testFixture = Head();
     while (testFixture != nullptr)
     {
         if (predicate(testFixture))

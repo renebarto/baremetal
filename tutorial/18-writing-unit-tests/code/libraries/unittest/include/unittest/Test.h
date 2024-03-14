@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.cpp
+// File        : Test.h
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : Test
 //
-// Description : Testcase base class
+// Description : Testcase
 //
 //------------------------------------------------------------------------------
 //
@@ -37,50 +37,29 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestBase.h>
+#pragma once
 
-#include <unittest/CurrentTest.h>
-#include <unittest/ExecuteTest.h>
-#include <unittest/TestResults.h>
+/// @file
+/// Test
 
-using namespace baremetal;
-
-namespace unittest {
-
-TestBase::TestBase()
-    : m_details{}
-    , m_next{}
+namespace unittest
 {
-}
 
-TestBase::TestBase(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-    : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-    , m_next{}
+/// <summary>
+/// Test class
+/// </summary>
+class Test
 {
-}
+public:
+    Test() = default;
+    Test(const Test&) = delete;
+    Test(Test&&) = delete;
+    virtual ~Test() = default;
 
-TestBase::~TestBase()
-{
-}
+    Test& operator = (const Test&) = delete;
+    Test& operator = (Test&&) = delete;
 
-void TestBase::Run(TestResults& testResults)
-{
-    CurrentTest::Results() = &testResults;
-
-    testResults.OnTestStart(m_details);
-
-    Run();
-
-    testResults.OnTestFinish(m_details);
-}
-
-void TestBase::Run()
-{
-    ExecuteTest(*this, m_details);
-}
-
-void TestBase::RunImpl() const
-{
-}
+    virtual void RunImpl() const;
+};
 
 } // namespace unittest

@@ -48,6 +48,9 @@
 #include <baremetal/Util.h>
 #include <baremetal/Version.h>
 
+/// @file
+/// Logger functionality implementation
+
 using namespace baremetal;
 
 /// @brief Define log name

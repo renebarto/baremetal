@@ -41,24 +41,29 @@
 
 #include <unittest/TestSuiteInfo.h>
 
+/// @file
+/// Test registry
+
 namespace unittest
 {
 
-class TestBase;
+class Test;
 class TestSuiteInfo;
 class TestResults;
 
+/// <summary>
+/// Test registry
+/// </summary>
 class TestRegistry
 {
 private:
     friend class TestRegistrar;
+    /// @brief Pointer to first test suite in the list
     TestSuiteInfo* m_head;
+    /// @brief Pointer to last test suite in the list
     TestSuiteInfo* m_tail;
 
 public:
-    static const char* DefaultFixtureName;
-    static const char* DefaultSuiteName;
-
     TestRegistry();
     TestRegistry(const TestRegistry&) = delete;
     TestRegistry(TestRegistry&&) = delete;
@@ -67,9 +72,13 @@ public:
     TestRegistry& operator = (const TestRegistry&) = delete;
     TestRegistry& operator = (TestRegistry&&) = delete;
 
-    TestSuiteInfo* GetHead() const;
+    /// <summary>
+    /// Returns a pointer to the first test suite in the list
+    /// </summary>
+    /// <returns>Pointer to the first test suite in the list</returns>
+    TestSuiteInfo* Head() const { return m_head; }
 
-    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+    template <typename Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
     template <typename Predicate> int CountSuitesIf(Predicate predicate);
     template <typename Predicate> int CountFixturesIf(Predicate predicate);
     template <typename Predicate> int CountTestsIf(Predicate predicate);
@@ -81,15 +90,20 @@ private:
     void AddSuite(TestSuiteInfo* testSuite);
 };
 
+/// <summary>
+/// Test registrar
+///
+/// This is a utility class to register a test to the registry, as part of a test declaration
+/// </summary>
 class TestRegistrar
 {
 public:
-    TestRegistrar(TestRegistry& registry, TestBase* test);
+    TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 };
 
-template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
 {
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
 
     while (testSuite != nullptr)
     {
@@ -102,7 +116,7 @@ template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, 
 template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
 {
     int numberOfTestSuites = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))
@@ -115,7 +129,7 @@ template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicat
 template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
 {
     int numberOfTestFixtures = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))
@@ -128,7 +142,7 @@ template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predic
 template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
 {
     int numberOfTests = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))

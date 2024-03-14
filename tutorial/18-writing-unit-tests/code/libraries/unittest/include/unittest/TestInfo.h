@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : TestInfo.h
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : TestInfo
 //
 // Description : Testcase
 //
@@ -41,39 +41,45 @@
 
 #include <unittest/TestDetails.h>
 
+/// @file
+/// Test administration
+
 namespace unittest
 {
 
+class Test;
 class TestResults;
 
-class TestBase
+/// <summary>
+/// Test administration class
+/// </summary>
+class TestInfo
 {
 private:
     friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+    /// @brief Test details
+    const TestDetails m_details;
+    /// @brief Pointer to actual test
+    Test* m_testInstance;
+    /// @brief Pointer to next test case in list
+    TestInfo* m_next;
 
 public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+    TestInfo();
+    TestInfo(const TestInfo&) = delete;
+    TestInfo(TestInfo&&) = delete;
+    explicit TestInfo(Test* testInstance, const TestDetails& details);
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
+    TestInfo& operator = (const TestInfo&) = delete;
+    TestInfo& operator = (TestInfo&&) = delete;
 
+    /// <summary>
+    /// Returns the test details
+    /// </summary>
+    /// <returns>Test details</returns>
     const TestDetails& Details() const { return m_details; }
 
     void Run(TestResults& testResults);
-    void Run();
-
-    virtual void RunImpl() const;
 };
 
 } // namespace unittest

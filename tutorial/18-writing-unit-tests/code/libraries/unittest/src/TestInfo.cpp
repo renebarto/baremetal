@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ExecuteTest.h
+// File        : TestInfo.cpp
 //
 // Namespace   : unittest
 //
-// Class       : ExecuteTest
+// Class       : TestInfo
 //
-// Description : Test executor
+// Description : Testcase base class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,20 +37,58 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <unittest/TestInfo.h>
 
 #include <unittest/CurrentTest.h>
-#include <unittest/TestDetails.h>
+#include <unittest/Test.h>
+#include <unittest/TestResults.h>
 
-namespace unittest
+/// @file
+/// Test case administration implementation
+
+using namespace baremetal;
+
+namespace unittest {
+
+/// <summary>
+/// Default constructor
+/// </summary>
+TestInfo::TestInfo()
+    : m_details{}
+    , m_testInstance{}
+    , m_next{}
 {
+}
 
-template<typename T>
-void ExecuteTest(T& testObject, const TestDetails& details)
+/// <summary>
+/// Explicit constructor
+/// </summary>
+/// <param name="testInstance">Test instance</param>
+/// <param name="details">Test details</param>
+TestInfo::TestInfo(Test* testInstance, const TestDetails& details)
+    : m_details{ details }
+    , m_testInstance{ testInstance }
+    , m_next{}
 {
-    CurrentTest::Details() = &details;
+}
 
-    testObject.RunImpl();
+/// <summary>
+/// Run the test instance, and update the test results
+/// </summary>
+/// <param name="testResults"></param>
+void TestInfo::Run(TestResults& testResults)
+{
+    CurrentTest::Details() = &Details();
+    CurrentTest::Results() = &testResults;
+
+    if (m_testInstance != nullptr)
+    {
+        testResults.OnTestStart(m_details);
+
+        m_testInstance->RunImpl();
+
+        testResults.OnTestFinish(m_details);
+    }
 }
 
 } // namespace unittest

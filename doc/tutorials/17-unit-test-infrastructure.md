@@ -3245,35 +3245,34 @@ File: code/libraries/unittest/src/TestDetails.cpp
 124: /// <summary>
 125: /// Return fully qualified test name in format [suite]::[fixture]::[test]
 126: /// </summary>
-127: /// <param name="details">Test details</param>
-128: /// <returns>Resulting string</returns>
-129: string TestDetails::QualifiedTestName() const
-130: {
-131:     return Format("%s::%s::%s",
-132:         SuiteName().c_str(),
-133:         FixtureName().c_str(),
-134:         TestName().c_str());
-135: }
-136: 
-137: /// <summary>
-138: /// Returns test source file name
-139: /// </summary>
-140: /// <returns>Test source file name</returns>
-141: string TestDetails::SourceFileName() const
-142: {
-143:     return m_fileName;
-144: }
-145: 
-146: 
-147: /// <summary>
-148: /// Returns test source line number
-149: /// </summary>
-150: /// <returns>Test source line number</returns>
-151: int TestDetails::SourceFileLineNumber() const
-152: {
-153:     return m_lineNumber;
-154: }
-...
+127: /// <returns>Resulting string</returns>
+128: string TestDetails::QualifiedTestName() const
+129: {
+130:     return Format("%s::%s::%s",
+131:         SuiteName().c_str(),
+132:         FixtureName().c_str(),
+133:         TestName().c_str());
+134: }
+135: 
+136: /// <summary>
+137: /// Returns test source file name
+138: /// </summary>
+139: /// <returns>Test source file name</returns>
+140: string TestDetails::SourceFileName() const
+141: {
+142:     return m_fileName;
+143: }
+144: 
+145: /// <summary>
+146: /// Returns test source line number
+147: /// </summary>
+148: /// <returns>Test source line number</returns>
+149: int TestDetails::SourceFileLineNumber() const
+150: {
+151:     return m_lineNumber;
+152: }
+153: 
+154: } // namespace unittest
 ```
 
 - Line 42: We include the header for `Format()`
@@ -3281,9 +3280,9 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 101-104: We implement the method `SuiteName()`, now using the default suite name if the name is empty
 - Line 110-113: We implement the method `FixtureName()`, now using the default fixture name if the name is empty
 - Line 119-122: We implement the method `TestName()`
-- Line 129-135: We implement the method `QualifiedTestName()`
-- Line 141-144: We implement the method `SourceFileName()`
-- Line 151-154: We implement the method `SourceFileLineNumber()`
+- Line 128-134: We implement the method `QualifiedTestName()`
+- Line 140-143: We implement the method `SourceFileName()`
+- Line 149-152: We implement the method `SourceFileLineNumber()`
 
 ### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYH}
 
@@ -3618,7 +3617,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 165:         testSuite = testSuite->m_next;
 166:     if (testSuite == nullptr)
 167:     {
-168: #ifdef DEBUG_REGISTRY
+168: #if DEBUG_REGISTRY
 169:         LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
 170: #endif
 171:         testSuite = new TestSuiteInfo(suiteName);
@@ -3626,7 +3625,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 173:     }
 174:     else
 175:     {
-176: #ifdef DEBUG_REGISTRY
+176: #if DEBUG_REGISTRY
 177:         LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
 178: #endif
 179:     }
@@ -3664,7 +3663,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 211: /// <param name="details">Test details</param>
 212: TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
 213: {
-214: #ifdef DEBUG_REGISTRY
+214: #if DEBUG_REGISTRY
 215:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
 216:         details.TestName().c_str(),
 217:         (details.FixtureName().c_str()),
@@ -3713,7 +3712,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 93:         testFixture = testFixture->m_next;
 94:     if (testFixture == nullptr)
 95:     {
-96: #ifdef DEBUG_REGISTRY
+96: #if DEBUG_REGISTRY
 97:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 98: #endif
 99:         testFixture = new TestFixtureInfo(fixtureName);
@@ -3721,7 +3720,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 101:     }
 102:     else
 103:     {
-104: #ifdef DEBUG_REGISTRY
+104: #if DEBUG_REGISTRY
 105:         LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 106: #endif
 107:     }
@@ -4016,7 +4015,7 @@ File: code/applications/demo/src/main.cpp
 197:     void RunImpl() const override;
 198: } myTest;
 199: 
-200: TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
+200: TestRegistrar registrarMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
 201: 
 202: void MyTest::RunImpl() const
 203: {
@@ -4912,69 +4911,95 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 101:     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 102: };
 103: 
-104: template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
-105: {
-106:     TestSuiteInfo* testSuite = Head();
-107: 
-108:     while (testSuite != nullptr)
-109:     {
-110:         if (predicate(testSuite))
-111:             testSuite->RunIf(predicate, testResults);
-112:         testSuite = testSuite->m_next;
-113:     }
-114: }
-115: 
-116: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
-117: {
-118:     int numberOfTestSuites = 0;
-119:     TestSuiteInfo* testSuite = Head();
-120:     while (testSuite != nullptr)
-121:     {
-122:         if (predicate(testSuite))
-123:             ++numberOfTestSuites;
-124:         testSuite = testSuite->m_next;
-125:     }
-126:     return numberOfTestSuites;
-127: }
-128: 
-129: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
-130: {
-131:     int numberOfTestFixtures = 0;
-132:     TestSuiteInfo* testSuite = Head();
-133:     while (testSuite != nullptr)
-134:     {
-135:         if (predicate(testSuite))
-136:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
-137:         testSuite = testSuite->m_next;
-138:     }
-139:     return numberOfTestFixtures;
-140: }
-141: 
-142: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
-143: {
-144:     int numberOfTests = 0;
-145:     TestSuiteInfo* testSuite = Head();
-146:     while (testSuite != nullptr)
-147:     {
-148:         if (predicate(testSuite))
-149:             numberOfTests += testSuite->CountTestsIf(predicate);
-150:         testSuite = testSuite->m_next;
-151:     }
-152:     return numberOfTests;
-153: }
-...
+File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\TestRegistry.h
+104: /// <summary>
+105: /// Run tests selected by the predicate
+106: /// </summary>
+107: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+108: /// <param name="predicate">Test selection predicate</param>
+109: /// <param name="testResults">Test results to be returned</param>
+110: template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+111: {
+112:     TestSuiteInfo* testSuite = Head();
+113: 
+114:     while (testSuite != nullptr)
+115:     {
+116:         if (predicate(testSuite))
+117:             testSuite->RunIf(predicate, testResults);
+118:         testSuite = testSuite->m_next;
+119:     }
+120: }
+121: 
+122: /// <summary>
+123: /// Count the number of test suites selected by the predicate
+124: /// </summary>
+125: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+126: /// <param name="predicate">Test selection predicate</param>
+127: /// <returns>Number of test suites selected by the predicate</returns>
+128: template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
+129: {
+130:     int numberOfTestSuites = 0;
+131:     TestSuiteInfo* testSuite = Head();
+132:     while (testSuite != nullptr)
+133:     {
+134:         if (predicate(testSuite))
+135:             ++numberOfTestSuites;
+136:         testSuite = testSuite->m_next;
+137:     }
+138:     return numberOfTestSuites;
+139: }
+140: 
+141: /// <summary>
+142: /// Count the number of tests fixtures selected by the predicate
+143: /// </summary>
+144: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+145: /// <param name="predicate">Test selection predicate</param>
+146: /// <returns>Number of test fixtures selected by the predicate</returns>
+147: template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
+148: {
+149:     int numberOfTestFixtures = 0;
+150:     TestSuiteInfo* testSuite = Head();
+151:     while (testSuite != nullptr)
+152:     {
+153:         if (predicate(testSuite))
+154:             numberOfTestFixtures += testSuite->CountFixturesIf(predicate);
+155:         testSuite = testSuite->m_next;
+156:     }
+157:     return numberOfTestFixtures;
+158: }
+159: 
+160: /// <summary>
+161: /// Count the number of tests selected by the predicate
+162: /// </summary>
+163: /// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+164: /// <param name="predicate">Test selection predicate</param>
+165: /// <returns>Number of tests selected by the predicate</returns>
+166: template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
+167: {
+168:     int numberOfTests = 0;
+169:     TestSuiteInfo* testSuite = Head();
+170:     while (testSuite != nullptr)
+171:     {
+172:         if (predicate(testSuite))
+173:             numberOfTests += testSuite->CountTestsIf(predicate);
+174:         testSuite = testSuite->m_next;
+175:     }
+176:     return numberOfTests;
+177: }
+178: 
+179: } // namespace unittest
 ```
 
 - Line 81: We replace the `Run()` method with a template version `RunIf()`, which takes a predicate, as well as a `TestResults` reference
 - Line 82: We replace then `CountSuites()` method with a template version `CountSuitesIf()`
 - Line 83: We replace then `CountFixtures()` method with a template version `CountFixturesIf()`
 - Line 84: We replace then `CountTests()` method with a template version `CountTestsIf()`
-- Line 104-114: We implement the `RunIf()` template method.
+- Line 110-120: We implement the `RunIf()` template method.
 Note that we use the `RunIf()` method on the test suite. We'll need to implement this
-- Line 116-127: We implement the `CountSuitesIf()` template method
-- Line 129-140: We implement the `CountFixturesIf()` template method.
+- Line 128-139: We implement the `CountSuitesIf()` template method
+- Line 147-158: We implement the `CountFixturesIf()` template method.
 Note that we use the `CountFixturesIf()` method on the test suite. We'll need to implement this
-- Line 142-153: We implement the `CountTestsIf()` template method.
+- Line 166-177: We implement the `CountTestsIf()` template method.
 Note that we use the `CountTestsIf()` method on the test suite. We'll need to implement this
 
 ### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTREGISTRYCPP}
@@ -5049,7 +5074,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 100:         testSuite = testSuite->m_next;
 101:     if (testSuite == nullptr)
 102:     {
-103: #ifdef DEBUG_REGISTRY
+103: #if DEBUG_REGISTRY
 104:         LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
 105: #endif
 106:         testSuite = new TestSuiteInfo(suiteName);
@@ -5057,7 +5082,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 108:     }
 109:     else
 110:     {
-111: #ifdef DEBUG_REGISTRY
+111: #if DEBUG_REGISTRY
 112:         LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
 113: #endif
 114:     }
@@ -5095,7 +5120,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 146: /// <param name="details">Test details</param>
 147: TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
 148: {
-149: #ifdef DEBUG_REGISTRY
+149: #if DEBUG_REGISTRY
 150:     LOG_DEBUG("Register test %s in fixture %s in suite %s",
 151:         details.TestName().c_str(),
 152:         (details.FixtureName().c_str()),
@@ -5308,7 +5333,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 93:         testFixture = testFixture->m_next;
 94:     if (testFixture == nullptr)
 95:     {
-96: #ifdef DEBUG_REGISTRY
+96: #if DEBUG_REGISTRY
 97:         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 98: #endif
 99:         testFixture = new TestFixtureInfo(fixtureName);
@@ -5316,7 +5341,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 101:     }
 102:     else
 103:     {
-104: #ifdef DEBUG_REGISTRY
+104: #if DEBUG_REGISTRY
 105:         LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 106: #endif
 107:     }
@@ -6447,7 +6472,7 @@ File: code\applications\demo\src\main.cpp
 189:     void RunImpl() const override;
 190: } myTest;
 191: 
-192: TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
+192: TestRegistrar registrarMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
 193: 
 194: void MyTest::RunImpl() const
 195: {
@@ -6860,7 +6885,7 @@ File: code/libraries/unittest/src/TestResult.cpp
 - Line 99-104: We implement the `TestResult` constructor
 - Line 106-110: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
 
-### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTH}
+### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTERH}
 
 Let's declare the `DeferredTestReporter` class.
 
@@ -6907,120 +6932,122 @@ File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
 37: //
 38: //------------------------------------------------------------------------------
 39: 
-40: #include <unittest/ITestReporter.h>
-41: #include <unittest/TestResult.h>
-42: 
-43: /// @file
-44: /// Deferred test reporter
-45: /// 
-46: /// Saves failures during the test run, so they can be sown in the overview after the complete test run
-47: 
-48: namespace unittest
-49: {
-50: 
-51: /// <summary>
-52: /// Test result entry
-53: /// </summary>
-54: class ResultEntry
-55: {
-56: private:
-57:     friend class ResultList;
-58:     /// @brief Test result
-59:     TestResult m_result;
-60:     /// @brief Pointer to next entry in list
-61:     ResultEntry* m_next;
-62: 
-63: public:
-64:     explicit ResultEntry(const TestResult& result);
-65:     /// <summary>
-66:     /// Return test result
-67:     /// </summary>
-68:     /// <returns>Test result</returns>
-69:     TestResult& GetResult() { return m_result; }
-70:     /// <summary>
-71:     /// Return next entry pointer
-72:     /// </summary>
-73:     /// <returns>Next entry pointer</returns>
-74:     ResultEntry* GetNext() { return m_next; }
-75: };
-76: 
-77: /// <summary>
-78: /// Test result entry list
-79: /// </summary>
-80: class ResultList
-81: {
-82: private:
-83:     /// @brief Start of list
-84:     ResultEntry* m_head;
-85:     /// @brief End of list
-86:     ResultEntry* m_tail;
-87: 
-88: public:
-89:     ResultList();
-90:     ~ResultList();
-91: 
-92:     void Add(const TestResult& result);
-93:     /// <summary>
-94:     /// Return start of list pointer
-95:     /// </summary>
-96:     /// <returns>Start of list pointer</returns>
-97:     ResultEntry* GetHead() const { return m_head; }
-98:     /// <summary>
-99:     /// Return end of list pointer
-100:     /// </summary>
-101:     /// <returns>End of list pointer</returns>
-102:     ResultEntry* GetTail() const { return m_tail; }
-103: };
-104: 
-105: /// <summary>
-106: /// Deferred test reporter
-107: /// 
-108: /// Implements abstract ITestReporter interface
-109: /// </summary>
-110: class DeferredTestReporter : public ITestReporter
-111: {
-112: private:
-113:     /// @brief Test result list for current test run
-114:     ResultList m_results;
-115: 
-116: public:
-117:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-118:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
-119:     void ReportTestRunSummary(const TestResults& results) override;
-120:     void ReportTestRunOverview(const TestResults& results) override;
-121:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-122:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
-123:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
-124:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
-125:     void ReportTestStart(const TestDetails& details) override;
-126:     void ReportTestFinish(const TestDetails& details, bool success) override;
-127:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
-128: 
-129:     ResultList& Results();
-130: };
-131: 
-132: } // namespace unittest
+40: #pragma once
+41: 
+42: #include <unittest/ITestReporter.h>
+43: #include <unittest/TestResult.h>
+44: 
+45: /// @file
+46: /// Deferred test reporter
+47: ///
+48: /// Saves failures during the test run, so they can be sown in the overview after the complete test run
+49: 
+50: namespace unittest
+51: {
+52: 
+53: /// <summary>
+54: /// Test result entry
+55: /// </summary>
+56: class ResultEntry
+57: {
+58: private:
+59:     friend class ResultList;
+60:     /// @brief Test result
+61:     TestResult m_result;
+62:     /// @brief Pointer to next entry in list
+63:     ResultEntry* m_next;
+64: 
+65: public:
+66:     explicit ResultEntry(const TestResult& result);
+67:     /// <summary>
+68:     /// Return test result
+69:     /// </summary>
+70:     /// <returns>Test result</returns>
+71:     TestResult& GetResult() { return m_result; }
+72:     /// <summary>
+73:     /// Return next entry pointer
+74:     /// </summary>
+75:     /// <returns>Next entry pointer</returns>
+76:     ResultEntry* GetNext() { return m_next; }
+77: };
+78: 
+79: /// <summary>
+80: /// Test result entry list
+81: /// </summary>
+82: class ResultList
+83: {
+84: private:
+85:     /// @brief Start of list
+86:     ResultEntry* m_head;
+87:     /// @brief End of list
+88:     ResultEntry* m_tail;
+89: 
+90: public:
+91:     ResultList();
+92:     ~ResultList();
+93: 
+94:     void Add(const TestResult& result);
+95:     /// <summary>
+96:     /// Return start of list pointer
+97:     /// </summary>
+98:     /// <returns>Start of list pointer</returns>
+99:     ResultEntry* GetHead() const { return m_head; }
+100:     /// <summary>
+101:     /// Return end of list pointer
+102:     /// </summary>
+103:     /// <returns>End of list pointer</returns>
+104:     ResultEntry* GetTail() const { return m_tail; }
+105: };
+106: 
+107: /// <summary>
+108: /// Deferred test reporter
+109: ///
+110: /// Implements abstract ITestReporter interface
+111: /// </summary>
+112: class DeferredTestReporter : public ITestReporter
+113: {
+114: private:
+115:     /// @brief Test result list for current test run
+116:     ResultList m_results;
+117: 
+118: public:
+119:     void ReportTestRunStart(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+120:     void ReportTestRunFinish(int numberOfTestSuites, int numberOfTestFixtures, int numberOfTests) override;
+121:     void ReportTestRunSummary(const TestResults& results) override;
+122:     void ReportTestRunOverview(const TestResults& results) override;
+123:     void ReportTestSuiteStart(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+124:     void ReportTestSuiteFinish(const baremetal::string& suiteName, int numberOfTestFixtures) override;
+125:     void ReportTestFixtureStart(const baremetal::string& fixtureName, int numberOfTests) override;
+126:     void ReportTestFixtureFinish(const baremetal::string& fixtureName, int numberOfTests) override;
+127:     void ReportTestStart(const TestDetails& details) override;
+128:     void ReportTestFinish(const TestDetails& details, bool success) override;
+129:     void ReportTestFailure(const TestDetails& details, const baremetal::string& failure) override;
+130: 
+131:     ResultList& Results();
+132: };
+133: 
+134: } // namespace unittest
 ```
 
-- Line 54-75: We declare the struct `ResultEntry`, which holds a `TestResult`, which we'll declare later, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
-  - Line 59: The member variable `m_result` holds the test result
-  - Line 61: The member variable `m_next` holds the pointer to the next `ResultEntry` in the list
-  - Line 64: We declare the constructor
-  - Line 69: We declare and define the method `GetResult()` which returns the test result
-  - Line 74: We declare and define the method `GetNext()` which returns the pointer to the next `ResultEntry` in the list
-- Line 77-103: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
-  - Line 84-86: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
-  - Line 89: We declare the constructor
-  - Line 90: We declare the destructor, which will clean up the list of `ResultEntry` instances
-  - Line 92: We declare and define the method `Add()` which adds a test result to the list (embedded in a `ResultEntry` instance)
-  - Line 97: We declare and define the method `GetHead()` which returns a const pointer to the first `ResultEntry` in the list
-  - Line 102: We declare and define the method `GetTail()` which returns a const pointer to the last `ResultEntry` in the list
-- Line 110-130: We declare the class `DeferredTestReporter`, which implements the abstract interface `ITestReporter`
-  - Line 114: The class variable `m_results` holds the list of test results saved during the test run
-  - Line 117-127: We implement the `ITestReporter` interface
-  - Line 129: We declare the method `Results()` which returns the `ResultList`
+- Line 56-77: We declare the struct `ResultEntry`, which holds a `TestResult`, which we'll declare later, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
+  - Line 61: The member variable `m_result` holds the test result
+  - Line 63: The member variable `m_next` holds the pointer to the next `ResultEntry` in the list
+  - Line 66: We declare the constructor
+  - Line 71: We declare and define the method `GetResult()` which returns the test result
+  - Line 76: We declare and define the method `GetNext()` which returns the pointer to the next `ResultEntry` in the list
+- Line 79-105: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
+  - Line 86-88: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
+  - Line 91: We declare the constructor
+  - Line 92: We declare the destructor, which will clean up the list of `ResultEntry` instances
+  - Line 94: We declare and define the method `Add()` which adds a test result to the list (embedded in a `ResultEntry` instance)
+  - Line 99: We declare and define the method `GetHead()` which returns a const pointer to the first `ResultEntry` in the list
+  - Line 104: We declare and define the method `GetTail()` which returns a const pointer to the last `ResultEntry` in the list
+- Line 112-132: We declare the class `DeferredTestReporter`, which implements the abstract interface `ITestReporter`
+  - Line 116: The class variable `m_results` holds the list of test results saved during the test run
+  - Line 119-129: We implement the `ITestReporter` interface
+  - Line 131: We declare the method `Results()` which returns the `ResultList`
 
-### DeferredTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTCPP}
+### DeferredTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTERCPP}
 
 Let's implement the `DeferredTestReporter` class.
 
@@ -7390,7 +7417,7 @@ File: code/libraries/unittest/src/ConsoleTestReport.cpp
 - Line 318-342: We reimplement the method `TestRunOverviewMessage` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
 - Line 350-357: We reimplement the method `TestFailureMessage` to print a correct failure message
 
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UNITTESTH}
+### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_UNITTESTH}
 
 We've added a header, so let's include that in the common header as well.
 
@@ -7406,9 +7433,9 @@ File: code/libraries/unittest/include/unittest/unittest.h
 50: #include <unittest/CurrentTest.h>
 51: #include <unittest/DeferredTestReporter.h>
 52: #include <unittest/Test.h>
-53: #include <unittest/TestInfo.h>
-54: #include <unittest/TestDetails.h>
-55: #include <unittest/TestFixtureInfo.h>
+53: #include <unittest/TestDetails.h>
+54: #include <unittest/TestFixtureInfo.h>
+55: #include <unittest/TestInfo.h>
 56: #include <unittest/TestRegistry.h>
 57: #include <unittest/TestResults.h>
 58: #include <unittest/TestRunner.h>

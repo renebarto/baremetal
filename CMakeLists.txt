@@ -64,7 +64,7 @@ option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
 option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
 option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
-option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" ON)
+option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" OFF)
 
 message(STATUS "\n** Setting up project **\n--")
 

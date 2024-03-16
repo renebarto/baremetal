@@ -11,12 +11,8 @@ LOG_MODULE("main");
 using namespace baremetal;
 using namespace unittest;
 
-namespace Suite1 {
-
-inline char const* GetSuiteName()
+TEST_SUITE(Suite1)
 {
-    return baremetal::string("Suite1");
-}
 
 class FixtureMyTest1
     : public TestFixture
@@ -32,51 +28,15 @@ public:
     }
 };
 
-class FixtureMyTest1Helper
-    : public FixtureMyTest1
+TEST_FIXTURE(FixtureMyTest1, MyTest1)
 {
-public:
-    FixtureMyTest1Helper(const FixtureMyTest1Helper&) = delete;
-    explicit FixtureMyTest1Helper(const TestDetails& details)
-        : m_details{ details }
-    {
-        SetUp();
-    }
-    virtual ~FixtureMyTest1Helper()
-    {
-        TearDown();
-    }
-    void RunImpl() const;
-    const TestDetails& m_details;
-};
-void FixtureMyTest1Helper::RunImpl() const
-{
-    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 1");
+    FAIL("For some reason");
 }
 
-class MyTest1
-    : public Test
+} // Suite1
+
+TEST_SUITE(Suite2)
 {
-    void RunImpl() const override;
-} myTest1;
-
-TestRegistrar registrarFixtureMyTest1(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest1", "FixtureMyTest1", GetSuiteName(), __FILE__, __LINE__));
-
-void MyTest1::RunImpl() const
-{
-    LOG_DEBUG("Test 1");
-    FixtureMyTest1Helper fixtureHelper(*CurrentTest::Details());
-    fixtureHelper.RunImpl();
-}
-
-} // namespace Suite1
-
-namespace Suite2 {
-
-inline char const* GetSuiteName()
-{
-    return baremetal::string("Suite2");
-}
 
 class FixtureMyTest2
     : public TestFixture
@@ -92,44 +52,15 @@ public:
     }
 };
 
-class FixtureMyTest2Helper
-    : public FixtureMyTest2
+TEST_FIXTURE(FixtureMyTest2, MyTest2)
 {
-public:
-    FixtureMyTest2Helper(const FixtureMyTest2Helper&) = delete;
-    explicit FixtureMyTest2Helper(const TestDetails& details)
-        : m_details{ details }
-    {
-        SetUp();
-    }
-    virtual ~FixtureMyTest2Helper()
-    {
-        TearDown();
-    }
-    void RunImpl() const;
-    const TestDetails& m_details;
-};
-void FixtureMyTest2Helper::RunImpl() const
-{
-    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 2");
+    EXPECT_TRUE(true);
+    EXPECT_FALSE(false);
+    EXPECT_TRUE(false);
+    EXPECT_FALSE(true);
 }
 
-class MyTest2
-    : public Test
-{
-    void RunImpl() const override;
-} myTest1;
-
-TestRegistrar registrarFixtureMyTest2(TestRegistry::GetTestRegistry(), &myTest1, TestDetails("MyTest2", "FixtureMyTest2", GetSuiteName(), __FILE__, __LINE__));
-
-void MyTest2::RunImpl() const
-{
-    LOG_DEBUG("Test 2");
-    FixtureMyTest2Helper fixtureHelper(*CurrentTest::Details());
-    fixtureHelper.RunImpl();
-}
-
-} // namespace Suite2
+} // Suite2
 
 class FixtureMyTest3
     : public TestFixture
@@ -145,56 +76,120 @@ public:
     }
 };
 
-class FixtureMyTest3Helper
-    : public FixtureMyTest3
+TEST_FIXTURE(FixtureMyTest3, MyTest3)
 {
-public:
-    FixtureMyTest3Helper(const FixtureMyTest3Helper&) = delete;
-    explicit FixtureMyTest3Helper(const TestDetails& details)
-        : m_details{ details }
-    {
-        SetUp();
-    }
-    virtual ~FixtureMyTest3Helper()
-    {
-        TearDown();
-    }
-    void RunImpl() const;
-    const TestDetails& m_details;
-};
-void FixtureMyTest3Helper::RunImpl() const
-{
-    LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 3");
+    int x = 0;
+    int y = 1;
+    int z = 1;
+    EXPECT_EQ(x, y);
+    EXPECT_EQ(y, z);
+    EXPECT_NE(x, y);
+    EXPECT_NE(y, z);
 }
 
-class MyTest3
-    : public Test
+TEST(MyTest)
 {
-    void RunImpl() const override;
-} myTest3;
+   int* p = nullptr;
+   int dd = 123;
+   int* q = &dd;
+   int* r = &dd;
+   ASSERT_NULL(p);
+   EXPECT_NULL(p);
+   ASSERT_NULL(q);
+   EXPECT_NULL(q);
+   ASSERT_NOT_NULL(p);
+   EXPECT_NOT_NULL(p);
+   ASSERT_NOT_NULL(q);
+   EXPECT_NOT_NULL(q);
+   baremetal::string s1 = "A";
+   baremetal::string s2 = "B";
+   baremetal::string s3 = "B";
+   baremetal::string s4 = "b";
+   ASSERT_EQ(s1, s2);
+   EXPECT_EQ(s1, s2);
+   ASSERT_EQ(s2, s3);
+   EXPECT_EQ(s2, s3);
+   ASSERT_NE(s1, s2);
+   EXPECT_NE(s1, s2);
+   ASSERT_NE(s2, s3);
+   EXPECT_NE(s2, s3);
+   ASSERT_EQ_IGNORE_CASE(s1, s2);
+   EXPECT_EQ_IGNORE_CASE(s1, s2);
+   ASSERT_EQ_IGNORE_CASE(s2, s3);
+   EXPECT_EQ_IGNORE_CASE(s2, s3);
+   ASSERT_NE_IGNORE_CASE(s1, s2);
+   EXPECT_NE_IGNORE_CASE(s1, s2);
+   ASSERT_NE_IGNORE_CASE(s2, s3);
+   EXPECT_NE_IGNORE_CASE(s2, s3);
+   ASSERT_EQ_IGNORE_CASE(s2, s4);
+   EXPECT_EQ_IGNORE_CASE(s2, s4);
+   ASSERT_NE_IGNORE_CASE(s2, s4);
+   EXPECT_NE_IGNORE_CASE(s2, s4);
+   char t[] = { 'A', '\0' };
+   char u[] = { 'B', '\0' };
+   char v[] = { 'B', '\0' };
+   char w[] = { 'b', '\0' };
+   const char* tC = "A";
+   const char* uC = "B";
+   const char* vC = "B";
+   const char* wC = "b";
+   ASSERT_EQ(t, u);
+   EXPECT_EQ(t, u);
+   ASSERT_EQ(u, v);
+   EXPECT_EQ(u, v);
+   ASSERT_EQ(t, u);
+   EXPECT_EQ(t, uC);
+   ASSERT_EQ(uC, v);
+   EXPECT_EQ(uC, vC);
+   ASSERT_EQ(t, w);
+   EXPECT_EQ(t, wC);
+   ASSERT_EQ(uC, w);
+   EXPECT_EQ(uC, wC);
+   ASSERT_NE(t, u);
+   EXPECT_NE(t, u);
+   ASSERT_NE(u, v);
+   EXPECT_NE(u, v);
+   ASSERT_NE(t, u);
+   EXPECT_NE(t, uC);
+   ASSERT_NE(uC, v);
+   EXPECT_NE(uC, vC);
+   ASSERT_NE(t, w);
+   EXPECT_NE(t, wC);
+   ASSERT_NE(uC, w);
+   EXPECT_NE(uC, wC);
+   ASSERT_EQ_IGNORE_CASE(t, u);
+   EXPECT_EQ_IGNORE_CASE(t, u);
+   ASSERT_EQ_IGNORE_CASE(u, v);
+   EXPECT_EQ_IGNORE_CASE(u, v);
+   ASSERT_EQ_IGNORE_CASE(t, u);
+   EXPECT_EQ_IGNORE_CASE(t, uC);
+   ASSERT_EQ_IGNORE_CASE(uC, v);
+   EXPECT_EQ_IGNORE_CASE(uC, vC);
+   ASSERT_EQ_IGNORE_CASE(t, w);
+   EXPECT_EQ_IGNORE_CASE(t, wC);
+   ASSERT_EQ_IGNORE_CASE(uC, w);
+   EXPECT_EQ_IGNORE_CASE(uC, wC);
+   ASSERT_NE_IGNORE_CASE(t, u);
+   EXPECT_NE_IGNORE_CASE(t, u);
+   ASSERT_NE_IGNORE_CASE(u, v);
+   EXPECT_NE_IGNORE_CASE(u, v);
+   ASSERT_NE_IGNORE_CASE(t, u);
+   EXPECT_NE_IGNORE_CASE(t, uC);
+   ASSERT_NE_IGNORE_CASE(uC, v);
+   EXPECT_NE_IGNORE_CASE(uC, vC);
+   ASSERT_NE_IGNORE_CASE(t, w);
+   EXPECT_NE_IGNORE_CASE(t, wC);
+   ASSERT_NE_IGNORE_CASE(uC, w);
+   EXPECT_NE_IGNORE_CASE(uC, wC);
 
-TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &myTest3, TestDetails("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__));
-
-void MyTest3::RunImpl() const
-{
-    LOG_DEBUG("Test 3");
-    FixtureMyTest3Helper fixtureHelper(*CurrentTest::Details());
-    fixtureHelper.RunImpl();
-}
-
-class MyTest
-    : public Test
-{
-public:
-    void RunImpl() const override;
-} myTest;
-
-TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
-
-void MyTest::RunImpl() const
-{
-    LOG_DEBUG("Running test");
-    CurrentTest::Results()->OnTestFailure(*CurrentTest::Details(), "Failure");
+   double a = 0.123;
+   double b = 0.122;
+   ASSERT_EQ(a, b);
+   EXPECT_EQ(a, b);
+   ASSERT_NEAR(a, b, 0.0001);
+   EXPECT_NEAR(a, b, 0.0001);
+   ASSERT_NEAR(a, b, 0.001);
+   EXPECT_NEAR(a, b, 0.001);
 }
 
 int main()

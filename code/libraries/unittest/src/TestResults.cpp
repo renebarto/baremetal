@@ -50,8 +50,7 @@
 
 using namespace baremetal;
 
-namespace unittest
-{
+namespace unittest {
 
 /// <summary>
 /// Constructor

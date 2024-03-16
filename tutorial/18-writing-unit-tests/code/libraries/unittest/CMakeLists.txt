@@ -27,10 +27,12 @@ set(PROJECT_LIBS
     ${PROJECT_DEPENDENCIES}
     )
 
-set(PROJECT_SOURCES
+    set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DeferredTestReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintValue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestFixtureInfo.cpp
@@ -43,9 +45,12 @@ set(PROJECT_SOURCES
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/DeferredTestReporter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/PrintValue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestFixture.h

@@ -189,7 +189,7 @@ public:
     void RunImpl() const override;
 } myTest;
 
-TestRegistrar registrarFixtureMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
+TestRegistrar registrarMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
 
 void MyTest::RunImpl() const
 {

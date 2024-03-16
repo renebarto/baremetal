@@ -93,7 +93,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
         testFixture = testFixture->m_next;
     if (testFixture == nullptr)
     {
-#ifdef DEBUG_REGISTRY
+#if DEBUG_REGISTRY
         LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 #endif
         testFixture = new TestFixtureInfo(fixtureName);
@@ -101,7 +101,7 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
     }
     else
     {
-#ifdef DEBUG_REGISTRY
+#if DEBUG_REGISTRY
         LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 #endif
     }

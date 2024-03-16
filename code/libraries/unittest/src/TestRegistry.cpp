@@ -100,7 +100,7 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
         testSuite = testSuite->m_next;
     if (testSuite == nullptr)
     {
-#ifdef DEBUG_REGISTRY
+#if DEBUG_REGISTRY
         LOG_DEBUG("Find suite %s ... not found, creating new object", suiteName.c_str());
 #endif
         testSuite = new TestSuiteInfo(suiteName);
@@ -108,7 +108,7 @@ TestSuiteInfo *TestRegistry::GetTestSuite(const string &suiteName)
     }
     else
     {
-#ifdef DEBUG_REGISTRY
+#if DEBUG_REGISTRY
         LOG_DEBUG("Find suite %s ... found", suiteName.c_str());
 #endif
     }
@@ -146,7 +146,7 @@ void TestRegistry::AddSuite(TestSuiteInfo *testSuite)
 /// <param name="details">Test details</param>
 TestRegistrar::TestRegistrar(TestRegistry &registry, Test *testInstance, const TestDetails& details)
 {
-#ifdef DEBUG_REGISTRY
+#if DEBUG_REGISTRY
     LOG_DEBUG("Register test %s in fixture %s in suite %s",
         details.TestName().c_str(),
         (details.FixtureName().c_str()),

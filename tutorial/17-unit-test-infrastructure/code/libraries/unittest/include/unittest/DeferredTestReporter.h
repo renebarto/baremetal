@@ -37,6 +37,8 @@
 //
 //------------------------------------------------------------------------------
 
+#pragma once
+
 #include <unittest/ITestReporter.h>
 #include <unittest/TestResult.h>
 

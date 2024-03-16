@@ -7,7 +7,7 @@
 //
 // Class       : TestFixtureInfo
 //
-// Description : TestInfo fixture info
+// Description : Test fixture info
 //
 //------------------------------------------------------------------------------
 //

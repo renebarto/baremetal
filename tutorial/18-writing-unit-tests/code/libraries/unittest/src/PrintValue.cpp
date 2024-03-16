@@ -1,14 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : unittest.h
+// File        : PrintValue.cpp
 //
-// Namespace   : -
+// Namespace   : unittest
 //
 // Class       : -
 //
-// Description : unittest general include file, with functions to start tests
-//
+// Description : Print values
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
@@ -37,25 +36,16 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <unittest/PrintValue.h>
 
-/// @file
-/// Unit test generic header
+using namespace baremetal;
 
-#include <unittest/TestFixture.h>
-#include <unittest/TestSuite.h>
+void PrintStringTo(const baremetal::string& str, baremetal::string& s)
+{
+    s = str;
+}
 
-#include <unittest/ITestReporter.h>
-#include <unittest/AssertMacros.h>
-#include <unittest/ConsoleTestReporter.h>
-#include <unittest/CurrentTest.h>
-#include <unittest/DeferredTestReporter.h>
-#include <unittest/Test.h>
-#include <unittest/TestDetails.h>
-#include <unittest/TestFixtureInfo.h>
-#include <unittest/TestInfo.h>
-#include <unittest/TestMacros.h>
-#include <unittest/TestRegistry.h>
-#include <unittest/TestResults.h>
-#include <unittest/TestRunner.h>
-#include <unittest/TestSuiteInfo.h>
+void PrintTo(unsigned char ch, baremetal::string &s)
+{
+    s += ch;
+}

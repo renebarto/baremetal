@@ -1,6 +1,7 @@
 #include "unittest/unittest.h"
 
 #include "baremetal/String.h"
+#include "baremetal/Util.h"
 
 using namespace unittest;
 
@@ -14,433 +15,2185 @@ class StringTest
     : public TestFixture
 {
 public:
+    const char* otherText = "abcdefghijklmnopqrstuvwxyz";
+    string other;
     void SetUp() override
     {
+        other = otherText;
     }
     void TearDown() override
     {
     }
 };
 
+TEST_FIXTURE(StringTest, ConstructDefault)
+{
+    string s;
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(size_t{ 0 }, s.size());
+    EXPECT_EQ(size_t{ 0 }, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+}
+
+TEST_FIXTURE(StringTest, ConstructConstCharPtr)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(expected);
+
+    string s(text);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructConstCharPtrEmpty)
+{
+    const char* text = "";
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+
+    string s(text);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructNullPtr)
+{
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+
+    string s(nullptr);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSize)
+{
+    const char* text = otherText;
+    const char* expected = "abcde";
+    size_t expectedLength = strlen(expected);
+    size_t length = expectedLength;
+
+    string s(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSizeTooLarge)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(otherText) + 3;
+
+    string s(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSizeNpos)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = string::npos;
+
+    string s(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructCountAndChar)
+{
+    char ch = 'X';
+    const char* expected = "XXXXX";
+    size_t expectedLength = strlen(expected);
+    size_t length = expectedLength;
+
+    string s(length, ch);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructCountNposAndChar)
+{
+    char ch = 'X';
+    size_t expectedLength = 0x7FFFF;
+    size_t length = string::npos;
+
+    string s(length, ch);
+
+    EXPECT_FALSE(s.empty());
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0x80000 }, s.capacity());
+}
+
+TEST_FIXTURE(StringTest, ConstructCopy)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string other(text);
+
+    string s(other);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructCopyEmpty)
+{
+    const char* text = "";
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string other(text);
+
+    string s(other);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructMove)
+{
+    // Cannot test yet, as we don't have a move operator
+}
+
+TEST_FIXTURE(StringTest, ConstructStringFromPos)
+{
+    const char* expected = "ghijklmnopqrstuvwxyz";
+    size_t expectedLength = strlen(expected);
+    size_t pos = 6;
+
+    string s(other, pos);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructStringFromPosTooLarge)
+{
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t pos = strlen(otherText) + 1;
+
+    string s(other, pos);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructStringFromPosNpos)
+{
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t pos = string::npos;
+
+    string s(other, pos);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructStringFromPosWithCount)
+{
+    const char* expected = "ghi";
+    size_t expectedLength = strlen(expected);
+    size_t length = expectedLength;
+    size_t pos = 6;
+
+    string s(other, pos, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstructStringFromPosWithCountTooLarge)
+{
+    const char* expected = "xyz";
+    size_t expectedLength = strlen(expected);
+    size_t length = 6;
+    size_t pos = 23;
+
+    string s(other, pos, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, ConstCharPtrCastOperator)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+
+    string s(text);
+
+    ASSERT_NOT_NULL((const char*)s);
+    EXPECT_EQ(0, strcmp(text, (const char*)s));
+}
+
+TEST_FIXTURE(StringTest, AssignmentOperatorConstCharPtr)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+
+    string s;
+
+    s = text;
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignmentOperatorCopy)
+{
+    const char* text = otherText;
+    string other(text);
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string s;
+
+    s = other;
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignmentOperatorMove)
+{
+    // Cannot test yet, as we don't have a move operator
+}
+
+TEST_FIXTURE(StringTest, Begin)
+{
+    string s{ otherText };
+
+    auto begin = s.begin();
+    EXPECT_EQ('a', *begin);
+}
+
+TEST_FIXTURE(StringTest, End)
+{
+    string s{ otherText };
+
+    auto end = s.end();
+    EXPECT_EQ('\0', *end);
+}
+
+TEST_FIXTURE(StringTest, BeginConst)
+{
+    string s{ otherText };
+
+    auto const begin = s.begin();
+    EXPECT_EQ('a', *begin);
+}
+
+TEST_FIXTURE(StringTest, EndConst)
+{
+    string s{ otherText };
+
+    auto const end = s.end();
+    EXPECT_EQ('\0', *end);
+}
+
 TEST_FIXTURE(StringTest, Iterate)
 {
-    string s{ "abcde" };
-    char expected[] = "abcde";
+    string s{ otherText };
+    const char* expected = otherText;
     size_t index{};
+
     for (auto ch : s)
     {
         EXPECT_EQ(expected[index++], ch);
     }
 }
 
+TEST_FIXTURE(StringTest, AssignConstCharPtr)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string s;
+
+    s.assign(text);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignConstCharPtrEmpty)
+{
+    const char* text = "";
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string s;
+
+    s.assign(text);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignNullPtr)
+{
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s.assign(nullptr);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignConstCharPtrAndSize)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(expected);
+    string s;
+
+    s.assign(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignConstCharPtrAndSizeTooLarge)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(otherText) + 3;
+    string s;
+
+    s.assign(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignConstCharPtrAndSizeNpos)
+{
+    const char* text = otherText;
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = string::npos;
+    string s;
+
+    s.assign(text, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignCountAndChar)
+{
+    char ch = 'X';
+    const char* expected = "XXXXX";
+    size_t expectedLength = strlen(expected);
+    size_t length = 5;
+    string s;
+
+    s.assign(length, ch);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignCountNposAndChar)
+{
+    char ch = 'X';
+    size_t expectedLength = 0x7FFFF;
+    size_t length = string::npos;
+    string s;
+
+    s.assign(length, ch);
+
+    EXPECT_FALSE(s.empty());
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0x80000 }, s.capacity());
+}
+
+TEST_FIXTURE(StringTest, AssignString)
+{
+    const char* text = otherText;
+    string other(text);
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string s;
+
+    s.assign(other);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringEmpty)
+{
+    const char* text = "";
+    string other(text);
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t length = strlen(text);
+    string s;
+
+    s.assign(other);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringFromPos)
+{
+    const char* expected = "ghijklmnopqrstuvwxyz";
+    size_t expectedLength = strlen(expected);
+    size_t pos = 6;
+    string s;
+
+    s.assign(other, pos);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringFromPosTooLarge)
+{
+    string str = "abc";
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t pos = 6;
+    size_t length = 0;
+    string s;
+
+    s.assign(str, pos);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringFromPosNPos)
+{
+    string str = "abc";
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+    size_t pos = string::npos;
+    size_t length = 0;
+    string s;
+
+    s.assign(str, pos);
+
+    EXPECT_TRUE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_EQ('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringFromPosWithCount)
+{
+    const char* expected = "ghi";
+    size_t expectedLength = strlen(expected);
+    size_t pos = 6;
+    size_t length = 3;
+    string s;
+
+    s.assign(other, pos, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, AssignStringFromPosWithCountTooLarge)
+{
+    const char* expected = "xyz";
+    size_t expectedLength = strlen(expected);
+    size_t pos = 23;
+    size_t length = 6;
+    string s;
+
+    s.assign(other, pos, length);
+
+    EXPECT_FALSE(s.empty());
+    ASSERT_NOT_NULL(s.data());
+    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NE('\0', s.data()[0]);
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_NE(size_t{ 0 }, s.capacity());
+    EXPECT_TRUE(expected == s);
+    EXPECT_TRUE(s == expected);
+    EXPECT_EQ(expected, s);
+    EXPECT_EQ(s, expected);
+}
+
+TEST_FIXTURE(StringTest, At)
+{
+    string s{other};
+
+    EXPECT_EQ('d', s.at(3));
+}
+
+TEST_FIXTURE(StringTest, AtConst)
+{
+    const string s{other};
+
+    EXPECT_EQ('d', s.at(3));
+}
+
+TEST_FIXTURE(StringTest, AtOutsideString)
+{
+    string s{other};
+
+    EXPECT_EQ('\0', s.at(other.size()));
+}
+
+TEST_FIXTURE(StringTest, AtConstOutsideString)
+{
+    const string s{other};
+
+    EXPECT_EQ('\0', s.at(other.size()));
+}
+
+TEST_FIXTURE(StringTest, AtEmptyString)
+{
+    string s;
+
+    EXPECT_EQ('\0', s.at(3));
+}
+
+TEST_FIXTURE(StringTest, AtConstEmptyString)
+{
+    string s;
+
+    EXPECT_EQ('\0', s.at(3));
+}
+
+TEST_FIXTURE(StringTest, Front)
+{
+    string s{other};
+
+    EXPECT_EQ('a', s.front());
+}
+
+TEST_FIXTURE(StringTest, FrontConst)
+{
+    const string s{other};
+
+    EXPECT_EQ('a', s.front());
+}
+
+TEST_FIXTURE(StringTest, FrontEmptyString)
+{
+    string s;
+
+    EXPECT_EQ('\0', s.front());
+}
+
+TEST_FIXTURE(StringTest, FrontConstEmptyString)
+{
+    const string s;
+
+    EXPECT_EQ('\0', s.front());
+}
+
+TEST_FIXTURE(StringTest, Back)
+{
+    string s{other};
+
+    EXPECT_EQ('z', s.back());
+}
+
+TEST_FIXTURE(StringTest, BackConst)
+{
+    const string s{other};
+
+    EXPECT_EQ('z', s.back());
+}
+
+TEST_FIXTURE(StringTest, BackEmptyString)
+{
+    string s;
+
+    EXPECT_EQ('\0', s.back());
+}
+
+TEST_FIXTURE(StringTest, BackConstEmptyString)
+{
+    const string s;
+
+    EXPECT_EQ('\0', s.back());
+}
+
+TEST_FIXTURE(StringTest, IndexOperator)
+{
+    string s{other};
+
+    EXPECT_EQ('d', s[3]);
+}
+
+TEST_FIXTURE(StringTest, IndexOperatorConst)
+{
+    const string s{other};
+
+    EXPECT_EQ('d', s[3]);
+}
+
+TEST_FIXTURE(StringTest, IndexOperatorOutsideString)
+{
+    string s{other};
+
+    EXPECT_EQ('\0', s[other.size()]);
+}
+
+TEST_FIXTURE(StringTest, IndexOperatorConstOutsideString)
+{
+    const string s{other};
+
+    EXPECT_EQ('\0', s[other.size()]);
+}
+
+TEST_FIXTURE(StringTest, IndexOperatorEmptyString)
+{
+    string s;
+
+    EXPECT_EQ('\0', s[3]);
+}
+
+TEST_FIXTURE(StringTest, IndexOperatorConstEmptyString)
+{
+    const string s;
+
+    EXPECT_EQ('\0', s[3]);
+}
+
+TEST_FIXTURE(StringTest, Data)
+{
+    string s{other};
+
+    char* text = s.data();
+
+    EXPECT_EQ(0, strcmp(text, otherText));
+}
+
+TEST_FIXTURE(StringTest, DataConst)
+{
+    string s{other};
+
+    const char* text = s.data();
+
+    EXPECT_EQ(0, strcmp(text, otherText));
+}
+
+TEST_FIXTURE(StringTest, CString)
+{
+    string s{other};
+
+    const char* text = s.c_str();
+
+    EXPECT_EQ(0, strcmp(text, otherText));
+}
+
+TEST_FIXTURE(StringTest, Reserve)
+{
+    string s{other};
+
+    auto oldCapacity = s.capacity();
+    size_t reserveCapacity = 4096;
+
+    s.reserve(reserveCapacity);
+
+    auto newCapacity = s.capacity();
+
+    // Check first, we expect the default capacity to be 64
+    ASSERT_EQ(size_t{ 64 }, oldCapacity);
+    EXPECT_NE(oldCapacity, newCapacity);
+    EXPECT_EQ(reserveCapacity, newCapacity);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentChar)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzA";
+    size_t expectedLength = strlen(expected);
+    char c = 'A';
+
+    s += c;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentString)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+
+    s += str;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentStringEmpty)
+{
+    string s{ other };
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    string str = "";
+
+    s += str;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentConstCharPtr)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    const char*str = "ABCDEF";
+
+    s += str;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentConstCharPtrEmpty)
+{
+    string s{ other };
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    const char* str = "";
+
+    s += str;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddAssignmentNullPtr)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyz";
+    size_t expectedLength = strlen(expected);
+    const char* str = nullptr;
+
+    s += str;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendCountAndChar)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzAAAA";
+    size_t expectedLength = strlen(expected);
+    size_t count = 4;
+    char c = 'A';
+
+    s.append(count, c);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendCountNposAndChar)
+{
+    string s{ other };
+    size_t expectedLength = 0x7FFFF;
+    size_t count = string::npos;
+    char c = 'A';
+
+    s.append(count, c);
+
+    EXPECT_FALSE(s.empty());
+    EXPECT_EQ(expectedLength, s.size());
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(size_t{ 0x80000 }, s.capacity());
+}
+
+TEST_FIXTURE(StringTest, AppendString)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+
+    s.append(str);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringEmpty)
+{
+    string s{ other };
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    string str = "";
+
+    s.append(str);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringAtPos)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzDEF";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+    size_t pos = 3;
+
+    s.append(str, pos);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringAtPosTooLarge)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyz";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+    size_t pos = strlen(str) + 3;
+
+    s.append(str, pos);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringAtPosNpos)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyz";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+    size_t pos = string::npos;
+
+    s.append(str, pos);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringAtPosWithCount)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzBCD";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+    size_t pos = 1;
+    size_t count = 3;
+
+    s.append(str, pos, count);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendStringAtPosWithCountTooLarge)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzDEF";
+    size_t expectedLength = strlen(expected);
+    string str = "ABCDEF";
+    size_t pos = 3;
+    size_t count = pos + strlen(str) + 3;
+
+    s.append(str, pos, count);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendConstCharPtr)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    const char* str = "ABCDEF";
+
+    s.append(str);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendConstCharPtrEmpty)
+{
+    string s{ other };
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    const char* str = "";
+
+    s.append(str);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendNullPtr)
+{
+    string s{ other };
+    const char* expected = otherText;
+    size_t expectedLength = strlen(expected);
+    const char* str = nullptr;
+
+    s.append(str);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendConstCharPtrWithCount)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCD";
+    size_t expectedLength = strlen(expected);
+    const char* str = "ABCDEF";
+    size_t count = 4;
+
+    s.append(str, count);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendConstCharPtrWithCountTooLarge)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    const char* str = "ABCDEF";
+    size_t count = strlen(str) + 3;
+
+    s.append(str, count);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AppendConstCharPtrWithCountNpos)
+{
+    string s{ other };
+    const char* expected = "abcdefghijklmnopqrstuvwxyzABCDEF";
+    size_t expectedLength = strlen(expected);
+    const char* str = "ABCDEF";
+    size_t count = string::npos;
+
+    s.append(str, count);
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, Clear)
+{
+    string s{ other };
+    const char* expected = "";
+    size_t expectedLength = strlen(expected);
+
+    s.clear();
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, FindString)
+{
+    string s{ other };
+    string subString = "c";
+    size_t expected = 2;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringEndOfString)
+{
+    string s{ other };
+    string subString = "xyz";
+    size_t expected = 23;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringNoMatch)
+{
+    string s{ other };
+    string subString = "deg";
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringEmpty)
+{
+    string s{ other };
+    string subString = "";
+    size_t expected = 0;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPos)
+{
+    string s{ other };
+    string subString = "c";
+    size_t pos = 1;
+    size_t expected = 2;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPosEndOfString)
+{
+    string s{ other };
+    string subString = "xyz";
+    size_t pos = 3;
+    size_t expected = 23;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPosTooLarge)
+{
+    string s{ other };
+    string subString = "c";
+    size_t pos = 3;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPosNpos)
+{
+    string s{ other };
+    string subString = "c";
+    size_t pos = string::npos;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPosEmpty)
+{
+    string s{ other };
+    string subString = "";
+    size_t pos = 3;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindStringAtPosWithCount)
+{
+    string s{ other };
+    string subString = "def";
+    size_t pos = 3;
+    size_t count = 3;
+    size_t expected = 3;
+
+    // Uses implicit const char* cast
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtr)
+{
+    string s{ other };
+    const char* subString = "c";
+    size_t expected = 2;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrNoMatch)
+{
+    string s{ other };
+    const char* subString = "deg";
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrEmpty)
+{
+    string s{ other };
+    const char* subString = "";
+    size_t expected = 0;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrNullPtr)
+{
+    string s{ other };
+    const char* subString = nullptr;
+    size_t expected = 0;
+
+    auto actual = s.find(subString);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPos)
+{
+    string s{ other };
+    const char* subString = "c";
+    size_t pos = 1;
+    size_t expected = 2;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosEndOfString)
+{
+    string s{ other };
+    const char* subString = "xyz";
+    size_t pos = 3;
+    size_t expected = 23;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosTooLarge)
+{
+    string s{ other };
+    const char* subString = "c";
+    size_t pos = 3;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosNpos)
+{
+    string s{ other };
+    const char* subString = "c";
+    size_t pos = string::npos;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosEmpty)
+{
+    string s{ other };
+    const char* subString = "";
+    size_t pos = 3;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosTooLargeEmpty)
+{
+    string s{ other };
+    const char* subString = "";
+    size_t pos = 26;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosNullPtr)
+{
+    string s{ other };
+    const char* subString = nullptr;
+    size_t pos = 3;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCount)
+{
+    string s{ other };
+    const char* subString = "def";
+    size_t pos = 3;
+    size_t count = 3;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountNoMatch)
+{
+    string s{ other };
+    const char* subString = "deg";
+    size_t pos = 3;
+    size_t count = 3;
+    size_t expected = string::npos;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountMatchPart)
+{
+    string s{ other };
+    const char* subString = "def";
+    size_t pos = 3;
+    size_t count = 2;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountTooLarge)
+{
+    string s{ other };
+    const char* subString = "def";
+    size_t pos = 3;
+    size_t count = 4;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountEmpty)
+{
+    string s{ other };
+    const char* subString = "";
+    size_t pos = 3;
+    size_t count = 4;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountTooLargeEmpty)
+{
+    string s{ other };
+    const char* subString = "";
+    size_t pos = 20;
+    size_t count = 7;
+    size_t expected = 20;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindConstCharPtrAtPosWithCountNullPtr)
+{
+    string s{ other };
+    const char* subString = nullptr;
+    size_t pos = 3;
+    size_t count = 4;
+    size_t expected = 3;
+
+    auto actual = s.find(subString, pos, count);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindChar)
+{
+    string s{ other };
+    char c = 'd';
+    size_t expected = 3;
+
+    auto actual = s.find(c);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindCharNoMatch)
+{
+    string s{ other };
+    char c = 'A';
+    size_t expected = string::npos;
+
+    auto actual = s.find(c);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindCharAtPos)
+{
+    string s{ other };
+    char c = 'd';
+    size_t pos = 2;
+    size_t expected = 3;
+
+    auto actual = s.find(c, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindCharAtPosTooLarge)
+{
+    string s{ other };
+    char c = 'd';
+    size_t pos = 4;
+    size_t expected = string::npos;
+
+    auto actual = s.find(c, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, FindCharAtPosNpos)
+{
+    string s{ other };
+    char c = 'd';
+    size_t pos = string::npos;
+    size_t expected = string::npos;
+
+    auto actual = s.find(c, pos);
+
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_FIXTURE(StringTest, StartsWithString)
+{
+    string s{ other };
+    string s1 = "abc";
+    string s2 = "xyz";
+    string s3 = "";
+
+    EXPECT_TRUE(s.starts_with(s1));
+    EXPECT_FALSE(s.starts_with(s2));
+    EXPECT_TRUE(s.starts_with(s3));
+}
+
+TEST_FIXTURE(StringTest, StartsWithConstCharPtr)
+{
+    string s{ other };
+    const char* s1 = "abc";
+    const char* s2 = "xyz";
+    const char* s3 = "";
+    const char* s4 = nullptr;
+
+    EXPECT_TRUE(s.starts_with(s1));
+    EXPECT_FALSE(s.starts_with(s2));
+    EXPECT_TRUE(s.starts_with(s3));
+    EXPECT_TRUE(s.starts_with(s4));
+}
+
+TEST_FIXTURE(StringTest, StartsWithChar)
+{
+    string s{ other };
+    char c1 = 'a';
+    char c2 = 'z';
+
+    EXPECT_TRUE(s.starts_with(c1));
+    EXPECT_FALSE(s.starts_with(c2));
+}
+
+TEST_FIXTURE(StringTest, EndsWithString)
+{
+    string s{ other };
+    string s1 = "abc";
+    string s2 = "xyz";
+    string s3 = "";
+
+    EXPECT_FALSE(s.ends_with(s1));
+    EXPECT_TRUE(s.ends_with(s2));
+    EXPECT_TRUE(s.ends_with(s3));
+}
+
+TEST_FIXTURE(StringTest, EndsWithConstCharPtr)
+{
+    string s{ other };
+    const char* s1 = "abc";
+    const char* s2 = "xyz";
+    const char* s3 = "";
+    const char* s4 = nullptr;
+
+    EXPECT_FALSE(s.ends_with(s1));
+    EXPECT_TRUE(s.ends_with(s2));
+    EXPECT_TRUE(s.ends_with(s3));
+    EXPECT_TRUE(s.ends_with(s4));
+}
+
+TEST_FIXTURE(StringTest, EndsWithChar)
+{
+    string s{ other };
+    char c1 = 'a';
+    char c2 = 'z';
+
+    EXPECT_FALSE(s.ends_with(c1));
+    EXPECT_TRUE(s.ends_with(c2));
+}
+
+TEST_FIXTURE(StringTest, ContainsString)
+{
+    string s{ other };
+    string s1 = "abc";
+    string s2 = "xyz";
+    string s3 = "ABC";
+    string s4 = "";
+
+    EXPECT_TRUE(s.contains(s1));
+    EXPECT_TRUE(s.contains(s2));
+    EXPECT_FALSE(s.contains(s3));
+    EXPECT_TRUE(s.contains(s4));
+}
+
+TEST_FIXTURE(StringTest, ContainsConstCharPtr)
+{
+    string s{ other };
+    const char* s1 = "abc";
+    const char* s2 = "xyz";
+    const char* s3 = "ABC";
+    const char* s4 = "";
+    const char* s5 = nullptr;
+
+    EXPECT_TRUE(s.contains(s1));
+    EXPECT_TRUE(s.contains(s2));
+    EXPECT_FALSE(s.contains(s3));
+    EXPECT_TRUE(s.contains(s4));
+    EXPECT_TRUE(s.contains(s5));
+}
+
+TEST_FIXTURE(StringTest, ContainsChar)
+{
+    string s{ other };
+    char c1 = 'a';
+    char c2 = 'z';
+    char c3 = '+';
+
+    EXPECT_TRUE(s.contains(c1));
+    EXPECT_TRUE(s.contains(c2));
+    EXPECT_FALSE(s.contains(c3));
+}
+
+TEST_FIXTURE(StringTest, SubStr)
+{
+    string s{ other };
+    string expected1 = other;
+    string expected2 = "ghijklmnopqrstuvwxyz";
+    string expected3 = "ghij";
+    string expected4 = "";
+    string expected5 = "ghijklmnopqrstuvwxyz";
+
+    EXPECT_EQ(expected1, s.substr());
+    EXPECT_EQ(expected2, s.substr(6));
+    EXPECT_EQ(expected3, s.substr(6, 4));
+    EXPECT_EQ(expected4, s.substr(30));
+    EXPECT_EQ(expected5, s.substr(6, 30));
+}
+
+TEST_FIXTURE(StringTest, Equals)
+{
+    string s1{ "abcdefg" };
+    string s2{ "abcdefG" };
+    string s3{ "abcdefg" };
+    string s4{ "" };
+    const char* s5 = "abcefg";
+    const char* s6 = "abcdefg";
+    const char* s7 = "abcdefG";
+
+    EXPECT_FALSE(s1.equals(s2));
+    EXPECT_TRUE(s1.equals(s3));
+    EXPECT_FALSE(s1.equals(s4));
+    EXPECT_FALSE(s1.equals(s5));
+    EXPECT_TRUE(s1.equals(s6));
+    EXPECT_FALSE(s1.equals(s7));
+    EXPECT_FALSE(s1.equals(""));
+    EXPECT_FALSE(s1.equals(nullptr));
+    EXPECT_FALSE(s4.equals(s3));
+    EXPECT_TRUE(s4.equals(""));
+    EXPECT_TRUE(s4.equals(nullptr));
+}
+
+TEST_FIXTURE(StringTest, EqualsCaseInsensitive)
+{
+    string s1{ "abcdefg" };
+    string s2{ "abcdefG" };
+    string s3{ "abcdefg" };
+    string s4{ "" };
+    const char* s5 = "abcefg";
+    const char* s6 = "abcdefg";
+    const char* s7 = "abcdefG";
+
+    EXPECT_TRUE(s1.equals_case_insensitive(s2));
+    EXPECT_TRUE(s1.equals_case_insensitive(s3));
+    EXPECT_FALSE(s1.equals_case_insensitive(s4));
+    EXPECT_FALSE(s1.equals_case_insensitive(s5));
+    EXPECT_TRUE(s1.equals_case_insensitive(s6));
+    EXPECT_TRUE(s1.equals_case_insensitive(s7));
+    EXPECT_FALSE(s1.equals_case_insensitive(""));
+    EXPECT_FALSE(s1.equals_case_insensitive(nullptr));
+    EXPECT_FALSE(s4.equals_case_insensitive(s3));
+    EXPECT_TRUE(s4.equals_case_insensitive(""));
+    EXPECT_TRUE(s4.equals_case_insensitive(nullptr));
+}
+
+TEST_FIXTURE(StringTest, Compare)
+{
+    string s1{ "abcdefg" };
+    string s2{ "abcdefG" };
+    string s3{ "abcdefg" };
+    string s4{ "bcdefg" };
+    string s5{ "" };
+    const char* s6 = "abcdefg";
+    const char* s7 = "abcdefG";
+
+    EXPECT_EQ(1, s1.compare(s2));
+    EXPECT_EQ(-1, s2.compare(s1));
+    EXPECT_EQ(0, s1.compare(s3));
+    EXPECT_EQ(0, s3.compare(s1));
+    EXPECT_EQ(0, s1.compare(1, 6, s4));
+    EXPECT_EQ(-1, s1.compare(1, 5, s4));
+    EXPECT_EQ(0, s1.compare(3, 6, s4, 2));
+    EXPECT_EQ(1, s1.compare(3, 6, s4, 2, 1));
+    EXPECT_EQ(0, s1.compare(3, 6, s4, 2, 6));
+    EXPECT_EQ(1, s1.compare("a"));
+    EXPECT_EQ(1, s1.compare("Abcdefg"));
+    EXPECT_EQ(-1, s1.compare("abdecfg"));
+    EXPECT_EQ(1, s1.compare(""));
+    EXPECT_EQ(1, s1.compare(nullptr));
+    EXPECT_EQ(-1, s5.compare("a"));
+    EXPECT_EQ(0, s5.compare(""));
+    EXPECT_EQ(0, s5.compare(nullptr));
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCountString)
+{
+    string s1{ "abcde" };
+    string s2{ "fghijk" };
+
+    auto s3 = s1.replace(0, 1, s2);
+    EXPECT_EQ("fghijkbcde", s1);
+    EXPECT_EQ("fghijkbcde", s3);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCountStringPos)
+{
+    string s1{ "abcde" };
+    string s2{ "fghijk" };
+
+    auto s3 = s1.replace(1, 2, s2, 2);
+    EXPECT_EQ("ahijkde", s1);
+    EXPECT_EQ("ahijkde", s3);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCountStringPosCount)
+{
+    string s1{ "abcde" };
+    string s2{ "fghijk" };
+
+    auto s3 = s1.replace(1, 2, s2, 2, 2);
+    EXPECT_EQ("ahide", s1);
+    EXPECT_EQ("ahide", s3);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCountConstCharPtr)
+{
+    string s1{ "abcde" };
+
+    auto s2 = s1.replace(0, 1, "uvwxyz");
+    EXPECT_EQ("uvwxyzbcde", s1);
+    EXPECT_EQ("uvwxyzbcde", s2);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCountConstCharPtrCount)
+{
+    string s1{ "abcde" };
+
+    auto s2 = s1.replace(1, 2, "uvwxyz", 2);
+    EXPECT_EQ("auvde", s1);
+    EXPECT_EQ("auvde", s2);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosChar)
+{
+    string s1{ "abcde" };
+
+    auto s2 = s1.replace(0, 1, 'x');
+    EXPECT_EQ("xbcde", s1);
+    EXPECT_EQ("xbcde", s2);
+}
+
+TEST_FIXTURE(StringTest, ReplacePosCharCount)
+{
+    string s1{ "abcde" };
+
+    auto s2 = s1.replace(1, 2, 'x', 3);
+    EXPECT_EQ("axxxde", s1);
+    EXPECT_EQ("axxxde", s2);
+}
+
+TEST_FIXTURE(StringTest, ReplaceSubstringString)
+{
+    string s1{ "abcde" };
+    string s2{ "cd" };
+    string s3{ "xy" };
+
+    EXPECT_EQ(1, s1.replace(s2, s3));
+    EXPECT_EQ("abxye", s1);
+    EXPECT_EQ("cd", s2);
+    EXPECT_EQ("xy", s3);
+}
+
+TEST_FIXTURE(StringTest, ReplaceSubstringStringMultiple)
+{
+    string s1{ "abababab" };
+    string s2{ "ab" };
+    string s3{ "cd" };
+
+    EXPECT_EQ(4, s1.replace(s2, s3));
+    EXPECT_EQ("cdcdcdcd", s1);
+    EXPECT_EQ("ab", s2);
+    EXPECT_EQ("cd", s3);
+}
+
+TEST_FIXTURE(StringTest, ReplaceSubstringConstCharPtr)
+{
+    string s1{ "abcde" };
+
+    EXPECT_EQ(1, s1.replace("cd", "xy"));
+    EXPECT_EQ("abxye", s1);
+}
+
+TEST_FIXTURE(StringTest, ReplaceSubstringConstCharPtrMultiple)
+{
+    string s1{ "abababab" };
+
+    EXPECT_EQ(4, s1.replace("ab", "cd"));
+    EXPECT_EQ("cdcdcdcd", s1);
+}
+
+TEST_FIXTURE(StringTest, Align)
+{
+    string s = "abcd";
+    string expected1 = "    abcd";
+    string expected2 = "abcd    ";
+    string expected3 = "abcd";
+
+    EXPECT_EQ(expected1, s.align(8));
+    EXPECT_EQ(expected2, s.align(-8));
+    EXPECT_EQ(expected3, s.align(0));
+}
+
+TEST_FIXTURE(StringTest, EqualityOperator)
+{
+    string s1{ "abcdefg" };
+    string s2{ "abcdefG" };
+    string s3{ "abcdefg" };
+    string s4{ "bcdefg" };
+    string s5{ "" };
+    const char* s6 = "abcdefg";
+    const char* s7 = "abcdefG";
+
+    EXPECT_FALSE(s1 == s2);
+    EXPECT_TRUE(s1 == s3);
+    EXPECT_FALSE(s1 == s4);
+    EXPECT_FALSE(s1 == s5);
+    EXPECT_TRUE(s1 == s6);
+    EXPECT_FALSE(s1 == s7);
+    EXPECT_FALSE(s1 == "");
+    EXPECT_FALSE(s1 == nullptr);
+    EXPECT_FALSE(s2 == s1);
+    EXPECT_TRUE(s3 == s1);
+    EXPECT_FALSE(s4 == s1);
+    EXPECT_FALSE(s5 == s1);
+    EXPECT_TRUE(s6 == s1);
+    EXPECT_FALSE(s7 == s1);
+    EXPECT_FALSE("" == s1);
+    EXPECT_FALSE(nullptr == s1);
+    EXPECT_EQ(s1, s3);
+    EXPECT_EQ(s1, s6);
+}
+
+TEST_FIXTURE(StringTest, InEqualityOperator)
+{
+    string s1{ "abcdefg" };
+    string s2{ "abcdefG" };
+    string s3{ "abcdefg" };
+    string s4{ "bcdefg" };
+    string s5{ "" };
+    const char* s6 = "abcdefg";
+    const char* s7 = "abcdefG";
+
+    EXPECT_TRUE(s1 != s2);
+    EXPECT_FALSE(s1 != s3);
+    EXPECT_TRUE(s1 != s4);
+    EXPECT_TRUE(s1 != s5);
+    EXPECT_FALSE(s1 != s6);
+    EXPECT_TRUE(s1 != s7);
+    EXPECT_TRUE(s1 != "");
+    EXPECT_TRUE(s1 != nullptr);
+    EXPECT_TRUE(s2 != s1);
+    EXPECT_FALSE(s3 != s1);
+    EXPECT_TRUE(s4 != s1);
+    EXPECT_TRUE(s5 != s1);
+    EXPECT_FALSE(s6 != s1);
+    EXPECT_TRUE(s7 != s1);
+    EXPECT_TRUE("" != s1);
+    EXPECT_TRUE(nullptr != s1);
+    EXPECT_NE(s1, s2);
+    EXPECT_NE(s1, s4);
+    EXPECT_NE(s1, s5);
+    EXPECT_NE(s1, s7);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorStringAndString)
+{
+    string a = "ABC";
+    string b = "def";
+    const char* expected = "ABCdef";
+    size_t expectedLength = strlen(expected);
+    string s;
+    
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorStringAndConstCharPtr)
+{
+    string a = "ABC";
+    const char* b = "def";
+    const char* expected = "ABCdef";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorStringAndConstCharPtrEmpty)
+{
+    string a = "ABC";
+    const char* b = "";
+    const char* expected = "ABC";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorStringAndNullPtr)
+{
+    string a = "ABC";
+    const char* b = nullptr;
+    const char* expected = "ABC";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorConstCharPtrAndString)
+{
+    const char* a = "ABC";
+    string b = "def";
+    const char* expected = "ABCdef";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorConstCharPtrEmptyAndString)
+{
+    const char* a = "";
+    string b = "def";
+    const char* expected = "def";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorNullPtrAndString)
+{
+    const char* a = nullptr;
+    string b = "def";
+    const char* expected = "def";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorStringAndChar)
+{
+    string a = "ABC";
+    char b = 'd';
+    const char* expected = "ABCd";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
+TEST_FIXTURE(StringTest, AddOperatorCharAndString)
+{
+    char a = 'd';
+    string b = "ABC";
+    const char* expected = "dABC";
+    size_t expectedLength = strlen(expected);
+    string s;
+
+    s = a + b;
+
+    EXPECT_EQ(expectedLength, s.length());
+    EXPECT_EQ(expected, s);
+}
+
 } // suite Baremetal
-
-
-    // string s1{ "a" };
-    // string s2{ "a" };
-    // string s3{ "aaaa", 3 };
-    // string s4{ 4, 'b' };
-    // string s5{ s3 };
-    // string s6{ s3, 1 };
-    // string s7{ s3, 1, 1 };
-    // string s8{ nullptr };
-    // string s9{ "" };
-    // string s10{ nullptr, 3 };
-
-    // LOG_INFO("s4");
-    // for (auto ch : s4)
-    // {
-    //     LOG_INFO("%c", ch);
-    // }
-    // assert(strcmp(s1, "a") == 0);
-    // assert(strcmp(s2, "a") == 0);
-    // assert(strcmp(s3, "aaa") == 0);
-    // assert(strcmp(s4, "bbbb") == 0);
-    // assert(strcmp(s5, "aaa") == 0);
-    // assert(strcmp(s6, "aa") == 0);
-    // assert(strcmp(s7, "a") == 0);
-    // assert(strcmp(s8, "") == 0);
-    // assert(strcmp(s9, "") == 0);
-    // assert(strcmp(s10, "") == 0);
-
-    // s7 = "abcde";
-    // assert(strcmp(s7, "abcde") == 0);
-    // s7 = nullptr;
-    // assert(strcmp(s7, "") == 0);
-    // s7 = "";
-    // assert(strcmp(s7, "") == 0);
-    // s6 = s4;
-    // assert(strcmp(s6, "bbbb") == 0);
-    // {
-    //     string s99{ "cccc" };
-    //     s6 = s99;
-    // }
-    // assert(strcmp(s6, "cccc") == 0);
-
-    // const char* s = "abcdefghijklmnopqrstuvwxyz";
-    // s1.assign(s);
-    // assert(strcmp(s1, "abcdefghijklmnopqrstuvwxyz") == 0);
-    // s1.assign("");
-    // assert(strcmp(s1, "") == 0);
-    // s1.assign(nullptr);
-    // assert(strcmp(s1, "") == 0);
-    // s1.assign(s, 6);
-    // assert(strcmp(s1, "abcdef") == 0);
-    // s1.assign("", 6);
-    // assert(strcmp(s1, "") == 0);
-    // s1.assign(nullptr, 6);
-    // assert(strcmp(s1, "") == 0);
-    // s8 = s;
-    // s1.assign(s8, 3);
-    // assert(strcmp(s1, "defghijklmnopqrstuvwxyz") == 0);
-    // s1.assign(s8, 4, 6);
-    // assert(strcmp(s1, "efghij") == 0);
-    // s1.assign(6, 'c');
-    // assert(strcmp(s1, "cccccc") == 0);
-
-    // const string s8c{ s8 };
-    // assert(s8.at(3) == 'd');
-    // assert(s8c.at(3) == 'd');
-    // assert(s8.front() == 'a');
-    // assert(s8c.front() == 'a');
-    // assert(s8.back() == 'z');
-    // assert(s8c.back() == 'z');
-    // assert(s8[3] == 'd');
-    // assert(s8c[3] == 'd');
-    // assert(s8c.capacity() == 64);
-    // assert(s8.reserve(128) == 128);
-    // assert(s8.capacity() == 128);
-
-    // s1 = "a";
-    // assert(strcmp(s1, "a") == 0);
-    // s1 += 'b';
-    // assert(strcmp(s1, "ab") == 0);
-    // s2 = "a";
-    // s1 += s2;
-    // assert(strcmp(s1, "aba") == 0);
-    // s1 += "abcde";
-    // assert(strcmp(s1, "abaabcde") == 0);
-    // s1 = "a";
-    // s1 += "";
-    // assert(strcmp(s1, "a") == 0);
-    // s1 += nullptr;
-    // assert(strcmp(s1, "a") == 0);
-
-    // s3 = "";
-    // s4 = s1 + s2;
-    // assert(strcmp(s4, "aa") == 0);
-    // s4 = s1 + s3;
-    // assert(strcmp(s4, "a") == 0);
-    // s4 = s1 + "b";
-    // assert(strcmp(s4, "ab") == 0);
-    // s4 = s1 + "";
-    // assert(strcmp(s4, "a") == 0);
-    // s4 = s1 + nullptr;
-    // assert(strcmp(s4, "a") == 0);
-    // s4 = "b" + s1;
-    // assert(strcmp(s4, "ba") == 0);
-    // s4 = "" + s1;
-    // assert(strcmp(s4, "a") == 0);
-    // s4 = nullptr + s1;
-    // assert(strcmp(s4, "a") == 0);
-
-    // s1 = "a";
-    // s1.append(4, 'b');
-    // assert(strcmp(s1, "abbbb") == 0);
-    // s1.append(s2);
-    // assert(strcmp(s1, "abbbba") == 0);
-    // s1.append(s8, 3, 5);
-    // assert(strcmp(s1, "abbbbadefgh") == 0);
-    // s1.append("ccc");
-    // assert(strcmp(s1, "abbbbadefghccc") == 0);
-    // s1.append("dddddd", 3);
-    // assert(strcmp(s1, "abbbbadefghcccddd") == 0);
-    // s1.clear();
-    // assert(strcmp(s1, "") == 0);
-    // s1.append("");
-    // assert(strcmp(s1, "") == 0);
-    // s1.append(nullptr);
-    // assert(strcmp(s1, "") == 0);
-    // s1.append("", 3);
-    // assert(strcmp(s1, "") == 0);
-    // s1.append(nullptr, 3);
-    // assert(strcmp(s1, "") == 0);
-
-    // s1 = s;
-    // s2 = "c";
-    // auto pos = s1.find(s2);
-    // assert(pos == 2);
-    // pos = s1.find(s2, 1);
-    // assert(pos == 2);
-    // pos = s1.find(s2, 3);
-    // assert(pos == string::npos);
-    // s2 = "deg";
-    // pos = s1.find(s2, 3);
-    // assert(pos == string::npos);
-    // pos = s1.find(s2, 3, 2);
-    // assert(pos == 3);
-    // s2 = "xyz";
-    // pos = s1.find(s2);
-    // assert(pos == 23);
-
-    // pos = s1.find("d");
-    // assert(pos == 3);
-    // pos = s1.find("d", 1);
-    // assert(pos == 3);
-    // pos = s1.find("d", 4);
-    // assert(pos == string::npos);
-    // pos = s1.find("def", 2);
-    // assert(pos == 3);
-    // pos = s1.find("deg", 2);
-    // assert(pos == string::npos);
-    // pos = s1.find("deg", 2, 2);
-    // assert(pos == 3);
-    // pos = s1.find("xyz");
-    // assert(pos == 23);
-    // pos = s1.find("");
-    // assert(pos == 0);
-    // pos = s1.find(nullptr);
-    // assert(pos == 0);
-    // pos = s1.find("", 2);
-    // assert(pos == 2);
-    // pos = s1.find(nullptr, 2);
-    // assert(pos == 2);
-    // pos = s1.find(nullptr, 26);
-    // assert(pos == string::npos);
-    // pos = s1.find("", 2, 2);
-    // assert(pos == 2);
-    // pos = s1.find(nullptr, 2, 2);
-    // assert(pos == 2);
-    // pos = s1.find(nullptr, 26, 1);
-    // assert(pos == string::npos);
-
-    // pos = s1.find('d');
-    // assert(pos == 3);
-    // pos = s1.find('d', 2);
-    // assert(pos == 3);
-    // pos = s1.find('d', 4);
-    // assert(pos == string::npos);
-    // pos = s1.find('A');
-    // assert(pos == string::npos);
-    // pos = s1.find("z");
-    // assert(pos == 25);
-
-    // s2 = "abc";
-    // s3 = "xyz";
-    // auto isTrue = s1.starts_with('a');
-    // assert(isTrue);
-    // isTrue = s1.starts_with('z');
-    // assert(!isTrue);
-    // isTrue = s1.starts_with("abc");
-    // assert(isTrue);
-    // isTrue = s1.starts_with("xyz");
-    // assert(!isTrue);
-    // isTrue = s1.starts_with("");
-    // assert(isTrue);
-    // isTrue = s1.starts_with(nullptr);
-    // assert(isTrue);
-    // isTrue = s1.starts_with(s2);
-    // assert(isTrue);
-    // isTrue = s1.starts_with(s3);
-    // assert(!isTrue);
-
-    // isTrue = s1.ends_with('a');
-    // assert(!isTrue);
-    // isTrue = s1.ends_with('z');
-    // assert(isTrue);
-    // isTrue = s1.ends_with("abc");
-    // assert(!isTrue);
-    // isTrue = s1.ends_with("xyz");
-    // assert(isTrue);
-    // isTrue = s1.ends_with("");
-    // assert(isTrue);
-    // isTrue = s1.ends_with(nullptr);
-    // assert(isTrue);
-    // isTrue = s1.ends_with(s2);
-    // assert(!isTrue);
-    // isTrue = s1.ends_with(s3);
-    // assert(isTrue);
-
-    // isTrue = s1.contains('a');
-    // assert(isTrue);
-    // isTrue = s1.contains('A');
-    // assert(!isTrue);
-    // isTrue = s1.contains("abc");
-    // assert(isTrue);
-    // isTrue = s1.contains("XYZ");
-    // assert(!isTrue);
-    // isTrue = s1.contains("");
-    // assert(isTrue);
-    // isTrue = s1.contains(nullptr);
-    // assert(isTrue);
-    // isTrue = s1.contains(s2);
-    // assert(isTrue);
-    // isTrue = s1.contains(s3);
-    // assert(isTrue);
-
-    // s2 = s1.substr();
-    // assert(strcmp(s2, "abcdefghijklmnopqrstuvwxyz") == 0);
-    // s2 = s1.substr(6);
-    // assert(strcmp(s2, "ghijklmnopqrstuvwxyz") == 0);
-    // s2 = s1.substr(6, 6);
-    // assert(strcmp(s2, "ghijkl") == 0);
-
-    // s1 = "abcdefg";
-    // s2 = "abcdefG";
-    // s3 = "abcdefg";
-    // isTrue = s1.equals(s2);
-    // assert(!isTrue);
-    // isTrue = s1.equals(s3);
-    // assert(isTrue);
-    // isTrue = s1.equals("abcefg");
-    // assert(!isTrue);
-    // isTrue = s1.equals("abcdefg");
-    // assert(isTrue);
-    // isTrue = s1.equals("");
-    // assert(!isTrue);
-    // isTrue = s1.equals(nullptr);
-    // assert(!isTrue);
-    // s4 = "";
-    // isTrue = s4.equals_case_insensitive(s3);
-    // assert(!isTrue);
-    // isTrue = s4.equals("");
-    // assert(isTrue);
-    // isTrue = s4.equals(nullptr);
-    // assert(isTrue);
-
-    // isTrue = s1.equals_case_insensitive(s2);
-    // assert(isTrue);
-    // isTrue = s1.equals_case_insensitive(s3);
-    // assert(isTrue);
-    // isTrue = s1.equals_case_insensitive("abcefg");
-    // assert(!isTrue);
-    // isTrue = s1.equals_case_insensitive("abcdefg");
-    // assert(isTrue);
-    // isTrue = s1.equals_case_insensitive("");
-    // assert(!isTrue);
-    // isTrue = s1.equals_case_insensitive(nullptr);
-    // assert(!isTrue);
-    // s4 = "";
-    // isTrue = s4.equals_case_insensitive(s3);
-    // assert(!isTrue);
-    // isTrue = s4.equals_case_insensitive("");
-    // assert(isTrue);
-    // isTrue = s4.equals_case_insensitive(nullptr);
-    // assert(isTrue);
-
-    // assert(s1 == s3);
-    // assert(s1 != s2);
-    // assert(s1 == "abcdefg");
-    // assert(s1 != "abcdefG");
-    // assert(s1 != "");
-    // assert(s1 != nullptr);
-    // assert("abcdefg" == s1);
-    // assert("abcdefG" != s1);
-    // assert("" != s1);
-    // assert(nullptr != s1);
-    // assert(s4 != s3);
-    // assert(s4 == "");
-    // assert(s4 == nullptr);
-    // assert("" == s4);
-    // assert(nullptr == s4);
-
-    // s4 = "bcdefg";
-    // s5 = "def";
-    // auto result = s1.compare(s2);
-    // assert(result == 1);
-    // result = s2.compare(s1);
-    // assert(result == -1);
-    // result = s1.compare(s3);
-    // assert(result == 0);
-    // result = s3.compare(s1);
-    // assert(result == 0);
-    // result = s1.compare(1, 6, s4);
-    // assert(result == 0);
-    // result = s1.compare(1, 5, s4);
-    // assert(result == -1);
-    // result = s1.compare(3, 6, s4, 2);
-    // assert(result == 0);
-    // result = s1.compare(3, 6, s4, 2, 1);
-    // assert(result == 1);
-    // result = s1.compare(3, 3, s4, 2, 6);
-    // assert(result == -1);
-
-    // result = s1.compare("a");
-    // assert(result == 1);
-    // result = s1.compare("Abcdefg");
-    // assert(result == 1);
-    // result = s1.compare("abdecfg");
-    // assert(result == -1);
-    // result = s1.compare("");
-    // assert(result == 1);
-    // result = s1.compare(nullptr);
-    // assert(result == 1);
-    // s2 = "";
-    // result = s2.compare("a");
-    // assert(result == -1);
-    // result = s2.compare("");
-    // assert(result == 0);
-    // result = s2.compare(nullptr);
-    // assert(result == 0);
-
-    // s1 = "abcde";
-    // s2 = "fghijk";
-    // s3 = s1.replace(0, 1, s2);
-    // assert(s1.equals("fghijkbcde"));
-    // assert(s3.equals("fghijkbcde"));
-    // s1 = "abcde";
-    // s3 = s1.replace(1, 2, s2, 2);
-    // assert(s1.equals("ahijkde"));
-    // assert(s3.equals("ahijkde"));
-    // s1 = "abcde";
-    // s3 = s1.replace(1, 2, s2, 2, 2);
-    // assert(s1.equals("ahide"));
-    // assert(s3.equals("ahide"));
-    // s1 = "abcde";
-    // s3 = s1.replace(0, 1, "uvwxyz");
-    // assert(s1.equals("uvwxyzbcde"));
-    // assert(s3.equals("uvwxyzbcde"));
-    // s1 = "abcde";
-    // s3 = s1.replace(1, 2, "uvwxyz", 2);
-    // assert(s1.equals("auvde"));
-    // assert(s3.equals("auvde"));
-    // s1 = "abcde";
-    // s3 = s1.replace(0, 1, 'x');
-    // assert(s1.equals("xbcde"));
-    // assert(s3.equals("xbcde"));
-    // s1 = "abcde";
-    // s3 = s1.replace(1, 2, 'x', 3);
-    // assert(s1.equals("axxxde"));
-    // assert(s3.equals("axxxde"));
-
-    // s1 = "abcde";
-    // s2 = "cd";
-    // s3 = "xy";
-    // int count = s1.replace(s2, s3);
-    // assert(count == 1);
-    // assert(s1.equals("abxye"));
-    // s1 = "abababab";
-    // s2 = "ab";
-    // s3 = "cd";
-    // count = s1.replace(s2, s3);
-    // assert(count == 4);
-    // assert(s1.equals("cdcdcdcd"));
-    // s1 = "abcde";
-    // count = s1.replace("cd", "xy");
-    // assert(count == 1);
-    // assert(s1.equals("abxye"));
-    // s1 = "abababab";
-    // count = s1.replace("ab", "cd");
-    // assert(count == 4);
-    // assert(s1.equals("cdcdcdcd"));
-
-    // s1 = "abcd";
-    // s2 = s1.align(8);
-    // assert(s2.equals("    abcd"));
-    // s2 = s1.align(-8);
-    // assert(s2.equals("abcd    "));
-    // s2 = s1.align(0);
-    // assert(s2.equals("abcd"));
 
 } // namespace test
 } // namespace baremetal

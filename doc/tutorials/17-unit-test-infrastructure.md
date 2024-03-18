@@ -4911,7 +4911,6 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 101:     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 102: };
 103: 
-File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\TestRegistry.h
 104: /// <summary>
 105: /// Run tests selected by the predicate
 106: /// </summary>
@@ -7300,7 +7299,6 @@ Update the file  `code/libraries/unittest/include/unittest/ConsoleTestReport.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/ConsoleTestReport.h
 ...
-File: d:\Projects\baremetal.github\code\libraries\unittest\include\unittest\ConsoleTestReporter.h
 42: #include <unittest/DeferredTestReporter.h>
 ...
 53: /// <summary>

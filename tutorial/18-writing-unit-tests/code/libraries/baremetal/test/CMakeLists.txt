@@ -1,4 +1,4 @@
-project(baremetal-test
+project(baremetal-test-18
     DESCRIPTION "Baremetal test application"
     LANGUAGES CXX)
 
@@ -23,8 +23,8 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal
-    unittest
+    baremetal-18
+    unittest-18
     )
 
 set(PROJECT_LIBS

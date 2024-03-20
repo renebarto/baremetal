@@ -120,44 +120,42 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 86:         TearDown();                                                                                         \
 87:     }                                                                                                       \
 88:     FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
-89:     virtual void SetUp() {}                                                                                 \
-90:     virtual void TearDown() {}                                                                              \
-91:     void RunImpl() const;                                                                                   \
-92:     unittest::TestDetails const & m_details;                                                                \
-93: };                                                                                                          \
-94:                                                                                                             \
-95: class Test##FixtureClass##TestName : public unittest::Test                                                  \
-96: {                                                                                                           \
-97: private:                                                                                                    \
-98:     void RunImpl() const override;                                                                          \
-99: } test##FixtureClass##TestName##Instance;                                                                   \
+89:     void RunImpl() const;                                                                                   \
+90:     unittest::TestDetails const & m_details;                                                                \
+91: };                                                                                                          \
+92:                                                                                                             \
+93: class Test##FixtureClass##TestName : public unittest::Test                                                  \
+94: {                                                                                                           \
+95: private:                                                                                                    \
+96:     void RunImpl() const override;                                                                          \
+97: } test##FixtureClass##TestName##Instance;                                                                   \
+98:                                                                                                             \
+99: unittest::TestRegistrar registrar##FixtureClass##TestName(Registry, &test##FixtureClass##TestName##Instance, TestDetails(baremetal::string(#TestName), baremetal::string(#FixtureClass), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__)); \
 100:                                                                                                             \
-101: unittest::TestRegistrar registrar##FixtureClass##TestName(Registry, &test##FixtureClass##TestName##Instance, TestDetails(baremetal::string(#TestName), baremetal::string(#FixtureClass), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__)); \
-102:                                                                                                             \
-103: void Test##FixtureClass##TestName::RunImpl() const                                                          \
-104: {                                                                                                           \
-105:     FixtureClass##TestName##Helper fixtureHelper(*CurrentTest::Details());                                  \
-106:     fixtureHelper.RunImpl();                                                                                \
-107: }                                                                                                           \
-108: void FixtureClass##TestName##Helper::RunImpl() const
-109: 
-110: /// @brief Register test inside test fixture
-111: ///
-112: /// Register the test named TestName inside a test fixture class named Fixture with the singleton test registry. This will use the TEST_FIXTURE_EX macro to do the actual test registration
-113: #define TEST_FIXTURE(FixtureClass,TestName) TEST_FIXTURE_EX(FixtureClass,TestName,unittest::TestRegistry::GetTestRegistry())
-114: 
-115: /// @brief Create test suite
-116: ///
-117: /// Creates a test suite named SuiteName. This simply creates a namespace inside which tests and test fixtures are placed
-118: #define TEST_SUITE(SuiteName)                                                                               \
-119:     namespace Suite##SuiteName                                                                              \
-120:     {                                                                                                       \
-121:         inline char const* GetSuiteName()                                                                   \
-122:         {                                                                                                   \
-123:             return baremetal::string(#SuiteName);                                                           \
-124:         }                                                                                                   \
-125:     }                                                                                                       \
-126:     namespace Suite##SuiteName
+101: void Test##FixtureClass##TestName::RunImpl() const                                                          \
+102: {                                                                                                           \
+103:     FixtureClass##TestName##Helper fixtureHelper(*CurrentTest::Details());                                  \
+104:     fixtureHelper.RunImpl();                                                                                \
+105: }                                                                                                           \
+106: void FixtureClass##TestName##Helper::RunImpl() const
+107: 
+108: /// @brief Register test inside test fixture
+109: ///
+110: /// Register the test named TestName inside a test fixture class named Fixture with the singleton test registry. This will use the TEST_FIXTURE_EX macro to do the actual test registration
+111: #define TEST_FIXTURE(FixtureClass,TestName) TEST_FIXTURE_EX(FixtureClass,TestName,unittest::TestRegistry::GetTestRegistry())
+112: 
+113: /// @brief Create test suite
+114: ///
+115: /// Creates a test suite named SuiteName. This simply creates a namespace inside which tests and test fixtures are placed
+116: #define TEST_SUITE(SuiteName)                                                                               \
+117:     namespace Suite##SuiteName                                                                              \
+118:     {                                                                                                       \
+119:         inline char const* GetSuiteName()                                                                   \
+120:         {                                                                                                   \
+121:             return baremetal::string(#SuiteName);                                                           \
+122:         }                                                                                                   \
+123:     }                                                                                                       \
+124:     namespace Suite##SuiteName
 ```
 
 - Line 50-59: We define the macro `TEST_EX`. This is used by macro `TEST`,
@@ -202,14 +200,16 @@ TEST(MyTest)
 }
 ```
 
-- Line 74-108: We define the macro `TEST_FIXTURE_EX`. This is used by macro `TEST_FIXTURE`,
+- Line 74-106: We define the macro `TEST_FIXTURE_EX`. This is used by macro `TEST_FIXTURE`,
 The parameters are the name of the fixture class `FixtureClass`, the name of the test `TestName` and the reference to the singleton `TestRegistry` instance `Registry`.
 - It declares the class `<FixtureClass><TestName>Helper`, which inherits from the `FixtureClass`, the class we defined for the fixture.
 - It then declares a class `Test<FixtureClass><TestName>`, which inherits from `TestBase`, and defines an instance named `test<FixtureClass><TestName>Instance`.
 - It then defines a `TestRegistrar` instance named `registrar<FixtureClass><TestName>` which registers the instance `test<FixtureClass><TestName>Instance`.
-- It then defines the implement of `RunImpl()` for the class `Test<FixtureClass><TestName>`. This creates and instance of class `<FixtureClass><TestName>Helper`, and then uses the `ExecuteTest()` function to run the test.
+- It then defines the implement of `RunImpl()` for the class `Test<FixtureClass><TestName>`. This creates and instance of class `<FixtureClass><TestName>Helper`.
+Through the constructor, the `SetUp()` method is called
 - Finally, it then starts the definition of the `RunImpl()` for the class `<FixtureClass><TestName>Helper` which is expected to be followed by the actual implementation of the test.
 Compare this to the application code we wrote before:
+- When the `RunImpl()` method for the class `Test<FixtureClass><TestName>` exits, the desctructor for `<FixtureClass><TestName>Helper` is called, which runs the `TearDown()` method
 
 ```cpp
 File: code/applications/demo/src/main.cpp
@@ -1011,7 +1011,7 @@ File: code/libraries/unittest/src/Checks.cpp
 60: /// </summary>
 61: /// <param name="message">Message to be included</param>
 62: /// <returns>Result object</returns>
-63: AssertionResult GenericFailure(const baremetal::string& message)
+63: AssertionResult GenericFailure(const string& message)
 64: {
 65:     return AssertionResult(true, message);
 66: }
@@ -2132,609 +2132,693 @@ File: code/libraries/unittest/src/Checks.cpp
 63: }
 64: 
 ...
-156: /// <summary>
-157: /// Create a comparison with tolerance failure object
-158: /// </summary>
-159: /// <param name="expectedExpression">String representation of the expected value</param>
-160: /// <param name="actualExpression">String representation of the actual value</param>
-161: /// <param name="toleranceExpression">String representation of the tolerance value</param>
-162: /// <param name="expectedValue">Expected value</param>
-163: /// <param name="actualValue">Actual value</param>
-164: /// <param name="toleranceValue">Tolerance value</param>
-165: /// <returns>Result object</returns>
-166: AssertionResult CloseFailure(const string& expectedExpression,
-167:                              const string& actualExpression,
-168:                              const string& toleranceExpression,
-169:                              const string& expectedValue,
-170:                              const string& actualValue,
-171:                              const string& toleranceValue)
-172: {
-173:     string result = Format("Value of: %s", actualExpression.c_str());
-174:     if (actualValue != actualExpression)
-175:     {
-176:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
-177:     }
-178: 
-179:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
-180:     if (expectedValue != expectedExpression)
-181:     {
-182:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
-183:     }
-184:     result.append(Format("\n  Tolerance: %s", toleranceExpression.c_str()));
-185:     if (toleranceValue != toleranceExpression)
-186:     {
-187:         result.append(Format("\n  (+/-) %s", toleranceValue.c_str()));
-188:     }
-189: 
-190:     return AssertionResult(true, result);
-191: }
-192: 
-193: namespace internal {
-194: 
-195: /// <summary>
-196: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-197: /// </summary>
-198: /// <param name="expectedExpression">String representation of expected value</param>
-199: /// <param name="actualExpression">String representation of actual value</param>
-200: /// <param name="expected">Expected value</param>
-201: /// <param name="actual">Actual value</param>
-202: /// <returns>Result object</returns>
-203: AssertionResult CheckStringsEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-204: {
-205:     if (expected == actual)
-206:         return AssertionSuccess();
-207: 
-208:     if (strcmp(expected, actual))
-209:     {
-210:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-211:     }
-212:     return AssertionSuccess();
-213: }
-214: 
-215: /// <summary>
-216: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-217: /// </summary>
-218: /// <param name="expectedExpression">String representation of expected value</param>
-219: /// <param name="actualExpression">String representation of actual value</param>
-220: /// <param name="expected">Expected value</param>
-221: /// <param name="actual">Actual value</param>
-222: /// <returns>Result object</returns>
-223: AssertionResult CheckStringsNotEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-224: {
-225:     if (expected == actual)
-226:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-227: 
-228:     if (!strcmp(expected, actual))
-229:     {
-230:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-231:     }
-232:     return AssertionSuccess();
-233: }
-234: 
-235: /// <summary>
-236: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-237: /// </summary>
-238: /// <param name="expectedExpression">String representation of expected value</param>
-239: /// <param name="actualExpression">String representation of actual value</param>
-240: /// <param name="expected">Expected value</param>
-241: /// <param name="actual">Actual value</param>
-242: /// <returns>Result object</returns>
-243: AssertionResult CheckStringsEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-244: {
-245:     if (expected == actual)
-246:         return AssertionSuccess();
-247: 
-248:     if (!EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
-249:     {
-250:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-251:     }
-252:     return AssertionSuccess();
-253: }
-254: 
-255: /// <summary>
-256: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-257: /// </summary>
-258: /// <param name="expectedExpression">String representation of expected value</param>
-259: /// <param name="actualExpression">String representation of actual value</param>
-260: /// <param name="expected">Expected value</param>
-261: /// <param name="actual">Actual value</param>
-262: /// <returns>Result object</returns>
-263: AssertionResult CheckStringsNotEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
-264: {
-265:     if (expected == actual)
-266:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-267: 
-268:     if (EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
-269:     {
-270:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-271:     }
-272:     return AssertionSuccess();
-273: }
-274: 
-275: } // namespace internal
+84: /// <summary>
+85: /// Create a boolean failure object
+86: /// </summary>
+87: /// <param name="valueExpression">String representation of the actual value</param>
+88: /// <param name="expectedValue">Expected value</param>
+89: /// <param name="actualValue">Actual value</param>
+90: /// <returns>Result object</returns>
+91: AssertionResult BooleanFailure(const baremetal::string& valueExpression, const baremetal::string& expectedValue, const baremetal::string& actualValue)
+92: {
+93:     string result = Format("Value of: %s", valueExpression.c_str());
+94:     if (actualValue != valueExpression)
+95:     {
+96:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
+97:     }
+98: 
+99:     result.append(Format("\n  Expected: %s\n", expectedValue.c_str()));
+100: 
+101:     return AssertionResult(true, result);
+102: }
+103: 
+104: /// <summary>
+105: /// Create a equality comparison failure object
+106: /// </summary>
+107: /// <param name="expectedExpression">String representation of the expected value</param>
+108: /// <param name="actualExpression">String representation of the actual value</param>
+109: /// <param name="expectedValue">Expected value</param>
+110: /// <param name="actualValue">Actual value</param>
+111: /// <returns>Result object</returns>
+112: AssertionResult EqFailure(
+113:     const baremetal::string& expectedExpression,
+114:     const baremetal::string& actualExpression,
+115:     const baremetal::string& expectedValue,
+116:     const baremetal::string& actualValue)
+117: {
+118:     string result = Format("Value of: %s", actualExpression.c_str());
+119:     if (actualValue != actualExpression)
+120:     {
+121:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
+122:     }
+123: 
+124:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
+125:     if (expectedValue != expectedExpression)
+126:     {
+127:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
+128:     }
+129:     result.append("\n");
+130: 
+131:     return AssertionResult(true, result);
+132: }
+133: 
+134: /// <summary>
+135: /// Create a inequality comparison failure object
+136: /// </summary>
+137: /// <param name="expectedExpression">String representation of the not expected value</param>
+138: /// <param name="actualExpression">String representation of the actual value</param>
+139: /// <param name="expectedValue">Expected value</param>
+140: /// <param name="actualValue">Actual value</param>
+141: /// <returns>Result object</returns>
+142: AssertionResult InEqFailure(
+143:     const baremetal::string& expectedExpression,
+144:     const baremetal::string& actualExpression,
+145:     const baremetal::string& expectedValue,
+146:     const baremetal::string& actualValue)
+147: {
+148:     string result = Format("Value of: %s", actualExpression.c_str());
+149:     if (actualValue != actualExpression)
+150:     {
+151:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
+152:     }
+153: 
+154:     result.append(Format("\n  Expected not equal to: %s", expectedExpression.c_str()));
+155:     if (expectedValue != expectedExpression)
+156:     {
+157:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
+158:     }
+159:     result.append("\n");
+160: 
+161:     return AssertionResult(true, result);
+162: }
+163: 
+164: /// <summary>
+165: /// Create a comparison with tolerance failure object
+166: /// </summary>
+167: /// <param name="expectedExpression">String representation of the expected value</param>
+168: /// <param name="actualExpression">String representation of the actual value</param>
+169: /// <param name="toleranceExpression">String representation of the tolerance value</param>
+170: /// <param name="expectedValue">Expected value</param>
+171: /// <param name="actualValue">Actual value</param>
+172: /// <param name="toleranceValue">Tolerance value</param>
+173: /// <returns>Result object</returns>
+174: AssertionResult CloseFailure(
+175:     const baremetal::string& expectedExpression,
+176:     const baremetal::string& actualExpression,
+177:     const baremetal::string& toleranceExpression,
+178:     const baremetal::string& expectedValue,
+179:     const baremetal::string& actualValue,
+180:     const baremetal::string& toleranceValue)
+181: {
+182:     string result = Format("Value of: %s", actualExpression.c_str());
+183:     if (actualValue != actualExpression)
+184:     {
+185:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
+186:     }
+187: 
+188:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
+189:     if (expectedValue != expectedExpression)
+190:     {
+191:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
+192:     }
+193:     result.append(Format("\n  Tolerance: %s", toleranceExpression.c_str()));
+194:     if (toleranceValue != toleranceExpression)
+195:     {
+196:         result.append(Format("\n  (+/-) %s", toleranceValue.c_str()));
+197:     }
+198: 
+199:     return AssertionResult(true, result);
+200: }
+201: 
+202: namespace internal {
+203: 
+204: /// <summary>
+205: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+206: /// </summary>
+207: /// <param name="expectedExpression">String representation of expected value</param>
+208: /// <param name="actualExpression">String representation of actual value</param>
+209: /// <param name="expected">Expected value</param>
+210: /// <param name="actual">Actual value</param>
+211: /// <returns>Result object</returns>
+212: AssertionResult CheckStringsEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+213: {
+214:     if (expected == actual)
+215:         return AssertionSuccess();
+216: 
+217:     if (strcmp(expected, actual))
+218:     {
+219:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
+220:     }
+221:     return AssertionSuccess();
+222: }
+223: 
+224: /// <summary>
+225: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+226: /// </summary>
+227: /// <param name="expectedExpression">String representation of expected value</param>
+228: /// <param name="actualExpression">String representation of actual value</param>
+229: /// <param name="expected">Expected value</param>
+230: /// <param name="actual">Actual value</param>
+231: /// <returns>Result object</returns>
+232: AssertionResult CheckStringsNotEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+233: {
+234:     if (expected == actual)
+235:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
+236: 
+237:     if (!strcmp(expected, actual))
+238:     {
+239:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
+240:     }
+241:     return AssertionSuccess();
+242: }
+243: 
+244: /// <summary>
+245: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+246: /// </summary>
+247: /// <param name="expectedExpression">String representation of expected value</param>
+248: /// <param name="actualExpression">String representation of actual value</param>
+249: /// <param name="expected">Expected value</param>
+250: /// <param name="actual">Actual value</param>
+251: /// <returns>Result object</returns>
+252: AssertionResult CheckStringsEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+253: {
+254:     if (expected == actual)
+255:         return AssertionSuccess();
+256: 
+257:     if (!EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
+258:     {
+259:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
+260:     }
+261:     return AssertionSuccess();
+262: }
+263: 
+264: /// <summary>
+265: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+266: /// </summary>
+267: /// <param name="expectedExpression">String representation of expected value</param>
+268: /// <param name="actualExpression">String representation of actual value</param>
+269: /// <param name="expected">Expected value</param>
+270: /// <param name="actual">Actual value</param>
+271: /// <returns>Result object</returns>
+272: AssertionResult CheckStringsNotEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+273: {
+274:     if (expected == actual)
+275:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
 276: 
-277: /// <summary>
-278: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-279: /// </summary>
-280: /// <param name="expectedExpression">String representation of expected value</param>
-281: /// <param name="actualExpression">String representation of actual value</param>
-282: /// <param name="expected">Expected value</param>
-283: /// <param name="actual">Actual value</param>
-284: /// <returns>Result object</returns>
-285: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
-286: {
-287:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-288: }
-289: 
-290: /// <summary>
-291: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-292: /// </summary>
-293: /// <param name="expectedExpression">String representation of expected value</param>
-294: /// <param name="actualExpression">String representation of actual value</param>
-295: /// <param name="expected">Expected value</param>
-296: /// <param name="actual">Actual value</param>
-297: /// <returns>Result object</returns>
-298: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
-299:                                    char *actual) // cppcheck-suppress constParameterPointer
-300: {
-301:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-302: }
-303: 
-304: /// <summary>
-305: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-306: /// </summary>
-307: /// <param name="expectedExpression">String representation of expected value</param>
-308: /// <param name="actualExpression">String representation of actual value</param>
-309: /// <param name="expected">Expected value</param>
-310: /// <param name="actual">Actual value</param>
-311: /// <returns>Result object</returns>
-312: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
-313:                                    char const *actual) // cppcheck-suppress constParameterPointer
-314: {
-315:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-316: }
-317: 
-318: /// <summary>
-319: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-320: /// </summary>
-321: /// <param name="expectedExpression">String representation of expected value</param>
-322: /// <param name="actualExpression">String representation of actual value</param>
-323: /// <param name="expected">Expected value</param>
-324: /// <param name="actual">Actual value</param>
-325: /// <returns>Result object</returns>
-326: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
-327:                                    char *actual) // cppcheck-suppress constParameterPointer
-328: {
-329:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-330: }
-331: 
-332: /// <summary>
-333: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-334: /// </summary>
-335: /// <param name="expectedExpression">String representation of expected value</param>
-336: /// <param name="actualExpression">String representation of actual value</param>
-337: /// <param name="expected">Expected value</param>
-338: /// <param name="actual">Actual value</param>
-339: /// <returns>Result object</returns>
-340: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
-341: {
-342:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-343: }
-344: 
-345: /// <summary>
-346: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-347: /// </summary>
-348: /// <param name="expectedExpression">String representation of expected value</param>
-349: /// <param name="actualExpression">String representation of actual value</param>
-350: /// <param name="expected">Expected value</param>
-351: /// <param name="actual">Actual value</param>
-352: /// <returns>Result object</returns>
-353: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
-354:                                       char *actual) // cppcheck-suppress constParameterPointer
-355: {
-356:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-357: }
-358: 
-359: /// <summary>
-360: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-361: /// </summary>
-362: /// <param name="expectedExpression">String representation of expected value</param>
-363: /// <param name="actualExpression">String representation of actual value</param>
-364: /// <param name="expected">Expected value</param>
-365: /// <param name="actual">Actual value</param>
-366: /// <returns>Result object</returns>
-367: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
-368:                                       char const *actual) // cppcheck-suppress constParameterPointer
-369: {
-370:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-371: }
-372: 
-373: /// <summary>
-374: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-375: /// </summary>
-376: /// <param name="expectedExpression">String representation of expected value</param>
-377: /// <param name="actualExpression">String representation of actual value</param>
-378: /// <param name="expected">Expected value</param>
-379: /// <param name="actual">Actual value</param>
-380: /// <returns>Result object</returns>
-381: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
-382:                                       char *actual) // cppcheck-suppress constParameterPointer
-383: {
-384:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-385: }
-386: 
-387: /// <summary>
-388: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-389: /// </summary>
-390: /// <param name="expectedExpression">String representation of expected value</param>
-391: /// <param name="actualExpression">String representation of actual value</param>
-392: /// <param name="expected">Expected value</param>
-393: /// <param name="actual">Actual value</param>
-394: /// <returns>Result object</returns>
-395: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-396:                                    const baremetal::string& actualExpression,
-397:                                    const baremetal::string& expected,
-398:                                    const baremetal::string& actual)
-399: {
-400:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-401: }
-402: 
-403: /// <summary>
-404: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-405: /// </summary>
-406: /// <param name="expectedExpression">String representation of expected value</param>
-407: /// <param name="actualExpression">String representation of actual value</param>
-408: /// <param name="expected">Expected value</param>
-409: /// <param name="actual">Actual value</param>
-410: /// <returns>Result object</returns>
-411: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-412:                                    const baremetal::string& actualExpression,
-413:                                    const baremetal::string& expected,
-414:                                    const char* actual)
-415: {
-416:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-417: }
-418: 
-419: /// <summary>
-420: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
-421: /// </summary>
-422: /// <param name="expectedExpression">String representation of expected value</param>
-423: /// <param name="actualExpression">String representation of actual value</param>
-424: /// <param name="expected">Expected value</param>
-425: /// <param name="actual">Actual value</param>
-426: /// <returns>Result object</returns>
-427: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
-428:                                    const baremetal::string& actualExpression,
-429:                                    const char* expected,
-430:                                    const baremetal::string& actual)
-431: {
-432:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
-433: }
-434: 
-435: /// <summary>
-436: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-437: /// </summary>
-438: /// <param name="expectedExpression">String representation of expected value</param>
-439: /// <param name="actualExpression">String representation of actual value</param>
-440: /// <param name="expected">Expected value</param>
-441: /// <param name="actual">Actual value</param>
-442: /// <returns>Result object</returns>
-443: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-444:                                       const baremetal::string& actualExpression,
-445:                                       const baremetal::string& expected,
-446:                                       const baremetal::string& actual)
-447: {
-448:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-449: }
-450: 
-451: /// <summary>
-452: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-453: /// </summary>
-454: /// <param name="expectedExpression">String representation of expected value</param>
-455: /// <param name="actualExpression">String representation of actual value</param>
-456: /// <param name="expected">Expected value</param>
-457: /// <param name="actual">Actual value</param>
-458: /// <returns>Result object</returns>
-459: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-460:                                       const baremetal::string& actualExpression,
-461:                                       const baremetal::string& expected,
-462:                                       const char* actual)
-463: {
-464:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-465: }
-466: 
-467: /// <summary>
-468: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
-469: /// </summary>
-470: /// <param name="expectedExpression">String representation of expected value</param>
-471: /// <param name="actualExpression">String representation of actual value</param>
-472: /// <param name="expected">Expected value</param>
-473: /// <param name="actual">Actual value</param>
-474: /// <returns>Result object</returns>
-475: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
-476:                                       const baremetal::string& actualExpression,
-477:                                       const char* expected,
-478:                                       const baremetal::string& actual)
-479: {
-480:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
-481: }
-482: 
-483: /// <summary>
-484: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-485: /// </summary>
-486: /// <param name="expectedExpression">String representation of expected value</param>
-487: /// <param name="actualExpression">String representation of actual value</param>
-488: /// <param name="expected">Expected value</param>
-489: /// <param name="actual">Actual value</param>
-490: /// <returns>Result object</returns>
-491: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-492:                                              char const* expected, char const* actual)
-493: {
-494:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-495: }
-496: 
-497: /// <summary>
-498: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-499: /// </summary>
-500: /// <param name="expectedExpression">String representation of expected value</param>
-501: /// <param name="actualExpression">String representation of actual value</param>
-502: /// <param name="expected">Expected value</param>
-503: /// <param name="actual">Actual value</param>
-504: /// <returns>Result object</returns>
-505: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-506:                                              char* expected, char* actual)
-507: {
-508:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-509: }
-510: 
-511: /// <summary>
-512: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-513: /// </summary>
-514: /// <param name="expectedExpression">String representation of expected value</param>
-515: /// <param name="actualExpression">String representation of actual value</param>
-516: /// <param name="expected">Expected value</param>
-517: /// <param name="actual">Actual value</param>
-518: /// <returns>Result object</returns>
-519: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-520:                                              char* expected, char const* actual)
-521: {
-522:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-523: }
-524: 
-525: /// <summary>
-526: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-527: /// </summary>
-528: /// <param name="expectedExpression">String representation of expected value</param>
-529: /// <param name="actualExpression">String representation of actual value</param>
-530: /// <param name="expected">Expected value</param>
-531: /// <param name="actual">Actual value</param>
-532: /// <returns>Result object</returns>
-533: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-534:                                              char const* expected, char* actual)
-535: {
-536:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-537: }
-538: 
-539: /// <summary>
-540: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-541: /// </summary>
-542: /// <param name="expectedExpression">String representation of expected value</param>
-543: /// <param name="actualExpression">String representation of actual value</param>
-544: /// <param name="expected">Expected value</param>
-545: /// <param name="actual">Actual value</param>
-546: /// <returns>Result object</returns>
-547: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-548:                                                 char const* expected, char const* actual)
-549: {
-550:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-551: }
-552: 
-553: /// <summary>
-554: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-555: /// </summary>
-556: /// <param name="expectedExpression">String representation of expected value</param>
-557: /// <param name="actualExpression">String representation of actual value</param>
-558: /// <param name="expected">Expected value</param>
-559: /// <param name="actual">Actual value</param>
-560: /// <returns>Result object</returns>
-561: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-562:                                                 char* expected, char* actual)
-563: {
-564:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-565: }
-566: 
-567: /// <summary>
-568: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-569: /// </summary>
-570: /// <param name="expectedExpression">String representation of expected value</param>
-571: /// <param name="actualExpression">String representation of actual value</param>
-572: /// <param name="expected">Expected value</param>
-573: /// <param name="actual">Actual value</param>
-574: /// <returns>Result object</returns>
-575: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-576:                                                 char* expected, char const* actual)
-577: {
-578:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-579: }
-580: 
-581: /// <summary>
-582: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-583: /// </summary>
-584: /// <param name="expectedExpression">String representation of expected value</param>
-585: /// <param name="actualExpression">String representation of actual value</param>
-586: /// <param name="expected">Expected value</param>
-587: /// <param name="actual">Actual value</param>
-588: /// <returns>Result object</returns>
-589: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
-590:                                                 char const* expected, char* actual)
-591: {
-592:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-593: }
-594: 
-595: /// <summary>
-596: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-597: /// </summary>
-598: /// <param name="expectedExpression">String representation of expected value</param>
-599: /// <param name="actualExpression">String representation of actual value</param>
-600: /// <param name="expected">Expected value</param>
-601: /// <param name="actual">Actual value</param>
-602: /// <returns>Result object</returns>
-603: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-604:                                              const baremetal::string& actualExpression,
-605:                                              const baremetal::string& expected,
-606:                                              const baremetal::string& actual)
-607: {
-608:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-609: }
-610: 
-611: /// <summary>
-612: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-613: /// </summary>
-614: /// <param name="expectedExpression">String representation of expected value</param>
-615: /// <param name="actualExpression">String representation of actual value</param>
-616: /// <param name="expected">Expected value</param>
-617: /// <param name="actual">Actual value</param>
-618: /// <returns>Result object</returns>
-619: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-620:                                              const baremetal::string& actualExpression,
-621:                                              const baremetal::string& expected,
-622:                                              const char* actual)
-623: {
-624:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-625: }
-626: 
-627: /// <summary>
-628: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
-629: /// </summary>
-630: /// <param name="expectedExpression">String representation of expected value</param>
-631: /// <param name="actualExpression">String representation of actual value</param>
-632: /// <param name="expected">Expected value</param>
-633: /// <param name="actual">Actual value</param>
-634: /// <returns>Result object</returns>
-635: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-636:                                              const baremetal::string& actualExpression,
-637:                                              const char* expected,
-638:                                              const baremetal::string& actual)
-639: {
-640:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-641: }
-642: 
-643: /// <summary>
-644: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-645: /// </summary>
-646: /// <param name="expectedExpression">String representation of expected value</param>
-647: /// <param name="actualExpression">String representation of actual value</param>
-648: /// <param name="expected">Expected value</param>
-649: /// <param name="actual">Actual value</param>
-650: /// <returns>Result object</returns>
-651: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-652:                                                 const baremetal::string& actualExpression,
-653:                                                 const baremetal::string& expected,
-654:                                                 const baremetal::string& actual)
-655: {
-656:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-657: }
-658: 
-659: /// <summary>
-660: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-661: /// </summary>
-662: /// <param name="expectedExpression">String representation of expected value</param>
-663: /// <param name="actualExpression">String representation of actual value</param>
-664: /// <param name="expected">Expected value</param>
-665: /// <param name="actual">Actual value</param>
-666: /// <returns>Result object</returns>
-667: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-668:                                                 const baremetal::string& actualExpression,
-669:                                                 const baremetal::string& expected,
-670:                                                 const char* actual)
-671: {
-672:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-673: }
-674: 
-675: /// <summary>
-676: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
-677: /// </summary>
-678: /// <param name="expectedExpression">String representation of expected value</param>
-679: /// <param name="actualExpression">String representation of actual value</param>
-680: /// <param name="expected">Expected value</param>
-681: /// <param name="actual">Actual value</param>
-682: /// <returns>Result object</returns>
-683: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
-684:                                                 const baremetal::string& actualExpression,
-685:                                                 const char* expected,
-686:                                                 const baremetal::string& actual)
-687: {
-688:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
-689: }
-690: 
-691: } // namespace unittest
+277:     if (EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
+278:     {
+279:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
+280:     }
+281:     return AssertionSuccess();
+282: }
+283: 
+284: } // namespace internal
+285: 
+286: /// <summary>
+287: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+288: /// </summary>
+289: /// <param name="expectedExpression">String representation of expected value</param>
+290: /// <param name="actualExpression">String representation of actual value</param>
+291: /// <param name="expected">Expected value</param>
+292: /// <param name="actual">Actual value</param>
+293: /// <returns>Result object</returns>
+294: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
+295: {
+296:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+297: }
+298: 
+299: /// <summary>
+300: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+301: /// </summary>
+302: /// <param name="expectedExpression">String representation of expected value</param>
+303: /// <param name="actualExpression">String representation of actual value</param>
+304: /// <param name="expected">Expected value</param>
+305: /// <param name="actual">Actual value</param>
+306: /// <returns>Result object</returns>
+307: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
+308:                                    char *actual) // cppcheck-suppress constParameterPointer
+309: {
+310:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+311: }
+312: 
+313: /// <summary>
+314: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+315: /// </summary>
+316: /// <param name="expectedExpression">String representation of expected value</param>
+317: /// <param name="actualExpression">String representation of actual value</param>
+318: /// <param name="expected">Expected value</param>
+319: /// <param name="actual">Actual value</param>
+320: /// <returns>Result object</returns>
+321: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
+322:                                    char const *actual) // cppcheck-suppress constParameterPointer
+323: {
+324:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+325: }
+326: 
+327: /// <summary>
+328: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+329: /// </summary>
+330: /// <param name="expectedExpression">String representation of expected value</param>
+331: /// <param name="actualExpression">String representation of actual value</param>
+332: /// <param name="expected">Expected value</param>
+333: /// <param name="actual">Actual value</param>
+334: /// <returns>Result object</returns>
+335: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
+336:                                    char *actual) // cppcheck-suppress constParameterPointer
+337: {
+338:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+339: }
+340: 
+341: /// <summary>
+342: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+343: /// </summary>
+344: /// <param name="expectedExpression">String representation of expected value</param>
+345: /// <param name="actualExpression">String representation of actual value</param>
+346: /// <param name="expected">Expected value</param>
+347: /// <param name="actual">Actual value</param>
+348: /// <returns>Result object</returns>
+349: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
+350: {
+351:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+352: }
+353: 
+354: /// <summary>
+355: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+356: /// </summary>
+357: /// <param name="expectedExpression">String representation of expected value</param>
+358: /// <param name="actualExpression">String representation of actual value</param>
+359: /// <param name="expected">Expected value</param>
+360: /// <param name="actual">Actual value</param>
+361: /// <returns>Result object</returns>
+362: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
+363:                                       char *actual) // cppcheck-suppress constParameterPointer
+364: {
+365:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+366: }
+367: 
+368: /// <summary>
+369: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+370: /// </summary>
+371: /// <param name="expectedExpression">String representation of expected value</param>
+372: /// <param name="actualExpression">String representation of actual value</param>
+373: /// <param name="expected">Expected value</param>
+374: /// <param name="actual">Actual value</param>
+375: /// <returns>Result object</returns>
+376: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
+377:                                       char const *actual) // cppcheck-suppress constParameterPointer
+378: {
+379:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+380: }
+381: 
+382: /// <summary>
+383: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+384: /// </summary>
+385: /// <param name="expectedExpression">String representation of expected value</param>
+386: /// <param name="actualExpression">String representation of actual value</param>
+387: /// <param name="expected">Expected value</param>
+388: /// <param name="actual">Actual value</param>
+389: /// <returns>Result object</returns>
+390: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
+391:                                       char *actual) // cppcheck-suppress constParameterPointer
+392: {
+393:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+394: }
+395: 
+396: /// <summary>
+397: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+398: /// </summary>
+399: /// <param name="expectedExpression">String representation of expected value</param>
+400: /// <param name="actualExpression">String representation of actual value</param>
+401: /// <param name="expected">Expected value</param>
+402: /// <param name="actual">Actual value</param>
+403: /// <returns>Result object</returns>
+404: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
+405:                                    const baremetal::string& actualExpression,
+406:                                    const baremetal::string& expected,
+407:                                    const baremetal::string& actual)
+408: {
+409:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+410: }
+411: 
+412: /// <summary>
+413: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+414: /// </summary>
+415: /// <param name="expectedExpression">String representation of expected value</param>
+416: /// <param name="actualExpression">String representation of actual value</param>
+417: /// <param name="expected">Expected value</param>
+418: /// <param name="actual">Actual value</param>
+419: /// <returns>Result object</returns>
+420: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
+421:                                    const baremetal::string& actualExpression,
+422:                                    const baremetal::string& expected,
+423:                                    const char* actual)
+424: {
+425:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+426: }
+427: 
+428: /// <summary>
+429: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
+430: /// </summary>
+431: /// <param name="expectedExpression">String representation of expected value</param>
+432: /// <param name="actualExpression">String representation of actual value</param>
+433: /// <param name="expected">Expected value</param>
+434: /// <param name="actual">Actual value</param>
+435: /// <returns>Result object</returns>
+436: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
+437:                                    const baremetal::string& actualExpression,
+438:                                    const char* expected,
+439:                                    const baremetal::string& actual)
+440: {
+441:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
+442: }
+443: 
+444: /// <summary>
+445: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+446: /// </summary>
+447: /// <param name="expectedExpression">String representation of expected value</param>
+448: /// <param name="actualExpression">String representation of actual value</param>
+449: /// <param name="expected">Expected value</param>
+450: /// <param name="actual">Actual value</param>
+451: /// <returns>Result object</returns>
+452: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
+453:                                       const baremetal::string& actualExpression,
+454:                                       const baremetal::string& expected,
+455:                                       const baremetal::string& actual)
+456: {
+457:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+458: }
+459: 
+460: /// <summary>
+461: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+462: /// </summary>
+463: /// <param name="expectedExpression">String representation of expected value</param>
+464: /// <param name="actualExpression">String representation of actual value</param>
+465: /// <param name="expected">Expected value</param>
+466: /// <param name="actual">Actual value</param>
+467: /// <returns>Result object</returns>
+468: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
+469:                                       const baremetal::string& actualExpression,
+470:                                       const baremetal::string& expected,
+471:                                       const char* actual)
+472: {
+473:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+474: }
+475: 
+476: /// <summary>
+477: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+478: /// </summary>
+479: /// <param name="expectedExpression">String representation of expected value</param>
+480: /// <param name="actualExpression">String representation of actual value</param>
+481: /// <param name="expected">Expected value</param>
+482: /// <param name="actual">Actual value</param>
+483: /// <returns>Result object</returns>
+484: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
+485:                                       const baremetal::string& actualExpression,
+486:                                       const char* expected,
+487:                                       const baremetal::string& actual)
+488: {
+489:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
+490: }
+491: 
+492: /// <summary>
+493: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+494: /// </summary>
+495: /// <param name="expectedExpression">String representation of expected value</param>
+496: /// <param name="actualExpression">String representation of actual value</param>
+497: /// <param name="expected">Expected value</param>
+498: /// <param name="actual">Actual value</param>
+499: /// <returns>Result object</returns>
+500: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+501:                                              char const* expected, char const* actual)
+502: {
+503:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+504: }
+505: 
+506: /// <summary>
+507: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+508: /// </summary>
+509: /// <param name="expectedExpression">String representation of expected value</param>
+510: /// <param name="actualExpression">String representation of actual value</param>
+511: /// <param name="expected">Expected value</param>
+512: /// <param name="actual">Actual value</param>
+513: /// <returns>Result object</returns>
+514: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+515:                                              char* expected, char* actual)
+516: {
+517:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+518: }
+519: 
+520: /// <summary>
+521: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+522: /// </summary>
+523: /// <param name="expectedExpression">String representation of expected value</param>
+524: /// <param name="actualExpression">String representation of actual value</param>
+525: /// <param name="expected">Expected value</param>
+526: /// <param name="actual">Actual value</param>
+527: /// <returns>Result object</returns>
+528: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+529:                                              char* expected, char const* actual)
+530: {
+531:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+532: }
+533: 
+534: /// <summary>
+535: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+536: /// </summary>
+537: /// <param name="expectedExpression">String representation of expected value</param>
+538: /// <param name="actualExpression">String representation of actual value</param>
+539: /// <param name="expected">Expected value</param>
+540: /// <param name="actual">Actual value</param>
+541: /// <returns>Result object</returns>
+542: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+543:                                              char const* expected, char* actual)
+544: {
+545:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+546: }
+547: 
+548: /// <summary>
+549: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+550: /// </summary>
+551: /// <param name="expectedExpression">String representation of expected value</param>
+552: /// <param name="actualExpression">String representation of actual value</param>
+553: /// <param name="expected">Expected value</param>
+554: /// <param name="actual">Actual value</param>
+555: /// <returns>Result object</returns>
+556: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+557:                                                 char const* expected, char const* actual)
+558: {
+559:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+560: }
+561: 
+562: /// <summary>
+563: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+564: /// </summary>
+565: /// <param name="expectedExpression">String representation of expected value</param>
+566: /// <param name="actualExpression">String representation of actual value</param>
+567: /// <param name="expected">Expected value</param>
+568: /// <param name="actual">Actual value</param>
+569: /// <returns>Result object</returns>
+570: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+571:                                                 char* expected, char* actual)
+572: {
+573:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+574: }
+575: 
+576: /// <summary>
+577: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+578: /// </summary>
+579: /// <param name="expectedExpression">String representation of expected value</param>
+580: /// <param name="actualExpression">String representation of actual value</param>
+581: /// <param name="expected">Expected value</param>
+582: /// <param name="actual">Actual value</param>
+583: /// <returns>Result object</returns>
+584: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+585:                                                 char* expected, char const* actual)
+586: {
+587:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+588: }
+589: 
+590: /// <summary>
+591: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+592: /// </summary>
+593: /// <param name="expectedExpression">String representation of expected value</param>
+594: /// <param name="actualExpression">String representation of actual value</param>
+595: /// <param name="expected">Expected value</param>
+596: /// <param name="actual">Actual value</param>
+597: /// <returns>Result object</returns>
+598: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
+599:                                                 char const* expected, char* actual)
+600: {
+601:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+602: }
+603: 
+604: /// <summary>
+605: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+606: /// </summary>
+607: /// <param name="expectedExpression">String representation of expected value</param>
+608: /// <param name="actualExpression">String representation of actual value</param>
+609: /// <param name="expected">Expected value</param>
+610: /// <param name="actual">Actual value</param>
+611: /// <returns>Result object</returns>
+612: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+613:                                              const baremetal::string& actualExpression,
+614:                                              const baremetal::string& expected,
+615:                                              const baremetal::string& actual)
+616: {
+617:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+618: }
+619: 
+620: /// <summary>
+621: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+622: /// </summary>
+623: /// <param name="expectedExpression">String representation of expected value</param>
+624: /// <param name="actualExpression">String representation of actual value</param>
+625: /// <param name="expected">Expected value</param>
+626: /// <param name="actual">Actual value</param>
+627: /// <returns>Result object</returns>
+628: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+629:                                              const baremetal::string& actualExpression,
+630:                                              const baremetal::string& expected,
+631:                                              const char* actual)
+632: {
+633:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+634: }
+635: 
+636: /// <summary>
+637: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+638: /// </summary>
+639: /// <param name="expectedExpression">String representation of expected value</param>
+640: /// <param name="actualExpression">String representation of actual value</param>
+641: /// <param name="expected">Expected value</param>
+642: /// <param name="actual">Actual value</param>
+643: /// <returns>Result object</returns>
+644: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+645:                                              const baremetal::string& actualExpression,
+646:                                              const char* expected,
+647:                                              const baremetal::string& actual)
+648: {
+649:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+650: }
+651: 
+652: /// <summary>
+653: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+654: /// </summary>
+655: /// <param name="expectedExpression">String representation of expected value</param>
+656: /// <param name="actualExpression">String representation of actual value</param>
+657: /// <param name="expected">Expected value</param>
+658: /// <param name="actual">Actual value</param>
+659: /// <returns>Result object</returns>
+660: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+661:                                                 const baremetal::string& actualExpression,
+662:                                                 const baremetal::string& expected,
+663:                                                 const baremetal::string& actual)
+664: {
+665:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+666: }
+667: 
+668: /// <summary>
+669: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+670: /// </summary>
+671: /// <param name="expectedExpression">String representation of expected value</param>
+672: /// <param name="actualExpression">String representation of actual value</param>
+673: /// <param name="expected">Expected value</param>
+674: /// <param name="actual">Actual value</param>
+675: /// <returns>Result object</returns>
+676: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+677:                                                 const baremetal::string& actualExpression,
+678:                                                 const baremetal::string& expected,
+679:                                                 const char* actual)
+680: {
+681:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+682: }
+683: 
+684: /// <summary>
+685: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+686: /// </summary>
+687: /// <param name="expectedExpression">String representation of expected value</param>
+688: /// <param name="actualExpression">String representation of actual value</param>
+689: /// <param name="expected">Expected value</param>
+690: /// <param name="actual">Actual value</param>
+691: /// <returns>Result object</returns>
+692: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
+693:                                                 const baremetal::string& actualExpression,
+694:                                                 const char* expected,
+695:                                                 const baremetal::string& actual)
+696: {
+697:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
+698: }
+699: 
+700: } // namespace unittest
 ```
 
 - Line 58-63: We define a local function `EqualCaseInsensitive` which compares two strings in a case insensitive way, and returns true if they are considered equal, false otherwise
-- Line 166-193: We implement the function `CloseFailure()`. This will return an assertion result flagging a failure, with a string explaining that the absolute difference between the actual value and the expected value is larger than the tolerance
-- Line 203-213: We define a function `CheckStringsEqual()` in a local namespace `internal`.
+- Line 91-102: Due to doxygen warnings, the `baremetal` namespace was added in the signature of the `BooleanFailure()` function, although it is not needed for C++
+- Line 112-132: Due to doxygen warnings, the `baremetal` namespace was added in the signature of the `EqFailure()` function, although it is not needed for C++
+- Line 142-162: Due to doxygen warnings, the `baremetal` namespace was added in the signature of the `InEqFailure()` function, although it is not needed for C++
+- Line 174-200: We implement the function `CloseFailure()`. This will return an assertion result flagging a failure, with a string explaining that the absolute difference between the actual value and the expected value is larger than the tolerance
+- Line 212-222: We define a function `CheckStringsEqual()` in a local namespace `internal`.
 If the two values of type const char* are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 223-233: We define a function `CheckStringsNotEqual()` in a local namespace `internal`.
+- Line 232-242: We define a function `CheckStringsNotEqual()` in a local namespace `internal`.
 If the two values of type const char* are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 243-253: We define a function `CheckStringsEqualIgnoreCase()` in a local namespace `internal`.
+- Line 252-262: We define a function `CheckStringsEqualIgnoreCase()` in a local namespace `internal`.
 If the two values of type const char* are considered equal ignoring case, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
-- Line 263-273: We define a function `CheckStringsNotEqualIgnoreCase()` in a local namespace `internal`.
+- Line 272-282: We define a function `CheckStringsNotEqualIgnoreCase()` in a local namespace `internal`.
 If the two values of type const char* are considered not equal ignoring case, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 285-288: We implement the function `CheckEqualInternal()` for two value of type const char*.
+- Line 294-297: We implement the function `CheckEqualInternal()` for two value of type const char*.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 298-302: We implement the function `CheckEqualInternal()` for two value of type char*.
+- Line 307-311: We implement the function `CheckEqualInternal()` for two value of type char*.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 312-316: We implement the function `CheckEqualInternal()` for two value of type char* and const char*.
+- Line 321-325: We implement the function `CheckEqualInternal()` for two value of type char* and const char*.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 326-330: We implement the function `CheckEqualInternal()` for two value of type const char* and char*.
+- Line 335-339: We implement the function `CheckEqualInternal()` for two value of type const char* and char*.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 340-343: We implement the function `CheckNotEqualInternal()` for two value of type const char*.
+- Line 349-352: We implement the function `CheckNotEqualInternal()` for two value of type const char*.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 353-357: We implement the function `CheckNotEqualInternal()` for two value of type char*.
+- Line 362-366: We implement the function `CheckNotEqualInternal()` for two value of type char*.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 367-371: We implement the function `CheckNotEqualInternal()` for two value of type char* and const char*.
+- Line 376-380: We implement the function `CheckNotEqualInternal()` for two value of type char* and const char*.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 381-385: We implement the function `CheckNotEqualInternal()` for two value of type const char* and char*.
+- Line 390-394: We implement the function `CheckNotEqualInternal()` for two value of type const char* and char*.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 395-401: We implement the function `CheckEqualInternal()` for two value of type string.
+- Line 404-410: We implement the function `CheckEqualInternal()` for two value of type string.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 411-417: We implement the function `CheckEqualInternal()` for two value of type char* and string.
+- Line 420-426: We implement the function `CheckEqualInternal()` for two value of type char* and string.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 427-433: We implement the function `CheckEqualInternal()` for two value of type string and const char*.
+- Line 436-442: We implement the function `CheckEqualInternal()` for two value of type string and const char*.
 This uses the function `CheckStringsEqual()` to compare the strings
-- Line 443-449: We implement the function `CheckNotEqualInternal()` for two value of type string.
+- Line 452-458: We implement the function `CheckNotEqualInternal()` for two value of type string.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 459-465: We implement the function `CheckNotEqualInternal()` for two value of type char* and string.
+- Line 468-474: We implement the function `CheckNotEqualInternal()` for two value of type char* and string.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 475-481: We implement the function `CheckNotEqualInternal()` for two value of type string and const char*.
+- Line 484-490: We implement the function `CheckNotEqualInternal()` for two value of type string and const char*.
 This uses the function `CheckStringsNotEqual()` to compare the strings
-- Line 491-495: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char*.
+- Line 500-504: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char*.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 505-509: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char*.
+- Line 514-518: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char*.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 519-523: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and const char*.
+- Line 528-532: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and const char*.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 533-537: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char* and char*.
+- Line 542-546: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type const char* and char*.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 547-551: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char*.
+- Line 556-560: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 561-565: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char*.
+- Line 570-574: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 575-579: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and const char*.
+- Line 584-588: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and const char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 589-593: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char* and char*.
+- Line 598-602: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type const char* and char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 603-609: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string.
+- Line 612-618: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 619-625: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and string.
+- Line 628-634: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type char* and string.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 635-641: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string and const char*.
+- Line 644-650: We implement the function `CheckEqualInternalIgnoreCase()` for two value of type string and const char*.
 This uses the function `CheckStringsEqualIgnoreCase()` to compare the strings
-- Line 651-657: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string.
+- Line 660-666: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 667-673: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and string.
+- Line 676-682: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type char* and string.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
-- Line 683-689: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string and const char*.
+- Line 692-698: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string and const char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
 
 ### PrintValue.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_PRINTVALUEH}
@@ -3732,13 +3816,122 @@ File: code\libraries\baremetal\test\main.cpp
 
 We'll add the source file containing the string tests.
 
-Create the file `code\libraries\baremetal\test\StringTest.cpp`
+As this file is quite sizeable, we'll not repeat the full source here, just an excerpt.
 
-\todo
+Create the file `code\libraries\baremetal\test\StringTest.cpp`
 
 ```cpp
 File: code\libraries\baremetal\test\StringTest.cpp
+40: #include "unittest/unittest.h"
+41: 
+42: #include "baremetal/String.h"
+43: #include "baremetal/Util.h"
+44: 
+45: using namespace unittest;
+46: 
+47: namespace baremetal {
+48: namespace test {
+49: 
+50: TEST_SUITE(Baremetal)
+51: {
+52: 
+53: class StringTest
+54:     : public TestFixture
+55: {
+56: public:
+57:     const char* otherText = "abcdefghijklmnopqrstuvwxyz";
+58:     string other;
+59:     void SetUp() override
+60:     {
+61:         other = otherText;
+62:     }
+63:     void TearDown() override
+64:     {
+65:     }
+66: };
+67: 
+68: TEST_FIXTURE(StringTest, ConstructDefault)
+69: {
+70:     string s;
+71:     EXPECT_TRUE(s.empty());
+72:     ASSERT_NOT_NULL(s.data());
+73:     ASSERT_NOT_NULL(s.c_str());
+74:     EXPECT_EQ('\0', s.data()[0]);
+75:     EXPECT_EQ(size_t{ 0 }, s.size());
+76:     EXPECT_EQ(size_t{ 0 }, s.length());
+77:     EXPECT_EQ(size_t{ 0 }, s.capacity());
+78: }
+79: 
+80: TEST_FIXTURE(StringTest, ConstructConstCharPtr)
+81: {
+82:     const char* text = otherText;
+83:     const char* expected = otherText;
+84:     size_t expectedLength = strlen(expected);
+85:     size_t length = strlen(expected);
+86: 
+87:     string s(text);
+88: 
+89:     EXPECT_FALSE(s.empty());
+90:     ASSERT_NOT_NULL(s.data());
+91:     ASSERT_NOT_NULL(s.c_str());
+92:     EXPECT_NE('\0', s.data()[0]);
+93:     EXPECT_EQ(expectedLength, s.size());
+94:     EXPECT_EQ(expectedLength, s.length());
+95:     EXPECT_NE(size_t{ 0 }, s.capacity());
+96:     EXPECT_TRUE(expected == s);
+97:     EXPECT_TRUE(s == expected);
+98:     EXPECT_EQ(expected, s);
+99:     EXPECT_EQ(s, expected);
+100: }
+101: 
+102: TEST_FIXTURE(StringTest, ConstructConstCharPtrEmpty)
+103: {
+104:     const char* text = "";
+105:     const char* expected = "";
+106:     size_t expectedLength = strlen(expected);
+107: 
+108:     string s(text);
+109: 
+110:     EXPECT_TRUE(s.empty());
+111:     ASSERT_NOT_NULL(s.data());
+112:     ASSERT_NOT_NULL(s.c_str());
+113:     EXPECT_EQ('\0', s.data()[0]);
+114:     EXPECT_EQ(expectedLength, s.size());
+115:     EXPECT_EQ(expectedLength, s.length());
+116:     EXPECT_NE(size_t{ 0 }, s.capacity());
+117:     EXPECT_TRUE(expected == s);
+118:     EXPECT_TRUE(s == expected);
+119:     EXPECT_EQ(expected, s);
+120:     EXPECT_EQ(s, expected);
+121: }
+122: 
+123: TEST_FIXTURE(StringTest, ConstructNullPtr)
+124: {
+125:     const char* expected = "";
+126:     size_t expectedLength = strlen(expected);
+127: 
+128:     string s(nullptr);
+129: 
+130:     EXPECT_TRUE(s.empty());
+131:     ASSERT_NOT_NULL(s.data());
+132:     ASSERT_NOT_NULL(s.c_str());
+133:     EXPECT_EQ('\0', s.data()[0]);
+134:     EXPECT_EQ(expectedLength, s.size());
+135:     EXPECT_EQ(expectedLength, s.length());
+136:     EXPECT_EQ(size_t{ 0 }, s.capacity());
+137:     EXPECT_TRUE(expected == s);
+138:     EXPECT_TRUE(s == expected);
+139:     EXPECT_EQ(expected, s);
+140:     EXPECT_EQ(s, expected);
+141: }
 ```
+
+- Line 50: We define the suite for these class tests, which is named after the library, so `Baremetal`
+- Line 53-66: We define the class for the test fixture. Notice that we collect some often used variables in the class, and initialize using the `SetUp()` method
+- Line 68-78: As an example, we test the default constructor
+- Line 80-100: We test the constructor taking const char*
+- Line 102-121: We test the constructor taking const char* for the corner case that an empty string is passed
+- Line 123-141: We test the constructor taking const char* for the corner case that a nullptr is passed
 
 ### Set up test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_SET_UP_TEST_PROJECT_CONFIGURATION}
 
@@ -3903,10 +4096,685 @@ We can now configure and build our code, and start debugging.
 The application will run the tests. All tests should succeed.
 
 ```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:201)
+[===========] Running 156 tests from 1 fixture in 1 suite.
+[   SUITE   ] Baremetal (1 fixture)
+[  FIXTURE  ] StringTest (156 tests)
+[ SUCCEEDED ] Baremetal::StringTest::ConstructDefault
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::ConstructNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSize
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSizeTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSizeNpos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCopy
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCopyEmpty
+[ SUCCEEDED ] Baremetal::StringTest::ConstructMove
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstCharPtrCastOperator
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorCopy
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorMove
+[ SUCCEEDED ] Baremetal::StringTest::Begin
+[ SUCCEEDED ] Baremetal::StringTest::End
+[ SUCCEEDED ] Baremetal::StringTest::BeginConst
+[ SUCCEEDED ] Baremetal::StringTest::EndConst
+[ SUCCEEDED ] Baremetal::StringTest::Iterate
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AssignNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSize
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSizeTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSizeNpos
+[ SUCCEEDED ] Baremetal::StringTest::AssignCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AssignCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AssignString
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPos
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosNPos
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::At
+[ SUCCEEDED ] Baremetal::StringTest::AtConst
+[ SUCCEEDED ] Baremetal::StringTest::AtOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::AtConstOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::AtEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::AtConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Front
+[ SUCCEEDED ] Baremetal::StringTest::FrontConst
+[ SUCCEEDED ] Baremetal::StringTest::FrontEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::FrontConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Back
+[ SUCCEEDED ] Baremetal::StringTest::BackConst
+[ SUCCEEDED ] Baremetal::StringTest::BackEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::BackConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperator
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConst
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConstOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Data
+[ SUCCEEDED ] Baremetal::StringTest::DataConst
+[ SUCCEEDED ] Baremetal::StringTest::CString
+[ SUCCEEDED ] Baremetal::StringTest::Reserve
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentChar
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentString
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AppendCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AppendString
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPos
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AppendNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCountNpos
+[ SUCCEEDED ] Baremetal::StringTest::Clear
+[ SUCCEEDED ] Baremetal::StringTest::FindString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosTooLargeEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountMatchPart
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountTooLargeEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindChar
+[ SUCCEEDED ] Baremetal::StringTest::FindCharNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithString
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithChar
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithString
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithChar
+[ SUCCEEDED ] Baremetal::StringTest::ContainsString
+[ SUCCEEDED ] Baremetal::StringTest::ContainsConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ContainsChar
+[ SUCCEEDED ] Baremetal::StringTest::SubStr
+[ SUCCEEDED ] Baremetal::StringTest::Equals
+[ SUCCEEDED ] Baremetal::StringTest::EqualsCaseInsensitive
+[ SUCCEEDED ] Baremetal::StringTest::Compare
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountString
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountStringPos
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountStringPosCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountConstCharPtrCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosChar
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCharCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringString
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringStringMultiple
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringConstCharPtrMultiple
+[ SUCCEEDED ] Baremetal::StringTest::Align
+[ SUCCEEDED ] Baremetal::StringTest::EqualityOperator
+[ SUCCEEDED ] Baremetal::StringTest::InEqualityOperator
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorConstCharPtrAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorConstCharPtrEmptyAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorNullPtrAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorCharAndString
+[  FIXTURE  ] 156 tests from StringTest
+[   SUITE   ] 1 fixture from Baremetal
+Success: 156 tests passed.
+
+No failures
+[===========] 156 tests from 1 fixture in 1 suite ran.
+Info   Halt (System:122)
 ```
+
+As you can see, we have 156 test for the `string` class, which actually have a multitude of this in test cases.
 
 ## Writing class tests for serialization - Step 5 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5}
 
 Let's also reimplement the tests for [16-serializing-and-formatting](#TUTORIAL_16_SERIALIZATION_AND_FORMATTING).
+
+### SerializationTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_STRINGTESTCPP}
+
+We'll add the source file containing the serialization tests.
+
+Create the file `code\libraries\baremetal\test\SerializationTest.cpp`
+
+```cpp
+File: code\libraries\baremetal\test\SerializationTest.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : SerializationTest.cpp
+5: //
+6: // Namespace   : baremetal
+7: //
+8: // Class       : SerializationTest
+9: //
+10: // Description : Serialization tests
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include "unittest/unittest.h"
+41: 
+42: #include "baremetal/Serialization.h"
+43: 
+44: using namespace unittest;
+45: 
+46: namespace baremetal {
+47: namespace test {
+48: 
+49: TEST_SUITE(Baremetal)
+50: {
+51: 
+52: class SerializationTest
+53:     : public TestFixture
+54: {
+55: public:
+56:     void SetUp() override
+57:     {
+58:     }
+59:     void TearDown() override
+60:     {
+61:     }
+62: };
+63: 
+64: TEST_FIXTURE(SerializationTest, SerializeChar)
+65: {
+66:     char c = 'A';
+67:     EXPECT_EQ("65", Serialize(c));
+68:     EXPECT_EQ("  65", Serialize(c, 4));
+69:     EXPECT_EQ("65  ", Serialize(c, -4));
+70: }
+71: 
+72: TEST_FIXTURE(SerializationTest, SerializeIntegerWithPrefix)
+73: {
+74:     int32 i32 = 1234567890l;
+75:     EXPECT_EQ("0b1001001100101100000001011010010", Serialize(i32, 0, 2, true));
+76:     EXPECT_EQ("011145401322", Serialize(i32, 0, 8, true));
+77:     EXPECT_EQ("1234567890", Serialize(i32, 0, 10, true));
+78:     EXPECT_EQ("0x499602D2", Serialize(i32, 0, 16, true));
+79: }
+80: 
+81: TEST_FIXTURE(SerializationTest, SerializeIntegerWithPrefixAndLeadingZeros)
+82: {
+83:     int32 i32 = 1234567890l;
+84:     EXPECT_EQ("0b01001001100101100000001011010010", Serialize(i32, 32, 2, true, true));
+85:     EXPECT_EQ("00000011145401322", Serialize(i32, 16, 8, true, true));
+86:     EXPECT_EQ("0000001234567890", Serialize(i32, 16, 10, true, true));
+87:     EXPECT_EQ("0x0000499602D2", Serialize(i32, 12, 16, true, true));
+88: }
+89: 
+90: TEST_FIXTURE(SerializationTest, SerializeIntegerWithoutPrefixWithLeadingZeros)
+91: {
+92:     int32 i32 = 1234567890l;
+93:     EXPECT_EQ("01001001100101100000001011010010", Serialize(i32, 32, 2, false, true));
+94:     EXPECT_EQ("0000011145401322", Serialize(i32, 16, 8, false, true));
+95:     EXPECT_EQ("0000001234567890", Serialize(i32, 16, 10, false, true));
+96:     EXPECT_EQ("0000499602D2", Serialize(i32, 12, 16, false, true));
+97: }
+98: 
+99: TEST_FIXTURE(SerializationTest, SerializeInt8)
+100: {
+101:     int8 i8 = 123;
+102:     EXPECT_EQ("123", Serialize(i8));
+103:     EXPECT_EQ("     123", Serialize(i8, 8));
+104:     EXPECT_EQ("123     ", Serialize(i8, -8));
+105:     EXPECT_EQ(" 1111011", Serialize(i8, 8, 2));
+106:     EXPECT_EQ("     173", Serialize(i8, 8, 8));
+107:     EXPECT_EQ("     123", Serialize(i8, 8, 10));
+108:     EXPECT_EQ("      7B", Serialize(i8, 8, 16));
+109:     EXPECT_EQ("    0x7B", Serialize(i8, 8, 16, true));
+110:     EXPECT_EQ("0x0000007B", Serialize(i8, 8, 16, true, true));
+111:     EXPECT_EQ("0000007B", Serialize(i8, 8, 16, false, true));
+112: }
+113: 
+114: TEST_FIXTURE(SerializationTest, SerializeUInt8)
+115: {
+116:     uint8 u8 = 234;
+117:     EXPECT_EQ("234", Serialize(u8));
+118:     EXPECT_EQ("     234", Serialize(u8, 8));
+119:     EXPECT_EQ("234     ", Serialize(u8, -8));
+120:     EXPECT_EQ("11101010", Serialize(u8, 8, 2));
+121:     EXPECT_EQ("     352", Serialize(u8, 8, 8));
+122:     EXPECT_EQ("     234", Serialize(u8, 8, 10));
+123:     EXPECT_EQ("      EA", Serialize(u8, 8, 16));
+124:     EXPECT_EQ("    0xEA", Serialize(u8, 8, 16, true));
+125:     EXPECT_EQ("0x000000EA", Serialize(u8, 8, 16, true, true));
+126:     EXPECT_EQ("000000EA", Serialize(u8, 8, 16, false, true));
+127: }
+128: 
+129: TEST_FIXTURE(SerializationTest, SerializeInt16)
+130: {
+131:     int16 i16 = 12345;
+132:     EXPECT_EQ("12345", Serialize(i16));
+133:     EXPECT_EQ("   12345", Serialize(i16, 8));
+134:     EXPECT_EQ("12345   ", Serialize(i16, -8));
+135:     EXPECT_EQ("  11000000111001", Serialize(i16, 16, 2));
+136:     EXPECT_EQ("   30071", Serialize(i16, 8, 8));
+137:     EXPECT_EQ("   12345", Serialize(i16, 8, 10));
+138:     EXPECT_EQ("    3039", Serialize(i16, 8, 16));
+139:     EXPECT_EQ("  0x3039", Serialize(i16, 8, 16, true));
+140:     EXPECT_EQ("0x00003039", Serialize(i16, 8, 16, true, true));
+141:     EXPECT_EQ("00003039", Serialize(i16, 8, 16, false, true));
+142: }
+143: 
+144: TEST_FIXTURE(SerializationTest, SerializeUInt16)
+145: {
+146:     uint16 u16 = 34567;
+147:     EXPECT_EQ("34567", Serialize(u16));
+148:     EXPECT_EQ("   34567", Serialize(u16, 8));
+149:     EXPECT_EQ("34567   ", Serialize(u16, -8));
+150:     EXPECT_EQ("1000011100000111", Serialize(u16, 16, 2));
+151:     EXPECT_EQ("  103407", Serialize(u16, 8, 8));
+152:     EXPECT_EQ("   34567", Serialize(u16, 8, 10));
+153:     EXPECT_EQ("    8707", Serialize(u16, 8, 16));
+154:     EXPECT_EQ("  0x8707", Serialize(u16, 8, 16, true));
+155:     EXPECT_EQ("0x00008707", Serialize(u16, 8, 16, true, true));
+156:     EXPECT_EQ("00008707", Serialize(u16, 8, 16, false, true));
+157: }
+158: 
+159: TEST_FIXTURE(SerializationTest, SerializeInt32)
+160: {
+161:     int32 i32 = 1234567890l;
+162:     EXPECT_EQ("1234567890", Serialize(i32));
+163:     EXPECT_EQ("  1234567890", Serialize(i32, 12));
+164:     EXPECT_EQ("1234567890  ", Serialize(i32, -12));
+165:     EXPECT_EQ(" 1001001100101100000001011010010", Serialize(i32, 32, 2));
+166:     EXPECT_EQ(" 11145401322", Serialize(i32, 12, 8));
+167:     EXPECT_EQ("  1234567890", Serialize(i32, 12, 10));
+168:     EXPECT_EQ("    499602D2", Serialize(i32, 12, 16));
+169:     EXPECT_EQ("  0x499602D2", Serialize(i32, 12, 16, true));
+170:     EXPECT_EQ("0x0000499602D2", Serialize(i32, 12, 16, true, true));
+171:     EXPECT_EQ("0000499602D2", Serialize(i32, 12, 16, false, true));
+172: }
+173: 
+174: TEST_FIXTURE(SerializationTest, SerializeUInt32)
+175: {
+176:     uint32 u32 = 2345678900ul;
+177:     EXPECT_EQ("2345678900", Serialize(u32));
+178:     EXPECT_EQ("  2345678900", Serialize(u32, 12));
+179:     EXPECT_EQ("2345678900  ", Serialize(u32, -12));
+180:     EXPECT_EQ("10001011110100000011100000110100", Serialize(u32, 32, 2));
+181:     EXPECT_EQ(" 21364034064", Serialize(u32, 12, 8));
+182:     EXPECT_EQ("  2345678900", Serialize(u32, 12, 10));
+183:     EXPECT_EQ("    8BD03834", Serialize(u32, 12, 16));
+184:     EXPECT_EQ("  0x8BD03834", Serialize(u32, 12, 16, true));
+185:     EXPECT_EQ("0x00008BD03834", Serialize(u32, 12, 16, true, true));
+186:     EXPECT_EQ("00008BD03834", Serialize(u32, 12, 16, false, true));
+187: }
+188: 
+189: TEST_FIXTURE(SerializationTest, SerializeInt64)
+190: {
+191:     int64 i64 = 9223372036854775807ll;
+192:     EXPECT_EQ("9223372036854775807", Serialize(i64));
+193:     EXPECT_EQ("     9223372036854775807", Serialize(i64, 24));
+194:     EXPECT_EQ("9223372036854775807     ", Serialize(i64, -24));
+195:     EXPECT_EQ(" 111111111111111111111111111111111111111111111111111111111111111", Serialize(i64, 64, 2));
+196:     EXPECT_EQ("   777777777777777777777", Serialize(i64, 24, 8));
+197:     EXPECT_EQ("     9223372036854775807", Serialize(i64, 24, 10));
+198:     EXPECT_EQ("        7FFFFFFFFFFFFFFF", Serialize(i64, 24, 16));
+199:     EXPECT_EQ("      0x7FFFFFFFFFFFFFFF", Serialize(i64, 24, 16, true));
+200:     EXPECT_EQ("0x000000007FFFFFFFFFFFFFFF", Serialize(i64, 24, 16, true, true));
+201:     EXPECT_EQ("000000007FFFFFFFFFFFFFFF", Serialize(i64, 24, 16, false, true));
+202: }
+203: 
+204: TEST_FIXTURE(SerializationTest, SerializeUInt64)
+205: {
+206:     uint64 u64 = 9223372036854775808ull;
+207:     EXPECT_EQ("9223372036854775808", Serialize(u64));
+208:     EXPECT_EQ("     9223372036854775808", Serialize(u64, 24));
+209:     EXPECT_EQ("9223372036854775808     ", Serialize(u64, -24));
+210:     EXPECT_EQ("1000000000000000000000000000000000000000000000000000000000000000", Serialize(u64, 64, 2));
+211:     EXPECT_EQ("  1000000000000000000000", Serialize(u64, 24, 8));
+212:     EXPECT_EQ("     9223372036854775808", Serialize(u64, 24, 10));
+213:     EXPECT_EQ("        8000000000000000", Serialize(u64, 24, 16));
+214:     EXPECT_EQ("      0x8000000000000000", Serialize(u64, 24, 16, true));
+215:     EXPECT_EQ("0x000000008000000000000000", Serialize(u64, 24, 16, true, true));
+216:     EXPECT_EQ("000000008000000000000000", Serialize(u64, 24, 16, false, true));
+217: }
+218: 
+219: TEST_FIXTURE(SerializationTest, SerializeFloat)
+220: {
+221:     float f = 1.23456789F;
+222:     EXPECT_EQ("1.2345679", Serialize(f));
+223:     EXPECT_EQ("   1.2345679", Serialize(f, 12));
+224:     EXPECT_EQ("1.2345679   ", Serialize(f, -12));
+225:     EXPECT_EQ("        1.23", Serialize(f, 12, 2));
+226:     EXPECT_EQ("   1.2345679", Serialize(f, 12, 7));
+227:     EXPECT_EQ("   1.2345679", Serialize(f, 12, 8));
+228: }
+229: 
+230: TEST_FIXTURE(SerializationTest, SerializeDouble)
+231: {
+232:     double d = 1.234567890123456;
+233:     EXPECT_EQ("1.23456789012346", Serialize(d));
+234:     EXPECT_EQ("  1.23456789012346", Serialize(d, 18));
+235:     EXPECT_EQ("1.23456789012346  ", Serialize(d, -18));
+236:     EXPECT_EQ("           1.23457", Serialize(d, 18, 5));
+237:     EXPECT_EQ("         1.2345679", Serialize(d, 18, 7));
+238:     EXPECT_EQ("    1.234567890123", Serialize(d, 18, 12));
+239: }
+240: 
+241: TEST_FIXTURE(SerializationTest, SerializeString)
+242: {
+243:     string s = "hello world";
+244:     EXPECT_EQ("hello world", Serialize(s));
+245:     EXPECT_EQ("    hello world", Serialize(s, 15));
+246:     EXPECT_EQ("hello world    ", Serialize(s, -15));
+247:     EXPECT_EQ("  \"hello world\"", Serialize(s, 15, true));
+248: }
+249: 
+250: TEST_FIXTURE(SerializationTest, SerializeConstCharPtr)
+251: {
+252:     const char* s = "hello world";
+253:     EXPECT_EQ("hello world", Serialize(s));
+254:     EXPECT_EQ("    hello world", Serialize(s, 15));
+255:     EXPECT_EQ("hello world    ", Serialize(s, -15));
+256:     EXPECT_EQ("  \"hello world\"", Serialize(s, 15, true));
+257: }
+258: 
+259: TEST_FIXTURE(SerializationTest, SerializeConstVoidPtr)
+260: {
+261:     const void* pvc = reinterpret_cast<const void*>(0x0123456789ABCDEF);
+262:     EXPECT_EQ("0x0123456789ABCDEF", Serialize(pvc));
+263:     EXPECT_EQ("  0x0123456789ABCDEF", Serialize(pvc, 20));
+264:     EXPECT_EQ("0x0123456789ABCDEF  ", Serialize(pvc, -20));
+265: }
+266: 
+267: TEST_FIXTURE(SerializationTest, SerializeVoidPtr)
+268: {
+269:     void* pv = reinterpret_cast<void*>(0x0123456789ABCDEF);
+270:     EXPECT_EQ("0x0123456789ABCDEF", Serialize(pv));
+271:     EXPECT_EQ("  0x0123456789ABCDEF", Serialize(pv, 20));
+272:     EXPECT_EQ("0x0123456789ABCDEF  ", Serialize(pv, -20));
+273: }
+274: 
+275: } // suite Baremetal
+276: 
+277: } // namespace test
+278: } // namespace baremetal
+```
+
+The tests should speak for themselves.
+
+### Update test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_SET_UP_TEST_PROJECT_CONFIGURATION}
+
+As we added a new source file, we'll update the test project CMake file.
+
+Update the file `code/libraries/baremetal/test/CMakeLists.txt`
+
+```cmake
+File: code/libraries/baremetal/test/CMakeLists.txt
+35: set(PROJECT_SOURCES
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/SerializationTest.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/StringTest.cpp
+39:     )
+40: 
+41: set(PROJECT_INCLUDES_PUBLIC )
+42: set(PROJECT_INCLUDES_PRIVATE )
+```
+
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and start debugging.
+
+The application will run all tests, so both stirng test and serialization tests. All tests should succeed.
+
+```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:201)
+[===========] Running 174 tests from 2 fixtures in 1 suite.
+[   SUITE   ] Baremetal (2 fixtures)
+[  FIXTURE  ] SerializationTest (18 tests)
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeChar
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeIntegerWithPrefix
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeIntegerWithPrefixAndLeadingZeros
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeIntegerWithoutPrefixWithLeadingZeros
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeInt8
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeUInt8
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeInt16
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeUInt16
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeInt32
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeUInt32
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeInt64
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeUInt64
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeFloat
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeDouble
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeString
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeConstCharPtr
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeConstVoidPtr
+[ SUCCEEDED ] Baremetal::SerializationTest::SerializeVoidPtr
+[  FIXTURE  ] 18 tests from SerializationTest
+[  FIXTURE  ] StringTest (156 tests)
+[ SUCCEEDED ] Baremetal::StringTest::ConstructDefault
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::ConstructNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSize
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSizeTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstructConstCharPtrAndSizeNpos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCopy
+[ SUCCEEDED ] Baremetal::StringTest::ConstructCopyEmpty
+[ SUCCEEDED ] Baremetal::StringTest::ConstructMove
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::ConstructStringFromPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::ConstCharPtrCastOperator
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorCopy
+[ SUCCEEDED ] Baremetal::StringTest::AssignmentOperatorMove
+[ SUCCEEDED ] Baremetal::StringTest::Begin
+[ SUCCEEDED ] Baremetal::StringTest::End
+[ SUCCEEDED ] Baremetal::StringTest::BeginConst
+[ SUCCEEDED ] Baremetal::StringTest::EndConst
+[ SUCCEEDED ] Baremetal::StringTest::Iterate
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AssignNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSize
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSizeTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AssignConstCharPtrAndSizeNpos
+[ SUCCEEDED ] Baremetal::StringTest::AssignCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AssignCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AssignString
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPos
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosNPos
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AssignStringFromPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::At
+[ SUCCEEDED ] Baremetal::StringTest::AtConst
+[ SUCCEEDED ] Baremetal::StringTest::AtOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::AtConstOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::AtEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::AtConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Front
+[ SUCCEEDED ] Baremetal::StringTest::FrontConst
+[ SUCCEEDED ] Baremetal::StringTest::FrontEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::FrontConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Back
+[ SUCCEEDED ] Baremetal::StringTest::BackConst
+[ SUCCEEDED ] Baremetal::StringTest::BackEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::BackConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperator
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConst
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConstOutsideString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::IndexOperatorConstEmptyString
+[ SUCCEEDED ] Baremetal::StringTest::Data
+[ SUCCEEDED ] Baremetal::StringTest::DataConst
+[ SUCCEEDED ] Baremetal::StringTest::CString
+[ SUCCEEDED ] Baremetal::StringTest::Reserve
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentChar
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentString
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddAssignmentNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendCountAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AppendCountNposAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AppendString
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPos
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AppendStringAtPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AppendNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCount
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::AppendConstCharPtrWithCountNpos
+[ SUCCEEDED ] Baremetal::StringTest::Clear
+[ SUCCEEDED ] Baremetal::StringTest::FindString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindStringEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindStringAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosEndOfString
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosTooLargeEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCount
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountMatchPart
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountTooLargeEmpty
+[ SUCCEEDED ] Baremetal::StringTest::FindConstCharPtrAtPosWithCountNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::FindChar
+[ SUCCEEDED ] Baremetal::StringTest::FindCharNoMatch
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPos
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPosTooLarge
+[ SUCCEEDED ] Baremetal::StringTest::FindCharAtPosNpos
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithString
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::StartsWithChar
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithString
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::EndsWithChar
+[ SUCCEEDED ] Baremetal::StringTest::ContainsString
+[ SUCCEEDED ] Baremetal::StringTest::ContainsConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ContainsChar
+[ SUCCEEDED ] Baremetal::StringTest::SubStr
+[ SUCCEEDED ] Baremetal::StringTest::Equals
+[ SUCCEEDED ] Baremetal::StringTest::EqualsCaseInsensitive
+[ SUCCEEDED ] Baremetal::StringTest::Compare
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountString
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountStringPos
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountStringPosCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCountConstCharPtrCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosChar
+[ SUCCEEDED ] Baremetal::StringTest::ReplacePosCharCount
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringString
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringStringMultiple
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::ReplaceSubstringConstCharPtrMultiple
+[ SUCCEEDED ] Baremetal::StringTest::Align
+[ SUCCEEDED ] Baremetal::StringTest::EqualityOperator
+[ SUCCEEDED ] Baremetal::StringTest::InEqualityOperator
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndConstCharPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndConstCharPtrEmpty
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndNullPtr
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorConstCharPtrAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorConstCharPtrEmptyAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorNullPtrAndString
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorStringAndChar
+[ SUCCEEDED ] Baremetal::StringTest::AddOperatorCharAndString
+[  FIXTURE  ] 156 tests from StringTest
+[   SUITE   ] 2 fixtures from Baremetal
+Success: 174 tests passed.
+
+No failures
+[===========] 174 tests from 2 fixtures in 1 suite ran.
+Info   Halt (System:122)
+```
 
 Next: [19-exceptions](19-exceptions.md)

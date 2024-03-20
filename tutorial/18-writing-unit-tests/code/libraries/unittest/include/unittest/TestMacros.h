@@ -86,8 +86,6 @@ public:                                                                         
         TearDown();                                                                                         \
     }                                                                                                       \
     FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
-    virtual void SetUp() {}                                                                                 \
-    virtual void TearDown() {}                                                                              \
     void RunImpl() const;                                                                                   \
     unittest::TestDetails const & m_details;                                                                \
 };                                                                                                          \

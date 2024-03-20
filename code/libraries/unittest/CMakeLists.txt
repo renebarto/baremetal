@@ -27,7 +27,7 @@ set(PROJECT_LIBS
     ${PROJECT_DEPENDENCIES}
     )
 
-    set(PROJECT_SOURCES
+set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CurrentTest.cpp

@@ -88,7 +88,7 @@ AssertionResult GenericFailure(const baremetal::string& message)
 /// <param name="expectedValue">Expected value</param>
 /// <param name="actualValue">Actual value</param>
 /// <returns>Result object</returns>
-AssertionResult BooleanFailure(const string& valueExpression, const string& expectedValue, const string& actualValue)
+AssertionResult BooleanFailure(const baremetal::string& valueExpression, const baremetal::string& expectedValue, const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", valueExpression.c_str());
     if (actualValue != valueExpression)
@@ -109,7 +109,11 @@ AssertionResult BooleanFailure(const string& valueExpression, const string& expe
 /// <param name="expectedValue">Expected value</param>
 /// <param name="actualValue">Actual value</param>
 /// <returns>Result object</returns>
-AssertionResult EqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
+AssertionResult EqFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)
@@ -135,7 +139,11 @@ AssertionResult EqFailure(const string& expectedExpression, const string& actual
 /// <param name="expectedValue">Expected value</param>
 /// <param name="actualValue">Actual value</param>
 /// <returns>Result object</returns>
-AssertionResult InEqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
+AssertionResult InEqFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)
@@ -163,12 +171,13 @@ AssertionResult InEqFailure(const string& expectedExpression, const string& actu
 /// <param name="actualValue">Actual value</param>
 /// <param name="toleranceValue">Tolerance value</param>
 /// <returns>Result object</returns>
-AssertionResult CloseFailure(const string& expectedExpression,
-                             const string& actualExpression,
-                             const string& toleranceExpression,
-                             const string& expectedValue,
-                             const string& actualValue,
-                             const string& toleranceValue)
+AssertionResult CloseFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& toleranceExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue,
+    const baremetal::string& toleranceValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)

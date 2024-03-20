@@ -43,6 +43,9 @@
 #include <baremetal/Synchronization.h>
 #include <baremetal/Types.h>
 
+/// @file
+/// Heap allocator
+
 namespace baremetal {
 
 /// @brief Block alignment
@@ -70,7 +73,9 @@ struct HeapBlockHeader
     uint8            align[HEAP_BLOCK_ALIGN - 16];
     /// @brief Start of actual allocated block
     uint8            data[0];
-} PACKED;
+} 
+/// @brief Just specifies the struct is packed
+PACKED;
 
 /// <summary>
 /// Bucket containing administration on allocated blocks of memory

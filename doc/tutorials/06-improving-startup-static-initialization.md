@@ -769,7 +769,7 @@ We've added line 109-115 here, which loop through the initialization array gener
 This is part of the `.init_array` section in `baremetal.ld', which also defines the start and end of the array:
 
 ```text
-File: d:\Projects\baremetal.github\baremetal.ld
+File: baremetal.ld
 78:     /* Executable static initialization section */
 79:     .init_array : {
 80:         __init_start = .;

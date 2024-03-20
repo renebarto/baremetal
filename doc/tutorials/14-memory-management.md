@@ -152,13 +152,16 @@ File: code/libraries/baremetal/include/baremetal/Synchronization.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: /// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
-43: #define DATA_CACHE_LINE_LENGTH_MIN  64
-44: /// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
-45: #define DATA_CACHE_LINE_LENGTH_MAX  64
+41: 
+42: /// @file
+43: /// Synchronization functionality
+44: 
+45: /// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+46: #define DATA_CACHE_LINE_LENGTH_MIN  64
+47: /// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+48: #define DATA_CACHE_LINE_LENGTH_MAX  64
 ```
 
 ### SysConfig.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSCONFIGH}
@@ -315,169 +318,174 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/Macros.h>
 43: #include <baremetal/Synchronization.h>
 44: #include <baremetal/Types.h>
-45:
-46: namespace baremetal {
-47:
-48: /// @brief Block alignment
-49: #define HEAP_BLOCK_ALIGN       DATA_CACHE_LINE_LENGTH_MAX
-50: /// @brief Block alignment mask
-51: #define HEAP_ALIGN_MASK        (HEAP_BLOCK_ALIGN - 1)
-52:
-53: /// @brief Maximum number of heap buckets used
-54: #define HEAP_BLOCK_MAX_BUCKETS 20
-55:
-56: /// <summary>
-57: /// Administration on an allocated block of memory
-58: /// </summary>
-59: struct HeapBlockHeader
-60: {
-61:     /// @brief Heap block magic number
-62:     uint32 magic;
-63:     /// @brief Heap block magic number
-64: #define HEAP_BLOCK_MAGIC 0x424C4D43
-65:     /// @brief Size of allocated block
-66:     uint32           size;
-67:     /// @brief Pointer to next header
-68:     HeapBlockHeader *next;
-69:     /// @brief Padding to align to HEAP_BLOCK_ALIGN bytes
-70:     uint8            align[HEAP_BLOCK_ALIGN - 16];
-71:     /// @brief Start of actual allocated block
-72:     uint8            data[0];
-73: } PACKED;
-74:
-75: /// <summary>
-76: /// Bucket containing administration on allocated blocks of memory
-77: /// </summary>
-78: struct HeapBlockBucket
-79: {
-80:     /// @brief Size of bucket (size actual memory allocated, excluding bucket header)
-81:     uint32 size;
-82: #if BAREMETAL_MEMORY_TRACING
-83:     /// @brief Count of blocks allocated in bucket
-84:     unsigned count;
-85:     /// @brief Maximum count of blocks allocated in bucket over time
-86:     unsigned maxCount;
-87:     /// @brief Total number of blocks allocated in bucket over time
-88:     uint64   totalAllocatedCount;
-89:     /// @brief Total number of bytes allocated in bucket over time
-90:     uint64   totalAllocated;
-91:     /// @brief Total number of blocks freed in bucket over time
-92:     uint64   totalFreedCount;
-93:     /// @brief Total number of bytes freed in bucket over time
-94:     uint64   totalFreed;
-95: #endif
-96:     /// @brief List of free blocks in bucket to be re-used
-97:     HeapBlockHeader *freeList;
-98: };
-99:
-100: /// <summary>
-101: /// Allocates blocks from a flat memory region
-102: /// </summary>
-103: class HeapAllocator
-104: {
-105: private:
-106:     /// @brief Name of the heap
-107:     const char*     m_heapName;
-108:     /// @brief Next available address
-109:     uint8*          m_next;
-110:     /// @brief End of available address space
-111:     uint8*          m_limit;
-112:     /// @brief Reserved address space
-113:     size_t          m_reserve;
-114:     /// @brief Allocated bucket administration
-115:     HeapBlockBucket m_buckets[HEAP_BLOCK_MAX_BUCKETS + 1];
-116:
-117:     /// @brief Sizes of allocation buckets
-118:     static uint32   s_bucketSizes[];
-119:
-120: public:
-121:     /// <summary>
-122:     /// Constructs a heap allocator
-123:     /// </summary>
-124:     /// <param name="heapName">Name of the heap for debugging purpose (must be static)</param>
-125:     explicit HeapAllocator(const char *heapName = "heap");
-126:
-127:     void Setup(uintptr baseAddress, size_t size, size_t reserve);
-128:
-129:     size_t GetFreeSpace() const;
-130:     void *Allocate(size_t size);
-131:     void *ReAllocate(void *block, size_t size);
-132:     void Free(void *block);
-133:
-134: #if BAREMETAL_MEMORY_TRACING
-135:     void   DumpStatus();
-136:
-137:     uint64 GetCurrentAllocatedBlockCount();
-138:     uint64 GetCurrentAllocationSize();
-139:     uint64 GetMaxAllocatedBlockCount();
-140:     uint64 GetTotalAllocatedBlockCount();
-141:     uint64 GetTotalFreedBlockCount();
-142:     uint64 GetTotalAllocationSize();
-143:     uint64 GetTotalFreeSize();
-144: #endif
-145: };
-146:
-147: } // namespace baremetal
+45: 
+46: /// @file
+47: /// Heap allocator
+48: 
+49: namespace baremetal {
+50: 
+51: /// @brief Block alignment
+52: #define HEAP_BLOCK_ALIGN       DATA_CACHE_LINE_LENGTH_MAX
+53: /// @brief Block alignment mask
+54: #define HEAP_ALIGN_MASK        (HEAP_BLOCK_ALIGN - 1)
+55: 
+56: /// @brief Maximum number of heap buckets used
+57: #define HEAP_BLOCK_MAX_BUCKETS 20
+58: 
+59: /// <summary>
+60: /// Administration on an allocated block of memory
+61: /// </summary>
+62: struct HeapBlockHeader
+63: {
+64:     /// @brief Heap block magic number
+65:     uint32 magic;
+66:     /// @brief Heap block magic number
+67: #define HEAP_BLOCK_MAGIC 0x424C4D43
+68:     /// @brief Size of allocated block
+69:     uint32           size;
+70:     /// @brief Pointer to next header
+71:     HeapBlockHeader *next;
+72:     /// @brief Padding to align to HEAP_BLOCK_ALIGN bytes
+73:     uint8            align[HEAP_BLOCK_ALIGN - 16];
+74:     /// @brief Start of actual allocated block
+75:     uint8            data[0];
+76: } 
+77: /// @brief Just specifies the struct is packed
+78: PACKED;
+79: 
+80: /// <summary>
+81: /// Bucket containing administration on allocated blocks of memory
+82: /// </summary>
+83: struct HeapBlockBucket
+84: {
+85:     /// @brief Size of bucket (size actual memory allocated, excluding bucket header)
+86:     uint32 size;
+87: #if BAREMETAL_MEMORY_TRACING
+88:     /// @brief Count of blocks allocated in bucket
+89:     unsigned count;
+90:     /// @brief Maximum count of blocks allocated in bucket over time
+91:     unsigned maxCount;
+92:     /// @brief Total number of blocks allocated in bucket over time
+93:     uint64   totalAllocatedCount;
+94:     /// @brief Total number of bytes allocated in bucket over time
+95:     uint64   totalAllocated;
+96:     /// @brief Total number of blocks freed in bucket over time
+97:     uint64   totalFreedCount;
+98:     /// @brief Total number of bytes freed in bucket over time
+99:     uint64   totalFreed;
+100: #endif
+101:     /// @brief List of free blocks in bucket to be re-used
+102:     HeapBlockHeader *freeList;
+103: };
+104: 
+105: /// <summary>
+106: /// Allocates blocks from a flat memory region
+107: /// </summary>
+108: class HeapAllocator
+109: {
+110: private:
+111:     /// @brief Name of the heap
+112:     const char*     m_heapName;
+113:     /// @brief Next available address
+114:     uint8*          m_next;
+115:     /// @brief End of available address space
+116:     uint8*          m_limit;
+117:     /// @brief Reserved address space
+118:     size_t          m_reserve;
+119:     /// @brief Allocated bucket administration
+120:     HeapBlockBucket m_buckets[HEAP_BLOCK_MAX_BUCKETS + 1];
+121: 
+122:     /// @brief Sizes of allocation buckets
+123:     static uint32   s_bucketSizes[];
+124: 
+125: public:
+126:     /// <summary>
+127:     /// Constructs a heap allocator
+128:     /// </summary>
+129:     /// <param name="heapName">Name of the heap for debugging purpose (must be static)</param>
+130:     explicit HeapAllocator(const char *heapName = "heap");
+131: 
+132:     void Setup(uintptr baseAddress, size_t size, size_t reserve);
+133: 
+134:     size_t GetFreeSpace() const;
+135:     void *Allocate(size_t size);
+136:     void *ReAllocate(void *block, size_t size);
+137:     void Free(void *block);
+138: 
+139: #if BAREMETAL_MEMORY_TRACING
+140:     void   DumpStatus();
+141: 
+142:     uint64 GetCurrentAllocatedBlockCount();
+143:     uint64 GetCurrentAllocationSize();
+144:     uint64 GetMaxAllocatedBlockCount();
+145:     uint64 GetTotalAllocatedBlockCount();
+146:     uint64 GetTotalFreedBlockCount();
+147:     uint64 GetTotalAllocationSize();
+148:     uint64 GetTotalFreeSize();
+149: #endif
+150: };
+151: 
+152: } // namespace baremetal
 ```
 
 - Line 43: We include `Synchronization.h` for the definition of the cache line length
-- Line 49: We define `HEAP_BLOCK_ALIGN` which signifies the alignment of allocated memory blocks
-- Line 51: We define `HEAP_ALIGN_MASK` which is used to check whether a memory block is indeed aligned correctly
-- Line 54: We define `HEAP_BLOCK_MAX_BUCKETS` which signifies the maximum number of buckets used for memory allocation.
+- Line 52: We define `HEAP_BLOCK_ALIGN` which signifies the alignment of allocated memory blocks
+- Line 54: We define `HEAP_ALIGN_MASK` which is used to check whether a memory block is indeed aligned correctly
+- Line 57: We define `HEAP_BLOCK_MAX_BUCKETS` which signifies the maximum number of buckets used for memory allocation.
 Think of the buckets as sizes for allocated memory blocks.
 We select the minimum buckets size which can hold the requested memory block, and allocate within that bucket.
-- Line 59-73: We declare a structure to administer memory block information
-  - Line 62: The member `magic` is used as a magic number to check against corruption of the memory block information
-  - Line 64: We define the magic number `HEAP_BLOCK_MAGIC` to be used (the hex version of the string 'BLMC')
-  - Line 66: The member `size` is the size of the allocated memory
-  - Line 68: The member `next` is a pointer to the next allocated memory block in a linked list
-  - Line 70: The member `align` makes sure that the data that follows is aligned to `HEAP_BLOCK_ALIGN` bytes.
+- Line 62-76: We declare a structure to administer memory block information
+  - Line 65: The member `magic` is used as a magic number to check against corruption of the memory block information
+  - Line 67: We define the magic number `HEAP_BLOCK_MAGIC` to be used (the hex version of the string 'BLMC')
+  - Line 69: The member `size` is the size of the allocated memory
+  - Line 71: The member `next` is a pointer to the next allocated memory block in a linked list
+  - Line 73: The member `align` makes sure that the data that follows is aligned to `HEAP_BLOCK_ALIGN` bytes.
 The memory block administration therefore uses 64 bytes of memory
-  - Line 72: The member `data` is a placeholder for the actual allocated memory
-- Line 78-98: We declare a structure to administer bucket information
-  - Line 81: The member `size` is the size of the bucket (the memory block excluding its administration needs to fit in a bucket).
+  - Line 75: The member `data` is a placeholder for the actual allocated memory
+- Line 83-103: We declare a structure to administer bucket information
+  - Line 86: The member `size` is the size of the bucket (the memory block excluding its administration needs to fit in a bucket).
 The amount of memory used is therefore the bucket size plus the size of the memory block administration
-  - Line 84: The member `count` is only defined when memory tracing is enabled. It holds the current number of allocated blocks in a bucket
-  - Line 86: The member `maxCount` is only defined when memory tracing is enabled. It holds the maximum number of allocated blocks in a bucket at any time
-  - Line 88: The member `totalAllocatedCount` is only defined when memory tracing is enabled. It holds the cumulative number of blocks allocated in a bucket over time
-  - Line 88: The member `totalAllocated` is only defined when memory tracing is enabled. It holds the cumulative amount of memory allocated in a bucket over time
-  - Line 88: The member `totalFreedCount` is only defined when memory tracing is enabled. It holds the cumulative number of blocks freed in a bucket over time
-  - Line 88: The member `totalFreed` is only defined when memory tracing is enabled. It holds the cumulative amount of memory freed in a bucket over time
-  - Line 97: The member `freeList` points to the first memory block administration of a list of blocks that were freed and not yet re-used
+  - Line 89: The member `count` is only defined when memory tracing is enabled. It holds the current number of allocated blocks in a bucket
+  - Line 91: The member `maxCount` is only defined when memory tracing is enabled. It holds the maximum number of allocated blocks in a bucket at any time
+  - Line 93: The member `totalAllocatedCount` is only defined when memory tracing is enabled. It holds the cumulative number of blocks allocated in a bucket over time
+  - Line 95: The member `totalAllocated` is only defined when memory tracing is enabled. It holds the cumulative amount of memory allocated in a bucket over time
+  - Line 97: The member `totalFreedCount` is only defined when memory tracing is enabled. It holds the cumulative number of blocks freed in a bucket over time
+  - Line 99: The member `totalFreed` is only defined when memory tracing is enabled. It holds the cumulative amount of memory freed in a bucket over time
+  - Line 102: The member `freeList` points to the first memory block administration of a list of blocks that were freed and not yet re-used
 - Line 103-145: We declare the class `HeapAllocator`
-  - Line 107: The member `m_heapName` holds the name of the heap for debugging purposes. This is passed to the constructor
-  - Line 109: The member `m_next` holds the pointer to the next address that is still free for allocation
-  - Line 111: The member `m_limit` holds the pointer to one byte beyond the last address available for the heap
-  - Line 113: The member `m_reserve` holds an amount of memory reserved for other purposes (e.g. allocated a block that does not fit in any bucket)
-  - Line 115: The member `m_buckets` holds the pointers to the first memory block information for each bucket
-  - Line 118: The static member `s_bucketSizes` holds the size of each bucket. Any values equal to 0 are unused buckets
-  - Line 125: We declare the constructor, which received the heap name
-  - Line 127: We declare the `Setup()` method, which is used to set the start address, size, and reserved space for the heap
-  - Line 129: We declare the `GetFreeSpace()` method, which returns the amount of unused memory space in the heap (excluding returned an unused previously allocated blocks)
-  - Line 130: We declare the `Allocate()` method, which allocates a block of memory, and returns the pointer to the memory block
-  - Line 131: We declare the `Rellocate()` method, which reallocates a block of memory (allocates a block of the newly requested size, copies the contents, and frees the original), and returns the pointer to the new memory block
-  - Line 132: We declare the `Free()` method, which frees a block of memory
-  - Line 135: The method `DumpStatus()` is only defined when memory tracing is enabled.
+  - Line 112: The member `m_heapName` holds the name of the heap for debugging purposes. This is passed to the constructor
+  - Line 114: The member `m_next` holds the pointer to the next address that is still free for allocation
+  - Line 116: The member `m_limit` holds the pointer to one byte beyond the last address available for the heap
+  - Line 118: The member `m_reserve` holds an amount of memory reserved for other purposes (e.g. allocated a block that does not fit in any bucket)
+  - Line 120: The member `m_buckets` holds the pointers to the first memory block information for each bucket
+  - Line 123: The static member `s_bucketSizes` holds the size of each bucket. Any values equal to 0 are unused buckets
+  - Line 130: We declare the constructor, which received the heap name
+  - Line 132: We declare the `Setup()` method, which is used to set the start address, size, and reserved space for the heap
+  - Line 134: We declare the `GetFreeSpace()` method, which returns the amount of unused memory space in the heap (excluding returned an unused previously allocated blocks)
+  - Line 135: We declare the `Allocate()` method, which allocates a block of memory, and returns the pointer to the memory block
+  - Line 136: We declare the `Rellocate()` method, which reallocates a block of memory (allocates a block of the newly requested size, copies the contents, and frees the original), and returns the pointer to the new memory block
+  - Line 137: We declare the `Free()` method, which frees a block of memory
+  - Line 140: The method `DumpStatus()` is only defined when memory tracing is enabled.
 It logs information on the currently allocated and free memory blocks
-  - Line 137: The method `GetCurrentAllocatedBlockCount()` is only defined when memory tracing is enabled.
+  - Line 142: The method `GetCurrentAllocatedBlockCount()` is only defined when memory tracing is enabled.
 It returns the total count of currently allocated memory blocks
-  - Line 138: The method `GetCurrentAllocationSize()` is only defined when memory tracing is enabled.
+  - Line 143: The method `GetCurrentAllocationSize()` is only defined when memory tracing is enabled.
 It returns the total size of allocated memory blocks
-  - Line 139: The method `GetMaxAllocatedBlockCount()` is only defined when memory tracing is enabled
+  - Line 144: The method `GetMaxAllocatedBlockCount()` is only defined when memory tracing is enabled
 It returns the maximum count of allocated memory blocks over time
-  - Line 140: The method `GetTotalAllocatedBlockCount()` is only defined when memory tracing is enabled.
+  - Line 145: The method `GetTotalAllocatedBlockCount()` is only defined when memory tracing is enabled.
 It returns the cumulative count of allocated memory blocks over time
-  - Line 141: The method `GetTotalFreedBlockCount()` is only defined when memory tracing is enabled.
+  - Line 146: The method `GetTotalFreedBlockCount()` is only defined when memory tracing is enabled.
 It returns the cumulative size of allocated memory blocks over time
-  - Line 142: The method `GetTotalAllocationSize()` is only defined when memory tracing is enabled
+  - Line 147: The method `GetTotalAllocationSize()` is only defined when memory tracing is enabled
 It returns the cumulative count of freed memory blocks over time
-  - Line 143: The method `GetTotalFreeSize()` is only defined when memory tracing is enabled.
+  - Line 148: The method `GetTotalFreeSize()` is only defined when memory tracing is enabled.
 It returns the cumulative size of freed memory blocks over time
 
 ### HeapAllocator.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_HEAPALLOCATORCPP}
@@ -526,355 +534,357 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/HeapAllocator.h>
-41:
+41: 
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/Util.h>
 45: #include <baremetal/SysConfig.h>
-46:
-47: using namespace baremetal;
-48:
-49: /// @brief Define log name
-50: LOG_MODULE("HeapAllocator");
-51:
-52: uint32 HeapAllocator::s_bucketSizes[] = { HEAP_BLOCK_BUCKET_SIZES };
-53:
-54: HeapAllocator::HeapAllocator(const char* heapName)
-55:     : m_heapName{ heapName }
-56:     , m_next{}
-57:     , m_limit{}
-58:     , m_reserve{}
-59:     , m_buckets{}
-60: {
-61:     memset(m_buckets, 0, sizeof(m_buckets));
-62:
-63:     size_t numBuckets = sizeof(s_bucketSizes) / sizeof(s_bucketSizes[0]);
-64:     if (numBuckets > HEAP_BLOCK_MAX_BUCKETS)
-65:     {
-66:         numBuckets = HEAP_BLOCK_MAX_BUCKETS;
-67:     }
-68:
-69:     for (size_t i = 0; i < numBuckets; ++i)
-70:     {
-71:         m_buckets[i].size = s_bucketSizes[i];
-72:     }
-73: }
-74:
-75: /// <summary>
-76: /// Sets up the heap allocator
-77: /// </summary>
-78: /// <param name="baseAddress">Base address of memory region (must be 16 bytes aligned)</param>
-79: /// <param name="size">Size of memory region</param>
-80: /// <param name="reserve">Free space reserved for handling of "Out of memory" messages.
-81: /// (Allocate() returns nullptr, if reserve is 0 and memory region is full)</param>
-82: void HeapAllocator::Setup(uintptr baseAddress, size_t size, size_t reserve)
-83: {
-84:     m_next = reinterpret_cast<uint8*>(baseAddress);
-85:     m_limit = reinterpret_cast<uint8*>(baseAddress + size);
-86:     m_reserve = reserve;
-87: #if BAREMETAL_MEMORY_TRACING
-88:     DumpStatus();
-89: #endif
-90: }
-91:
-92: /// <summary>
-93: /// Calculate and return the amount of free (unallocated) space in all buckets
-94: /// @note Unused blocks on a free list do not count here.
-95: /// </summary>
-96: /// <returns>Free space of the memory region, which is not allocated by blocks.</returns>
-97: size_t HeapAllocator::GetFreeSpace() const
-98: {
-99:     return m_limit - m_next;
-100: }
-101:
-102: /// <summary>
-103: /// Allocate a block of memory
-104: /// \note Resulting block is always 16 bytes aligned
-105: /// \note If reserve in Setup() is non-zero, the system panics if heap is full.
-106: /// </summary>
-107: /// <param name="size">Block size to be allocated</param>
-108: /// <returns>Pointer to new allocated block (nullptr if heap is full or not set-up)</returns>
-109: void* HeapAllocator::Allocate(size_t size)
-110: {
-111:     if (m_next == nullptr)
-112:     {
-113:         return nullptr;
-114:     }
-115:
-116:     HeapBlockBucket* bucket;
-117:     for (bucket = m_buckets; bucket->size > 0; bucket++)
-118:     {
-119:         if (size <= bucket->size)
-120:         {
-121:             size = bucket->size;
-122:
-123: #if BAREMETAL_MEMORY_TRACING
-124:             if (++bucket->count > bucket->maxCount)
-125:             {
-126:                 bucket->maxCount = bucket->count;
-127:             }
-128:             ++bucket->totalAllocatedCount;
-129:             bucket->totalAllocated += size;
-130:
-131: #endif
-132:             break;
-133:         }
-134:     }
-135:
-136:     HeapBlockHeader* blockHeader{ bucket->freeList };
-137:     if ((bucket->size > 0) && (blockHeader != nullptr))
-138:     {
-139:         assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
-140:         bucket->freeList = blockHeader->next;
-141: #if BAREMETAL_MEMORY_TRACING_DETAIL
-142:         LOG_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-143:         LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-144: #endif
-145:     }
-146:     else
-147:     {
-148:         blockHeader = reinterpret_cast<HeapBlockHeader*>(m_next);
-149:
-150:         uint8* nextBlock = m_next;
-151:         nextBlock += (sizeof(HeapBlockHeader) + size + HEAP_BLOCK_ALIGN - 1) & ~HEAP_ALIGN_MASK;
-152:
-153:         if ((nextBlock <= m_next) ||                    // may have wrapped
-154:             (nextBlock > m_limit - m_reserve))
-155:         {
-File: d:\Projects\baremetal.github\code\libraries\baremetal\src\HeapAllocator.cpp
-156: #if BAREMETAL_MEMORY_TRACING
-157:             DumpStatus();
-158: #endif
-159:             LOG_ERROR("%s: Out of memory", m_heapName);
-160:             return nullptr;
-161:         }
-162:
-163:         m_next = nextBlock;
-164:
-165:         blockHeader->magic = HEAP_BLOCK_MAGIC;
-166:         blockHeader->size = static_cast<uint32>(size);
-167:
-168: #if BAREMETAL_MEMORY_TRACING_DETAIL
-169:         LOG_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-170:         LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-171: #endif
-172:     }
-173:
-174:     blockHeader->next = nullptr;
-175:
-176:     void* result = blockHeader->data;
-177:     assert((reinterpret_cast<uintptr>(result) & HEAP_ALIGN_MASK) == 0);
-178:
-179:     return result;
-180: }
-181:
-182: /// <summary>
-183: /// Reallocate block of memory
-184: /// </summary>
-185: /// <param name="block">Block of memory to be reallocated to the new size</param>
-186: /// <param name="size">Block size to be allocated</param>
-187: /// <returns>Pointer to new allocated block (nullptr if heap is full or not set-up)</returns>
-188: void* HeapAllocator::ReAllocate(void* block, size_t size)
-189: {
-190:     if (block == nullptr)
-191:     {
-192:         return Allocate(size);
-193:     }
-194:
-195:     if (size == 0)
-196:     {
-197:         Free(block);
-198:
-199:         return nullptr;
-200:     }
-201:
-202:     const HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
-203:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
-204:     if (blockHeader->size >= size)
-205:     {
-206:         return block;
-207:     }
-208:
-209:     void* newBlock = Allocate(size);
-210:     if (newBlock == nullptr)
-211:     {
-212:         return nullptr;
-213:     }
-214:
-215:     memcpy(newBlock, block, blockHeader->size);
-216:
-217:     Free(block);
-218:
-219:     return newBlock;
-220: }
-221:
-222: /// <summary>
-223: /// Free (de-allocate) block of memory.
-224: /// \note Memory space of blocks, which are bigger than the largest bucket size, cannot be returned to a free list and is lost.
-225: /// </summary>
-226: /// <param name="block">Memory block to be freed</param>
-227: void HeapAllocator::Free(void* block)
-228: {
-229:     if (block == nullptr)
-230:     {
-231:         return;
-232:     }
-233:
-234:     HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
-235:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
-236:
-237:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; bucket++)
-238:     {
-239:         if (blockHeader->size == bucket->size)
-240:         {
-241:             blockHeader->next = bucket->freeList;
-242:             bucket->freeList = blockHeader;
-243:
-244: #if BAREMETAL_MEMORY_TRACING
-245:             bucket->count--;
-246:             ++bucket->totalFreedCount;
-247:             bucket->totalFreed += blockHeader->size;
-248: #if BAREMETAL_MEMORY_TRACING_DETAIL
-249:             LOG_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-250:             LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
-251: #endif
-252: #endif
-253:
-254:             return;
-255:         }
-256:     }
-257:
-258: #if BAREMETAL_MEMORY_TRACING
-259:     LOG_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
-260: #endif
-261: }
-262:
-263: #if BAREMETAL_MEMORY_TRACING
-264: /// <summary>
-265: /// Display the current status of the heap allocator
-266: /// </summary>
-267: void HeapAllocator::DumpStatus()
-268: {
-269:     LOG_DEBUG("Heap allocator info:     %s", m_heapName);
-270:     LOG_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
-271:     LOG_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
-272:     LOG_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
-273:     LOG_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
-274:     LOG_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
-275:     LOG_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
-276:     LOG_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
-277:
-278:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-279:     {
-280:         LOG_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu",
-281:             bucket->size, bucket->count, bucket->maxCount, bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
-282:     }
-283: }
-284:
-285: /// <summary>
-286: /// Returns the number of currently allocated memory blocks for this heap allocator.
-287: /// </summary>
-288: /// <returns>Number of currently allocated memory blocks for this heap allocator</returns>
-289: uint64 HeapAllocator::GetCurrentAllocatedBlockCount()
-290: {
-291:     uint64 total{};
-292:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-293:     {
-294:         total += bucket->count;
-295:     }
-296:     return total;
-297: }
-298:
-299: /// <summary>
-300: /// Returns the total size of currently allocated memory blocks for this heap allocator.
-301: /// </summary>
-302: /// <returns>Total size of currently allocated memory blocks for this heap allocator</returns>
-303: uint64 HeapAllocator::GetCurrentAllocationSize()
-304: {
-305:     uint64 total{};
-306:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-307:     {
-308:         total += bucket->count * bucket->size;
-309:     }
-310:     return total;
-311: }
-312:
-313: /// <summary>
-314: /// Returns the maximum number of currently allocated memory blocks for this heap allocator over time.
-315: /// </summary>
-316: /// <returns>Maximum number of currently allocated memory blocks for this heap allocator over time</returns>
-317: uint64 HeapAllocator::GetMaxAllocatedBlockCount()
-318: {
-319:     uint64 total{};
-320:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-321:     {
-322:         total += bucket->maxCount;
-323:     }
-324:     return total;
-325: }
-326:
-327: /// <summary>
-328: /// Returns the total number of allocated memory blocks for this heap allocator over time.
-329: /// </summary>
-330: /// <returns>Total number of allocated memory blocks for this heap allocator over time</returns>
-331: uint64 HeapAllocator::GetTotalAllocatedBlockCount()
-332: {
-333:     uint64 total{};
-334:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-335:     {
-336:         total += bucket->totalAllocatedCount;
-337:     }
-338:     return total;
-339: }
-340:
-341: /// <summary>
-342: /// Returns the total number of freed memory blocks for this heap allocator over time.
-343: /// </summary>
-344: /// <returns>Total number of freed memory blocks for this heap allocator over time</returns>
-345: uint64 HeapAllocator::GetTotalFreedBlockCount()
-346: {
-347:     uint64 total{};
-348:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-349:     {
-350:         total += bucket->totalFreedCount;
-351:     }
-352:     return total;
-353: }
-354:
-355: /// <summary>
-356: /// Returns the total size of allocated memory blocks for this heap allocator over time.
-357: /// </summary>
-358: /// <returns>Total size of allocated memory blocks for this heap allocator over time</returns>
-359: uint64 HeapAllocator::GetTotalAllocationSize()
-360: {
-361:     uint64 total{};
-362:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-363:     {
-364:         total += bucket->totalAllocated;
-365:     }
-366:     return total;
-367: }
-368:
-369: /// <summary>
-370: /// Returns the total size of freed memory blocks for this heap allocator over time.
-371: /// </summary>
-372: /// <returns>Total size of freed memory blocks for this heap allocator over time</returns>
-373: uint64 HeapAllocator::GetTotalFreeSize()
-374: {
-375:     uint64 total{};
-376:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
-377:     {
-378:         total += bucket->totalFreed;
-379:     }
-380:     return total;
-381: }
-382:
-383: #endif
+46: 
+47: /// @file
+48: /// Heap allocator implementation
+49: 
+50: using namespace baremetal;
+51: 
+52: /// @brief Define log name
+53: LOG_MODULE("HeapAllocator");
+54: 
+55: uint32 HeapAllocator::s_bucketSizes[] = { HEAP_BLOCK_BUCKET_SIZES };
+56: 
+57: HeapAllocator::HeapAllocator(const char* heapName)
+58:     : m_heapName{ heapName }
+59:     , m_next{}
+60:     , m_limit{}
+61:     , m_reserve{}
+62:     , m_buckets{}
+63: {
+64:     memset(m_buckets, 0, sizeof(m_buckets));
+65: 
+66:     size_t numBuckets = sizeof(s_bucketSizes) / sizeof(s_bucketSizes[0]);
+67:     if (numBuckets > HEAP_BLOCK_MAX_BUCKETS)
+68:     {
+69:         numBuckets = HEAP_BLOCK_MAX_BUCKETS;
+70:     }
+71: 
+72:     for (size_t i = 0; i < numBuckets; ++i)
+73:     {
+74:         m_buckets[i].size = s_bucketSizes[i];
+75:     }
+76: }
+77: 
+78: /// <summary>
+79: /// Sets up the heap allocator
+80: /// </summary>
+81: /// <param name="baseAddress">Base address of memory region (must be 16 bytes aligned)</param>
+82: /// <param name="size">Size of memory region</param>
+83: /// <param name="reserve">Free space reserved for handling of "Out of memory" messages.
+84: /// (Allocate() returns nullptr, if reserve is 0 and memory region is full)</param>
+85: void HeapAllocator::Setup(uintptr baseAddress, size_t size, size_t reserve)
+86: {
+87:     m_next = reinterpret_cast<uint8*>(baseAddress);
+88:     m_limit = reinterpret_cast<uint8*>(baseAddress + size);
+89:     m_reserve = reserve;
+90: #if BAREMETAL_MEMORY_TRACING
+91:     DumpStatus();
+92: #endif
+93: }
+94: 
+95: /// <summary>
+96: /// Calculate and return the amount of free (unallocated) space in all buckets
+97: /// @note Unused blocks on a free list do not count here.
+98: /// </summary>
+99: /// <returns>Free space of the memory region, which is not allocated by blocks.</returns>
+100: size_t HeapAllocator::GetFreeSpace() const
+101: {
+102:     return m_limit - m_next;
+103: }
+104: 
+105: /// <summary>
+106: /// Allocate a block of memory
+107: /// \note Resulting block is always 16 bytes aligned
+108: /// \note If reserve in Setup() is non-zero, the system panics if heap is full.
+109: /// </summary>
+110: /// <param name="size">Block size to be allocated</param>
+111: /// <returns>Pointer to new allocated block (nullptr if heap is full or not set-up)</returns>
+112: void* HeapAllocator::Allocate(size_t size)
+113: {
+114:     if (m_next == nullptr)
+115:     {
+116:         return nullptr;
+117:     }
+118: 
+119:     HeapBlockBucket* bucket;
+120:     for (bucket = m_buckets; bucket->size > 0; bucket++)
+121:     {
+122:         if (size <= bucket->size)
+123:         {
+124:             size = bucket->size;
+125: 
+126: #if BAREMETAL_MEMORY_TRACING
+127:             if (++bucket->count > bucket->maxCount)
+128:             {
+129:                 bucket->maxCount = bucket->count;
+130:             }
+131:             ++bucket->totalAllocatedCount;
+132:             bucket->totalAllocated += size;
+133: 
+134: #endif
+135:             break;
+136:         }
+137:     }
+138: 
+139:     HeapBlockHeader* blockHeader{ bucket->freeList };
+140:     if ((bucket->size > 0) && (blockHeader != nullptr))
+141:     {
+142:         assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
+143:         bucket->freeList = blockHeader->next;
+144: #if BAREMETAL_MEMORY_TRACING_DETAIL
+145:         LOG_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+146:         LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+147: #endif
+148:     }
+149:     else
+150:     {
+151:         blockHeader = reinterpret_cast<HeapBlockHeader*>(m_next);
+152: 
+153:         uint8* nextBlock = m_next;
+154:         nextBlock += (sizeof(HeapBlockHeader) + size + HEAP_BLOCK_ALIGN - 1) & ~HEAP_ALIGN_MASK;
+155: 
+156:         if ((nextBlock <= m_next) ||                    // may have wrapped
+157:             (nextBlock > m_limit - m_reserve))
+158:         {
+159: #if BAREMETAL_MEMORY_TRACING
+160:             DumpStatus();
+161: #endif
+162:             LOG_ERROR("%s: Out of memory", m_heapName);
+163:             return nullptr;
+164:         }
+165: 
+166:         m_next = nextBlock;
+167: 
+168:         blockHeader->magic = HEAP_BLOCK_MAGIC;
+169:         blockHeader->size = static_cast<uint32>(size);
+170: 
+171: #if BAREMETAL_MEMORY_TRACING_DETAIL
+172:         LOG_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+173:         LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+174: #endif
+175:     }
+176: 
+177:     blockHeader->next = nullptr;
+178: 
+179:     void* result = blockHeader->data;
+180:     assert((reinterpret_cast<uintptr>(result) & HEAP_ALIGN_MASK) == 0);
+181: 
+182:     return result;
+183: }
+184: 
+185: /// <summary>
+186: /// Reallocate block of memory
+187: /// </summary>
+188: /// <param name="block">Block of memory to be reallocated to the new size</param>
+189: /// <param name="size">Block size to be allocated</param>
+190: /// <returns>Pointer to new allocated block (nullptr if heap is full or not set-up)</returns>
+191: void* HeapAllocator::ReAllocate(void* block, size_t size)
+192: {
+193:     if (block == nullptr)
+194:     {
+195:         return Allocate(size);
+196:     }
+197: 
+198:     if (size == 0)
+199:     {
+200:         Free(block);
+201: 
+202:         return nullptr;
+203:     }
+204: 
+205:     const HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
+206:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
+207:     if (blockHeader->size >= size)
+208:     {
+209:         return block;
+210:     }
+211: 
+212:     void* newBlock = Allocate(size);
+213:     if (newBlock == nullptr)
+214:     {
+215:         return nullptr;
+216:     }
+217: 
+218:     memcpy(newBlock, block, blockHeader->size);
+219: 
+220:     Free(block);
+221: 
+222:     return newBlock;
+223: }
+224: 
+225: /// <summary>
+226: /// Free (de-allocate) block of memory.
+227: /// \note Memory space of blocks, which are bigger than the largest bucket size, cannot be returned to a free list and is lost.
+228: /// </summary>
+229: /// <param name="block">Memory block to be freed</param>
+230: void HeapAllocator::Free(void* block)
+231: {
+232:     if (block == nullptr)
+233:     {
+234:         return;
+235:     }
+236: 
+237:     HeapBlockHeader* blockHeader = reinterpret_cast<HeapBlockHeader*>(reinterpret_cast<uintptr>(block) - sizeof(HeapBlockHeader));
+238:     assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
+239: 
+240:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; bucket++)
+241:     {
+242:         if (blockHeader->size == bucket->size)
+243:         {
+244:             blockHeader->next = bucket->freeList;
+245:             bucket->freeList = blockHeader;
+246: 
+247: #if BAREMETAL_MEMORY_TRACING
+248:             bucket->count--;
+249:             ++bucket->totalFreedCount;
+250:             bucket->totalFreed += blockHeader->size;
+251: #if BAREMETAL_MEMORY_TRACING_DETAIL
+252:             LOG_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+253:             LOG_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+254: #endif
+255: #endif
+256: 
+257:             return;
+258:         }
+259:     }
+260: 
+261: #if BAREMETAL_MEMORY_TRACING
+262:     LOG_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
+263: #endif
+264: }
+265: 
+266: #if BAREMETAL_MEMORY_TRACING
+267: /// <summary>
+268: /// Display the current status of the heap allocator
+269: /// </summary>
+270: void HeapAllocator::DumpStatus()
+271: {
+272:     LOG_DEBUG("Heap allocator info:     %s", m_heapName);
+273:     LOG_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
+274:     LOG_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
+275:     LOG_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
+276:     LOG_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
+277:     LOG_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
+278:     LOG_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
+279:     LOG_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
+280: 
+281:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+282:     {
+283:         LOG_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu",
+284:             bucket->size, bucket->count, bucket->maxCount, bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
+285:     }
+286: }
+287: 
+288: /// <summary>
+289: /// Returns the number of currently allocated memory blocks for this heap allocator.
+290: /// </summary>
+291: /// <returns>Number of currently allocated memory blocks for this heap allocator</returns>
+292: uint64 HeapAllocator::GetCurrentAllocatedBlockCount()
+293: {
+294:     uint64 total{};
+295:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+296:     {
+297:         total += bucket->count;
+298:     }
+299:     return total;
+300: }
+301: 
+302: /// <summary>
+303: /// Returns the total size of currently allocated memory blocks for this heap allocator.
+304: /// </summary>
+305: /// <returns>Total size of currently allocated memory blocks for this heap allocator</returns>
+306: uint64 HeapAllocator::GetCurrentAllocationSize()
+307: {
+308:     uint64 total{};
+309:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+310:     {
+311:         total += bucket->count * bucket->size;
+312:     }
+313:     return total;
+314: }
+315: 
+316: /// <summary>
+317: /// Returns the maximum number of currently allocated memory blocks for this heap allocator over time.
+318: /// </summary>
+319: /// <returns>Maximum number of currently allocated memory blocks for this heap allocator over time</returns>
+320: uint64 HeapAllocator::GetMaxAllocatedBlockCount()
+321: {
+322:     uint64 total{};
+323:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+324:     {
+325:         total += bucket->maxCount;
+326:     }
+327:     return total;
+328: }
+329: 
+330: /// <summary>
+331: /// Returns the total number of allocated memory blocks for this heap allocator over time.
+332: /// </summary>
+333: /// <returns>Total number of allocated memory blocks for this heap allocator over time</returns>
+334: uint64 HeapAllocator::GetTotalAllocatedBlockCount()
+335: {
+336:     uint64 total{};
+337:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+338:     {
+339:         total += bucket->totalAllocatedCount;
+340:     }
+341:     return total;
+342: }
+343: 
+344: /// <summary>
+345: /// Returns the total number of freed memory blocks for this heap allocator over time.
+346: /// </summary>
+347: /// <returns>Total number of freed memory blocks for this heap allocator over time</returns>
+348: uint64 HeapAllocator::GetTotalFreedBlockCount()
+349: {
+350:     uint64 total{};
+351:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+352:     {
+353:         total += bucket->totalFreedCount;
+354:     }
+355:     return total;
+356: }
+357: 
+358: /// <summary>
+359: /// Returns the total size of allocated memory blocks for this heap allocator over time.
+360: /// </summary>
+361: /// <returns>Total size of allocated memory blocks for this heap allocator over time</returns>
+362: uint64 HeapAllocator::GetTotalAllocationSize()
+363: {
+364:     uint64 total{};
+365:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+366:     {
+367:         total += bucket->totalAllocated;
+368:     }
+369:     return total;
+370: }
+371: 
+372: /// <summary>
+373: /// Returns the total size of freed memory blocks for this heap allocator over time.
+374: /// </summary>
+375: /// <returns>Total size of freed memory blocks for this heap allocator over time</returns>
+376: uint64 HeapAllocator::GetTotalFreeSize()
+377: {
+378:     uint64 total{};
+379:     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
+380:     {
+381:         total += bucket->totalFreed;
+382:     }
+383:     return total;
+384: }
+385: 
+386: #endif
 ```
 
-- Line 52: We define the static member `s_bucketSizes` with the initializer `HEAP_BLOCK_BUCKET_SIZES` defined in `SysConfig.h` (unless overridden).
+- Line 55: We define the static member `s_bucketSizes` with the initializer `HEAP_BLOCK_BUCKET_SIZES` defined in `SysConfig.h` (unless overridden).
 The default bucket sizes are:
   - 64 bytes (128 including memory block administration)
   - 1024 bytes (1088 including memory block administration)
@@ -883,47 +893,47 @@ The default bucket sizes are:
   - 65536 bytes (65600 including memory block administration)
   - 262144 bytes (262208 including memory block administration)
   - 524288 bytes (524352 including memory block administration)
-- Line 54-73: We implement the `HeapAllocator` constructor
-  - Line 61: We clear the bucket administration array
-  - Line 64-72: We set the sizes of buckets from the static member `s_bucketSizes`, making sure we stay within the maximum bucket count
-- Line 82-90: We implement the method `Setup()`
-  - Line 84: We set the pointer to the next available space to the start of the region
-  - Line 85: We set the pointer to the end of available space to the end of the region
-  - Line 86: We save the reserved space
-  - Line 88: Only if `BAREMETAL_MEMORY_TRACING` is defined: We dump the current memory management status to the log
-- Line 97-100: We implement the method `GetFreeSpace()` which returns the available space left
-- Line 109-187: We implement the method `Allocate()`
-  - Line 111-114: We add a sanity check to verify that the memory manager is set up
-  - Line 116-134: We find the smallest bucket that supports the requested size
-  - Line 136-145: We check whether there is a block within the selected bucket that was freed before, so we can re-use it
-  - Line 147-179: If no block can be re-used, we allocate a new one
-    - Line 148: We use the first available address in free space
-    - Line 150-151: We calculate the next available address in free space (we add the size of the administration block and the requested size rounded up to the heap alignment)
-    - Line 153-161: If the next available address would no longer fit in the available space, we fail by returning nullptr, after logging an error
-    - Line 163: We update the first available address in free space
-    - Line 165-166: We fill the memory block administration
-  - Line 174: We set the pointer to the next memory block
-  - Line 176-177: We get the pointer to the actual memory block, and check for correct alignment
-- Line 188-220: We implement the method `ReAllocate()`
-  - Line 190-193: If the memory block is actually a nullptr, we simply allocate
-  - Line 195-200: If the new size is 0, we free the block and return nullptr
-  - Line 202-203: We get hold of the memory block administration and check for a valid magic number
-  - Line 204-207: If the new size still fits in the current bucket, we simply return the block
-  - Line 209-213: We allocate a new block of the new size
-  - Line 215: We copy the contents of the current block into the new one (not that this only happens when we grow the block)
-  - Line 217: We free the old memory block
-- Line 227-261: We implement the method `Free()`
-  - Line 229-231: If the memory block is nullptr, we simply return
-  - Line 234-235: We get hold of the memory block administration and check for a valid magic number
-  - Line 237-256: We look up the bucket this block block belongs to and add it to the list of free memory blocks for that bucket
-  - Line 258-261: Note that when a block was allocated that does not fit in any bucket, that memory is lost
-- Line 289-297: We implement the method `GetCurrentAllocatedBlockCount()`
-- Line 303-311: We implement the method `GetCurrentAllocationSize()`
-- Line 317-325: We implement the method `GetMaxAllocatedBlockCount()`
-- Line 331-339: We implement the method `GetTotalAllocatedBlockCount()`
-- Line 345-352: We implement the method `GetTotalFreedBlockCount()`
-- Line 359-367: We implement the method `GetTotalAllocationSize()`
-- Line 373-381: We implement the method `GetTotalFreeSize()`
+- Line 57-76: We implement the `HeapAllocator` constructor
+  - Line 64: We clear the bucket administration array
+  - Line 67-75: We set the sizes of buckets from the static member `s_bucketSizes`, making sure we stay within the maximum bucket count
+- Line 85-93: We implement the method `Setup()`
+  - Line 87: We set the pointer to the next available space to the start of the region
+  - Line 88: We set the pointer to the end of available space to the end of the region
+  - Line 89: We save the reserved space
+  - Line 91: Only if `BAREMETAL_MEMORY_TRACING` is defined: We dump the current memory management status to the log
+- Line 100-103: We implement the method `GetFreeSpace()` which returns the available space left
+- Line 112-190: We implement the method `Allocate()`
+  - Line 114-117: We add a sanity check to verify that the memory manager is set up
+  - Line 119-137: We find the smallest bucket that supports the requested size
+  - Line 139-148: We check whether there is a block within the selected bucket that was freed before, so we can re-use it
+  - Line 150-182: If no block can be re-used, we allocate a new one
+    - Line 151: We use the first available address in free space
+    - Line 153-154: We calculate the next available address in free space (we add the size of the administration block and the requested size rounded up to the heap alignment)
+    - Line 156-164: If the next available address would no longer fit in the available space, we fail by returning nullptr, after logging an error
+    - Line 167: We update the first available address in free space
+    - Line 168-169: We fill the memory block administration
+  - Line 177: We set the pointer to the next memory block
+  - Line 179-180: We get the pointer to the actual memory block, and check for correct alignment
+- Line 191-223: We implement the method `ReAllocate()`
+  - Line 193-196: If the memory block is actually a nullptr, we simply allocate
+  - Line 198-203: If the new size is 0, we free the block and return nullptr
+  - Line 205-208: We get hold of the memory block administration and check for a valid magic number
+  - Line 207-210: If the new size still fits in the current bucket, we simply return the block
+  - Line 212-216: We allocate a new block of the new size
+  - Line 218: We copy the contents of the current block into the new one (not that this only happens when we grow the block)
+  - Line 220: We free the old memory block
+- Line 230-264: We implement the method `Free()`
+  - Line 232-234: If the memory block is nullptr, we simply return
+  - Line 237-238: We get hold of the memory block administration and check for a valid magic number
+  - Line 240-259: We look up the bucket this block block belongs to and add it to the list of free memory blocks for that bucket
+  - Line 261-263: Note that when a block was allocated that does not fit in any bucket, that memory is lost
+- Line 292-300: We implement the method `GetCurrentAllocatedBlockCount()`
+- Line 306-314: We implement the method `GetCurrentAllocationSize()`
+- Line 320-328: We implement the method `GetMaxAllocatedBlockCount()`
+- Line 334-342: We implement the method `GetTotalAllocatedBlockCount()`
+- Line 348-355: We implement the method `GetTotalFreedBlockCount()`
+- Line 362-370: We implement the method `GetTotalAllocationSize()`
+- Line 376-384: We implement the method `GetTotalFreeSize()`
 
 ### MemoryManager.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMANAGERH}
 
@@ -985,19 +995,18 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 99:     MemoryManager();
 100:
 101: public:
-102:
-103:     static uintptr GetCoherentPage(CoherentPageSlot slot);
-104:
-105:     static void* HeapAllocate(size_t size, HeapType type);
-106:     static void* HeapReAllocate(void* block, size_t size);
-107:     static void HeapFree(void* block);
-108:     static size_t GetHeapFreeSpace(HeapType type);
-109:     static void DumpStatus();
-110: };
-111:
-112: MemoryManager& GetMemoryManager();
-113:
-114: } // namespace baremetal
+102:     static uintptr GetCoherentPage(CoherentPageSlot slot);
+103: 
+104:     static void* HeapAllocate(size_t size, HeapType type);
+105:     static void* HeapReAllocate(void* block, size_t size);
+106:     static void HeapFree(void* block);
+107:     static size_t GetHeapFreeSpace(HeapType type);
+108:     static void DumpStatus();
+109: };
+110: 
+111: MemoryManager& GetMemoryManager();
+112: 
+113: } // namespace baremetal
 ```
 
 - Line 43: We include `HeapAllocator.h`
@@ -1009,12 +1018,12 @@ This does not take into account the reservations for paging, and the part used f
 - Line 94: The member `m_heapLow` is the low heap
 - Line 97: The member `m_heapHigh` is only defined for Raspberry Pi 4 and higher, is the high heap
 - Line 99: We declare the private constructor for `MemoryManager`. This can only be called by `GetMemoryManager()`
-- Line 105: We declare the method `HeapAllocate()`, which allocates memory of the requested size, in the requested heap
-- Line 106: We declare the method `HeapReAllocate()`, which re-allocates a memory block to the requested size
-- Line 107: We declare the method `HeapFree()`, which frees a memory block
-- Line 108: We declare the method `GetHeapFreeSpace()`, which returned available memory in all heaps
-- Line 109: We declare the method `DumpStatus()`, which log information on all heaps concerning allocated and freed memory blocks
-- Line 112: We declare the method `GetMemoryManager()`, which initiates the singleton `MemoryManager`
+- Line 104: We declare the method `HeapAllocate()`, which allocates memory of the requested size, in the requested heap
+- Line 105: We declare the method `HeapReAllocate()`, which re-allocates a memory block to the requested size
+- Line 106: We declare the method `HeapFree()`, which frees a memory block
+- Line 107: We declare the method `GetHeapFreeSpace()`, which returned available memory in all heaps
+- Line 108: We declare the method `DumpStatus()`, which log information on all heaps concerning allocated and freed memory blocks
+- Line 111: We declare the method `GetMemoryManager()`, which initiates the singleton `MemoryManager`
 
 ### MemoryManager.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMANAGERCPP}
 
@@ -1024,45 +1033,7 @@ Update the file `code/libraries/baremetal/src/MemoryManager.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/MemoryManager.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : MemoryManager.cpp
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : MemoryManager
-9: //
-10: // Description : Memory handling
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
+...
 40: #include <baremetal/MemoryManager.h>
 41:
 42: #include <baremetal/Assert.h>
@@ -1244,24 +1215,26 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 218: /// </summary>
 219: void MemoryManager::DumpStatus()
 220: {
-221:     auto& memoryManager = GetMemoryManager();
-222:     LOG_DEBUG("Low heap:");
-223:     memoryManager.m_heapLow.DumpStatus();
-224: #if BAREMETAL_RPI_TARGET >= 4
-225:     LOG_DEBUG("High heap:");
-226:     memoryManager.m_heapHigh.DumpState();
-227: #endif
-228: }
-229:
-230: /// <summary>
-231: /// Construct the singleton MemoryManager instance if needed, and return a reference to the instance
-232: /// </summary>
-233: /// <returns>Reference to the singleton MemoryManager</returns>
-234: MemoryManager& baremetal::GetMemoryManager()
-235: {
-236:     static MemoryManager instance;
-237:     return instance;
-238: }
+221: #if BAREMETAL_MEMORY_TRACING
+222:     auto& memoryManager = GetMemoryManager();
+223:     LOG_DEBUG("Low heap:");
+224:     memoryManager.m_heapLow.DumpStatus();
+225: #if BAREMETAL_RPI_TARGET >= 4
+226:     LOG_DEBUG("High heap:");
+227:     memoryManager.m_heapHigh.DumpStatus();
+228: #endif
+229: #endif
+230: }
+231: 
+232: /// <summary>
+233: /// Construct the singleton MemoryManager instance if needed, and return a reference to the instance
+234: /// </summary>
+235: /// <returns>Reference to the singleton MemoryManager</returns>
+236: MemoryManager& baremetal::GetMemoryManager()
+237: {
+238:     static MemoryManager instance;
+239:     return instance;
+240: }
 ```
 
 - Line 42-45: We need to include `Assert.h`, `Logger.h` and `MachineInfo.h`
@@ -1292,14 +1265,14 @@ If any heap was selected, we first attempt to claim from the low heap, if that f
 If any heap is selected, the freespace for both heaps is added together
   - Line 207-212: In case of Raspberry Pi 3, we call `GetFreeSpace()` on the low heap
 - Line 219-228: We implement the method `DumpStatus()`
-  - Line 221: As this is a static method, we retrieve the `MemoryManager` instance
-  - Line 222-223: We call `DumpStatus()` on the low heap
-  - Line 225-226: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
-- Line 234-238: We implement the function `GetMemoryManager()`
+  - Line 222: As this is a static method, we retrieve the `MemoryManager` instance
+  - Line 223-224: We call `DumpStatus()` on the low heap
+  - Line 226-227: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
+- Line 236-240: We implement the function `GetMemoryManager()`
 
 ### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSTEMCPP}
 
-Although not urgently needed yet, we'll need singleton the `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
+Although not urgently needed yet, we'll need the singleton `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
 So let's go ahead and instantiate the `MemoryManager` there.
 
 Update the file `code/libraries/baremetal/src/System.cpp`
@@ -1329,11 +1302,37 @@ File: code/libraries/baremetal/src/System.cpp
 195:         (**func)();
 196:     }
 197:
-...
+198:     SetupVersion();
+199: 
+200:     GetLogger();
+201:     LOG_INFO("Starting up");
+202: 
+203:     extern int main();
+204: 
+205:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
+206:     {
+207: #if BAREMETAL_MEMORY_TRACING
+208:         GetMemoryManager().DumpStatus();
+209: #endif
+210:         GetSystem().Reboot();
+211:     }
+212: 
+213: #if BAREMETAL_MEMORY_TRACING
+214:     GetMemoryManager().DumpStatus();
+215: #endif
+216:     GetSystem().Halt();
+217: }
+218: 
+219: #ifdef __cplusplus
+220: }
+221: #endif
+222: 
 ```
 
 - Line 46: We need to include `MemoryManager.h`
 - Line 188: We call `GetMemoryManager()` to instantiate the `MemoryManager` singleton instance.
+- Line 207-209: If tracing is requested, we call the `MemoryManager` method `DumpStatus()`
+- Line 213-215: If tracing is requested, we call the `MemoryManager` method `DumpStatus()`
 
 ### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_APPLICATION_CODE}
 

@@ -39,11 +39,19 @@
 
 #pragma once
 
+/// @file
+/// Build version
+
+/// @brief Platform name
 #define BAREMETAL_NAME              "Baremetal"
 
+/// @brief Major version number (specified by define at compile time)
 #define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
+/// @brief Minor version number (specified by define at compile time)
 #define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
+/// @brief patch version number (specified by define at compile time)
 #define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
+/// @brief Version string
 #define BAREMETAL_VERSION_STRING    GetVersion()
 
 namespace baremetal {

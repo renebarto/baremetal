@@ -42,10 +42,22 @@
 #include <baremetal/Format.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Build version implementation
+
+/// @brief Buffer size of version string buffer
 static const size_t BufferSize = 20;
+/// @brief Version string buffer
 static char s_baremetalVersionString[BufferSize]{};
+/// @brief Flag to check if version set up was already done
 static bool s_baremetalVersionSetupDone = false;
 
+/// <summary>
+/// Set up version string
+///
+/// The version string is written into a buffer without allocating memory.
+/// This is important, as we may be logging before memory management is set up.
+/// </summary>
 void baremetal::SetupVersion()
 {
     if (!s_baremetalVersionSetupDone)
@@ -55,6 +67,10 @@ void baremetal::SetupVersion()
     }
 }
 
+/// <summary>
+/// Return version string
+/// </summary>
+/// <returns>Version string</returns>
 const char* baremetal::GetVersion()
 {
     return s_baremetalVersionString;

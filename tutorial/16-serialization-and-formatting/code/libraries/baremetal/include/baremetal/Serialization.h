@@ -53,6 +53,12 @@ namespace baremetal {
 // width < 0 Left aligned
 // width > 0 right aligned
 // width < actual length no alignment
+
+/// <summary>
+/// Serialize boolean
+/// </summary>
+/// <param name="value">Value</param>
+/// <returns>Resulting string</returns>
 inline string Serialize(const bool& value)
 {
     return string(value ? "true" : "false");
@@ -71,13 +77,12 @@ string Serialize(uint64 value, int width = 0, int base = 10, bool showBase = fal
 /// <summary>
 /// Serialize long long int value, type specific specialization
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
 /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
 /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+/// <returns>Resulting string</returns>
 inline string Serialize(long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
 {
     return Serialize(static_cast<int64>(value), width, base, showBase, leadingZeros);
@@ -85,13 +90,12 @@ inline string Serialize(long long value, int width = 0, int base = 10, bool show
 /// <summary>
 /// Serialize unsigned long long int value, type specific specialization
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
 /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
 /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+/// <returns>Resulting string</returns>
 inline string Serialize(unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
 {
     return Serialize(static_cast<uint64>(value), width, base, showBase, leadingZeros);

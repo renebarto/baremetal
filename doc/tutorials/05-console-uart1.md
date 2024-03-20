@@ -2046,7 +2046,7 @@ This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). The varia
 The macro armv8_switch_to_el1_m sets up a number of registers for our code to run smoothly. This contains quite to intricate details, so bare with me.
 
 ```asm
-File: d:\Projects\baremetal.github\code\libraries\baremetal\src\Startup.S
+File: code/libraries/baremetal/src/Startup.S
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
 45:
 46:     // Initialize Generic Timers
@@ -2277,7 +2277,7 @@ We add the defintion of the memory layout for the system. As we are building a b
 Create the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 
 ```cpp
-File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\MemoryMap.h
+File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //

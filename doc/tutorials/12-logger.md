@@ -323,210 +323,218 @@ File: code/libraries/baremetal/src/Console.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Console.h>
-41:
+41: 
 42: #include <baremetal/Serialization.h>
 43: #include <baremetal/Timer.h>
 44: #include <baremetal/UART0.h>
 45: #include <baremetal/UART1.h>
 46: #include <baremetal/Util.h>
-47:
-48: namespace baremetal {
-49:
-50: static const char *GetAnsiColorCode(ConsoleColor color)
-51: {
-52:     switch (color)
-53:     {
-54:     case ConsoleColor::Black:
-55:     case ConsoleColor::DarkGray:
-56:         return "0";
-57:     case ConsoleColor::Red:
-58:     case ConsoleColor::BrightRed:
-59:         return "1";
-60:     case ConsoleColor::Green:
-61:     case ConsoleColor::BrightGreen:
-62:         return "2";
-63:     case ConsoleColor::Yellow:
-64:     case ConsoleColor::BrightYellow:
-65:         return "3";
-66:     case ConsoleColor::Blue:
-67:     case ConsoleColor::BrightBlue:
-68:         return "4";
-69:     case ConsoleColor::Magenta:
-70:     case ConsoleColor::BrightMagenta:
-71:         return "5";
-72:     case ConsoleColor::Cyan:
-73:     case ConsoleColor::BrightCyan:
-74:         return "6";
-75:     case ConsoleColor::LightGray:
-76:     case ConsoleColor::White:
-77:         return "7";
-78:     default:
-79:         return 0;
-80:     };
-81: }
-82:
-83: /// <summary>
-84: /// Create a console linked to the specified character device. Note that the constructor is private, so GetConsole() is needed to instantiate the console
-85: /// </summary>
-86: /// <param name="device">Character device used for output</param>
-87: Console::Console(CharDevice *device)
-88:     : m_device{device}
-89: {
-90: }
-91:
-92: /// <summary>
-93: /// Change the attached device
-94: /// </summary>
-95: /// <param name="device">Character device to be set to for output</param>
-96: void Console::AssignDevice(CharDevice *device)
+47: 
+48: /// @file
+49: /// Console implementation
+50: 
+51: namespace baremetal {
+52: 
+53: /// <summary>
+54: /// Determine ANSI color string for specified color
+55: /// </summary>
+56: /// <param name="color">ANSI color to use</param>
+57: /// <returns>ANSI color string</returns>
+58: static const char *GetAnsiColorCode(ConsoleColor color)
+59: {
+60:     switch (color)
+61:     {
+62:     case ConsoleColor::Black:
+63:     case ConsoleColor::DarkGray:
+64:         return "0";
+65:     case ConsoleColor::Red:
+66:     case ConsoleColor::BrightRed:
+67:         return "1";
+68:     case ConsoleColor::Green:
+69:     case ConsoleColor::BrightGreen:
+70:         return "2";
+71:     case ConsoleColor::Yellow:
+72:     case ConsoleColor::BrightYellow:
+73:         return "3";
+74:     case ConsoleColor::Blue:
+75:     case ConsoleColor::BrightBlue:
+76:         return "4";
+77:     case ConsoleColor::Magenta:
+78:     case ConsoleColor::BrightMagenta:
+79:         return "5";
+80:     case ConsoleColor::Cyan:
+81:     case ConsoleColor::BrightCyan:
+82:         return "6";
+83:     case ConsoleColor::LightGray:
+84:     case ConsoleColor::White:
+85:         return "7";
+86:     default:
+87:         return 0;
+88:     };
+89: }
+90: 
+91: /// <summary>
+92: /// Create a console linked to the specified character device. Note that the constructor is private, so GetConsole() is needed to instantiate the console
+93: /// </summary>
+94: /// <param name="device">Character device used for output</param>
+95: Console::Console(CharDevice *device)
+96:     : m_device{device}
 97: {
-98:     m_device = device;
-99: }
-100:
-101: /// <summary>
-102: /// Set console foreground and background color (will output ANSI color codes)
-103: /// </summary>
-104: /// <param name="foregroundColor">Foreground color to use. Default brings the color back to the color originally set</param>
-105: /// <param name="backgroundColor">Background color to use. Default brings the color back to the color originally set</param>
-106: void Console::SetTerminalColor(ConsoleColor foregroundColor /*= ConsoleColor::Default*/, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
-107: {
-108:     Write("\033[0");
-109:     if (foregroundColor != ConsoleColor::Default)
-110:     {
-111:         if (foregroundColor <= ConsoleColor::LightGray)
-112:         {
-113:             Write(";3");
-114:         }
-115:         else
-116:         {
-117:             Write(";9");
-118:         }
-119:         Write(GetAnsiColorCode(foregroundColor));
-120:     }
-121:     if (backgroundColor != ConsoleColor::Default)
-122:     {
-123:         if (backgroundColor <= ConsoleColor::LightGray)
+98: }
+99: 
+100: /// <summary>
+101: /// Change the attached device
+102: /// </summary>
+103: /// <param name="device">Character device to be set to for output</param>
+104: void Console::AssignDevice(CharDevice *device)
+105: {
+106:     m_device = device;
+107: }
+108: 
+109: /// <summary>
+110: /// Set console foreground and background color (will output ANSI color codes)
+111: /// </summary>
+112: /// <param name="foregroundColor">Foreground color to use. Default brings the color back to the color originally set</param>
+113: /// <param name="backgroundColor">Background color to use. Default brings the color back to the color originally set</param>
+114: void Console::SetTerminalColor(ConsoleColor foregroundColor /*= ConsoleColor::Default*/, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
+115: {
+116:     Write("\033[0");
+117:     if (foregroundColor != ConsoleColor::Default)
+118:     {
+119:         if (foregroundColor <= ConsoleColor::LightGray)
+120:         {
+121:             Write(";3");
+122:         }
+123:         else
 124:         {
-125:             Write(";4");
+125:             Write(";9");
 126:         }
-127:         else
-128:         {
-129:             Write(";10");
-130:         }
-131:         Write(GetAnsiColorCode(backgroundColor));
-132:     }
-133:     Write("m");
-134: }
-135:
-136: /// <summary>
-137: /// Reset console foreground and background back to original (will output ANSI color codes)
-138: /// </summary>
-139: void Console::ResetTerminalColor()
-140: {
-141:     SetTerminalColor();
+127:         Write(GetAnsiColorCode(foregroundColor));
+128:     }
+129:     if (backgroundColor != ConsoleColor::Default)
+130:     {
+131:         if (backgroundColor <= ConsoleColor::LightGray)
+132:         {
+133:             Write(";4");
+134:         }
+135:         else
+136:         {
+137:             Write(";10");
+138:         }
+139:         Write(GetAnsiColorCode(backgroundColor));
+140:     }
+141:     Write("m");
 142: }
-143:
+143: 
 144: /// <summary>
-145: /// Write a string, using the specified foreground and background color
+145: /// Reset console foreground and background back to original (will output ANSI color codes)
 146: /// </summary>
-147: /// <param name="str">String to be written</param>
-148: /// <param name="foregroundColor">Foreground color to use. Default brings the color back to the color originally set</param>
-149: /// <param name="backgroundColor">Background color to use. Default brings the color back to the color originally set</param>
-150: void Console::Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
-151: {
-152:     static volatile bool inUse{};
-153:
-154:     while (inUse)
-155:     {
-156:         Timer::WaitMilliSeconds(1);
-157:     }
-158:     inUse = true;
-159:
-160:     SetTerminalColor(foregroundColor, backgroundColor);
-161:     Write(str);
-162:     SetTerminalColor();
-163:
-164:     inUse = false;
-165: }
-166:
-167: /// <summary>
-168: /// Write a string without changing the foreground and background color
-169: /// </summary>
-170: /// <param name="str">String to be written</param>
-171: void Console::Write(const char *str)
-172: {
-173:     while (*str)
-174:     {
-175:         // convert newline to carriage return + newline
-176:         if (*str == '\n')
-177:             WriteChar('\r');
-178:         WriteChar(*str++);
-179:     }
-180: }
-181:
-182: /// <summary>
-183: /// Read a character
-184: /// </summary>
-185: /// <returns>Character received</returns>
-186: char Console::ReadChar()
-187: {
-188:     char ch{};
-189:     if (m_device != nullptr)
-190:     {
-191:         ch = m_device->Read();
-192:     }
-193:     return ch;
-194: }
-195:
-196: /// <summary>
-197: /// Write a single character.
-198: /// </summary>
-199: /// <param name="ch">Character to be written</param>
-200: void Console::WriteChar(char ch)
-201: {
-202:     if (m_device != nullptr)
-203:     {
-204:         m_device->Write(ch);
-205:     }
-206: }
-207:
-208: /// <summary>
-209: /// Retrieve the singleton console
-210: ///
-211: /// Creates a static instance of Console, and returns a reference to it.
-212: /// </summary>
-213: /// <returns>A reference to the singleton console.</returns>
-214: Console &GetConsole()
-215: {
-216: #if defined(BAREMETAL_CONSOLE_UART0)
-217:     static UART0&  uart = GetUART0();
-218:     static Console console(&uart);
-219: #elif defined(BAREMETAL_CONSOLE_UART1)
-220:     static UART1&  uart = GetUART1();
-221:     static Console console(&uart);
-222: #else
-223:     static Console console(nullptr);
-224: #endif
-225:     return console;
-226: }
-227:
-228: } // namespace baremetal
+147: void Console::ResetTerminalColor()
+148: {
+149:     SetTerminalColor();
+150: }
+151: 
+152: /// <summary>
+153: /// Write a string, using the specified foreground and background color
+154: /// </summary>
+155: /// <param name="str">String to be written</param>
+156: /// <param name="foregroundColor">Foreground color to use. Default brings the color back to the color originally set</param>
+157: /// <param name="backgroundColor">Background color to use. Default brings the color back to the color originally set</param>
+158: void Console::Write(const char *str, ConsoleColor foregroundColor, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
+159: {
+160:     static volatile bool inUse{};
+161: 
+162:     while (inUse)
+163:     {
+164:         Timer::WaitMilliSeconds(1);
+165:     }
+166:     inUse = true;
+167: 
+168:     SetTerminalColor(foregroundColor, backgroundColor);
+169:     Write(str);
+170:     SetTerminalColor();
+171: 
+172:     inUse = false;
+173: }
+174: 
+175: /// <summary>
+176: /// Write a string without changing the foreground and background color
+177: /// </summary>
+178: /// <param name="str">String to be written</param>
+179: void Console::Write(const char *str)
+180: {
+181:     while (*str)
+182:     {
+183:         // convert newline to carriage return + newline
+184:         if (*str == '\n')
+185:             WriteChar('\r');
+186:         WriteChar(*str++);
+187:     }
+188: }
+189: 
+190: /// <summary>
+191: /// Read a character
+192: /// </summary>
+193: /// <returns>Character received</returns>
+194: char Console::ReadChar()
+195: {
+196:     char ch{};
+197:     if (m_device != nullptr)
+198:     {
+199:         ch = m_device->Read();
+200:     }
+201:     return ch;
+202: }
+203: 
+204: /// <summary>
+205: /// Write a single character.
+206: /// </summary>
+207: /// <param name="ch">Character to be written</param>
+208: void Console::WriteChar(char ch)
+209: {
+210:     if (m_device != nullptr)
+211:     {
+212:         m_device->Write(ch);
+213:     }
+214: }
+215: 
+216: /// <summary>
+217: /// Retrieve the singleton console
+218: ///
+219: /// Creates a static instance of Console, and returns a reference to it.
+220: /// </summary>
+221: /// <returns>A reference to the singleton console.</returns>
+222: Console &GetConsole()
+223: {
+224: #if defined(BAREMETAL_CONSOLE_UART0)
+225:     static UART0&  uart = GetUART0();
+226:     static Console console(&uart);
+227: #elif defined(BAREMETAL_CONSOLE_UART1)
+228:     static UART1&  uart = GetUART1();
+229:     static Console console(&uart);
+230: #else
+231:     static Console console(nullptr);
+232: #endif
+233:     return console;
+234: }
+235: 
+236: } // namespace baremetal
 ```
 
-- Line 50-81: Implements a color conversion to an ANSI color code. Not that normal and bright colors use the same code, but have a different prefix.
-- Line 87-90: Implements the constructor
-- Line 96-99: Implements the method `AssignDevice()`
-- Line 106-134: Implements the method `SetTerminalColor()`. Here we see that normal and light foreground colors use a different prefix, and similarly for background colors.
-- Line 139-142: Implements the method `ResetTerminalColor()`, which simply calls `SetTerminalColor()` with default arguments.
-- Line 150-165: Implements the `Write()` method for a string with color specification. This is simply a combination of setting colors, writing the string, and resetting colors.
+- Line 58-89: Implements a color conversion to an ANSI color code. Not that normal and bright colors use the same code, but have a different prefix.
+- Line 95-98: Implements the constructor
+- Line 104-107: Implements the method `AssignDevice()`
+- Line 114-142: Implements the method `SetTerminalColor()`. Here we see that normal and light foreground colors use a different prefix, and similarly for background colors.
+- Line 147-150: Implements the method `ResetTerminalColor()`, which simply calls `SetTerminalColor()` with default arguments.
+- Line 158-173: Implements the `Write()` method for a string with color specification. This is simply a combination of setting colors, writing the string, and resetting colors.
 The only exception is that we wait for the bool inUse to became false. This is a very simple locking mechanism that will prevent multiple cores writing to the console at the same time, to organize output a bit better.
 We'll get to that when we actually start using multiple cores.
-- Line 171-180: Implements the `Write()` method for a string with no color specification.
-- Line 186-194: Implements the `ReadChar()` method.
-- Line 200-206: Implements the `WriteChar()` method.
-- Line 214-226: Implements the `GetConsole()` function.
+- Line 179-188: Implements the `Write()` method for a string with no color specification.
+- Line 194-1202: Implements the `ReadChar()` method.
+- Line 208-214: Implements the `WriteChar()` method.
+- Line 222-234: Implements the `GetConsole()` function.
 Notice how we define a static UART0 instance when `BAREMETAL_CONSOLE_UART0` is defined,
 otherwise we define a static UART1 instance when `BAREMETAL_CONSOLE_UART1` is defined,
 and if both are not defined, we set the console to a nullptr device.
@@ -1022,354 +1030,374 @@ File: code/libraries/baremetal/src/Format.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Format.h>
-41:
+41: 
 42: #include <baremetal/Serialization.h>
 43: #include <baremetal/Util.h>
-44:
+44: 
 45: namespace baremetal {
-46:
+46: 
 47: const size_t BufferSize = 1024;
-48:
-49: static void Append(char* buffer, size_t bufferSize, char c)
-50: {
-51:     size_t len = strlen(buffer);
-52:     char* p = buffer + len;
-53:     if (static_cast<size_t>(p - buffer) < bufferSize)
-54:     {
-55:         *p++ = c;
-56:     }
-57:     if (static_cast<size_t>(p - buffer) < bufferSize)
-58:     {
-59:         *p = '\0';
-60:     }
-61: }
-62:
-63: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
-64: {
-65:     size_t len = strlen(buffer);
-66:     char* p = buffer + len;
-67:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
-68:     {
-69:         *p++ = c;
-70:         --count;
-71:     }
-72:     if (static_cast<size_t>(p - buffer) < bufferSize)
-73:     {
-74:         *p = '\0';
-75:     }
-76: }
-77:
-78: static void Append(char* buffer, size_t bufferSize, const char* str)
-79: {
-80:     strncat(buffer, str, bufferSize);
-81: }
-82:
-83: void Format(char* buffer, size_t bufferSize, const char* format, ...)
-84: {
-85:     va_list var;
-86:     va_start(var, format);
-87:
-88:     FormatV(buffer, bufferSize, format, var);
-89:
-90:     va_end(var);
-91: }
-92:
-93: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args)
-94: {
-95:     buffer[0] = '\0';
-96:
-97:     while (*format != '\0')
-98:     {
-99:         if (*format == '%')
-100:         {
-101:             if (*++format == '%')
-102:             {
-103:                 Append(buffer, bufferSize, '%');
-104:                 format++;
-105:                 continue;
-106:             }
-107:
-108:             bool alternate = false;
-109:             if (*format == '#')
-110:             {
-111:                 alternate = true;
-112:                 format++;
-113:             }
-114:
-115:             bool left = false;
-116:             if (*format == '-')
-117:             {
-118:                 left = true;
-119:                 format++;
-120:             }
-121:
-122:             bool leadingZero = false;
-123:             if (*format == '0')
-124:             {
-125:                 leadingZero = true;
-126:                 format++;
-127:             }
-128:
-129:             size_t width = 0;
-130:             while (('0' <= *format) && (*format <= '9'))
-131:             {
-132:                 width = width * 10 + (*format - '0');
-133:                 format++;
-134:             }
-135:
-136:             unsigned precision = 6;
-137:             if (*format == '.')
-138:             {
+48: 
+49: 
+50: /// <summary>
+51: /// Append a character to the buffer
+52: /// </summary>
+53: /// <param name="buffer">Buffer to write to</param>
+54: /// <param name="bufferSize">Size of the buffer</param>
+55: /// <param name="c">Character to append</param>
+56: static void Append(char* buffer, size_t bufferSize, char c)
+57: {
+58:     size_t len = strlen(buffer);
+59:     char* p = buffer + len;
+60:     if (static_cast<size_t>(p - buffer) < bufferSize)
+61:     {
+62:         *p++ = c;
+63:     }
+64:     if (static_cast<size_t>(p - buffer) < bufferSize)
+65:     {
+66:         *p = '\0';
+67:     }
+68: }
+69: 
+70: /// <summary>
+71: /// Append a set of identical characters to the buffer
+72: /// </summary>
+73: /// <param name="buffer">Buffer to write to</param>
+74: /// <param name="bufferSize">Size of the buffer</param>
+75: /// <param name="count">Number of characters to append</param>
+76: /// <param name="c">Character to append</param>
+77: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
+78: {
+79:     size_t len = strlen(buffer);
+80:     char* p = buffer + len;
+81:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
+82:     {
+83:         *p++ = c;
+84:         --count;
+85:     }
+86:     if (static_cast<size_t>(p - buffer) < bufferSize)
+87:     {
+88:         *p = '\0';
+89:     }
+90: }
+91: 
+92: /// <summary>
+93: /// Append a string to the buffer
+94: /// </summary>
+95: /// <param name="buffer">Buffer to write to</param>
+96: /// <param name="bufferSize">Size of the buffer</param>
+97: /// <param name="str">String to append</param>
+98: static void Append(char* buffer, size_t bufferSize, const char* str)
+99: {
+100:     strncat(buffer, str, bufferSize);
+101: }
+102: 
+103: void Format(char* buffer, size_t bufferSize, const char* format, ...)
+104: {
+105:     va_list var;
+106:     va_start(var, format);
+107: 
+108:     FormatV(buffer, bufferSize, format, var);
+109: 
+110:     va_end(var);
+111: }
+112: 
+113: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args)
+114: {
+115:     buffer[0] = '\0';
+116: 
+117:     while (*format != '\0')
+118:     {
+119:         if (*format == '%')
+120:         {
+121:             if (*++format == '%')
+122:             {
+123:                 Append(buffer, bufferSize, '%');
+124:                 format++;
+125:                 continue;
+126:             }
+127: 
+128:             bool alternate = false;
+129:             if (*format == '#')
+130:             {
+131:                 alternate = true;
+132:                 format++;
+133:             }
+134: 
+135:             bool left = false;
+136:             if (*format == '-')
+137:             {
+138:                 left = true;
 139:                 format++;
-140:                 precision = 0;
-141:                 while ('0' <= *format && *format <= '9')
-142:                 {
-143:                     precision = precision * 10 + (*format - '0');
-144:
-145:                     format++;
-146:                 }
+140:             }
+141: 
+142:             bool leadingZero = false;
+143:             if (*format == '0')
+144:             {
+145:                 leadingZero = true;
+146:                 format++;
 147:             }
-148:
-149:             bool haveLong{};
-150:             bool haveLongLong{};
-151:
-152:             if (*format == 'l')
-153:             {
-154:                 if (*(format + 1) == 'l')
-155:                 {
-156:                     haveLongLong = true;
-157:
-158:                     format++;
-159:                 }
-160:                 else
-161:                 {
-162:                     haveLong = true;
-163:                 }
-164:
-165:                 format++;
-166:             }
-167:
-168:             switch (*format)
-169:             {
-170:             case 'c':
-171:                 {
-172:                     char ch = static_cast<char>(va_arg(args, int));
-173:                     if (left)
-174:                     {
-175:                         Append(buffer, bufferSize, ch);
-176:                         if (width > 1)
-177:                         {
-178:                             Append(buffer, bufferSize, width - 1, ' ');
-179:                         }
-180:                     }
-181:                     else
-182:                     {
-183:                         if (width > 1)
-184:                         {
-185:                             Append(buffer, bufferSize, width - 1, ' ');
-186:                         }
-187:                         Append(buffer, bufferSize, ch);
-188:                     }
-189:                 }
-190:                 break;
-191:
-192:             case 'd':
-193:             case 'i':
-194:                 if (haveLongLong)
-195:                 {
-196:                     char str[BufferSize]{};
-197:                     Serialize(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
-198:                     Append(buffer, bufferSize, str);
-199:                 }
-200:                 else if (haveLong)
-201:                 {
-202:                     char str[BufferSize]{};
-203:                     Serialize(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
-204:                     Append(buffer, bufferSize, str);
-205:                 }
-206:                 else
-207:                 {
-208:                     char str[BufferSize]{};
-209:                     Serialize(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
-210:                     Append(buffer, bufferSize, str);
-211:                 }
-212:                 break;
-213:
-214:             case 'f':
+148: 
+149:             size_t width = 0;
+150:             while (('0' <= *format) && (*format <= '9'))
+151:             {
+152:                 width = width * 10 + (*format - '0');
+153:                 format++;
+154:             }
+155: 
+156:             unsigned precision = 6;
+157:             if (*format == '.')
+158:             {
+159:                 format++;
+160:                 precision = 0;
+161:                 while ('0' <= *format && *format <= '9')
+162:                 {
+163:                     precision = precision * 10 + (*format - '0');
+164: 
+165:                     format++;
+166:                 }
+167:             }
+168: 
+169:             bool haveLong{};
+170:             bool haveLongLong{};
+171: 
+172:             if (*format == 'l')
+173:             {
+174:                 if (*(format + 1) == 'l')
+175:                 {
+176:                     haveLongLong = true;
+177: 
+178:                     format++;
+179:                 }
+180:                 else
+181:                 {
+182:                     haveLong = true;
+183:                 }
+184: 
+185:                 format++;
+186:             }
+187: 
+188:             switch (*format)
+189:             {
+190:             case 'c':
+191:                 {
+192:                     char ch = static_cast<char>(va_arg(args, int));
+193:                     if (left)
+194:                     {
+195:                         Append(buffer, bufferSize, ch);
+196:                         if (width > 1)
+197:                         {
+198:                             Append(buffer, bufferSize, width - 1, ' ');
+199:                         }
+200:                     }
+201:                     else
+202:                     {
+203:                         if (width > 1)
+204:                         {
+205:                             Append(buffer, bufferSize, width - 1, ' ');
+206:                         }
+207:                         Append(buffer, bufferSize, ch);
+208:                     }
+209:                 }
+210:                 break;
+211: 
+212:             case 'd':
+213:             case 'i':
+214:                 if (haveLongLong)
 215:                 {
 216:                     char str[BufferSize]{};
-217:                     Serialize(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
+217:                     Serialize(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
 218:                     Append(buffer, bufferSize, str);
 219:                 }
-220:                 break;
-221:
-222:             case 'b':
-223:                 if (alternate)
-224:                 {
-225:                     Append(buffer, bufferSize, "0b");
-226:                 }
-227:                 if (haveLongLong)
-228:                 {
-229:                     char str[BufferSize]{};
-230:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
-231:                     Append(buffer, bufferSize, str);
-232:                 }
-233:                 else if (haveLong)
-234:                 {
-235:                     char str[BufferSize]{};
-236:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
-237:                     Append(buffer, bufferSize, str);
-238:                 }
-239:                 else
-240:                 {
-241:                     char str[BufferSize]{};
-242:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
-243:                     Append(buffer, bufferSize, str);
-244:                 }
-245:                 break;
-246:
-247:             case 'o':
-248:                 if (alternate)
-249:                 {
-250:                     Append(buffer, bufferSize, '0');
-251:                 }
-252:                 if (haveLongLong)
-253:                 {
-254:                     char str[BufferSize]{};
-255:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
-256:                     Append(buffer, bufferSize, str);
-257:                 }
-258:                 else if (haveLong)
-259:                 {
-260:                     char str[BufferSize]{};
-261:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
-262:                     Append(buffer, bufferSize, str);
-263:                 }
-264:                 else
-265:                 {
-266:                     char str[BufferSize]{};
-267:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
-268:                     Append(buffer, bufferSize, str);
-269:                 }
-270:                 break;
-271:
-272:             case 's':
+220:                 else if (haveLong)
+221:                 {
+222:                     char str[BufferSize]{};
+223:                     Serialize(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
+224:                     Append(buffer, bufferSize, str);
+225:                 }
+226:                 else
+227:                 {
+228:                     char str[BufferSize]{};
+229:                     Serialize(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
+230:                     Append(buffer, bufferSize, str);
+231:                 }
+232:                 break;
+233: 
+234:             case 'f':
+235:                 {
+236:                     char str[BufferSize]{};
+237:                     Serialize(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
+238:                     Append(buffer, bufferSize, str);
+239:                 }
+240:                 break;
+241: 
+242:             case 'b':
+243:                 if (alternate)
+244:                 {
+245:                     Append(buffer, bufferSize, "0b");
+246:                 }
+247:                 if (haveLongLong)
+248:                 {
+249:                     char str[BufferSize]{};
+250:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
+251:                     Append(buffer, bufferSize, str);
+252:                 }
+253:                 else if (haveLong)
+254:                 {
+255:                     char str[BufferSize]{};
+256:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
+257:                     Append(buffer, bufferSize, str);
+258:                 }
+259:                 else
+260:                 {
+261:                     char str[BufferSize]{};
+262:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
+263:                     Append(buffer, bufferSize, str);
+264:                 }
+265:                 break;
+266: 
+267:             case 'o':
+268:                 if (alternate)
+269:                 {
+270:                     Append(buffer, bufferSize, '0');
+271:                 }
+272:                 if (haveLongLong)
 273:                 {
 274:                     char str[BufferSize]{};
-275:                     Serialize(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
+275:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
 276:                     Append(buffer, bufferSize, str);
 277:                 }
-278:                 break;
-279:
-280:             case 'u':
-281:                 if (haveLongLong)
-282:                 {
-283:                     char str[BufferSize]{};
-284:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
-285:                     Append(buffer, bufferSize, str);
-286:                 }
-287:                 else if (haveLong)
-288:                 {
-289:                     char str[BufferSize]{};
-290:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
-291:                     Append(buffer, bufferSize, str);
-292:                 }
-293:                 else
-294:                 {
-295:                     char str[BufferSize]{};
-296:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
-297:                     Append(buffer, bufferSize, str);
-298:                 }
-299:                 break;
-300:
-301:             case 'x':
-302:             case 'X':
-303:                 if (alternate)
-304:                 {
-305:                     Append(buffer, bufferSize, "0x");
+278:                 else if (haveLong)
+279:                 {
+280:                     char str[BufferSize]{};
+281:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
+282:                     Append(buffer, bufferSize, str);
+283:                 }
+284:                 else
+285:                 {
+286:                     char str[BufferSize]{};
+287:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
+288:                     Append(buffer, bufferSize, str);
+289:                 }
+290:                 break;
+291: 
+292:             case 's':
+293:                 {
+294:                     char str[BufferSize]{};
+295:                     Serialize(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
+296:                     Append(buffer, bufferSize, str);
+297:                 }
+298:                 break;
+299: 
+300:             case 'u':
+301:                 if (haveLongLong)
+302:                 {
+303:                     char str[BufferSize]{};
+304:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
+305:                     Append(buffer, bufferSize, str);
 306:                 }
-307:                 if (haveLongLong)
+307:                 else if (haveLong)
 308:                 {
 309:                     char str[BufferSize]{};
-310:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
+310:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
 311:                     Append(buffer, bufferSize, str);
 312:                 }
-313:                 else if (haveLong)
+313:                 else
 314:                 {
 315:                     char str[BufferSize]{};
-316:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
+316:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
 317:                     Append(buffer, bufferSize, str);
 318:                 }
-319:                 else
-320:                 {
-321:                     char str[BufferSize]{};
-322:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
-323:                     Append(buffer, bufferSize, str);
-324:                 }
-325:                 break;
-326:
-327:             case 'p':
-328:                 if (alternate)
-329:                 {
-330:                     Append(buffer, bufferSize, "0x");
-331:                 }
-332:                 {
-333:                     char str[BufferSize]{};
-334:                     Serialize(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
-335:                     Append(buffer, bufferSize, str);
-336:                 }
-337:                 break;
-338:
-339:             default:
-340:                 Append(buffer, bufferSize, '%');
-341:                 Append(buffer, bufferSize, *format);
-342:                 break;
-343:             }
-344:         }
-345:         else
-346:         {
-347:             Append(buffer, bufferSize, *format);
-348:         }
-349:
-350:         format++;
-351:     }
-352: }
-353:
-354: } // namespace baremetal
+319:                 break;
+320: 
+321:             case 'x':
+322:             case 'X':
+323:                 if (alternate)
+324:                 {
+325:                     Append(buffer, bufferSize, "0x");
+326:                 }
+327:                 if (haveLongLong)
+328:                 {
+329:                     char str[BufferSize]{};
+330:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
+331:                     Append(buffer, bufferSize, str);
+332:                 }
+333:                 else if (haveLong)
+334:                 {
+335:                     char str[BufferSize]{};
+336:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
+337:                     Append(buffer, bufferSize, str);
+338:                 }
+339:                 else
+340:                 {
+341:                     char str[BufferSize]{};
+342:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
+343:                     Append(buffer, bufferSize, str);
+344:                 }
+345:                 break;
+346: 
+347:             case 'p':
+348:                 if (alternate)
+349:                 {
+350:                     Append(buffer, bufferSize, "0x");
+351:                 }
+352:                 {
+353:                     char str[BufferSize]{};
+354:                     Serialize(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
+355:                     Append(buffer, bufferSize, str);
+356:                 }
+357:                 break;
+358: 
+359:             default:
+360:                 Append(buffer, bufferSize, '%');
+361:                 Append(buffer, bufferSize, *format);
+362:                 break;
+363:             }
+364:         }
+365:         else
+366:         {
+367:             Append(buffer, bufferSize, *format);
+368:         }
+369: 
+370:         format++;
+371:     }
+372: }
+373: 
+374: } // namespace baremetal
 ```
 
 - Line 47: We define a buffer size, to define the buffer, but also to check against writing outside the buffer.
-- Line 49-61: Implements the function `Append()` for writing a single character to the buffer, checked for overflow
-- Line 63-76: Implements the function `Append()` for writing multiple of a single character to the buffer, checked for overflow
-- Line 78-81: Implements the function `Append()` for writing a string to the buffer, checked for overflow
-- Line 83-91: Implements the `Format()` function, using the ellipsis operator. This simple creates a `va_list` from the arguments, and calls the other version of `Format()`
-- Line 93-358: Implements the `Format()` function, using the `va_list` argument
-  - Line 95: We make sure to have an empty buffer
-  - Line 97: We scan through the format string
-  - Line 99: If the format character is `%` this is a special format operator
-    - Line 101-106: In case the format string holds `%%` we see this as verbatim `%`, so we add that character
-    - Line 108-113: If the next character is `#` we see this as an alternative version, signalling to add the prefix (only for base 2, 8, 16 integers), and advance
-    - Line 115-120: If the next character is `-` we left-align the value, and advance
-    - Line 122-127: If the next character is `0` we use leading zeros to fill up the value to its normal length, and advance
-    - Line 129-134: If more digits follow, e.g. `%12` or `%012`, we extract the width of the value to be printed, and advance
-    - Line 136-147: If a decimal point follows, we expect this to be a floating point value, and expect the next digits to specify the length of the fraction.
+- Line 56-68: Implements the function `Append()` for writing a single character to the buffer, checked for overflow
+- Line 77-90: Implements the function `Append()` for writing multiple of a single character to the buffer, checked for overflow
+- Line 98-101: Implements the function `Append()` for writing a string to the buffer, checked for overflow
+- Line 103-111: Implements the `Format()` function, using the ellipsis operator. This simple creates a `va_list` from the arguments, and calls the other version of `Format()`
+- Line 113-372: Implements the `Format()` function, using the `va_list` argument
+  - Line 115: We make sure to have an empty buffer
+  - Line 117: We scan through the format string
+  - Line 119: If the format character is `%` this is a special format operator
+    - Line 121-126: In case the format string holds `%%` we see this as verbatim `%`, so we add that character
+    - Line 128-133: If the next character is `#` we see this as an alternative version, signalling to add the prefix (only for base 2, 8, 16 integers), and advance
+    - Line 135-140: If the next character is `-` we left-align the value, and advance
+    - Line 142-147: If the next character is `0` we use leading zeros to fill up the value to its normal length, and advance
+    - Line 149-154: If more digits follow, e.g. `%12` or `%012`, we extract the width of the value to be printed, and advance
+    - Line 156-167: If a decimal point follows, we expect this to be a floating point value, and expect the next digits to specify the length of the fraction.
     We read all digits, calculate the fraction length, and advance
-    - Line 149-166: If the next character is `l` this is seen as a specification for a `long` (32 bit) value (only for integer values).
+    - Line 169-186: If the next character is `l` this is seen as a specification for a `long` (32 bit) value (only for integer values).
 If another `l` follows, we see this as a `long long` (64 bit) value
-    - Line 170-190: If the format character is a `c` we print the value as a character
-    - Line 192-212: If the format character is a `d` or `i` we print the value as a signed integer, taking into account the `l` or `ll` prefix
-    - Line 214-220: If the format character is a `f` we print the value as a double, taking into account the precision if set
-    - Line 222-245: If the format character is a `b` we print the value as a binary unsigned integer, taking into account the `#`, `l` or `ll` prefix.
+    - Line 190-210: If the format character is a `c` we print the value as a character
+    - Line 212-232: If the format character is a `d` or `i` we print the value as a signed integer, taking into account the `l` or `ll` prefix
+    - Line 234-250: If the format character is a `f` we print the value as a double, taking into account the precision if set
+    - Line 242-265: If the format character is a `b` we print the value as a binary unsigned integer, taking into account the `#`, `l` or `ll` prefix.
 Note that this is an addition to `printf()` behaviour
-    - Line 227-270: If the format character is a `o` we print the value as a octal unsigned integer, taking into account the `#`, `l` or `ll` prefix.
+    - Line 267-290: If the format character is a `o` we print the value as a octal unsigned integer, taking into account the `#`, `l` or `ll` prefix.
 Note that this is an addition to `printf()` behaviour
-    - Line 272-278: If the format character is a `s` we print the value as a string
-    - Line 280-299: If the format character is a `u` we print the value as a decimal unsigned integer, taking into account the `l` or `ll` prefix
-    - Line 301-325: If the format character is a `x` or `X` we print the value as a hexadecimal unsigned integer, taking into account the `#`, `l` or `ll` prefix
-    - Line 327-337: If the format character is a `p` we print the value as a pointer, meaning it is printed as a 64 bit unsigned integer
-  - Line 345-348: If the format character is not `%` we simply add the character
+    - Line 292-298: If the format character is a `s` we print the value as a string
+    - Line 300-319: If the format character is a `u` we print the value as a decimal unsigned integer, taking into account the `l` or `ll` prefix
+    - Line 321-345: If the format character is a `x` or `X` we print the value as a hexadecimal unsigned integer, taking into account the `#`, `l` or `ll` prefix
+    - Line 347-357: If the format character is a `p` we print the value as a pointer, meaning it is printed as a 64 bit unsigned integer
+  - Line 365-368: If the format character is not `%` we simply add the character
 
 ## Adding the Logger class - Step 3 {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3}
 
@@ -1586,29 +1614,37 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: #define BAREMETAL_NAME              "Baremetal"
-43:
-44: #define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
-45: #define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
-46: #define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
-47: #define BAREMETAL_VERSION_STRING    GetVersion()
-48:
-49: namespace baremetal {
-50:
-51: void SetupVersion();
-52: const char* GetVersion();
-53:
-54: }
+41: 
+42: /// @file
+43: /// Build version
+44: 
+45: /// @brief Platform name
+46: #define BAREMETAL_NAME              "Baremetal"
+47: 
+48: /// @brief Major version number (specified by define at compile time)
+49: #define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
+50: /// @brief Minor version number (specified by define at compile time)
+51: #define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
+52: /// @brief patch version number (specified by define at compile time)
+53: #define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
+54: /// @brief Version string
+55: #define BAREMETAL_VERSION_STRING    GetVersion()
+56: 
+57: namespace baremetal {
+58: 
+59: void SetupVersion();
+60: const char* GetVersion();
+61: 
+62: }
 ```
 
-- Line 42: We create a definition for the name of our platform
-- Line 44-46: We create definitions of the platform version parts, using the compiler definitions passed from `CMake`
-- Line 47: We create a definition to get the version string
-- Line 51: We declare a function `SetupVersion()` to build the version string
-- Line 52: We declare a function `GetVersion()` to return the version string
+- Line 46: We create a definition for the name of our platform
+- Line 49-53: We create definitions of the platform version parts, using the compiler definitions passed from `CMake`
+- Line 55: We create a definition to get the version string
+- Line 59: We declare a function `SetupVersion()` to build the version string
+- Line 60: We declare a function `GetVersion()` to return the version string
 
 #### Version.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_VERSIONCPP}
 
@@ -1656,34 +1692,50 @@ File: code/libraries/baremetal/src/Version.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Version.h>
-41:
+41: 
 42: #include <baremetal/Format.h>
 43: #include <baremetal/Util.h>
-44:
-45: static const size_t BufferSize = 20;
-46: static char s_baremetalVersionString[BufferSize]{};
-47: static bool s_baremetalVersionSetupDone = false;
-48:
-49: void baremetal::SetupVersion()
-50: {
-51:     if (!s_baremetalVersionSetupDone)
-52:     {
-53:         Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
-54:         s_baremetalVersionSetupDone = true;
-55:     }
-56: }
-57:
-58: const char* baremetal::GetVersion()
-59: {
-60:     return s_baremetalVersionString;
-61: }
+44: 
+45: /// @file
+46: /// Build version implementation
+47: 
+48: /// @brief Buffer size of version string buffer
+49: static const size_t BufferSize = 20;
+50: /// @brief Version string buffer
+51: static char s_baremetalVersionString[BufferSize]{};
+52: /// @brief Flag to check if version set up was already done
+53: static bool s_baremetalVersionSetupDone = false;
+54: 
+55: /// <summary>
+56: /// Set up version string
+57: /// 
+58: /// The version string is written into a buffer without allocating memory.
+59: /// This is important, as we may be logging before memory management is set up.
+60: /// </summary>
+61: void baremetal::SetupVersion()
+62: {
+63:     if (!s_baremetalVersionSetupDone)
+64:     {
+65:         Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+66:         s_baremetalVersionSetupDone = true;
+67:     }
+68: }
+69: 
+70: /// <summary>
+71: /// Return version string
+72: /// </summary>
+73: /// <returns>Version string</returns>
+74: const char* baremetal::GetVersion()
+75: {
+76:     return s_baremetalVersionString;
+77: }
 ```
 
-- Line 45-46: We define the local variable `s_baremetalVersionString` and its size
-- Line 49-56: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
-- Line 58-61: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
+- Line 59-51: We define the local variable `s_baremetalVersionString` and its size
+- Line 61-68: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
+- Line 74-77: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
 
 #### Logger.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_ADDING_VERSION_INFORMATION_LOGGERH}
 
@@ -1731,18 +1783,18 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/Console.h>
 43: #include <baremetal/StdArg.h>
 44: #include <baremetal/Types.h>
-45:
+45: 
 46: /// @file
 47: /// Logger functionality
-48:
+48: 
 49: namespace baremetal {
-50:
+50: 
 51: /// <summary>
 52: /// Logging severity classes
 53: /// </summary>
@@ -1759,9 +1811,9 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 64:     /// @brief Message, which is only interesting for debugging this component
 65:     Debug
 66: };
-67:
+67: 
 68: class Timer;
-69:
+69: 
 70: /// <summary>
 71: /// Logger class
 72: /// </summary>
@@ -1772,7 +1824,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 77:     /// </summary>
 78:     /// <returns>Reference to the singleton logger instance</returns>
 79:     friend Logger &GetLogger();
-80:
+80: 
 81: private:
 82:     /// @brief True if class is already initialized
 83:     bool        m_initialized;
@@ -1782,22 +1834,22 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 87:     Console    &m_console;
 88:     /// @brief Currently set logging severity level
 89:     LogSeverity m_level;
-90:
+90: 
 91:     explicit Logger(LogSeverity logLevel, Timer *timer = nullptr, Console &console = GetConsole());
-92:
+92: 
 93: public:
 94:     bool Initialize();
 95:     void SetLogLevel(LogSeverity logLevel);
-96:
+96: 
 97:     void Write(const char *source, int line, LogSeverity severity, const char *message, ...);
 98:     void WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args);
 99: };
-100:
+100: 
 101: Logger &GetLogger();
-102:
+102: 
 103: /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
 104: #define LOG_MODULE(name)       static const char From[] = name
-105:
+105: 
 106: /// @brief Log a panic message
 107: #define LOG_PANIC(...)         GetLogger().Write(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
 108: /// @brief Log an error message
@@ -1808,10 +1860,10 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 113: #define LOG_INFO(...)          GetLogger().Write(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
 114: /// @brief Log a debug message
 115: #define LOG_DEBUG(...)         GetLogger().Write(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
-116:
+116: 
 117: /// @brief Log a message with specified severity and message string
 118: #define LOG(severity, message) GetLogger().Write(From, __LINE__, severity, message);
-119:
+119: 
 120: } // namespace baremetal
 ```
 
@@ -1882,194 +1934,198 @@ File: code/libraries/baremetal/src/Logger.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Logger.h>
-41:
+41: 
 42: #include <baremetal/Console.h>
 43: #include <baremetal/Format.h>
 44: #include <baremetal/System.h>
 45: #include <baremetal/Timer.h>
 46: #include <baremetal/Util.h>
 47: #include <baremetal/Version.h>
-48:
-49: using namespace baremetal;
-50:
-51: LOG_MODULE("Logger");
-52:
-53: /// <summary>
-54: /// Construct a logger
-55: /// </summary>
-56: /// <param name="logLevel">Only messages with (severity <= m_level) will be logged</param>
-57: /// <param name="timer">Pointer to system timer object (time is not logged, if this is nullptr). Defaults to nullptr</param>
-58: /// <param name="console">Console to print to, defaults to the singleton console instance</param>
-59: Logger::Logger(LogSeverity logLevel, Timer *timer /*= nullptr*/, Console &console /*= GetConsole()*/)
-60:     : m_initialized{}
-61:     , m_timer{timer}
-62:     , m_console{console}
-63:     , m_level{logLevel}
-64: {
-65: }
-66:
-67: /// <summary>
-68: /// Initialize logger
-69: /// </summary>
-70: /// <returns>true on succes, false on failure</returns>
-71: bool Logger::Initialize()
-72: {
-73:     if (m_initialized)
-74:         return true;
-75:     SetupVersion();
-76:     m_initialized = true; // Stop reentrant calls from happening
-77:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi" /*GetMachineInfo().GetName()*/);
-78:
-79:     return true;
-80: }
-81:
-82: /// <summary>
-83: /// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
-84: /// </summary>
-85: /// <param name="logLevel">Maximum log level</param>
-86: void Logger::SetLogLevel(LogSeverity logLevel)
-87: {
-88:     m_level = logLevel;
-89: }
-90:
-91: /// <summary>
-92: /// Write a string with variable arguments to the logger
-93: /// </summary>
-94: /// <param name="source">Source name or file name</param>
-95: /// <param name="line">Source line number</param>
-96: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-97: /// <param name="message">Formatted message string, with variable arguments</param>
-98: void Logger::Write(const char *source, int line, LogSeverity severity, const char *message, ...)
-99: {
-100:     va_list var;
-101:     va_start(var, message);
-102:     WriteV(source, line, severity, message, var);
-103:     va_end(var);
-104: }
-105:
-106: /// <summary>
-107: /// Write a string with variable arguments to the logger
-108: /// </summary>
-109: /// <param name="source">Source name or file name</param>
-110: /// <param name="line">Source line number</param>
-111: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-112: /// <param name="message">Formatted message string</param>
-113: /// <param name="args">Variable argument list</param>
-114: void Logger::WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args)
-115: {
-116:     if (static_cast<int>(severity) > static_cast<int>(m_level))
-117:         return;
-118:
-119:     static const size_t BufferSize = 1024;
-120:     char buffer[BufferSize]{};
-121:
-122:     char sourceString[BufferSize]{};
-123:     Format(sourceString, BufferSize, " (%s:%d)", source, line);
-124:
-125:     char messageBuffer[BufferSize]{};
-126:     FormatV(messageBuffer, BufferSize, message, args);
-127:
-128:     switch (severity)
-129:     {
-130:     case LogSeverity::Panic:
-131:         strncat(buffer, "!Panic!", BufferSize);
-132:         break;
-133:     case LogSeverity::Error:
-134:         strncat(buffer, "Error  ", BufferSize);
-135:         break;
-136:     case LogSeverity::Warning:
-137:         strncat(buffer, "Warning", BufferSize);
-138:         break;
-139:     case LogSeverity::Info:
-140:         strncat(buffer, "Info   ", BufferSize);
-141:         break;
-142:     case LogSeverity::Debug:
-143:         strncat(buffer, "Debug  ", BufferSize);
-144:         break;
-145:     }
-146:
-147:     if (m_timer != nullptr)
-148:     {
-149:         const size_t TimeBufferSize = 32;
-150:         char timeBuffer[TimeBufferSize]{};
-151:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-152:         if (strlen(timeBuffer) > 0)
-153:         {
-154:            strncat(buffer, timeBuffer, BufferSize);
-155:            strncat(buffer, " ", BufferSize);
-156:         }
-157:     }
-158:
-159:     strncat(buffer, messageBuffer, BufferSize);
-160:     strncat(buffer, sourceString, BufferSize);
-161:     strncat(buffer, "\n", BufferSize);
-162:
-163: #if BAREMETAL_COLOR_OUTPUT
-164:     switch (severity)
-165:     {
-166:     case LogSeverity::Panic:
-167:         m_console.Write(buffer, ConsoleColor::BrightRed);
-168:         break;
-169:     case LogSeverity::Error:
-170:         m_console.Write(buffer, ConsoleColor::Red);
-171:         break;
-172:     case LogSeverity::Warning:
-173:         m_console.Write(buffer, ConsoleColor::BrightYellow);
-174:         break;
-175:     case LogSeverity::Info:
-176:         m_console.Write(buffer, ConsoleColor::Cyan);
-177:         break;
-178:     case LogSeverity::Debug:
-179:         m_console.Write(buffer, ConsoleColor::Yellow);
-180:         break;
-181:     default:
-182:         m_console.Write(buffer, ConsoleColor::White);
-183:         break;
-184:     }
-185: #else
-186:     m_console.Write(buffer);
-187: #endif
-188:
-189:     if (severity == LogSeverity::Panic)
-190:     {
-191:         GetSystem().Halt();
-192:     }
-193: }
-194:
-195: /// <summary>
-196: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
-197: /// </summary>
-198: /// <returns>Reference to the singleton logger instance</returns>
-199: Logger &baremetal::GetLogger()
-200: {
-201:     static LogSeverity defaultSeverity{LogSeverity::Debug};
-202:     static Logger      logger(defaultSeverity, &GetTimer());
-203:     logger.Initialize();
-204:     return logger;
-205: }
+48: 
+49: /// @file
+50: /// Logger functionality implementation
+51: 
+52: using namespace baremetal;
+53: 
+54: /// @brief Define log name
+55: LOG_MODULE("Logger");
+56: 
+57: /// <summary>
+58: /// Construct a logger
+59: /// </summary>
+60: /// <param name="logLevel">Only messages with (severity <= m_level) will be logged</param>
+61: /// <param name="timer">Pointer to system timer object (time is not logged, if this is nullptr). Defaults to nullptr</param>
+62: /// <param name="console">Console to print to, defaults to the singleton console instance</param>
+63: Logger::Logger(LogSeverity logLevel, Timer *timer /*= nullptr*/, Console &console /*= GetConsole()*/)
+64:     : m_initialized{}
+65:     , m_timer{timer}
+66:     , m_console{console}
+67:     , m_level{logLevel}
+68: {
+69: }
+70: 
+71: /// <summary>
+72: /// Initialize logger
+73: /// </summary>
+74: /// <returns>true on succes, false on failure</returns>
+75: bool Logger::Initialize()
+76: {
+77:     if (m_initialized)
+78:         return true;
+79:     SetupVersion();
+80:     m_initialized = true; // Stop reentrant calls from happening
+81:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi" /*GetMachineInfo().GetName()*/);
+82: 
+83:     return true;
+84: }
+85: 
+86: /// <summary>
+87: /// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
+88: /// </summary>
+89: /// <param name="logLevel">Maximum log level</param>
+90: void Logger::SetLogLevel(LogSeverity logLevel)
+91: {
+92:     m_level = logLevel;
+93: }
+94: 
+95: /// <summary>
+96: /// Write a string with variable arguments to the logger
+97: /// </summary>
+98: /// <param name="source">Source name or file name</param>
+99: /// <param name="line">Source line number</param>
+100: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+101: /// <param name="message">Formatted message string, with variable arguments</param>
+102: void Logger::Write(const char *source, int line, LogSeverity severity, const char *message, ...)
+103: {
+104:     va_list var;
+105:     va_start(var, message);
+106:     WriteV(source, line, severity, message, var);
+107:     va_end(var);
+108: }
+109: 
+110: /// <summary>
+111: /// Write a string with variable arguments to the logger
+112: /// </summary>
+113: /// <param name="source">Source name or file name</param>
+114: /// <param name="line">Source line number</param>
+115: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+116: /// <param name="message">Formatted message string</param>
+117: /// <param name="args">Variable argument list</param>
+118: void Logger::WriteV(const char *source, int line, LogSeverity severity, const char *message, va_list args)
+119: {
+120:     if (static_cast<int>(severity) > static_cast<int>(m_level))
+121:         return;
+122: 
+123:     static const size_t BufferSize = 1024;
+124:     char buffer[BufferSize]{};
+125: 
+126:     char sourceString[BufferSize]{};
+127:     Format(sourceString, BufferSize, " (%s:%d)", source, line);
+128: 
+129:     char messageBuffer[BufferSize]{};
+130:     FormatV(messageBuffer, BufferSize, message, args);
+131: 
+132:     switch (severity)
+133:     {
+134:     case LogSeverity::Panic:
+135:         strncat(buffer, "!Panic!", BufferSize);
+136:         break;
+137:     case LogSeverity::Error:
+138:         strncat(buffer, "Error  ", BufferSize);
+139:         break;
+140:     case LogSeverity::Warning:
+141:         strncat(buffer, "Warning", BufferSize);
+142:         break;
+143:     case LogSeverity::Info:
+144:         strncat(buffer, "Info   ", BufferSize);
+145:         break;
+146:     case LogSeverity::Debug:
+147:         strncat(buffer, "Debug  ", BufferSize);
+148:         break;
+149:     }
+150: 
+151:     if (m_timer != nullptr)
+152:     {
+153:         const size_t TimeBufferSize = 32;
+154:         char timeBuffer[TimeBufferSize]{};
+155:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+156:         if (strlen(timeBuffer) > 0)
+157:         {
+158:             strncat(buffer, timeBuffer, BufferSize);
+159:             strncat(buffer, " ", BufferSize);
+160:         }
+161:     }
+162: 
+163:     strncat(buffer, messageBuffer, BufferSize);
+164:     strncat(buffer, sourceString, BufferSize);
+165:     strncat(buffer, "\n", BufferSize);
+166: 
+167: #if BAREMETAL_COLOR_OUTPUT
+168:     switch (severity)
+169:     {
+170:     case LogSeverity::Panic:
+171:         m_console.Write(buffer, ConsoleColor::BrightRed);
+172:         break;
+173:     case LogSeverity::Error:
+174:         m_console.Write(buffer, ConsoleColor::Red);
+175:         break;
+176:     case LogSeverity::Warning:
+177:         m_console.Write(buffer, ConsoleColor::BrightYellow);
+178:         break;
+179:     case LogSeverity::Info:
+180:         m_console.Write(buffer, ConsoleColor::Cyan);
+181:         break;
+182:     case LogSeverity::Debug:
+183:         m_console.Write(buffer, ConsoleColor::Yellow);
+184:         break;
+185:     default:
+186:         m_console.Write(buffer, ConsoleColor::White);
+187:         break;
+188:     }
+189: #else
+190:     m_console.Write(buffer);
+191: #endif
+192: 
+193:     if (severity == LogSeverity::Panic)
+194:     {
+195:         GetSystem().Halt();
+196:     }
+197: }
+198: 
+199: /// <summary>
+200: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
+201: /// </summary>
+202: /// <returns>Reference to the singleton logger instance</returns>
+203: Logger &baremetal::GetLogger()
+204: {
+205:     static LogSeverity defaultSeverity{LogSeverity::Debug};
+206:     static Logger      logger(defaultSeverity, &GetTimer());
+207:     logger.Initialize();
+208:     return logger;
+209: }
 ```
 
-- Line 51: We use the macro `LOG_MODULE` also internally to specify that we are in the `Logger` class itself, and we can use the `LOG*` macros
-- Line 59-65: We implement the constructor
-- Line 71-80: We implement the `Initialize()` method
-  - Line 75: We use the function `SetupVersion()` from `Version.h` to set up the version string
-  - Line 77: We use the `Logger` itself to log the first message, stating the platform name and its version
-- Line 86-89: We implement the `SetLogLevel()` method. This simply set the maximum log level for filtering
-- Line 98-104: We implement the `Write()` method. This simply call `WriteV()` after setting up the variable argument list
-- Line 114-193: We implement the `WriteV()` method
-  - Line 116-117: If the severity level passed in is to high (priority too low) we simply return without printing
-  - Line 119-120: We define a buffer to hold the line to write
-  - Line 122-123: We print source name and line number into a separate buffer
-  - Line 125-126: We print the message with arguments into a separate buffer
-  - Line 128-145: For each level, we add a string to the line buffer
-  - Line 147-157: If a `Timer` was passed in, we request the current time, and print it into the line buffer.
+- Line 55: We use the macro `LOG_MODULE` also internally to specify that we are in the `Logger` class itself, and we can use the `LOG*` macros
+- Line 63-69: We implement the constructor
+- Line 75-84: We implement the `Initialize()` method
+  - Line 79: We use the function `SetupVersion()` from `Version.h` to set up the version string
+  - Line 81: We use the `Logger` itself to log the first message, stating the platform name and its version
+- Line 90-93: We implement the `SetLogLevel()` method. This simply set the maximum log level for filtering
+- Line 102-108: We implement the `Write()` method. This simply call `WriteV()` after setting up the variable argument list
+- Line 118-197: We implement the `WriteV()` method
+  - Line 120-121: If the severity level passed in is to high (priority too low) we simply return without printing
+  - Line 123-124: We define a buffer to hold the line to write
+  - Line 126-127: We print source name and line number into a separate buffer
+  - Line 129-130: We print the message with arguments into a separate buffer
+  - Line 132-149: For each level, we add a string to the line buffer
+  - Line 151-161: If a `Timer` was passed in, we request the current time, and print it into the line buffer.
 We'll add the timer method in a minute
-  - Line 159-161: We add the message, source information and end of line to the buffer
-  - Line 163-187: Depending on whether we defined `BAREMETAL_COLOR_OUTPUT`, we either simply print the buffer without color, or we use a severity level specific color
-  - Line 189-192: If the severity level is `Panic` we halt the system
-- Line 199-205: We implement the friend function `GetLogger()` to retrieve the singleton instance of the logger.
+  - Line 163-165: We add the message, source information and end of line to the buffer
+  - Line 167-191: Depending on whether we defined `BAREMETAL_COLOR_OUTPUT`, we either simply print the buffer without color, or we use a severity level specific color
+  - Line 193-196: If the severity level is `Panic` we halt the system
+- Line 203-209: We implement the friend function `GetLogger()` to retrieve the singleton instance of the logger.
 As a default, we set the maximum log level to `Debug` meaning that everything is logged. We also use the singleton `Timer` instance
 
 ### Updating the Timer class {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS__STEP_3_UPDATING_THE_TIMER_CLASS}
@@ -2450,69 +2506,76 @@ File: code/libraries/baremetal/src/Assert.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Assert.h>
-41:
+41: 
 42: #include <baremetal/Logger.h>
 43: #include <baremetal/System.h>
-44:
-45: LOG_MODULE("Assert");
-46:
-47: namespace baremetal {
-48:
-49: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
-50:
-51: static AssertionCallback *s_callback = AssertionFailedDefault;
-52:
-53: /// <summary>
-54: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
-55: /// </summary>
-56: /// <param name="expression">Expression to be printed</param>
-57: /// <param name="fileName">Filename of file causing the failed assertion</param>
-58: /// <param name="lineNumber">Line number causing the failed assertion</param>
-59: void AssertionFailed(const char *expression, const char *fileName, int lineNumber)
-60: {
-61:     if (s_callback != nullptr)
-62:         s_callback(expression, fileName, lineNumber);
-63: }
-64:
-65: /// <summary>
-66: /// Default failed assertion handler
-67: /// </summary>
-68: /// <param name="expression">Expression to be printed</param>
-69: /// <param name="fileName">Filename of file causing the failed assertion</param>
-70: /// <param name="lineNumber">Line number causing the failed assertion</param>
-71: static void AssertionFailedDefault(const char *expression, const char *fileName, int lineNumber)
-72: {
-73:     GetLogger().Write(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
-74: }
-75:
-76: /// <summary>
-77: /// Reset the assertion failure handler to the default
-78: /// </summary>
-79: void ResetAssertionCallback()
-80: {
-81:     s_callback = AssertionFailedDefault;
-82: }
-83:
-84: /// <summary>
-85: /// Sets up a custom assertion failure handler
-86: /// </summary>
-87: /// <param name="callback">Assertion failure handler</param>
-88: void SetAssertionCallback(AssertionCallback* callback)
-89: {
-90:     s_callback = callback;
-91: }
-92:
-93: } // namespace baremetal
+44: 
+45: /// @file
+46: /// Assertion functions implementation
+47: 
+48: /// @brief Define log name
+49: LOG_MODULE("Assert");
+50: 
+51: namespace baremetal {
+52: 
+53: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
+54: 
+55: /// @brief Assertion callback function
+56: ///
+57: /// Set to the default assertion handler function at startup, but can be overriden
+58: static AssertionCallback *s_callback = AssertionFailedDefault;
+59: 
+60: /// <summary>
+61: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
+62: /// </summary>
+63: /// <param name="expression">Expression to be printed</param>
+64: /// <param name="fileName">Filename of file causing the failed assertion</param>
+65: /// <param name="lineNumber">Line number causing the failed assertion</param>
+66: void AssertionFailed(const char *expression, const char *fileName, int lineNumber)
+67: {
+68:     if (s_callback != nullptr)
+69:         s_callback(expression, fileName, lineNumber);
+70: }
+71: 
+72: /// <summary>
+73: /// Default failed assertion handler
+74: /// </summary>
+75: /// <param name="expression">Expression to be printed</param>
+76: /// <param name="fileName">Filename of file causing the failed assertion</param>
+77: /// <param name="lineNumber">Line number causing the failed assertion</param>
+78: static void AssertionFailedDefault(const char *expression, const char *fileName, int lineNumber)
+79: {
+80:     GetLogger().Write(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
+81: }
+82: 
+83: /// <summary>
+84: /// Reset the assertion failure handler to the default
+85: /// </summary>
+86: void ResetAssertionCallback()
+87: {
+88:     s_callback = AssertionFailedDefault;
+89: }
+90: 
+91: /// <summary>
+92: /// Sets up a custom assertion failure handler
+93: /// </summary>
+94: /// <param name="callback">Assertion failure handler</param>
+95: void SetAssertionCallback(AssertionCallback* callback)
+96: {
+97:     s_callback = callback;
+98: }
+99: 
+100: } // namespace baremetal
 ```
 
-- Line 51: We define a static variable to point to the set assertion failure handler function, which is set to `AssertionFailedDefault()` by default
-- Line 59-63: We implement the function `AssertionFailed()` which is called when the `assert()` macro fails.
+- Line 58: We define a static variable to point to the set assertion failure handler function, which is set to `AssertionFailedDefault()` by default
+- Line 66-70: We implement the function `AssertionFailed()` which is called when the `assert()` macro fails.
 This will call the set assertion failure handler function
-- Line 71-74: We implement the default assertion failure handler function `AssertionFailedDefault()`, which logs a `Panic` message, and will then halt the system
-- Line 79-82: We implement the function `ResetAssertionCallback()` which will reset the assertion failure handler function to default
-- Line 88-91: We implement the function `SetAssertionCallback()` which will set a custom assertion failure handler function
+- Line 78-81: We implement the default assertion failure handler function `AssertionFailedDefault()`, which logs a `Panic` message, and will then halt the system
+- Line 86-89: We implement the function `ResetAssertionCallback()` which will reset the assertion failure handler function to default
+- Line 95-98: We implement the function `SetAssertionCallback()` which will set a custom assertion failure handler function
 
 ### Macros.h {#TUTORIAL_12_LOGGER_ASSERTION__STEP_4_MACROSH}
 

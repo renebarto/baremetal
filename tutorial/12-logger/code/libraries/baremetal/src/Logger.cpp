@@ -46,8 +46,12 @@
 #include <baremetal/Util.h>
 #include <baremetal/Version.h>
 
+/// @file
+/// Logger functionality implementation
+
 using namespace baremetal;
 
+/// @brief Define log name
 LOG_MODULE("Logger");
 
 /// <summary>
@@ -151,8 +155,8 @@ void Logger::WriteV(const char *source, int line, LogSeverity severity, const ch
         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
         if (strlen(timeBuffer) > 0)
         {
-           strncat(buffer, timeBuffer, BufferSize);
-           strncat(buffer, " ", BufferSize);
+            strncat(buffer, timeBuffer, BufferSize);
+            strncat(buffer, " ", BufferSize);
         }
     }
 

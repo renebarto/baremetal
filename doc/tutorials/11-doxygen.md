@@ -752,5 +752,10 @@ The `@tableofcontents` tag is useful in Markdown files. It will (if enabled) mak
 
 <img src="images/doxygen-table-of-contents.png" alt="Doxygen table of contents" width="1000"/>
 
+## Documentation {#TUTORIAL_11_DOXYGEN_DOCUMENTATION}
+
+From here onwards, we will be adding documentation to code.
+We will however not be showing the changes related to adding the documentation.
+
 Next: [12-logger](12-logger.md)
 

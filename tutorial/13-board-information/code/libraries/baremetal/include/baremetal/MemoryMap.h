@@ -41,7 +41,7 @@
 
 /// @file
 /// Memory map definitions
-/// 
+///
 /// Some of the definitions could be pre-defined in either SysConfig.h or by the build, so include SysConfig.h instead of MemoryMap.h directly
 
 /// @brief Default RAM memory size (minimum size as of RPI 3)
@@ -80,8 +80,8 @@
 #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
 
 #if BAREMETAL_RPI_TARGET == 3
-/// @brief Region reserved for coherent memory
-#define COHERENT_REGION_SIZE 1 * MEGABYTE (memory shared between ARM and GPU). We reserve 1 Mb, but make sure then end is rounded
+/// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 1 Mb, but make sure then end is rounded
+#define COHERENT_REGION_SIZE 1 * MEGABYTE
 #else
 /// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
 #define COHERENT_REGION_SIZE 4 * MEGABYTE

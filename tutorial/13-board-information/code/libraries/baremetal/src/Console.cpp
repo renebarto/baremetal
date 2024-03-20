@@ -45,8 +45,16 @@
 #include <baremetal/UART1.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Console implementation
+
 namespace baremetal {
 
+/// <summary>
+/// Determine ANSI color string for specified color
+/// </summary>
+/// <param name="color">ANSI color to use</param>
+/// <returns>ANSI color string</returns>
 static const char *GetAnsiColorCode(ConsoleColor color)
 {
     switch (color)

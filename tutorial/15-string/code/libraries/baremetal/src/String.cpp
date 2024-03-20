@@ -50,12 +50,17 @@ using namespace baremetal;
 
 /// @brief Minimum allocation size for any string
 static constexpr size_t MinimumAllocationSize = 64;
+
+/// @brief Maximum string size (largest 256Mb - 1 due to largest heap allocation block size)
+static constexpr size_t MaximumStringSize = 0x80000 - 1;
+
 const size_t string::npos = static_cast<size_t>(-1);
 /// @brief Constant null character, using as string terminator, and also returned as a reference for const methods where nothing can be returned
 static const string::ValueType NullCharConst = '\0';
 /// @brief Non-constant null character, returned as a reference for const methods where nothing can be returned (always reinitialized before returning)
 static string::ValueType NullChar = '\0';
 
+/// @brief Define log name
 LOG_MODULE("String");
 
 /// <summary>
@@ -144,6 +149,8 @@ string::string(size_t count, ValueType ch)
     , m_allocatedSize{}
 {
     auto size = count;
+    if (size > MaximumStringSize)
+        size = MaximumStringSize;
     if (reallocate(size + 1))
     {
         memset(m_buffer, ch, size);
@@ -201,6 +208,8 @@ string::string(const string& other, size_t pos, size_t count /*= npos*/)
     , m_end{}
     , m_allocatedSize{}
 {
+    if (pos >= other.length())
+        return;
     auto size = other.length() - pos;
     if (count < size)
         size = count;
@@ -381,6 +390,8 @@ string& string::assign(const ValueType* str, size_t count)
 string& string::assign(size_t count, ValueType ch)
 {
     auto size = count;
+    if (size > MaximumStringSize)
+        size = MaximumStringSize;
     if ((size + 1) > m_allocatedSize)
     {
         if (!reallocate(size + 1))
@@ -425,17 +436,23 @@ string& string::assign(const string& str)
 /// <returns>A reference to the string</returns>
 string& string::assign(const string& str, size_t pos, size_t count /*= npos*/)
 {
-    auto size = str.length() - pos;
-    if (count < size)
-        size = count;
-    if ((size + 1) > m_allocatedSize)
+    if (str.empty())
+        return assign(str);
+
+    if (pos < str.length())
     {
-        if (!reallocate(size + 1))
-            return *this;
+        auto size = str.length() - pos;
+        if (count < size)
+            size = count;
+        if ((size + 1) > m_allocatedSize)
+        {
+            if (!reallocate(size + 1))
+                return *this;
+        }
+        strncpy(m_buffer, str.data() + pos, size);
+        m_end = m_buffer + size;
+        m_buffer[size] = NullCharConst;
     }
-    strncpy(m_buffer, str.data() + pos, size);
-    m_end = m_buffer + size;
-    m_buffer[size] = NullCharConst;
     return *this;
 }
 
@@ -523,6 +540,11 @@ const string::ValueType& string::back() const
 /// <returns>Returns a non-const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
 string::ValueType& string::operator[] (size_t pos)
 {
+    if (pos >= size())
+    {
+        NullChar = '\0';
+        return NullChar;
+    }
     return m_buffer[pos];
 }
 
@@ -533,6 +555,8 @@ string::ValueType& string::operator[] (size_t pos)
 /// <returns>Returns a const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
 const string::ValueType& string::operator[] (size_t pos) const
 {
+    if (pos >= size())
+        return NullCharConst;
     return m_buffer[pos];
 }
 
@@ -668,13 +692,16 @@ string& string::operator +=(const ValueType* str)
 void string::append(size_t count, ValueType ch)
 {
     auto len = length();
-    auto size = len + count;
+    auto strLength = count;
+    if (strLength > MaximumStringSize - len)
+        strLength = MaximumStringSize - len;
+    auto size = len + strLength;
     if ((size + 1) > m_allocatedSize)
     {
         if (!reallocate(size + 1))
             return;
     }
-    memset(m_buffer + len, ch, count);
+    memset(m_buffer + len, ch, strLength);
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
@@ -710,13 +737,13 @@ void string::append(const string& str)
 /// <param name="count">Number of characters to copy from str. Default is until the end of the string. If count is larger than the string length, characters are copied up to the end of the string</param>
 void string::append(const string& str, size_t pos, size_t count /*= npos*/)
 {
-    auto len = length();
-    auto strLength = str.length();
-    auto strCount = count;
-    if (pos >= strLength)
+    if (pos >= str.length())
         return;
-    if (pos + strCount > strLength)
-        strCount = strLength - pos;
+    auto strLength = str.length();
+    auto strCount = strLength - pos;
+    if (count < strCount)
+        strCount = count;
+    auto len = length();
     auto size = len + strCount;
     if ((size + 1) > m_allocatedSize)
     {
@@ -1024,15 +1051,15 @@ bool string::contains(const ValueType* str) const
 string string::substr(size_t pos /*= 0*/, size_t count /*= npos*/) const
 {
     string result;
-    auto len = length();
-    auto size = count;
-    if (pos < len)
+    auto size = length() - pos;
+    if (pos < length())
     {
-        if (count > len - pos)
-            count = len - pos;
-        result.reallocate(count + 1);
-        memcpy(result.data(), data() + pos, count);
-        result.data()[count] = NullCharConst;
+        if (count < size)
+            size = count;
+        result.reallocate(size + 1);
+        memcpy(result.data(), data() + pos, size);
+        result.m_end = result.m_buffer + size;
+        result.data()[size] = NullCharConst;
     }
 
     return result;

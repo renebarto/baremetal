@@ -55,7 +55,7 @@ using namespace baremetal;
 /// <returns>Pointer to allocated block of memory or nullptr</returns>
 void* operator new (size_t size, HeapType type)
 {
-	return MemoryManager::HeapAllocate(size, type);
+    return MemoryManager::HeapAllocate(size, type);
 }
 
 /// <summary>
@@ -66,7 +66,7 @@ void* operator new (size_t size, HeapType type)
 /// <returns>Pointer to allocated block of memory or nullptr</returns>
 void* operator new[](size_t size, HeapType type)
 {
-	return MemoryManager::HeapAllocate(size, type);
+    return MemoryManager::HeapAllocate(size, type);
 }
 
 /// <summary>
@@ -77,7 +77,7 @@ void* operator new[](size_t size, HeapType type)
 /// <returns>Pointer to block of memory</returns>
 void* operator new (size_t size, void* address)
 {
-	return address;
+    return address;
 }
 
 /// <summary>
@@ -88,7 +88,7 @@ void* operator new (size_t size, void* address)
 /// <returns>Pointer to block of memory</returns>
 void* operator new[](size_t size, void* address)
 {
-	return address;
+    return address;
 }
 
 /// <summary>
@@ -100,7 +100,7 @@ void* operator new[](size_t size, void* address)
 /// <returns>Pointer to allocated block of memory or nullptr</returns>
 void* operator new (size_t size)
 {
-	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
+    return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
 }
 
 /// <summary>
@@ -112,7 +112,7 @@ void* operator new (size_t size)
 /// <returns>Pointer to allocated block of memory or nullptr</returns>
 void* operator new[](size_t size)
 {
-	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
+    return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
 }
 
 /// <summary>
@@ -121,7 +121,7 @@ void* operator new[](size_t size)
 /// <param name="address">Block to free</param>
 void operator delete (void* address) noexcept
 {
-	MemoryManager::HeapFree(address);
+    MemoryManager::HeapFree(address);
 }
 
 /// <summary>
@@ -130,7 +130,7 @@ void operator delete (void* address) noexcept
 /// <param name="address">Block to free</param>
 void operator delete[](void* address) noexcept
 {
-	MemoryManager::HeapFree(address);
+    MemoryManager::HeapFree(address);
 }
 
 /// <summary>
@@ -139,7 +139,7 @@ void operator delete[](void* address) noexcept
 /// <param name="address">Block to free</param>
 void operator delete (void* address, size_t /*size*/) noexcept
 {
-	MemoryManager::HeapFree(address);
+    MemoryManager::HeapFree(address);
 }
 
 /// <summary>
@@ -149,5 +149,5 @@ void operator delete (void* address, size_t /*size*/) noexcept
 //// <param name="size">Size of block to free</param>
 void operator delete[](void* address, size_t /*size*/) noexcept
 {
-	MemoryManager::HeapFree(address);
+    MemoryManager::HeapFree(address);
 }

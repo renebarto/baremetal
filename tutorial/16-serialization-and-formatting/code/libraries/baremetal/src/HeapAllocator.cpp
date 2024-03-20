@@ -44,6 +44,9 @@
 #include <baremetal/Util.h>
 #include <baremetal/SysConfig.h>
 
+/// @file
+/// Heap allocator implementation
+
 using namespace baremetal;
 
 /// @brief Define log name

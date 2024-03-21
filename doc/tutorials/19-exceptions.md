@@ -4,15 +4,15 @@
 
 ## New tutorial setup {#TUTORIAL_19_EXCEPTIONS_NEW_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/18-exceptions-and-interrupts`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/19-exceptions`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_19_EXCEPTIONS_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
-- a library `output/Debug/lib/baremetal-18.a`
-- an application `output/Debug/bin/18-exceptions-and-interrupts.elf`
-- an image in `deploy/Debug/18-exceptions-and-interrupts-image`
+- a library `output/Debug/lib/baremetal-19.a`
+- an application `output/Debug/bin/19-exceptions.elf`
+- an image in `deploy/Debug/19-exceptions-image`
 
 ## Exception handling - Step 1 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1}
 
@@ -25,31 +25,36 @@ The ARM processor has 8 different modes of operation:
 
 - User mode (USR): Unprivileged mode in which most applications run
 - FIQ mode (FIQ): Entered on a FIQ (fast) interrupt exception
-- IRQ mode (IRQ): Entered on an IRQ (nromal) interrupt exception
+- IRQ mode (IRQ): Entered on an IRQ (normal) interrupt exception
 - Supervisor mode (SVC): Entered on reset or when a Supervisor Call instruction (SVC) is executed
-- Monitor (MOD): Entered when the SMC instruction (Secure Monitor Call) is executed or when the processor takes an exception which is configured for secure handling.
+- Secure Monitor (MON): Entered when the SMC instruction (Secure Monitor Call) is executed or when the processor takes an exception which is configured for secure handling.
 Provided to support switching between Secure and Non-secure states.
-- Abort mode: Data or instruction fetch is aborted. Entered on a memory access exception
-- Undefined mode: Entered when an undefined instruction is executed
+- Abort mode (ABT): Data or instruction fetch is aborted. Entered on a memory access exception
+- Undefined mode (UND): Entered when an undefined instruction is executed
 - System (SYS): Privileged mode, sharing the register view with User mode
 - Hypervisor (HYP): Entered by the Hypervisor Call and Hypervisor Trap exceptions
 
 ### Register in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_REGISTER_IN_THE_ARM_PROCESSOR}
 
 - 64 bit registers X0-X30 (W0-W30 are 32 bit registers using the low significant 32 bits of X0-X30)
+- 128 bit floating point registers Q0-Q31 (D0-D31 are 64 bit registers using the low significant 64 bits, similar for S0-S31 with 32 bits, H0-H31 with 16 bits, B0-B31 with 8 bits)
 - X0-X29: General purpose 64 bit registers)
-- X30: Link register
+- X30: Link register (LR)
 - SP (also WSP for 32 bits): Stack pointer
-- PC: Program counter
+- PC: Program counter (this is not accessible directly, but needs specific instructions)
 - XZR (also WZR for 32 bits): Zero register
+- There is also a large set of system registers. See [ARM registers](#ARM_REGISTERS), [documentation](pdf/arm-architecture-registers.pdf), and [ARM� Architecture Reference Manual](pdf/AArch64ReferenceManual.1410976032.pdf) for more information.
 
 ### Exception levels in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVELS_IN_THE_ARM_PROCESSOR}
+
+ARMv8 has four exception levels:
 - EL0: Application level
 - EL1: Operating system level
 - EL2: Hypervisor level
 - EL3: Firmware privilege level / Secure monitor level
 
 ### Exception level specific registers {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVEL_SPECIFIC_REGISTERS}
+
 Each exception level has its own special registers:
 - EL0: SP_EL0
 - EL1: SP_EL1, ELR_EL1 (Exception Link Register), SPSR_EL1 (Saved Process Status Register)
@@ -63,10 +68,13 @@ Stack pointers can be used in a different way:
 - EL3: EL3t uses SP_EL0, EL3h uses SP_EL3
 
 ### Exception types {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_TYPES}
+
 - Interrupts: There are two types of interrupts called IRQ and FIQ.
 FIQ is higher priority than IRQ. Both of these kinds of exception are typically associated with input pins on the core.
 External hardware asserts an interrupt request line and the corresponding exception type is raised when the current instruction finishes executing (although some instructions, those that can load multiple values, can be interrupted), assuming that the interrupt is not disabled
-- Aborts: Aborts can be generated either on failed instruction fetches (instruction aborts) or failed data accesses (Data Aborts)
+  - IRQ can be interrupted by FIQ
+  - FIQ cannot be interrupted by other FIQ, only one can be active at any time
+- Aborts: Aborts can be generated either on failed instruction fetches (instruction aborts) or failed data accesses (data aborts)
 - Reset: Reset is treated as a special vector for the highest implemented Exception level
 - Exception generating instructions: Execution of certain instructions can generate exceptions. Such instructions are typically executed to request a service from software that runs at a higher privilege level:
   - The Supervisor Call (SVC) instruction enables User mode programs to request an OS service.
@@ -76,12 +84,12 @@ External hardware asserts an interrupt request line and the corresponding except
 ### Exception vector {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_VECTOR}
 
 When an exception occurs, the processor must execute handler code which corresponds to the exception.
-The location in memory where the handler is stored is called the exception vector. 
+The location in memory where the handler is stored is called the exception vector.
 Each entry in the vector table is 16 instructions long.
 
 The base address is given by VBAR_ELn and then each entry has a defined offset from this base address.
-Each table has 16 entries, with each entry being 128 bytes (32 instructions) in size.
-The table effectively consists of 4 sets of 4 entries. Which entry is used depends upon a number of factors:
+Each table has 16 entries, with each entry being 128 bytes (32 instructions) in size. Each exception level (except EL0) has its own exception vector.
+The table effectively consists of 4 sets of 4 entries each. Which entry is used depends upon a number of factors:
 - The type of exception (SError, FIQ, IRQ or Synchronous)
 - If the exception is being taken at the same Exception level, the Stack Pointer to be used (SP0 or SPx)
 - If the exception is being taken at a lower Exception level, the execution state of the next lower level (AArch64 or AArch32)
@@ -108,6 +116,22 @@ The table effectively consists of 4 sets of 4 entries. Which entry is used depen
 
 We'll need to write some more assembly code, that implements the different exception handlers, and creates the exception vector table.
 
+### Macros.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_MACROSH}
+
+We are going to use a new macro `BITS` in the previous file, which we'll need to define.
+
+Update the file `code/libraries/baremetal/include/baremetal/Macros.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Macros.h
+64: /// @brief Convert bit range into integer
+65: /// @param n Start (low) bit index
+66: /// @param m End (high) bit index
+67: #define BITS(n,m)           (((1U << (m-n+1)) - 1) << (n))
+```
+
+This defines the `BITS` macro to create a mask for bit sequences (from bit n to up to and including bit m)
+
 ### ARMInstructions.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_ARMINSTRUCTIONSH}
 
 We already create a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
@@ -120,115 +144,188 @@ Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
-89: //------------------------------------------------------------------------------
-90: // ARM register fields
-91: //------------------------------------------------------------------------------
-92: 
-93: /// @brief SPSR_EL1 M[3:0] field bit shift
-94: #define SPSR_EL1_M30_SHIFT 0
-95: /// @brief SPSR_EL1 M[3:0] field bit mask
-96: #define SPSR_EL1_M30_MASK BITS(0,3)
-97: /// @brief SPSR_EL1 M[3:0] field exctraction
-98: #define SPSR_EL1_M30(value) ((value >> SPSR_EL1_M30_SHIFT) & SPSR_EL1_M30_MASK)
-99: /// @brief SPSR_EL1 M[3:0] field value for EL0t mode
-100: #define SPSR_EL1_M30_EL0t 0x0
-101: /// @brief SPSR_EL1 M[3:0] field value for EL1t mode
-102: #define SPSR_EL1_M30_EL1t 0x4
-103: /// @brief SPSR_EL1 M[3:0] field value for EL1h mode
-104: #define SPSR_EL1_M30_EL1h 0x5
-105: 
-106: /// @brief ESR_EL1 EC field bit shift
-107: #define ESR_EL1_EC_SHIFT 26
-108: /// @brief ESR_EL1 EC field bit mask
-109: #define ESR_EL1_EC_MASK  BITS(0,5)
-110: /// @brief ESR_EL1 EC field extraction
-111: #define ESR_EL1_EC(value) ((value >> ESR_EL1_EC_SHIFT) & ESR_EL1_EC_MASK)
-112: /// @brief ESR_EL1 EC field value for unknown exception
-113: #define ESR_EL1_EC_UNKNOWN 0x00
-114: /// @brief ESR_EL1 EC field value for trapped WF<x> instruction exception
-115: #define ESR_EL1_EC_TRAPPED_WFx_INSTRUCTION 0x01
-116: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0F
-117: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0F 0x03
-118: /// @brief ESR_EL1 EC field value for MCRR or MRRC instruction exception when coproc = 0x0F
-119: #define ESR_EL1_EC_TRAPPED_MCRR_MRRC_ACCESS_CORPROC_0F 0x04
-120: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0E
-121: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0E 0x05
-122: /// @brief ESR_EL1 EC field value for trapped LDC or STC instruction exception
-123: #define ESR_EL1_EC_TRAPPED_LDC_STC_ACCESS 0x06
-124: /// @brief ESR_EL1 EC field value for unknown SME, SVE, SIMD or Floating pointer instruction exception
-125: #define ESR_EL1_EC_TRAPPED_SME_SVE_SIMD_FP_ACCESS 0x07
-126: /// @brief ESR_EL1 EC field value for trapped LD64<x> or ST64<x> instruction exception
-127: #define ESR_EL1_EC_TRAPPED_LD64x_ST64x_ACCESS 0x0A
-128: /// @brief ESR_EL1 EC field value for trapped MRRC instruction exception when coproc = 0x0C
-129: #define ESR_EL1_EC_TRAPPED_MRRC_ACCESS_COPROC_0E 0x0C
-130: /// @brief ESR_EL1 EC field value for branch target exception
-131: #define ESR_EL1_EC_BRANCH_TARGET_EXCEPTION 0x0D
-132: /// @brief ESR_EL1 EC field value for illegal executions state exception
-133: #define ESR_EL1_EC_ILLEGAL_EXECUTION_STATE 0x0E
-134: /// @brief ESR_EL1 EC field value for trapped SVC 32 bit instruction exception
-135: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_32 0x11
-136: /// @brief ESR_EL1 EC field value for trapped SVC 64 bit instruction exception
-137: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_64 0x15
-138: /// @brief ESR_EL1 EC field value for MCR or MRC 64 bit instruction exception
-139: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_64 0x18
-140: /// @brief ESR_EL1 EC field value for trapped SVE access exception
-141: #define ESR_EL1_EC_TRAPPED_SVE_ACCESS 0x19
-142: /// @brief ESR_EL1 EC field value for trapped TStart access exception
-143: #define ESR_EL1_EC_TRAPPED_TSTART_ACCESS 0x1B
-144: /// @brief ESR_EL1 EC field value for pointer authentication failure exception
-145: #define ESR_EL1_EC_POINTER_AUTHENTICATION_FAILURE 0x1C
-146: /// @brief ESR_EL1 EC field value for trapped SME access exception
-147: #define ESR_EL1_EC_TRAPPED_SME_ACCESS 0x1D
-148: /// @brief ESR_EL1 EC field value for granule protection check exception
-149: #define ESR_EL1_EC_GRANULE_PROTECTION_CHECK 0x1E
-150: /// @brief ESR_EL1 EC field value for instruction abort from lower EL exception
-151: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL 0x20
-152: /// @brief ESR_EL1 EC field value for instruction abort from same EL exception
-153: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_SAME_EL 0x21
-154: /// @brief ESR_EL1 EC field value for PC alignment fault exception
-155: #define ESR_EL1_EC_PC_ALIGNMENT_FAULT 0x22
-156: /// @brief ESR_EL1 EC field value for data abort from lower EL exception
-157: #define ESR_EL1_EC_DATA_ABORT_FROM_LOWER_EL 0x24
-158: /// @brief ESR_EL1 EC field value for data abort from same EL exception
-159: #define ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL 0x25
-160: /// @brief ESR_EL1 EC field value for SP alignment fault exception
-161: #define ESR_EL1_EC_SP_ALIGNMENT_FAULT 0x27
-162: /// @brief ESR_EL1 EC field value for trapped 32 bit FP instruction exception
-163: #define ESR_EL1_EC_TRAPPED_FP_32 0x28
-164: /// @brief ESR_EL1 EC field value for trapped 64 bit FP instruction exception
-165: #define ESR_EL1_EC_TRAPPED_FP_64 0x2C
-166: /// @brief ESR_EL1 EC field value for SError interrupt exception
-167: #define ESR_EL1_EC_SERROR_INTERRUPT 0x2F
-168: /// @brief ESR_EL1 EC field value for Breakpoint from lower EL exception
-169: #define ESR_EL1_EC_BREAKPOINT_FROM_LOWER_EL 0x30
-170: /// @brief ESR_EL1 EC field value for Breakpoint from same EL exception
-171: #define ESR_EL1_EC_BREAKPOINT_FROM_SAME_EL 0x31
-172: /// @brief ESR_EL1 EC field value for SW step from lower EL exception
-173: #define ESR_EL1_EC_SW_STEP_FROM_LOWER_EL 0x32
-174: /// @brief ESR_EL1 EC field value for SW step from same EL exception
-175: #define ESR_EL1_EC_SW_STEP_FROM_SAME_EL 0x33
-176: /// @brief ESR_EL1 EC field value for Watchpoint from lower EL exception
-177: #define ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL 0x34
-178: /// @brief ESR_EL1 EC field value for Watchpoint from same EL exception
-179: #define ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL 0x35
-180: /// @brief ESR_EL1 EC field value for 32 bit BKPT instruction exception
-181: #define ESR_EL1_EC_BKPT_32 0x38
-182: /// @brief ESR_EL1 EC field value for 64 bit BRK instruction exception
-183: #define ESR_EL1_EC_BRK_64 0x3C
-184: 
-185: /// @brief ESR_EL1 ISS field bit shift
-186: #define ESR_EL1_ISS_SHIFT 0
-187: /// @brief ESR_EL1 ISS field bit mask
-188: #define ESR_EL1_ISS_MASK  BITS(0,24)
-189: /// @brief ESR_EL1 ISS field extraction
-190: #define ESR_EL1_ISS(value) ((value >> ESR_EL1_ISS_SHIFT) & ESR_EL1_ISS_MASK)
+42: #include <baremetal/Macros.h>
+43:
+...
+91: /// @brief Get current exception level
+92: #define GetCurrentEL(value)             asm volatile ("mrs %0, CurrentEL" : "=r" (value))
+93:
+94: /// @brief Get Saved Program Status Register (EL1)
+95: #define GetSPSR_EL1(value)              asm volatile ("mrs %0, SPSR_EL1" : "=r" (value))
+96:
+97: /// @brief Get Exception Syndrome Register (EL1)
+98: #define GetESR_EL1(value)               asm volatile ("mrs %0, ESR_EL1" : "=r" (value))
+99:
+100: /// @brief SPSR_EL1 M[3:0] field bit shift
+101: #define SPSR_EL1_M30_SHIFT 0
+102: /// @brief SPSR_EL1 M[3:0] field bit mask
+103: #define SPSR_EL1_M30_MASK BITS(0,3)
+104: /// @brief SPSR_EL1 M[3:0] field exctraction
+105: #define SPSR_EL1_M30(value) ((value >> SPSR_EL1_M30_SHIFT) & SPSR_EL1_M30_MASK)
+106: /// @brief SPSR_EL1 M[3:0] field value for EL0t mode
+107: #define SPSR_EL1_M30_EL0t 0x0
+108: /// @brief SPSR_EL1 M[3:0] field value for EL1t mode
+109: #define SPSR_EL1_M30_EL1t 0x4
+110: /// @brief SPSR_EL1 M[3:0] field value for EL1h mode
+111: #define SPSR_EL1_M30_EL1h 0x5
+112:
+113: /// @brief ESR_EL1 EC field bit shift
+114: #define ESR_EL1_EC_SHIFT 26
+115: /// @brief ESR_EL1 EC field bit mask
+116: #define ESR_EL1_EC_MASK  BITS(0,5)
+117: /// @brief ESR_EL1 EC field extraction
+118: #define ESR_EL1_EC(value) ((value >> ESR_EL1_EC_SHIFT) & ESR_EL1_EC_MASK)
+119: /// @brief ESR_EL1 EC field value for unknown exception
+120: #define ESR_EL1_EC_UNKNOWN 0x00
+121: /// @brief ESR_EL1 EC field value for trapped WF<x> instruction exception
+122: #define ESR_EL1_EC_TRAPPED_WFx_INSTRUCTION 0x01
+123: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0F
+124: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0F 0x03
+125: /// @brief ESR_EL1 EC field value for MCRR or MRRC instruction exception when coproc = 0x0F
+126: #define ESR_EL1_EC_TRAPPED_MCRR_MRRC_ACCESS_CORPROC_0F 0x04
+127: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0E
+128: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0E 0x05
+129: /// @brief ESR_EL1 EC field value for trapped LDC or STC instruction exception
+130: #define ESR_EL1_EC_TRAPPED_LDC_STC_ACCESS 0x06
+131: /// @brief ESR_EL1 EC field value for unknown SME, SVE, SIMD or Floating pointer instruction exception
+132: #define ESR_EL1_EC_TRAPPED_SME_SVE_SIMD_FP_ACCESS 0x07
+133: /// @brief ESR_EL1 EC field value for trapped LD64<x> or ST64<x> instruction exception
+134: #define ESR_EL1_EC_TRAPPED_LD64x_ST64x_ACCESS 0x0A
+135: /// @brief ESR_EL1 EC field value for trapped MRRC instruction exception when coproc = 0x0C
+136: #define ESR_EL1_EC_TRAPPED_MRRC_ACCESS_COPROC_0E 0x0C
+137: /// @brief ESR_EL1 EC field value for branch target exception
+138: #define ESR_EL1_EC_BRANCH_TARGET_EXCEPTION 0x0D
+139: /// @brief ESR_EL1 EC field value for illegal executions state exception
+140: #define ESR_EL1_EC_ILLEGAL_EXECUTION_STATE 0x0E
+141: /// @brief ESR_EL1 EC field value for trapped SVC 32 bit instruction exception
+142: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_32 0x11
+143: /// @brief ESR_EL1 EC field value for trapped SVC 64 bit instruction exception
+144: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_64 0x15
+145: /// @brief ESR_EL1 EC field value for MCR or MRC 64 bit instruction exception
+146: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_64 0x18
+147: /// @brief ESR_EL1 EC field value for trapped SVE access exception
+148: #define ESR_EL1_EC_TRAPPED_SVE_ACCESS 0x19
+149: /// @brief ESR_EL1 EC field value for trapped TStart access exception
+150: #define ESR_EL1_EC_TRAPPED_TSTART_ACCESS 0x1B
+151: /// @brief ESR_EL1 EC field value for pointer authentication failure exception
+152: #define ESR_EL1_EC_POINTER_AUTHENTICATION_FAILURE 0x1C
+153: /// @brief ESR_EL1 EC field value for trapped SME access exception
+154: #define ESR_EL1_EC_TRAPPED_SME_ACCESS 0x1D
+155: /// @brief ESR_EL1 EC field value for granule protection check exception
+156: #define ESR_EL1_EC_GRANULE_PROTECTION_CHECK 0x1E
+157: /// @brief ESR_EL1 EC field value for instruction abort from lower EL exception
+158: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL 0x20
+159: /// @brief ESR_EL1 EC field value for instruction abort from same EL exception
+160: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_SAME_EL 0x21
+161: /// @brief ESR_EL1 EC field value for PC alignment fault exception
+162: #define ESR_EL1_EC_PC_ALIGNMENT_FAULT 0x22
+163: /// @brief ESR_EL1 EC field value for data abort from lower EL exception
+164: #define ESR_EL1_EC_DATA_ABORT_FROM_LOWER_EL 0x24
+165: /// @brief ESR_EL1 EC field value for data abort from same EL exception
+166: #define ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL 0x25
+167: /// @brief ESR_EL1 EC field value for SP alignment fault exception
+168: #define ESR_EL1_EC_SP_ALIGNMENT_FAULT 0x27
+169: /// @brief ESR_EL1 EC field value for trapped 32 bit FP instruction exception
+170: #define ESR_EL1_EC_TRAPPED_FP_32 0x28
+171: /// @brief ESR_EL1 EC field value for trapped 64 bit FP instruction exception
+172: #define ESR_EL1_EC_TRAPPED_FP_64 0x2C
+173: /// @brief ESR_EL1 EC field value for SError interrupt exception
+174: #define ESR_EL1_EC_SERROR_INTERRUPT 0x2F
+175: /// @brief ESR_EL1 EC field value for Breakpoint from lower EL exception
+176: #define ESR_EL1_EC_BREAKPOINT_FROM_LOWER_EL 0x30
+177: /// @brief ESR_EL1 EC field value for Breakpoint from same EL exception
+178: #define ESR_EL1_EC_BREAKPOINT_FROM_SAME_EL 0x31
+179: /// @brief ESR_EL1 EC field value for SW step from lower EL exception
+180: #define ESR_EL1_EC_SW_STEP_FROM_LOWER_EL 0x32
+181: /// @brief ESR_EL1 EC field value for SW step from same EL exception
+182: #define ESR_EL1_EC_SW_STEP_FROM_SAME_EL 0x33
+183: /// @brief ESR_EL1 EC field value for Watchpoint from lower EL exception
+184: #define ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL 0x34
+185: /// @brief ESR_EL1 EC field value for Watchpoint from same EL exception
+186: #define ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL 0x35
+187: /// @brief ESR_EL1 EC field value for 32 bit BKPT instruction exception
+188: #define ESR_EL1_EC_BKPT_32 0x38
+189: /// @brief ESR_EL1 EC field value for 64 bit BRK instruction exception
+190: #define ESR_EL1_EC_BRK_64 0x3C
+191:
+192: /// @brief ESR_EL1 ISS field bit shift
+193: #define ESR_EL1_ISS_SHIFT 0
+194: /// @brief ESR_EL1 ISS field bit mask
+195: #define ESR_EL1_ISS_MASK  BITS(0,24)
+196: /// @brief ESR_EL1 ISS field extraction
+197: #define ESR_EL1_ISS(value) ((value >> ESR_EL1_ISS_SHIFT) & ESR_EL1_ISS_MASK)
 ```
 
-- Line 94-98: We define the M[3:0] field in the SPSR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 100-104: We define different values for this field
-- Line 107-111: We define the EC field in the ESR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 113-183: We define different values for this field
-- Line 186-190: We define the ISS field in the ESR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 42: We need to include the macro header for a new definition we're going to use
+- Line 92: We add an instruction to retrieve the value of the `CurrentEL` register, which holds the current exception level
+- Line 95: We add an instruction to retrieve the value of the `SPR_EL1` (Saved Program Status Register EL1), which hold information on the cause of an exception
+- Line 98: We add an instruction to retrieve the value of the `ESR_EL1` (Exception Status Register EL1), which hold information on the cause of an exception
+- Line 100-105: We define the M3:0 field in the `SPSR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 106-111: We define different values for this field
+- Line 113-119: We define the EC field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 120-190: We define different values for this field
+- Line 192-197: We define the ISS field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+
+### Exception.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONH}
+
+We will define some values for different types of exceptions.
+
+Create the file `code/libraries/baremetal/include/baremetal/Exception.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Exception.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2024 Rene Barto
+3: //
+4: // File        : Exception.h
+5: //
+6: // Namespace   : -
+7: //
+8: // Class       : -
+9: //
+10: // Description : Exception definitions
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39:
+40: #pragma once
+41:
+42: /// @file
+43: /// Exception types
+44:
+45: /// @brief Unexpected exception
+46: #define EXCEPTION_UNEXPECTED                0
+47: /// @brief Synchronous exception
+48: #define EXCEPTION_SYNCHRONOUS               1
+49: /// @brief System error
+50: #define EXCEPTION_SYSTEM_ERROR              2
+51:
+```
 
 ### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERH}
 
@@ -252,9 +349,9 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -274,20 +371,20 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/Types.h>
-43: 
+43:
 44: /// @file
-45: /// Exception handling
-46: 
+45: /// Exception handler function
+46:
 47: #ifdef __cplusplus
 48: extern "C" {
 49: #endif
-50: 
+50:
 51: /// @brief Exception abort frame
 52: ///
 53: /// Storage for register value in case of exception, in order to recover
@@ -310,27 +407,52 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 70:     /// @brief Unused valuem used to align to 64 bytes
 71:     uint64	unused;
 72: }
-73: PACKED;
-74: 
-75: /// @brief Handles an exception, with the abort frame passed in.
-76: ///
-77: /// The exception handler is called from assembly code (ExceptionStub.S)
-78: /// @param exceptionID Exception type being thrown (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-79: /// @param abortFrame  Filled in AbortFrame instance.
-80: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-81: 
-82: #ifdef __cplusplus
-83: }
-84: #endif
+73: /// @brief Just specifies the struct is packed
+74: PACKED;
+75:
+76: /// @brief Handles an unexpected exception, with the abort frame passed in.
+77: ///
+78: /// The exception handler is called from assembly code (ExceptionStub.S)
+79: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_UNEXPECTED)
+80: /// @param abortFrame  Filled in AbortFrame instance.
+81: void UnexpectedHandler(uint64 exceptionID, AbortFrame* abortFrame);
+82:
+83: /// @brief Handles a synchronous exception, with the abort frame passed in.
+84: ///
+85: /// The exception handler is called from assembly code (ExceptionStub.S)
+86: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYNCHRONOUS)
+87: /// @param abortFrame  Filled in AbortFrame instance.
+88: void SynchronousExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+89:
+90: /// @brief Handles a system error exception, with the abort frame passed in.
+91: ///
+92: /// The exception handler is called from assembly code (ExceptionStub.S)
+93: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYSTEM_ERROR)
+94: /// @param abortFrame  Filled in AbortFrame instance.
+95: void SystemErrorHandler(uint64 exceptionID, AbortFrame* abortFrame);
+96:
+97: /// @brief Handles an interrupt.
+98: ///
+99: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+100: void InterruptHandler();
+101:
+102: #ifdef __cplusplus
+103: }
+104: #endif
 ```
 
-- Line 54-73: We create struct `AbortFrame` which will hold all important information on entry. This information is actually registers saved on the stack, as we'll see later.
-- Line 80: We declare the exception handler function `ExceptionHandler()` which will receive two parameters.
-The first parameter is an exception ID which we will set, the second is a pointer to the `AbortFrame` which is actually the stack pointer value
+- Line 54-74: We create struct `AbortFrame` which will hold all important information on entry. This information is actually registers saved on the stack, as we'll see later
+- Line 81: We declare the exception handler for an unexpected exception `UnexpectedHandler()` which will receive two parameters.
+The first parameter is an exception ID which we will set (in this case EXCEPTION_UNEXPECTED), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
+- Line 88: We declare the exception handler for a synchronous exception (e.g. data exception, illegal instruction exception,break exception) `SynchronousExceptionHandler()` which will receive two parameters.
+The first parameter is an exception ID which we will set (in this case EXCEPTION_SYNCHRONOUS), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
+- Line 95: We declare the exception handler for a system error exception `SystemErrorHandler()` (implementation defined) which will receive two parameters.
+The first parameter is an exception ID which we will set (in this case EXCEPTION_SYSTEM_ERROR), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
+- Line 100: We declare the interrupt handler `InterruptHandler()`. This will later be moved, it is for now just added to avoid linker errors
 
 ### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERCPP}
 
-We will implement the exception handler.
+We will implement the exception handlers.
 
 Create the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
 
@@ -374,1007 +496,1084 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/ExceptionHandler.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
-43: #include <baremetal/ExceptionSystem.h>
-44: 
-45: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
-46: {
-47:     EnableFIQs();
-48: 
-49:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-50: }
-```
-
-- Line 43: We include the exception system header which we will create next.
-This is to create a class that does the handling in C++ domain
-- Line 45-50: We implement the `ExceptionHandler()` function. Next to enabling the FIQ interrupts, we simply relay to the `ExceptionSystem` class
-
-### ExceptionSystem.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSYSTEMH}
-
-We will the actual exception handling class `ExceptionSystem`.
-
-Create the file `code/libraries/baremetal/include/baremetal/ExceptionSystem.h`
-
-```cpp
-File: code/libraries/baremetal/include/baremetal/ExceptionSystem.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : ExceptionSystem.h
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : ExceptionSystem
-9: //
-10: // Description : Exception handler
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/Macros.h>
-43: #include <baremetal/ExceptionHandler.h>
-44: 
+43: #include <baremetal/Logger.h>
+44:
 45: /// @file
-46: /// Exception handling system
-47: 
-48: /// @brief Exception vector table
-49: ///
-50: /// The exception vector table is used to select an exception type depending on conditions:
-51: /// - Whether the current EL is equal to EL0 or EL1 or greater
-52: /// - Whether the EL the exception was called from was lower that the current, and which architecture was used.
-53: ///
-54: /// The exception vector table has a total of 16 entries, each 128 bytes in size.
-55: ///
-56: /// Offset  Exception type      Description
-57: /// 0x000   Synchronous         Current EL with SP0
-58: /// 0x080   IRQ/vIRQ
-59: /// 0x100   FIQ/vFIQ
-60: /// 0x180   SError/vSError
-61: ///
-62: /// 0x200   Synchronous         Current EL with SPx
-63: /// 0x280   IRQ/vIRQ
-64: /// 0x300   FIQ/vFIQ
-65: /// 0x380   SError/vSError
-66: ///
-67: /// 0x400   Synchronous         Lower EL using AArch64
-68: /// 0x480   IRQ/vIRQ
-69: /// 0x500   FIQ/vFIQ
-70: /// 0x580   SError/vSError
-71: ///
-72: /// 0x600   Synchronous         Lower EL using AArch32
-73: /// 0x680   IRQ/vIRQ
-74: /// 0x700   FIQ/vFIQ
-75: /// 0x780   SError/vSError
-76: ///
-77: /// Each entry simple has a 32 bit pointer to a function
-78: 
-79: /// <summary>
-80: /// Exception vector table
-81: /// </summary>
-82: struct VectorTable
-83: {
-84:     /// <summary>
-85:     /// Exception vector table contents
-86:     /// </summary>
-87:     struct
-88:     {
-89:         uint32	Branch;
-90:         uint32	Dummy[31];      // Align to 128 bytes
-91:     }
-92:     Vector[16];
-93: }
-94: PACKED;
-95: 
-96: namespace baremetal {
-97: 
-98: /// @brief Exception handling system. Handles ARM processor exceptions
-99: /// This is a singleton class, created as soon as GetExceptionSystem() is called
-100: class ExceptionSystem
-101: {
-102:     friend ExceptionSystem& GetExceptionSystem();
-103: 
-104: private:
-105:     /// @brief Create a exception handling system. Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
-106:     ExceptionSystem();
-107: 
-108: public:
-109:     ~ExceptionSystem();
-110: 
-111:     /// @brief Throw a ARM exception with an abort frame
-112:     /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-113:     /// @param abortFrame   Stored state information at the time of exception
-114:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
-115: };
-116: 
-117: /// @brief Callback function called by the exception handler if registered
-118: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-119: /// @param abortFrame   Stored state information at the time of exception
-120: using ExceptionPanicHandler = bool(unsigned exceptionID, AbortFrame* abortFrame);
-121: 
-122: /// @brief Convert exception ID to a string
-123: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-124: /// @return String representation of exception ID
-125: const char* GetExceptionType(unsigned exceptionID);
-126: 
-127: /// @brief Register an exception callback function, and return the previous one.
-128: /// @param handler      Exception handler callback function to register
-129: /// @return Previously set exception handler callback function
-130: ExceptionPanicHandler* RegisterPanicHandler(ExceptionPanicHandler* handler);
-131: 
-132: /// @brief Retrieve the singleton exception handling system
-133: ///
-134: /// Creates a static instance of ExceptionSystem, and returns a reference to it.
-135: /// @return A reference to the singleton exception handling system.
-136: ExceptionSystem& GetExceptionSystem();
-137: 
-138: } // namespace baremetal
+46: /// Exception handler function implementation
+47:
+48: /// @brief Define log name
+49: LOG_MODULE("ExceptionHandler");
+50:
+51: using namespace baremetal;
+52:
+53: void UnexpectedHandler(uint64 exceptionID, AbortFrame* abortFrame)
+54: {
+55:     LOG_INFO("UnexpectedHandler");
+56: }
+57:
+58: void SynchronousExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+59: {
+60:     uint32 esr_el1{};
+61:     GetESR_EL1(esr_el1);
+62:     uint32 esr_ec = ESR_EL1_EC(esr_el1);
+63:     uint32 esr_iss = ESR_EL1_ISS(esr_el1);
+64:     LOG_INFO("SynchronousHandler EC=%02x ISS=%07x", esr_ec, esr_iss);
+65: }
+66:
+67: void SystemErrorHandler(uint64 exceptionID, AbortFrame* abortFrame)
+68: {
+69:     LOG_INFO("SystemErrorHandler");
+70: }
+71:
+72: void InterruptHandler()
+73: {
+74: }
 ```
 
-- Line 82-94: We declare the exception vector table type `VectorTable`. This contains the 16 different exception vector entries
-- Line 100-115: We declare the class `ExceptionSystem`. This is the acutal handler class for exceptions
-  - Line 102: We make the function `GetExceptionSystem()` a friend. This function is the only way to create an instance of `ExceptionSystem`
-  - Line 106: We declare the (private) constructor
-  - Line 109: We declare the destructor
-  - Line 114: We declare the method `Throw()` which is used to handle an exception
-- Line 120: We declare a function type `ExceptionPanicHandler` which is used to enable a hook for a function to handle panics
-- Line 125: We declare a function `GetExceptionType()` to convert an exception ID to a string
-- Line 130: We declare a function `RegisterPanicHandler()` to set or reset a panic function handler
-- Line 136 We declare the function `GetExceptionSystem()` which is used to create and return the singleton instance of `ExceptionSystem`
+- Line 53-56: We implement the function `UnexpectedHandler()`, which simply prints some text
+- Line 58-65: We implement the function `SynchronousExceptionHandler()`, which extracts two fields from the `ESR_EL1` register (using the macros and instructions we just added), and prints the values.
+- Line 67-70: We implement the function `SystemErrorHandler()`, which simply prints some text
+- Line 72-74: We implement the function `InterruptHandler()`, which does nothing
 
-### ExceptionSystem.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSYSTEMCPP}
+### BCMRegisters.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_BCMREGISTERSH}
 
-We will implement the exception handler.
+We are using a new macro `BITS` in the previous file, which we'll need to define.
 
-Create the file `code/libraries/baremetal/src/ExceptionSystem.cpp`
+Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`
 
 ```cpp
-File: code/libraries/baremetal/src/ExceptionSystem.cpp
+File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
+...
+47: #include <baremetal/Macros.h>
+48: #ifdef __cplusplus
+49: #include <baremetal/Types.h>
+50: #endif
+...
+96: //---------------------------------------------
+97: // Interrupt Controller
+98: //---------------------------------------------
+99:
+100: /// @brief Raspberry Pi Interrupt Control Registers base address. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+101: #define RPI_INTRCTRL_BASE               RPI_BCM_IO_BASE + 0x0000B000
+102:
+103: /// @brief Raspberry Pi Interrupt Control basic IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
+104: #define RPI_INTRCTRL_IRQ_BASIC_PENDING  reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000200)
+105: /// @brief Raspberry Pi Interrupt Control register 1 IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
+106: #define RPI_INTRCTRL_IRQ_PENDING_1      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000204)
+107: /// @brief Raspberry Pi Interrupt Control register 2 IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
+108: #define RPI_INTRCTRL_IRQ_PENDING_2      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000208)
+109: /// @brief Raspberry Pi Interrupt Control FIQ enable register. See @ref RASPBERRY_PI_MAILBOX
+110: #ifdef __cplusplus
+111: #define RPI_INTRCTRL_FIQ_CONTROL        reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000020C)
+112: #else
+113: #define RPI_INTRCTRL_FIQ_CONTROL        (RPI_MAILBOX_BASE + 0x0000020C)
+114: #endif
+115: /// @brief Raspberry Pi Interrupt Control register 1 IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
+116: #define RPI_INTRCTRL_ENABLE_IRQS_1      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000210)
+117: /// @brief Raspberry Pi Interrupt Control register 2 IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
+118: #define RPI_INTRCTRL_ENABLE_IRQS_2      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000214)
+119: /// @brief Raspberry Pi Interrupt Control basic IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
+120: #define RPI_INTRCTRL_ENABLE_BASIC_IRQS  reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000218)
+121: /// @brief Raspberry Pi Interrupt Control register 1 IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
+122: #define RPI_INTRCTRL_DISABLE_IRQS_1     reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000021C)
+123: /// @brief Raspberry Pi Interrupt Control register 2 IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
+124: #define RPI_INTRCTRL_DISABLE_IRQS_2     reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000220)
+125: /// @brief Raspberry Pi Interrupt Control basic IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
+126: #define RPI_INTRCTRL_DISABLE_BASIC_IRQS reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000224)
+127:
+...
+```
+
+- Line 48-50: As this header is also included by the exception stub comming up next, we need to protect against specific C/C++ definitions, so we only include the type definitions header if we are building for C++
+- Line 100-126: We add definitions for registers relating to the Raspberry Pi interrupt control register. Some of these are used by the exception stub code
+
+### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSTUBS}
+
+Next we need to write some assembly to implement the exception vectors.
+
+Create the file `code/libraries/baremetal/src/ExceptionStub.S`
+
+```cpp
+File: code/libraries/baremetal/src/ExceptionStub.S
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
-4: // File        : ExceptionSystem.cpp
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : ExceptionSystem
-9: //
-10: // Description : Exception handling class
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: // 
-38: //------------------------------------------------------------------------------
-39: 
-40: #include <baremetal/ExceptionSystem.h>
-41: #include <baremetal/Exception.h>
-42: 
-43: #include <baremetal/ARMInstructions.h>
-44: #include <baremetal/Assert.h>
-45: #include <baremetal/Logger.h>
-46: #include <baremetal/String.h>
-47: #include <baremetal/Synchronization.h>
-48: #include <baremetal/System.h>
-49: #include <baremetal/InterruptHandler.h>
-50: 
-51: namespace baremetal {
-52: 
-53: static const char FromExcept[] = "except";
-54: 
-55: ExceptionPanicHandler* s_exceptionPanicHandler;
-56: 
-57: ExceptionSystem::~ExceptionSystem()
-58: {
-59: }
-60: 
-61: // order must match exception identifiers in baremetal/Exception.h
-62: static const char* s_exceptionName[] =
-63: {
-64:     "Unexpected exception",
-65:     "Synchronous exception",
-66:     "System error"
-67: };
-68: 
-69: ExceptionSystem::ExceptionSystem()
-70: {
-71: }
-72: 
-73: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
-74: {
-75:     assert(abortFrame != nullptr);
-76: 
-77:     uint64 sp = abortFrame->sp_el0;
-78:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
-79:     {
-80:         sp = abortFrame->sp_el1;
-81:     }
-82: 
-83:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
-84:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
-85: 
-86:     uint64 FAR = 0;
-87:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
-88:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
-89:     {
-90:         FAR = abortFrame->far_el1;
-91:     }
-92: 
-93:     bool halt = true;
-94:     if (s_exceptionPanicHandler != nullptr)
-95:     {
-96:         halt = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
-97:     }
-98: 
-99:     GetLogger().Write(FromExcept, __LINE__, halt ? LogSeverity::Panic : LogSeverity::Error,
-100:         "%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-101:         s_exceptionName[exceptionID],
-102:         abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-103: }
-104: 
-105: const char* GetExceptionType(unsigned exceptionID)
-106: {
-107:     return s_exceptionName[exceptionID];
-108: }
-109: 
-110: ExceptionPanicHandler* RegisterPanicHandler(ExceptionPanicHandler* handler)
-111: {
-112:     auto result = s_exceptionPanicHandler;
-113:     s_exceptionPanicHandler = handler;
-114:     return result;
-115: }
-116: 
-117: ExceptionSystem& GetExceptionSystem()
-118: {
-119:     static ExceptionSystem system;
-120:     return system;
-121: }
-122: 
-123: } // namespace baremetal
-```
-
-## Interrupt handling - Step 2 {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2}
-
-We'll add a class `InterruptSystem` to enable, disable, and handle interrupts.
-
-### ARMRegisters.h {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_ARMREGISTERSH}
-
-Next to the Raspberry Pi registers for peripherals etc., there are also ARM processor registers, but specific for Raspberry Pi.
-The complete set of registers is defined in [documentation](pdf/bcm2836-peripherals.pdf), the most important ones are described in [ARM local device registers](#RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS).
-
-The ARM specific registers are in a different address range, reaching from 0x40000000 to 0x4003FFFF on Raspberry Pi 3, and 0xFF800000 to 0xFF83FFFF on Raspberry Pi 4 and later.
-
-We'll add the definition for the register we will be using.
-
-Create the file `code/libraries/baremetal/include/baremetal/ARMRegisters.h`
-
-```cpp
-File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\ARMRegisters.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : ARMRegisters.h
+4: // File        : ExceptionStub.S
 5: //
 6: // Namespace   : -
 7: //
 8: // Class       : -
 9: //
-10: // Description : Locations and definitions for Raspberry Pi ARM registers
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: /// @file
-41: /// Register addresses of Raspberry Pi peripheral registers.
-42: ///
-43: /// For specific registers, we also define the fields and their possible values.
-44: 
-45: #pragma once
-46: 
-47: #include <baremetal/Macros.h>
-48: #include <baremetal/Types.h>
-49: 
-50: #if BAREMETAL_RPI_TARGET <= 3
-51: #define ARM_LOCAL_BASE 0x40000000
-52: #else
-53: #define ARM_LOCAL_BASE 0xFF800000
-54: #endif
-55: 
-56: /// @brief Raspberry Pi ARM Local Control Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-57: #define ARM_LOCAL_CONTROL                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000000)
-58: /// @brief Raspberry Pi ARM Local Core Timer Prescaler Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-59: #define ARM_LOCAL_PRESCALER                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000008)
-60: /// @brief Raspberry Pi ARM Local GPU Interrupt Routing Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-61: #define ARM_LOCAL_GPU_INT_ROUTING          reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000000C)
-62: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-63: #define ARM_LOCAL_PM_ROUTING_SET           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000010)
-64: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-65: #define ARM_LOCAL_PM_ROUTING_CLR           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000014)
-66: /// @brief Raspberry Pi ARM Local Core Timer Least Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-67: #define ARM_LOCAL_TIMER_LS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000001C)
-68: /// @brief Raspberry Pi ARM Local Core Timer Most Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-69: #define ARM_LOCAL_TIMER_MS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000020)
-70: #define ARM_LOCAL_INT_ROUTING              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000024)
-71: /// @brief Raspberry Pi ARM Local AXI Outstanding Read/Write Counters Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-72: #define ARM_LOCAL_AXI_COUNT                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000002C)
-73: /// @brief Raspberry Pi ARM Local AXI Outstanding Interrupt Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-74: #define ARM_LOCAL_AXI_IRQ                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000030)
-75: /// @brief Raspberry Pi ARM Local Timer Control / Status Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-76: #define ARM_LOCAL_TIMER_CONTROL            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000034)
-77: /// @brief Raspberry Pi ARM Local Timer IRQ Clear / Reload Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-78: #define ARM_LOCAL_TIMER_WRITE              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000038)
-79: 
-80: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-81: #define ARM_LOCAL_TIMER_INT_CONTROL0       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000040)
-82: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-83: #define ARM_LOCAL_TIMER_INT_CONTROL1       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000044)
-84: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-85: #define ARM_LOCAL_TIMER_INT_CONTROL2       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000048)
-86: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-87: #define ARM_LOCAL_TIMER_INT_CONTROL3       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000004C)
-88: 
-89: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-90: #define ARM_LOCAL_MAILBOX_INT_CONTROL0 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000050)
-91: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-92: #define ARM_LOCAL_MAILBOX_INT_CONTROL1 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000054)
-93: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-94: #define ARM_LOCAL_MAILBOX_INT_CONTROL2 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000058)
-95: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-96: #define ARM_LOCAL_MAILBOX_INT_CONTROL3 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000005C)
-97: 
-98: /// @brief Raspberry Pi ARM Local Core 0 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-99: #define ARM_LOCAL_IRQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000060)
-100: /// @brief Raspberry Pi ARM Local Core 1 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-101: #define ARM_LOCAL_IRQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000064)
-102: /// @brief Raspberry Pi ARM Local Core 2 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-103: #define ARM_LOCAL_IRQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000068)
-104: /// @brief Raspberry Pi ARM Local Core 3 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-105: #define ARM_LOCAL_IRQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000006C)
-106: 
-107: /// @brief Raspberry Pi ARM Local Core 0 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-108: #define ARM_LOCAL_FIQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000070)
-109: /// @brief Raspberry Pi ARM Local Core 1 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-110: #define ARM_LOCAL_FIQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000074)
-111: /// @brief Raspberry Pi ARM Local Core 2 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-112: #define ARM_LOCAL_FIQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000078)
-113: /// @brief Raspberry Pi ARM Local Core 3 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-114: #define ARM_LOCAL_FIQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000007C)
-115: 
-116: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-117: #define ARM_LOCAL_MAILBOX0_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000080)
-118: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-119: #define ARM_LOCAL_MAILBOX1_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000084)
-120: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-121: #define ARM_LOCAL_MAILBOX2_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000088)
-122: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-123: #define ARM_LOCAL_MAILBOX3_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000008C)
-124: 
-125: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-126: #define ARM_LOCAL_MAILBOX0_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000090)
-127: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-128: #define ARM_LOCAL_MAILBOX1_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000094)
-129: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-130: #define ARM_LOCAL_MAILBOX2_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000098)
-131: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-132: #define ARM_LOCAL_MAILBOX3_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000009C)
-133: 
-134: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-135: #define ARM_LOCAL_MAILBOX0_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A0)
-136: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-137: #define ARM_LOCAL_MAILBOX1_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A4)
-138: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-139: #define ARM_LOCAL_MAILBOX2_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A8)
-140: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-141: #define ARM_LOCAL_MAILBOX3_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000AC)
-142: 
-143: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-144: #define ARM_LOCAL_MAILBOX0_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B0)
-145: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-146: #define ARM_LOCAL_MAILBOX1_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B4)
-147: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-148: #define ARM_LOCAL_MAILBOX2_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B8)
-149: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-150: #define ARM_LOCAL_MAILBOX3_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000BC)
-151: 
-152: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-153: #define ARM_LOCAL_MAILBOX0_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C0)
-154: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-155: #define ARM_LOCAL_MAILBOX1_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C4)
-156: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-157: #define ARM_LOCAL_MAILBOX2_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C8)
-158: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-159: #define ARM_LOCAL_MAILBOX3_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000CC)
-160: 
-161: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-162: #define ARM_LOCAL_MAILBOX0_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D0)
-163: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-164: #define ARM_LOCAL_MAILBOX1_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D4)
-165: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-166: #define ARM_LOCAL_MAILBOX2_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D8)
-167: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-168: #define ARM_LOCAL_MAILBOX3_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000DC)
-169: 
-170: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-171: #define ARM_LOCAL_MAILBOX0_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E0)
-172: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-173: #define ARM_LOCAL_MAILBOX1_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E4)
-174: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-175: #define ARM_LOCAL_MAILBOX2_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E8)
-176: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-177: #define ARM_LOCAL_MAILBOX3_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000EC)
-178: 
-179: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-180: #define ARM_LOCAL_MAILBOX0_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F0)
-181: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-182: #define ARM_LOCAL_MAILBOX1_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F4)
-183: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-184: #define ARM_LOCAL_MAILBOX2_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F8)
-185: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-186: #define ARM_LOCAL_MAILBOX3_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000FC)
-187: 
-188: /// @brief Raspberry Pi ARM Local Register region end address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-189: #define ARM_LOCAL_END                      reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000003FFFF)
-```
-
-We'll explain the details on each of these registers as we use them.
-
-### InterruptSystem.h {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_INTERRUPTSYSTEMH}
-
-Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestDetails.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestDetails.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestDetails
-9: //
-10: // Description : Test detail
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: 
-44: namespace unittest
-45: {
-46: 
-47: class TestDetails
-48: {
-49: private:
-50:     const baremetal::string m_suiteName;
-51:     const baremetal::string m_fixtureName;
-52:     const baremetal::string m_testName;
-53:     const baremetal::string m_fileName;
-54:     const int m_lineNumber;
-55: 
-56: public:
-57:     TestDetails();
-58:     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
-59: 
-60:     const baremetal::string& SuiteName() const { return m_suiteName; }
-61:     const baremetal::string& FixtureName() const { return m_fixtureName; }
-62:     const baremetal::string& TestName() const { return m_testName; }
-63:     const baremetal::string& SourceFileName() const { return m_fileName; }
-64:     int SourceFileLineNumber() const { return m_lineNumber; }
-65: };
-66: 
-67: } // namespace unittest
-```
-
-The `TestDetails` class is added to the `unittest` namespace.
-
-- Line 42: We use strings, so we need to include the header for the `string` class
-- Line 47-65: We declare the class `TestDetails` which will hold information on a test
-  - Line 50: The class member variable `m_suiteName` is the test suite name
-  - Line 51: The class member variable `m_fixtureName` is the test fixture name
-  - Line 52: The class member variable `m_testName` is the test name
-  - Line 53: The class member variable `m_fileName` is the source file in which the actual test is defined
-  - Line 54: The class member variable `m_lineNumber` is the source line in which the actual test is defined
-  - Line 57: We declare the default constructor
-  - Line 58: We declare the normal constructor which specifies all the needed information
-  - Line 60: We declare an accessor `SuiteName()` for the test suite name
-  - Line 61: We declare an accessor `FixtureName()` for the test fixture name
-  - Line 62: We declare an accessor `TestName()` for the test name
-  - Line 63: We declare an accessor `SourceFileName()` for the source file name
-  - Line 64: We declare an accessor `SourceFileLineNumber()` for the source line number
-
-### TestDetails.cpp {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_TESTDETAILSCPP}
-
-Let's implement the `TestDetails` class.
-
-Create the file `code/libraries/unittest/src/TestDetails.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestDetails.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestDetails.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestDetails
-9: //
-10: // Description : Test details
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #include <unittest/TestDetails.h>
-41:
-42: using namespace baremetal;
-43:
-44: namespace unittest {
-45:
-46: TestDetails::TestDetails()
-47:     : m_suiteName{}
-48:     , m_fixtureName{}
-49:     , m_testName{}
-50:     , m_fileName{}
-51:     , m_lineNumber{}
-52: {
-53: }
-54:
-55: TestDetails::TestDetails(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-56:     : m_suiteName{ suiteName }
-57:     , m_fixtureName{ fixtureName }
-58:     , m_testName{ testName }
-59:     , m_fileName{ fileName }
-60:     , m_lineNumber{ lineNumber }
-61: {
-62: }
-63:
-64: } // namespace unittest
-```
-
-- Line 46-53: We implement the default constructor
-- Line 55-62: We implement the non default constructor
-
-### TestBase.h {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_TESTBASEH}
-
-We will add a base class for each test. All tests will derive from this class, and implement its `RunImpl()` method to run the actual test.
-
-Create the file `code/libraries/unittest/include/unittest/TestBase.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestBase.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestBase.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestBase
-9: //
-10: // Description : Testcase
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #pragma once
-41:
-42: #include <unittest/TestDetails.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class TestBase
-48: {
-49: private:
-50:     TestDetails const m_details;
-51:     TestBase* m_next;
-52:
-53: public:
-54:     TestBase();
-55:     TestBase(const TestBase&) = delete;
-56:     TestBase(TestBase&&) = delete;
-57:     explicit TestBase(
-58:         const baremetal::string& testName,
-59:         const baremetal::string& fixtureName = {},
-60:         const baremetal::string& suiteName = {},
-61:         const baremetal::string& fileName = {},
-62:         int lineNumber = {});
-63:     virtual ~TestBase();
-64:
-65:     TestBase& operator = (const TestBase&) = delete;
-66:     TestBase& operator = (TestBase&&) = delete;
-67:
-68:     const TestDetails& Details() const { return m_details; }
-69:
-70:     void Run();
-71:
-72:     virtual void RunImpl() const;
-73: };
-74:
-75: } // namespace unittest
-```
-
-The `TestBase` class is added to the `unittest` namespace.
-
-- Line 50: We declare the details for the test
-- Line 51: We declare a pointer to the next test. Tests will be stored in a linked list
-- Line 54: We declare a default constructor
-- Line 55-56: We remove the copy constructor and move constructor
-- Line 57: We declare an explicit constructor
-- Line 63: We declare the destructor. This may be important as we will be inheriting from this class
-- Line 65-66: We remove the assignment operators
-- Line 68: We declare methods to retrieve details
-- Line 70: We declare a method `Run()` to run the test.
-This will ultimately invoke the `RunImpl()` virtual method, which is expected to be overriden by an actual test.
-- Line 72: We declare the overridable `RunImpl()` method
-
-### TestBase.cpp {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_TESTBASECPP}
-
-We'll implement the `TestBase` class.
-
-Create the file `code/libraries/unittest/src/TestBase.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestBase.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestBase.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestBase
-9: //
-10: // Description : Testcase base class
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #include <unittest/TestBase.h>
-41:
-42: using namespace baremetal;
-43:
-44: namespace unittest {
-45:
-46: TestBase::TestBase()
-47:     : m_details{}
-48:     , m_next{}
-49: {
-50: }
-51:
-52: TestBase::TestBase(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-53:     : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-54:     , m_next{}
-55: {
-56: }
-57:
-58: TestBase::~TestBase()
-59: {
-60: }
-61:
-62: void TestBase::Run()
-63: {
-64:     RunImpl();
-65: }
-66:
-67: void TestBase::RunImpl() const
-68: {
-69: }
-70:
-71: } // namespace unittest
-```
-
-- Line 46-50: We implement the default constructor
-- Line 52-56: We implement the non default constructor
-- Line 58-60: We implement the destructor
-- Line 62-65: We provide a first implementation for the `Run()` method
-- Line 67-69: We provide a default implementation for the `RunImpl()` method
-
-### Update CMake file {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_UPDATE_CMAKE_FILE}
-
-As we have now added some source files to the `unittest` library, we need to update its CMake file.
-
-Update the file `code/libraries/unitttest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unitttest/CMakeLists.txt
-...
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-33:     )
-34:
-35: set(PROJECT_INCLUDES_PUBLIC
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-38:     )
-39: set(PROJECT_INCLUDES_PRIVATE )
+10: // Description : Exception stub. This defines the functions to be called in case a processor exception is thown.
+11: //               Note: this file is based on the Circle startup assembly file by Rene Stange.
+12: //
+13: //------------------------------------------------------------------------------
+14: //
+15: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+16: //
+17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+18: //
+19: // Permission is hereby granted, free of charge, to any person
+20: // obtaining a copy of this software and associated documentation
+21: // files(the "Software"), to deal in the Software without
+22: // restriction, including without limitation the rights to use, copy,
+23: // modify, merge, publish, distribute, sublicense, and /or sell copies
+24: // of the Software, and to permit persons to whom the Software is
+25: // furnished to do so, subject to the following conditions :
+26: //
+27: // The above copyright notice and this permission notice shall be
+28: // included in all copies or substantial portions of the Software.
+29: //
+30: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+31: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+32: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+33: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+34: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+35: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+36: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+37: // DEALINGS IN THE SOFTWARE.
+38: //
+39: //------------------------------------------------------------------------------
 40:
+41: #include <baremetal/BCMRegisters.h>
+42: #include <baremetal/Exception.h>
+43: #include <baremetal/SysConfig.h>
+44:
+45: /// @file
+46: /// Exception stub assembly code
+47:
+48: .macro	vector handler
+49:
+50:     .align	7
+51:
+52:     b \handler                          // Jump to handler
+53:
+54: .endm
+55:
+56: .macro  stub name, exception, handler
+57:
+58:     .globl  \name
+59: \name:
+60:     mrs     x0, esr_el1                 // Read Exception Syndrome Register (EL1)
+61:     mrs     x1, spsr_el1                // Read Saved Program Status Register (EL1)
+62:     mov     x2, x30                     // X30=Link Register(LR)
+63:     mrs     x3, elr_el1                 // Read Exception Link Register (EL1)
+64:     mrs     x4, sp_el0                  // Read Stack Pointer (EL0)
+65:     mov     x5, sp                      // Get Stack Pointer (EL1)
+66:     mrs     x6, far_el1                 // Fault Address Register (EL1)
+67:
+68:     str     x6, [sp, #-16]!             // Store X6 on stack, decrement stack
+69:     stp     x4, x5, [sp, #-16]!         // Store X4,X5 on stack, decrement stack
+70:     stp     x2, x3, [sp, #-16]!         // Store X2,X3 on stack, decrement stack
+71:     stp     x0, x1, [sp, #-16]!         // Store X0,X1 on stack, decrement stack
+72:
+73:     mov     x0, #\exception             // Get exception function pointer
+74:     mov     x1, sp                      // Save stack pointer
+75:     b       \handler                    // Calls handler(uint64 exceptionID, AbortFrame* abortFrame). x0 = exception is exceptionID, x1 = sp = abortFrame. Never returns
+76:
+77: .endm
+78:
+79:     .text
+80:
+81:     .align  11
+82:
+83:     .globl  VectorTable
+84: VectorTable:
+85:
+86:     // from current EL with sp_el0 (mode EL0, El1t, El2t, EL3t)
+87:     vector  SynchronousStub
+88:     vector  UnexpectedStub
+89:     vector  UnexpectedStub
+90:     vector  SErrorStub
+91:
+92:     // from current EL with sp_elx, x != 0  (mode El1h, El2h, EL3h)
+93:     vector  SynchronousStub
+94:     vector  UnexpectedStub
+95:     vector  UnexpectedStub
+96:     vector  SErrorStub
+97:
+98:     // from lower EL, target EL minus 1 is AArch64
+99:     vector  HVCStub
+100:     vector  UnexpectedStub
+101:     vector  UnexpectedStub
+102:     vector  UnexpectedStub
+103:
+104:     // from lower EL, target EL minus 1 is AArch32
+105:     vector  UnexpectedStub
+106:     vector  UnexpectedStub
+107:     vector  UnexpectedStub
+108:     vector  UnexpectedStub
+109:
+110: //*************************************************
+111: // IRQ stub
+112: //*************************************************
+113: .macro irq_stub name, handler
+114:     .globl  \name
+115: \name:
+116:     stp     x29, x30, [sp, #-16]!       // Save x29, x30 onto stack
+117:     mrs     x29, elr_el1                // Read Exception Link Register (EL1)
+118:     mrs     x30, spsr_el1               // Read Saved Program Status Register (EL1)
+119:     stp     x29, x30, [sp, #-16]!       // Save onto stack
+120:     msr     DAIFClr, #1                 // Enable FIQ
+121:
+122: #ifdef SAVE_VFP_REGS_ON_IRQ
+123:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+124:     stp     q28, q29, [sp, #-32]!
+125:     stp     q26, q27, [sp, #-32]!
+126:     stp     q24, q25, [sp, #-32]!
+127:     stp     q22, q23, [sp, #-32]!
+128:     stp     q20, q21, [sp, #-32]!
+129:     stp     q18, q19, [sp, #-32]!
+130:     stp     q16, q17, [sp, #-32]!
+131:     stp     q14, q15, [sp, #-32]!
+132:     stp     q12, q13, [sp, #-32]!
+133:     stp     q10, q11, [sp, #-32]!
+134:     stp     q8, q9, [sp, #-32]!
+135:     stp     q6, q7, [sp, #-32]!
+136:     stp     q4, q5, [sp, #-32]!
+137:     stp     q2, q3, [sp, #-32]!
+138:     stp     q0, q1, [sp, #-32]!
+139: #endif
+140:     stp     x27, x28, [sp, #-16]!       // Save x0-x28 onto stack
+141:     stp     x25, x26, [sp, #-16]!
+142:     stp     x23, x24, [sp, #-16]!
+143:     stp     x21, x22, [sp, #-16]!
+144:     stp     x19, x20, [sp, #-16]!
+145:     stp     x17, x18, [sp, #-16]!
+146:     stp     x15, x16, [sp, #-16]!
+147:     stp     x13, x14, [sp, #-16]!
+148:     stp     x11, x12, [sp, #-16]!
+149:     stp     x9, x10, [sp, #-16]!
+150:     stp     x7, x8, [sp, #-16]!
+151:     stp     x5, x6, [sp, #-16]!
+152:     stp     x3, x4, [sp, #-16]!
+153:     stp     x1, x2, [sp, #-16]!
+154:     str     x0, [sp, #-16]!
+155:
+156:     ldr     x0, =IRQReturnAddress       // Store return address for profiling
+157:     str     x29, [x0]
+158:
+159:     bl      \handler                    // Call interrupt handler
+160:
+161:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
+162:     ldp     x1, x2, [sp], #16
+163:     ldp     x3, x4, [sp], #16
+164:     ldp     x5, x6, [sp], #16
+165:     ldp     x7, x8, [sp], #16
+166:     ldp     x9, x10, [sp], #16
+167:     ldp     x11, x12, [sp], #16
+168:     ldp     x13, x14, [sp], #16
+169:     ldp     x15, x16, [sp], #16
+170:     ldp     x17, x18, [sp], #16
+171:     ldp     x19, x20, [sp], #16
+172:     ldp     x21, x22, [sp], #16
+173:     ldp     x23, x24, [sp], #16
+174:     ldp     x25, x26, [sp], #16
+175:     ldp     x27, x28, [sp], #16
+176: #ifdef SAVE_VFP_REGS_ON_IRQ
+177:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+178:     ldp     q2, q3, [sp], #32
+179:     ldp     q4, q5, [sp], #32
+180:     ldp     q6, q7, [sp], #32
+181:     ldp     q8, q9, [sp], #32
+182:     ldp     q10, q11, [sp], #32
+183:     ldp     q12, q13, [sp], #32
+184:     ldp     q14, q15, [sp], #32
+185:     ldp     q16, q17, [sp], #32
+186:     ldp     q18, q19, [sp], #32
+187:     ldp     q20, q21, [sp], #32
+188:     ldp     q22, q23, [sp], #32
+189:     ldp     q24, q25, [sp], #32
+190:     ldp     q26, q27, [sp], #32
+191:     ldp     q28, q29, [sp], #32
+192:     ldp     q30, q31, [sp], #32
+193: #endif
+194:
+195:     msr     DAIFSet, #1                 // Disable FIQ
+196:     ldp     x29, x30, [sp], #16         // Restore from stack
+197:     msr     elr_el1, x29                // Restore Exception Link Register (EL1)
+198:     msr     spsr_el1, x30               // Restore Saved Program Status Register (EL1)
+199:     ldp     x29, x30, [sp], #16         // restore x29, x30 from stack
+200:
+201:     eret                                // Restore previous EL
+202:
+203: .endm
+204:
+205: //*************************************************
+206: // FIQ stub
+207: //*************************************************
+208:     .globl  FIQStub
+209: FIQStub:
+210: #ifdef SAVE_VFP_REGS_ON_FIQ
+211:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+212:     stp     q28, q29, [sp, #-32]!
+213:     stp     q26, q27, [sp, #-32]!
+214:     stp     q24, q25, [sp, #-32]!
+215:     stp     q22, q23, [sp, #-32]!
+216:     stp     q20, q21, [sp, #-32]!
+217:     stp     q18, q19, [sp, #-32]!
+218:     stp     q16, q17, [sp, #-32]!
+219:     stp     q14, q15, [sp, #-32]!
+220:     stp     q12, q13, [sp, #-32]!
+221:     stp     q10, q11, [sp, #-32]!
+222:     stp     q8, q9, [sp, #-32]!
+223:     stp     q6, q7, [sp, #-32]!
+224:     stp     q4, q5, [sp, #-32]!
+225:     stp     q2, q3, [sp, #-32]!
+226:     stp     q0, q1, [sp, #-32]!
+227: #endif
+228:     stp     x29, x30, [sp, #-16]!       // Save x0-x28 onto stack
+229:     stp     x27, x28, [sp, #-16]!
+230:     stp     x25, x26, [sp, #-16]!
+231:     stp     x23, x24, [sp, #-16]!
+232:     stp     x21, x22, [sp, #-16]!
+233:     stp     x19, x20, [sp, #-16]!
+234:     stp     x17, x18, [sp, #-16]!
+235:     stp     x15, x16, [sp, #-16]!
+236:     stp     x13, x14, [sp, #-16]!
+237:     stp     x11, x12, [sp, #-16]!
+238:     stp     x9, x10, [sp, #-16]!
+239:     stp     x7, x8, [sp, #-16]!
+240:     stp     x5, x6, [sp, #-16]!
+241:     stp     x3, x4, [sp, #-16]!
+242:     stp     x1, x2, [sp, #-16]!
+243:     str     x0, [sp, #-16]!
+244:
+245:     ldr     x2, =s_fiqData
+246:     ldr     x1, [x2]                    // Get s_fiqData.handler
+247:     cmp     x1, #0                      // Is handler set?
+248:     b.eq    no_fiq_handler
+249:     ldr     x0, [x2, #8]                // Get s_fiqData.param
+250:     blr     x1                          // Call handler
+251:
+252: restore_after_fiq_handler:
+253:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
+254:     ldp     x1, x2, [sp], #16
+255:     ldp     x3, x4, [sp], #16
+256:     ldp     x5, x6, [sp], #16
+257:     ldp     x7, x8, [sp], #16
+258:     ldp     x9, x10, [sp], #16
+259:     ldp     x11, x12, [sp], #16
+260:     ldp     x13, x14, [sp], #16
+261:     ldp     x15, x16, [sp], #16
+262:     ldp     x17, x18, [sp], #16
+263:     ldp     x19, x20, [sp], #16
+264:     ldp     x21, x22, [sp], #16
+265:     ldp     x23, x24, [sp], #16
+266:     ldp     x25, x26, [sp], #16
+267:     ldp     x27, x28, [sp], #16
+268:     ldp     x29, x30, [sp], #16
+269: #ifdef SAVE_VFP_REGS_ON_FIQ
+270:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+271:     ldp     q2, q3, [sp], #32
+272:     ldp     q4, q5, [sp], #32
+273:     ldp     q6, q7, [sp], #32
+274:     ldp     q8, q9, [sp], #32
+275:     ldp     q10, q11, [sp], #32
+276:     ldp     q12, q13, [sp], #32
+277:     ldp     q14, q15, [sp], #32
+278:     ldp     q16, q17, [sp], #32
+279:     ldp     q18, q19, [sp], #32
+280:     ldp     q20, q21, [sp], #32
+281:     ldp     q22, q23, [sp], #32
+282:     ldp     q24, q25, [sp], #32
+283:     ldp     q26, q27, [sp], #32
+284:     ldp     q28, q29, [sp], #32
+285:     ldp     q30, q31, [sp], #32
+286: #endif
+287:
+288:     eret                                // Restore previous EL
+289:
+290: no_fiq_handler:
+291:     ldr     x1, =RPI_INTRCTRL_FIQ_CONTROL // Disable FIQ (if handler is not set)
+292:     mov     w0, #0
+293:     str     w0, [x1]
+294:     b       restore_after_fiq_handler
+295:
+296: #if BAREMETAL_RPI_TARGET >= 4
+297:
+298: /*
+299:  * SMC stub
+300:  */
+301: .macro smc_stub name, handler
+302:     .globl  \name
+303: \name:
+304:     ldr     x2, =SMCStack
+305:     mov     sp, x2                      // Set SMC stack
+306:     str     x30, [sp, #-16]!            // Save x30 (LR) on stack
+307:     bl      \handler                    // Call handler
+308:     ldr     x30, [sp], #16              // Restore x30 (LR) from stack
+309:     eret
+310:
+311: .endm
+312:
+313: #endif
+314:
+315: /*
+316:  * HVC stub
+317:  */
+318: HVCStub:                                // Return to EL2h mode
+319:     mrs     x0, spsr_el2                // Read Saved Program Status Register (EL2)
+320:     bic     x0, x0, #0xF                // Clear bit 3:0
+321:     mov     x1, #9
+322:     orr     x0, x0, x1                  // Set bit 3 and bit 0 -> EL2h
+323:     msr     spsr_el2, x0                // Write Saved Program Status Register (EL2)
+324:     eret                                // Move to EL2h
+325:
+326:     .data
+327:
+328:     .align  3
+329:
+330:     .globl  s_fiqData
+331: s_fiqData:                              // Matches FIQData:
+332:     .quad   0                           // handler
+333:     .quad   0                           // param
+334:     .word   0                           // fiqID (unused)
+335:
+336:     .align  3
+337:
+338:     .globl  IRQReturnAddress
+339: IRQReturnAddress:
+340:     .quad   0
+341:
+342: #if BAREMETAL_RPI_TARGET >= 4
+343:
+344:     .bss
+345:
+346:     .align  4
+347:
+348:     .space  128
+349: SMCStack:
+350:
+351: #endif
+352:
+353: //*************************************************
+354: // Abort stubs
+355: //*************************************************
+356:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   UnexpectedHandler
+357:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  SynchronousExceptionHandler
+358:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, SystemErrorHandler
+359:     irq_stub    IRQStub,                                    InterruptHandler
+360: #if BAREMETAL_RPI_TARGET >= 4
+361:     smc_stub    SMCStub,                                    SecureMonitorHandler
+362: #endif
+363:
+364: // End
+```
+
+- Line 48-54: We create a macro `vector` to define a vector in the vector table.
+Every vector is aligned to 128 bytes, hence the statement `.align 7` which align by 7 bits, or 128 (1 << 7) bytes.
+The only code we add is a jump to the current stub, passed as `handler`
+- Line 56-77: We create a macro `stub` for a generic stub, which saves the system registers `ESR_EL11`, `SPSR_EL1`, `ELR_EL1`, `SP_EL0` and `FAR_EL1` and the registers `x30` (LR) and `SP`, in general purpose registers x0-x6.
+These are then stored on the stack, every time decreasing the stack pointer by 16 bytes.
+Then the exception type passed through `exception` is stored in x0, and the stack pointer in x1.
+Finally the exception handler passed through `handler` is branched to.
+This will effectively call the exception handler function `void handler(uint64 exceptionID, AbortFrame* abortFrame)` with `exceptionID` = x0, `abortFrame` = x1
+- Line 79-108: We implement the actual exception vector table.
+This has 16 entries using the macro `vector`, each aligned to 128 bytes, while the complete table is aligned to 2048 (1 << 11) bytes, hence `.align 11`
+- Line 113-193: We create a macro `irq_stub` for an interrupt stub, which saves almost all registers, depending on the define `SAVE_VFP_REGS_ON_IRQ`.
+These are then stored on the stack, every time decreasing the stack pointer by 32 or 16 bytes, depending on the registers.
+The FIQ interrupts are enabled while the interrupt is being handled.
+After saving the registers the interrupt handler passed through `handler` is called, and after than the registers are restored.
+Then FIQ interrupts are disabled again, and the stub returns to the state before the interrupt using `eret`.
+This also reset the state of interrupt enables, etc. as well as the exception level
+- Line 208-288: We implement the FIQ interrupt stub `FIQStub`. This is similar to the normal interrupt stub, however this is not a macro.
+Also, the pointer to the handler is retrieved from a memory area structure `s_fiqData`, as well as the parameter to pass to the handler.
+If no handler was set no function is called, and the registers are simply restored
+- Line 301-311: For Raspberry Pi 4 and later, we create a macro `smc_stub` for an secure monitor call stub, which saves the link register `x30` on its own stack `SMCStack` and calls the handler passed through `handler`.
+After the call returns, the linker register is restored, and the stub returns to the state before the interrupt using `eret`.
+This also reset the state of interrupt enables, etc. as well as the exception level
+- Line 318-324: We implement the hypervisor call stub `HVCStub`. This is similar to the SMC stub, however this is not a macro.
+The function reads the `SPSR_EL2` system register, and sets it to switch to EL2h exception level, then moves to that that exception level using `eret`.
+This also reset the state of interrupt enables, etc.
+- Line 328-334: We define the `s_fiqData` structure, aligned to 8 bytes
+- Line 336-338: We define an address for profiling of interrupts. We'll get to that later. THis is also 8 bytes aligned
+- Line 344-349: For Raspberry Pi 4 and later, we define the stack for the supervisor monitor call `SMCStack`. Note that the stack pointer is set at the bottom of the stack
+- Line 356: We declare unexpected exceptions stub using the `stub` macro, and set its handler to `UnexpectedHandler()`
+- Line 357: We declare synchronous exceptions stub using the `stub` macro, and set its handler to `SynchronousExceptionHandler()`
+- Line 358: We declare system errors stub using the `stub` macro, and set its handler to `SystemErrorHandler()`
+- Line 359: We declare interrupt stub using the `irq_stub` macro, and set its handler to `InterruptHandler()`
+- Line 361: For Raspberry Pi 4 and later, we declare SMC stub using the `smc_stub` macro, and set its handler to `SecureMonitorHandler()`
+
+Not that this means we need to defined the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`, `InterruptHandler()` and for RaspberryPi 4 and later also `SecureMonitorHandler()`, like we did in the exception handler implementation
+
+### System.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_SYSTEMH}
+
+We'll add a function to extract the current exception level, to be printer for information.
+
+Update the file `code/libraries/baremetal/include/baremetal/System.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/System.h
+...
+51: /// <summary>
+52: /// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
+53: /// </summary>
+54: /// <returns>Current exception level (0..3)</returns>
+55: extern uint8 CurrentEL();
 ...
 ```
 
-### Update application code {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_UPDATE_APPLICATION_CODE}
+### System.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_SYSTEMCPP}
 
-Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
+We'll implement the newly added `CurrentEL()` function.
+
+Update the file `code/libraries/baremetal/src/System.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/System.cpp
+...
+90: uint8 baremetal::CurrentEL()
+91: {
+92:     uint32 registerValue{};
+93:     GetCurrentEL(registerValue);
+94:     return (registerValue & 0x0000000C) >> 2;
+95: }
+...
+```
+
+This function used the assembly macro `GetCurrentEL` to retrieve the `CurrentEL` system register value, and extracts the bits 2..3 which hold the exception level.
+
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+
+Ok, so now we creation the infrastructure for dealing with processor exceptions, let's see whether they work.
 
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16:
-17: #include <unittest/TestBase.h>
+1: #include <baremetal/Assert.h>
+2: #include <baremetal/Console.h>
+3: #include <baremetal/Logger.h>
+4: #include <baremetal/System.h>
+5: #include <baremetal/Timer.h>
+6: #include <baremetal/ExceptionHandler.h>
+7: #include <baremetal/BCMRegisters.h>
+8:
+9: #include <unittest/unittest.h>
+10:
+11: LOG_MODULE("main");
+12:
+13: using namespace baremetal;
+14:
+15: int main()
+16: {
+17:     auto& console = GetConsole();
 18:
-19: LOG_MODULE("main");
-20:
-21: using namespace baremetal;
-22: using namespace unittest;
-23:
-24: class MyTest
-25:     : public TestBase
-26: {
-27: public:
-28:     MyTest()
-29:         : TestBase("MyTest", "", "", __FILE__, __LINE__)
-30:     {
-31:
-32:     }
-33:     void RunImpl() const override
-34:     {
-35:         LOG_DEBUG("In RunImpl");
-36:     }
-37: };
-38:
-39: int main()
-40: {
-41:     auto& console = GetConsole();
-42:     LOG_DEBUG("Hello World!");
-43:
-44:     MyTest test;
-45:     test.Run();
-46:
-47:     LOG_INFO("Wait 5 seconds");
-48:     Timer::WaitMilliSeconds(5000);
-49:
-50:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-51:     char ch{};
-52:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-53:     {
-54:         ch = console.ReadChar();
-55:         console.WriteChar(ch);
-56:     }
-57:     if (ch == 'p')
-58:         assert(false);
-59:
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-61: }
+19:     auto exceptionLevel = CurrentEL();
+20:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+21:
+22:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
+23:     char ch{};
+24:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+25:     {
+26:         ch = console.ReadChar();
+27:         console.WriteChar(ch);
+28:     }
+29:     if (ch == 't')
+30:         // Trap
+31:         __builtin_trap();
+32:     else if (ch == 'm')
+33:     {
+34:         // Memory failure
+35:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
+36:         // make gcc happy about unused variables :-)
+37:         r++;
+38:     }
+39:
+40:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+41: }
 ```
 
-- Line 17: We include the header for `TestBase`
-- Line 24-38: We declare and implement the class `MyTest` based on `TestBase`
-  - Line 28-32: We declare and implement the constructor. We use the class name as the test name, and set the test fixture name and test suite name to an empty string. The file name and line number are taken from the actual source location
-  - Line 33-37: We declare and implement an override for the `RunImpl()` method. It simply logs a string
-- Line 45-46: We define an instance of MyTest, and then run the test.
+- Line 29-31: If we press `t`, we cause a standard system trap, which results in a debug break
+- Line 33-38: If we press 'm', we cause a data abort due to reading a non-existent memory location
 
-### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_INTERRUPT_HANDLING__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_TEST_PROJECT_CONFIGURATION}
 
-We can now configure and build our code, and start debugging. We'll first switch off the memory debug output to get a cleaner console.
+As we added a new source file, we'll update the project CMake file.
 
-Update the file `CMakeLists.txt`
+Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+29: set(PROJECT_SOURCES
+30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionStub.S
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/src/String.cpp
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
+52:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
+53:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+54:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
+55:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
+56:     )
+57:
+58: set(PROJECT_INCLUDES_PUBLIC
+59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
+61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ExceptionHandler.h
+65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
+66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
+67:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+68:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
+69:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+70:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
+71:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MachineInfo.h
+72:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
+73:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
+74:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+75:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
+76:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+77:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
+78:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+79:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
+80:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
+81:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
+82:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/StdArg.h
+83:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/String.h
+84:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+85:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
+86:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
+87:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
+88:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
+89:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+90:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Util.h
+91:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
+92:     )
+93: set(PROJECT_INCLUDES_PRIVATE )
+```
+
+### baremetal.ld {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_BAREMETALLD}
+
+We need to update the linker definition file to make sure the exception handling frame is defined.
+
+Update the file `baremetal.ld`
+
+```cmake
+File: baremetal.ld
 ...
-61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
-65: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
+87:     /* Exception handling data */
+88:     .eh_frame : {
+89:         *(.eh_frame*)
+90:     } : data
+91:
 ...
 ```
 
-The application will run the test, and therefore show the log output.
+### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and start debugging.
+
+If we cause a trap, the output will be:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Info   Starting up (System:201)
-Debug  Hello World! (main:42)
-Debug  In RunImpl (main:35)
-Info   Wait 5 seconds (main:47)
-Press r to reboot, h to halt, p to fail assertion and panic
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:20)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+tInfo   SynchronousHandler EC=3C ISS=00003E8 (ExceptionHandler:63)
+Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:63)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
 ```
 
-Next: [19-timer-extension](19-timer-extension.md)
+If we cause a memory violation, the output will be:
+
+```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:20)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+mInfo   SynchronousHandler EC=25 ISS=0000000 (ExceptionHandler:63)
+Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:63)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
+```
+
+As can be found in [Arm� Architecture Registers](pdf/arm-architecture-registers.pdf), page 570, exception code 3C stands for "BRK instruction execution in AArch64 state", and on page 571, exception code 25 stands for "Data Abort taken without a change in Exception level."
+
+## Exception system - Step 2 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2}
+
+To improve our code a little, let's create a class for handling exceptions.
+
+### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONHANDLERH}
+
+We'll add the class `ExceptionSystem` and change the exception handling to a single function `ExceptionHandler()`.
+
+Update the file `code/libraries/baremetal/include/baremetal/ExceptionHandler.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
+...
+42: #include <baremetal/Types.h>
+43: #include <baremetal/System.h>
+...
+77: /// @brief Handles an exception, with the abort frame passed in.
+78: ///
+79: /// The exception handler is called from assembly code (ExceptionStub.S)
+80: /// @param exceptionID Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)
+81: /// @param abortFrame  Filled in AbortFrame instance.
+82: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+83: 
+84: /// @brief Handles an interrupt.
+85: ///
+86: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+87: void InterruptHandler();
+88: 
+89: #ifdef __cplusplus
+90: }
+91: #endif
+92: 
+93: namespace baremetal {
+94: 
+95: /// @brief Exception handling system. Handles ARM processor exceptions
+96: /// This is a singleton class, created as soon as GetExceptionSystem() is called
+97: class ExceptionSystem
+98: {
+99:     /// <summary>
+100:     /// Construct the singleton exception system instance if needed, and return a reference to the instance. This is a friend function of class ExceptionSystem
+101:     /// </summary>
+102:     /// <returns>Reference to the singleton system instance</returns>
+103:     friend ExceptionSystem& GetExceptionSystem();
+104: 
+105: private:
+106:     ExceptionSystem();
+107: 
+108: public:
+109:     ~ExceptionSystem();
+110: 
+111:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
+112: };
+113: 
+114: /// <summary>
+115: /// Injectable exception handler
+116: /// </summary>
+117: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+118: /// <param name="abortFrame">Stored state information at the time of exception</param>
+119: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
+120: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
+121: 
+122: const char* GetExceptionType(unsigned exceptionID);
+123: 
+124: /// <summary>
+125: /// Register a panic handler
+126: /// </summary>
+127: /// <param name="handler">Exception panic handler</param>
+128: /// <returns>The previously set handler</returns>
+129: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+130: 
+131: ExceptionSystem& GetExceptionSystem();
+132: 
+133: } // namespace baremetal
+```
+
+- Line 82: We change the three exception handlers to a single one, `ExceptionHandler()`
+- Line 97-112: We declare the class `ExceptionSystem`
+  - Line 103: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
+  - Line 106: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
+  - Line 109: We declare the destructor
+  - Line 111: We declare the method `Throw()` which will be called by `ExceptionHandler()`
+- Line 120: We declare the type for an injectable exception panic handler.
+This will be call by the `Throw()` method of `ExceptionSystem` if set, and will return true if the system should be halted, false if not
+- Line 122: We declare a helper function `GetExceptionType()` to convert an exception type into a string
+- Line 129: We declare a method to set the exception panice handler, returning the old installed handler, if any
+- Line 131: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
+
+### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONHANDLERCPP}
+
+We'll implement the newly added `ExceptionSystem` class and reimplement the ExceptionHandler() function.
+
+Update the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/ExceptionHandler.cpp
+...
+54: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+55: {
+56:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
+57: }
+58: 
+59: void InterruptHandler()
+60: {
+61: }
+62: 
+63: namespace baremetal {
+64: 
+65: /// <summary>
+66: /// Exception panic handler
+67: ///
+68: /// If set, the panic handler is called first, and if it returns false, the system is not halted (as it would by default)
+69: /// </summary>
+70: static ExceptionPanicHandler* s_exceptionPanicHandler{};
+71: 
+72: /// <summary>
+73: /// Names exception types
+74: ///
+75: /// Order must match exception identifiers in baremetal/Exception.h
+76: /// </summary>
+77: static const char* s_exceptionName[] =
+78: {
+79:     "Unexpected exception",
+80:     "Synchronous exception",
+81:     "System error"
+82: };
+83: 
+84: /// <summary>
+85: /// Constructor
+86: ///
+87: /// Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
+88: /// </summary>
+89: ExceptionSystem::ExceptionSystem()
+90: {
+91: }
+92: 
+93: /// <summary>
+94: /// Destructor
+95: /// </summary>
+96: ExceptionSystem::~ExceptionSystem()
+97: {
+98: }
+99: 
+100: /// <summary>
+101: /// Throw an exception to the exception system
+102: /// </summary>
+103: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+104: /// <param name="abortFrame">Stored state information at the time of exception</param>
+105: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
+106: {
+107:     assert(abortFrame != nullptr);
+108: 
+109:     uint64 sp = abortFrame->sp_el0;
+110:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
+111:     {
+112:         sp = abortFrame->sp_el1;
+113:     }
+114: 
+115:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
+116:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
+117: 
+118:     uint64 FAR = 0;
+119:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
+120:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
+121:     {
+122:         FAR = abortFrame->far_el1;
+123:     }
+124: 
+125:     ReturnCode action = ReturnCode::ExitHalt;
+126:     if (s_exceptionPanicHandler != nullptr)
+127:     {
+128:         action = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
+129:     }
+130: 
+131:     if (action == ReturnCode::ExitHalt)
+132:         LOG_PANIC("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+133:             s_exceptionName[exceptionID],
+134:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+135:     else
+136:     {
+137:         LOG_ERROR("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+138:             s_exceptionName[exceptionID],
+139:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+140:         GetSystem().Reboot();
+141:     }
+142: }
+143: 
+144: /// @brief Convert exception ID to a string
+145: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
+146: /// @return String representation of exception ID
+147: const char* GetExceptionType(unsigned exceptionID)
+148: {
+149:     return s_exceptionName[exceptionID];
+150: }
+151: 
+152: /// @brief Register an exception callback function, and return the previous one.
+153: /// @param handler      Exception handler callback function to register
+154: /// @return Previously set exception handler callback function
+155: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler)
+156: {
+157:     auto result = s_exceptionPanicHandler;
+158:     s_exceptionPanicHandler = handler;
+159:     return result;
+160: }
+161: 
+162: /// @brief Retrieve the singleton exception handling system
+163: ///
+164: /// Creates a static instance of ExceptionSystem, and returns a reference to it.
+165: /// @return A reference to the singleton exception handling system.
+166: ExceptionSystem& GetExceptionSystem()
+167: {
+168:     static ExceptionSystem system;
+169:     return system;
+170: }
+171: 
+172: } // namespace baremetal
+```
+
+- Line 54-57: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
+- Line 70: We define a static variable `s_exceptionPanicHandler` to hold the injected exception panic handler pointer.
+It is initialized as nullptr, meaning not handler is installed
+- Line 77-82: We define the mapping `s_exceptionName` from exception type to string
+- Line 89-91: We implement the `ExceptionSystem` constructor
+- Line 96-98: We implement the `ExceptionSystem` destructor
+- Line 105-142: We implement the method `Throw()`
+  - Line 109-113: We determine the stack pointer at the time of the exception, which is the EL0 stack pointer, unless the exception level was EL1h (We can only be in exception level EL0 or EL1, as we specifically move to EL1 in the startup code)
+  - Line 115-116: We extract the EC and ISS fields from the ESR_EL1 register value
+  - Line 119-123: If the exception has an exception code relating to an instruction abort, a data abort or a watchpoint, We get the value of the Fault Address Register, which holds the address which generated the exception
+  - Line 125-129: We call the exception panic handler if installed, setting its return value as the return code. If no handler is installed, the default is to halt
+  - Line 131-141: If we need to halt, we perform a panic log (which will halt the system), otherwise we log an error and reboot
+- Line 147-150: We implement the function `GetExceptionType()`
+- Line 155-160: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
+- Line 166-170: We implement the function `GetExceptionSystem()` in the by now common way
+
+### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONSTUBS}
+
+We'll implement the newly added `CurrentEL()` function.
+
+Update the file `code/libraries/baremetal/src/ExceptionStub.S`
+
+```cpp
+File: code/libraries/baremetal/src/ExceptionStub.S
+...
+353: //*************************************************
+354: // Abort stubs
+355: //*************************************************
+356:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
+357:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
+358:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
+359:     irq_stub    IRQStub,                                    InterruptHandler
+360: #if BAREMETAL_RPI_TARGET >= 4
+361:     smc_stub    SMCStub,                                    SecureMonitorHandler
+362: #endif
+363: 
+...
+```
+
+We now changed the functions called for the different types of exceptions to a single one, `ExceptionHandler`
+
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+
+Let's implement and use an exception panic handler, that forces the system to reboot on exception
+
+Update the file `code/applications/demo/src/main.cpp`
+
+```cpp
+File: code/applications/demo/src/main.cpp
+1: #include <baremetal/Assert.h>
+2: #include <baremetal/Console.h>
+3: #include <baremetal/Logger.h>
+4: #include <baremetal/System.h>
+5: #include <baremetal/Timer.h>
+6: #include <baremetal/ExceptionHandler.h>
+7: #include <baremetal/BCMRegisters.h>
+8: 
+9: #include <unittest/unittest.h>
+10: 
+11: LOG_MODULE("main");
+12: 
+13: using namespace baremetal;
+14: 
+15: static ReturnCode RebootOnException(unsigned /*exceptionID*/, AbortFrame* /*abortFrame*/)
+16: {
+17:     return ReturnCode::ExitReboot;
+18: }
+19: 
+20: int main()
+21: {
+22:     auto& console = GetConsole();
+23: 
+24:     auto exceptionLevel = CurrentEL();
+25:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+26: 
+27:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
+28:     char ch{};
+29:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+30:     {
+31:         ch = console.ReadChar();
+32:         console.WriteChar(ch);
+33:     }
+34:     RegisterExceptionPanicHandler(RebootOnException);
+35: 
+36:     if (ch == 't')
+37:         // Trap
+38:         __builtin_trap();
+39:     else if (ch == 'm')
+40:     {
+41:         // Memory failure
+42:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
+43:         // make gcc happy about unused variables :-)
+44:         r++;
+45:     }
+46: 
+47:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+48: }
+```
+
+- Line 15-18: We add a function `RebootOnException()` that simply returns `ReturnCode::ExitReboot`
+- Line 34: We inject the function `RebootOnException()` to be called on exceptions
+
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_TEST_PROJECT_CONFIGURATION}
+
+As no files were added, we don't need to update the project CMake file.
+
+### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and start debugging.
+
+If we cause a trap, the output will be:
+
+```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:25)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+tError  Synchronous exception (PC 00000000000808D8, EC 000000000000003C, ISS 00000000000003E8, FAR 0000000000000000, SP 000000000029FFB0, LR 0000000060000304, SPSR 0000000060000304) (ExceptionHandler:137)
+Info   Reboot (System:152)
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:25)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+```
+
+If we cause a memory violation, the output will be:
+
+```text
+Info   Reboot (System:152)
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:25)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+mError  Synchronous exception (PC 00000000000808EC, EC 0000000000000025, ISS 0000000000000000, FAR FFFFFFFFFF000000, SP 000000000029FFB0, LR 0000000060000304, SPSR 0000000060000304) (ExceptionHandler:137)
+Info   Reboot (System:152)
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:25)
+Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
+```
+
+In both cases, the system reboots.
+
+Next: [20-interrupts](20-interrupts.md)

@@ -700,7 +700,7 @@ We'll add the definition for the register we will be using.
 Create the file `code/libraries/baremetal/include/baremetal/ARMRegisters.h`
 
 ```cpp
-File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\ARMRegisters.h
+File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1377,4 +1377,4 @@ Info   Wait 5 seconds (main:47)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-Next: [19-timer-extension](19-timer-extension.md)
+Next: [21-timer-extension](21-timer-extension.md)

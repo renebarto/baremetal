@@ -43,6 +43,9 @@
 #include <baremetal/String.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Formatting functionality implementation
+
 namespace baremetal {
 
 /// @brief Write characters with base above 10 as uppercase or not
@@ -509,8 +512,17 @@ static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value
     *bufferPtr++ = '\0';
 }
 
+/// <summary>
+/// Size of buffer used by FormatNoAllocV internally
+/// </summary>
 static const size_t BufferSize = 4096;
 
+/// <summary>
+/// Append a character to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="c">Character to append</param>
 static void Append(char* buffer, size_t bufferSize, char c)
 {
     size_t len = strlen(buffer);
@@ -525,6 +537,13 @@ static void Append(char* buffer, size_t bufferSize, char c)
     }
 }
 
+/// <summary>
+/// Append a set of identical characters to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="count">Number of characters to append</param>
+/// <param name="c">Character to append</param>
 static void Append(char* buffer, size_t bufferSize, size_t count, char c)
 {
     size_t len = strlen(buffer);
@@ -540,11 +559,24 @@ static void Append(char* buffer, size_t bufferSize, size_t count, char c)
     }
 }
 
+/// <summary>
+/// Append a string to the buffer
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="str">String to append</param>
 static void Append(char* buffer, size_t bufferSize, const char* str)
 {
     strncat(buffer, str, bufferSize);
 }
 
+/// <summary>
+/// Format a string
+///
+/// This version of Format uses the string class, and thus allocates memory
+/// </summary>
+/// <param name="format">Format string (printf like)</param>
+/// <returns>Resulting string</returns>
 string Format(const char* format, ...)
 {
     va_list var;
@@ -557,6 +589,14 @@ string Format(const char* format, ...)
     return result;
 }
 
+/// <summary>
+/// Format a string
+///
+/// This version of FormatV uses the string class, and thus allocates memory
+/// </summary>
+/// <param name="format">Format string (printf like)</param>
+/// <param name="args">Variable argument list</param>
+/// <returns>Resulting string</returns>
 string FormatV(const char* format, va_list args)
 {
     string result;
@@ -784,6 +824,14 @@ string FormatV(const char* format, va_list args)
     return result;
 }
 
+/// <summary>
+/// Format a string
+///
+/// This version of Format writes directly to a buffer, and does not allocate memory
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="format">Format string (printf like)</param>
 void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
 {
     va_list var;
@@ -794,6 +842,15 @@ void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
     va_end(var);
 }
 
+/// <summary>
+/// Format a string
+///
+/// This version of FormatV writes directly to a buffer, and does not allocate memory
+/// </summary>
+/// <param name="buffer">Buffer to write to</param>
+/// <param name="bufferSize">Size of the buffer</param>
+/// <param name="format">Format string (printf like)</param>
+/// <param name="args">Variable argument list</param>
 void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args)
 {
     buffer[0] = '\0';
@@ -872,26 +929,26 @@ void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list
             switch (*format)
             {
             case 'c':
-            {
-                char ch = static_cast<char>(va_arg(args, int));
-                if (left)
                 {
-                    Append(buffer, bufferSize, ch);
-                    if (width > 1)
+                    char ch = static_cast<char>(va_arg(args, int));
+                    if (left)
                     {
-                        Append(buffer, bufferSize, width - 1, ' ');
+                        Append(buffer, bufferSize, ch);
+                        if (width > 1)
+                        {
+                            Append(buffer, bufferSize, width - 1, ' ');
+                        }
+                    }
+                    else
+                    {
+                        if (width > 1)
+                        {
+                            Append(buffer, bufferSize, width - 1, ' ');
+                        }
+                        Append(buffer, bufferSize, ch);
                     }
                 }
-                else
-                {
-                    if (width > 1)
-                    {
-                        Append(buffer, bufferSize, width - 1, ' ');
-                    }
-                    Append(buffer, bufferSize, ch);
-                }
-            }
-            break;
+                break;
 
             case 'd':
             case 'i':
@@ -916,12 +973,12 @@ void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list
                 break;
 
             case 'f':
-            {
-                char str[BufferSize]{};
-                PrintValue(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
-                Append(buffer, bufferSize, str);
-            }
-            break;
+                {
+                    char str[BufferSize]{};
+                    PrintValue(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
+                    Append(buffer, bufferSize, str);
+                }
+                break;
 
             case 'b':
                 if (alternate)
@@ -974,12 +1031,12 @@ void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list
                 break;
 
             case 's':
-            {
-                char str[BufferSize]{};
-                PrintValue(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
-                Append(buffer, bufferSize, str);
-            }
-            break;
+                {
+                    char str[BufferSize]{};
+                    PrintValue(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
+                    Append(buffer, bufferSize, str);
+                }
+                break;
 
             case 'u':
                 if (haveLongLong)

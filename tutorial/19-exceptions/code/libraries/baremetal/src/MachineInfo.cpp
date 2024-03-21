@@ -43,6 +43,9 @@
 #include <baremetal/Console.h>
 #include <baremetal/Util.h>
 
+/// @file
+/// Machine info retrieval implementation
+
 using namespace baremetal;
 
 /// <summary>

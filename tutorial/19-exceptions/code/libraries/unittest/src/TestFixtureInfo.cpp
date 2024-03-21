@@ -40,10 +40,17 @@
 
 #include <baremetal/Assert.h>
 
+/// @file
+/// Test fixture administration implementation
+
 using namespace baremetal;
 
 namespace unittest {
 
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="fixtureName">Test fixture name</param>
 TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
     : m_head{}
     , m_tail{}
@@ -52,18 +59,29 @@ TestFixtureInfo::TestFixtureInfo(const string& fixtureName)
 {
 }
 
+/// <summary>
+/// Destructor
+///
+/// Cleans up all registered tests for this test fixture
+/// </summary>
 TestFixtureInfo::~TestFixtureInfo()
 {
-    TestBase* test = m_head;
+    TestInfo* test = m_head;
     while (test != nullptr)
     {
-        TestBase* currentTest = test;
+        TestInfo* currentTest = test;
         test = test->m_next;
         delete currentTest;
     }
 }
 
-void TestFixtureInfo::AddTest(TestBase* test)
+/// <summary>
+/// Add a test to the list
+///
+/// This method is called at static initialization time to register tests
+/// </summary>
+/// <param name="test">Test to register</param>
+void TestFixtureInfo::AddTest(TestInfo* test)
 {
     if (m_tail == nullptr)
     {
@@ -78,15 +96,14 @@ void TestFixtureInfo::AddTest(TestBase* test)
     }
 }
 
-TestBase* TestFixtureInfo::GetHead() const
-{
-    return m_head;
-}
-
+/// <summary>
+/// Count the number of tests in the test fixture
+/// </summary>
+/// <returns>Number of tests in the test fixture</returns>
 int TestFixtureInfo::CountTests()
 {
     int numberOfTests = 0;
-    TestBase* test = m_head;
+    TestInfo* test = Head();
     while (test != nullptr)
     {
         ++numberOfTests;

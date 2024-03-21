@@ -93,7 +93,6 @@ static constexpr int BitsToDigits(int bits, int base)
 /// <param name="value">Value to be serialized</param>
 /// <param name="width">Minimum width in characters, if negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <returns>Serialized string value</returns>
-
 string Serialize(char value, int width)
 {
     string result;
@@ -427,10 +426,8 @@ string Serialize(double value, int width, int precision)
 
 /// <summary>
 /// Serialize a string to string.
-///
 /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-///
 /// If requested, the string is placed between double quotes (").
 /// </summary>
 /// <param name="value">Value to be serialized</param>
@@ -451,11 +448,9 @@ string Serialize(const string& value, int width, bool quote)
 }
 
 /// <summary>
-/// Serialize a string to string.
-///
+/// Serialize a string to string
 /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-///
 /// If requested, the string is placed between double quotes (").
 /// </summary>
 /// <param name="value">Value to be serialized</param>
@@ -468,7 +463,7 @@ string Serialize(const char* value, int width, bool quote)
 }
 
 /// <summary>
-/// Serialize a const void pointer to string.
+/// Serialize a const void pointer to string
 ///
 /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.

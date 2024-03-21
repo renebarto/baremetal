@@ -30,6 +30,9 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionStub.S
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
@@ -58,6 +61,7 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ExceptionHandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
@@ -148,3 +152,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NA
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
 
 show_target_properties(${PROJECT_NAME})
+
+add_subdirectory(test)

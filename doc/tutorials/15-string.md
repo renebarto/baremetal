@@ -363,7 +363,6 @@ Create the file `code/libraries/baremetal/src/String.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/String.cpp
-File: d:\Projects\baremetal.github\code\libraries\baremetal\src\String.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //

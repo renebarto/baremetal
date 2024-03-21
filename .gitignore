@@ -10,5 +10,7 @@ doxygen/doxygen.log
 /fix-links.log
 doc/boards/raspberrypi/images
 doc/boards/raspberrypi/pdf
+doc/cpu/arm/images
+doc/cpu/arm/pdf
 doc/tutorials/images
 doc/tutorials/pdf

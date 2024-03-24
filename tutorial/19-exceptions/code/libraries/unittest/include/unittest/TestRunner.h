@@ -43,53 +43,94 @@
 #include <unittest/TestRegistry.h>
 #include <unittest/TestResults.h>
 
+/// @file
+/// Test runner
+
 namespace unittest {
 
 class ITestReporter;
-class TestBase;
+class TestInfo;
 class TestFixtureInfo;
 class TestResults;
 class TestSuiteInfo;
 
+/// <summary>
+/// True predicate
+///
+/// Is used as a predicate to select all tests in all test fixtures in all test suites
+/// </summary>
 struct True
 {
-    bool operator()(const TestBase* const ) const
+    /// <summary>
+    /// Returns test selection value
+    /// </summary>
+    /// <returns>Returns true for all tests, meaning that all tests are selected</returns>
+    bool operator()(const TestInfo* const ) const
     {
         return true;
     }
+    /// <summary>
+    /// Returns test fixture selection value
+    /// </summary>
+    /// <returns>Returns true for all test fixtures, meaning that all test fixtures are selected</returns>
     bool operator()(const TestFixtureInfo* const ) const
     {
         return true;
     }
+    /// <summary>
+    /// Returns test suite selection value
+    /// </summary>
+    /// <returns>Returns true for all test suites, meaning that all test suites are selected</returns>
     bool operator()(const TestSuiteInfo* const ) const
     {
         return true;
     }
 };
 
+/// <summary>
+/// Selection predicate
+///
+/// Is used as a predicate to include specific tests in specific test fixtures in specific test suites
+/// </summary>
 class InSelection
 {
 private:
+    /// @brief Test suite name to select
     const char* m_suiteName;
+    /// @brief Test fixture name to select
     const char* m_fixtureName;
+    /// @brief Test name to select
     const char* m_testName;
 
 public:
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="suiteName">Test suite name to select (nullptr to select all)</param>
+    /// <param name="fixtureName">Test fixture name to select (nullptr to select all)</param>
+    /// <param name="testName">Test name to select (nullptr to select all)</param>
     InSelection(const char* suiteName, const char* fixtureName, const char* testName)
         : m_suiteName{ suiteName }
         , m_fixtureName{ fixtureName }
         , m_testName{ testName }
     {
     }
-    bool operator()(const TestBase* const test) const;
+    bool operator()(const TestInfo* const test) const;
     bool operator()(const TestFixtureInfo* const fixture) const;
     bool operator()(const TestSuiteInfo* const suite) const;
 };
 
+/// <summary>
+/// Test runner
+///
+/// Runs a selected set of tests, and reports using a test reporter
+/// </summary>
 class TestRunner
 {
 private:
+    /// @brief Selected test reports
     ITestReporter* m_reporter;
+    /// @brief Accumulated results for all tests run
     TestResults m_testResults;
 
 public:
@@ -110,6 +151,15 @@ private:
     int Finish(const Predicate& predicate) const;
 };
 
+/// <summary>
+/// Runs all tests selected by the predicate
+///
+/// The test registry is built at static initialization time and contains all registered tests.
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="registry">Test registry</param>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test failures</returns>
 template <class Predicate>
 int TestRunner::RunTestsIf(TestRegistry const& registry, const Predicate& predicate)
 {
@@ -120,6 +170,11 @@ int TestRunner::RunTestsIf(TestRegistry const& registry, const Predicate& predic
     return Finish(predicate);
 }
 
+/// <summary>
+/// Start a test run
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
 template <class Predicate>
 void TestRunner::Start(const Predicate& predicate) const
 {
@@ -130,6 +185,12 @@ void TestRunner::Start(const Predicate& predicate) const
     m_reporter->ReportTestRunStart(numberOfTestSuites, numberOfTestFixtures, numberOfTests);
 }
 
+/// <summary>
+/// Finish a test run
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test failures</returns>
 template <class Predicate>
 int TestRunner::Finish(const Predicate & predicate) const
 {
@@ -147,6 +208,13 @@ int TestRunner::Finish(const Predicate & predicate) const
 
 int RunAllTests(ITestReporter* reporter = nullptr);
 
+/// <summary>
+/// Run tests selected by predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="reporter">Test reporter to use</param>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test failures</returns>
 template <class Predicate>
 int RunSelectedTests(ITestReporter* reporter, const Predicate& predicate)
 {

@@ -510,6 +510,6 @@ Info   Wait 5 seconds (main:47)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-Next: [19-timer-extension](19-timer-extension.md)
+Next: [21-timer-extension](21-timer-extension.md)
 
 

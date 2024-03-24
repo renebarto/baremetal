@@ -87,6 +87,13 @@ void __cxa_atexit([[maybe_unused]] void (* func)(void* param), [[maybe_unused]] 
 /// @brief Wait time in milliseconds to ensure that UART info is written before system halt or reboot
 static const uint32 WaitTime = 10;
 
+uint8 baremetal::CurrentEL()
+{
+    uint32 registerValue{};
+    GetCurrentEL(registerValue);
+    return (registerValue & 0x0000000C) >> 2;
+}
+
 /// <summary>
 /// Construct the singleton system handler if needed, and return a reference to the instance
 /// </summary>

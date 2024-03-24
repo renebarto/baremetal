@@ -39,16 +39,21 @@
 
 #pragma once
 
+/// @file
+/// Unit test generic header
+
 #include <unittest/TestFixture.h>
 #include <unittest/TestSuite.h>
 
 #include <unittest/ITestReporter.h>
 #include <unittest/AssertMacros.h>
 #include <unittest/ConsoleTestReporter.h>
-#include <unittest/ExecuteTest.h>
-#include <unittest/TestBase.h>
+#include <unittest/CurrentTest.h>
+#include <unittest/DeferredTestReporter.h>
+#include <unittest/Test.h>
 #include <unittest/TestDetails.h>
 #include <unittest/TestFixtureInfo.h>
+#include <unittest/TestInfo.h>
 #include <unittest/TestMacros.h>
 #include <unittest/TestRegistry.h>
 #include <unittest/TestResults.h>

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ExecuteTest.h
+// File        : Test.h
 //
 // Namespace   : unittest
 //
-// Class       : ExecuteTest
+// Class       : Test
 //
-// Description : Test executor
+// Description : Testcase
 //
 //------------------------------------------------------------------------------
 //
@@ -39,18 +39,27 @@
 
 #pragma once
 
-#include <unittest/CurrentTest.h>
-#include <unittest/TestDetails.h>
+/// @file
+/// Test
 
 namespace unittest
 {
 
-template<typename T>
-void ExecuteTest(T& testObject, const TestDetails& details)
+/// <summary>
+/// Test class
+/// </summary>
+class Test
 {
-    CurrentTest::Details() = &details;
+public:
+    Test() = default;
+    Test(const Test&) = delete;
+    Test(Test&&) = delete;
+    virtual ~Test() = default;
 
-    testObject.RunImpl();
-}
+    Test& operator = (const Test&) = delete;
+    Test& operator = (Test&&) = delete;
+
+    virtual void RunImpl() const;
+};
 
 } // namespace unittest

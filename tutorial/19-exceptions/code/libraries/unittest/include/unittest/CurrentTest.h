@@ -39,16 +39,23 @@
 
 #pragma once
 
+/// @file
+/// Current test information
+
 namespace unittest
 {
 
 class TestResults;
 class TestDetails;
 
-namespace CurrentTest
+/// <summary>
+/// Container class for current test administration
+/// </summary>
+class CurrentTest
 {
-    TestResults*& Results();
-    const TestDetails*& Details();
-}
+public:
+    static TestResults*& Results();
+    static const TestDetails*& Details();
+};
 
 } // namespace unittest

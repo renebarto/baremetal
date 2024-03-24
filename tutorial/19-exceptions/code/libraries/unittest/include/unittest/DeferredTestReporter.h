@@ -37,44 +37,82 @@
 //
 //------------------------------------------------------------------------------
 
+#pragma once
+
 #include <unittest/ITestReporter.h>
 #include <unittest/TestResult.h>
+
+/// @file
+/// Deferred test reporter
+///
+/// Saves failures during the test run, so they can be sown in the overview after the complete test run
 
 namespace unittest
 {
 
+/// <summary>
+/// Test result entry
+/// </summary>
 class ResultEntry
 {
 private:
     friend class ResultList;
+    /// @brief Test result
     TestResult m_result;
+    /// @brief Pointer to next entry in list
     ResultEntry* m_next;
 
 public:
     explicit ResultEntry(const TestResult& result);
+    /// <summary>
+    /// Return test result
+    /// </summary>
+    /// <returns>Test result</returns>
     TestResult& GetResult() { return m_result; }
+    /// <summary>
+    /// Return next entry pointer
+    /// </summary>
+    /// <returns>Next entry pointer</returns>
     ResultEntry* GetNext() { return m_next; }
 };
 
+/// <summary>
+/// Test result entry list
+/// </summary>
 class ResultList
 {
 private:
+    /// @brief Start of list
     ResultEntry* m_head;
+    /// @brief End of list
     ResultEntry* m_tail;
 
 public:
-
     ResultList();
     ~ResultList();
 
     void Add(const TestResult& result);
+    /// <summary>
+    /// Return start of list pointer
+    /// </summary>
+    /// <returns>Start of list pointer</returns>
     ResultEntry* GetHead() const { return m_head; }
+    /// <summary>
+    /// Return end of list pointer
+    /// </summary>
+    /// <returns>End of list pointer</returns>
     ResultEntry* GetTail() const { return m_tail; }
 };
 
+/// <summary>
+/// Deferred test reporter
+///
+/// Implements abstract ITestReporter interface
+/// </summary>
 class DeferredTestReporter : public ITestReporter
 {
 private:
+    /// @brief Test result list for current test run
     ResultList m_results;
 
 public:

@@ -4272,7 +4272,7 @@ As you can see, we have 156 test for the `string` class, which actually have a m
 
 Let's also reimplement the tests for [16-serializing-and-formatting](#TUTORIAL_16_SERIALIZATION_AND_FORMATTING).
 
-### SerializationTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_STRINGTESTCPP}
+### SerializationTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_SERIALIZATIONTESTCPP}
 
 We'll add the source file containing the serialization tests.
 
@@ -4562,7 +4562,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 
 The tests should speak for themselves.
 
-### Update test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_SET_UP_TEST_PROJECT_CONFIGURATION}
+### Update test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_UPDATE_TEST_PROJECT_CONFIGURATION}
 
 As we added a new source file, we'll update the test project CMake file.
 
@@ -4580,7 +4580,7 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 42: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

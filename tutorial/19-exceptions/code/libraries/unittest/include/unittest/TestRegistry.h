@@ -41,24 +41,29 @@
 
 #include <unittest/TestSuiteInfo.h>
 
+/// @file
+/// Test registry
+
 namespace unittest
 {
 
-class TestBase;
+class Test;
 class TestSuiteInfo;
 class TestResults;
 
+/// <summary>
+/// Test registry
+/// </summary>
 class TestRegistry
 {
 private:
     friend class TestRegistrar;
+    /// @brief Pointer to first test suite in the list
     TestSuiteInfo* m_head;
+    /// @brief Pointer to last test suite in the list
     TestSuiteInfo* m_tail;
 
 public:
-    static const char* DefaultFixtureName;
-    static const char* DefaultSuiteName;
-
     TestRegistry();
     TestRegistry(const TestRegistry&) = delete;
     TestRegistry(TestRegistry&&) = delete;
@@ -67,9 +72,13 @@ public:
     TestRegistry& operator = (const TestRegistry&) = delete;
     TestRegistry& operator = (TestRegistry&&) = delete;
 
-    TestSuiteInfo* GetHead() const;
+    /// <summary>
+    /// Returns a pointer to the first test suite in the list
+    /// </summary>
+    /// <returns>Pointer to the first test suite in the list</returns>
+    TestSuiteInfo* Head() const { return m_head; }
 
-    template <class Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
+    template <typename Predicate> void RunIf(const Predicate& predicate, TestResults& testResults);
     template <typename Predicate> int CountSuitesIf(Predicate predicate);
     template <typename Predicate> int CountFixturesIf(Predicate predicate);
     template <typename Predicate> int CountTestsIf(Predicate predicate);
@@ -81,15 +90,26 @@ private:
     void AddSuite(TestSuiteInfo* testSuite);
 };
 
+/// <summary>
+/// Test registrar
+///
+/// This is a utility class to register a test to the registry, as part of a test declaration
+/// </summary>
 class TestRegistrar
 {
 public:
-    TestRegistrar(TestRegistry& registry, TestBase* test);
+    TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 };
 
-template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
+/// <summary>
+/// Run tests selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <param name="testResults">Test results to be returned</param>
+template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
 {
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
 
     while (testSuite != nullptr)
     {
@@ -99,10 +119,16 @@ template <class Predicate> void TestRegistry::RunIf(const Predicate& predicate, 
     }
 }
 
+/// <summary>
+/// Count the number of test suites selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test suites selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
 {
     int numberOfTestSuites = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))
@@ -112,10 +138,16 @@ template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicat
     return numberOfTestSuites;
 }
 
+/// <summary>
+/// Count the number of tests fixtures selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test fixtures selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
 {
     int numberOfTestFixtures = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))
@@ -125,10 +157,16 @@ template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predic
     return numberOfTestFixtures;
 }
 
+/// <summary>
+/// Count the number of tests selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of tests selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
 {
     int numberOfTests = 0;
-    TestSuiteInfo* testSuite = GetHead();
+    TestSuiteInfo* testSuite = Head();
     while (testSuite != nullptr)
     {
         if (predicate(testSuite))

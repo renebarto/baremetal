@@ -41,6 +41,11 @@
 
 #include <baremetal/String.h>
 
+/// @file
+/// Test results
+///
+/// Results for a complete test run
+
 namespace unittest
 {
 
@@ -49,8 +54,25 @@ class TestDetails;
 class TestSuiteInfo;
 class TestFixtureInfo;
 
+/// <summary>
+/// Test results
+///
+/// Holds the test results for a complete test run
+/// </summary>
 class TestResults
 {
+private:
+    /// @brief Selected test reporter
+    ITestReporter* m_reporter;
+    /// @brief Total count fo tests in test run
+    int m_totalTestCount;
+    /// @brief Total count of failed tests in test run
+    int m_failedTestCount;
+    /// @brief Total count of failures in test run
+    int m_failureCount;
+    /// @brief Flag for failure in current test, set to true if at least one failure occurred in the current test
+    bool m_currentTestFailed;
+
 public:
     explicit TestResults(ITestReporter* reporter = nullptr);
     TestResults(const TestResults&) = delete;
@@ -68,16 +90,22 @@ public:
     void OnTestFailure(const TestDetails& details, const baremetal::string& message);
     void OnTestFinish(const TestDetails& details);
 
-    int GetTotalTestCount() const;
-    int GetFailedTestCount() const;
-    int GetFailureCount() const;
+    /// <summary>
+    /// Returns the number of tests in the test run
+    /// </summary>
+    /// <returns>Number of tests in the test run</returns>
+    int GetTotalTestCount() const { return m_totalTestCount; }
+    /// <summary>
+    /// Returns the number of failed tests in the test run
+    /// </summary>
+    /// <returns>Number of failed tests in the test run</returns>
+    int GetFailedTestCount() const { return m_failedTestCount; }
+    /// <summary>
+    /// Returns the number of failures in the test run
+    /// </summary>
+    /// <returns>Number of failures in the test run</returns>
+    int GetFailureCount() const { return m_failureCount; }
 
-private:
-    ITestReporter* m_reporter;
-    int m_totalTestCount;
-    int m_failedTestCount;
-    int m_failureCount;
-    bool m_currentTestFailed;
 };
 
 } // namespace unittest

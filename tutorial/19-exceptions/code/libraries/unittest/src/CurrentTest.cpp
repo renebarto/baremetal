@@ -39,15 +39,30 @@
 
 #include <unittest/CurrentTest.h>
 
+/// @file
+/// Current test information implementation
+
 namespace unittest
 {
 
+/// <summary>
+/// Returns reference to static test results pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test results during the test run.
+/// </summary>
+/// <returns>A reference to the current test results pointer</returns>
 TestResults *& CurrentTest::Results()
 {
     static TestResults* testResults = nullptr;
     return testResults;
 }
 
+/// <summary>
+/// Returns reference to static test details pointer
+///
+/// As a reference is returned, the pointer can also be set. This pointer is used to keep track of test details during the test run.
+/// </summary>
+/// <returns>A reference to the current test details pointer</returns>
 const TestDetails *& CurrentTest::Details()
 {
     static const TestDetails* testDetails = nullptr;

@@ -5,7 +5,7 @@
 //
 // Namespace   : unittest
 //
-// Class       : Checks
+// Class       : -
 //
 // Description : Check functions
 //
@@ -37,15 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#include "unittest/Checks.h"
+#include <unittest/Checks.h>
 
 #include <baremetal/Format.h>
 #include <baremetal/Util.h>
+
+/// @file
+/// Assertion checks implementation
 
 using namespace baremetal;
 
 namespace unittest {
 
+/// <summary>
+/// Compare two strings ignoring case
+/// </summary>
+/// <param name="a">Left hand side of comparison</param>
+/// <param name="b">Right hand side of comparison</param>
+/// <returns>True if the strings are equal ignoring case, false otherwise</returns>
 static bool EqualCaseInsensitive(const string& a, const string& b)
 {
     if (a.length() != b.length())
@@ -53,12 +62,33 @@ static bool EqualCaseInsensitive(const string& a, const string& b)
     return strcasecmp(a.data(), b.data()) == 0;
 }
 
+/// <summary>
+/// Create a success object
+/// </summary>
+/// <returns>Result object</returns>
 AssertionResult AssertionSuccess()
 {
     return AssertionResult(false, string());
 }
 
-AssertionResult BooleanFailure(const string& valueExpression, const string& expectedValue, const string& actualValue)
+/// <summary>
+/// Create a generic failure object with the provided message
+/// </summary>
+/// <param name="message">Message to be included</param>
+/// <returns>Result object</returns>
+AssertionResult GenericFailure(const baremetal::string& message)
+{
+    return AssertionResult(true, message);
+}
+
+/// <summary>
+/// Create a boolean failure object
+/// </summary>
+/// <param name="valueExpression">String representation of the actual value</param>
+/// <param name="expectedValue">Expected value</param>
+/// <param name="actualValue">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult BooleanFailure(const baremetal::string& valueExpression, const baremetal::string& expectedValue, const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", valueExpression.c_str());
     if (actualValue != valueExpression)
@@ -71,7 +101,19 @@ AssertionResult BooleanFailure(const string& valueExpression, const string& expe
     return AssertionResult(true, result);
 }
 
-AssertionResult EqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
+/// <summary>
+/// Create a equality comparison failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of the expected value</param>
+/// <param name="actualExpression">String representation of the actual value</param>
+/// <param name="expectedValue">Expected value</param>
+/// <param name="actualValue">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult EqFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)
@@ -89,7 +131,19 @@ AssertionResult EqFailure(const string& expectedExpression, const string& actual
     return AssertionResult(true, result);
 }
 
-AssertionResult InEqFailure(const string& expectedExpression, const string& actualExpression, const string& expectedValue, const string& actualValue)
+/// <summary>
+/// Create a inequality comparison failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of the not expected value</param>
+/// <param name="actualExpression">String representation of the actual value</param>
+/// <param name="expectedValue">Expected value</param>
+/// <param name="actualValue">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult InEqFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)
@@ -107,12 +161,23 @@ AssertionResult InEqFailure(const string& expectedExpression, const string& actu
     return AssertionResult(true, result);
 }
 
-AssertionResult CloseFailure(const string& expectedExpression,
-                             const string& actualExpression,
-                             const string& toleranceExpression,
-                             const string& expectedValue,
-                             const string& actualValue,
-                             const string& toleranceValue)
+/// <summary>
+/// Create a comparison with tolerance failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of the expected value</param>
+/// <param name="actualExpression">String representation of the actual value</param>
+/// <param name="toleranceExpression">String representation of the tolerance value</param>
+/// <param name="expectedValue">Expected value</param>
+/// <param name="actualValue">Actual value</param>
+/// <param name="toleranceValue">Tolerance value</param>
+/// <returns>Result object</returns>
+AssertionResult CloseFailure(
+    const baremetal::string& expectedExpression,
+    const baremetal::string& actualExpression,
+    const baremetal::string& toleranceExpression,
+    const baremetal::string& expectedValue,
+    const baremetal::string& actualValue,
+    const baremetal::string& toleranceValue)
 {
     string result = Format("Value of: %s", actualExpression.c_str());
     if (actualValue != actualExpression)
@@ -136,6 +201,14 @@ AssertionResult CloseFailure(const string& expectedExpression,
 
 namespace internal {
 
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckStringsEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
 {
     if (expected == actual)
@@ -148,6 +221,14 @@ AssertionResult CheckStringsEqual(const string& expectedExpression, const string
     return AssertionSuccess();
 }
 
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckStringsNotEqual(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
 {
     if (expected == actual)
@@ -160,6 +241,14 @@ AssertionResult CheckStringsNotEqual(const string& expectedExpression, const str
     return AssertionSuccess();
 }
 
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckStringsEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
 {
     if (expected == actual)
@@ -172,6 +261,14 @@ AssertionResult CheckStringsEqualIgnoreCase(const string& expectedExpression, co
     return AssertionSuccess();
 }
 
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckStringsNotEqualIgnoreCase(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
 {
     if (expected == actual)
@@ -186,52 +283,124 @@ AssertionResult CheckStringsNotEqualIgnoreCase(const string& expectedExpression,
 
 } // namespace internal
 
-AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
 {
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
                                    char *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
                                    char const *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected,
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
                                    char *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected, char const *actual)
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected, char const *actual)
 {
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
                                       char *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char *expected,
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char *expected,
                                       char const *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
-AssertionResult CheckNotEqualInternal(const string& expectedExpression, const string& actualExpression, char const *expected,
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
+AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression, char const *expected,
                                       char *actual) // cppcheck-suppress constParameterPointer
 {
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
                                    const baremetal::string& actualExpression,
                                    const baremetal::string& expected,
@@ -240,6 +409,14 @@ AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
                                    const baremetal::string& actualExpression,
                                    const baremetal::string& expected,
@@ -248,6 +425,14 @@ AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
                                    const baremetal::string& actualExpression,
                                    const char* expected,
@@ -256,6 +441,14 @@ AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
                                       const baremetal::string& actualExpression,
                                       const baremetal::string& expected,
@@ -264,6 +457,14 @@ AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpressio
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
                                       const baremetal::string& actualExpression,
                                       const baremetal::string& expected,
@@ -272,6 +473,14 @@ AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpressio
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
                                       const baremetal::string& actualExpression,
                                       const char* expected,
@@ -280,54 +489,126 @@ AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpressio
     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                              char const* expected, char const* actual)
 {
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                              char* expected, char* actual)
 {
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                              char* expected, char const* actual)
 {
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                              char const* expected, char* actual)
 {
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                                 char const* expected, char const* actual)
 {
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                                 char* expected, char* actual)
 {
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                                 char* expected, char const* actual)
 {
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
                                                 char const* expected, char* actual)
 {
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                              const baremetal::string& actualExpression,
                                              const baremetal::string& expected,
@@ -336,6 +617,14 @@ AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedEx
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                              const baremetal::string& actualExpression,
                                              const baremetal::string& expected,
@@ -344,6 +633,14 @@ AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedEx
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                              const baremetal::string& actualExpression,
                                              const char* expected,
@@ -352,6 +649,14 @@ AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedEx
     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                                 const baremetal::string& actualExpression,
                                                 const baremetal::string& expected,
@@ -360,6 +665,14 @@ AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expecte
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                                 const baremetal::string& actualExpression,
                                                 const baremetal::string& expected,
@@ -368,6 +681,14 @@ AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expecte
     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 }
 
+/// <summary>
+/// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
+/// </summary>
+/// <param name="expectedExpression">String representation of expected value</param>
+/// <param name="actualExpression">String representation of actual value</param>
+/// <param name="expected">Expected value</param>
+/// <param name="actual">Actual value</param>
+/// <returns>Result object</returns>
 AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
                                                 const baremetal::string& actualExpression,
                                                 const char* expected,

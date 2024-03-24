@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.h
+// File        : TestInfo.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : TestInfo
 //
-// Description : Testcase
+// Description : Testcase base class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,43 +37,58 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <unittest/TestInfo.h>
 
-#include <unittest/TestDetails.h>
+#include <unittest/CurrentTest.h>
+#include <unittest/Test.h>
+#include <unittest/TestResults.h>
 
-namespace unittest
+/// @file
+/// Test case administration implementation
+
+using namespace baremetal;
+
+namespace unittest {
+
+/// <summary>
+/// Default constructor
+/// </summary>
+TestInfo::TestInfo()
+    : m_details{}
+    , m_testInstance{}
+    , m_next{}
 {
+}
 
-class TestResults;
-
-class TestBase
+/// <summary>
+/// Explicit constructor
+/// </summary>
+/// <param name="testInstance">Test instance</param>
+/// <param name="details">Test details</param>
+TestInfo::TestInfo(Test* testInstance, const TestDetails& details)
+    : m_details{ details }
+    , m_testInstance{ testInstance }
+    , m_next{}
 {
-private:
-    friend class TestFixtureInfo;
-    TestDetails const m_details;
-    TestBase* m_next;
+}
 
-public:
-    TestBase();
-    TestBase(const TestBase&) = delete;
-    TestBase(TestBase&&) = delete;
-    explicit TestBase(
-        const baremetal::string& testName,
-        const baremetal::string& fixtureName = {},
-        const baremetal::string& suiteName = {},
-        const baremetal::string& fileName = {},
-        int lineNumber = {});
-    virtual ~TestBase();
+/// <summary>
+/// Run the test instance, and update the test results
+/// </summary>
+/// <param name="testResults"></param>
+void TestInfo::Run(TestResults& testResults)
+{
+    CurrentTest::Details() = &Details();
+    CurrentTest::Results() = &testResults;
 
-    TestBase& operator = (const TestBase&) = delete;
-    TestBase& operator = (TestBase&&) = delete;
+    if (m_testInstance != nullptr)
+    {
+        testResults.OnTestStart(m_details);
 
-    const TestDetails& Details() const { return m_details; }
+        m_testInstance->RunImpl();
 
-    void Run(TestResults& testResults);
-    void Run();
-
-    virtual void RunImpl() const;
-};
+        testResults.OnTestFinish(m_details);
+    }
+}
 
 } // namespace unittest

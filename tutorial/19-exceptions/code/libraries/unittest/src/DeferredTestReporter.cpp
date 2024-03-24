@@ -41,23 +41,36 @@
 
 #include <unittest/TestDetails.h>
 
+/// @file
+/// Deferred test reporter implementation
+
 using namespace baremetal;
 
 namespace unittest
 {
 
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="result">Test result to be stored</param>
 ResultEntry::ResultEntry(const TestResult& result)
     : m_result{ result }
     , m_next{}
 {
 }
 
+/// <summary>
+/// Constructor
+/// </summary>
 ResultList::ResultList()
     : m_head{}
     , m_tail{}
 {
 }
 
+/// <summary>
+/// Destructor
+/// </summary>
 ResultList::~ResultList()
 {
     auto current = m_head;
@@ -69,6 +82,10 @@ ResultList::~ResultList()
     }
 }
 
+/// <summary>
+/// Add a test result to the list
+/// </summary>
+/// <param name="result">Test result to add</param>
 void ResultList::Add(const TestResult& result)
 {
     auto entry = new ResultEntry(result);
@@ -86,53 +103,111 @@ void ResultList::Add(const TestResult& result)
     m_tail = entry;
 }
 
+/// <summary>
+/// Start of test run callback (empty)
+/// </summary>
+/// <param name="numberOfTestSuites">Number of test suites to be run</param>
+/// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+/// <param name="numberOfTests">Number of tests to be run</param>
 void DeferredTestReporter::ReportTestRunStart(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
 {
 }
 
+/// <summary>
+/// Finish of test run callback (empty)
+/// </summary>
+/// <param name="numberOfTestSuites">Number of test suites run</param>
+/// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+/// <param name="numberOfTests">Number of tests run</param>
 void DeferredTestReporter::ReportTestRunFinish(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
 {
 }
 
+/// <summary>
+/// Test summary callback (empty)
+/// </summary>
+/// <param name="results">Test run results</param>
 void DeferredTestReporter::ReportTestRunSummary(const TestResults& /*results*/)
 {
 }
 
+/// <summary>
+/// Test run overview callback (empty)
+/// </summary>
+/// <param name="results">Test run results</param>
 void DeferredTestReporter::ReportTestRunOverview(const TestResults& /*results*/)
 {
 }
 
+/// <summary>
+/// Test suite start callback (empty)
+/// </summary>
+/// <param name="suiteName">Test suite name</param>
+/// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
 void DeferredTestReporter::ReportTestSuiteStart(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
 {
 }
 
-void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTests*/)
+/// <summary>
+/// Test suite finish callback (empty)
+/// </summary>
+/// <param name="suiteName">Test suite name</param>
+/// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
 {
 }
 
+/// <summary>
+/// Test fixture start callback (empty)
+/// </summary>
+/// <param name="fixtureName">Test fixture name</param>
+/// <param name="numberOfTests">Number of tests within test fixture</param>
 void DeferredTestReporter::ReportTestFixtureStart(const string& /*fixtureName*/, int /*numberOfTests*/)
 {
 }
 
+/// <summary>
+/// Test fixture finish callback (empty)
+/// </summary>
+/// <param name="fixtureName">Test fixture name</param>
+/// <param name="numberOfTests">Number of tests within test fixture</param>
 void DeferredTestReporter::ReportTestFixtureFinish(const string& /*fixtureName*/, int /*numberOfTests*/)
 {
 }
 
+/// <summary>
+/// Test start callback
+/// </summary>
+/// <param name="details">Test details</param>
 void DeferredTestReporter::ReportTestStart(const TestDetails& details)
 {
     m_results.Add(TestResult(details));
 }
 
+/// <summary>
+/// Test finish callback (empty)
+/// </summary>
+/// <param name="details">Test details</param>
+/// <param name="success">Test result, true is successful, false is failed</param>
 void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
 {
 }
 
+/// <summary>
+/// Test failure callback
+/// </summary>
+/// <param name="details">Test details</param>
+/// <param name="failure">Test failure message</param>
 void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
 {
     TestResult& result = m_results.GetTail()->GetResult();
     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
 }
 
+/// <summary>
+/// Return test result list
+/// </summary>
+/// <returns>Test result list</returns>
 ResultList& DeferredTestReporter::Results()
 {
     return m_results;

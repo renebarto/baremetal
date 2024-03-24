@@ -7,7 +7,7 @@
 //
 // Class       : -
 //
-// Description : Macros for specifyig tests
+// Description : Macros for specifying tests
 //
 //------------------------------------------------------------------------------
 //
@@ -39,22 +39,39 @@
 
 #pragma once
 
+/// @file
+/// Test macros
+
+/// @brief Register test
+///
+/// Register the test named TestName with the registry Registry. This will declare a test class Test[TestName] and instantiate it as test[TestName]Instance.
+/// It will also instantiate a TestRegistrar which will register the test instance with the test registry.
+/// It will then define the RunImpl() method of the Test[TestName] class, which is formed by the following code between curly brackets
 #define TEST_EX(TestName, Registry)                                                                         \
-class Test##TestName : public unittest::TestBase                                                            \
+class Test##TestName : public unittest::Test                                                                \
 {                                                                                                           \
-public:                                                                                                     \
-    Test##TestName() : TestBase(baremetal::string(#TestName), baremetal::string(""), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__) {} \
 private:                                                                                                    \
     virtual void RunImpl() const override;                                                                  \
 } test##TestName##Instance;                                                                                 \
                                                                                                             \
-static unittest::TestRegistrar registrar##TestName(Registry, &test##TestName##Instance);                    \
+static unittest::TestRegistrar registrar##TestName(Registry, &test##TestName##Instance, unittest::TestDetails(baremetal::string(#TestName), baremetal::string(""), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__)); \
                                                                                                             \
 void Test##TestName::RunImpl() const
 
+/// @brief Register test
+///
+/// Register the test named TestName with the singleton test registry. This will use the TEST_EX macro to do the actual test registration
 #define TEST(TestName) TEST_EX(TestName, unittest::TestRegistry::GetTestRegistry())
 
-#define TEST_FIXTURE_EX(FixtureClass,TestName,Registry) \
+/// @brief Register test inside test fixture
+///
+/// Register the test inside a test fixture named FixtureClass for the test named TestName with the registry Registry.
+/// This will declare a class [FixtureClass][TestName]Helper, which calls the Setup() method in the constructor, and the TearDown() method in the destructor.
+/// It also declares a test class Test[FixtureClass][TestName] and instantiate it as test[FixtureClass][TestName]Instance.
+/// It will also instantiate a TestRegistrar which will register the test  with the test registry.
+/// The RunImpl() method of the Test[FixtureClass][TestName] is implemented as creating an instance of the test fixture, and invoking its RunImpl() method.
+/// It will then define the RunImpl() method of the Test[FixtureClass][TestName] class, which is formed by the following code between curly brackets
+#define TEST_FIXTURE_EX(FixtureClass,TestName,Registry)                                                     \
 class FixtureClass##TestName##Helper : public FixtureClass                                                  \
 {                                                                                                           \
 public:                                                                                                     \
@@ -69,35 +86,33 @@ public:                                                                         
         TearDown();                                                                                         \
     }                                                                                                       \
     FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
-    virtual void SetUp() {}                                                                                 \
-    virtual void TearDown() {}                                                                              \
     void RunImpl() const;                                                                                   \
     unittest::TestDetails const & m_details;                                                                \
 };                                                                                                          \
                                                                                                             \
-class Test##FixtureClass##TestName : public unittest::TestBase                                              \
+class Test##FixtureClass##TestName : public unittest::Test                                                  \
 {                                                                                                           \
-public:                                                                                                     \
-    Test##FixtureClass##TestName() :                                                                        \
-        TestBase(baremetal::string(#TestName), baremetal::string(#FixtureClass), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__) \
-    {                                                                                                       \
-    }                                                                                                       \
 private:                                                                                                    \
     void RunImpl() const override;                                                                          \
 } test##FixtureClass##TestName##Instance;                                                                   \
                                                                                                             \
-unittest::TestRegistrar registrar##FixtureClass##TestName(Registry, &test##FixtureClass##TestName##Instance); \
+unittest::TestRegistrar registrar##FixtureClass##TestName(Registry, &test##FixtureClass##TestName##Instance, TestDetails(baremetal::string(#TestName), baremetal::string(#FixtureClass), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__)); \
                                                                                                             \
 void Test##FixtureClass##TestName::RunImpl() const                                                          \
 {                                                                                                           \
-    bool ctorOk = false;                                                                                    \
-    FixtureClass##TestName##Helper fixtureHelper(Details());                                                \
-    unittest::ExecuteTest(fixtureHelper, Details());                                                        \
+    FixtureClass##TestName##Helper fixtureHelper(*CurrentTest::Details());                                  \
+    fixtureHelper.RunImpl();                                                                                \
 }                                                                                                           \
 void FixtureClass##TestName##Helper::RunImpl() const
 
+/// @brief Register test inside test fixture
+///
+/// Register the test named TestName inside a test fixture class named Fixture with the singleton test registry. This will use the TEST_FIXTURE_EX macro to do the actual test registration
 #define TEST_FIXTURE(FixtureClass,TestName) TEST_FIXTURE_EX(FixtureClass,TestName,unittest::TestRegistry::GetTestRegistry())
 
+/// @brief Create test suite
+///
+/// Creates a test suite named SuiteName. This simply creates a namespace inside which tests and test fixtures are placed
 #define TEST_SUITE(SuiteName)                                                                               \
     namespace Suite##SuiteName                                                                              \
     {                                                                                                       \

@@ -49,6 +49,12 @@ namespace baremetal {
 class IMemoryAccess;
 
 /// <summary>
+/// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
+/// </summary>
+/// <returns>Current exception level (0..3)</returns>
+extern uint8 CurrentEL();
+
+/// <summary>
 /// System startup / shutdown handling class
 /// </summary>
 class System

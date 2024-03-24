@@ -108,11 +108,17 @@ _start:                                 // Normally entered from armstub8 in EL2
     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
     msr sp_el1, x0                      // Write Stack Pointer (EL1), init El1 stack
 
+    ldr	x0, =VectorTable                // Init exception vector table for EL2
+    msr	vbar_el2, x0                    // Write Vector Base Address Register (EL2)
+
     armv8_switch_to_el1_m x0, x1        // Move to EL1
 
 EL1:
     ldr x0, =MEM_KERNEL_STACK           // Main thread runs in EL1t and uses sp_el0
     mov sp, x0                          // init its stack
+
+    ldr	x0, =VectorTable	            // Init exception vector table for EL1
+    msr	vbar_el1, x0                    // Write Vector Base Address Register (EL1)
 
     b sysinit                           // Jump to C/C++ code
 

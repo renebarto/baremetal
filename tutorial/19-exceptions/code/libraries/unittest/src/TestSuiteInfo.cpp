@@ -43,12 +43,20 @@
 #include <baremetal/Logger.h>
 #include <unittest/TestRegistry.h>
 
+/// @file
+/// Test suite administration implementation
+
 using namespace baremetal;
 
 namespace unittest {
 
+/// @brief Define log name
 LOG_MODULE("TestSuiteInfo");
 
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="suiteName">Test suite name</param>
 TestSuiteInfo::TestSuiteInfo(const string &suiteName)
     : m_head{}
     , m_tail{}
@@ -57,6 +65,11 @@ TestSuiteInfo::TestSuiteInfo(const string &suiteName)
 {
 }
 
+/// <summary>
+/// Destructor
+///
+/// Cleans up all registered tests and test fixtures for this test suite
+/// </summary>
 TestSuiteInfo::~TestSuiteInfo()
 {
     TestFixtureInfo *testFixture = m_head;
@@ -68,6 +81,11 @@ TestSuiteInfo::~TestSuiteInfo()
     }
 }
 
+/// <summary>
+/// Find a test fixture with specified name, register a new one if not found
+/// </summary>
+/// <param name="fixtureName">Test fixture name to search for</param>
+/// <returns>Found or created test fixture</returns>
 TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
 {
     TestFixtureInfo *testFixture = m_head;
@@ -75,21 +93,25 @@ TestFixtureInfo *TestSuiteInfo::GetTestFixture(const string &fixtureName)
         testFixture = testFixture->m_next;
     if (testFixture == nullptr)
     {
-#ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+#if DEBUG_REGISTRY
+        LOG_DEBUG("Fixture %s not found, creating new object", fixtureName.c_str());
 #endif
         testFixture = new TestFixtureInfo(fixtureName);
         AddFixture(testFixture);
     }
     else
     {
-#ifdef DEBUG_REGISTRY
-        LOG_DEBUG("Fixture %s found", fixtureName.empty() ? TestRegistry::DefaultFixtureName : fixtureName.c_str());
+#if DEBUG_REGISTRY
+        LOG_DEBUG("Fixture %s found", fixtureName.c_str());
 #endif
     }
     return testFixture;
 }
 
+/// <summary>
+/// Add a test fixture
+/// </summary>
+/// <param name="testFixture">Test fixture to add</param>
 void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
 {
     if (m_tail == nullptr)
@@ -105,15 +127,14 @@ void TestSuiteInfo::AddFixture(TestFixtureInfo *testFixture)
     }
 }
 
-TestFixtureInfo *TestSuiteInfo::GetHead() const
-{
-    return m_head;
-}
-
+/// <summary>
+/// Count the number of test fixtures in the test suite
+/// </summary>
+/// <returns>Number of test fixtures in the test suite</returns>
 int TestSuiteInfo::CountFixtures()
 {
-    int              numberOfTestFixtures = 0;
-    TestFixtureInfo *testFixture          = m_head;
+    int numberOfTestFixtures = 0;
+    TestFixtureInfo *testFixture = Head();
     while (testFixture != nullptr)
     {
         ++numberOfTestFixtures;
@@ -122,10 +143,14 @@ int TestSuiteInfo::CountFixtures()
     return numberOfTestFixtures;
 }
 
+/// <summary>
+/// Count the number of tests in the test suite
+/// </summary>
+/// <returns>Number of tests in the test suite</returns>
 int TestSuiteInfo::CountTests()
 {
-    int              numberOfTests = 0;
-    TestFixtureInfo *testFixture   = m_head;
+    int numberOfTests = 0;
+    TestFixtureInfo *testFixture = Head();
     while (testFixture != nullptr)
     {
         numberOfTests += testFixture->CountTests();

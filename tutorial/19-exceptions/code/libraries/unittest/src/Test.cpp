@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : TestBase.cpp
+// File        : Test.cpp
 //
 // Namespace   : unittest
 //
-// Class       : TestBase
+// Class       : Test
 //
-// Description : Testcase base class
+// Description : Test class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,49 +37,17 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/TestBase.h>
+#include <unittest/Test.h>
 
-#include <unittest/CurrentTest.h>
-#include <unittest/ExecuteTest.h>
-#include <unittest/TestResults.h>
-
-using namespace baremetal;
+/// @file
+/// Test implementation
 
 namespace unittest {
 
-TestBase::TestBase()
-    : m_details{}
-    , m_next{}
-{
-}
-
-TestBase::TestBase(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-    : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-    , m_next{}
-{
-}
-
-TestBase::~TestBase()
-{
-}
-
-void TestBase::Run(TestResults& testResults)
-{
-    CurrentTest::Results() = &testResults;
-
-    testResults.OnTestStart(m_details);
-
-    Run();
-
-    testResults.OnTestFinish(m_details);
-}
-
-void TestBase::Run()
-{
-    ExecuteTest(*this, m_details);
-}
-
-void TestBase::RunImpl() const
+/// <summary>
+/// Actual test implementation
+/// </summary>
+void Test::RunImpl() const
 {
 }
 

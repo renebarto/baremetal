@@ -1092,7 +1092,7 @@ File: code/applications/demo/src/main.cpp
 - Line 29-31: If we press `t`, we cause a standard system trap, which results in a debug break
 - Line 33-38: If we press 'm', we cause a data abort due to reading a non-existent memory location
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_TEST_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added a new source file, we'll update the project CMake file.
 
@@ -1474,7 +1474,7 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 
 We now changed the functions called for the different types of exceptions to a single one, `ExceptionHandler`
 
-### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
 
 Let's implement and use an exception panic handler, that forces the system to reboot on exception
 
@@ -1535,7 +1535,7 @@ File: code/applications/demo/src/main.cpp
 - Line 15-18: We add a function `RebootOnException()` that simply returns `ReturnCode::ExitReboot`
 - Line 34: We inject the function `RebootOnException()` to be called on exceptions
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_TEST_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As no files were added, we don't need to update the project CMake file.
 

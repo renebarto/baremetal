@@ -4,15 +4,15 @@
 
 ## New tutorial setup {#TUTORIAL_20_INTERRUPTS_NEW_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/18-exceptions-and-interrupts`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/20-interrupts`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_20_INTERRUPTS_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
-- a library `output/Debug/lib/baremetal-18.a`
-- an application `output/Debug/bin/18-exceptions-and-interrupts.elf`
-- an image in `deploy/Debug/18-exceptions-and-interrupts-image`
+- a library `output/Debug/lib/baremetal-20.a`
+- an application `output/Debug/bin/20-interrupts.elf`
+- an image in `deploy/Debug/20-interrupts-image`
 
 ## Exception handling - Step 1 {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1}
 

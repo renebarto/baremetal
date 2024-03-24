@@ -1,4 +1,4 @@
-project(baremetal-test-18
+project(baremetal-18-test
     DESCRIPTION "Baremetal test application"
     LANGUAGES CXX)
 

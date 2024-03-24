@@ -121,11 +121,6 @@ using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abort
 
 const char* GetExceptionType(unsigned exceptionID);
 
-/// <summary>
-/// Register a panic handler
-/// </summary>
-/// <param name="handler">Exception panic handler</param>
-/// <returns>The previously set handler</returns>
 ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
 
 ExceptionSystem& GetExceptionSystem();

@@ -14,247 +14,394 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/20-interrupts.elf`
 - an image in `deploy/Debug/20-interrupts-image`
 
-## Exception handling - Step 1 {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1}
+## Interrupt handling - Step 1 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1}
 
-Before we can do anything with interrupts, we need to embrace the concept of exceptions.
-These are not the same as exceptions in programming languages such as C++, but are exceptions in the context of the processor.
+The ARM processor supports two different kinds of interrupts:
 
-First a bit of detail on the ARM processor.
+- IRQ: Normal interrupts
+- FIQ: Fast interrupts
 
-The ARM processor has 8 different modes of operation:
+FIQ is a specialized type of interrupt request, which is a standard technique used in computer CPUs to deal with events that need to be processed as they occur, such as receiving data from a network card, or keyboard or mouse actions.
+FIQs are specific to the ARM architecture, which supports two types of interrupts; FIQs for fast, low-latency interrupt handling, and standard interrupt requests (IRQs), for more general interrupts.
 
-- User mode (USR): Unprivileged mode in which most applications run
-- FIQ mode (FIQ): Entered on a FIQ (fast) interrupt exception
-- IRQ mode (IRQ): Entered on an IRQ (nromal) interrupt exception
-- Supervisor mode (SVC): Entered on reset or when a Supervisor Call instruction (SVC) is executed
-- Monitor (MOD): Entered when the SMC instruction (Secure Monitor Call) is executed or when the processor takes an exception which is configured for secure handling.
-Provided to support switching between Secure and Non-secure states.
-- Abort mode: Data or instruction fetch is aborted. Entered on a memory access exception
-- Undefined mode: Entered when an undefined instruction is executed
-- System (SYS): Privileged mode, sharing the register view with User mode
-- Hypervisor (HYP): Entered by the Hypervisor Call and Hypervisor Trap exceptions
+A FIQ takes priority over an IRQ in an ARM system. Only one FIQ source at a time is supported. 
+This helps reduce interrupt latency as the interrupt service routine can be executed directly without determining the source of the interrupt.
+A context save is not required for servicing a FIQ since it has its own set of banked registers. This reduces the overhead of context switching.
 
-### Register in the ARM processor {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_REGISTER_IN_THE_ARM_PROCESSOR}
+FIQs are often used for data transfers such as DMA operations.
 
-- 64 bit registers X0-X30 (W0-W30 are 32 bit registers using the low significant 32 bits of X0-X30)
-- X0-X29: General purpose 64 bit registers)
-- X30: Link register
-- SP (also WSP for 32 bits): Stack pointer
-- PC: Program counter
-- XZR (also WZR for 32 bits): Zero register
+### ExceptionStub.S {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONSTUBS}
 
-### Exception levels in the ARM processor {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVELS_IN_THE_ARM_PROCESSOR}
-- EL0: Application level
-- EL1: Operating system level
-- EL2: Hypervisor level
-- EL3: Firmware privilege level / Secure monitor level
+In order to support FIQ and IRQ interrupts, we need to update the exception assembly code.
 
-### Exception level specific registers {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVEL_SPECIFIC_REGISTERS}
-Each exception level has its own special registers:
-- EL0: SP_EL0
-- EL1: SP_EL1, ELR_EL1 (Exception Link Register), SPSR_EL1 (Saved Process Status Register)
-- EL2: SP_EL2, ELR_EL2 (Exception Link Register), SPSR_EL2 (Saved Process Status Register)
-- EL3: SP_EL3, ELR_EL3 (Exception Link Register), SPSR_EL3 (Saved Process Status Register)
-
-Stack pointers can be used in a different way:
-- EL0: EL0t uses SP_EL0
-- EL1: EL1t uses SP_EL0, EL1h uses SP_EL1
-- EL2: EL2t uses SP_EL0, EL2h uses SP_EL2
-- EL3: EL3t uses SP_EL0, EL3h uses SP_EL3
-
-### Exception types {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_TYPES}
-- Interrupts: There are two types of interrupts called IRQ and FIQ.
-FIQ is higher priority than IRQ. Both of these kinds of exception are typically associated with input pins on the core.
-External hardware asserts an interrupt request line and the corresponding exception type is raised when the current instruction finishes executing (although some instructions, those that can load multiple values, can be interrupted), assuming that the interrupt is not disabled
-- Aborts: Aborts can be generated either on failed instruction fetches (instruction aborts) or failed data accesses (Data Aborts)
-- Reset: Reset is treated as a special vector for the highest implemented Exception level
-- Exception generating instructions: Execution of certain instructions can generate exceptions. Such instructions are typically executed to request a service from software that runs at a higher privilege level:
-  - The Supervisor Call (SVC) instruction enables User mode programs to request an OS service.
-  - The Hypervisor Call (HVC) instruction enables the guest OS to request hypervisor services.
-  - The Secure monitor Call (SMC) instruction enables the Normal world to request Secure world services.
-
-### Exception vector {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_VECTOR}
-
-When an exception occurs, the processor must execute handler code which corresponds to the exception.
-The location in memory where the handler is stored is called the exception vector. 
-Each entry in the vector table is 16 instructions long.
-
-The base address is given by VBAR_ELn and then each entry has a defined offset from this base address.
-Each table has 16 entries, with each entry being 128 bytes (32 instructions) in size.
-The table effectively consists of 4 sets of 4 entries. Which entry is used depends upon a number of factors:
-- The type of exception (SError, FIQ, IRQ or Synchronous)
-- If the exception is being taken at the same Exception level, the Stack Pointer to be used (SP0 or SPx)
-- If the exception is being taken at a lower Exception level, the execution state of the next lower level (AArch64 or AArch32)
-
-<table>
-<tr><th>Offset<th>Exception type<th>Description</tr>
-<tr><td>0x000<td>Synchronous<td rowspan="4">Current EL with SP0</tr>
-<tr><td>0x080<td>IRQ/vIRQ</tr>
-<tr><td>0x100<td>FIQ/vFIQ</tr>
-<tr><td>0x180<td>SError/vSError</tr>
-<tr><td>0x200<td>Synchronous<td rowspan="4">Current EL with SPx</tr>
-<tr><td>0x280<td>IRQ/vIRQ</tr>
-<tr><td>0x300<td>FIQ/vFIQ</tr>
-<tr><td>0x380<td>SError/vSError</tr>
-<tr><td>0x400<td>Synchronous<td rowspan="4">Lower EL using AArch64</tr>
-<tr><td>0x480<td>IRQ/vIRQ</tr>
-<tr><td>0x500<td>FIQ/vFIQ</tr>
-<tr><td>0x580<td>SError/vSError</tr>
-<tr><td>0x600<td>Synchronous<td rowspan="4">Lower EL using AArch32</tr>
-<tr><td>0x680<td>IRQ/vIRQ</tr>
-<tr><td>0x700<td>FIQ/vFIQ</tr>
-<tr><td>0x780<td>SError/vSError</tr>
-</table>
-
-We'll need to write some more assembly code, that implements the different exception handlers, and creates the exception vector table.
-
-### ARMInstructions.h {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_ARMINSTRUCTIONSH}
-
-We already create a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
-The complete set or ARM registers is documented in [documentation](pdf/arm-architecture-registers.pdf), the most important ones are described in [ARM registers](#ARM_REGISTERS).
-
-We'll add some definitions for some of these registers.
-
-Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`
+Update the file `code/libraries/baremetal/src/ExceptionStub.S`
 
 ```cpp
-File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
-...
-89: //------------------------------------------------------------------------------
-90: // ARM register fields
-91: //------------------------------------------------------------------------------
-92: 
-93: /// @brief SPSR_EL1 M[3:0] field bit shift
-94: #define SPSR_EL1_M30_SHIFT 0
-95: /// @brief SPSR_EL1 M[3:0] field bit mask
-96: #define SPSR_EL1_M30_MASK BITS(0,3)
-97: /// @brief SPSR_EL1 M[3:0] field exctraction
-98: #define SPSR_EL1_M30(value) ((value >> SPSR_EL1_M30_SHIFT) & SPSR_EL1_M30_MASK)
-99: /// @brief SPSR_EL1 M[3:0] field value for EL0t mode
-100: #define SPSR_EL1_M30_EL0t 0x0
-101: /// @brief SPSR_EL1 M[3:0] field value for EL1t mode
-102: #define SPSR_EL1_M30_EL1t 0x4
-103: /// @brief SPSR_EL1 M[3:0] field value for EL1h mode
-104: #define SPSR_EL1_M30_EL1h 0x5
-105: 
-106: /// @brief ESR_EL1 EC field bit shift
-107: #define ESR_EL1_EC_SHIFT 26
-108: /// @brief ESR_EL1 EC field bit mask
-109: #define ESR_EL1_EC_MASK  BITS(0,5)
-110: /// @brief ESR_EL1 EC field extraction
-111: #define ESR_EL1_EC(value) ((value >> ESR_EL1_EC_SHIFT) & ESR_EL1_EC_MASK)
-112: /// @brief ESR_EL1 EC field value for unknown exception
-113: #define ESR_EL1_EC_UNKNOWN 0x00
-114: /// @brief ESR_EL1 EC field value for trapped WF<x> instruction exception
-115: #define ESR_EL1_EC_TRAPPED_WFx_INSTRUCTION 0x01
-116: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0F
-117: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0F 0x03
-118: /// @brief ESR_EL1 EC field value for MCRR or MRRC instruction exception when coproc = 0x0F
-119: #define ESR_EL1_EC_TRAPPED_MCRR_MRRC_ACCESS_CORPROC_0F 0x04
-120: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0E
-121: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0E 0x05
-122: /// @brief ESR_EL1 EC field value for trapped LDC or STC instruction exception
-123: #define ESR_EL1_EC_TRAPPED_LDC_STC_ACCESS 0x06
-124: /// @brief ESR_EL1 EC field value for unknown SME, SVE, SIMD or Floating pointer instruction exception
-125: #define ESR_EL1_EC_TRAPPED_SME_SVE_SIMD_FP_ACCESS 0x07
-126: /// @brief ESR_EL1 EC field value for trapped LD64<x> or ST64<x> instruction exception
-127: #define ESR_EL1_EC_TRAPPED_LD64x_ST64x_ACCESS 0x0A
-128: /// @brief ESR_EL1 EC field value for trapped MRRC instruction exception when coproc = 0x0C
-129: #define ESR_EL1_EC_TRAPPED_MRRC_ACCESS_COPROC_0E 0x0C
-130: /// @brief ESR_EL1 EC field value for branch target exception
-131: #define ESR_EL1_EC_BRANCH_TARGET_EXCEPTION 0x0D
-132: /// @brief ESR_EL1 EC field value for illegal executions state exception
-133: #define ESR_EL1_EC_ILLEGAL_EXECUTION_STATE 0x0E
-134: /// @brief ESR_EL1 EC field value for trapped SVC 32 bit instruction exception
-135: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_32 0x11
-136: /// @brief ESR_EL1 EC field value for trapped SVC 64 bit instruction exception
-137: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_64 0x15
-138: /// @brief ESR_EL1 EC field value for MCR or MRC 64 bit instruction exception
-139: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_64 0x18
-140: /// @brief ESR_EL1 EC field value for trapped SVE access exception
-141: #define ESR_EL1_EC_TRAPPED_SVE_ACCESS 0x19
-142: /// @brief ESR_EL1 EC field value for trapped TStart access exception
-143: #define ESR_EL1_EC_TRAPPED_TSTART_ACCESS 0x1B
-144: /// @brief ESR_EL1 EC field value for pointer authentication failure exception
-145: #define ESR_EL1_EC_POINTER_AUTHENTICATION_FAILURE 0x1C
-146: /// @brief ESR_EL1 EC field value for trapped SME access exception
-147: #define ESR_EL1_EC_TRAPPED_SME_ACCESS 0x1D
-148: /// @brief ESR_EL1 EC field value for granule protection check exception
-149: #define ESR_EL1_EC_GRANULE_PROTECTION_CHECK 0x1E
-150: /// @brief ESR_EL1 EC field value for instruction abort from lower EL exception
-151: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL 0x20
-152: /// @brief ESR_EL1 EC field value for instruction abort from same EL exception
-153: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_SAME_EL 0x21
-154: /// @brief ESR_EL1 EC field value for PC alignment fault exception
-155: #define ESR_EL1_EC_PC_ALIGNMENT_FAULT 0x22
-156: /// @brief ESR_EL1 EC field value for data abort from lower EL exception
-157: #define ESR_EL1_EC_DATA_ABORT_FROM_LOWER_EL 0x24
-158: /// @brief ESR_EL1 EC field value for data abort from same EL exception
-159: #define ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL 0x25
-160: /// @brief ESR_EL1 EC field value for SP alignment fault exception
-161: #define ESR_EL1_EC_SP_ALIGNMENT_FAULT 0x27
-162: /// @brief ESR_EL1 EC field value for trapped 32 bit FP instruction exception
-163: #define ESR_EL1_EC_TRAPPED_FP_32 0x28
-164: /// @brief ESR_EL1 EC field value for trapped 64 bit FP instruction exception
-165: #define ESR_EL1_EC_TRAPPED_FP_64 0x2C
-166: /// @brief ESR_EL1 EC field value for SError interrupt exception
-167: #define ESR_EL1_EC_SERROR_INTERRUPT 0x2F
-168: /// @brief ESR_EL1 EC field value for Breakpoint from lower EL exception
-169: #define ESR_EL1_EC_BREAKPOINT_FROM_LOWER_EL 0x30
-170: /// @brief ESR_EL1 EC field value for Breakpoint from same EL exception
-171: #define ESR_EL1_EC_BREAKPOINT_FROM_SAME_EL 0x31
-172: /// @brief ESR_EL1 EC field value for SW step from lower EL exception
-173: #define ESR_EL1_EC_SW_STEP_FROM_LOWER_EL 0x32
-174: /// @brief ESR_EL1 EC field value for SW step from same EL exception
-175: #define ESR_EL1_EC_SW_STEP_FROM_SAME_EL 0x33
-176: /// @brief ESR_EL1 EC field value for Watchpoint from lower EL exception
-177: #define ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL 0x34
-178: /// @brief ESR_EL1 EC field value for Watchpoint from same EL exception
-179: #define ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL 0x35
-180: /// @brief ESR_EL1 EC field value for 32 bit BKPT instruction exception
-181: #define ESR_EL1_EC_BKPT_32 0x38
-182: /// @brief ESR_EL1 EC field value for 64 bit BRK instruction exception
-183: #define ESR_EL1_EC_BRK_64 0x3C
-184: 
-185: /// @brief ESR_EL1 ISS field bit shift
-186: #define ESR_EL1_ISS_SHIFT 0
-187: /// @brief ESR_EL1 ISS field bit mask
-188: #define ESR_EL1_ISS_MASK  BITS(0,24)
-189: /// @brief ESR_EL1 ISS field extraction
-190: #define ESR_EL1_ISS(value) ((value >> ESR_EL1_ISS_SHIFT) & ESR_EL1_ISS_MASK)
+File: code/libraries/baremetal/src/ExceptionStub.S
+110: //*************************************************
+111: // IRQ stub
+112: //*************************************************
+113: .macro irq_stub name, handler
+114:     .globl  \name
+115: \name:
+116:     stp     x29, x30, [sp, #-16]!       // Save x29, x30 onto stack
+117:     mrs     x29, elr_el1                // Read Exception Link Register (EL1)
+118:     mrs     x30, spsr_el1               // Read Saved Program Status Register (EL1)
+119:     stp     x29, x30, [sp, #-16]!       // Save onto stack
+120:     msr     DAIFClr, #1                 // Enable FIQ
+121: 
+122: #ifdef SAVE_VFP_REGS_ON_IRQ
+123:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+124:     stp     q28, q29, [sp, #-32]!
+125:     stp     q26, q27, [sp, #-32]!
+126:     stp     q24, q25, [sp, #-32]!
+127:     stp     q22, q23, [sp, #-32]!
+128:     stp     q20, q21, [sp, #-32]!
+129:     stp     q18, q19, [sp, #-32]!
+130:     stp     q16, q17, [sp, #-32]!
+131:     stp     q14, q15, [sp, #-32]!
+132:     stp     q12, q13, [sp, #-32]!
+133:     stp     q10, q11, [sp, #-32]!
+134:     stp     q8, q9, [sp, #-32]!
+135:     stp     q6, q7, [sp, #-32]!
+136:     stp     q4, q5, [sp, #-32]!
+137:     stp     q2, q3, [sp, #-32]!
+138:     stp     q0, q1, [sp, #-32]!
+139: #endif
+140:     stp     x27, x28, [sp, #-16]!       // Save x0-x28 onto stack
+141:     stp     x25, x26, [sp, #-16]!
+142:     stp     x23, x24, [sp, #-16]!
+143:     stp     x21, x22, [sp, #-16]!
+144:     stp     x19, x20, [sp, #-16]!
+145:     stp     x17, x18, [sp, #-16]!
+146:     stp     x15, x16, [sp, #-16]!
+147:     stp     x13, x14, [sp, #-16]!
+148:     stp     x11, x12, [sp, #-16]!
+149:     stp     x9, x10, [sp, #-16]!
+150:     stp     x7, x8, [sp, #-16]!
+151:     stp     x5, x6, [sp, #-16]!
+152:     stp     x3, x4, [sp, #-16]!
+153:     stp     x1, x2, [sp, #-16]!
+154:     str     x0, [sp, #-16]!
+155: 
+156:     bl      \handler                    // Call interrupt handler
+157: 
+158:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
+159:     ldp     x1, x2, [sp], #16
+160:     ldp     x3, x4, [sp], #16
+161:     ldp     x5, x6, [sp], #16
+162:     ldp     x7, x8, [sp], #16
+163:     ldp     x9, x10, [sp], #16
+164:     ldp     x11, x12, [sp], #16
+165:     ldp     x13, x14, [sp], #16
+166:     ldp     x15, x16, [sp], #16
+167:     ldp     x17, x18, [sp], #16
+168:     ldp     x19, x20, [sp], #16
+169:     ldp     x21, x22, [sp], #16
+170:     ldp     x23, x24, [sp], #16
+171:     ldp     x25, x26, [sp], #16
+172:     ldp     x27, x28, [sp], #16
+173: #ifdef BAREMETAL_SAVE_VFP_REGS_ON_IRQ
+174:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+175:     ldp     q2, q3, [sp], #32
+176:     ldp     q4, q5, [sp], #32
+177:     ldp     q6, q7, [sp], #32
+178:     ldp     q8, q9, [sp], #32
+179:     ldp     q10, q11, [sp], #32
+180:     ldp     q12, q13, [sp], #32
+181:     ldp     q14, q15, [sp], #32
+182:     ldp     q16, q17, [sp], #32
+183:     ldp     q18, q19, [sp], #32
+184:     ldp     q20, q21, [sp], #32
+185:     ldp     q22, q23, [sp], #32
+186:     ldp     q24, q25, [sp], #32
+187:     ldp     q26, q27, [sp], #32
+188:     ldp     q28, q29, [sp], #32
+189:     ldp     q30, q31, [sp], #32
+190: #endif // BAREMETAL_SAVE_VFP_REGS_ON_IRQ
+191: 
+192:     msr     DAIFSet, #1                 // Disable FIQ
+193:     ldp     x29, x30, [sp], #16         // Restore from stack
+194:     msr     elr_el1, x29                // Restore Exception Link Register (EL1)
+195:     msr     spsr_el1, x30               // Restore Saved Program Status Register (EL1)
+196:     ldp     x29, x30, [sp], #16         // restore x29, x30 from stack
+197: 
+198:     eret                                // Restore previous EL
+199: 
+200: .endm
+201: 
+202: //*************************************************
+203: // FIQ stub
+204: //*************************************************
+205:     .globl  FIQStub
+206: FIQStub:
+207: #ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+208:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+209:     stp     q28, q29, [sp, #-32]!
+210:     stp     q26, q27, [sp, #-32]!
+211:     stp     q24, q25, [sp, #-32]!
+212:     stp     q22, q23, [sp, #-32]!
+213:     stp     q20, q21, [sp, #-32]!
+214:     stp     q18, q19, [sp, #-32]!
+215:     stp     q16, q17, [sp, #-32]!
+216:     stp     q14, q15, [sp, #-32]!
+217:     stp     q12, q13, [sp, #-32]!
+218:     stp     q10, q11, [sp, #-32]!
+219:     stp     q8, q9, [sp, #-32]!
+220:     stp     q6, q7, [sp, #-32]!
+221:     stp     q4, q5, [sp, #-32]!
+222:     stp     q2, q3, [sp, #-32]!
+223:     stp     q0, q1, [sp, #-32]!
+224: #endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+225:     stp     x29, x30, [sp, #-16]!       // Save x0-x28 onto stack
+226:     stp     x27, x28, [sp, #-16]!
+227:     stp     x25, x26, [sp, #-16]!
+228:     stp     x23, x24, [sp, #-16]!
+229:     stp     x21, x22, [sp, #-16]!
+230:     stp     x19, x20, [sp, #-16]!
+231:     stp     x17, x18, [sp, #-16]!
+232:     stp     x15, x16, [sp, #-16]!
+233:     stp     x13, x14, [sp, #-16]!
+234:     stp     x11, x12, [sp, #-16]!
+235:     stp     x9, x10, [sp, #-16]!
+236:     stp     x7, x8, [sp, #-16]!
+237:     stp     x5, x6, [sp, #-16]!
+238:     stp     x3, x4, [sp, #-16]!
+239:     stp     x1, x2, [sp, #-16]!
+240:     str     x0, [sp, #-16]!
+241: 
+242:     ldr     x2, =s_fiqData
+243:     ldr     x1, [x2]                    // Get s_fiqData.handler
+244:     cmp     x1, #0                      // Is handler set?
+245:     b.eq    no_fiq_handler
+246:     ldr     x0, [x2, #8]                // Get s_fiqData.param
+247:     blr     x1                          // Call handler
+248: 
+249: restore_after_fiq_handler:
+250:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
+251:     ldp     x1, x2, [sp], #16
+252:     ldp     x3, x4, [sp], #16
+253:     ldp     x5, x6, [sp], #16
+254:     ldp     x7, x8, [sp], #16
+255:     ldp     x9, x10, [sp], #16
+256:     ldp     x11, x12, [sp], #16
+257:     ldp     x13, x14, [sp], #16
+258:     ldp     x15, x16, [sp], #16
+259:     ldp     x17, x18, [sp], #16
+260:     ldp     x19, x20, [sp], #16
+261:     ldp     x21, x22, [sp], #16
+262:     ldp     x23, x24, [sp], #16
+263:     ldp     x25, x26, [sp], #16
+264:     ldp     x27, x28, [sp], #16
+265:     ldp     x29, x30, [sp], #16
+266: #ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+267:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+268:     ldp     q2, q3, [sp], #32
+269:     ldp     q4, q5, [sp], #32
+270:     ldp     q6, q7, [sp], #32
+271:     ldp     q8, q9, [sp], #32
+272:     ldp     q10, q11, [sp], #32
+273:     ldp     q12, q13, [sp], #32
+274:     ldp     q14, q15, [sp], #32
+275:     ldp     q16, q17, [sp], #32
+276:     ldp     q18, q19, [sp], #32
+277:     ldp     q20, q21, [sp], #32
+278:     ldp     q22, q23, [sp], #32
+279:     ldp     q24, q25, [sp], #32
+280:     ldp     q26, q27, [sp], #32
+281:     ldp     q28, q29, [sp], #32
+282:     ldp     q30, q31, [sp], #32
+283: #endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+284: 
+285:     eret                                // Restore previous EL
+286: 
+287: no_fiq_handler:
+288:     ldr     x1, =RPI_INTRCTRL_FIQ_CONTROL // Disable FIQ (if handler is not set)
+289:     mov     w0, #0
+290:     str     w0, [x1]
+291:     b       restore_after_fiq_handler
+292: 
+293: /*
+294:  * HVC stub
+295:  */
+296: HVCStub:                                // Return to EL2h mode
+297:     mrs     x0, spsr_el2                // Read Saved Program Status Register (EL2)
+298:     bic     x0, x0, #0xF                // Clear bit 3:0
+299:     mov     x1, #9
+300:     orr     x0, x0, x1                  // Set bit 3 and bit 0 -> EL2h
+301:     msr     spsr_el2, x0                // Write Saved Program Status Register (EL2)
+302:     eret                                // Move to EL2h
+303: 
+304:     .data
+305: 
+306:     .align  3
+307: 
+308:     .globl  s_fiqData
+309: s_fiqData:                              // Matches FIQData:
+310:     .quad   0                           // handler
+311:     .quad   0                           // param
+312:     .word   0                           // fiqID (unused)
+313: 
+314: //*************************************************
+315: // Abort stubs
+316: //*************************************************
+317:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
+318:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
+319:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
+320:     irq_stub    IRQStub,                                    InterruptHandler
+321: 
+322: // End
 ```
 
-- Line 94-98: We define the M[3:0] field in the SPSR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 100-104: We define different values for this field
-- Line 107-111: We define the EC field in the ESR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 113-183: We define different values for this field
-- Line 186-190: We define the ISS field in the ESR_EL1 register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 113-200: We create a macro `irq_stub` for an IRQ interrupt, which saves almost all registers, depending on the define `BAREMETAL_SAVE_VFP_REGS_ON_IRQ`.
+These are then stored on the stack, every time decreasing the stack pointer by 32 or 16 bytes, depending on the registers.
+The FIQ interrupts are enabled while the interrupt is being handled, to allow for priority.
+After saving the registers the interrupt handler passed through `handler` is called, and after than the registers are restored.
+Then FIQ interrupts are disabled again, and the stub returns to the state before the interrupt using `eret`.
+This also reset the state of interrupt enables, etc. as well as the exception level. Note that even though we disable FIQ here, returning to the original exception level may enable them again
+- Line 205-291: We implement the FIQ interrupt stub `FIQStub`. This is similar to the normal interrupt stub, however this is not a macro.
+Also, the pointer to the handler is retrieved from a memory area structure `s_fiqData`, as well as the parameter to pass to the handler.
+If no handler was set no function is called, and the registers are simply restored
+- Line 306-312: We define the structure s_fiqData, which is 8 byte aligned
+- Line 320: We declare interrupt stub using the `irq_stub` macro, and set its handler to `InterruptHandler()`
 
-### ExceptionHandler.h {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERH}
+### ExceptionHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONHANDLERH}
 
-We will create a prototype for the exception handler.
+We will move the `InterruptHandler()` function to a new source file, so let's remove it from the exception handler code first.
 
-Create the file `code/libraries/baremetal/include/baremetal/ExceptionHandler.h`
+Update the file `code/libraries/baremetal/include/baremetal/ExceptionHandler.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
+...
+48: #ifdef __cplusplus
+49: extern "C" {
+50: #endif
+51: 
+52: /// <summary>
+53: /// Exception abort frame
+54: ///
+55: /// Storage for register value in case of exception, in order to recover
+56: /// </summary>
+57: struct AbortFrame
+58: {
+59:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+60:     uint64	esr_el1;
+61:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
+62:     uint64	spsr_el1;
+63:     /// @brief General-purpose register, Link Register
+64:     uint64	x30;
+65:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+66:     uint64	elr_el1;
+67:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+68:     uint64	sp_el0;
+69:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+70:     uint64	sp_el1;
+71:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+72:     uint64	far_el1;
+73:     /// @brief Unused valuem used to align to 64 bytes
+74:     uint64	unused;
+75: }
+76: /// @brief Just specifies the struct is packed
+77: PACKED;
+78: 
+79: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+80: 
+81: #ifdef __cplusplus
+82: }
+83: #endif
+84: 
+85: namespace baremetal {
+86: 
+87: /// <summary>
+88: /// Exception handling system. Handles ARM processor exceptions
+89: /// 
+90: /// This is a singleton class, created as soon as GetExceptionSystem() is called
+91: /// </summary>
+92: class ExceptionSystem
+93: {
+94:     friend ExceptionSystem& GetExceptionSystem();
+95: 
+96: private:
+97:     ExceptionSystem();
+98: 
+99: public:
+100:     ~ExceptionSystem();
+101: 
+102:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
+103: };
+104: 
+105: /// <summary>
+106: /// Injectable exception handler
+107: /// </summary>
+108: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+109: /// <param name="abortFrame">Stored state information at the time of exception</param>
+110: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
+111: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
+112: 
+113: const char* GetExceptionType(unsigned exceptionID);
+114: 
+115: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+116: 
+117: ExceptionSystem& GetExceptionSystem();
+118: 
+119: } // namespace baremetal
+```
+
+- Line 81: We removed the `InterruptHandler()` declaration
+
+### ExceptionHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONHANDLERCPP}
+
+We'll also remove the `InterruptHandler()` function from the source code.
+
+Update the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/ExceptionHandler.cpp
+...
+54: // <summary>
+55: /// Handles an exception, with the abort frame passed in.
+56: ///
+57: /// The exception handler is called from assembly code (ExceptionStub.S)
+58: /// </summary>
+59: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
+60: /// <param name="abortFrame">Filled in AbortFrame instance</param>
+61: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+62: {
+63:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
+64: }
+65: 
+```
+
+- Line 66: We removed the `InterruptHandler()` implementation
+
+### InterruptHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_INTERRUPTHANDLERH}
+
+We will add the `InterruptHandler()` function.
+Similar to waht we did for exceptions, we will also declare a class `InterruptSystem`, which is a singleton, and has its own implementation for `InterruptHandler()`.
+We'll only create the bare minimum for this calss for now, but we'll extend it soon.
+
+Create the file `code/libraries/baremetal/include/baremetal/InterruptHandler.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
-4: // File        : ExceptionHandler.h
+4: // File        : InterruptHandler.h
 5: //
 6: // Namespace   : -
 7: //
 8: // Class       : -
 9: //
-10: // Description : Exception handler
+10: // Description : Interrupt handler
 11: //
 12: //------------------------------------------------------------------------------
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
+15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
+17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
 20: // files(the "Software"), to deal in the Software without
@@ -274,78 +421,99 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 36: // DEALINGS IN THE SOFTWARE.
-37: // 
+37: //
 38: //------------------------------------------------------------------------------
 39: 
 40: #pragma once
 41: 
-42: #include <baremetal/Types.h>
-43: 
-44: /// @file
-45: /// Exception handling
-46: 
-47: #ifdef __cplusplus
-48: extern "C" {
-49: #endif
-50: 
-51: /// @brief Exception abort frame
-52: ///
-53: /// Storage for register value in case of exception, in order to recover
-54: struct AbortFrame
-55: {
-56:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-57:     uint64	esr_el1;
-58:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
-59:     uint64	spsr_el1;
-60:     /// @brief General-purpose register, Link Register
-61:     uint64	x30;
-62:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-63:     uint64	elr_el1;
-64:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-65:     uint64	sp_el0;
-66:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-67:     uint64	sp_el1;
-68:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-69:     uint64	far_el1;
-70:     /// @brief Unused valuem used to align to 64 bytes
-71:     uint64	unused;
-72: }
-73: PACKED;
-74: 
-75: /// @brief Handles an exception, with the abort frame passed in.
-76: ///
-77: /// The exception handler is called from assembly code (ExceptionStub.S)
-78: /// @param exceptionID Exception type being thrown (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-79: /// @param abortFrame  Filled in AbortFrame instance.
-80: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+42: #include <baremetal/Interrupt.h>
+43: #include <baremetal/Macros.h>
+44: #include <baremetal/Types.h>
+45: 
+46: /// @file
+47: /// Interrupt handler function
+48: 
+49: #ifdef __cplusplus
+50: extern "C" {
+51: #endif
+52: 
+53: void InterruptHandler();
+54: 
+55: #ifdef __cplusplus
+56: }
+57: #endif
+58: 
+59: namespace baremetal {
+60: 
+61: /// <summary>
+62: /// IRQ handler function
+63: /// </summary>
+64: using IRQHandler = void(void* param);
+65: 
+66: /// <summary>
+67: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
+68: /// This is a SINGLETON class
+69: /// </summary>
+70: class InterruptSystem
+71: {
+72:     /// @brief Pointer to registered IRQ handler
+73:     IRQHandler* m_irqHandler;
+74:     /// @brief Pointer to parameter to pass to registered IRQ handler
+75:     void* m_irqHandlerParams;
+76: 
+77:     friend InterruptSystem& GetInterruptSystem();
+78: 
+79: private:
+80:     InterruptSystem();
 81: 
-82: #ifdef __cplusplus
-83: }
-84: #endif
+82: public:
+83:     ~InterruptSystem();
+84: 
+85:     void Initialize();
+86: 
+87:     void RegisterIRQHandler(IRQHandler* handler, void* param);
+88:     void UnregisterIRQHandler();
+89: 
+90:     void InterruptHandler();
+91: };
+92: 
+93: InterruptSystem& GetInterruptSystem();
+94: 
+95: } // namespace baremetal
 ```
 
-- Line 54-73: We create struct `AbortFrame` which will hold all important information on entry. This information is actually registers saved on the stack, as we'll see later.
-- Line 80: We declare the exception handler function `ExceptionHandler()` which will receive two parameters.
-The first parameter is an exception ID which we will set, the second is a pointer to the `AbortFrame` which is actually the stack pointer value
+- Line 53: We declare the function `InterruptHandler()`
+- Line 64: We declare a callback function type `IRQHandler` to act as the handler for an IRQ
+- Line 70-91: We declare the class `InterruptSystem`
+  - Line 72: The member variable `m_irqHandler` stores the registered handler
+  - Line 74: The member variable `m_irqHandlerParams` stores the parameter to pass to the registered handler
+  - Line 77: We make `GetInterruptSystem()` a friend, so it can call the constructor
+  - Line 80: We declare a private default constructor, such that only the `GetInterruptSystem()` function can create an instance
+  - Line 83: We declare a destructor
+  - Line 85: We declare a method `Initialize()` which will set up the interrupt system
+  - Line 87: We declare a method `RegisterIRQHandler()` which will register a handler to be called when an interrupt occurs
+  - Line 88: We declare a method `UnregisterIRQHandler()` which will unregister a registered handler
+  - Line 90: We declate a method `InterruptHandler()` which is called by the global `InterruptHandler()` function
+- Line 93: We declare the function `GetInterruptSystem()`, which creates the singleton instance of the `InterruptSystem` class if needed, and returns a reference to it
 
-### ExceptionHandler.cpp {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERCPP}
+### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_INTERRUPTHANDLERCPP}
 
-We will implement the exception handler.
+We'll implement the `InterruptHandler()` function as well as the `InterruptSystem` class.
 
-Create the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
+Create the file `code/libraries/baremetal/src/InterruptHandler.cpp`
 
 ```cpp
-File: code/libraries/baremetal/src/ExceptionHandler.cpp
+File: code/libraries/baremetal/src/InterruptHandler.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
-4: // File        : ExceptionHandler.cpp
+4: // File        : InterruptHandler.cpp
 5: //
-6: // Namespace   : baremetal
+6: // Namespace   : -
 7: //
 8: // Class       : -
 9: //
-10: // Description : Exception handler
+10: // Description : Interrupt handler
 11: //
 12: //------------------------------------------------------------------------------
 13: //
@@ -375,320 +543,104 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 37: //
 38: //------------------------------------------------------------------------------
 39: 
-40: #include <baremetal/ExceptionHandler.h>
+40: #include <baremetal/InterruptHandler.h>
 41: 
-42: #include <baremetal/ARMInstructions.h>
-43: #include <baremetal/ExceptionSystem.h>
-44: 
-45: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
-46: {
-47:     EnableFIQs();
+42: #include <baremetal/Assert.h>
+43: 
+44: /// @file
+45: /// Interrupt handler function implementation
+46: 
+47: using namespace baremetal;
 48: 
-49:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-50: }
-```
-
-- Line 43: We include the exception system header which we will create next.
-This is to create a class that does the handling in C++ domain
-- Line 45-50: We implement the `ExceptionHandler()` function. Next to enabling the FIQ interrupts, we simply relay to the `ExceptionSystem` class
-
-### ExceptionSystem.h {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSYSTEMH}
-
-We will the actual exception handling class `ExceptionSystem`.
-
-Create the file `code/libraries/baremetal/include/baremetal/ExceptionSystem.h`
-
-```cpp
-File: code/libraries/baremetal/include/baremetal/ExceptionSystem.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : ExceptionSystem.h
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : ExceptionSystem
-9: //
-10: // Description : Exception handler
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39: 
-40: #pragma once
-41: 
-42: #include <baremetal/Macros.h>
-43: #include <baremetal/ExceptionHandler.h>
-44: 
-45: /// @file
-46: /// Exception handling system
-47: 
-48: /// @brief Exception vector table
-49: ///
-50: /// The exception vector table is used to select an exception type depending on conditions:
-51: /// - Whether the current EL is equal to EL0 or EL1 or greater
-52: /// - Whether the EL the exception was called from was lower that the current, and which architecture was used.
-53: ///
-54: /// The exception vector table has a total of 16 entries, each 128 bytes in size.
-55: ///
-56: /// Offset  Exception type      Description
-57: /// 0x000   Synchronous         Current EL with SP0
-58: /// 0x080   IRQ/vIRQ
-59: /// 0x100   FIQ/vFIQ
-60: /// 0x180   SError/vSError
-61: ///
-62: /// 0x200   Synchronous         Current EL with SPx
-63: /// 0x280   IRQ/vIRQ
-64: /// 0x300   FIQ/vFIQ
-65: /// 0x380   SError/vSError
-66: ///
-67: /// 0x400   Synchronous         Lower EL using AArch64
-68: /// 0x480   IRQ/vIRQ
-69: /// 0x500   FIQ/vFIQ
-70: /// 0x580   SError/vSError
-71: ///
-72: /// 0x600   Synchronous         Lower EL using AArch32
-73: /// 0x680   IRQ/vIRQ
-74: /// 0x700   FIQ/vFIQ
-75: /// 0x780   SError/vSError
-76: ///
-77: /// Each entry simple has a 32 bit pointer to a function
+49: void InterruptHandler()
+50: {
+51:     GetInterruptSystem().InterruptHandler();
+52: }
+53: 
+54: /// <summary>
+55: /// Create a interrupt system
+56: ///
+57: /// Note that the constructor is private, so GetInterruptSystem() is needed to instantiate the interrupt system control
+58: /// </summary>
+59: InterruptSystem::InterruptSystem()
+60:     : m_irqHandler{}
+61:     , m_irqHandlerParams{}
+62: {
+63: }
+64: 
+65: /// <summary>
+66: /// Destructor
+67: /// </summary>
+68: InterruptSystem::~InterruptSystem()
+69: {
+70: }
+71: 
+72: /// <summary>
+73: /// Initialize interrupt system
+74: /// </summary>
+75: void InterruptSystem::Initialize()
+76: {
+77: }
 78: 
 79: /// <summary>
-80: /// Exception vector table
+80: /// Register an IRQ handler
 81: /// </summary>
-82: struct VectorTable
-83: {
-84:     /// <summary>
-85:     /// Exception vector table contents
-86:     /// </summary>
-87:     struct
-88:     {
-89:         uint32	Branch;
-90:         uint32	Dummy[31];      // Align to 128 bytes
-91:     }
-92:     Vector[16];
-93: }
-94: PACKED;
-95: 
-96: namespace baremetal {
-97: 
-98: /// @brief Exception handling system. Handles ARM processor exceptions
-99: /// This is a singleton class, created as soon as GetExceptionSystem() is called
-100: class ExceptionSystem
-101: {
-102:     friend ExceptionSystem& GetExceptionSystem();
-103: 
-104: private:
-105:     /// @brief Create a exception handling system. Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
-106:     ExceptionSystem();
-107: 
-108: public:
-109:     ~ExceptionSystem();
-110: 
-111:     /// @brief Throw a ARM exception with an abort frame
-112:     /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-113:     /// @param abortFrame   Stored state information at the time of exception
-114:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
-115: };
-116: 
-117: /// @brief Callback function called by the exception handler if registered
-118: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-119: /// @param abortFrame   Stored state information at the time of exception
-120: using ExceptionPanicHandler = bool(unsigned exceptionID, AbortFrame* abortFrame);
-121: 
-122: /// @brief Convert exception ID to a string
-123: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-124: /// @return String representation of exception ID
-125: const char* GetExceptionType(unsigned exceptionID);
-126: 
-127: /// @brief Register an exception callback function, and return the previous one.
-128: /// @param handler      Exception handler callback function to register
-129: /// @return Previously set exception handler callback function
-130: ExceptionPanicHandler* RegisterPanicHandler(ExceptionPanicHandler* handler);
-131: 
-132: /// @brief Retrieve the singleton exception handling system
-133: ///
-134: /// Creates a static instance of ExceptionSystem, and returns a reference to it.
-135: /// @return A reference to the singleton exception handling system.
-136: ExceptionSystem& GetExceptionSystem();
-137: 
-138: } // namespace baremetal
-```
-
-- Line 82-94: We declare the exception vector table type `VectorTable`. This contains the 16 different exception vector entries
-- Line 100-115: We declare the class `ExceptionSystem`. This is the acutal handler class for exceptions
-  - Line 102: We make the function `GetExceptionSystem()` a friend. This function is the only way to create an instance of `ExceptionSystem`
-  - Line 106: We declare the (private) constructor
-  - Line 109: We declare the destructor
-  - Line 114: We declare the method `Throw()` which is used to handle an exception
-- Line 120: We declare a function type `ExceptionPanicHandler` which is used to enable a hook for a function to handle panics
-- Line 125: We declare a function `GetExceptionType()` to convert an exception ID to a string
-- Line 130: We declare a function `RegisterPanicHandler()` to set or reset a panic function handler
-- Line 136 We declare the function `GetExceptionSystem()` which is used to create and return the singleton instance of `ExceptionSystem`
-
-### ExceptionSystem.cpp {#TUTORIAL_20_INTERRUPTS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSYSTEMCPP}
-
-We will implement the exception handler.
-
-Create the file `code/libraries/baremetal/src/ExceptionSystem.cpp`
-
-```cpp
-File: code/libraries/baremetal/src/ExceptionSystem.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : ExceptionSystem.cpp
-5: //
-6: // Namespace   : baremetal
-7: //
-8: // Class       : ExceptionSystem
-9: //
-10: // Description : Exception handling class
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: // 
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: // 
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: // 
-38: //------------------------------------------------------------------------------
-39: 
-40: #include <baremetal/ExceptionSystem.h>
-41: #include <baremetal/Exception.h>
-42: 
-43: #include <baremetal/ARMInstructions.h>
-44: #include <baremetal/Assert.h>
-45: #include <baremetal/Logger.h>
-46: #include <baremetal/String.h>
-47: #include <baremetal/Synchronization.h>
-48: #include <baremetal/System.h>
-49: #include <baremetal/InterruptHandler.h>
-50: 
-51: namespace baremetal {
-52: 
-53: static const char FromExcept[] = "except";
-54: 
-55: ExceptionPanicHandler* s_exceptionPanicHandler;
-56: 
-57: ExceptionSystem::~ExceptionSystem()
-58: {
-59: }
-60: 
-61: // order must match exception identifiers in baremetal/Exception.h
-62: static const char* s_exceptionName[] =
-63: {
-64:     "Unexpected exception",
-65:     "Synchronous exception",
-66:     "System error"
-67: };
-68: 
-69: ExceptionSystem::ExceptionSystem()
-70: {
-71: }
-72: 
-73: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
-74: {
-75:     assert(abortFrame != nullptr);
-76: 
-77:     uint64 sp = abortFrame->sp_el0;
-78:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
-79:     {
-80:         sp = abortFrame->sp_el1;
-81:     }
-82: 
-83:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
-84:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
-85: 
-86:     uint64 FAR = 0;
-87:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
-88:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
-89:     {
-90:         FAR = abortFrame->far_el1;
-91:     }
-92: 
-93:     bool halt = true;
-94:     if (s_exceptionPanicHandler != nullptr)
-95:     {
-96:         halt = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
-97:     }
+82: /// <param name="handler">Handler to register</param>
+83: /// <param name="param">Parameter to pass to IRQ handler</param>
+84: void InterruptSystem::RegisterIRQHandler(IRQHandler* handler, void* param)
+85: {
+86:     assert(m_irqHandler == nullptr);
+87: 
+88:     m_irqHandler = handler;
+89:     m_irqHandlerParams = param;
+90: }
+91: 
+92: /// <summary>
+93: /// Unregister an IRQ handler
+94: /// </summary>
+95: void InterruptSystem::UnregisterIRQHandler()
+96: {
+97:     assert(m_irqHandler != nullptr);
 98: 
-99:     GetLogger().Write(FromExcept, __LINE__, halt ? LogSeverity::Panic : LogSeverity::Error,
-100:         "%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-101:         s_exceptionName[exceptionID],
-102:         abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-103: }
-104: 
-105: const char* GetExceptionType(unsigned exceptionID)
-106: {
-107:     return s_exceptionName[exceptionID];
-108: }
-109: 
-110: ExceptionPanicHandler* RegisterPanicHandler(ExceptionPanicHandler* handler)
-111: {
-112:     auto result = s_exceptionPanicHandler;
-113:     s_exceptionPanicHandler = handler;
-114:     return result;
-115: }
-116: 
-117: ExceptionSystem& GetExceptionSystem()
-118: {
-119:     static ExceptionSystem system;
-120:     return system;
-121: }
-122: 
-123: } // namespace baremetal
+99:     m_irqHandler = nullptr;
+100:     m_irqHandlerParams = nullptr;
+101: }
+102: 
+103: /// <summary>
+104: /// Handles an interrupt.
+105: ///
+106: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+107: /// </summary>
+108: void InterruptSystem::InterruptHandler()
+109: {
+110:     if (m_irqHandler)
+111:         m_irqHandler(m_irqHandlerParams);
+112: }
+113: 
+114: /// <summary>
+115: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
+116: ///
+117: /// This is a friend function of class InterruptSystem
+118: /// </summary>
+119: /// <returns>Reference to the singleton interrupt system instance</returns>
+120: InterruptSystem& baremetal::GetInterruptSystem()
+121: {
+122:     static InterruptSystem system;
+123:     system.Initialize();
+124:     return system;
+125: }
 ```
 
-## Interrupt handling - Step 2 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2}
+- Line 49-52: We implement the `InterruptHandler()` function by called the `InterruptHandler()` method on the singleton `InterruptSystem` instance
+- Line 59-63: We implement the constructor
+- Line 68-70: We implement the destructor
+- Line 75-77: We implement the `Initialize()` method. For now this is empty
+- Line 84-90: We implement the `RegisterIRQHandler()` method
+- Line 95-101: We implement the `UnregisterIRQHandler()` method
+- Line 108-112: We implement the `InterruptHandler()` method. This will call the handler, if installed
+- Line 120-125: We implement the `GetInterruptSystem()` function
 
-We'll add a class `InterruptSystem` to enable, disable, and handle interrupts.
-
-### ARMRegisters.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_ARMREGISTERSH}
+### ARMRegisters.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_ARMREGISTERSH}
 
 Next to the Raspberry Pi registers for peripherals etc., there are also ARM processor registers, but specific for Raspberry Pi.
 The complete set of registers is defined in [documentation](pdf/bcm2836-peripherals.pdf), the most important ones are described in [ARM local device registers](#RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS).
@@ -701,6 +653,7 @@ Create the file `code/libraries/baremetal/include/baremetal/ARMRegisters.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
+File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\ARMRegisters.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -741,160 +694,380 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 38: //------------------------------------------------------------------------------
 39: 
 40: /// @file
-41: /// Register addresses of Raspberry Pi peripheral registers.
+41: /// Register addresses of Raspberry Pi ARM local registers.
 42: ///
-43: /// For specific registers, we also define the fields and their possible values.
-44: 
-45: #pragma once
-46: 
-47: #include <baremetal/Macros.h>
-48: #include <baremetal/Types.h>
-49: 
-50: #if BAREMETAL_RPI_TARGET <= 3
-51: #define ARM_LOCAL_BASE 0x40000000
-52: #else
-53: #define ARM_LOCAL_BASE 0xFF800000
-54: #endif
-55: 
-56: /// @brief Raspberry Pi ARM Local Control Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-57: #define ARM_LOCAL_CONTROL                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000000)
-58: /// @brief Raspberry Pi ARM Local Core Timer Prescaler Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-59: #define ARM_LOCAL_PRESCALER                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000008)
-60: /// @brief Raspberry Pi ARM Local GPU Interrupt Routing Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-61: #define ARM_LOCAL_GPU_INT_ROUTING          reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000000C)
-62: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-63: #define ARM_LOCAL_PM_ROUTING_SET           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000010)
-64: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-65: #define ARM_LOCAL_PM_ROUTING_CLR           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000014)
-66: /// @brief Raspberry Pi ARM Local Core Timer Least Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-67: #define ARM_LOCAL_TIMER_LS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000001C)
-68: /// @brief Raspberry Pi ARM Local Core Timer Most Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-69: #define ARM_LOCAL_TIMER_MS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000020)
-70: #define ARM_LOCAL_INT_ROUTING              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000024)
-71: /// @brief Raspberry Pi ARM Local AXI Outstanding Read/Write Counters Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-72: #define ARM_LOCAL_AXI_COUNT                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000002C)
-73: /// @brief Raspberry Pi ARM Local AXI Outstanding Interrupt Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-74: #define ARM_LOCAL_AXI_IRQ                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000030)
-75: /// @brief Raspberry Pi ARM Local Timer Control / Status Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-76: #define ARM_LOCAL_TIMER_CONTROL            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000034)
-77: /// @brief Raspberry Pi ARM Local Timer IRQ Clear / Reload Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-78: #define ARM_LOCAL_TIMER_WRITE              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000038)
-79: 
-80: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-81: #define ARM_LOCAL_TIMER_INT_CONTROL0       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000040)
-82: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-83: #define ARM_LOCAL_TIMER_INT_CONTROL1       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000044)
-84: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-85: #define ARM_LOCAL_TIMER_INT_CONTROL2       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000048)
-86: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-87: #define ARM_LOCAL_TIMER_INT_CONTROL3       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000004C)
-88: 
-89: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-90: #define ARM_LOCAL_MAILBOX_INT_CONTROL0 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000050)
-91: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-92: #define ARM_LOCAL_MAILBOX_INT_CONTROL1 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000054)
-93: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-94: #define ARM_LOCAL_MAILBOX_INT_CONTROL2 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000058)
-95: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-96: #define ARM_LOCAL_MAILBOX_INT_CONTROL3 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000005C)
-97: 
-98: /// @brief Raspberry Pi ARM Local Core 0 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-99: #define ARM_LOCAL_IRQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000060)
-100: /// @brief Raspberry Pi ARM Local Core 1 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-101: #define ARM_LOCAL_IRQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000064)
-102: /// @brief Raspberry Pi ARM Local Core 2 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-103: #define ARM_LOCAL_IRQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000068)
-104: /// @brief Raspberry Pi ARM Local Core 3 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-105: #define ARM_LOCAL_IRQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000006C)
-106: 
-107: /// @brief Raspberry Pi ARM Local Core 0 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-108: #define ARM_LOCAL_FIQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000070)
-109: /// @brief Raspberry Pi ARM Local Core 1 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-110: #define ARM_LOCAL_FIQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000074)
-111: /// @brief Raspberry Pi ARM Local Core 2 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-112: #define ARM_LOCAL_FIQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000078)
-113: /// @brief Raspberry Pi ARM Local Core 3 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-114: #define ARM_LOCAL_FIQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000007C)
-115: 
-116: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-117: #define ARM_LOCAL_MAILBOX0_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000080)
-118: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-119: #define ARM_LOCAL_MAILBOX1_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000084)
-120: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-121: #define ARM_LOCAL_MAILBOX2_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000088)
-122: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-123: #define ARM_LOCAL_MAILBOX3_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000008C)
-124: 
-125: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-126: #define ARM_LOCAL_MAILBOX0_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000090)
-127: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-128: #define ARM_LOCAL_MAILBOX1_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000094)
-129: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-130: #define ARM_LOCAL_MAILBOX2_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000098)
-131: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-132: #define ARM_LOCAL_MAILBOX3_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000009C)
-133: 
-134: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-135: #define ARM_LOCAL_MAILBOX0_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A0)
-136: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-137: #define ARM_LOCAL_MAILBOX1_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A4)
-138: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-139: #define ARM_LOCAL_MAILBOX2_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A8)
-140: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-141: #define ARM_LOCAL_MAILBOX3_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000AC)
-142: 
-143: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-144: #define ARM_LOCAL_MAILBOX0_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B0)
-145: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-146: #define ARM_LOCAL_MAILBOX1_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B4)
-147: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-148: #define ARM_LOCAL_MAILBOX2_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B8)
-149: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-150: #define ARM_LOCAL_MAILBOX3_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000BC)
-151: 
-152: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-153: #define ARM_LOCAL_MAILBOX0_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C0)
-154: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-155: #define ARM_LOCAL_MAILBOX1_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C4)
-156: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-157: #define ARM_LOCAL_MAILBOX2_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C8)
-158: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-159: #define ARM_LOCAL_MAILBOX3_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000CC)
-160: 
-161: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-162: #define ARM_LOCAL_MAILBOX0_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D0)
-163: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-164: #define ARM_LOCAL_MAILBOX1_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D4)
-165: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-166: #define ARM_LOCAL_MAILBOX2_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D8)
-167: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-168: #define ARM_LOCAL_MAILBOX3_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000DC)
-169: 
-170: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-171: #define ARM_LOCAL_MAILBOX0_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E0)
-172: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-173: #define ARM_LOCAL_MAILBOX1_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E4)
-174: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-175: #define ARM_LOCAL_MAILBOX2_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E8)
-176: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-177: #define ARM_LOCAL_MAILBOX3_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000EC)
-178: 
-179: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-180: #define ARM_LOCAL_MAILBOX0_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F0)
-181: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-182: #define ARM_LOCAL_MAILBOX1_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F4)
-183: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-184: #define ARM_LOCAL_MAILBOX2_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F8)
-185: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-186: #define ARM_LOCAL_MAILBOX3_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000FC)
-187: 
-188: /// @brief Raspberry Pi ARM Local Register region end address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
-189: #define ARM_LOCAL_END                      reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000003FFFF)
+43: /// ARM local registers are implemented in the Raspberry Pi BCM chip, but are intended to control functionality in the ARM core.
+44: /// For specific registers, we also define the fields and their possible values.
+45: 
+46: #pragma once
+47: 
+48: #include <baremetal/Macros.h>
+49: #include <baremetal/Types.h>
+50: 
+51: #if BAREMETAL_RPI_TARGET <= 3
+52: /// @brief Base address for ARM Local registers
+53: #define ARM_LOCAL_BASE 0x40000000
+54: #else
+55: /// @brief Base address for ARM Local registers
+56: #define ARM_LOCAL_BASE 0xFF800000
+57: #endif
+58: 
+59: /// @brief Raspberry Pi ARM Local Control Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+60: #define ARM_LOCAL_CONTROL                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000000)
+61: /// @brief Raspberry Pi ARM Local Core Timer Prescaler Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+62: #define ARM_LOCAL_PRESCALER                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000008)
+63: /// @brief Raspberry Pi ARM Local GPU Interrupt Routing Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+64: #define ARM_LOCAL_GPU_INT_ROUTING          reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000000C)
+65: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+66: #define ARM_LOCAL_PM_ROUTING_SET           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000010)
+67: /// @brief Raspberry Pi ARM Local Performance Monitor Interrupt Routing Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+68: #define ARM_LOCAL_PM_ROUTING_CLR           reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000014)
+69: /// @brief Raspberry Pi ARM Local Core Timer Least Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+70: #define ARM_LOCAL_TIMER_LS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000001C)
+71: /// @brief Raspberry Pi ARM Local Core Timer Most Significant Word Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+72: #define ARM_LOCAL_TIMER_MS                 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000020)
+73: /// @brief Raspberry Pi ARM Local Interrupt Routing Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+74: #define ARM_LOCAL_INT_ROUTING              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000024)
+75: /// @brief Raspberry Pi ARM Local AXI Outstanding Read/Write Counters Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+76: #define ARM_LOCAL_AXI_COUNT                reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000002C)
+77: /// @brief Raspberry Pi ARM Local AXI Outstanding Interrupt Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+78: #define ARM_LOCAL_AXI_IRQ                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000030)
+79: /// @brief Raspberry Pi ARM Local Timer Control / Status Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+80: #define ARM_LOCAL_TIMER_CONTROL            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000034)
+81: /// @brief Raspberry Pi ARM Local Timer IRQ Clear / Reload Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+82: #define ARM_LOCAL_TIMER_WRITE              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000038)
+83: 
+84: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+85: #define ARM_LOCAL_TIMER_INT_CONTROL0       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000040)
+86: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+87: #define ARM_LOCAL_TIMER_INT_CONTROL1       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000044)
+88: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+89: #define ARM_LOCAL_TIMER_INT_CONTROL2       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000048)
+90: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+91: #define ARM_LOCAL_TIMER_INT_CONTROL3       reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000004C)
+92: 
+93: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+94: #define ARM_LOCAL_MAILBOX_INT_CONTROL0 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000050)
+95: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+96: #define ARM_LOCAL_MAILBOX_INT_CONTROL1 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000054)
+97: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 2 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+98: #define ARM_LOCAL_MAILBOX_INT_CONTROL2 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000058)
+99: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+100: #define ARM_LOCAL_MAILBOX_INT_CONTROL3 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000005C)
+101: 
+102: /// @brief Raspberry Pi ARM Local Core 0 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+103: #define ARM_LOCAL_IRQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000060)
+104: /// @brief Raspberry Pi ARM Local Core 1 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+105: #define ARM_LOCAL_IRQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000064)
+106: /// @brief Raspberry Pi ARM Local Core 2 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+107: #define ARM_LOCAL_IRQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000068)
+108: /// @brief Raspberry Pi ARM Local Core 3 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+109: #define ARM_LOCAL_IRQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000006C)
+110: 
+111: /// @brief Raspberry Pi ARM Local Core 0 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+112: #define ARM_LOCAL_FIQ_PENDING0             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000070)
+113: /// @brief Raspberry Pi ARM Local Core 1 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+114: #define ARM_LOCAL_FIQ_PENDING1             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000074)
+115: /// @brief Raspberry Pi ARM Local Core 2 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+116: #define ARM_LOCAL_FIQ_PENDING2             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000078)
+117: /// @brief Raspberry Pi ARM Local Core 3 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+118: #define ARM_LOCAL_FIQ_PENDING3             reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000007C)
+119: 
+120: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+121: #define ARM_LOCAL_MAILBOX0_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000080)
+122: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+123: #define ARM_LOCAL_MAILBOX1_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000084)
+124: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+125: #define ARM_LOCAL_MAILBOX2_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000088)
+126: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+127: #define ARM_LOCAL_MAILBOX3_SET0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000008C)
+128: 
+129: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+130: #define ARM_LOCAL_MAILBOX0_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000090)
+131: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+132: #define ARM_LOCAL_MAILBOX1_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000094)
+133: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+134: #define ARM_LOCAL_MAILBOX2_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000098)
+135: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+136: #define ARM_LOCAL_MAILBOX3_SET1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000009C)
+137: 
+138: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+139: #define ARM_LOCAL_MAILBOX0_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A0)
+140: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+141: #define ARM_LOCAL_MAILBOX1_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A4)
+142: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+143: #define ARM_LOCAL_MAILBOX2_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A8)
+144: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+145: #define ARM_LOCAL_MAILBOX3_SET2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000AC)
+146: 
+147: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+148: #define ARM_LOCAL_MAILBOX0_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B0)
+149: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+150: #define ARM_LOCAL_MAILBOX1_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B4)
+151: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+152: #define ARM_LOCAL_MAILBOX2_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B8)
+153: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+154: #define ARM_LOCAL_MAILBOX3_SET3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000BC)
+155: 
+156: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+157: #define ARM_LOCAL_MAILBOX0_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C0)
+158: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+159: #define ARM_LOCAL_MAILBOX1_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C4)
+160: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+161: #define ARM_LOCAL_MAILBOX2_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C8)
+162: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+163: #define ARM_LOCAL_MAILBOX3_CLR0            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000CC)
+164: 
+165: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+166: #define ARM_LOCAL_MAILBOX0_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D0)
+167: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+168: #define ARM_LOCAL_MAILBOX1_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D4)
+169: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+170: #define ARM_LOCAL_MAILBOX2_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D8)
+171: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+172: #define ARM_LOCAL_MAILBOX3_CLR1            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000DC)
+173: 
+174: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+175: #define ARM_LOCAL_MAILBOX0_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E0)
+176: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+177: #define ARM_LOCAL_MAILBOX1_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E4)
+178: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+179: #define ARM_LOCAL_MAILBOX2_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E8)
+180: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+181: #define ARM_LOCAL_MAILBOX3_CLR2            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000EC)
+182: 
+183: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+184: #define ARM_LOCAL_MAILBOX0_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F0)
+185: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+186: #define ARM_LOCAL_MAILBOX1_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F4)
+187: /// @brief Raspberry Pi ARM Local Core Mailbox 2 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+188: #define ARM_LOCAL_MAILBOX2_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F8)
+189: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+190: #define ARM_LOCAL_MAILBOX3_CLR3            reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000FC)
+191: 
+192: /// @brief Raspberry Pi ARM Local Register region end address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
+193: #define ARM_LOCAL_END                      reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000003FFFF)
 ```
 
-We'll explain the details on each of these registers as we use them.
+- Line 85: We create definition for the Core Timer Interrupt Control register for core 0
+- Line 87: We create definition for the Core Timer Interrupt Control register for core 1
+- Line 89: We create definition for the Core Timer Interrupt Control register for core 2
+- Line 91: We create definition for the Core Timer Interrupt Control register for core 3
 
-### InterruptSystem.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_INTERRUPTSYSTEMH}
+The rest of the registers will be explained as we use them.
+
+### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_UPDATE_CMAKE_FILE}
+
+As we have now added some source files to the `baremetal` library, we need to update its CMake file.
+
+Update the file `code/libraries/baremetal/CMakeLists.txt`
+
+```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+...
+File: d:\Projects\baremetal.github\code\libraries\baremetal\CMakeLists.txt
+29: set(PROJECT_SOURCES
+30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionStub.S
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/InterruptHandler.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/src/String.cpp
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
+52:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
+53:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
+54:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+55:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
+56:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
+57:     )
+58: 
+59: set(PROJECT_INCLUDES_PUBLIC
+60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMRegisters.h
+62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
+63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ExceptionHandler.h
+67:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
+68:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
+69:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+70:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
+71:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+72:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/InterruptHandler.h
+73:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
+74:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MachineInfo.h
+75:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
+76:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
+77:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+78:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
+79:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+80:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
+81:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+82:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
+83:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
+84:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
+85:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/StdArg.h
+86:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/String.h
+87:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+88:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
+89:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
+90:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
+91:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
+92:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+93:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Util.h
+94:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
+95:     )
+96: set(PROJECT_INCLUDES_PRIVATE )
+...
+```
+
+### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+
+Let's start generating some interrupts. For now, we'll do this all in the `main()` code, we will be moving and generalizing this later.
+
+Update the file `code/applications/demo/src/main.cpp`
+
+```cpp
+File: code/applications/demo/src/main.cpp
+1: #include <baremetal/Assert.h>
+2: #include <baremetal/Console.h>
+3: #include <baremetal/Logger.h>
+4: #include <baremetal/System.h>
+5: #include <baremetal/Timer.h>
+6: #include <baremetal/ARMInstructions.h>
+7: #include <baremetal/ARMRegisters.h>
+8: #include <baremetal/BCMRegisters.h>
+9: #include <baremetal/MemoryAccess.h>
+10: #include <baremetal/InterruptHandler.h>
+11: 
+12: LOG_MODULE("main");
+13: 
+14: using namespace baremetal;
+15: 
+16: #define TICKS_PER_SECOND 2 // Timer ticks per second
+17: 
+18: static uint32 clockTicksPerSystemTick;
+19: 
+20: void IntHandler(void* param)
+21: {
+22:     uint64 counterCompareValue;
+23:     GetTimerCompareValue(counterCompareValue);
+24:     SetTimerCompareValue(counterCompareValue + clockTicksPerSystemTick);
+25: 
+26:     LOG_INFO("Ping");
+27: }
+28: 
+29: void EnableIRQ()
+30: {
+31:     GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+32:         GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT(1));
+33: }
+34: 
+35: void DisableIRQ()
+36: {
+37:     GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+38:         GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT(1));
+39: }
+40: 
+41: int main()
+42: {
+43:     auto& console = GetConsole();
+44: 
+45:     auto exceptionLevel = CurrentEL();
+46:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+47: 
+48:     uint64 counterFreq{};
+49:     GetTimerFrequency(counterFreq);
+50:     assert(counterFreq % TICKS_PER_SECOND == 0);
+51:     clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
+52: 
+53:     uint64 counter;
+54:     GetTimerCounter(counter);
+55:     SetTimerCompareValue(counter + clockTicksPerSystemTick);
+56:     SetTimerControl(CNTP_CTL_EL0_ENABLE);
+57: 
+58:     GetInterruptSystem().RegisterIRQHandler(IntHandler, nullptr);
+59: 
+60:     EnableIRQ();
+61: 
+62:     LOG_INFO("Wait 5 seconds");
+63:     Timer::WaitMilliSeconds(5000);
+64: 
+65:     DisableIRQ();
+66: 
+67:     GetInterruptSystem().UnregisterIRQHandler();
+68: 
+69:     console.Write("Press r to reboot, h to halt\n");
+70:     char ch{};
+71:     while ((ch != 'r') && (ch != 'h'))
+72:     {
+73:         ch = console.ReadChar();
+74:         console.WriteChar(ch);
+75:     }
+76: 
+77:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+78: }
+```
+
+- Line 16: We create a definition to set the timer to trigger 2 times a second
+- Line 18: We define a variable to hold the number of clock ticks for every timer tick
+- Line 20-27: We define a IRQ handler function `IntHandler()`, which reprograms the timer to trigger `clockTicksPerSystemTick` clock ticks from now, and print some text
+- Line 29-33: We define a function `EnableIRQ()`, which enables the IRQ for the ARM local time for core 0
+- Line 35-39: We define a function `DisableIRQ()`, which disables the IRQ for the ARM local time for core 0
+- Line 48-51: We calculate from the clock tick frequency how many clock ticks are in a timer tick
+- Line 53-56: We set the timer to trigger `clockTicksPerSystemTick` clock ticks from now, and enable the interrupt for the timer
+- Line 58: We register the handler function
+- Line 60: We enable the timer IRQ
+- Line 65: We disable the timer IRQ
+- Line 67: We unregister the handler function
+
+### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+The application will start the timer, and after 5 seconds stop it again. As we set the timer to tick twice a second, we expect to see 10 ticks happening.
+
+```text
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:49)
+Info   Wait 5 seconds (main:65)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Info   Ping (main:26)
+Press r to reboot, h to halt
+hInfo   Halt (System:129)
+```
+
+
+## Interrupt System - Step 2 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2}
+
+We'll update the class `InterruptSystem` to enable, disable, and handle interrupts.
+
+\todo
+
+### InterruptSystem.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTSYSTEMH}
 
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 
@@ -986,7 +1159,7 @@ The `TestDetails` class is added to the `unittest` namespace.
   - Line 63: We declare an accessor `SourceFileName()` for the source file name
   - Line 64: We declare an accessor `SourceFileLineNumber()` for the source line number
 
-### TestDetails.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_TESTDETAILSCPP}
+### TestDetails.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTDETAILSCPP}
 
 Let's implement the `TestDetails` class.
 
@@ -1063,7 +1236,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 46-53: We implement the default constructor
 - Line 55-62: We implement the non default constructor
 
-### TestBase.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_TESTBASEH}
+### TestBase.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTBASEH}
 
 We will add a base class for each test. All tests will derive from this class, and implement its `RunImpl()` method to run the actual test.
 
@@ -1162,7 +1335,7 @@ The `TestBase` class is added to the `unittest` namespace.
 This will ultimately invoke the `RunImpl()` virtual method, which is expected to be overriden by an actual test.
 - Line 72: We declare the overridable `RunImpl()` method
 
-### TestBase.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_TESTBASECPP}
+### TestBase.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTBASECPP}
 
 We'll implement the `TestBase` class.
 
@@ -1249,7 +1422,7 @@ File: code/libraries/unittest/src/TestBase.cpp
 - Line 62-65: We provide a first implementation for the `Run()` method
 - Line 67-69: We provide a default implementation for the `RunImpl()` method
 
-### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_CMAKE_FILE}
 
 As we have now added some source files to the `unittest` library, we need to update its CMake file.
 
@@ -1272,7 +1445,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
 
 Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
 
@@ -1349,7 +1522,7 @@ File: code/applications/demo/src/main.cpp
   - Line 33-37: We declare and implement an override for the `RunImpl()` method. It simply logs a string
 - Line 45-46: We define an instance of MyTest, and then run the test.
 
-### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging. We'll first switch off the memory debug output to get a cleaner console.
 

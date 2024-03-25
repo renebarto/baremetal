@@ -49,9 +49,11 @@
 extern "C" {
 #endif
 
-/// @brief Exception abort frame
+/// <summary>
+/// Exception abort frame
 ///
 /// Storage for register value in case of exception, in order to recover
+/// </summary>
 struct AbortFrame
 {
     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
@@ -74,17 +76,7 @@ struct AbortFrame
 /// @brief Just specifies the struct is packed
 PACKED;
 
-/// @brief Handles an exception, with the abort frame passed in.
-///
-/// The exception handler is called from assembly code (ExceptionStub.S)
-/// @param exceptionID Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)
-/// @param abortFrame  Filled in AbortFrame instance.
 void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-
-/// @brief Handles an interrupt.
-///
-/// The interrupt handler is called from assembly code (ExceptionStub.S)
-void InterruptHandler();
 
 #ifdef __cplusplus
 }
@@ -92,14 +84,17 @@ void InterruptHandler();
 
 namespace baremetal {
 
-/// @brief Exception handling system. Handles ARM processor exceptions
+/// <summary>
+/// Exception handling system. Handles ARM processor exceptions
+/// 
 /// This is a singleton class, created as soon as GetExceptionSystem() is called
+/// </summary>
 class ExceptionSystem
 {
     /// <summary>
-    /// Construct the singleton exception system instance if needed, and return a reference to the instance. This is a friend function of class ExceptionSystem
+    /// Construct the singleton ExceptionSystem instance if needed, and return a reference to the instance. This is a friend function of class ExceptionSystem
     /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
+    /// <returns>Reference to the singleton ExceptionSystem instance</returns>
     friend ExceptionSystem& GetExceptionSystem();
 
 private:

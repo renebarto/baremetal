@@ -85,14 +85,14 @@ VectorTable:
 
     // from current EL with sp_el0 (mode EL0, El1t, El2t, EL3t)
     vector  SynchronousStub
-    vector  UnexpectedStub
-    vector  UnexpectedStub
+    vector  IRQStub
+    vector  FIQStub
     vector  SErrorStub
 
     // from current EL with sp_elx, x != 0  (mode El1h, El2h, EL3h)
     vector  SynchronousStub
-    vector  UnexpectedStub
-    vector  UnexpectedStub
+    vector  IRQStub
+    vector  FIQStub
     vector  SErrorStub
 
     // from lower EL, target EL minus 1 is AArch64
@@ -119,7 +119,7 @@ VectorTable:
     stp     x29, x30, [sp, #-16]!       // Save onto stack
     msr     DAIFClr, #1                 // Enable FIQ
 
-#ifdef SAVE_VFP_REGS_ON_IRQ
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_IRQ
     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
     stp     q28, q29, [sp, #-32]!
     stp     q26, q27, [sp, #-32]!
@@ -136,7 +136,7 @@ VectorTable:
     stp     q4, q5, [sp, #-32]!
     stp     q2, q3, [sp, #-32]!
     stp     q0, q1, [sp, #-32]!
-#endif
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_IRQ
     stp     x27, x28, [sp, #-16]!       // Save x0-x28 onto stack
     stp     x25, x26, [sp, #-16]!
     stp     x23, x24, [sp, #-16]!
@@ -152,9 +152,6 @@ VectorTable:
     stp     x3, x4, [sp, #-16]!
     stp     x1, x2, [sp, #-16]!
     str     x0, [sp, #-16]!
-
-    ldr     x0, =IRQReturnAddress       // Store return address for profiling
-    str     x29, [x0]
 
     bl      \handler                    // Call interrupt handler
 
@@ -173,7 +170,7 @@ VectorTable:
     ldp     x23, x24, [sp], #16
     ldp     x25, x26, [sp], #16
     ldp     x27, x28, [sp], #16
-#ifdef SAVE_VFP_REGS_ON_IRQ
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_IRQ
     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
     ldp     q2, q3, [sp], #32
     ldp     q4, q5, [sp], #32
@@ -190,7 +187,7 @@ VectorTable:
     ldp     q26, q27, [sp], #32
     ldp     q28, q29, [sp], #32
     ldp     q30, q31, [sp], #32
-#endif
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_IRQ
 
     msr     DAIFSet, #1                 // Disable FIQ
     ldp     x29, x30, [sp], #16         // Restore from stack
@@ -207,7 +204,7 @@ VectorTable:
 //*************************************************
     .globl  FIQStub
 FIQStub:
-#ifdef SAVE_VFP_REGS_ON_FIQ
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
     stp     q28, q29, [sp, #-32]!
     stp     q26, q27, [sp, #-32]!
@@ -224,7 +221,7 @@ FIQStub:
     stp     q4, q5, [sp, #-32]!
     stp     q2, q3, [sp, #-32]!
     stp     q0, q1, [sp, #-32]!
-#endif
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
     stp     x29, x30, [sp, #-16]!       // Save x0-x28 onto stack
     stp     x27, x28, [sp, #-16]!
     stp     x25, x26, [sp, #-16]!
@@ -266,7 +263,7 @@ restore_after_fiq_handler:
     ldp     x25, x26, [sp], #16
     ldp     x27, x28, [sp], #16
     ldp     x29, x30, [sp], #16
-#ifdef SAVE_VFP_REGS_ON_FIQ
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
     ldp     q2, q3, [sp], #32
     ldp     q4, q5, [sp], #32
@@ -283,7 +280,7 @@ restore_after_fiq_handler:
     ldp     q26, q27, [sp], #32
     ldp     q28, q29, [sp], #32
     ldp     q30, q31, [sp], #32
-#endif
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
 
     eret                                // Restore previous EL
 
@@ -292,25 +289,6 @@ no_fiq_handler:
     mov     w0, #0
     str     w0, [x1]
     b       restore_after_fiq_handler
-
-#if BAREMETAL_RPI_TARGET >= 4
-
-/*
- * SMC stub
- */
-.macro smc_stub name, handler
-    .globl  \name
-\name:
-    ldr     x2, =SMCStack
-    mov     sp, x2                      // Set SMC stack
-    str     x30, [sp, #-16]!            // Save x30 (LR) on stack
-    bl      \handler                    // Call handler
-    ldr     x30, [sp], #16              // Restore x30 (LR) from stack
-    eret
-
-.endm
-
-#endif
 
 /*
  * HVC stub
@@ -333,23 +311,6 @@ s_fiqData:                              // Matches FIQData:
     .quad   0                           // param
     .word   0                           // fiqID (unused)
 
-    .align  3
-
-    .globl  IRQReturnAddress
-IRQReturnAddress:
-    .quad   0
-
-#if BAREMETAL_RPI_TARGET >= 4
-
-    .bss
-
-    .align  4
-
-    .space  128
-SMCStack:
-
-#endif
-
 //*************************************************
 // Abort stubs
 //*************************************************
@@ -357,8 +318,5 @@ SMCStack:
     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
     irq_stub    IRQStub,                                    InterruptHandler
-#if BAREMETAL_RPI_TARGET >= 4
-    smc_stub    SMCStub,                                    SecureMonitorHandler
-#endif
 
 // End

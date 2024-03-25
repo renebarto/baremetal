@@ -3,45 +3,78 @@
 #include <baremetal/Logger.h>
 #include <baremetal/System.h>
 #include <baremetal/Timer.h>
-#include <baremetal/ExceptionHandler.h>
+#include <baremetal/ARMInstructions.h>
+#include <baremetal/ARMRegisters.h>
 #include <baremetal/BCMRegisters.h>
-
-#include <unittest/unittest.h>
+#include <baremetal/MemoryAccess.h>
+#include <baremetal/InterruptHandler.h>
 
 LOG_MODULE("main");
 
 using namespace baremetal;
 
-static ReturnCode RebootOnException(unsigned /*exceptionID*/, AbortFrame* /*abortFrame*/)
+#define TICKS_PER_SECOND 2 // Timer ticks per second
+
+static uint32 clockTicksPerSystemTick;
+
+void IntHandler(void* param)
 {
-    return ReturnCode::ExitReboot;
+    uint64 counterCompareValue;
+    GetTimerCompareValue(counterCompareValue);
+    SetTimerCompareValue(counterCompareValue + clockTicksPerSystemTick);
+
+    LOG_INFO("Ping");
 }
+
+void EnableIRQ()
+{
+    GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+        GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT(1));
+}
+
+void DisableIRQ()
+{
+    GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+        GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT(1));
+}
+
 
 int main()
 {
     auto& console = GetConsole();
 
+    MemoryAccess memoryAccess;
+
     auto exceptionLevel = CurrentEL();
     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 
-    console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
+    uint64 counterFreq{};
+    GetTimerFrequency(counterFreq);
+    assert(counterFreq % TICKS_PER_SECOND == 0);
+    clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
+
+    uint64 counter;
+    GetTimerCounter(counter);
+    SetTimerCompareValue(counter + clockTicksPerSystemTick);
+    SetTimerControl(CNTP_CTL_EL0_ENABLE);
+
+    GetInterruptSystem().RegisterIRQHandler(IntHandler, nullptr);
+
+    EnableIRQ();
+
+    LOG_INFO("Wait 5 seconds");
+    Timer::WaitMilliSeconds(5000);
+
+    DisableIRQ();
+
+    GetInterruptSystem().UnregisterIRQHandler();
+
+    console.Write("Press r to reboot, h to halt\n");
     char ch{};
-    while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+    while ((ch != 'r') && (ch != 'h'))
     {
         ch = console.ReadChar();
         console.WriteChar(ch);
-    }
-    RegisterExceptionPanicHandler(RebootOnException);
-
-    if (ch == 't')
-        // Trap
-        __builtin_trap();
-    else if (ch == 'm')
-    {
-        // Memory failure
-        auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
-        // make gcc happy about unused variables :-)
-        r++;
     }
 
     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);

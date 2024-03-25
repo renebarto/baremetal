@@ -51,13 +51,16 @@ LOG_MODULE("ExceptionHandler");
 
 using namespace baremetal;
 
+/// <summary>
+/// Handles an exception, with the abort frame passed in.
+///
+/// The exception handler is called from assembly code (ExceptionStub.S)
+/// </summary>
+/// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
+/// <param name="abortFrame">Filled in AbortFrame instance</param>
 void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
 {
     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-}
-
-void InterruptHandler()
-{
 }
 
 namespace baremetal {
@@ -159,10 +162,12 @@ ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* hand
     return result;
 }
 
-/// @brief Retrieve the singleton exception handling system
+/// <summary>
+/// Construct the singleton exception system instance if needed, and return a reference to the instance
 ///
-/// Creates a static instance of ExceptionSystem, and returns a reference to it.
-/// @return A reference to the singleton exception handling system.
+/// This is a friend function of class ExceptionSystem
+/// </summary>
+/// <returns>Reference to the singleton exception system instance</returns>
 ExceptionSystem& GetExceptionSystem()
 {
     static ExceptionSystem system;

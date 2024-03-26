@@ -39,7 +39,6 @@
 
 #pragma once
 
-#include <baremetal/Interrupt.h>
 #include <baremetal/Macros.h>
 #include <baremetal/Types.h>
 

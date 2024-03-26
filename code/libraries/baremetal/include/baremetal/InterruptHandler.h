@@ -59,9 +59,31 @@ void InterruptHandler();
 namespace baremetal {
 
 /// <summary>
+/// FIQ handler function
+/// </summary>
+using FIQHandler = void(void* param);
+
+/// <summary>
 /// IRQ handler function
 /// </summary>
 using IRQHandler = void(void* param);
+
+/// <summary>
+/// FIQ data
+///
+/// This is data stored in Exceptions.S
+/// </summary>
+struct FIQData
+{
+    /// @brief FIQ handler
+    FIQHandler* handler;
+    /// @brief Parameter to pass to registered FIQ handler
+    void*       param;
+    /// @brief ID of FIQ
+    uint32      fiqID;
+} PACKED;
+
+class IMemoryAccess;
 
 /// <summary>
 /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
@@ -69,10 +91,14 @@ using IRQHandler = void(void* param);
 /// </summary>
 class InterruptSystem
 {
-    /// @brief Pointer to registered IRQ handler
-    IRQHandler* m_irqHandler;
-    /// @brief Pointer to parameter to pass to registered IRQ handler
-    void* m_irqHandlerParams;
+    /// @brief True if class is already initialized
+    bool m_initialized;
+    /// @brief Pointer to registered IRQ handler for each IRQ
+    IRQHandler* m_irqHandlers[IRQ_LINES];
+    /// @brief Parameter to pass to registered IRQ handler
+    void* m_irqHandlersParams[IRQ_LINES];
+    /// @brief Memory access interface
+    IMemoryAccess& m_memoryAccess;
 
     /// <summary>
     /// Construct the singleton InterruptSystem instance if needed, and return a reference to the instance. This is a friend function of class InterruptSystem
@@ -81,19 +107,39 @@ class InterruptSystem
     friend InterruptSystem& GetInterruptSystem();
 
 private:
+
+    /// @brief Create a interrupt system. Note that the constructor is private, so GetInterruptSystem() is needed to instantiate the interrupt system control
     InterruptSystem();
 
 public:
+    InterruptSystem(IMemoryAccess& memoryAccess);
     ~InterruptSystem();
 
     void Initialize();
 
-    void RegisterIRQHandler(IRQHandler* handler, void* param);
-    void UnregisterIRQHandler();
+    void DisableInterrupts();
+
+    void RegisterIRQHandler(unsigned irqID, IRQHandler* handler, void* param);
+    void UnregisterIRQHandler(unsigned irqID);
+
+    void RegisterFIQHandler(unsigned fiqID, FIQHandler* handler, void* param);
+    void UnregisterFIQHandler();
+
+    static void EnableIRQ(unsigned irqID);
+    static void DisableIRQ(unsigned irqID);
+
+    static void EnableFIQ(unsigned fiqID);
+    static void DisableFIQ();
 
     void InterruptHandler();
+
+private:
+    bool CallIRQHandler(unsigned irqID);
 };
 
 InterruptSystem& GetInterruptSystem();
 
 } // namespace baremetal
+
+/// @brief FIQ administration, see Exception.S
+extern baremetal::FIQData s_fiqData;

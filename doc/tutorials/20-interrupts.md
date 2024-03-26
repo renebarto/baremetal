@@ -385,6 +385,7 @@ Create the file `code/libraries/baremetal/include/baremetal/InterruptHandler.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
+File: d:\Projects\baremetal.github\tutorial\20-interrupts\code\libraries\baremetal\include\baremetal\InterruptHandler.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -426,75 +427,78 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 39: 
 40: #pragma once
 41: 
-42: #include <baremetal/Interrupt.h>
-43: #include <baremetal/Macros.h>
-44: #include <baremetal/Types.h>
-45: 
-46: /// @file
-47: /// Interrupt handler function
-48: 
-49: #ifdef __cplusplus
-50: extern "C" {
-51: #endif
-52: 
-53: void InterruptHandler();
-54: 
-55: #ifdef __cplusplus
-56: }
-57: #endif
-58: 
-59: namespace baremetal {
-60: 
-61: /// <summary>
-62: /// IRQ handler function
-63: /// </summary>
-64: using IRQHandler = void(void* param);
-65: 
-66: /// <summary>
-67: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
-68: /// This is a SINGLETON class
-69: /// </summary>
-70: class InterruptSystem
-71: {
-72:     /// @brief Pointer to registered IRQ handler
-73:     IRQHandler* m_irqHandler;
-74:     /// @brief Pointer to parameter to pass to registered IRQ handler
-75:     void* m_irqHandlerParams;
-76: 
-77:     friend InterruptSystem& GetInterruptSystem();
-78: 
-79: private:
-80:     InterruptSystem();
+42: #include <baremetal/Macros.h>
+43: #include <baremetal/Types.h>
+44: 
+45: /// @file
+46: /// Interrupt handler function
+47: 
+48: #ifdef __cplusplus
+49: extern "C" {
+50: #endif
+51: 
+52: void InterruptHandler();
+53: 
+54: #ifdef __cplusplus
+55: }
+56: #endif
+57: 
+58: namespace baremetal {
+59: 
+60: /// <summary>
+61: /// IRQ handler function
+62: /// </summary>
+63: using IRQHandler = void(void* param);
+64: 
+65: /// <summary>
+66: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
+67: /// This is a SINGLETON class
+68: /// </summary>
+69: class InterruptSystem
+70: {
+71:     /// @brief Pointer to registered IRQ handler
+72:     IRQHandler* m_irqHandler;
+73:     /// @brief Pointer to parameter to pass to registered IRQ handler
+74:     void* m_irqHandlerParams;
+75: 
+76:     /// <summary>
+77:     /// Construct the singleton InterruptSystem instance if needed, and return a reference to the instance. This is a friend function of class InterruptSystem
+78:     /// </summary>
+79:     /// <returns>Reference to the singleton InterruptSystem instance</returns>
+80:     friend InterruptSystem& GetInterruptSystem();
 81: 
-82: public:
-83:     ~InterruptSystem();
+82: private:
+83:     InterruptSystem();
 84: 
-85:     void Initialize();
-86: 
-87:     void RegisterIRQHandler(IRQHandler* handler, void* param);
-88:     void UnregisterIRQHandler();
+85: public:
+86:     ~InterruptSystem();
+87: 
+88:     void Initialize();
 89: 
-90:     void InterruptHandler();
-91: };
+90:     void RegisterIRQHandler(IRQHandler* handler, void* param);
+91:     void UnregisterIRQHandler();
 92: 
-93: InterruptSystem& GetInterruptSystem();
-94: 
-95: } // namespace baremetal
+93:     void InterruptHandler();
+94: };
+95: 
+96: InterruptSystem& GetInterruptSystem();
+97: 
+98: } // namespace baremetal
 ```
 
-- Line 53: We declare the function `InterruptHandler()`
-- Line 64: We declare a callback function type `IRQHandler` to act as the handler for an IRQ
-- Line 70-91: We declare the class `InterruptSystem`
+- Line 52: We declare the function `InterruptHandler()`
+- Line 63: We declare a callback function type `IRQHandler` to act as the handler for an IRQ
+- Line 69-94: We declare the class `InterruptSystem`
   - Line 72: The member variable `m_irqHandler` stores the registered handler
   - Line 74: The member variable `m_irqHandlerParams` stores the parameter to pass to the registered handler
-  - Line 77: We make `GetInterruptSystem()` a friend, so it can call the constructor
-  - Line 80: We declare a private default constructor, such that only the `GetInterruptSystem()` function can create an instance
-  - Line 83: We declare a destructor
-  - Line 85: We declare a method `Initialize()` which will set up the interrupt system
-  - Line 87: We declare a method `RegisterIRQHandler()` which will register a handler to be called when an interrupt occurs
-  - Line 88: We declare a method `UnregisterIRQHandler()` which will unregister a registered handler
-  - Line 90: We declate a method `InterruptHandler()` which is called by the global `InterruptHandler()` function
-- Line 93: We declare the function `GetInterruptSystem()`, which creates the singleton instance of the `InterruptSystem` class if needed, and returns a reference to it
+  - Line 80: We make `GetInterruptSystem()` a friend, so it can call the constructor
+  - Line 83: We declare a private default constructor, such that only the `GetInterruptSystem()` function can create an instance
+  - Line 86: We declare a destructor
+  - Line 88: We declare a method `Initialize()` which will set up the interrupt system
+  - Line 90: We declare a method `RegisterIRQHandler()` which will register a handler to be called when an interrupt occurs
+  - Line 91: We declare a method `UnregisterIRQHandler()` which will unregister a registered handler
+  - Line 93: We declate a method `InterruptHandler()` which is called by the global `InterruptHandler()` function
+- Line 96: We declare the function `GetInterruptSystem()`, which creates the singleton instance of the `InterruptSystem` class if needed, and returns a reference to it
 
 ### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_INTERRUPTHANDLERCPP}
 
@@ -653,7 +657,6 @@ Create the file `code/libraries/baremetal/include/baremetal/ARMRegisters.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
-File: d:\Projects\baremetal.github\code\libraries\baremetal\include\baremetal\ARMRegisters.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1060,29 +1063,451 @@ Press r to reboot, h to halt
 hInfo   Halt (System:129)
 ```
 
-
 ## Interrupt System - Step 2 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2}
 
 We'll update the class `InterruptSystem` to enable, disable, and handle interrupts.
-
-\todo
+We'll also add support for fast interrupts (FIQ).
 
 ### InterruptSystem.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTSYSTEMH}
 
-Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
+Update the file `code/libraries/baremetal/include/baremetal/InterruptSystem.h`
 
 ```cpp
-File: code/libraries/unittest/include/unittest/TestDetails.h
+File: code/libraries/baremetal/include/baremetal/InterruptSystem.h
+...
+59: namespace baremetal {
+60: 
+61: /// <summary>
+62: /// FIQ handler function
+63: /// </summary>
+64: using FIQHandler = void(void* param);
+65: 
+66: /// <summary>
+67: /// IRQ handler function
+68: /// </summary>
+69: using IRQHandler = void(void* param);
+70: 
+71: /// <summary>
+72: /// FIQ data
+73: ///
+74: /// This is data stored in Exceptions.S
+75: /// </summary>
+76: struct FIQData
+77: {
+78:     /// @brief FIQ handler
+79:     FIQHandler* handler;
+80:     /// @brief Parameter to pass to registered FIQ handler
+81:     void*       param;
+82:     /// @brief ID of FIQ
+83:     uint32      fiqID;
+84: } PACKED;
+85: 
+86: class IMemoryAccess;
+87: 
+88: /// <summary>
+89: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
+90: /// This is a SINGLETON class
+91: /// </summary>
+92: class InterruptSystem
+93: {
+94:     /// @brief True if class is already initialized
+95:     bool m_initialized;
+96:     /// @brief Pointer to registered IRQ handler for each IRQ
+97:     IRQHandler* m_irqHandlers[IRQ_LINES];
+98:     /// @brief Parameter to pass to registered IRQ handler
+99:     void* m_irqHandlersParams[IRQ_LINES];
+100:     /// @brief Memory access interface
+101:     IMemoryAccess& m_memoryAccess;
+102: 
+103:     /// <summary>
+104:     /// Construct the singleton InterruptSystem instance if needed, and return a reference to the instance. This is a friend function of class InterruptSystem
+105:     /// </summary>
+106:     /// <returns>Reference to the singleton InterruptSystem instance</returns>
+107:     friend InterruptSystem& GetInterruptSystem();
+108: 
+109: private:
+110: 
+111:     /// @brief Create a interrupt system. Note that the constructor is private, so GetInterruptSystem() is needed to instantiate the interrupt system control
+112:     InterruptSystem();
+113: 
+114: public:
+115:     InterruptSystem(IMemoryAccess& memoryAccess);
+116:     ~InterruptSystem();
+117: 
+118:     void Initialize();
+119: 
+120:     void DisableInterrupts();
+121: 
+122:     void RegisterIRQHandler(unsigned irqID, IRQHandler* handler, void* param);
+123:     void UnregisterIRQHandler(unsigned irqID);
+124: 
+125:     void RegisterFIQHandler(unsigned fiqID, FIQHandler* handler, void* param);
+126:     void UnregisterFIQHandler();
+127: 
+128:     static void EnableIRQ(unsigned irqID);
+129:     static void DisableIRQ(unsigned irqID);
+130: 
+131:     static void EnableFIQ(unsigned fiqID);
+132:     static void DisableFIQ();
+133: 
+134:     void InterruptHandler();
+135: 
+136: private:
+137:     bool CallIRQHandler(unsigned irqID);
+138: };
+139: 
+140: InterruptSystem& GetInterruptSystem();
+141: 
+142: } // namespace baremetal
+143: 
+144: /// @brief FIQ administration, see Exception.S
+145: extern baremetal::FIQData s_fiqData;
+```
+
+- Line 64: We add a declaration for the `FIQHandler()` function type, much like the `IRQHandler()` function type
+- Line 76-84: We add a declaration for the `FIQData` struct, which mirrors the data defined in `ExceptionStub.S'
+- Line 115: We add a declaration for a specialized constructor taken a `MemoryAccess` reference, meant for testing
+- Line 120: We add the method `DisableInterrupts()`, which disables all interrupts, e.g. it disables interrupt enables on all IRQ lines, as well as the FIQ
+- Line 122: We change the method `RegisterIRQHandler()` to also take an IRQ id
+- Line 123: We change the method `UnregisterIRQHandler()` to take an IRQ id
+- Line 125: We add the method `RegisterFIQHandler()` which registers a FIQ handler for the specified FIQ id. Only one FIQ handler can be active at any time
+- Line 126: We add the method `UnregisterFIQHandler()` which unregisters the previously registered FIQ handler. As there can only be one FIQ handler registered at any time, we don't need to specify the FIQ id
+- Line 128: We add the static method `EnableIRQ()` which enables the IRQ with the specified id
+- Line 129: We add the static method `DisableIRQ()` which disables the IRQ with the specified id
+- Line 131: We add the static method `EnableFIQ()` which enables the FIQ with the specified id
+- Line 132: We add the static method `DisableFIQ()` which disables any enable FIQ
+- Line 137: We add the method `CallIRQHandler()` which calls the registered IRQ handler for the IRQ with the specified id
+- Line 145: We declare the FIQData struct instance s_fiqData, which is defined in `ExceptionStub.S'
+
+### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTHANDLERCPP}
+
+Let's update the `InterruptSystem` class.
+
+Create the file `code/libraries/baremetal/src/InterruptHandler.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/InterruptHandler.cpp
+...
+63: /// <summary>
+64: /// Create a interrupt system
+65: ///
+66: /// Note that the constructor is private, so GetInterruptSystem() is needed to instantiate the interrupt system control
+67: /// </summary>
+68: InterruptSystem::InterruptSystem()
+69:     : m_initialized{}
+70:     , m_irqHandlers{}
+71:     , m_irqHandlersParams{}
+72:     , m_memoryAccess{ GetMemoryAccess() }
+73: {
+74: }
+75: 
+76: /// <summary>
+77: /// Constructs a specialized InterruptSystem instance which injects a custom IMemoryAccess instance. This is intended for testing.
+78: /// </summary>
+79: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+80: InterruptSystem::InterruptSystem(IMemoryAccess& memoryAccess)
+81:     : m_initialized{}
+82:     , m_irqHandlers{}
+83:     , m_irqHandlersParams{}
+84:     , m_memoryAccess{ memoryAccess }
+85: {
+86: }
+87: 
+88: /// <summary>
+89: /// Destructor
+90: /// </summary>
+91: InterruptSystem::~InterruptSystem()
+92: {
+93:     DisableIRQs();
+94: 
+95:     DisableInterrupts();
+96: }
+97: 
+98: /// <summary>
+99: /// Initialize interrupt system
+100: /// </summary>
+101: void InterruptSystem::Initialize()
+102: {
+103:     if (m_initialized)
+104:         return;
+105:     for (unsigned irqID = 0; irqID < IRQ_LINES; irqID++)
+106:     {
+107:         m_irqHandlers[irqID] = nullptr;
+108:         m_irqHandlersParams[irqID] = nullptr;
+109:     }
+110: 
+111:     DisableInterrupts();
+112: 
+113:     EnableIRQs();
+114: 
+115:     m_initialized = true;
+116: }
+117: 
+118: /// <summary>
+119: /// Disable all IRQ interrupts
+120: /// </summary>
+121: void InterruptSystem::DisableInterrupts()
+122: {
+123:     m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
+124: 
+125:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_1, static_cast<uint32>(-1));
+126:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_2, static_cast<uint32>(-1));
+127:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_BASIC_IRQS, static_cast<uint32>(-1));
+128:     m_memoryAccess.Write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
+129: }
+130: 
+131: /// <summary>
+132: /// Enable and register an IRQ handler
+133: /// 
+134: /// Enable the IRQ with specified index, and register its handler.
+135: /// IRQ are divided into groups:
+136: /// - IRQ1: 0..31 (System Timer, GPU, DMA, ...)
+137: /// - IRQ2: 32..63 (HDMI, CAM, GPIO, SPI, I2C, I2S, RNG, ...)
+138: /// - IRQ_Basic: 64..71 (ARM standard interrupts)
+139: /// - IRQ_ARM_LOcal: 72..83 (ARM local interrupts)
+140: /// </summary>
+141: /// <param name="irqID">IRQ number 0..83</param>
+142: /// <param name="handler">Handler to register for this IRQ</param>
+143: /// <param name="param">Parameter to pass to IRQ handler</param>
+144: void InterruptSystem::RegisterIRQHandler(unsigned irqID, IRQHandler* handler, void* param)
+145: {
+146:     assert(irqID < IRQ_LINES);
+147:     assert(m_irqHandlers[irqID] == nullptr);
+148: 
+149:     m_irqHandlers[irqID] = handler;
+150:     m_irqHandlersParams[irqID] = param;
+151: 
+152:     EnableIRQ(irqID);
+153: }
+154: 
+155: /// <summary>
+156: /// Disable and unregister an IRQ handler
+157: /// 
+158: /// Disable the IRQ with specified index, and unregister its handler.
+159: /// </summary>
+160: /// <param name="irqID">IRQ number 0..83</param>
+161: void InterruptSystem::UnregisterIRQHandler(unsigned irqID)
+162: {
+163:     assert(irqID < IRQ_LINES);
+164:     assert(m_irqHandlers[irqID] != nullptr);
+165: 
+166:     DisableIRQ(irqID);
+167: 
+168:     m_irqHandlers[irqID] = nullptr;
+169:     m_irqHandlersParams[irqID] = nullptr;
+170: }
+171: 
+172: /// <summary>
+173: /// Enable and register a FIQ interrupt handler. Only one can be enabled at any time.
+174: /// </summary>
+175: /// <param name="fiqID">FIQ interrupt number</param>
+176: /// <param name="handler">FIQ interrupt handler</param>
+177: /// <param name="param">FIQ interrupt data</param>
+178: // cppcheck-suppress unusedFunction
+179: void InterruptSystem::RegisterFIQHandler(unsigned fiqID, FIQHandler *handler, void *param)
+180: {
+181:     assert(fiqID <= BCM_MAX_FIQ);
+182:     assert(handler != nullptr);
+183:     assert(s_fiqData.handler == nullptr);
+184: 
+185:     s_fiqData.handler = handler;
+186:     s_fiqData.param   = param;
+187: 
+188:     EnableFIQ(fiqID);
+189: }
+190: 
+191: /// <summary>
+192: /// Disable and unregister a FIQ interrupt handler
+193: /// </summary>
+194: void InterruptSystem::UnregisterFIQHandler()
+195: {
+196:     assert(s_fiqData.handler != nullptr);
+197: 
+198:     DisableFIQ();
+199: 
+200:     s_fiqData.handler = nullptr;
+201:     s_fiqData.param   = nullptr;
+202: }
+203: 
+204: /// <summary>
+205: /// Enable an IRQ interrupt. And interrupt cannot be chained, so only one handler can be connected
+206: /// RPI3 has 64 IRQ + 8 basic IRQ + 12 local IRQ. The local IRQ are handled differently
+207: /// RPI4 has 256 IRQ, and no local IRQ (not handled here yes, uses the GIC)
+208: /// </summary>
+209: /// <param name="irqID"></param>
+210: void InterruptSystem::EnableIRQ(unsigned irqID)
+211: {
+212:     assert(irqID < IRQ_LINES);
+213: 
+214:     if (irqID < ARM_IRQLOCAL_BASE)
+215:     {
+216:         GetInterruptSystem().m_memoryAccess.Write32(ARM_IC_IRQS_ENABLE(irqID), ARM_IRQ_MASK(irqID));
+217:     }
+218:     else
+219:     {
+220:         assert(irqID == ARM_IRQLOCAL0_CNTPNS); // The only implemented local IRQ so far
+221:         GetInterruptSystem().m_memoryAccess.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+222:             GetInterruptSystem().m_memoryAccess.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT(1));
+223:     }
+224: }
+225: 
+226: /// <summary>
+227: /// Disable an IRQ interrupt.
+228: /// RPI3 has 64 IRQ + 8 basic IRQ + 12 local IRQ. The local IRQ are handled differently
+229: /// RPI4 has 256 IRQ, and no local IRQ (not handled here yes, uses the GIC)
+230: /// </summary>
+231: /// <param name="irqID"></param>
+232: void InterruptSystem::DisableIRQ(unsigned irqID)
+233: {
+234:     assert(irqID < IRQ_LINES);
+235: 
+236:     if (irqID < ARM_IRQLOCAL_BASE)
+237:     {
+238:         GetInterruptSystem().m_memoryAccess.Write32(ARM_IC_IRQS_DISABLE(irqID), ARM_IRQ_MASK(irqID));
+239:     }
+240:     else
+241:     {
+242:         assert(irqID == ARM_IRQLOCAL0_CNTPNS); // The only implemented local IRQ so far
+243:         GetInterruptSystem().m_memoryAccess.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+244:             GetInterruptSystem().m_memoryAccess.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT(1));
+245:     }
+246: }
+247: 
+248: /// <summary>
+249: /// Enable a FIQ interrupt. Only one can be enabled at any time
+250: /// </summary>
+251: /// <param name="fiqID">FIQ interrupt number</param>
+252: void InterruptSystem::EnableFIQ(unsigned fiqID)
+253: {
+254:     assert(fiqID <= BCM_MAX_FIQ);
+255: 
+256:     GetInterruptSystem().m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, fiqID | FIQ_INTR_ENABLE);
+257: }
+258: 
+259: /// <summary>
+260: /// Disabled the enabled FIQ interrupt (if any).
+261: /// </summary>
+262: void InterruptSystem::DisableFIQ()
+263: {
+264:     GetInterruptSystem().m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
+265: }
+266: 
+267: /// <summary>
+268: /// Handles an interrupt.
+269: ///
+270: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+271: /// </summary>
+272: void InterruptSystem::InterruptHandler()
+273: {
+274:     uint32 localpendingIRQs = m_memoryAccess.Read32(ARM_LOCAL_IRQ_PENDING0);
+275:     assert(!(localpendingIRQs & ~(1 << 1 | 0xF << 4 | 1 << 8)));
+276:     if (localpendingIRQs & (1 << 1)) // the only implemented local IRQ so far
+277:     {
+278:         CallIRQHandler(ARM_IRQLOCAL0_CNTPNS);
+279: 
+280:         return;
+281:     }
+282: 
+283:     uint32 pendingIRQs[ARM_IC_IRQ_REGS];
+284:     pendingIRQs[0] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_1);
+285:     pendingIRQs[1] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_2);
+286:     pendingIRQs[2] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_BASIC_PENDING) & 0xFF; // Only 8 basic interrupts
+287: 
+288:     for (unsigned reg = 0; reg < ARM_IC_IRQ_REGS; reg++)
+289:     {
+290:         uint32 pendingIRQ = pendingIRQs[reg];
+291:         if (pendingIRQ != 0)
+292:         {
+293:             unsigned irqID = reg * BCM_IRQS_PER_REG;
+294: 
+295:             do
+296:             {
+297:                 if ((pendingIRQ & 1) && CallIRQHandler(irqID))
+298:                 {
+299:                     return;
+300:                 }
+301: 
+302:                 pendingIRQ >>= 1;
+303:                 irqID++;
+304:             } while (pendingIRQ != 0);
+305:         }
+306:     }
+307: }
+308: 
+309: /// <summary>
+310: /// Call the IRQ handler for the specified IRQ ID
+311: /// </summary>
+312: /// <param name="irqID">ID of the IRQ</param>
+313: /// <returns>True if a IRQ handler was found, false if not</returns>
+314: bool InterruptSystem::CallIRQHandler(unsigned irqID)
+315: {
+316:     assert(irqID < IRQ_LINES);
+317:     IRQHandler* handler = m_irqHandlers[irqID];
+318: 
+319:     if (handler != nullptr)
+320:     {
+321:         (*handler)(m_irqHandlersParams[irqID]);
+322: 
+323:         return true;
+324:     }
+325: 
+326:     DisableIRQ(irqID);
+327: 
+328:     return false;
+329: }
+330: 
+331: /// <summary>
+332: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
+333: ///
+334: /// This is a friend function of class InterruptSystem
+335: /// </summary>
+336: /// <returns>Reference to the singleton interrupt system instance</returns>
+337: InterruptSystem& baremetal::GetInterruptSystem()
+338: {
+339:     static InterruptSystem system;
+340:     system.Initialize();
+341:     return system;
+342: }
+```
+
+- Line 68-74: We update the default constructor to initialize the new member variables
+- Line 80-86: We implement the specialized constructor
+- Line 91-96: We update the destructor to disable all interrupts
+- Line 101-116: We update the `Initialize()` method set up the administration for IRQs, disable all interrupt lines, but enable the IRQs system wide.
+Note that we use `m_initialized` to protect against multiple initialization
+- Line 121-129: We implement the `DisableInterrupts()` method
+- Line 144-153: We update the `RegisterIRQHandler()` method to administer the registered IRQ handler, and enable its IRQ line
+- Line 161-170: We update the `UnregisterIRQHandler()` method to remove the registered IRQ handler, and disable its IRQ line
+- Line 179-189: We implement the `RegisterFIQHandler()` method to administer the registered FIQ handler, and enable it
+- Line 194-202: We implement the `UnregisterIRQHandler()` method to remove the registered FIQ handler, and disable it
+- Line 210-224: We implement the `EnableIRQ()` method.
+Not that ARM local interrupts are handled differently, and that currently only one ARM local interrupt is supported, i.e. `ARM_IRQLOCAL0_CNTPNS`
+- Line 232-246: We implement the `DisableIRQ()` method
+- Line 252-257: We implement the `EnableFIQ()` method.
+- Line 262-265: We implement the `DisableFIQ()` method
+- Line 272-307: We update the `InterruptHandler()` method. This checks for the ARM local interrupt pending for `ARM_IRQLOCAL0_CNTPNS`,
+then check whether any of the IRQ 1, IRQ 2 and IRQ basic interrupts are pending, and calls `CallIRQHandler()` for each pending interrupt, until one has been called or no interrupts are pending..
+So at most one interrupt is handled in each call to `InterruptHandler()`
+- Line 316-329: We implement the `CallIRQHandler()` method. This call the IRQ handler if registered, otherwise disables the interrupt for the future
+
+### Interrupt.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTH}
+
+We'll add definitions for all IRQ and FIQ interrupts.
+
+Create the file `code/libraries/baremetal/include/baremetal/Interrupt.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Interrupt.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
-4: // File        : TestDetails.h
+4: // File        : Interrupt.h
 5: //
-6: // Namespace   : unittest
+6: // Namespace   : -
 7: //
-8: // Class       : TestDetails
+8: // Class       : -
 9: //
-10: // Description : Test detail
+10: // Description : Interrupt definitions
 11: //
 12: //------------------------------------------------------------------------------
 13: //
@@ -1114,440 +1539,644 @@ File: code/libraries/unittest/include/unittest/TestDetails.h
 39: 
 40: #pragma once
 41: 
-42: #include <baremetal/String.h>
-43: 
-44: namespace unittest
-45: {
+42: /// @file
+43: /// Interrupt handler function
+44: 
+45: #if BAREMETAL_RPI_TARGET <= 3
 46: 
-47: class TestDetails
-48: {
-49: private:
-50:     const baremetal::string m_suiteName;
-51:     const baremetal::string m_fixtureName;
-52:     const baremetal::string m_testName;
-53:     const baremetal::string m_fileName;
-54:     const int m_lineNumber;
-55: 
-56: public:
-57:     TestDetails();
-58:     TestDetails(const baremetal::string& testName, const baremetal::string& fixtureName, const baremetal::string& suiteName, const baremetal::string& fileName, int lineNumber);
-59: 
-60:     const baremetal::string& SuiteName() const { return m_suiteName; }
-61:     const baremetal::string& FixtureName() const { return m_fixtureName; }
-62:     const baremetal::string& TestName() const { return m_testName; }
-63:     const baremetal::string& SourceFileName() const { return m_fileName; }
-64:     int SourceFileLineNumber() const { return m_lineNumber; }
-65: };
-66: 
-67: } // namespace unittest
+47: // IRQ
+48: 
+49: /// @brief Total count of BCM IRQ registers (GPU and basic)
+50: #define ARM_IC_IRQ_REGS 3
+51: 
+52: /// @brief NUmber of IRQ lines in each GPU IRQ register
+53: #define BCM_IRQS_PER_REG         32
+54: /// @brief NUmber of IRQ lines in the basic IRQ register
+55: #define BCM_IRQS_BASIC_REG       8
+56: /// @brief NUmber of IRQ lines in the ARM local IRQ register
+57: #define ARM_IRQS_LOCAL_REG       12
+58: 
+59: /// @brief GPU IRQ 1 register holds IRQ 0..31. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+60: #define BCM_IRQ1_BASE            0
+61: /// @brief GPU IRQ 2 register holds IRQ 32..63. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+62: #define BCM_IRQ2_BASE            (BCM_IRQ1_BASE + BCM_IRQS_PER_REG)
+63: /// @brief Basic IRQ register holds 8 IRQs. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+64: #define BCM_IRQBASIC_BASE        (BCM_IRQ2_BASE + BCM_IRQS_PER_REG)
+65: /// @brief IRQ local register holds 12 IRQs. See @ref RASPBERRY_PI_BCM_LOCAL_DEVICE_REGISTERS
+66: #define ARM_IRQLOCAL_BASE        (BCM_IRQBASIC_BASE + BCM_IRQS_BASIC_REG)
+67: 
+68: /// @brief Determine register to read for IRQ pending status (BCM IRQs only)
+69: #define ARM_IC_IRQ_PENDING(irq)                                                                                                                                \
+70:     ((irq) < BCM_IRQ2_BASE ? RPI_INTRCTRL_IRQ_PENDING_1 : ((irq) < BCM_IRQBASIC_BASE ? RPI_INTRCTRL_IRQ_PENDING_2 : RPI_INTRCTRL_IRQ_BASIC_PENDING))
+71: /// @brief Determine register to enable IRQ (BCM IRQs only)
+72: #define ARM_IC_IRQS_ENABLE(irq)                                                                                                                                \
+73:     ((irq) < BCM_IRQ2_BASE ? RPI_INTRCTRL_ENABLE_IRQS_1 : ((irq) < BCM_IRQBASIC_BASE ? RPI_INTRCTRL_ENABLE_IRQS_2 : RPI_INTRCTRL_ENABLE_BASIC_IRQS))
+74: /// @brief Determine register to disable IRQ (BCM IRQs only)
+75: #define ARM_IC_IRQS_DISABLE(irq)                                                                                                                               \
+76:     ((irq) < BCM_IRQ2_BASE ? RPI_INTRCTRL_DISABLE_IRQS_1 : ((irq) < BCM_IRQBASIC_BASE ? RPI_INTRCTRL_DISABLE_IRQS_2 : RPI_INTRCTRL_DISABLE_BASIC_IRQS))
+77: /// @brief Determine mask to read / write IRQ register (BCM IRQs only)
+78: #define ARM_IRQ_MASK(irq) (1 << ((irq) & (BCM_IRQS_PER_REG - 1)))
+79: 
+80: // IRQ 1 interrupts
+81: 
+82: /// @brief RPI System Timer Compare 0 interrupt (bcm2835-system-timer)
+83: #define BCM_IRQ_TIMER0           (BCM_IRQ1_BASE + 0)
+84: /// @brief RPI System Timer Compare 1 interrupt (bcm2835-system-timer)
+85: #define BCM_IRQ_TIMER1           (BCM_IRQ1_BASE + 1)
+86: /// @brief RPI System Timer Compare 2 interrupt (bcm2835-system-timer)
+87: #define BCM_IRQ_TIMER2           (BCM_IRQ1_BASE + 2)
+88: /// @brief RPI System Timer Compare 3 interrupt (bcm2835-system-timer)
+89: #define BCM_IRQ_TIMER3           (BCM_IRQ1_BASE + 3)
+90: /// @brief RPI Codec 0 interrupt (bcm2835-cprman)
+91: #define BCM_IRQ_CODEC0           (BCM_IRQ1_BASE + 4)
+92: /// @brief RPI Codec 1 interrupt (bcm2835-cprman)
+93: #define BCM_IRQ_CODEC1           (BCM_IRQ1_BASE + 5)
+94: /// @brief RPI Codec 2 interrupt
+95: #define BCM_IRQ_CODEC2           (BCM_IRQ1_BASE + 6)
+96: /// @brief RPI JPEG interrupt
+97: #define BCM_IRQ_JPEG             (BCM_IRQ1_BASE + 7)
+98: /// @brief TBD
+99: #define BCM_IRQ_ISP              (BCM_IRQ1_BASE + 8)
+100: /// @brief RPI USB interrupt (bcm2708-usb)
+101: #define BCM_IRQ_USB              (BCM_IRQ1_BASE + 9)
+102: /// @brief RPI VC4 3D interrupt (vc4-v3d)
+103: #define BCM_IRQ_3D               (BCM_IRQ1_BASE + 10)
+104: /// @brief RPI Transposer (TXP) interrupt (bcm2835-txp)
+105: #define BCM_IRQ_TRANSPOSER       (BCM_IRQ1_BASE + 11)
+106: /// @brief TBD
+107: #define BCM_IRQ_MULTICORESYNC0   (BCM_IRQ1_BASE + 12)
+108: /// @brief TBD
+109: #define BCM_IRQ_MULTICORESYNC1   (BCM_IRQ1_BASE + 13)
+110: /// @brief TBD
+111: #define BCM_IRQ_MULTICORESYNC2   (BCM_IRQ1_BASE + 14)
+112: /// @brief TBD
+113: #define BCM_IRQ_MULTICORESYNC3   (BCM_IRQ1_BASE + 15)
+114: /// @brief RPI DMA channel 0 interrupt (bcm2835-dma)
+115: #define BCM_IRQ_DMA0             (BCM_IRQ1_BASE + 16)
+116: /// @brief RPI DMA channel 1 interrupt (bcm2835-dma)
+117: #define BCM_IRQ_DMA1             (BCM_IRQ1_BASE + 17)
+118: /// @brief RPI DMA channel 2 interrupt (bcm2835-dma)
+119: #define BCM_IRQ_DMA2             (BCM_IRQ1_BASE + 18)
+120: /// @brief RPI DMA channel 3 interrupt (bcm2835-dma)
+121: #define BCM_IRQ_DMA3             (BCM_IRQ1_BASE + 19)
+122: /// @brief RPI DMA channel 4 interrupt (bcm2835-dma)
+123: #define BCM_IRQ_DMA4             (BCM_IRQ1_BASE + 20)
+124: /// @brief RPI DMA channel 5 interrupt (bcm2835-dma)
+125: #define BCM_IRQ_DMA5             (BCM_IRQ1_BASE + 21)
+126: /// @brief RPI DMA channel 6 interrupt (bcm2835-dma)
+127: #define BCM_IRQ_DMA6             (BCM_IRQ1_BASE + 22)
+128: /// @brief RPI DMA channel 7 interrupt (bcm2835-dma)
+129: #define BCM_IRQ_DMA7             (BCM_IRQ1_BASE + 23)
+130: /// @brief RPI DMA channel 8 interrupt (bcm2835-dma)
+131: #define BCM_IRQ_DMA8             (BCM_IRQ1_BASE + 24)
+132: /// @brief RPI DMA channel 9 interrupt (bcm2835-dma)
+133: #define BCM_IRQ_DMA9             (BCM_IRQ1_BASE + 25)
+134: /// @brief RPI DMA channel 10 interrupt (bcm2835-dma)
+135: #define BCM_IRQ_DMA10            (BCM_IRQ1_BASE + 26)
+136: /// @brief RPI DMA channel 11/12/13/14 interrupt (bcm2835-dma)
+137: #define BCM_IRQ_DMA11            (BCM_IRQ1_BASE + 27)
+138: /// @brief RPI DMA shared interrupt (bcm2835-dma)
+139: #define BCM_IRQ_DMA_SHARED       (BCM_IRQ1_BASE + 28)
+140: /// @brief RPI Auxiliary Peripheral interrupt (bcm2835-aux-uart, bcm43438-bt)
+141: #define BCM_IRQ_AUX              (BCM_IRQ1_BASE + 29)
+142: /// @brief TBD
+143: #define BCM_IRQ_ARM              (BCM_IRQ1_BASE + 30)
+144: /// @brief TBD
+145: #define BCM_IRQ_VPUDMA           (BCM_IRQ1_BASE + 31)
+146: 
+147: // IRQ 2 interrupts
+148: 
+149: /// @brief RPI USB Host interrupt (bcm2708-usb)
+150: #define BCM_IRQ_HOSTPORT         (BCM_IRQ2_BASE + 0)
+151: /// @brief RPI Videoscaler interrupt (bcm2835-hvs)
+152: #define BCM_IRQ_VIDEOSCALER      (BCM_IRQ2_BASE + 1)
+153: /// @brief TBD
+154: #define BCM_IRQ_CCP2TX           (BCM_IRQ2_BASE + 2)
+155: /// @brief TBD
+156: #define BCM_IRQ_SDC              (BCM_IRQ2_BASE + 3)
+157: /// @brief RPI DSI0 interrupt (bcm2835-dsi0)
+158: #define BCM_IRQ_DSI0             (BCM_IRQ2_BASE + 4)
+159: /// @brief RPI AVE interrupt (bcm2711-pixelvalve2)
+160: #define BCM_IRQ_AVE              (BCM_IRQ2_BASE + 5)
+161: /// @brief RPI CAM 0 interrupt (bcm2835-unicam)
+162: #define BCM_IRQ_CAM0             (BCM_IRQ2_BASE + 6)
+163: /// @brief RPI CAM 1 interrupt (bcm2835-unicam)
+164: #define BCM_IRQ_CAM1             (BCM_IRQ2_BASE + 7)
+165: /// @brief RPI HDMI 0 interrupt (bcm2835-hdmi)
+166: #define BCM_IRQ_HDMI0            (BCM_IRQ2_BASE + 8)
+167: /// @brief RPI HDMI 1 interrupt (bcm2835-hdmi)
+168: #define BCM_IRQ_HDMI1            (BCM_IRQ2_BASE + 9)
+169: /// @brief RPI Pixel valve 2 interrupt (bcm2835-pixelvalve2, bcm2711-pixelvalve3)
+170: #define BCM_IRQ_PIXELVALVE1      (BCM_IRQ2_BASE + 10)
+171: /// @brief RPI I2C slave interrupt
+172: #define BCM_IRQ_I2CSPISLV        (BCM_IRQ2_BASE + 11)
+173: /// @brief RPI DSI1 interrupt (bcm2835-dsi1)
+174: #define BCM_IRQ_DSI1             (BCM_IRQ2_BASE + 12)
+175: /// @brief RPI Pixel valve 0 interrupt (bcm2835-pixelvalve0, bcm2711-pixelvalve0)
+176: #define BCM_IRQ_PWA0             (BCM_IRQ2_BASE + 13)
+177: /// @brief RPI Pixel valve 1 interrupt (bcm2835-pixelvalve1, bcm2711-pixelvalve1, bcm2711-pixelvalve4)
+178: #define BCM_IRQ_PWA1             (BCM_IRQ2_BASE + 14)
+179: /// @brief TBD
+180: #define BCM_IRQ_CPR              (BCM_IRQ2_BASE + 15)
+181: /// @brief RPI SMI interrupt (bcm2835-smi, rpi-firmware-kms)
+182: #define BCM_IRQ_SMI              (BCM_IRQ2_BASE + 16)
+183: /// @brief RPI GPIO 0 interrupt (bcm2835-gpio)
+184: #define BCM_IRQ_GPIO0            (BCM_IRQ2_BASE + 17)
+185: /// @brief RPI GPIO 1 interrupt (bcm2835-gpio)
+186: #define BCM_IRQ_GPIO1            (BCM_IRQ2_BASE + 18)
+187: /// @brief RPI GPIO 2 interrupt
+188: #define BCM_IRQ_GPIO2            (BCM_IRQ2_BASE + 19)
+189: /// @brief RPI GPIO 3 interrupt
+190: #define BCM_IRQ_GPIO3            (BCM_IRQ2_BASE + 20)
+191: /// @brief RPI I2C interrupt (bcm2835-i2c)
+192: #define BCM_IRQ_I2C              (BCM_IRQ2_BASE + 21)
+193: /// @brief RPI SPI interrupt (bcm2835-spi)
+194: #define BCM_IRQ_SPI              (BCM_IRQ2_BASE + 22)
+195: /// @brief RPI I2C audio interrupt
+196: #define BCM_IRQ_I2SPCM           (BCM_IRQ2_BASE + 23)
+197: /// @brief RPI EMMC / SDIO interrupt (bcm2835-sdhost)
+198: #define BCM_IRQ_SDIO             (BCM_IRQ2_BASE + 24)
+199: /// @brief RPI UART interrupt (arm,primecell, serial@7e201000, bcm43438-bt)
+200: #define BCM_IRQ_UART             (BCM_IRQ2_BASE + 25)
+201: /// @brief TBD
+202: #define BCM_IRQ_SLIMBUS          (BCM_IRQ2_BASE + 26)
+203: /// @brief RPI VEC interrupt (bcm2835-vec, bcm2711-vec)
+204: #define BCM_IRQ_VEC              (BCM_IRQ2_BASE + 27)
+205: /// @brief TBD
+206: #define BCM_IRQ_CPG              (BCM_IRQ2_BASE + 28)
+207: /// @brief RPI RNG interrupt (bcm2835-rng)
+208: #define BCM_IRQ_RNG              (BCM_IRQ2_BASE + 29)
+209: /// @brief RPI SDHCI (bcm2835-sdhci, bcm2711-emmc2)
+210: #define BCM_IRQ_ARASANSDIO       (BCM_IRQ2_BASE + 30)
+211: /// @brief TBD
+212: #define BCM_IRQ_AVSPMON          (BCM_IRQ2_BASE + 31)
+213: 
+214: // IRQ basic interrupts
+215: 
+216: /// @brief RPI ARM Timer interrupt interrupt
+217: #define BCM_IRQ_BCM_TIMER        (BCM_IRQBASIC_BASE + 0)
+218: /// @brief RPI ARM Mailbox interrupt interrupt (bcm2835-mbox)
+219: #define BCM_IRQ_BCM_MAILBOX      (BCM_IRQBASIC_BASE + 1)
+220: /// @brief RPI ARM Doorbell 0 interrupt interrupt (bcm2835-vchiq, bcm2711-vchiq)
+221: #define BCM_IRQ_BCM_DOORBELL_0   (BCM_IRQBASIC_BASE + 2)
+222: /// @brief RPI ARM Doorbell 1 interrupt interrupt
+223: #define BCM_IRQ_BCM_DOORBELL_1   (BCM_IRQBASIC_BASE + 3)
+224: /// @brief RPI ARM GPU 0 halted interrupt (bcm2835-cprman)
+225: #define BCM_IRQ_VPU0_HALTED      (BCM_IRQBASIC_BASE + 4)
+226: /// @brief RPI ARM GPU 1 halted interrupt (bcm2835-cprman)
+227: #define BCM_IRQ_VPU1_HALTED      (BCM_IRQBASIC_BASE + 5)
+228: /// @brief RPI ARM Illegal access type 1 interrupt
+229: #define BCM_IRQ_ILLEGAL_TYPE0    (BCM_IRQBASIC_BASE + 6)
+230: /// @brief RPI ARM Illegal access type 0 interrupt
+231: #define BCM_IRQ_ILLEGAL_TYPE1    (BCM_IRQBASIC_BASE + 7)
+232: 
+233: // ARM local interrupts
+234: 
+235: /// @brief RPI ARM Local Counter-timer Physical Secure Timer interrupt (armv7-timer)
+236: #define ARM_IRQLOCAL0_CNTPS      (ARM_IRQLOCAL_BASE + 0)
+237: /// @brief RPI ARM Local Counter-timer Physical Timer interrupt (armv7-timer)
+238: #define ARM_IRQLOCAL0_CNTPNS     (ARM_IRQLOCAL_BASE + 1)
+239: /// @brief RPI ARM Local Counter-timer Hypervisor Timer interrupt (armv7-timer)
+240: #define ARM_IRQLOCAL0_CNTHP      (ARM_IRQLOCAL_BASE + 2)
+241: /// @brief RPI ARM Local Counter-timer Virtual Timer interrupt (armv7-timer)
+242: #define ARM_IRQLOCAL0_CNTV       (ARM_IRQLOCAL_BASE + 3)
+243: /// @brief RPI ARM Local Mailbox 0 interrupt
+244: #define ARM_IRQLOCAL0_MAILBOX0   (ARM_IRQLOCAL_BASE + 4)
+245: /// @brief RPI ARM Local Mailbox 1 interrupt
+246: #define ARM_IRQLOCAL0_MAILBOX1   (ARM_IRQLOCAL_BASE + 5)
+247: /// @brief RPI ARM Local Mailbox 2 interrupt
+248: #define ARM_IRQLOCAL0_MAILBOX2   (ARM_IRQLOCAL_BASE + 6)
+249: /// @brief RPI ARM Local Mailbox 3 interrupt
+250: #define ARM_IRQLOCAL0_MAILBOX3   (ARM_IRQLOCAL_BASE + 7)
+251: /// @brief RPI ARM Local GPU interrupt
+252: #define ARM_IRQLOCAL0_GPU        (ARM_IRQLOCAL_BASE + 8) // cascaded GPU interrupts
+253: /// @brief RPI ARM Local Performance Monitor Unit interrupt (cortex-a7-pmu)
+254: #define ARM_IRQLOCAL0_PMU        (ARM_IRQLOCAL_BASE + 9)
+255: /// @brief RPI ARM Local AXI interrupt
+256: #define ARM_IRQLOCAL0_AXI_IDLE   (ARM_IRQLOCAL_BASE + 10) // on core 0 only
+257: /// @brief RPI ARM Local Timer interrupt
+258: #define ARM_IRQLOCAL0_LOCALTIMER (ARM_IRQLOCAL_BASE + 11)
+259: 
+260: /// @brief Total count of IRQ lines on RPI3
+261: #define IRQ_LINES                (BCM_IRQS_PER_REG * 2 + BCM_IRQS_BASIC_REG + ARM_IRQS_LOCAL_REG)
+262: 
+263: #elif BAREMETAL_RPI_TARGET == 4
+264: 
+265: /// @brief GIC interrupts private per core
+266: #define GIC_PPI(n)             (16 + (n))
+267: /// @brief GIC interrupts shared between cores
+268: #define GIC_SPI(n)             (32 + (n))
+269: 
+270: // ARM local interrupts
+271: /// @brief RPI ARM Local Counter-timer Physical Timer interrupt (RPI4)
+272: #define BCM_IRQLOCAL0_CNTPNS   GIC_PPI(14)
+273: 
+274: // BCM basic IRQs
+275: /// @brief RPI BCM Mailbox interrupt (RPI4)
+276: #define BCM_IRQ_BCM_MAILBOX    GIC_SPI(0x21)
+277: /// @brief RPI BCM Doorbell 0 interrupt (RPI4)
+278: #define BCM_IRQ_BCM_DOORBELL_0 GIC_SPI(0x22) // (bcm2711-vchiq)
+279: /// @brief RPI BCM Hostport interrupt (RPI4)
+280: #define BCM_IRQ_HOSTPORT       GIC_SPI(0x28) // (bcm2708-usb)
+281: 
+282: // IRQ 1 interrupts
+283: /// @brief RPI System Timer Compare 0 interrupt (bcm2835-system-timer)
+284: #define BCM_IRQ_TIMER0         GIC_SPI(0x40) // (bcm2835-system-timer)
+285: /// @brief RPI System Timer Compare 1 interrupt (bcm2835-system-timer)
+286: #define BCM_IRQ_TIMER1         GIC_SPI(0x41) // (bcm2835-system-timer)
+287: /// @brief RPI System Timer Compare 2 interrupt (bcm2835-system-timer)
+288: #define BCM_IRQ_TIMER2         GIC_SPI(0x42) // (bcm2835-system-timer)
+289: /// @brief RPI System Timer Compare 3 interrupt (bcm2835-system-timer)
+290: #define BCM_IRQ_TIMER3         GIC_SPI(0x43) // (bcm2835-system-timer)
+291: /// @brief RPI USB interrupt (bcm2708-usb)
+292: #define BCM_IRQ_USB            GIC_SPI(0x49) // (bcm2708-usb)
+293: /// @brief RPI VC4 3D interrupt (vc4-v3d)
+294: #define BCM_IRQ_3D             GIC_SPI(0x4A) // (2711-v3d)
+295: /// @brief RPI Transposer (TXP) interrupt (bcm2835-txp)
+296: #define BCM_IRQ_TRANSPOSER     GIC_SPI(0x4B) // (bcm2835-system-timer)
+297: /// @brief RPI DMA channel 0 interrupt (bcm2835-dma)
+298: #define BCM_IRQ_DMA0           GIC_SPI(0x50) // (bcm2835-dma)
+299: /// @brief RPI DMA channel 1 interrupt (bcm2835-dma)
+300: #define BCM_IRQ_DMA1           GIC_SPI(0x51) // (bcm2835-dma)
+301: /// @brief RPI DMA channel 2 interrupt (bcm2835-dma)
+302: #define BCM_IRQ_DMA2           GIC_SPI(0x52) // (bcm2835-dma)
+303: /// @brief RPI DMA channel 3 interrupt (bcm2835-dma)
+304: #define BCM_IRQ_DMA3           GIC_SPI(0x53) // (bcm2835-dma)
+305: /// @brief RPI DMA channel 4 interrupt (bcm2835-dma)
+306: #define BCM_IRQ_DMA4           GIC_SPI(0x54) // (bcm2835-dma)
+307: /// @brief RPI DMA channel 5 interrupt (bcm2835-dma)
+308: #define BCM_IRQ_DMA5           GIC_SPI(0x55) // (bcm2835-dma)
+309: /// @brief RPI DMA channel 6 interrupt (bcm2835-dma)
+310: #define BCM_IRQ_DMA6           GIC_SPI(0x56) // (bcm2835-dma)
+311: /// @brief RPI DMA channel 7 interrupt (bcm2835-dma)
+312: #define BCM_IRQ_DMA7           GIC_SPI(0x57) // (bcm2835-dma)
+313: /// @brief RPI DMA channel 8 interrupt (bcm2835-dma)
+314: #define BCM_IRQ_DMA8           GIC_SPI(0x57) // same value
+315: /// @brief RPI DMA channel 9 interrupt (bcm2835-dma)
+316: #define BCM_IRQ_DMA9           GIC_SPI(0x58) // (bcm2835-dma)
+317: /// @brief RPI DMA channel 10 interrupt (bcm2835-dma)
+318: #define BCM_IRQ_DMA10          GIC_SPI(0x58) // same value
+319: /// @brief RPI DMA channel 11 interrupt (bcm2835-dma)
+320: #define BCM_IRQ_DMA11          GIC_SPI(0x59) // (bcm2711-dma)
+321: /// @brief RPI DMA channel 12 interrupt (bcm2835-dma)
+322: #define BCM_IRQ_DMA12          GIC_SPI(0x5A) // (bcm2711-dma)
+323: /// @brief RPI DMA channel 13 interrupt (bcm2835-dma)
+324: #define BCM_IRQ_DMA13          GIC_SPI(0x5B) // (bcm2711-dma)
+325: /// @brief RPI DMA channel 14 interrupt (bcm2835-dma)
+326: #define BCM_IRQ_DMA14          GIC_SPI(0x5C) // (bcm2711-dma)
+327: /// @brief RPI Auxiliary Peripheral interrupt (bcm2835-aux-uart, bcm43438-bt)
+328: #define BCM_IRQ_AUX            GIC_SPI(0x5D) // (bcm2835-aux-uart)
+329: /// @brief TBD
+330: #define BCM_IRQ_INTC           GIC_SPI(0x60) // (bcm2711-l2-intc) (HDMI0, HDMI1)
+331: /// @brief RPI Videoscaler interrupt (bcm2835-hvs)
+332: #define BCM_IRQ_VIDEOSCALER    GIC_SPI(0x61) // (bcm2711-hvs)
+333: /// @brief TBD
+334: #define BCM_IRQ_CCP2TX         GIC_SPI(0x62) // (rpivid-vid-decoder)
+335: /// @brief RPI DSI0 interrupt (bcm2835-dsi0)
+336: #define BCM_IRQ_DSI0           GIC_SPI(0x64) // (bcm2835-dsi0)
+337: /// @brief RPI AVE interrupt (bcm2711-pixelvalve2)
+338: #define BCM_IRQ_AVE            GIC_SPI(0x65) // (bcm2711-pixelvalve2)
+339: /// @brief RPI CAM 0 interrupt (bcm2835-unicam)
+340: #define BCM_IRQ_CAM0           GIC_SPI(0x66) // (bcm2835-unicam)
+341: /// @brief RPI CAM 1 interrupt (bcm2835-unicam)
+342: #define BCM_IRQ_CAM1           GIC_SPI(0x67) // (bcm2835-unicam)
+343: /// @brief TBD
+344: #define BCM_IRQ_PWA3           GIC_SPI(0x6A) // (bcm2711-pixelvalve3)
+345: /// @brief RPI DSI interrupt (bcm2835-dsi1)
+346: #define BCM_IRQ_DSI1           GIC_SPI(0x6C) // (bcm2711-dsi1)
+347: /// @brief TBD
+348: #define BCM_IRQ_PWA0           GIC_SPI(0x6D) // (bcm2711-pixelvalve0)
+349: /// @brief TBD
+350: #define BCM_IRQ_PWA1           GIC_SPI(0x6E) // (bcm2711-pixelvalve1, bcm2711-pixelvalve4)
+351: /// @brief TBD
+352: #define BCM_IRQ_SMI            GIC_SPI(0x70) // (rpi-firmware-kms-2711, bcm2835-smi)
+353: /// @brief RPI GPIO 0 interrupt (bcm2835-gpio)
+354: #define BCM_IRQ_GPIO0          GIC_SPI(0x71) // (bcm2711-gpio)
+355: /// @brief RPI GPIO 1 interrupt (bcm2835-gpio)
+356: #define BCM_IRQ_GPIO1          GIC_SPI(0x72) // (bcm2711-gpio)
+357: /// @brief RPI GPIO 2 interrupt
+358: #define BCM_IRQ_GPIO2          GIC_SPI(0x73)
+359: /// @brief RPI GPIO 3 interrupt
+360: #define BCM_IRQ_GPIO3          GIC_SPI(0x74)
+361: /// @brief RPI I2C interrupt (bcm2835-i2c)
+362: #define BCM_IRQ_I2C            GIC_SPI(0x75) // (bcm2835-i2c)
+363: /// @brief RPI SPI interrupt (bcm2835-spi)
+364: #define BCM_IRQ_SPI            GIC_SPI(0x76) // (bcm2835-spi)
+365: /// @brief RPI EMMC / SDIO interrupt (bcm2835-sdhost)
+366: #define BCM_IRQ_SDIO           GIC_SPI(0x78) // (bcm2835-sdhost)
+367: /// @brief RPI UART interrupt (arm,primecell, serial@7e201000, bcm43438-bt)
+368: #define BCM_IRQ_UART           GIC_SPI(0x79) // (arm,primecell)
+369: /// @brief RPI VEC interrupt (bcm2835-vec, bcm2711-vec)
+370: #define BCM_IRQ_VEC            GIC_SPI(0x7B) // (bcm2711-vec)
+371: /// @brief RPI SDHCI (bcm2835-sdhci, bcm2711-emmc2)
+372: #define BCM_IRQ_ARASANSDIO     GIC_SPI(0x7E) // (bcm2835-sdhci, bcm2711-emmc2)
+373: /// @brief TBD
+374: #define BCM_IRQ_PCIE_HOST_INTA GIC_SPI(0x8F) // (bcm2711-pcie)
+375: /// @brief TBD
+376: #define BCM_IRQ_PCIE_HOST_MSI2 GIC_SPI(0x93) // (bcm2711-pcie)
+377: /// @brief TBD
+378: #define BCM_IRQ_PCIE_HOST_MSI  GIC_SPI(0x94) // (bcm2711-pcie)
+379: /// @brief TBD
+380: #define BCM_IRQ_BCM54213_0     GIC_SPI(0x9D) // (bcm2711-genet-v5)
+381: /// @brief TBD
+382: #define BCM_IRQ_BCM54213_1     GIC_SPI(0x9E) // (bcm2711-genet-v5)
+383: /// @brief TBD
+384: #define BCM_IRQ_XHCI_INTERNAL  GIC_SPI(0xB0) // (generic-xhci)
+385: 
+386: /// @brief Total count of IRQ lines on RPI4
+387: #define IRQ_LINES              256
+388: 
+389: #else // BAREMETAL_RPI_TARGET >= 5
+390: 
+391: /// @brief GIC interrupts private per core
+392: #define GIC_PPI(n)             (16 + (n))
+393: /// @brief GIC interrupts shared between cores
+394: #define GIC_SPI(n)             (32 + (n))
+395: 
+396: // IRQs
+397: /// @brief RPI Videoscaler interrupt (bcm2835-hvs)
+398: #define BCM_IRQ_VIDEOSCALER    GIC_SPI(0x09) // (bcm2712-hvs)
+399: 
+400: #endif
+401: 
+402: // FIQ
+403: 
+404: #if BAREMETAL_RPI_TARGET <= 3
+405: 
+406: /// @brief RPI System Timer Compare 0 interrupt (bcm2835-system-timer)
+407: #define BCM_FIQ_TIMER0         0
+408: /// @brief RPI System Timer Compare 1 interrupt (bcm2835-system-timer)
+409: #define BCM_FIQ_TIMER1         1
+410: /// @brief RPI System Timer Compare 2 interrupt (bcm2835-system-timer)
+411: #define BCM_FIQ_TIMER2         2
+412: /// @brief RPI System Timer Compare 3 interrupt (bcm2835-system-timer)
+413: #define BCM_FIQ_TIMER3         3
+414: /// @brief RPI Codec 0 interrupt (bcm2835-cprman)
+415: #define BCM_FIQ_CODEC0         4
+416: /// @brief RPI Codec 1 interrupt (bcm2835-cprman)
+417: #define BCM_FIQ_CODEC1         5
+418: /// @brief RPI Codec 2 interrupt
+419: #define BCM_FIQ_CODEC2         6
+420: /// @brief RPI JPEG interrupt
+421: #define BCM_FIQ_JPEG           7
+422: /// @brief TBD
+423: #define BCM_FIQ_ISP            8
+424: /// @brief RPI USB interrupt (bcm2708-usb)
+425: #define BCM_FIQ_USB            9
+426: /// @brief RPI VC4 3D interrupt (vc4-v3d)
+427: #define BCM_FIQ_3D             10
+428: /// @brief RPI Transposer (TXP) interrupt (bcm2835-txp)
+429: #define BCM_FIQ_TRANSPOSER     11
+430: /// @brief TBD
+431: #define BCM_FIQ_MULTICORESYNC0 12
+432: /// @brief TBD
+433: #define BCM_FIQ_MULTICORESYNC1 13
+434: /// @brief TBD
+435: #define BCM_FIQ_MULTICORESYNC2 14
+436: /// @brief TBD
+437: #define BCM_FIQ_MULTICORESYNC3 15
+438: /// @brief RPI DMA channel 0 interrupt (bcm2835-dma)
+439: #define BCM_FIQ_DMA0           16
+440: /// @brief RPI DMA channel 1 interrupt (bcm2835-dma)
+441: #define BCM_FIQ_DMA1           17
+442: /// @brief RPI DMA channel 2 interrupt (bcm2835-dma)
+443: #define BCM_FIQ_DMA2           18
+444: /// @brief RPI DMA channel 3 interrupt (bcm2835-dma)
+445: #define BCM_FIQ_DMA3           19
+446: /// @brief RPI DMA channel 4 interrupt (bcm2835-dma)
+447: #define BCM_FIQ_DMA4           20
+448: /// @brief RPI DMA channel 5 interrupt (bcm2835-dma)
+449: #define BCM_FIQ_DMA5           21
+450: /// @brief RPI DMA channel 6 interrupt (bcm2835-dma)
+451: #define BCM_FIQ_DMA6           22
+452: /// @brief RPI DMA channel 7 interrupt (bcm2835-dma)
+453: #define BCM_FIQ_DMA7           23
+454: /// @brief RPI DMA channel 8 interrupt (bcm2835-dma)
+455: #define BCM_FIQ_DMA8           24
+456: /// @brief RPI DMA channel 9 interrupt (bcm2835-dma)
+457: #define BCM_FIQ_DMA9           25
+458: /// @brief RPI DMA channel 10 interrupt (bcm2835-dma)
+459: #define BCM_FIQ_DMA10          26
+460: /// @brief RPI DMA channel 11/12/13/14 interrupt (bcm2835-dma)
+461: #define BCM_FIQ_DMA11          27
+462: /// @brief RPI DMA shared interrupt (bcm2835-dma)
+463: #define BCM_FIQ_DMA_SHARED     28
+464: /// @brief RPI Auxiliary Peripheral interrupt (bcm2835-aux-uart, bcm43438-bt)
+465: #define BCM_FIQ_AUX            29
+466: /// @brief TBD
+467: #define BCM_FIQ_ARM            30
+468: /// @brief TBD
+469: #define BCM_FIQ_VPUDMA         31
+470: /// @brief RPI USB Host interrupt (bcm2708-usb)
+471: #define BCM_FIQ_HOSTPORT       32
+472: /// @brief RPI Videoscaler interrupt (bcm2835-hvs)
+473: #define BCM_FIQ_VIDEOSCALER    33
+474: /// @brief TBD
+475: #define BCM_FIQ_CCP2TX         34
+476: /// @brief TBD
+477: #define BCM_FIQ_SDC            35
+478: /// @brief RPI DSI0 interrupt (bcm2835-dsi0)
+479: #define BCM_FIQ_DSI0           36
+480: /// @brief RPI AVE interrupt (bcm2711-pixelvalve2)
+481: #define BCM_FIQ_AVE            37
+482: /// @brief RPI CAM 0 interrupt (bcm2835-unicam)
+483: #define BCM_FIQ_CAM0           38
+484: /// @brief RPI CAM 1 interrupt (bcm2835-unicam)
+485: #define BCM_FIQ_CAM1           39
+486: /// @brief RPI HDMI 0 interrupt (bcm2835-hdmi)
+487: #define BCM_FIQ_HDMI0          40
+488: /// @brief RPI HDMI 1 interrupt (bcm2835-hdmi)
+489: #define BCM_FIQ_HDMI1          41
+490: /// @brief RPI Pixel valve 2 interrupt (bcm2835-pixelvalve2, bcm2711-pixelvalve3)
+491: #define BCM_FIQ_PIXELVALVE1    42
+492: /// @brief RPI I2C slave interrupt
+493: #define BCM_FIQ_I2CSPISLV      43
+494: /// @brief RPI DSI1 interrupt (bcm2835-dsi1)
+495: #define BCM_FIQ_DSI1           44
+496: /// @brief RPI Pixel valve 0 interrupt (bcm2835-pixelvalve0, bcm2711-pixelvalve0)
+497: #define BCM_FIQ_PWA0           45
+498: /// @brief RPI Pixel valve 1 interrupt (bcm2835-pixelvalve1, bcm2711-pixelvalve1, bcm2711-pixelvalve4)
+499: #define BCM_FIQ_PWA1           46
+500: /// @brief TBD
+501: #define BCM_FIQ_CPR            47
+502: /// @brief RPI SMI interrupt (bcm2835-smi, rpi-firmware-kms)
+503: #define BCM_FIQ_SMI            48
+504: /// @brief RPI GPIO 0 interrupt (bcm2835-gpio)
+505: #define BCM_FIQ_GPIO0          49
+506: /// @brief RPI GPIO 1 interrupt (bcm2835-gpio)
+507: #define BCM_FIQ_GPIO1          50
+508: /// @brief RPI GPIO 2 interrupt
+509: #define BCM_FIQ_GPIO2          51
+510: /// @brief RPI GPIO 3 interrupt
+511: #define BCM_FIQ_GPIO3          52
+512: /// @brief RPI I2C interrupt (bcm2835-i2c)
+513: #define BCM_FIQ_I2C            53
+514: /// @brief RPI SPI interrupt (bcm2835-spi)
+515: #define BCM_FIQ_SPI            54
+516: /// @brief RPI I2C audio interrupt
+517: #define BCM_FIQ_I2SPCM         55
+518: /// @brief RPI EMMC / SDIO interrupt (bcm2835-sdhost)
+519: #define BCM_FIQ_SDIO           56
+520: /// @brief RPI UART interrupt (arm,primecell, serial@7e201000, bcm43438-bt)
+521: #define BCM_FIQ_UART           57
+522: /// @brief TBD
+523: #define BCM_FIQ_SLIMBUS        58
+524: /// @brief RPI VEC interrupt (bcm2835-vec, bcm2711-vec)
+525: #define BCM_FIQ_VEC            59
+526: /// @brief TBD
+527: #define BCM_FIQ_CPG            60
+528: /// @brief RPI RNG interrupt (bcm2835-rng)
+529: #define BCM_FIQ_RNG            61
+530: /// @brief RPI SDHCI (bcm2835-sdhci, bcm2711-emmc2)
+531: #define BCM_FIQ_ARASANSDIO     62
+532: /// @brief TBD
+533: #define BCM_FIQ_AVSPMON        63
+534: /// @brief RPI ARM Timer interrupt interrupt
+535: #define BCM_FIQ_BCM_TIMER      64
+536: /// @brief RPI ARM Mailbox interrupt interrupt (bcm2835-mbox)
+537: #define BCM_FIQ_BCM_MAILBOX    65
+538: /// @brief RPI ARM Doorbell 0 interrupt interrupt (bcm2835-vchiq, bcm2711-vchiq)
+539: #define BCM_FIQ_BCM_DOORBELL_0 66
+540: /// @brief RPI ARM Doorbell 1 interrupt interrupt
+541: #define BCM_FIQ_BCM_DOORBELL_1 67
+542: /// @brief RPI ARM GPU 0 halted interrupt (bcm2835-cprman)
+543: #define BCM_FIQ_VPU0_HALTED    68
+544: /// @brief RPI ARM GPU 1 halted interrupt (bcm2835-cprman)
+545: #define BCM_FIQ_VPU1_HALTED    69
+546: /// @brief RPI ARM Illegal access type 1 interrupt
+547: #define BCM_FIQ_ILLEGAL_TYPE0  70
+548: /// @brief RPI ARM Illegal access type 0 interrupt
+549: #define BCM_FIQ_ILLEGAL_TYPE1  71
+550: 
+551: /// @brief Maximum index of FIQ interrupts RPI3
+552: #define BCM_MAX_FIQ            71
+553: 
+554: /// @brief FIQ interrupt enable bit
+555: #define FIQ_INTR_ENABLE   BIT(7)
+556: 
+557: #else // BAREMETAL_RPI_TARGET >= 4
+558: 
+559: // FIQs
+560: 
+561: /// @brief RPI System Timer Compare 1 interrupt (bcm2835-system-timer)
+562: #define BCM_FIQ_TIMER1 BCM_IRQ_TIMER1
+563: /// @brief RPI GPIO 3 interrupt
+564: #define BCM_FIQ_GPIO3  BCM_IRQ_GPIO3
+565: /// @brief RPI UART interrupt (arm,primecell, serial@7e201000, bcm43438-bt)
+566: #define BCM_FIQ_UART   BCM_IRQ_UART
+567: 
+568: /// @brief Maximum count of FIQ interrupts RPI4 and later
+569: #define BCM_MAX_FIQ    IRQ_LINES
+570: 
+571: #endif // if BAREMETAL_RPI_TARGET <= 3
 ```
 
-The `TestDetails` class is added to the `unittest` namespace.
+We'll not get into each and every IRQ or FIQ id, but give some descriptions on macros used
 
-- Line 42: We use strings, so we need to include the header for the `string` class
-- Line 47-65: We declare the class `TestDetails` which will hold information on a test
-  - Line 50: The class member variable `m_suiteName` is the test suite name
-  - Line 51: The class member variable `m_fixtureName` is the test fixture name
-  - Line 52: The class member variable `m_testName` is the test name
-  - Line 53: The class member variable `m_fileName` is the source file in which the actual test is defined
-  - Line 54: The class member variable `m_lineNumber` is the source line in which the actual test is defined
-  - Line 57: We declare the default constructor
-  - Line 58: We declare the normal constructor which specifies all the needed information
-  - Line 60: We declare an accessor `SuiteName()` for the test suite name
-  - Line 61: We declare an accessor `FixtureName()` for the test fixture name
-  - Line 62: We declare an accessor `TestName()` for the test name
-  - Line 63: We declare an accessor `SourceFileName()` for the source file name
-  - Line 64: We declare an accessor `SourceFileLineNumber()` for the source line number
-
-### TestDetails.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTDETAILSCPP}
-
-Let's implement the `TestDetails` class.
-
-Create the file `code/libraries/unittest/src/TestDetails.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestDetails.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestDetails.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestDetails
-9: //
-10: // Description : Test details
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #include <unittest/TestDetails.h>
-41:
-42: using namespace baremetal;
-43:
-44: namespace unittest {
-45:
-46: TestDetails::TestDetails()
-47:     : m_suiteName{}
-48:     , m_fixtureName{}
-49:     , m_testName{}
-50:     , m_fileName{}
-51:     , m_lineNumber{}
-52: {
-53: }
-54:
-55: TestDetails::TestDetails(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-56:     : m_suiteName{ suiteName }
-57:     , m_fixtureName{ fixtureName }
-58:     , m_testName{ testName }
-59:     , m_fileName{ fileName }
-60:     , m_lineNumber{ lineNumber }
-61: {
-62: }
-63:
-64: } // namespace unittest
-```
-
-- Line 46-53: We implement the default constructor
-- Line 55-62: We implement the non default constructor
-
-### TestBase.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTBASEH}
-
-We will add a base class for each test. All tests will derive from this class, and implement its `RunImpl()` method to run the actual test.
-
-Create the file `code/libraries/unittest/include/unittest/TestBase.h`
-
-```cpp
-File: code/libraries/unittest/include/unittest/TestBase.h
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestBase.h
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestBase
-9: //
-10: // Description : Testcase
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #pragma once
-41:
-42: #include <unittest/TestDetails.h>
-43:
-44: namespace unittest
-45: {
-46:
-47: class TestBase
-48: {
-49: private:
-50:     TestDetails const m_details;
-51:     TestBase* m_next;
-52:
-53: public:
-54:     TestBase();
-55:     TestBase(const TestBase&) = delete;
-56:     TestBase(TestBase&&) = delete;
-57:     explicit TestBase(
-58:         const baremetal::string& testName,
-59:         const baremetal::string& fixtureName = {},
-60:         const baremetal::string& suiteName = {},
-61:         const baremetal::string& fileName = {},
-62:         int lineNumber = {});
-63:     virtual ~TestBase();
-64:
-65:     TestBase& operator = (const TestBase&) = delete;
-66:     TestBase& operator = (TestBase&&) = delete;
-67:
-68:     const TestDetails& Details() const { return m_details; }
-69:
-70:     void Run();
-71:
-72:     virtual void RunImpl() const;
-73: };
-74:
-75: } // namespace unittest
-```
-
-The `TestBase` class is added to the `unittest` namespace.
-
-- Line 50: We declare the details for the test
-- Line 51: We declare a pointer to the next test. Tests will be stored in a linked list
-- Line 54: We declare a default constructor
-- Line 55-56: We remove the copy constructor and move constructor
-- Line 57: We declare an explicit constructor
-- Line 63: We declare the destructor. This may be important as we will be inheriting from this class
-- Line 65-66: We remove the assignment operators
-- Line 68: We declare methods to retrieve details
-- Line 70: We declare a method `Run()` to run the test.
-This will ultimately invoke the `RunImpl()` virtual method, which is expected to be overriden by an actual test.
-- Line 72: We declare the overridable `RunImpl()` method
-
-### TestBase.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_TESTBASECPP}
-
-We'll implement the `TestBase` class.
-
-Create the file `code/libraries/unittest/src/TestBase.cpp`
-
-```cpp
-File: code/libraries/unittest/src/TestBase.cpp
-1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : TestBase.cpp
-5: //
-6: // Namespace   : unittest
-7: //
-8: // Class       : TestBase
-9: //
-10: // Description : Testcase base class
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------
-39:
-40: #include <unittest/TestBase.h>
-41:
-42: using namespace baremetal;
-43:
-44: namespace unittest {
-45:
-46: TestBase::TestBase()
-47:     : m_details{}
-48:     , m_next{}
-49: {
-50: }
-51:
-52: TestBase::TestBase(const string& testName, const string& fixtureName, const string& suiteName, const string& fileName, int lineNumber)
-53:     : m_details{ testName, fixtureName, suiteName, fileName, lineNumber }
-54:     , m_next{}
-55: {
-56: }
-57:
-58: TestBase::~TestBase()
-59: {
-60: }
-61:
-62: void TestBase::Run()
-63: {
-64:     RunImpl();
-65: }
-66:
-67: void TestBase::RunImpl() const
-68: {
-69: }
-70:
-71: } // namespace unittest
-```
-
-- Line 46-50: We implement the default constructor
-- Line 52-56: We implement the non default constructor
-- Line 58-60: We implement the destructor
-- Line 62-65: We provide a first implementation for the `Run()` method
-- Line 67-69: We provide a default implementation for the `RunImpl()` method
+- Line 45-262: We define IRQ related macros for Raspberry PI 3
+  - Line 50: We define the number of BCM interrupt registers
+  - Line 53-57: We define the number of IRQ supported by IRQ 1/2, IEQ basic and ARM local IRQ
+  - Line 60-66: We define the ID range for IRQ 1/2, IEQ basic and ARM local IRQ
+  - Line 69-70: We define macros to access the IRQ pending register for BCM IRQ lines
+  - Line 72-73: We define macros to access the IRQ enable register for BCM IRQ lines
+  - Line 75-76: We define macros to access the IRQ disable register for BCM IRQ lines
+  - Line 78: We define macros to determine the mask for the selected IRQ id to access the IRQ pending / enable / disable register
+  - Line 83-258: We define all currently supported FIQ for Raspberry 3
+  - Line 261: We define the total count of IRQ interrupts supported by the system for Raspberry 3
+- Line 263-388: We define IRQ related macros for Raspberry PI 4
+  - Line 266-268: We define macros to access private per core interrupts and interrupts shared by all cores for Raspberry 4
+  - Line 272-384: We define all currently supported FIQ for Raspberry 4
+  - Line 387: We define the total count of IRQ interrupts supported by the system for Raspberry 4
+- Line 389-400: We define IRQ related macros for Raspberry PI 5
+  - Line 392-394: We define macros to access private per core interrupts and interrupts shared by all cores for Raspberry 5
+  - Line 398: We define all currently supported FIQ for Raspberry 5
+- Line 404-556: We define FIQ related macros for Raspberry PI 3
+  - Line 407-549: We define all currently supported FIQ for Raspberry 3
+  - Line 552: We define the total count of FIQ interrupts supported by the system for Raspberry 3
+  - Line 555: We define enable bit for FIQ for Raspberry 3
+- Line 561-569: We define IRQ related macros for Raspberry PI 4 and later
+  - Line 562-566: We define all currently supported FIQ for Raspberry 4 and later
+  - Line 569: We define the total count of FIQ interrupts supported by the system for Raspberry 4 and later
 
 ### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_CMAKE_FILE}
 
-As we have now added some source files to the `unittest` library, we need to update its CMake file.
-
-Update the file `code/libraries/unitttest/CMakeLists.txt`
-
-```cmake
-File: code/libraries/unitttest/CMakeLists.txt
-...
-30: set(PROJECT_SOURCES
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestBase.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestDetails.cpp
-33:     )
-34:
-35: set(PROJECT_INCLUDES_PUBLIC
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestBase.h
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/TestDetails.h
-38:     )
-39: set(PROJECT_INCLUDES_PRIVATE )
-40:
-...
-```
+As we have not added any source files to the `baremetal` library, we do not need to update its CMake file.
 
 ### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
 
-Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
+We'll make a few small changes to use the new `InterruptSystem` implementation.
 
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: #include <baremetal/ARMInstructions.h>
-2: #include <baremetal/Assert.h>
-3: #include <baremetal/BCMRegisters.h>
-4: #include <baremetal/Console.h>
-5: #include <baremetal/Logger.h>
-6: #include <baremetal/Mailbox.h>
-7: #include <baremetal/MemoryManager.h>
-8: #include <baremetal/New.h>
-9: #include <baremetal/RPIProperties.h>
-10: #include <baremetal/Serialization.h>
-11: #include <baremetal/String.h>
-12: #include <baremetal/SysConfig.h>
-13: #include <baremetal/System.h>
-14: #include <baremetal/Timer.h>
-15: #include <baremetal/Util.h>
-16:
-17: #include <unittest/TestBase.h>
-18:
-19: LOG_MODULE("main");
-20:
-21: using namespace baremetal;
-22: using namespace unittest;
-23:
-24: class MyTest
-25:     : public TestBase
-26: {
-27: public:
-28:     MyTest()
-29:         : TestBase("MyTest", "", "", __FILE__, __LINE__)
-30:     {
-31:
-32:     }
-33:     void RunImpl() const override
-34:     {
-35:         LOG_DEBUG("In RunImpl");
-36:     }
-37: };
-38:
-39: int main()
-40: {
-41:     auto& console = GetConsole();
-42:     LOG_DEBUG("Hello World!");
-43:
-44:     MyTest test;
-45:     test.Run();
-46:
-47:     LOG_INFO("Wait 5 seconds");
-48:     Timer::WaitMilliSeconds(5000);
-49:
-50:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-51:     char ch{};
-52:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-53:     {
-54:         ch = console.ReadChar();
-55:         console.WriteChar(ch);
-56:     }
-57:     if (ch == 'p')
-58:         assert(false);
-59:
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-61: }
+...
+28: int main()
+29: {
+30:     auto& console = GetConsole();
+31: 
+32:     MemoryAccess memoryAccess;
+33: 
+34:     auto exceptionLevel = CurrentEL();
+35:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+36: 
+37:     GetInterruptSystem().RegisterIRQHandler(ARM_IRQLOCAL0_CNTPNS, IntHandler, nullptr);
+38: 
+39:     uint64 counterFreq{};
+40:     GetTimerFrequency(counterFreq);
+41:     assert(counterFreq % TICKS_PER_SECOND == 0);
+42:     clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
+43: 
+44:     uint64 counter;
+45:     GetTimerCounter(counter);
+46:     SetTimerCompareValue(counter + clockTicksPerSystemTick);
+47:     SetTimerControl(CNTP_CTL_EL0_ENABLE);
+48: 
+49:     LOG_INFO("Wait 5 seconds");
+50:     Timer::WaitMilliSeconds(5000);
+51: 
+52:     SetTimerControl(0);
+53: 
+54:     GetInterruptSystem().UnregisterIRQHandler(ARM_IRQLOCAL0_CNTPNS);
+55: 
+56:     console.Write("Press r to reboot, h to halt\n");
+57:     char ch{};
+58:     while ((ch != 'r') && (ch != 'h'))
+59:     {
+60:         ch = console.ReadChar();
+61:         console.WriteChar(ch);
+62:     }
+63: 
+64:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+65: }
 ```
 
-- Line 17: We include the header for `TestBase`
-- Line 24-38: We declare and implement the class `MyTest` based on `TestBase`
-  - Line 28-32: We declare and implement the constructor. We use the class name as the test name, and set the test fixture name and test suite name to an empty string. The file name and line number are taken from the actual source location
-  - Line 33-37: We declare and implement an override for the `RunImpl()` method. It simply logs a string
-- Line 45-46: We define an instance of MyTest, and then run the test.
+- Line 37: We replace the code to register the IRQ handler with a single call to `RegisterIRQHandler()`
+- Line 54: We replace the code to unregister the IRQ handler with a single call to `UnregisterIRQHandler()`
 
 ### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
-We can now configure and build our code, and start debugging. We'll first switch off the memory debug output to get a cleaner console.
+We can now configure and build our code, and start debugging. 
 
-Update the file `CMakeLists.txt`
-
-```cmake
-...
-61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
-65: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
-...
-```
-
-The application will run the test, and therefore show the log output.
+The application will act exactly as before. We expect to see 10 ticks happening.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Info   Starting up (System:201)
-Debug  Hello World! (main:42)
-Debug  In RunImpl (main:35)
-Info   Wait 5 seconds (main:47)
-Press r to reboot, h to halt, p to fail assertion and panic
+Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Starting up (System:208)
+Info   Current EL: 1 (main:35)
+Info   Wait 5 seconds (main:49)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Info   Ping (main:25)
+Press r to reboot, h to halt
+hInfo   Halt (System:129)
 ```
 
 Next: [21-timer-extension](21-timer-extension.md)

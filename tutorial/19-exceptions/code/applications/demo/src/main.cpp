@@ -6,8 +6,6 @@
 #include <baremetal/ExceptionHandler.h>
 #include <baremetal/BCMRegisters.h>
 
-#include <unittest/unittest.h>
-
 LOG_MODULE("main");
 
 using namespace baremetal;

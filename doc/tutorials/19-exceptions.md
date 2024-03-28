@@ -134,7 +134,7 @@ This defines the `BITS` macro to create a mask for bit sequences (from bit n to 
 
 ### ARMInstructions.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_ARMINSTRUCTIONSH}
 
-We already create a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
+We already created a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
 The complete set or ARM registers is documented in [documentation](pdf/arm-architecture-registers.pdf), the most important ones are described in [ARM registers](#ARM_REGISTERS).
 
 We'll add some definitions for some of these registers.
@@ -638,24 +638,24 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 37: // DEALINGS IN THE SOFTWARE.
 38: //
 39: //------------------------------------------------------------------------------
-40:
+40: 
 41: #include <baremetal/BCMRegisters.h>
 42: #include <baremetal/Exception.h>
 43: #include <baremetal/SysConfig.h>
-44:
+44: 
 45: /// @file
 46: /// Exception stub assembly code
-47:
+47: 
 48: .macro	vector handler
-49:
+49: 
 50:     .align	7
-51:
+51: 
 52:     b \handler                          // Jump to handler
-53:
+53: 
 54: .endm
-55:
+55: 
 56: .macro  stub name, exception, handler
-57:
+57: 
 58:     .globl  \name
 59: \name:
 60:     mrs     x0, esr_el1                 // Read Exception Syndrome Register (EL1)
@@ -665,304 +665,78 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 64:     mrs     x4, sp_el0                  // Read Stack Pointer (EL0)
 65:     mov     x5, sp                      // Get Stack Pointer (EL1)
 66:     mrs     x6, far_el1                 // Fault Address Register (EL1)
-67:
+67: 
 68:     str     x6, [sp, #-16]!             // Store X6 on stack, decrement stack
 69:     stp     x4, x5, [sp, #-16]!         // Store X4,X5 on stack, decrement stack
 70:     stp     x2, x3, [sp, #-16]!         // Store X2,X3 on stack, decrement stack
 71:     stp     x0, x1, [sp, #-16]!         // Store X0,X1 on stack, decrement stack
-72:
+72: 
 73:     mov     x0, #\exception             // Get exception function pointer
 74:     mov     x1, sp                      // Save stack pointer
 75:     b       \handler                    // Calls handler(uint64 exceptionID, AbortFrame* abortFrame). x0 = exception is exceptionID, x1 = sp = abortFrame. Never returns
-76:
+76: 
 77: .endm
-78:
+78: 
 79:     .text
-80:
+80: 
 81:     .align  11
-82:
+82: 
 83:     .globl  VectorTable
 84: VectorTable:
-85:
+85: 
 86:     // from current EL with sp_el0 (mode EL0, El1t, El2t, EL3t)
 87:     vector  SynchronousStub
 88:     vector  UnexpectedStub
 89:     vector  UnexpectedStub
 90:     vector  SErrorStub
-91:
+91: 
 92:     // from current EL with sp_elx, x != 0  (mode El1h, El2h, EL3h)
 93:     vector  SynchronousStub
 94:     vector  UnexpectedStub
 95:     vector  UnexpectedStub
 96:     vector  SErrorStub
-97:
+97: 
 98:     // from lower EL, target EL minus 1 is AArch64
 99:     vector  HVCStub
 100:     vector  UnexpectedStub
 101:     vector  UnexpectedStub
 102:     vector  UnexpectedStub
-103:
+103: 
 104:     // from lower EL, target EL minus 1 is AArch32
 105:     vector  UnexpectedStub
 106:     vector  UnexpectedStub
 107:     vector  UnexpectedStub
 108:     vector  UnexpectedStub
-109:
-110: //*************************************************
-111: // IRQ stub
-112: //*************************************************
-113: .macro irq_stub name, handler
-114:     .globl  \name
-115: \name:
-116:     stp     x29, x30, [sp, #-16]!       // Save x29, x30 onto stack
-117:     mrs     x29, elr_el1                // Read Exception Link Register (EL1)
-118:     mrs     x30, spsr_el1               // Read Saved Program Status Register (EL1)
-119:     stp     x29, x30, [sp, #-16]!       // Save onto stack
-120:     msr     DAIFClr, #1                 // Enable FIQ
-121:
-122: #ifdef SAVE_VFP_REGS_ON_IRQ
-123:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
-124:     stp     q28, q29, [sp, #-32]!
-125:     stp     q26, q27, [sp, #-32]!
-126:     stp     q24, q25, [sp, #-32]!
-127:     stp     q22, q23, [sp, #-32]!
-128:     stp     q20, q21, [sp, #-32]!
-129:     stp     q18, q19, [sp, #-32]!
-130:     stp     q16, q17, [sp, #-32]!
-131:     stp     q14, q15, [sp, #-32]!
-132:     stp     q12, q13, [sp, #-32]!
-133:     stp     q10, q11, [sp, #-32]!
-134:     stp     q8, q9, [sp, #-32]!
-135:     stp     q6, q7, [sp, #-32]!
-136:     stp     q4, q5, [sp, #-32]!
-137:     stp     q2, q3, [sp, #-32]!
-138:     stp     q0, q1, [sp, #-32]!
-139: #endif
-140:     stp     x27, x28, [sp, #-16]!       // Save x0-x28 onto stack
-141:     stp     x25, x26, [sp, #-16]!
-142:     stp     x23, x24, [sp, #-16]!
-143:     stp     x21, x22, [sp, #-16]!
-144:     stp     x19, x20, [sp, #-16]!
-145:     stp     x17, x18, [sp, #-16]!
-146:     stp     x15, x16, [sp, #-16]!
-147:     stp     x13, x14, [sp, #-16]!
-148:     stp     x11, x12, [sp, #-16]!
-149:     stp     x9, x10, [sp, #-16]!
-150:     stp     x7, x8, [sp, #-16]!
-151:     stp     x5, x6, [sp, #-16]!
-152:     stp     x3, x4, [sp, #-16]!
-153:     stp     x1, x2, [sp, #-16]!
-154:     str     x0, [sp, #-16]!
-155:
-156:     ldr     x0, =IRQReturnAddress       // Store return address for profiling
-157:     str     x29, [x0]
-158:
-159:     bl      \handler                    // Call interrupt handler
-160:
-161:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
-162:     ldp     x1, x2, [sp], #16
-163:     ldp     x3, x4, [sp], #16
-164:     ldp     x5, x6, [sp], #16
-165:     ldp     x7, x8, [sp], #16
-166:     ldp     x9, x10, [sp], #16
-167:     ldp     x11, x12, [sp], #16
-168:     ldp     x13, x14, [sp], #16
-169:     ldp     x15, x16, [sp], #16
-170:     ldp     x17, x18, [sp], #16
-171:     ldp     x19, x20, [sp], #16
-172:     ldp     x21, x22, [sp], #16
-173:     ldp     x23, x24, [sp], #16
-174:     ldp     x25, x26, [sp], #16
-175:     ldp     x27, x28, [sp], #16
-176: #ifdef SAVE_VFP_REGS_ON_IRQ
-177:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
-178:     ldp     q2, q3, [sp], #32
-179:     ldp     q4, q5, [sp], #32
-180:     ldp     q6, q7, [sp], #32
-181:     ldp     q8, q9, [sp], #32
-182:     ldp     q10, q11, [sp], #32
-183:     ldp     q12, q13, [sp], #32
-184:     ldp     q14, q15, [sp], #32
-185:     ldp     q16, q17, [sp], #32
-186:     ldp     q18, q19, [sp], #32
-187:     ldp     q20, q21, [sp], #32
-188:     ldp     q22, q23, [sp], #32
-189:     ldp     q24, q25, [sp], #32
-190:     ldp     q26, q27, [sp], #32
-191:     ldp     q28, q29, [sp], #32
-192:     ldp     q30, q31, [sp], #32
-193: #endif
-194:
-195:     msr     DAIFSet, #1                 // Disable FIQ
-196:     ldp     x29, x30, [sp], #16         // Restore from stack
-197:     msr     elr_el1, x29                // Restore Exception Link Register (EL1)
-198:     msr     spsr_el1, x30               // Restore Saved Program Status Register (EL1)
-199:     ldp     x29, x30, [sp], #16         // restore x29, x30 from stack
-200:
-201:     eret                                // Restore previous EL
-202:
-203: .endm
-204:
-205: //*************************************************
-206: // FIQ stub
-207: //*************************************************
-208:     .globl  FIQStub
-209: FIQStub:
-210: #ifdef SAVE_VFP_REGS_ON_FIQ
-211:     stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
-212:     stp     q28, q29, [sp, #-32]!
-213:     stp     q26, q27, [sp, #-32]!
-214:     stp     q24, q25, [sp, #-32]!
-215:     stp     q22, q23, [sp, #-32]!
-216:     stp     q20, q21, [sp, #-32]!
-217:     stp     q18, q19, [sp, #-32]!
-218:     stp     q16, q17, [sp, #-32]!
-219:     stp     q14, q15, [sp, #-32]!
-220:     stp     q12, q13, [sp, #-32]!
-221:     stp     q10, q11, [sp, #-32]!
-222:     stp     q8, q9, [sp, #-32]!
-223:     stp     q6, q7, [sp, #-32]!
-224:     stp     q4, q5, [sp, #-32]!
-225:     stp     q2, q3, [sp, #-32]!
-226:     stp     q0, q1, [sp, #-32]!
-227: #endif
-228:     stp     x29, x30, [sp, #-16]!       // Save x0-x28 onto stack
-229:     stp     x27, x28, [sp, #-16]!
-230:     stp     x25, x26, [sp, #-16]!
-231:     stp     x23, x24, [sp, #-16]!
-232:     stp     x21, x22, [sp, #-16]!
-233:     stp     x19, x20, [sp, #-16]!
-234:     stp     x17, x18, [sp, #-16]!
-235:     stp     x15, x16, [sp, #-16]!
-236:     stp     x13, x14, [sp, #-16]!
-237:     stp     x11, x12, [sp, #-16]!
-238:     stp     x9, x10, [sp, #-16]!
-239:     stp     x7, x8, [sp, #-16]!
-240:     stp     x5, x6, [sp, #-16]!
-241:     stp     x3, x4, [sp, #-16]!
-242:     stp     x1, x2, [sp, #-16]!
-243:     str     x0, [sp, #-16]!
-244:
-245:     ldr     x2, =s_fiqData
-246:     ldr     x1, [x2]                    // Get s_fiqData.handler
-247:     cmp     x1, #0                      // Is handler set?
-248:     b.eq    no_fiq_handler
-249:     ldr     x0, [x2, #8]                // Get s_fiqData.param
-250:     blr     x1                          // Call handler
-251:
-252: restore_after_fiq_handler:
-253:     ldr     x0, [sp], #16               // Restore x0-x28 from stack
-254:     ldp     x1, x2, [sp], #16
-255:     ldp     x3, x4, [sp], #16
-256:     ldp     x5, x6, [sp], #16
-257:     ldp     x7, x8, [sp], #16
-258:     ldp     x9, x10, [sp], #16
-259:     ldp     x11, x12, [sp], #16
-260:     ldp     x13, x14, [sp], #16
-261:     ldp     x15, x16, [sp], #16
-262:     ldp     x17, x18, [sp], #16
-263:     ldp     x19, x20, [sp], #16
-264:     ldp     x21, x22, [sp], #16
-265:     ldp     x23, x24, [sp], #16
-266:     ldp     x25, x26, [sp], #16
-267:     ldp     x27, x28, [sp], #16
-268:     ldp     x29, x30, [sp], #16
-269: #ifdef SAVE_VFP_REGS_ON_FIQ
-270:     ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
-271:     ldp     q2, q3, [sp], #32
-272:     ldp     q4, q5, [sp], #32
-273:     ldp     q6, q7, [sp], #32
-274:     ldp     q8, q9, [sp], #32
-275:     ldp     q10, q11, [sp], #32
-276:     ldp     q12, q13, [sp], #32
-277:     ldp     q14, q15, [sp], #32
-278:     ldp     q16, q17, [sp], #32
-279:     ldp     q18, q19, [sp], #32
-280:     ldp     q20, q21, [sp], #32
-281:     ldp     q22, q23, [sp], #32
-282:     ldp     q24, q25, [sp], #32
-283:     ldp     q26, q27, [sp], #32
-284:     ldp     q28, q29, [sp], #32
-285:     ldp     q30, q31, [sp], #32
-286: #endif
-287:
-288:     eret                                // Restore previous EL
-289:
-290: no_fiq_handler:
-291:     ldr     x1, =RPI_INTRCTRL_FIQ_CONTROL // Disable FIQ (if handler is not set)
-292:     mov     w0, #0
-293:     str     w0, [x1]
-294:     b       restore_after_fiq_handler
-295:
-296: #if BAREMETAL_RPI_TARGET >= 4
-297:
-298: /*
-299:  * SMC stub
-300:  */
-301: .macro smc_stub name, handler
-302:     .globl  \name
-303: \name:
-304:     ldr     x2, =SMCStack
-305:     mov     sp, x2                      // Set SMC stack
-306:     str     x30, [sp, #-16]!            // Save x30 (LR) on stack
-307:     bl      \handler                    // Call handler
-308:     ldr     x30, [sp], #16              // Restore x30 (LR) from stack
-309:     eret
-310:
-311: .endm
-312:
-313: #endif
-314:
-315: /*
-316:  * HVC stub
-317:  */
-318: HVCStub:                                // Return to EL2h mode
-319:     mrs     x0, spsr_el2                // Read Saved Program Status Register (EL2)
-320:     bic     x0, x0, #0xF                // Clear bit 3:0
-321:     mov     x1, #9
-322:     orr     x0, x0, x1                  // Set bit 3 and bit 0 -> EL2h
-323:     msr     spsr_el2, x0                // Write Saved Program Status Register (EL2)
-324:     eret                                // Move to EL2h
-325:
-326:     .data
-327:
-328:     .align  3
-329:
-330:     .globl  s_fiqData
-331: s_fiqData:                              // Matches FIQData:
-332:     .quad   0                           // handler
-333:     .quad   0                           // param
-334:     .word   0                           // fiqID (unused)
-335:
-336:     .align  3
-337:
-338:     .globl  IRQReturnAddress
-339: IRQReturnAddress:
-340:     .quad   0
-341:
-342: #if BAREMETAL_RPI_TARGET >= 4
-343:
-344:     .bss
-345:
-346:     .align  4
-347:
-348:     .space  128
-349: SMCStack:
-350:
-351: #endif
-352:
-353: //*************************************************
-354: // Abort stubs
-355: //*************************************************
-356:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   UnexpectedHandler
-357:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  SynchronousExceptionHandler
-358:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, SystemErrorHandler
-359:     irq_stub    IRQStub,                                    InterruptHandler
-360: #if BAREMETAL_RPI_TARGET >= 4
-361:     smc_stub    SMCStub,                                    SecureMonitorHandler
-362: #endif
-363:
-364: // End
+109: 
+110: /*
+111:  * HVC stub
+112:  */
+113: HVCStub:                                // Return to EL2h mode
+114:     mrs     x0, spsr_el2                // Read Saved Program Status Register (EL2)
+115:     bic     x0, x0, #0xF                // Clear bit 0
+116:     mov     x1, #9
+117:     orr     x0, x0, x1                  // Set bit 3 and bit 0 -> EL2h
+118:     msr     spsr_el2, x0                // Write Saved Program Status Register (EL2)
+119:     eret                                // Move to EL2h
+120: 
+121:     .data
+122: 
+123:     .align  3
+124: 
+125:     .globl  s_fiqData
+126: s_fiqData:                              // Matches FIQData:
+127:     .quad   0                           // handler
+128:     .quad   0                           // param
+129:     .word   0                           // fiqID (unused)
+130: 
+131: //*************************************************
+132: // Abort stubs
+133: //*************************************************
+134:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
+135:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
+136:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
+137: 
+138: // End
 ```
 
 - Line 48-54: We create a macro `vector` to define a vector in the vector table.
@@ -975,31 +749,15 @@ Finally the exception handler passed through `handler` is branched to.
 This will effectively call the exception handler function `void handler(uint64 exceptionID, AbortFrame* abortFrame)` with `exceptionID` = x0, `abortFrame` = x1
 - Line 79-108: We implement the actual exception vector table.
 This has 16 entries using the macro `vector`, each aligned to 128 bytes, while the complete table is aligned to 2048 (1 << 11) bytes, hence `.align 11`
-- Line 113-193: We create a macro `irq_stub` for an interrupt stub, which saves almost all registers, depending on the define `SAVE_VFP_REGS_ON_IRQ`.
-These are then stored on the stack, every time decreasing the stack pointer by 32 or 16 bytes, depending on the registers.
-The FIQ interrupts are enabled while the interrupt is being handled.
-After saving the registers the interrupt handler passed through `handler` is called, and after than the registers are restored.
-Then FIQ interrupts are disabled again, and the stub returns to the state before the interrupt using `eret`.
-This also reset the state of interrupt enables, etc. as well as the exception level
-- Line 208-288: We implement the FIQ interrupt stub `FIQStub`. This is similar to the normal interrupt stub, however this is not a macro.
-Also, the pointer to the handler is retrieved from a memory area structure `s_fiqData`, as well as the parameter to pass to the handler.
-If no handler was set no function is called, and the registers are simply restored
-- Line 301-311: For Raspberry Pi 4 and later, we create a macro `smc_stub` for an secure monitor call stub, which saves the link register `x30` on its own stack `SMCStack` and calls the handler passed through `handler`.
-After the call returns, the linker register is restored, and the stub returns to the state before the interrupt using `eret`.
-This also reset the state of interrupt enables, etc. as well as the exception level
-- Line 318-324: We implement the hypervisor call stub `HVCStub`. This is similar to the SMC stub, however this is not a macro.
+- Line 113-119: We implement the hypervisor call stub `HVCStub`.
 The function reads the `SPSR_EL2` system register, and sets it to switch to EL2h exception level, then moves to that that exception level using `eret`.
 This also reset the state of interrupt enables, etc.
-- Line 328-334: We define the `s_fiqData` structure, aligned to 8 bytes
-- Line 336-338: We define an address for profiling of interrupts. We'll get to that later. THis is also 8 bytes aligned
-- Line 344-349: For Raspberry Pi 4 and later, we define the stack for the supervisor monitor call `SMCStack`. Note that the stack pointer is set at the bottom of the stack
-- Line 356: We declare unexpected exceptions stub using the `stub` macro, and set its handler to `UnexpectedHandler()`
-- Line 357: We declare synchronous exceptions stub using the `stub` macro, and set its handler to `SynchronousExceptionHandler()`
-- Line 358: We declare system errors stub using the `stub` macro, and set its handler to `SystemErrorHandler()`
-- Line 359: We declare interrupt stub using the `irq_stub` macro, and set its handler to `InterruptHandler()`
-- Line 361: For Raspberry Pi 4 and later, we declare SMC stub using the `smc_stub` macro, and set its handler to `SecureMonitorHandler()`
+- Line 123-129: We define the `s_fiqData` structure, aligned to 8 bytes
+- Line 134: We declare unexpected exceptions stub using the `stub` macro, and set its handler to `UnexpectedHandler()`
+- Line 135: We declare synchronous exceptions stub using the `stub` macro, and set its handler to `SynchronousExceptionHandler()`
+- Line 136: We declare system errors stub using the `stub` macro, and set its handler to `SystemErrorHandler()`
 
-Not that this means we need to defined the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`, `InterruptHandler()` and for RaspberryPi 4 and later also `SecureMonitorHandler()`, like we did in the exception handler implementation
+Note that this means we need to defined the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`
 
 ### System.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_SYSTEMH}
 
@@ -1053,46 +811,45 @@ File: code/applications/demo/src/main.cpp
 5: #include <baremetal/Timer.h>
 6: #include <baremetal/ExceptionHandler.h>
 7: #include <baremetal/BCMRegisters.h>
-8:
-9: #include <unittest/unittest.h>
-10:
-11: LOG_MODULE("main");
-12:
-13: using namespace baremetal;
-14:
-15: int main()
-16: {
-17:     auto& console = GetConsole();
-18:
-19:     auto exceptionLevel = CurrentEL();
-20:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-21:
-22:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
-23:     char ch{};
-24:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
-25:     {
-26:         ch = console.ReadChar();
-27:         console.WriteChar(ch);
-28:     }
-29:     if (ch == 't')
-30:         // Trap
-31:         __builtin_trap();
-32:     else if (ch == 'm')
-33:     {
-34:         // Memory failure
-35:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
-36:         // make gcc happy about unused variables :-)
-37:         r++;
-38:     }
-39:
-40:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-41: }
+8: 
+9: LOG_MODULE("main");
+10: 
+11: using namespace baremetal;
+12: 
+13: int main()
+14: {
+15:     auto& console = GetConsole();
+16: 
+17:     auto exceptionLevel = CurrentEL();
+18:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+19: 
+20:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
+21:     char ch{};
+22:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+23:     {
+24:         ch = console.ReadChar();
+25:         console.WriteChar(ch);
+26:     }
+27: 
+28:     if (ch == 't')
+29:         // Trap
+30:         __builtin_trap();
+31:     else if (ch == 'm')
+32:     {
+33:         // Memory failure
+34:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
+35:         // make gcc happy about unused variables :-)
+36:         r++;
+37:     }
+38: 
+39:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+40: }
 ```
 
-- Line 29-31: If we press `t`, we cause a standard system trap, which results in a debug break
-- Line 33-38: If we press 'm', we cause a data abort due to reading a non-existent memory location
+- Line 28-30: If we press `t`, we cause a standard system trap, which results in a debug break
+- Line 32-37: If we press 'm', we cause a data abort due to reading a non-existent memory location
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_TEST_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added a new source file, we'll update the project CMake file.
 
@@ -1232,76 +989,91 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 42: #include <baremetal/Types.h>
 43: #include <baremetal/System.h>
 ...
-77: /// @brief Handles an exception, with the abort frame passed in.
-78: ///
-79: /// The exception handler is called from assembly code (ExceptionStub.S)
-80: /// @param exceptionID Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)
-81: /// @param abortFrame  Filled in AbortFrame instance.
-82: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-83: 
-84: /// @brief Handles an interrupt.
-85: ///
-86: /// The interrupt handler is called from assembly code (ExceptionStub.S)
-87: void InterruptHandler();
-88: 
-89: #ifdef __cplusplus
-90: }
-91: #endif
-92: 
-93: namespace baremetal {
-94: 
-95: /// @brief Exception handling system. Handles ARM processor exceptions
-96: /// This is a singleton class, created as soon as GetExceptionSystem() is called
-97: class ExceptionSystem
-98: {
-99:     /// <summary>
-100:     /// Construct the singleton exception system instance if needed, and return a reference to the instance. This is a friend function of class ExceptionSystem
-101:     /// </summary>
-102:     /// <returns>Reference to the singleton system instance</returns>
-103:     friend ExceptionSystem& GetExceptionSystem();
+48: #ifdef __cplusplus
+49: extern "C" {
+50: #endif
+51: 
+52: /// <summary>
+53: /// Exception abort frame
+54: ///
+55: /// Storage for register value in case of exception, in order to recover
+56: /// </summary>
+57: struct AbortFrame
+58: {
+59:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+60:     uint64	esr_el1;
+61:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
+62:     uint64	spsr_el1;
+63:     /// @brief General-purpose register, Link Register
+64:     uint64	x30;
+65:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+66:     uint64	elr_el1;
+67:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+68:     uint64	sp_el0;
+69:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+70:     uint64	sp_el1;
+71:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+72:     uint64	far_el1;
+73:     /// @brief Unused valuem used to align to 64 bytes
+74:     uint64	unused;
+75: }
+76: /// @brief Just specifies the struct is packed
+77: PACKED;
+78: 
+79: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+80: 
+81: #ifdef __cplusplus
+82: }
+83: #endif
+84: 
+85: namespace baremetal {
+86: 
+87: /// <summary>
+88: /// Exception handling system. Handles ARM processor exceptions
+89: /// 
+90: /// This is a singleton class, created as soon as GetExceptionSystem() is called
+91: /// </summary>
+92: class ExceptionSystem
+93: {
+94:     friend ExceptionSystem& GetExceptionSystem();
+95: 
+96: private:
+97:     ExceptionSystem();
+98: 
+99: public:
+100:     ~ExceptionSystem();
+101: 
+102:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
+103: };
 104: 
-105: private:
-106:     ExceptionSystem();
-107: 
-108: public:
-109:     ~ExceptionSystem();
-110: 
-111:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
-112: };
-113: 
-114: /// <summary>
-115: /// Injectable exception handler
-116: /// </summary>
-117: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
-118: /// <param name="abortFrame">Stored state information at the time of exception</param>
-119: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
-120: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
-121: 
-122: const char* GetExceptionType(unsigned exceptionID);
-123: 
-124: /// <summary>
-125: /// Register a panic handler
-126: /// </summary>
-127: /// <param name="handler">Exception panic handler</param>
-128: /// <returns>The previously set handler</returns>
-129: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
-130: 
-131: ExceptionSystem& GetExceptionSystem();
-132: 
-133: } // namespace baremetal
+105: /// <summary>
+106: /// Injectable exception handler
+107: /// </summary>
+108: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+109: /// <param name="abortFrame">Stored state information at the time of exception</param>
+110: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
+111: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
+112: 
+113: const char* GetExceptionType(unsigned exceptionID);
+114: 
+115: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+116: 
+117: ExceptionSystem& GetExceptionSystem();
+118: 
+119: } // namespace baremetal
 ```
 
-- Line 82: We change the three exception handlers to a single one, `ExceptionHandler()`
-- Line 97-112: We declare the class `ExceptionSystem`
-  - Line 103: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
-  - Line 106: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
-  - Line 109: We declare the destructor
-  - Line 111: We declare the method `Throw()` which will be called by `ExceptionHandler()`
-- Line 120: We declare the type for an injectable exception panic handler.
+- Line 79: We change the three exception handlers to a single one, `ExceptionHandler()`
+- Line 92-103: We declare the class `ExceptionSystem`
+  - Line 94: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
+  - Line 97: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
+  - Line 100: We declare the destructor
+  - Line 1102: We declare the method `Throw()` which will be called by `ExceptionHandler()`
+- Line 111: We declare the type for an injectable exception panic handler.
 This will be call by the `Throw()` method of `ExceptionSystem` if set, and will return true if the system should be halted, false if not
-- Line 122: We declare a helper function `GetExceptionType()` to convert an exception type into a string
-- Line 129: We declare a method to set the exception panice handler, returning the old installed handler, if any
-- Line 131: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
+- Line 113: We declare a helper function `GetExceptionType()` to convert an exception type into a string
+- Line 115: We declare a method to set the exception panice handler, returning the old installed handler, if any
+- Line 117: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
 
 ### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONHANDLERCPP}
 
@@ -1312,142 +1084,148 @@ Update the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
 ```cpp
 File: code/libraries/baremetal/src/ExceptionHandler.cpp
 ...
-54: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
-55: {
-56:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-57: }
-58: 
-59: void InterruptHandler()
-60: {
-61: }
-62: 
-63: namespace baremetal {
-64: 
-65: /// <summary>
-66: /// Exception panic handler
-67: ///
-68: /// If set, the panic handler is called first, and if it returns false, the system is not halted (as it would by default)
-69: /// </summary>
-70: static ExceptionPanicHandler* s_exceptionPanicHandler{};
-71: 
-72: /// <summary>
-73: /// Names exception types
-74: ///
-75: /// Order must match exception identifiers in baremetal/Exception.h
-76: /// </summary>
-77: static const char* s_exceptionName[] =
-78: {
-79:     "Unexpected exception",
-80:     "Synchronous exception",
-81:     "System error"
-82: };
-83: 
-84: /// <summary>
-85: /// Constructor
-86: ///
-87: /// Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
-88: /// </summary>
-89: ExceptionSystem::ExceptionSystem()
-90: {
-91: }
-92: 
-93: /// <summary>
-94: /// Destructor
-95: /// </summary>
-96: ExceptionSystem::~ExceptionSystem()
-97: {
-98: }
-99: 
-100: /// <summary>
-101: /// Throw an exception to the exception system
-102: /// </summary>
-103: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
-104: /// <param name="abortFrame">Stored state information at the time of exception</param>
-105: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
-106: {
-107:     assert(abortFrame != nullptr);
-108: 
-109:     uint64 sp = abortFrame->sp_el0;
-110:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
-111:     {
-112:         sp = abortFrame->sp_el1;
-113:     }
-114: 
-115:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
-116:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
+54: /// <summary>
+55: /// Handles an exception, with the abort frame passed in.
+56: ///
+57: /// The exception handler is called from assembly code (ExceptionStub.S)
+58: /// </summary>
+59: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
+60: /// <param name="abortFrame">Filled in AbortFrame instance</param>
+61: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+62: {
+63:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
+64: }
+65: 
+66: namespace baremetal {
+67: 
+68: /// <summary>
+69: /// Exception panic handler
+70: ///
+71: /// If set, the panic handler is called first, and if it returns false, the system is not halted (as it would by default)
+72: /// </summary>
+73: static ExceptionPanicHandler* s_exceptionPanicHandler{};
+74: 
+75: /// <summary>
+76: /// Names exception types
+77: ///
+78: /// Order must match exception identifiers in baremetal/Exception.h
+79: /// </summary>
+80: static const char* s_exceptionName[] =
+81: {
+82:     "Unexpected exception",
+83:     "Synchronous exception",
+84:     "System error"
+85: };
+86: 
+87: /// <summary>
+88: /// Constructor
+89: ///
+90: /// Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
+91: /// </summary>
+92: ExceptionSystem::ExceptionSystem()
+93: {
+94: }
+95: 
+96: /// <summary>
+97: /// Destructor
+98: /// </summary>
+99: ExceptionSystem::~ExceptionSystem()
+100: {
+101: }
+102: 
+103: /// <summary>
+104: /// Throw an exception to the exception system
+105: /// </summary>
+106: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+107: /// <param name="abortFrame">Stored state information at the time of exception</param>
+108: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
+109: {
+110:     assert(abortFrame != nullptr);
+111: 
+112:     uint64 sp = abortFrame->sp_el0;
+113:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
+114:     {
+115:         sp = abortFrame->sp_el1;
+116:     }
 117: 
-118:     uint64 FAR = 0;
-119:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
-120:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
-121:     {
-122:         FAR = abortFrame->far_el1;
-123:     }
-124: 
-125:     ReturnCode action = ReturnCode::ExitHalt;
-126:     if (s_exceptionPanicHandler != nullptr)
-127:     {
-128:         action = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
-129:     }
-130: 
-131:     if (action == ReturnCode::ExitHalt)
-132:         LOG_PANIC("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-133:             s_exceptionName[exceptionID],
-134:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-135:     else
-136:     {
-137:         LOG_ERROR("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-138:             s_exceptionName[exceptionID],
-139:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-140:         GetSystem().Reboot();
-141:     }
-142: }
-143: 
-144: /// @brief Convert exception ID to a string
-145: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-146: /// @return String representation of exception ID
-147: const char* GetExceptionType(unsigned exceptionID)
-148: {
-149:     return s_exceptionName[exceptionID];
-150: }
-151: 
-152: /// @brief Register an exception callback function, and return the previous one.
-153: /// @param handler      Exception handler callback function to register
-154: /// @return Previously set exception handler callback function
-155: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler)
-156: {
-157:     auto result = s_exceptionPanicHandler;
-158:     s_exceptionPanicHandler = handler;
-159:     return result;
-160: }
-161: 
-162: /// @brief Retrieve the singleton exception handling system
-163: ///
-164: /// Creates a static instance of ExceptionSystem, and returns a reference to it.
-165: /// @return A reference to the singleton exception handling system.
-166: ExceptionSystem& GetExceptionSystem()
-167: {
-168:     static ExceptionSystem system;
-169:     return system;
-170: }
-171: 
-172: } // namespace baremetal
+118:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
+119:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
+120: 
+121:     uint64 FAR = 0;
+122:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
+123:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
+124:     {
+125:         FAR = abortFrame->far_el1;
+126:     }
+127: 
+128:     ReturnCode action = ReturnCode::ExitHalt;
+129:     if (s_exceptionPanicHandler != nullptr)
+130:     {
+131:         action = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
+132:     }
+133: 
+134:     if (action == ReturnCode::ExitHalt)
+135:         LOG_PANIC("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+136:             s_exceptionName[exceptionID],
+137:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+138:     else
+139:     {
+140:         LOG_ERROR("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+141:             s_exceptionName[exceptionID],
+142:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+143:         GetSystem().Reboot();
+144:     }
+145: }
+146: 
+147: /// @brief Convert exception ID to a string
+148: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
+149: /// @return String representation of exception ID
+150: const char* GetExceptionType(unsigned exceptionID)
+151: {
+152:     return s_exceptionName[exceptionID];
+153: }
+154: 
+155: /// @brief Register an exception callback function, and return the previous one.
+156: /// @param handler      Exception handler callback function to register
+157: /// @return Previously set exception handler callback function
+158: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler)
+159: {
+160:     auto result = s_exceptionPanicHandler;
+161:     s_exceptionPanicHandler = handler;
+162:     return result;
+163: }
+164: 
+165: /// <summary>
+166: /// Construct the singleton exception system instance if needed, and return a reference to the instance
+167: /// 
+168: /// This is a friend function of class ExceptionSystem
+169: /// </summary>
+170: /// <returns>Reference to the singleton exception system instance</returns>
+171: ExceptionSystem& GetExceptionSystem()
+172: {
+173:     static ExceptionSystem system;
+174:     return system;
+175: }
+176: 
+177: } // namespace baremetal
+178: 
 ```
 
-- Line 54-57: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
-- Line 70: We define a static variable `s_exceptionPanicHandler` to hold the injected exception panic handler pointer.
+- Line 61-64: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
+- Line 73: We define a static variable `s_exceptionPanicHandler` to hold the injected exception panic handler pointer.
 It is initialized as nullptr, meaning not handler is installed
-- Line 77-82: We define the mapping `s_exceptionName` from exception type to string
-- Line 89-91: We implement the `ExceptionSystem` constructor
-- Line 96-98: We implement the `ExceptionSystem` destructor
-- Line 105-142: We implement the method `Throw()`
-  - Line 109-113: We determine the stack pointer at the time of the exception, which is the EL0 stack pointer, unless the exception level was EL1h (We can only be in exception level EL0 or EL1, as we specifically move to EL1 in the startup code)
-  - Line 115-116: We extract the EC and ISS fields from the ESR_EL1 register value
-  - Line 119-123: If the exception has an exception code relating to an instruction abort, a data abort or a watchpoint, We get the value of the Fault Address Register, which holds the address which generated the exception
-  - Line 125-129: We call the exception panic handler if installed, setting its return value as the return code. If no handler is installed, the default is to halt
-  - Line 131-141: If we need to halt, we perform a panic log (which will halt the system), otherwise we log an error and reboot
-- Line 147-150: We implement the function `GetExceptionType()`
-- Line 155-160: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
-- Line 166-170: We implement the function `GetExceptionSystem()` in the by now common way
+- Line 80-85: We define the mapping `s_exceptionName` from exception type to string
+- Line 92-94: We implement the `ExceptionSystem` constructor
+- Line 99-101: We implement the `ExceptionSystem` destructor
+- Line 108-145: We implement the method `Throw()`
+  - Line 112-116: We determine the stack pointer at the time of the exception, which is the EL0 stack pointer, unless the exception level was EL1h (We can only be in exception level EL0 or EL1, as we specifically move to EL1 in the startup code)
+  - Line 118-119: We extract the EC and ISS fields from the ESR_EL1 register value
+  - Line 122-126: If the exception has an exception code relating to an instruction abort, a data abort or a watchpoint, We get the value of the Fault Address Register, which holds the address which generated the exception
+  - Line 128-132: We call the exception panic handler if installed, setting its return value as the return code. If no handler is installed, the default is to halt
+  - Line 134-144: If we need to halt, we perform a panic log (which will halt the system), otherwise we log an error and reboot
+- Line 150-153: We implement the function `GetExceptionType()`
+- Line 158-163: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
+- Line 171-175: We implement the function `GetExceptionSystem()` in the by now common way
 
 ### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONSTUBS}
 
@@ -1458,23 +1236,18 @@ Update the file `code/libraries/baremetal/src/ExceptionStub.S`
 ```cpp
 File: code/libraries/baremetal/src/ExceptionStub.S
 ...
-353: //*************************************************
-354: // Abort stubs
-355: //*************************************************
-356:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
-357:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
-358:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
-359:     irq_stub    IRQStub,                                    InterruptHandler
-360: #if BAREMETAL_RPI_TARGET >= 4
-361:     smc_stub    SMCStub,                                    SecureMonitorHandler
-362: #endif
-363: 
+131: //*************************************************
+132: // Abort stubs
+133: //*************************************************
+134:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
+135:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
+136:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
 ...
 ```
 
 We now changed the functions called for the different types of exceptions to a single one, `ExceptionHandler`
 
-### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
 
 Let's implement and use an exception panic handler, that forces the system to reboot on exception
 
@@ -1490,52 +1263,50 @@ File: code/applications/demo/src/main.cpp
 6: #include <baremetal/ExceptionHandler.h>
 7: #include <baremetal/BCMRegisters.h>
 8: 
-9: #include <unittest/unittest.h>
+9: LOG_MODULE("main");
 10: 
-11: LOG_MODULE("main");
+11: using namespace baremetal;
 12: 
-13: using namespace baremetal;
-14: 
-15: static ReturnCode RebootOnException(unsigned /*exceptionID*/, AbortFrame* /*abortFrame*/)
-16: {
-17:     return ReturnCode::ExitReboot;
-18: }
-19: 
-20: int main()
-21: {
-22:     auto& console = GetConsole();
-23: 
-24:     auto exceptionLevel = CurrentEL();
-25:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-26: 
-27:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
-28:     char ch{};
-29:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
-30:     {
-31:         ch = console.ReadChar();
-32:         console.WriteChar(ch);
-33:     }
-34:     RegisterExceptionPanicHandler(RebootOnException);
-35: 
-36:     if (ch == 't')
-37:         // Trap
-38:         __builtin_trap();
-39:     else if (ch == 'm')
-40:     {
-41:         // Memory failure
-42:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
-43:         // make gcc happy about unused variables :-)
-44:         r++;
-45:     }
-46: 
-47:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-48: }
+13: static ReturnCode RebootOnException(unsigned /*exceptionID*/, AbortFrame* /*abortFrame*/)
+14: {
+15:     return ReturnCode::ExitReboot;
+16: }
+17: 
+18: int main()
+19: {
+20:     auto& console = GetConsole();
+21: 
+22:     auto exceptionLevel = CurrentEL();
+23:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+24: 
+25:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
+26:     char ch{};
+27:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+28:     {
+29:         ch = console.ReadChar();
+30:         console.WriteChar(ch);
+31:     }
+32:     RegisterExceptionPanicHandler(RebootOnException);
+33: 
+34:     if (ch == 't')
+35:         // Trap
+36:         __builtin_trap();
+37:     else if (ch == 'm')
+38:     {
+39:         // Memory failure
+40:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
+41:         // make gcc happy about unused variables :-)
+42:         r++;
+43:     }
+44: 
+45:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+46: }
 ```
 
-- Line 15-18: We add a function `RebootOnException()` that simply returns `ReturnCode::ExitReboot`
-- Line 34: We inject the function `RebootOnException()` to be called on exceptions
+- Line 13-16: We add a function `RebootOnException()` that simply returns `ReturnCode::ExitReboot`
+- Line 32: We inject the function `RebootOnException()` to be called on exceptions
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_TEST_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As no files were added, we don't need to update the project CMake file.
 

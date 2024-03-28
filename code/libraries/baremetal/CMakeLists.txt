@@ -35,6 +35,7 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/InterruptHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
@@ -57,6 +58,7 @@ set(PROJECT_SOURCES
 
 set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
@@ -67,6 +69,8 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Interrupt.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/InterruptHandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MachineInfo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h

@@ -165,6 +165,7 @@ function(create_image target image project)
     message(STATUS "generate ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image} from ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${project}")
     add_custom_command(
         OUTPUT ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
+        COMMAND mkdir -p ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}
         COMMAND ${CMAKE_OBJCOPY} ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${TARGET_NAME} -O binary ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
         DEPENDS ${project}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

@@ -9,21 +9,22 @@ If we want to do development for an embedded board, a number of things need to b
 In order to perform a cross-build (building on one machine to create code that runs on a different target machine), we will need a so-called toolchain.
 This is the complete set of compilers, assemblers, linkers, etc. to build binaries for the target platform.
 
-When building for a specific OS, we also need a sysroot, simple said a SDK, that contains all header files and libraries to compile and link with for the specific OS installation.
+When building for a specific OS, we also need a sysroot, simply said a SDK, that contains all header files and libraries to compile and link with for the specific OS installation.
 This requires all libraries needed to build the SW to be present in the sysroot, otherwise we clearly cannot build the SW.
 However, since we're going build for baremetal, the only libraries we'll need is the compiler's set of libraries. So no sysroot is needed.
+If however we would build against the Raspberry Pi OS for example, a sysroot would be needed.
 
 For the toolchain, we're going to choose the GNU toolchain for ARM64. It is possible to use Clang for this as well, but we'll not cover that here.
 
-The current version as of writing this document is 13.2 rel 1.
+The current version as of writing this document is 13.3 rel 1.
 
 ### Windows {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_COMPILER_TOOLCHAIN_WINDOWS}
 
-For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf.zip?rev=01c03590412e49d495c78b9f979fd21c&hash=BC02BCAA3B72FF2472AAB83ECBE4F27C).
+For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-arm-none-linux-gnueabihf.zip).
 Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
 The best way to install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
-Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`:
+Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`:
 
 <img src="images/env-before.png" alt="Environment edit" width="500"/>
 
@@ -31,7 +32,7 @@ In the lower pane, select Path and click Edit...
 
 <img src="images/env-add.png" alt="Environment add" width="500"/>
 
-Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK.
+Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK.
 
 Click OK again to finalize changing the environment.
 
@@ -43,7 +44,7 @@ aarch64-none-elf-gcc --version
 The command should execute without error, and print the version of the compiler:
 
 ```text
-aarch64-none-elf-gcc (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.1 20231009
+aarch64-none-elf-gcc (Arm GNU Toolchain 13.3.Rel1 (Build arm-13.24)) 13.3.1 20240614
 Copyright (C) 2023 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -51,22 +52,22 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ### Linux {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_COMPILER_TOOLCHAIN_LINUX}
 
-For building on Linux, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz?rev=a05df3001fa34105838e6fba79ee1b23&hash=D63F63D13F01626D207019956E7122B5).
+For building on Linux, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz).
 Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
 The easiest way to install on Linux is as follows:
 
 ```bash
-wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
+wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz
 sudo mkdir -p /opt/toolchains
-tar xvf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
-sudo mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/ /opt/toolchains/
+tar xvf arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz
+sudo mv arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/ /opt/toolchains/
 ```
 
 In order to add the path to your environment, edit `.bashrc` in your home directory, and add the following line, for example at the end:
 
 ```text
-export PATH=/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin:$PATH
+export PATH=/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin:$PATH
 ```
 
 To test, first log out and log in again, open a command line prompt, and execute:
@@ -77,7 +78,7 @@ aarch64-none-elf-gcc --version
 The command should execute without error, and print the version of the compiler:
 
 ```text
-aarch64-none-elf-gcc (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.1 20231009
+aarch64-none-elf-gcc (Arm GNU Toolchain 13.3.Rel1 (Build arm-13.24)) 13.3.1 20240614
 Copyright (C) 2023 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -108,7 +109,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest), 
 by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
-The latest stable release at the moment of writing this document is [3.27.8](https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-windows-x86_64.msi).
+The latest stable release at the moment of writing this document is [3.30.1](https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-windows-x86_64.msi).
 
 <img src="images/cmake-install-1.png" alt="CMake installation step 1" width="400"/>
 
@@ -120,7 +121,7 @@ Check "I accept the terms in the License Agreement", and click Next
 
 <img src="images/cmake-install-3.png" alt="CMake installation step 3" width="400"/>
 
-Select "Add CMake to the system PATH for all users" or "Add CMake to the system PATH for the current user"
+Select "Add CMake to the PATH environment variable"
 
 Click Next
 
@@ -144,7 +145,7 @@ To test, open a command line prompt, and execute:
 The command should execute without error, and print the version of the CMake:
 
 ```text
-cmake version 3.27.8
+cmake version 3.30.1
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
@@ -158,23 +159,24 @@ sudo apt update
 sudo apt install cmake
 ```
 
+The latest version will depend on your distribution. In this case (Ubuntu 22.04) it is 3.29.6
+
 ```text
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
-Suggested packages:
-  cmake-doc cmake-format elpa-cmake-mode
 The following NEW packages will be installed:
   cmake
-0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-Need to get 0 B/8,692 kB of archives.
-After this operation, 29.6 MB of additional disk space will be used.
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 13,9 MB of archives.
+After this operation, 46,0 MB of additional disk space will be used.
+Get:1 https://apt.kitware.com/ubuntu focal/main amd64 cmake amd64 3.29.6-0kitware1ubuntu20.04.1 [13,9 MB]
+Fetched 13,9 MB in 3s (5.167 kB/s)
 Selecting previously unselected package cmake.
-(Reading database ... 207262 files and directories currently installed.)
-Preparing to unpack .../cmake_3.25.1-1_amd64.deb ...
-Unpacking cmake (3.25.1-1) ...
-Setting up cmake (3.25.1-1) ...
-Processing triggers for man-db (2.11.2-2) ...
+(Reading database ... 306230 files and directories currently installed.)
+Preparing to unpack .../cmake_3.29.6-0kitware1ubuntu20.04.1_amd64.deb ...
+Unpacking cmake (3.29.6-0kitware1ubuntu20.04.1) ...
+Setting up cmake (3.29.6-0kitware1ubuntu20.04.1) ...
 ```
 
 To test, open a command line prompt, and execute:
@@ -185,7 +187,7 @@ cmake --version
 The command should execute without error, and print the version of the CMake:
 
 ```text
-cmake version 3.25.1
+cmake version 3.29.6
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
@@ -209,7 +211,7 @@ The command should execute without error, and print the version of the Ninja:
 1.10.2
 ```
 
-To install Ninja build on your system separately, download it from [here](https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip), and unpack the ZIP file. It will contain only one file, `ninja.exe`.
+To install Ninja build on your system separately, download it from [here](https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip), and unpack the ZIP file. It will contain only one file, `ninja.exe`.
 For example you can place this file in `C:\Program Files\Ninja`. Make sure to add it to your PATH environment variable.
 
 To test, open a command line prompt, and execute:
@@ -220,7 +222,7 @@ To test, open a command line prompt, and execute:
 The command should execute without error, and print the version of the Ninja:
 
 ```text
-1.11.1
+1.12.1
 ```
 
 #### Linux {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_BUILD_ENVIRONMENT_NINJA_LINUX}
@@ -231,21 +233,25 @@ On Linux, your can install ninja by installing the `ninja-build` package:
 sudo apt install ninja-build
 ```
 
+The version installed will differ depending on your distribution. In this case (Ubuntu 22.04) it is 1.10.1.
+
 ```text
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 The following NEW packages will be installed:
   ninja-build
-0 upgraded, 1 newly installed, 0 to remove and 3 not upgraded.
-Need to get 0 B/136 kB of archives.
-After this operation, 427 kB of additional disk space will be used.
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 111 kB of archives.
+After this operation, 358 kB of additional disk space will be used.
+Get:1 http://nl.archive.ubuntu.com/ubuntu jammy/universe amd64 ninja-build amd64 1.10.1-1 [111 kB]
+Fetched 111 kB in 0s (2.032 kB/s)
 Selecting previously unselected package ninja-build.
-(Reading database ... 207877 files and directories currently installed.)
-Preparing to unpack .../ninja-build_1.11.1-1_amd64.deb ...
-Unpacking ninja-build (1.11.1-1) ...
-Setting up ninja-build (1.11.1-1) ...
-Processing triggers for man-db (2.11.2-2) ...
+(Reading database ... 306229 files and directories currently installed.)
+Preparing to unpack .../ninja-build_1.10.1-1_amd64.deb ...
+Unpacking ninja-build (1.10.1-1) ...
+Setting up ninja-build (1.10.1-1) ...
+Processing triggers for man-db (2.10.2-1) ...
 ```
 
 To test, open a command line prompt, and execute:
@@ -256,7 +262,7 @@ ninja --version
 The command should execute without error, and print the version of the Ninja:
 
 ```text
-1.11.1
+1.10.1
 ```
 
 ## Development environment {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEVELOPMENT_ENVIRONMENT}
@@ -294,6 +300,7 @@ Make sure that your editor of choice is installed. Some logical choices may be:
 - geany
 - joe
 - gedit
+- pluma
 - gnome-text-editor
 - Visual Studio Code
 - ...
@@ -310,22 +317,10 @@ In order to deploy a baremetal application, we will need to follow a couple of s
   - Copy the image onto an SD card and start the system (see [Running from SD card](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_FROM_SD_CARD)).
 The SD card will need to contain some other files in order for the system to start.
   - Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
-
-In `tutorial/01-demo` you will find a `Netboot.zip`, which is verified to work on both Raspberry Pi 3 and 4.
-There is still one caveat, on Raspberry Pi 4, a reboot does not restart Netboot yet.
-
-_Correctly combining files for Raspberry Pi to boot is a challenge, especially if you don't know or understand how the system starts up.
-So it's wise to simply take something that works, and play around with it._
-More information can be found in [System startup](#SYSTEM_STARTUP) and online [here](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-boot-eeprom)
-
-Unpack it onto the SD card (this must be formatted as FAT), make sure to eject (Windows) or sync (Linux) before taking the SD card out.
-Place it into your board, and go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
-
 __This is my personal preference, as we don't need to rewrite the SD card every time__. The next time the system boots, it will start netboot again.
 See [Running using Netboot](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_USING_NETBOOT).
-  - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi3 for now, but there is a [patch](https://github.com/0xMirasio/qemu-patch-raspberry4) (untested for now) to run as rpi4).
+  - Run the image within QEMU. QEMU is an emulator that supports multiple platforms, including Raspberry Pi (the default QEMU supports up to rpi4 for now).
 
-__It is also possible to use QEMU with Odroid boards, this will be described later__.
 QEMU requires quite some options, which are not always straightforward. Also, QEMU can never fully emulate all HW on the board.
 For running inside QEMU, see [Running in QEMU](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_IN_QEMU).
 
@@ -345,8 +340,8 @@ For the demo you will need to attach a serial console
 For an example of a good adapter see [ADAFruit](https://www.adafruit.com/product/954). See below for the one I prefer, however there are more.
 <u>__Be careful about the pinning__</u>.
 - Attach the USB to serial device <u>__before__</u> powering on the board
-- Make sure to connect the serial to USB device to the <u>__correct pins__</u> (normally, and in this case as well, GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1.
-In our examples we will be using UART 1 in most cases)
+- Make sure to connect the serial to USB device to the <u>__correct pins__</u> (GPIO 14 is used for TxD, GPIO15 for RxD for either UART 0 or UART 1.
+In our examples we will be using UART 1 initially, but later move to UART 0, as this is slightly harder to initialize)
 - Make sure you have the drivers for the serial to USB device (USB side of course) correctly installed on your host system
   - Most devices use a Prolific 2303 TA chip, support on Windows 11 is a bit tricky, you'll have to replace the driver for it to work well.
 Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://embetronicx.com/uncategorized/fixed-prolific-pl2303ta-usb-to-serial-and-windows-11/). You'll have to re-install the drivers on Windows 11 after every reboot, which is annoying.
@@ -354,7 +349,7 @@ Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://emb
   - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
   - [Teraterm](https://tera-term.en.lo4d.com/download) is my personal favorite, but the download sites seem a bit less trustworthy nowadays
   - One Linux there are quite a few applications available, e.g. screen, minicom, gtkterm
-- Make sure you have the correct device assigned (COMx on Windows /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
+- Make sure you have the correct device assigned (COMx on Windows, /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
 <img src="images/usb-rs232.jpg" alt="USB-to-serial example" width="400"/>
 
@@ -364,7 +359,7 @@ Please refer to the image below (the wiring color is common for most Prolific 23
 
 <img src="images/gpio-pinout-diagram-uart1.png" alt="GPIO pinout for UART1" width="400"/>
 
-Do <u>__NOT__</u> connect the red wire (+3.3V).
+Do <u>__NOT__</u> connect the red wire (+3.3V). The converter is automatically powered through USB, and connecting this wire will try to power Raspberry Pi through the host PC's USB port, which is <u>__NOT__</u> a wise choice.
 
 ### Running from SD card {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_FROM_SD_CARD}
 
@@ -375,6 +370,18 @@ Please make sure to eject / sync your SD card first before removing it from the 
 Put the SD card in your board, and attach a serial to USB device to the board. Then power on the board.
 
 ### Running using Netboot {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_USING_NETBOOT}
+
+
+In `tutorial/01-demo` you will find a `Netboot.zip`, which is verified to work on both Raspberry Pi 3 and 4.
+There is still one caveat, on Raspberry Pi 4, a reboot does not restart Netboot yet.
+On Raspberry Pi 5 this is not tested yet.
+
+_Correctly combining files for Raspberry Pi to boot is a challenge, especially if you don't know or understand how the system starts up.
+So it's wise to simply take something that works, and play around with it._
+More information can be found in [System startup](#SYSTEM_STARTUP) and online [here](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-boot-eeprom)
+
+Unpack it onto the SD card (this must be formatted as FAT), make sure to eject (Windows) or sync (Linux) before taking the SD card out.
+Place it into your board, and go to the website created by netboot, select an image and upload it. This will reboot the system with your image.
 
 The SD card will be created by unzipping the file `tutorial/01-demo/Netboot.zip`, and copying the contents to the SD card.
 Please make sure to eject / sync your SD card first before removing it from the reader.
@@ -394,8 +401,8 @@ Using QEMU is quite straightforward. You will need to install QEMU however.
 
 ##### Windows {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_IN_QEMU_INSTALLING_QEMU_WINDOWS}
 
-There are specific builds of QEMU provided by Stephan Weil, which can be downloaded [here](https://qemu.weilnetz.de/w64/)
-The latest version at the moment of writing this document is [8.2.0](https://qemu.weilnetz.de/w64/qemu-w64-setup-20231224.exe).
+There are specific Windows builds of QEMU provided by Stephan Weil, which can be downloaded [here](https://qemu.weilnetz.de/w64/2024/)
+The latest version at the moment of writing this document is [9.0.50](https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20240720.exe).
 
 Simply run the executable, which will install QEMU.
 
@@ -430,11 +437,13 @@ QEMU is now installed in `C:\Program Files\qemu`
 ```
 
 ```text
-QEMU emulator version 8.2.0 (v8.2.0-12045-g3d58f9b5c5)
-Copyright (c) 2003-2023 Fabrice Bellard and the QEMU Project developers
+QEMU emulator version 9.0.50 (v9.0.0-14417-ga1d2d66911-dirty)
+Copyright (c) 2003-2024 Fabrice Bellard and the QEMU Project developers
 ```
 
 ##### Linux {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_IN_QEMU_INSTALLING_QEMU_LINUX}
+
+On Linux (Debian Bookworm), the 64 bit support is very limited, and only goes up to Raspberry Pi 3B.
 
 To install QEMU:
 
@@ -443,21 +452,78 @@ sudo apt install qemu-system-arm
 ```
 
 ```text
+[sudo] password for rene:
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 The following additional packages will be installed:
-  ibverbs-providers ipxe-qemu libaio1 libcacard0 libcapstone4 libdaxctl1 libexecs0 libfdt1 libfmt9 libgfapi0 libgfrpc0 libgfxdr0 libglusterfs0 libibverbs1 libiscsi7 libndctl6 libpmem1 librados2 librbd1 librdmacm1 libslirp0
-  libspice-server1 libssh-4 liburing2 libusbredirparser1 libvdeplug2 libvirglrenderer1 qemu-block-extra qemu-efi-aarch64 qemu-efi-arm qemu-system-common qemu-system-data qemu-system-gui qemu-utils
+  cpu-checker msr-tools ovmf qemu-system-mips qemu-system-misc qemu-system-ppc qemu-system-s390x qemu-system-sparc qemu-system-x86 seabios
 Suggested packages:
   samba vde2
 The following NEW packages will be installed:
-  ibverbs-providers ipxe-qemu libaio1 libcacard0 libcapstone4 libdaxctl1 libexecs0 libfdt1 libfmt9 libgfapi0 libgfrpc0 libgfxdr0 libglusterfs0 libibverbs1 libiscsi7 libndctl6 libpmem1 librados2 librbd1 librdmacm1 libslirp0
-  libspice-server1 libssh-4 liburing2 libusbredirparser1 libvdeplug2 libvirglrenderer1 qemu-block-extra qemu-efi-aarch64 qemu-efi-arm qemu-system-arm qemu-system-common qemu-system-data qemu-system-gui qemu-utils
-0 upgraded, 35 newly installed, 0 to remove and 0 not upgraded.
-Need to get 39.6 MB of archives.
-After this operation, 529 MB of additional disk space will be used.
+  cpu-checker msr-tools ovmf qemu-system qemu-system-mips qemu-system-misc qemu-system-ppc qemu-system-s390x qemu-system-sparc qemu-system-x86 seabios
+0 upgraded, 11 newly installed, 0 to remove and 1 not upgraded.
+Need to get 91,2 MB of archives.
+After this operation, 366 MB of additional disk space will be used.
 Do you want to continue? [Y/n] y
+Get:1 http://nl.archive.ubuntu.com/ubuntu jammy/main amd64 msr-tools amd64 1.3-4 [10,3 kB]
+Get:2 http://nl.archive.ubuntu.com/ubuntu jammy/main amd64 cpu-checker amd64 0.7-1.3build1 [6.800 B]
+Get:3 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-mips amd64 1:6.2+dfsg-2ubuntu6.21 [15,1 MB]
+Get:4 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-ppc amd64 1:6.2+dfsg-2ubuntu6.21 [8.418 kB]
+Get:5 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-sparc amd64 1:6.2+dfsg-2ubuntu6.21 [5.735 kB]
+Get:6 http://nl.archive.ubuntu.com/ubuntu jammy/main amd64 seabios all 1.15.0-1 [174 kB]
+Get:7 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-x86 amd64 1:6.2+dfsg-2ubuntu6.21 [10,1 MB]
+Get:8 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-s390x amd64 1:6.2+dfsg-2ubuntu6.21 [2.869 kB]
+Get:9 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system-misc amd64 1:6.2+dfsg-2ubuntu6.21 [41,2 MB]
+Get:10 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 qemu-system amd64 1:6.2+dfsg-2ubuntu6.21 [12,7 kB]
+Get:11 http://nl.archive.ubuntu.com/ubuntu jammy-updates/main amd64 ovmf all 2022.02-3ubuntu0.22.04.2 [7.561 kB]
+Fetched 91,2 MB in 6s (14,3 MB/s)
+Selecting previously unselected package msr-tools.
+(Reading database ... 306240 files and directories currently installed.)
+Preparing to unpack .../00-msr-tools_1.3-4_amd64.deb ...
+Unpacking msr-tools (1.3-4) ...
+Selecting previously unselected package cpu-checker.
+Preparing to unpack .../01-cpu-checker_0.7-1.3build1_amd64.deb ...
+Unpacking cpu-checker (0.7-1.3build1) ...
+Selecting previously unselected package qemu-system-mips.
+Preparing to unpack .../02-qemu-system-mips_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-mips (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package qemu-system-ppc.
+Preparing to unpack .../03-qemu-system-ppc_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-ppc (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package qemu-system-sparc.
+Preparing to unpack .../04-qemu-system-sparc_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-sparc (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package seabios.
+Preparing to unpack .../05-seabios_1.15.0-1_all.deb ...
+Unpacking seabios (1.15.0-1) ...
+Selecting previously unselected package qemu-system-x86.
+Preparing to unpack .../06-qemu-system-x86_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-x86 (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package qemu-system-s390x.
+Preparing to unpack .../07-qemu-system-s390x_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-s390x (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package qemu-system-misc.
+Preparing to unpack .../08-qemu-system-misc_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system-misc (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package qemu-system.
+Preparing to unpack .../09-qemu-system_1%3a6.2+dfsg-2ubuntu6.21_amd64.deb ...
+Unpacking qemu-system (1:6.2+dfsg-2ubuntu6.21) ...
+Selecting previously unselected package ovmf.
+Preparing to unpack .../10-ovmf_2022.02-3ubuntu0.22.04.2_all.deb ...
+Unpacking ovmf (2022.02-3ubuntu0.22.04.2) ...
+Setting up qemu-system-mips (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up qemu-system-sparc (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up msr-tools (1.3-4) ...
+Setting up qemu-system-ppc (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up qemu-system-misc (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up ovmf (2022.02-3ubuntu0.22.04.2) ...
+Setting up seabios (1.15.0-1) ...
+Setting up cpu-checker (0.7-1.3build1) ...
+Setting up qemu-system-s390x (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up qemu-system-x86 (1:6.2+dfsg-2ubuntu6.21) ...
+Setting up qemu-system (1:6.2+dfsg-2ubuntu6.21) ...
+Processing triggers for man-db (2.10.2-1) ...
 ...
 ```
 
@@ -466,8 +532,8 @@ qemu-system-aarch64 --version
 ```
 
 ```text
-QEMU emulator version 7.2.7 (Debian 1:7.2+dfsg-7+deb12u3)
-Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
+QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.21)
+Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 ```
 
 #### Running the application in QEMU {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_IN_QEMU_RUNNING_THE_APPLICATION_IN_QEMU}
@@ -684,6 +750,24 @@ As the standard debugger from ARM does not work well due to a Python dependency,
 sudo apt install gdb-multiarch
 ```
 
+```text
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  gdb-multiarch
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 4.591 kB of archives.
+After this operation, 18,2 MB of additional disk space will be used.
+Get:1 http://nl.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 gdb-multiarch amd64 12.1-0ubuntu1~22.04.2 [4.591 kB]
+Fetched 4.591 kB in 0s (13,4 MB/s)
+Selecting previously unselected package gdb-multiarch.
+(Reading database ... 306401 files and directories currently installed.)
+Preparing to unpack .../gdb-multiarch_12.1-0ubuntu1~22.04.2_amd64.deb ...
+Unpacking gdb-multiarch (12.1-0ubuntu1~22.04.2) ...
+Setting up gdb-multiarch (12.1-0ubuntu1~22.04.2) ...
+```
+
 Start gdb:
 
 ```bash
@@ -763,10 +847,67 @@ Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal/code/application
 59	    LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
 (gdb) n
 60	    LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
-(gdb) kill
-Kill the program being debugged? (y or n) y
-[Inferior 1 (process 1) killed]
+(gdb) c
+Continuing.
+```
+
+Press h in QEMU
+
+``` text
+[Inferior 1 (process 1) exited normally]
 (gdb) quit
 ```
 
+Output in QEMU will be as shown below
+
+<img src="images/qemu-output-linux.png" alt="QEMU waiting for debugger" width="500"/>
+
 Next: [02-setting-up-a-project](02-setting-up-a-project.md)
+
+\todo Possibly add explanation on VSCode. It should be possible to add a kit to .vscode\cmake-kits.json:
+[
+    {
+        "name": "Baremetal",
+        "toolchainFile": "${workspacedir}/baremetal.toolchain",
+        "isTrusted": true
+    }
+]
+And and the correct definitions for CMake using .vscode/settings.json:
+{
+    "cmake.configureArgs": [
+        "-DVERSION_NUMBER=1.0.0",
+        "-DVERBOSE_BUILD=ON",
+        "-DBAREMETAL_RPI_TARGET=3",
+        "-DBAREMETAL_CONSOLE_UART0=ON"
+    ],
+    "cmake.buildDirectory": "${workspaceFolder}/cmake-build"
+}
+And then configure the debugger such that it injects the correct commands using .vscode/launch.json:
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/output/Debug/bin/demo.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "miDebuggerPath": "gdb-multiarch",
+            "miDebuggerArgs": "${workspaceFolder}/output/Debug/bin/demo.elf",
+            "MIMode": "gdb",
+            "setupCommands": [
+                { "text": "set architecture aarch64", "description": "ARM64 architecture", "ignoreFailures": false },
+                { "text": "target remote localhost:1234", "description": "Connect to QEMU", "ignoreFailures": false },
+                { "text": "load", "description": "Start executable", "ignoreFailures": false }                
+            ],
+            "customLaunchSetupCommands": []
+        }
+    ]
+}

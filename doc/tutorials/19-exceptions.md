@@ -14,7 +14,7 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/19-exceptions.elf`
 - an image in `deploy/Debug/19-exceptions-image`
 
-## Exception handling - Step 1 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1}
+## Exception handling - Step 1 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1}
 
 Before we can do anything with interrupts, we need to embrace the concept of exceptions.
 These are not the same as exceptions in programming languages such as C++, but are exceptions in the context of the processor.
@@ -34,7 +34,7 @@ Provided to support switching between Secure and Non-secure states.
 - System (SYS): Privileged mode, sharing the register view with User mode
 - Hypervisor (HYP): Entered by the Hypervisor Call and Hypervisor Trap exceptions
 
-### Register in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_REGISTER_IN_THE_ARM_PROCESSOR}
+### Register in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_REGISTER_IN_THE_ARM_PROCESSOR}
 
 - 64 bit registers X0-X30 (W0-W30 are 32 bit registers using the low significant 32 bits of X0-X30)
 - 128 bit floating point registers Q0-Q31 (D0-D31 are 64 bit registers using the low significant 64 bits, similar for S0-S31 with 32 bits, H0-H31 with 16 bits, B0-B31 with 8 bits)
@@ -45,7 +45,7 @@ Provided to support switching between Secure and Non-secure states.
 - XZR (also WZR for 32 bits): Zero register
 - There is also a large set of system registers. See [ARM registers](#ARM_REGISTERS), [documentation](pdf/arm-architecture-registers.pdf), and [ARM� Architecture Reference Manual](pdf/AArch64ReferenceManual.1410976032.pdf) for more information.
 
-### Exception levels in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVELS_IN_THE_ARM_PROCESSOR}
+### Exception levels in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTION_LEVELS_IN_THE_ARM_PROCESSOR}
 
 ARMv8 has four exception levels:
 - EL0: Application level
@@ -53,7 +53,7 @@ ARMv8 has four exception levels:
 - EL2: Hypervisor level
 - EL3: Firmware privilege level / Secure monitor level
 
-### Exception level specific registers {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_LEVEL_SPECIFIC_REGISTERS}
+### Exception level specific registers {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTION_LEVEL_SPECIFIC_REGISTERS}
 
 Each exception level has its own special registers:
 - EL0: SP_EL0
@@ -67,7 +67,7 @@ Stack pointers can be used in a different way:
 - EL2: EL2t uses SP_EL0, EL2h uses SP_EL2
 - EL3: EL3t uses SP_EL0, EL3h uses SP_EL3
 
-### Exception types {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_TYPES}
+### Exception types {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTION_TYPES}
 
 - Interrupts: There are two types of interrupts called IRQ and FIQ.
 FIQ is higher priority than IRQ. Both of these kinds of exception are typically associated with input pins on the core.
@@ -81,7 +81,7 @@ External hardware asserts an interrupt request line and the corresponding except
   - The Hypervisor Call (HVC) instruction enables the guest OS to request hypervisor services.
   - The Secure monitor Call (SMC) instruction enables the Normal world to request Secure world services.
 
-### Exception vector {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTION_VECTOR}
+### Exception vector {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTION_VECTOR}
 
 When an exception occurs, the processor must execute handler code which corresponds to the exception.
 The location in memory where the handler is stored is called the exception vector.
@@ -116,7 +116,7 @@ The table effectively consists of 4 sets of 4 entries each. Which entry is used 
 
 We'll need to write some more assembly code, that implements the different exception handlers, and creates the exception vector table.
 
-### Macros.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_MACROSH}
+### Macros.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_MACROSH}
 
 We are going to use a new macro `BITS` in the previous file, which we'll need to define.
 
@@ -132,7 +132,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 
 This defines the `BITS` macro to create a mask for bit sequences (from bit n to up to and including bit m)
 
-### ARMInstructions.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_ARMINSTRUCTIONSH}
+### ARMInstructions.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_ARMINSTRUCTIONSH}
 
 We already created a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
 The complete set or ARM registers is documented in [documentation](pdf/arm-architecture-registers.pdf), the most important ones are described in [ARM registers](#ARM_REGISTERS).
@@ -266,7 +266,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 - Line 120-190: We define different values for this field
 - Line 192-197: We define the ISS field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
 
-### Exception.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONH}
+### Exception.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONH}
 
 We will define some values for different types of exceptions.
 
@@ -289,7 +289,7 @@ File: code/libraries/baremetal/include/baremetal/Exception.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -327,7 +327,7 @@ File: code/libraries/baremetal/include/baremetal/Exception.h
 51:
 ```
 
-### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERH}
+### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONHANDLERH}
 
 We will create a prototype for the exception handler.
 
@@ -350,7 +350,7 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -450,7 +450,7 @@ The first parameter is an exception ID which we will set (in this case EXCEPTION
 The first parameter is an exception ID which we will set (in this case EXCEPTION_SYSTEM_ERROR), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
 - Line 100: We declare the interrupt handler `InterruptHandler()`. This will later be moved, it is for now just added to avoid linker errors
 
-### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONHANDLERCPP}
+### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONHANDLERCPP}
 
 We will implement the exception handlers.
 
@@ -473,7 +473,7 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -539,7 +539,7 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 - Line 67-70: We implement the function `SystemErrorHandler()`, which simply prints some text
 - Line 72-74: We implement the function `InterruptHandler()`, which does nothing
 
-### BCMRegisters.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_BCMREGISTERSH}
+### BCMRegisters.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_BCMREGISTERSH}
 
 We are using a new macro `BITS` in the previous file, which we'll need to define.
 
@@ -591,7 +591,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 - Line 48-50: As this header is also included by the exception stub comming up next, we need to protect against specific C/C++ definitions, so we only include the type definitions header if we are building for C++
 - Line 100-126: We add definitions for registers relating to the Raspberry Pi interrupt control register. Some of these are used by the exception stub code
 
-### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_EXCEPTIONSTUBS}
+### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONSTUBS}
 
 Next we need to write some assembly to implement the exception vectors.
 
@@ -615,7 +615,7 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 14: //
 15: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 16: //
-17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 18: //
 19: // Permission is hereby granted, free of charge, to any person
 20: // obtaining a copy of this software and associated documentation
@@ -759,7 +759,7 @@ This also reset the state of interrupt enables, etc.
 
 Note that this means we need to defined the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`
 
-### System.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_SYSTEMH}
+### System.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_SYSTEMH}
 
 We'll add a function to extract the current exception level, to be printer for information.
 
@@ -776,7 +776,7 @@ File: code/libraries/baremetal/include/baremetal/System.h
 ...
 ```
 
-### System.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_SYSTEMCPP}
+### System.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_SYSTEMCPP}
 
 We'll implement the newly added `CurrentEL()` function.
 
@@ -796,7 +796,7 @@ File: code/libraries/baremetal/src/System.cpp
 
 This function used the assembly macro `GetCurrentEL` to retrieve the `CurrentEL` system register value, and extracts the bits 2..3 which hold the exception level.
 
-### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_UPDATE_APPLICATION_CODE}
 
 Ok, so now we creation the infrastructure for dealing with processor exceptions, let's see whether they work.
 
@@ -849,7 +849,7 @@ File: code/applications/demo/src/main.cpp
 - Line 28-30: If we press `t`, we cause a standard system trap, which results in a debug break
 - Line 32-37: If we press 'm', we cause a data abort due to reading a non-existent memory location
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added a new source file, we'll update the project CMake file.
 
@@ -924,7 +924,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 93: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### baremetal.ld {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_BAREMETALLD}
+### baremetal.ld {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_BAREMETALLD}
 
 We need to update the linker definition file to make sure the exception handling frame is defined.
 
@@ -941,7 +941,7 @@ File: baremetal.ld
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -973,11 +973,11 @@ Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
 
 As can be found in [Arm� Architecture Registers](pdf/arm-architecture-registers.pdf), page 570, exception code 3C stands for "BRK instruction execution in AArch64 state", and on page 571, exception code 25 stands for "Data Abort taken without a change in Exception level."
 
-## Exception system - Step 2 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2}
+## Exception system - Step 2 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2}
 
 To improve our code a little, let's create a class for handling exceptions.
 
-### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONHANDLERH}
+### ExceptionHandler.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONHANDLERH}
 
 We'll add the class `ExceptionSystem` and change the exception handling to a single function `ExceptionHandler()`.
 
@@ -1075,7 +1075,7 @@ This will be call by the `Throw()` method of `ExceptionSystem` if set, and will 
 - Line 115: We declare a method to set the exception panice handler, returning the old installed handler, if any
 - Line 117: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
 
-### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONHANDLERCPP}
+### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONHANDLERCPP}
 
 We'll implement the newly added `ExceptionSystem` class and reimplement the ExceptionHandler() function.
 
@@ -1227,7 +1227,7 @@ It is initialized as nullptr, meaning not handler is installed
 - Line 158-163: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
 - Line 171-175: We implement the function `GetExceptionSystem()` in the by now common way
 
-### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_EXCEPTIONSTUBS}
+### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONSTUBS}
 
 We'll implement the newly added `CurrentEL()` function.
 
@@ -1247,7 +1247,7 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 
 We now changed the functions called for the different types of exceptions to a single one, `ExceptionHandler`
 
-### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_UPDATE_APPLICATION_CODE}
 
 Let's implement and use an exception panic handler, that forces the system to reboot on exception
 
@@ -1306,11 +1306,11 @@ File: code/applications/demo/src/main.cpp
 - Line 13-16: We add a function `RebootOnException()` that simply returns `ReturnCode::ExitReboot`
 - Line 32: We inject the function `RebootOnException()` to be called on exceptions
 
-### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As no files were added, we don't need to update the project CMake file.
 
-### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

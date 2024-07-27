@@ -14,7 +14,7 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/16-serialization-and-formatting.elf`
 - an image in `deploy/Debug/16-serialization-and-formatting-image`
 
-## Memory allocating and non memory allocating printing - Step 1 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1}
+## Memory allocating and non memory allocating printing - Step 1 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING___STEP_1}
 
 It would be nice if we could start using our `string` class for logging, serialization, etc.
 However, sometimes we want to print things before the memory manager is initialized.
@@ -22,7 +22,7 @@ So we'll want to have a non memory-allocating version next to the new memory-all
 
 We'll first update the `Logger` to support both versions, and we'll move down from there.
 
-### Logger.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_LOGGERH}
+### Logger.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING___STEP_1_LOGGERH}
 
 We'll add non memory-allocating methods `WriteNoAlloc()` and `WriteNoAllocV()`, and add complementary macros.
 
@@ -60,7 +60,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 138: } // namespace baremetal
 ```
 
-### Logger.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_LOGGERCPP}
+### Logger.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING___STEP_1_LOGGERCPP}
 
 We'll implement the new methods.
 We'll also use the non memory-allocating macro in the `Initialize()` method.
@@ -296,7 +296,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 - Line 205-211: We implement the non memory-allocating `WriteNoAlloc()`. This uses `WriteNoAllocV()` for output
 - Line 221-300: We implement the non memory-allocating `WriteNoAllocV()`. This is the original function, but using `FormatNoAlloc()` and `FormatNoAllocV()`
 
-### Format.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_FORMATH}
+### Format.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING___STEP_1_FORMATH}
 
 We'll add non memory-allocating methods `FormatNoAlloc()` and `FormatNoAllocV()`, and convert `Format()` and `FormatV()` into string returning versions.
 
@@ -317,7 +317,7 @@ File: code/libraries/baremetal/include/baremetal/Format.h
 57: } // namespace baremetal
 ```
 
-### Format.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING__STEP_1_FORMATCPP}
+### Format.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_MEMORY_ALLOCATING_AND_NON_MEMORY_ALLOCATING_PRINTING___STEP_1_FORMATCPP}
 
 We'll implement the new methods.
 
@@ -1423,12 +1423,12 @@ The string is finally returned
 - Line 835-843: We rename the old `Format()` to `FormatNoAlloc()` and change the call to `FormatNoAllocV()`
 - Line 854-1113: We rename the old `FormatV()` to `FormatNoAllocV()`. The implementation only changes in the calls to `Serialize()` being replaced with calls to the internal `PrintValue()` functions)
 
-## Updating serializers - Step 2 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2}
+## Updating serializers - Step 2 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2}
 
 Now we'll change all the `Serialize()` methods to be returning a `string`.
 We'll also be adding some more functions to expand the different types supported.
 
-### Serialization.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_SERIALIZATIONH}
+### Serialization.h {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_SERIALIZATIONH}
 
 We'll change the serialization functions to return a `string`.
 
@@ -1518,7 +1518,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 - Line 105-106: We declare the specializations for strings. Note that we've added a serialization for `string` here as well as the `const char*` version
 - Line 107-108: We declare the specializations for pointers. Any pointer can be simply cast to either `void*` or `const void*`. Pointers will simply be serialized by printing their address as a hexadecimal value
 
-### Serialization.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_SERIALIZATIONCPP}
+### Serialization.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_SERIALIZATIONCPP}
 
 We'll implement the new and updated functions.
 
@@ -2206,7 +2206,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 - Line 523-604: We implement internal `SerializeInternalInt()` function
 - Line 625-695: We implement internal `SerializeInternalUInt()` function
 
-### HeapAllocator.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_HEAPALLOCATORCPP}
+### HeapAllocator.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_HEAPALLOCATORCPP}
 
 As the `HeapAllocator` class implements part of memory management, if we wish to print debug information, we need to do so without using memory allocation.
 
@@ -2285,7 +2285,7 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 387:
 ```
 
-### String.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_STRINGCPP}
+### String.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_STRINGCPP}
 
 It is convenient to get some more information if desired on which memory allocations and de-allocations are done by strings, so we'll add some logging there.
 
@@ -2352,7 +2352,7 @@ File: code/libraries/baremetal/src/String.cpp
 1461: }
 ```
 
-### System.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_SYSTEMCPP}
+### System.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_SYSTEMCPP}
 
 We print an overview of the status of memory management at startup (if `BAREMETAL_MEMORY_TRACING` is defined).
 If would be even more helpful, if we would print the memory management status just before halting or rebooting, so we can see whether there is any memory leaked
@@ -2383,7 +2383,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 ```
 
-### Version.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS__STEP_2_VERSIONCPP}
+### Version.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_VERSIONCPP}
 
 The version string is composed using a call to `Format()`. We need to again use the non-allocating version.
 

@@ -36,14 +36,14 @@ For an overview, see the image below.
 
 Let's start off by implementing a simple test class, and using a macro to define the test.
 
-## Creating the unittest library - Step 1 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY__STEP_1}
+## Creating the unittest library - Step 1 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY___STEP_1}
 
 We'll place the unit testing functionality in a new library, named `unittest`.
 The structure is similar to what we set up for `baremetal` (see [Creating the baremetal library structure - Step 1](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1))
 
 <img src="images/treeview-unittest-library.png" alt="Tree view" width="300"/>
 
-### CMake file for unittest {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY__STEP_1_CMAKE_FILE_FOR_UNITTEST}
+### CMake file for unittest {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY___STEP_1_CMAKE_FILE_FOR_UNITTEST}
 
 We need to create the unittest project CMake file
 
@@ -151,7 +151,7 @@ File: code/libraries/unittest/CMakeLists.txt
 
 As no source files are added yet, configuring will fail, but we'll get to that in a while.
 
-### Update libraries CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY__STEP_1_UPDATE_LIBRARIES_CMAKE_FILE}
+### Update libraries CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_CREATING_THE_UNITTEST_LIBRARY___STEP_1_UPDATE_LIBRARIES_CMAKE_FILE}
 
 First we need to include the unittest project in the libraries CMake file.
 
@@ -165,9 +165,9 @@ add_subdirectory(baremetal)
 add_subdirectory(unittest)
 ```
 
-## Adding a test - Step 2 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2}
+## Adding a test - Step 2 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2}
 
-### Test.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2_TESTH}
+### Test.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_TESTH}
 
 We will start by adding a test class. All tests (and later test fixtures) will derive from this class, and implement its `RunImpl()` method to run the actual test.
 
@@ -190,7 +190,7 @@ File: code/libraries/unittest/include/unittest/Test.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -253,7 +253,7 @@ The `Test` class is added to the `unittest` namespace.
   - Line 61-62: We remove the assignment operators
   - Line 64: We declare the overridable `RunImpl()` method
 
-### Test.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2_TESTCPP}
+### Test.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_TESTCPP}
 
 We'll implement the `Test` class.
 
@@ -276,7 +276,7 @@ File: code/libraries/unittest/src/Test.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -321,7 +321,7 @@ File: code/libraries/unittest/src/Test.cpp
 
 As you can see this is a very simple implementation, we simply implement the `RunImpl()` method with an default implementation.
 
-### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_CMAKE_FILE}
 
 As we have now added some source files to the `unittest` library, we need to update its CMake file.
 
@@ -341,7 +341,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_APPLICATION_CODE}
 
 Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
 
@@ -403,7 +403,7 @@ File: code/applications/demo/src/main.cpp
 - Line 20-22: We implement the `RunImpl()` method for `MyTest`. It simply logs a string
 - Line 29-30: We define an instance of MyTest, and then run the test.
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging. We'll first switch off the memory debug output to get a cleaner console.
 
@@ -431,13 +431,13 @@ Press r to reboot, h to halt, p to fail assertion and panic
 hInfo   Halt (System:122)
 ```
 
-## Test administration - Step 3 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3}
+## Test administration - Step 3 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3}
 
 In order to register tests, we need to add an extra class that holds information on a test.
 For this we introduce the `TestInfo` class.
 This class will depend on another information class, `TestDetails` which holds the name of the test, the source file information, etc.
 
-### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTDETAILSH}
+### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTDETAILSH}
 
 First we'll add the `TestDetails` class to describe a test.
 This will hold its test suite name, test fixture name, test name, source file, and line number.
@@ -461,7 +461,7 @@ File: code/libraries/unittest/include/unittest/TestDetails.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -565,7 +565,7 @@ The `TestDetails` class is added to the `unittest` namespace.
   - Line 91: We declare an accessor `SourceFileName()` for the source file name
   - Line 96: We declare an accessor `SourceFileLineNumber()` for the source line number
 
-### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTDETAILSCPP}
+### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTDETAILSCPP}
 
 Let's implement the `TestDetails` class.
 
@@ -588,7 +588,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -671,7 +671,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 69-76: We implement the non default constructor
 - Line 83-90: We implement the "copy" constructor
 
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTRESULTSH}
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTRESULTSH}
 
 In order to use the `TestInfo` class, we need to declare `TestResults`.
 For now we'll simply declare a simple class with a default constructor.
@@ -696,7 +696,7 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -740,7 +740,7 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 57: } // namespace unittest
 ```
 
-### CurrentTest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_CURRENTTESTH}
+### CurrentTest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_CURRENTTESTH}
 
 When running tests, we need a way to keep track of the details for the current test, as well as the test run results.
 We therefore introduce a simple class `CurrentTest` that holds pointers to both.
@@ -764,7 +764,7 @@ File: code/libraries/unittest/include/unittest/CurrentTest.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -812,7 +812,7 @@ File: code/libraries/unittest/include/unittest/CurrentTest.h
 61: } // namespace unittest
 ```
 
-### CurrentTest.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_CURRENTTESTCPP}
+### CurrentTest.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_CURRENTTESTCPP}
 
 We'll implement the `CurrentTest` class.
 
@@ -835,7 +835,7 @@ File: code/libraries/unittest/src/CurrentTest.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -899,7 +899,7 @@ This simply returns a pointer to the static variable inside the function, which 
 - Line 66-70: We implement the `Details()` method.
 This simply returns a pointer to the static variable inside the function, which can the be set and used
 
-### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTINFOH}
+### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTINFOH}
 
 Next we will add the test administration class `TestInfo`.
 This class will be used to register information for a test.
@@ -923,7 +923,7 @@ File: code/libraries/unittest/include/unittest/TestInfo.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1011,7 +1011,7 @@ We'll get to that in a minute.
   - Line 86: We declare a method `SetTest()` to set the test instance pointer
   - Line 88: We declare a method `Run()` to run the test and update the test results
 
-### TestInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_TESTINFOCPP}
+### TestInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTINFOCPP}
 
 We'll implement the `TestInfo` class.
 
@@ -1034,7 +1034,7 @@ File: code/libraries/unittest/src/TestInfo.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1109,7 +1109,7 @@ File: code/libraries/unittest/src/TestInfo.cpp
 - Line 67-72: We implement the non default constructor
 - Line 78-82: We implement the `Run()` method
 
-### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_UPDATE_CMAKE_FILE}
 
 As we have now added some source files to the `unittest` library, we need to update its CMake file.
 
@@ -1136,7 +1136,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_UPDATE_APPLICATION_CODE}
 
 Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
 
@@ -1205,7 +1205,7 @@ File: code/applications/demo/src/main.cpp
 - Line 34: We define an instance of `TestResults`
 - Line 36: We run the test through the `Run()` method of `TestInfo`
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1220,7 +1220,7 @@ Press r to reboot, h to halt, p to fail assertion and panic
 hInfo   Halt (System:122)
 ```
 
-## Adding test fixtures - Step 4 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4}
+## Adding test fixtures - Step 4 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4}
 
 Now that we have a test we can run, let's add the test fixture, to hold multiple tests, and provide for a setup / teardown method call.
 Test fixtures are slightly different from tests in their structure.
@@ -1242,7 +1242,7 @@ See also the image below.
 
 Things will become more clear when we start using the test fixtures.
 
-### TestFixture.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTFIXTUREH}
+### TestFixture.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTFIXTUREH}
 
 The `TestFixture` class is as said simply a base class for helper derivatives.
 
@@ -1265,7 +1265,7 @@ File: code/libraries/unittest/include/unittest/TestFixture.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1334,7 +1334,7 @@ File: code/libraries/unittest/include/unittest/TestFixture.h
 
 As can be seen, nothing else needs to be added for implementation.
 
-### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTFIXTUREINFOH}
+### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTFIXTUREINFOH}
 
 So let's declare the `TestFixtureInfo` class.
 
@@ -1357,7 +1357,7 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1457,7 +1457,7 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 - Line 94: The method `CountTests()` counts and returns the number of tests in the test fixture
 - Line 96: The method `AddTest()` adds a test to the list for the test fixture
 
-### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTINFOH}
+### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTINFOH}
 
 As the `TestFixtureInfo` class needs access to the `TestInfo` class in order to access the `m_next` pointer, we need to make it a friend class.
 
@@ -1480,7 +1480,7 @@ File: code/libraries/unittest/include/unittest/TestInfo.h
 ...
 ```
 
-### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTFIXTUREINFOCPP}
+### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTFIXTUREINFOCPP}
 
 Let's implement the `TestFixtureInfo` class.
 
@@ -1502,7 +1502,7 @@ File: code/libraries/unittest/src/TestFixtureInfo.cpp
 12: //
 13: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 14: //
-15: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+15: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 16: //
 17: // Permission is hereby granted, free of charge, to any person
 18: // obtaining a copy of this software and associated documentation
@@ -1625,7 +1625,7 @@ File: code/libraries/unittest/src/TestFixtureInfo.cpp
 - Line 103-111: We implement the `Run()` method. This goes through the list of tests, and calls `Run()` on each
 - Line 117-127: We implement the `CountTests()` method. This goes through the list of tests, and counts them
 
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTRESULTSH}
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTRESULTSH}
 
 We will add some methods to the `TestResults` class to indicate what we're moving towards.
 
@@ -1664,7 +1664,7 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 - Line 65: We declare the method 'OnTestRun()` to indicate we're running a test (this will be changed later)
 - Line 66: We declare the method `OnTestFinish()` to indicate the end of a test
 
-### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTRESULTSCPP}
+### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTRESULTSCPP}
 
 Let's implement the new methods in the `Testresults` class.
 
@@ -1687,7 +1687,7 @@ File: code/libraries/unittest/src/TestResults.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1765,7 +1765,7 @@ File: code/libraries/unittest/src/TestResults.cpp
 
 As this code will change soon, it's not documented now.
 
-### TestInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_TESTINFOCPP}
+### TestInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_TESTINFOCPP}
 
 As we have added some methods to `TestResults`, we'll update the `Run()` method in `TestInfo` to call these.
 
@@ -1804,7 +1804,7 @@ File: code/libraries/unittest/src/TestInfo.cpp
 - Line 44: We need to include the header for `TestResults`
 - Line 79-92: Next to calling the `RunImpl()` method on the test, we also call the `OnTestStart()` and `OnTestFinish()` methods on the `TestResults` class
 
-### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_UPDATE_CMAKE_FILE}
 
 As we have added some files to the `unittest` library, we need to update its CMake file.
 
@@ -1835,7 +1835,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_UPDATE_APPLICATION_CODE}
 
 Let's start using the test fixtures.
 We'll add a couple of simple test cases by declaring and implementing a class derived from `TestBase`.
@@ -2082,7 +2082,7 @@ This all seems like quite a bit of plumbing just to run three tests in a test fi
 That is why we'll create macros later to do this work for us.
 But it's good to understand what is happening underneath the hood.
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_FIXTURES___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -2119,7 +2119,7 @@ Info   Wait 5 seconds (main:204)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Adding test suites - Step 5 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5}
+## Adding test suites - Step 5 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5}
 
 The final step in building infrasturcture for unit tests is collecting test fixtures in test suites.
 Test suites are again different from tests and test fixtures in their structure.
@@ -2129,7 +2129,7 @@ Test suites are again different from tests and test fixtures in their structure.
 
 So the `TestSuiteInfo` class holds the administration of the test suite, like `TestFixtureInfo` and `TestInfo` do for test fixtures and tests.
 
-### TestSuite.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTSUITEH}
+### TestSuite.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTSUITEH}
 
 The header for the test suite is quite simple, it simple defines the global function `GetSuiteName()`, which is used when not in a namespace.
 
@@ -2152,7 +2152,7 @@ File: code/libraries/unittest/include/unittest/TestSuite.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2191,7 +2191,7 @@ File: code/libraries/unittest/include/unittest/TestSuite.h
 52: }
 ```
 
-### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTSUITEINFOH}
+### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTSUITEINFOH}
 
 Now let's declare the `TestSuiteInfo` class.
 
@@ -2214,7 +2214,7 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2317,7 +2317,7 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 - Line 97: The method `GetTestFixture()` finds and returns a test fixture in the list for the test suite, or if not found, creates a new test fixture with the specified name
 - Line 98: The method `AddFixture()` adds a test fixture to the list for the test suite
 
-### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTFIXTUREINFOH}
+### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTFIXTUREINFOH}
 
 As the `TestSuiteInfo` class needs access to the `TestFixtureInfo` in order to access the `m_next` pointer, we need to make it a friend class.
 
@@ -2343,7 +2343,7 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 ...
 ```
 
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTRESULTSH}
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTRESULTSH}
 
 We will add some more methods to the `TestResults` class for displaying start and finish of both test fixtures and test suites.
 
@@ -2385,7 +2385,7 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 - Line 68: We declare the method `OnTestFixtureStart()` to indicate the start of a test fixture
 - Line 69: We declare the method `OnTestFixtureFinish()` to indicate the finish of a test fixture
 
-### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTRESULTSCPP}
+### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTRESULTSCPP}
 
 Let's implement the new methods in the `Testresults` class.
 
@@ -2408,7 +2408,7 @@ File: code/libraries/unittest/src/TestResults.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2537,7 +2537,7 @@ File: code/libraries/unittest/src/TestResults.cpp
 
 You will notice, that now we have documented the code as well.
 
-### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTFIXTUREINFOCPP}
+### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTFIXTUREINFOCPP}
 
 We'll change the `Run()` method in the `TestFixtureInfo` class to call the corresponding methods in the `TestResults` class.
 
@@ -2566,7 +2566,7 @@ File: code/libraries/unittest/src/TestResults.cpp
 ...
 ```
 
-### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_TESTSUITEINFOCPP}
+### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_TESTSUITEINFOCPP}
 
 Let's implement the `TestSuiteInfo` class.
 
@@ -2589,7 +2589,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2755,7 +2755,7 @@ Note that it also calls the methods `OnTestSuiteStart()` and `OnTestSuiteFinish(
 - Line 142-152: We implement the `CountFixtures()` method. This goes through the list of test fixtures, and counts them
 - Line 158-168: We implement the `CountTests()` method. This goes through the list of test fixtures, and counts the tests in each of them
 
-### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_UPDATE_CMAKE_FILE}
 
 As we have added some files to the `unittest` library, we need to update its CMake file.
 
@@ -2789,7 +2789,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_UPDATE_APPLICATION_CODE}
 
 So as a final step let's define test fixtures inside a test suite, and outside any test suite.
 We'll add the test fixtures in the test suite, and leave the ones without a suite out of course.
@@ -3108,7 +3108,7 @@ Notice that the constructor uses the default `GetSuiteName()` function to retrie
 We've create even more infrastructure to define all test suites, test fixture, tests, and hook them up.
 Be patient, we'll create macros later to do this work for us.
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES__STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -3154,13 +3154,13 @@ Info   Wait 5 seconds (main:263)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Test registration - Step 6 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6}
+## Test registration - Step 6 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6}
 
 Now that we have all the classes defined to run tests, we still need to find a way to register them, such that we can ask a test runner to run all (or part of) the tests.
 For this we will define a class `TestRegistry`, which will keep administration at the top level (the list of all test suites).
 We will also define a class `TestRegistrar` which is used to register tests statically, so that before the application runs, the tests have already been registered.
 
-### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTDETAILSH}
+### TestDetails.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTDETAILSH}
 
 We'll define some constants to identify the default test fixture and default test suite.
 Then we'll update the methods to retrieve the test suite name and test fixture name.
@@ -3199,7 +3199,7 @@ File: code/libraries/unittest/include/unittest/TestDetails.h
 - Line 81: We remove the implementation for the method `SourceFileName`, and change it to return a string, instead of a const string reference
 - Line 82: We remove the implementation for the method `SourceFileLineNumber`
 
-### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTDETAILSCPP}
+### TestDetails.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTDETAILSCPP}
 
 Let's update the implementation of `TestDetails`.
 
@@ -3284,7 +3284,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 140-143: We implement the method `SourceFileName()`
 - Line 149-152: We implement the method `SourceFileLineNumber()`
 
-### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYH}
+### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTREGISTRYH}
 
 So let's declare the `TestRegistry` and `TestRegistrar` classes.
 
@@ -3307,7 +3307,7 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -3418,7 +3418,7 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 - Line 98-102: We declare the `TestRegistrar` class
   - Line 101: We declare the only method in the class, the constructor
 
-### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTSUITEINFOH}
+### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTSUITEINFOH}
 
 As the `TestRegistry` class needs access to the `TestSuiteInfo` in order to access the `m_next` pointer, we need to make it a friend class.
 
@@ -3442,7 +3442,7 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 ....
 ```
 
-### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTREGISTRYCPP}
+### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTREGISTRYCPP}
 
 Let's implement the `TestRegistry` and `TestRegistrar` class.
 
@@ -3465,7 +3465,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -3691,7 +3691,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 The constructor receives a reference to the test registry, as well as a pointer to a test to link to (derived from `Test`) and test details, and adds the test to the registry.
 The `TestDetails` are used to create a test administraton instance, and lookup and if needed create the surrounding test fixture and test suite
 
-### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_TESTSUITEINFOCPP}
+### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_TESTSUITEINFOCPP}
 
 Now that we have a `TestRegistry`, we can update the method `GetTestFixture` in `TestSuiteInfo` to add some debug info.
 
@@ -3729,7 +3729,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 ...
 ```
 
-### Debugging registry {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_DEBUGGING_REGISTRY}
+### Debugging registry {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_DEBUGGING_REGISTRY}
 
 In the `TestRegistry` implementation we use the definition `DEBUG_REGISTRY` to debug the registration of tests.
 As we're interested to see how our new code registers, let's switch on the debugging.
@@ -3772,7 +3772,7 @@ File: CMakeLists.txt
 - Line 107-111: Dependin on the value of `BAREMETAL_DEBUG_UNITTEST_REGISTRY` we set the variable `BAREMETAL_UNITTEST_REGISTRY_TRACING` to either 1 or 0
 - Line 121: We add a definition for `DEBUG_REGISTRY` using the value of variable `BAREMETAL_UNITTEST_REGISTRY_TRACING`
 
-### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_UPDATE_CMAKE_FILE}
 
 As we have added some files to the `unittest` library, we need to update its CMake file.
 
@@ -3808,7 +3808,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_UPDATE_APPLICATION_CODE}
 
 Now we can use the TestRegistry. Even though we still need to create quite some classes, the plumbing of registering the classes is now taken care of by the `TestRegistry` class, and instances of the `TestRegistrar` class.
 
@@ -4080,7 +4080,7 @@ The `RunImpl()` method is now defined later
 
 Note that we don't need to clean up anymore, that is all taken care of.
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION__STEP_6_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -4140,9 +4140,9 @@ Info   Wait 5 seconds (main:214)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Test runner and visitor - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7}
+## Test runner and visitor - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7}
 
-### ITestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_ITESTREPORTERH}
+### ITestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_ITESTREPORTERH}
 
 We'll add a visitor interface, which we'll implement later on as a test reporter, which will print the progress and results of the tests.
 
@@ -4165,7 +4165,7 @@ File: code/libraries/unittest/include/unittest/ITestReporter.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -4296,7 +4296,7 @@ File: code/libraries/unittest/include/unittest/ITestReporter.h
   - Line 122: The method `ReportTestFinish()` will print a marker for the end of a test run
   - Line 128: The method `ReportTestFailure()` will print a statement that a failure was found, with information
 
-### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRESULTSH}
+### TestResults.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRESULTSH}
 
 We introduced the `TestResults` class before, we will now extend it to keep hold of the test reporter, and to count tests, test fixtures and test suites.
 
@@ -4398,7 +4398,7 @@ This will also call `ReportTestFailure()` on the test reporter. This is the only
 - Line 102: The method `GetFailedTestCount()` returns the total number of tests that failed
 - Line 107: The method `GetFailureCount()` returns the total number of failures found. A test can have more than one failure
 
-### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRESULTSCPP}
+### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRESULTSCPP}
 
 Let's implement additional methods of the `TestResults` class.
 
@@ -4529,7 +4529,7 @@ Most methods are quite straightforward.
 - Line 120-126: The `OnTestStart()` method also counts the tests run, and resets the flag whether the test failed
 - Line 133-143: The `OnTestFailure()` method increments the failure count, and if this is the first failure in the test, also increments the failed test count
 
-### TestRunner.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRUNNERH}
+### TestRunner.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRUNNERH}
 
 Next we define a class `TestRunner` that can run the registered tests.
 This will introduce a method for filtering which tests to run.
@@ -4553,7 +4553,7 @@ File: code/libraries/unittest/include/unittest/TestRunner.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -4734,7 +4734,7 @@ The method returns the number of failures, which is reported back by the `RunTes
 - Line 209: We declare a function `RunAllTests()` which will simply run all tests and use the passed test reporter for reporting
 - Line 218-223: We define a template function `RunSelectedTests()` which will run all tests matching a predicate and use the passed test reporter for reporting
 
-### TestRunner.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTRUNNERCPP}
+### TestRunner.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRUNNERCPP}
 
 Let's implement the `TestRunner` class. Most of the methods are template methods, so we will only need to imlement part here.
 
@@ -4757,7 +4757,7 @@ File: code/libraries/unittest/src/TestRunner.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -4855,7 +4855,7 @@ File: code/libraries/unittest/src/TestRunner.cpp
 - Line 90-92: We define the destructor for `TestRunner`
 - Line 99-102: We implement the function `RunAllTests()`
 
-### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTREGISTRYH}
+### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTREGISTRYH}
 
 In order to be able to run tests with a predicate, we need to update the `TestRegistry` class.
 
@@ -5001,7 +5001,7 @@ Note that we use the `CountFixturesIf()` method on the test suite. We'll need to
 - Line 166-177: We implement the `CountTestsIf()` template method.
 Note that we use the `CountTestsIf()` method on the test suite. We'll need to implement this
 
-### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTREGISTRYCPP}
+### TestRegistry.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTREGISTRYCPP}
 
 We'll also need to update the `TestRegistry` implementation.
 
@@ -5136,7 +5136,7 @@ File: code/libraries/unittest/src/TestRegistry.cpp
 
 - Line 91: We remove the implementation for the methods `Run()`, `CountSuites()`, `CountFixtures()` and `CountTests()`.
 
-### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTSUITEINFOH}
+### TestSuiteInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTSUITEINFOH}
 
 We also need to update the `TestSuiteInfo` class.
 
@@ -5267,7 +5267,7 @@ Note that we use the method `RunIf()` in the `TestFixtureInfo` class. We'll need
 - Line 152-163: We implement the `CountTestsIf()` template method.
 Note that we use the method `CountTestsIf()` in the `TestFixtureInfo` class. We'll need to implement it
 
-### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTSUITEINFOCPP}
+### TestSuiteInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTSUITEINFOCPP}
 
 We'll also need to update the `TestSuiteInfo` implementation.
 
@@ -5403,7 +5403,7 @@ File: code/libraries/unittest/src/TestSuiteInfo.cpp
 
 - Line 130: We remove the implementation for the method `Run()`
 
-### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTFIXTUREINFOH}
+### TestFixtureInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTFIXTUREINFOH}
 
 We also need to update the `TestFixtureInfo` class.
 
@@ -5507,7 +5507,7 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 - Line 109-122: We implement the `RunIf()` template method
 - Line 130-141: We implement the `CountTestsIf()` template method
 
-### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_TESTFIXTUREINFOCPP}
+### TestFixtureInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTFIXTUREINFOCPP}
 
 We'll also need to update the `TestFixtureInfo` implementation.
 
@@ -5597,7 +5597,7 @@ File: code/libraries/unittest/src/TestFixtureInfo.cpp
 
 - Line 99: We remove the implementation for the method `Run()`
 
-### ConsoleTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONSOLETESTREPORTERH}
+### ConsoleTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_CONSOLETESTREPORTERH}
 
 We still need to implement the abstract interface `ITestReporter` to actually report information.
 We'll create a console test reporter class `ConsoleTestReporter` for this purpose, which leans on the `baremetal::Console` class.
@@ -5621,7 +5621,7 @@ File: code/libraries/unittest/include/unittest/ConsoleTestReporter.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -5711,7 +5711,7 @@ File: code/libraries/unittest/include/unittest/ConsoleTestReporter.h
 - Line 74-84: We declare the overrides for the `ITestReporter` abstract interface
 - Line 86-95: We declare some utility functions to build strings for output
 
-### ConsoleTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONSOLETESTREPORTERCPP}
+### ConsoleTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_CONSOLETESTREPORTERCPP}
 
 We'll implement the class `ConsoleTestReporter`.
 
@@ -5734,7 +5734,7 @@ File: code/libraries/unittest/src/ConsoleTestReporter.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -6166,7 +6166,7 @@ and "Success: 2 tests passed.\n" otherwise
 - Line 386-392: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
 - Line 400-403: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
 
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UNITTESTH}
+### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_UNITTESTH}
 
 As we now need to include quite a few header files to set up and run our tests, let create a single include header that includes everything needed.
 
@@ -6189,7 +6189,7 @@ File: code/libraries/unittest/include/unittest/unittest.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -6234,7 +6234,7 @@ File: code/libraries/unittest/include/unittest/unittest.h
 58: #include <unittest/TestSuiteInfo.h>
 ```
 
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -6272,7 +6272,7 @@ File: code/libraries/unittest/CMakeLists.txt
 57: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_APPLICATION_CODE}
+### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_APPLICATION_CODE}
 
 Now that we have added a test runner and a test report, we can use these to make running the tests even simpler.
 
@@ -6507,7 +6507,7 @@ File: code\applications\demo\src\main.cpp
 - Line 204: We instantiate a test reporter throug the `ConsoleTestReporter` class
 - Line 205: We run all tests using the test reporter using the `RunAllTests()` function
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR__STEP_7_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -6515,13 +6515,13 @@ You will see all the output being generared by the console test reported using c
 
 <img src="images/demo-output-unit-test.png" alt="Tree view" width="800"/>
 
-## Collecting test information - Step 8 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8}
+## Collecting test information - Step 8 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8}
 
 So far, we can run tests, but the output is written immediately as we run. A better way would be to collect information and print it after the test run has completed.
 That way the test run output itself will be more clean, and we have a simple summary of all failures.
 For this, we'll introduce the `DeferredTestReporter` class, and make `ConsoleTestReporter` inherit from this.
 
-### TestResult.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_TESTRESULTH}
+### TestResult.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_TESTRESULTH}
 
 The `DeferredTestReporter` will use a list of entries holding a `TestResult` to keep track of the results during the test run.
 The `TestResult` class will hold the information and result for a single test, which is extracted initially from `TestDetails`.
@@ -6547,7 +6547,7 @@ File: code/libraries/unittest/include/unittest/TestResult.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -6754,7 +6754,7 @@ File: code/libraries/unittest/include/unittest/TestResult.h
   - Line 183: We declare and define the method `Failed()` which returns true if a failure occurred
   - Line 188: We declare and define the method `Details()` which returns the test details
 
-### TestResult.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_TESTRESULTCPP}
+### TestResult.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_TESTRESULTCPP}
 
 Let's implement the `TestResult` class.
 
@@ -6777,7 +6777,7 @@ File: code/libraries/unittest/src/TestResult.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -6884,7 +6884,7 @@ File: code/libraries/unittest/src/TestResult.cpp
 - Line 99-104: We implement the `TestResult` constructor
 - Line 106-110: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
 
-### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTERH}
+### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_DEFERREDTESTREPORTERH}
 
 Let's declare the `DeferredTestReporter` class.
 
@@ -6907,7 +6907,7 @@ File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -7046,7 +7046,7 @@ File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
   - Line 119-129: We implement the `ITestReporter` interface
   - Line 131: We declare the method `Results()` which returns the `ResultList`
 
-### DeferredTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_DEFERREDTESTREPORTERCPP}
+### DeferredTestReporter.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_DEFERREDTESTREPORTERCPP}
 
 Let's implement the `DeferredTestReporter` class.
 
@@ -7069,7 +7069,7 @@ File: code/libraries/unittest/src/DeferredTestReporter.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -7290,7 +7290,7 @@ This does nothing, as `DeferredTestReporter` does not report anything in itself.
 - Line 201-205: We implement the method `ReportTestFailure` for `DeferredTestReporter`. This adds a failure to the list for the current result
 - Line 211-214: We implement the method `Results` for `DeferredTestReporter`
 
-### ConsoleTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONSOLETESTREPORTH}
+### ConsoleTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_CONSOLETESTREPORTH}
 
 We need to update the class `ConsoleTestReporter` to derive from `DeferredTestReporter`.
 
@@ -7315,7 +7315,7 @@ File: code/libraries/unittest/include/unittest/ConsoleTestReport.h
 - Line 56-57: We inherit from `DeferredTestReporter`
 - Line 77: We replace the method `TestFailureMessage()` with a version taking a `TestResult` and a `Failure`
 
-### ConsoleTestReport.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONSOLETESTREPORTCPP}
+### ConsoleTestReport.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_CONSOLETESTREPORTCPP}
 
 Let's update the implementation for `ConsoleTestReport`.
 
@@ -7415,7 +7415,7 @@ File: code/libraries/unittest/src/ConsoleTestReport.cpp
 - Line 318-342: We reimplement the method `TestRunOverviewMessage` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
 - Line 350-357: We reimplement the method `TestFailureMessage` to print a correct failure message
 
-### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_UNITTESTH}
+### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_UNITTESTH}
 
 We've added a header, so let's include that in the common header as well.
 
@@ -7440,7 +7440,7 @@ File: code/libraries/unittest/include/unittest/unittest.h
 59: #include <unittest/TestSuiteInfo.h>
 ```
 
-### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -7482,11 +7482,11 @@ File: code/libraries/unittest/CMakeLists.txt
 61: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_APPLICATION_CODE}
+### Application code {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_APPLICATION_CODE}
 
 We will keep the application code unchanged for now.
 
-### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION__STEP_8_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

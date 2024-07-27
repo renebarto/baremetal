@@ -695,7 +695,7 @@ Pinout:
 | -               | Base+0x002000AC | 31:0  | -                                     | -   | Reserved
 | -               | Base+0x002000B0 | 31:0  | -                                     | -   | Test
 
-## Pull up-down mode {#RASPBERRY_PI_GPIO_PULL_UPDOWN_MODE}
+## Pull up-down mode {#RASPBERRY_PI_GPIO_PULL_UP_DOWN_MODE}
 
 Details GPIO pin pull up/down mode
 

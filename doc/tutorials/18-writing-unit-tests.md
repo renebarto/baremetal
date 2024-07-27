@@ -21,9 +21,9 @@ As said in the previous tutorial, in tutorials [15-string](#TUTORIAL_15_STRING) 
 We'll now focus on creating macros to create test suites, test fixtures and test, and for creating actual test cases.
 When that is done, we'll convert the tests in the two mentioned tutorials to actual class tests.
 
-## Adding macros for creating tests, fixtures and suites - Step 1 {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1}
+## Adding macros for creating tests, fixtures and suites - Step 1 {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1}
 
-### TestMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_TESTMACROSH}
+### TestMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_TESTMACROSH}
 
 The most cumbersome about the current implementation is that we need to be very verbose when writing tests, test fixture and test suites.
 We can easily solve this by creating some macros.
@@ -47,7 +47,7 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -338,7 +338,7 @@ TEST_FIXTURE(MyFixture, MyTest)
 }
 ```
 
-### unittest.h {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_UNITTESTH}
+### unittest.h {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_UNITTESTH}
 
 We added a header file, so we'll update the `unittest.h` header
 
@@ -365,7 +365,7 @@ File: code/libraries/unittest/include/unittest/unittest.h
 60: #include <unittest/TestSuiteInfo.h>
 ```
 
-### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -408,7 +408,7 @@ File: code/libraries/unittest/CMakeLists.txt
 62: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_APPLICATION_CODE}
+### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_APPLICATION_CODE}
 
 Now that we have added a test runner and a test report, we can use these to make running the tests even simpler.
 
@@ -536,7 +536,7 @@ Note that we still need to defined the class `FixtureMyTest2` as it defines comm
 Note that we still need to defined the class `FixtureMyTest3` as it defines common behaviour for all tests in the test fixture
 - Line 81: We replace the declaration and definition of class `MyTest` by the macro `TEST`.
 
-### CMakeLists.txt {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_CMAKELISTSTXT}
+### CMakeLists.txt {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_CMAKELISTSTXT}
 
 We still have debug tracing for the test registration, which is no longer needed, so let's switch that off now.
 
@@ -547,7 +547,7 @@ File: CMakeLists.txt
 67: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" OFF)
 ```
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -589,7 +589,7 @@ Info   Wait 5 seconds (main:94)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Creating test cases - Step 2 {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2}
+## Creating test cases - Step 2 {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2}
 
 So far we have been focusing on the structure for running tests, but not on the actual tests.
 It would be nice to be able to check using simple statements such as:
@@ -610,7 +610,7 @@ We'll define a set of macros, and we'll need to do some trickery to get it all t
 
 We'll start with simple boolean tests, and equality / inequality of integral types. The rest will follow in the next and final step.
 
-### Checks.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_CHECKSH}
+### Checks.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_CHECKSH}
 
 We'll start with some utility functions and classes.
 
@@ -633,7 +633,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -941,7 +941,7 @@ If the values are considered equal, `AssertionSuccess()` is returned, otherwise,
 If the values are considered inequal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
 - Line 256-293: We declare a class `EqHelper` which has two methods `CheckEqual()` (which uses `CheckEqualInternal()`) and `CheckNotEqual()` (which uses `CheckNotEqualInternal()`)
 
-### Checks.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_CHECKSCPP}
+### Checks.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_CHECKSCPP}
 
 Let's implement the functions for the checks.
 
@@ -964,7 +964,7 @@ File: code/libraries/unittest/src/Checks.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1097,7 +1097,7 @@ File: code/libraries/unittest/src/Checks.cpp
 - Line 96-112: We implement the function `EqFailure()`. This will return an assertion result flagging a failure, with a string explaining that the actual value is not equal to the expected value
 - Line 122-138: We implement the function `InEqFailure()`. This will return an assertion result flagging a failure, with a string explaining that the actual value is equal to the expected value
 
-### PrintValue.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_PRINTVALUEH}
+### PrintValue.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_PRINTVALUEH}
 
 The `PrintValue` header contains a lot of template magic to print a value of any type. It is simplified for now, but will be extended in the next step.
 I'll try to explain as much as possible. Part of this code is based on how Google Test prints values.
@@ -1121,7 +1121,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1275,7 +1275,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 - Line 132-145: We declare a specialization of `UniversalTersePrinter` for type `T&` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 - Line 153-159: We define a template function `PrintToString()` which uses the `Print()` method of any matching class `UniversalTersePrinter`
 
-### AssertMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_ASSERTMACROSH}
+### AssertMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_ASSERTMACROSH}
 
 Let's define the test macros.
 
@@ -1298,7 +1298,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1476,7 +1476,7 @@ The two parameter version is used with `EqHelper::CheckEqual()` or `EqHelper::Ch
 - Line 154-158: We define a macro `ASSERT_NE` which uses `ASSERT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
 - Line 160-164: We define a macro `EXPECT_NE` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
 
-### unittest.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_UNITTESTH}
+### unittest.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_UNITTESTH}
 
 We added a header file, so we'll update the `unittest.h` header
 
@@ -1504,7 +1504,7 @@ File: code/libraries/unittest/include/unittest/unittest.h
 61: #include <unittest/TestSuiteInfo.h>
 ```
 
-### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -1551,7 +1551,7 @@ File: code/libraries/unittest/CMakeLists.txt
 66: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_APPLICATION_CODE}
+### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_APPLICATION_CODE}
 
 Now let's start using the macros we defined.
 
@@ -1683,7 +1683,7 @@ File: code\applications\demo\src\main.cpp
 - Line 90-93: We change the `Test4` function to a failed assertion.
 As said before, this should throw an exception, but for now this is commented out, so it will result in a normal failure, and the test run will continue
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1740,12 +1740,12 @@ Info   Wait 5 seconds (main:102)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Test assert macro extension - Step 3 {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3}
+## Test assert macro extension - Step 3 {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3}
 
 We can now perform boolean checks and compare integers, but we would also like to be able to compare pointers and strings.
 So we'll extend the macros a bit.
 
-### Checks.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_CHECKSH}
+### Checks.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_CHECKSH}
 
 We need to extend the utility functions a bit.
 
@@ -2102,7 +2102,7 @@ The function compares the absolute difference between `expected` and `actual` wi
 - Line 484-497: We define a template function `CheckClose()`, which uses `AreClose()` to compare two values `expected` and `actual`. Their stringified versions are passed as `expectedExpression` and `actualExpression` with tolerance `tolerance`.
 If the absolute difference between `expected` and `actual` is smaller or equal to `tolerance`, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
 
-### Checks.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_CHECKSCPP}
+### Checks.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_CHECKSCPP}
 
 Let's implement the new functions for the checks.
 
@@ -2821,7 +2821,7 @@ This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
 - Line 692-698: We implement the function `CheckNotEqualInternalIgnoreCase()` for two value of type string and const char*.
 This uses the function `CheckStringsNotEqualIgnoreCase()` to compare the strings
 
-### PrintValue.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_PRINTVALUEH}
+### PrintValue.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_PRINTVALUEH}
 
 The `PrintValue` header will now be extended to support printing pointers and strings.
 
@@ -3109,7 +3109,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 - Line 295-315: We declare a template class `UniversalTersePrinter` specialization for type `const char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 - Line 321-333: We declare a template class `UniversalTersePrinter` specialization for type `char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 
-### PrintValue.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_PRINTVALUECPP}
+### PrintValue.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_PRINTVALUECPP}
 
 Some print functions need to be implemented.
 
@@ -3131,7 +3131,7 @@ File: code/libraries/unittest/src/PrintValue.cpp
 12: //
 13: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 14: //
-15: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+15: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 16: //
 17: // Permission is hereby granted, free of charge, to any person
 18: // obtaining a copy of this software and associated documentation
@@ -3172,7 +3172,7 @@ File: code/libraries/unittest/src/PrintValue.cpp
 
 The functions speak for themselves.
 
-### AssertMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_ASSERTMACROSH}
+### AssertMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_ASSERTMACROSH}
 
 We need to extend the assertion macros a bit.
 
@@ -3345,7 +3345,7 @@ The three parameter version is used with `CheckClose()` to check the result of c
 - Line 271: We define a macro `ASSERT_NOT_NULL` to check if the parameter is not a null pointer, and generate a `InEqFailure` if the check fails
 - Line 273: We define a macro `EXPECT_NOT_NULL` to check if the parameter is not a null pointer, and generate a `InEqFailure` if the check fails
 
-### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files, we need to update the CMake file.
 
@@ -3398,7 +3398,7 @@ File: code/libraries/unittest/CMakeLists.txt
 67: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_APPLICATION_CODE}
+### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_APPLICATION_CODE}
 
 We'll use `Test` to use the new macros defined.
 
@@ -3514,7 +3514,7 @@ File: code\applications\demo\src\main.cpp
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -3780,7 +3780,7 @@ Info   Wait 5 seconds (main:202)
 Press r to reboot, h to halt, p to fail assertion and panic
 ```
 
-## Writing class tests for string - Step 4 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4}
+## Writing class tests for string - Step 4 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4}
 
 Now that our unit test framework is complete, let's reimplement the tests we created in [15-string](#TUTORIAL_15_STRING).
 First we'll create a folder `test` underneath `code/libraries/baremetal`, and underneath a folder `src`.
@@ -3788,7 +3788,7 @@ We'll also be creating a CMake file for the tests, as well as the structure for 
 
 <img src="images/unittest-add-test-project.png" alt="Tree view" width="400"/>
 
-### main.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_MAINCPP}
+### main.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_MAINCPP}
 
 First we'll create the main source file that will run the tests.
 
@@ -3812,7 +3812,7 @@ File: code\libraries\baremetal\test\main.cpp
 14: 
 ```
 
-### StringTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_STRINGTESTCPP}
+### StringTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_STRINGTESTCPP}
 
 We'll add the source file containing the string tests.
 
@@ -3933,7 +3933,7 @@ File: code\libraries\baremetal\test\StringTest.cpp
 - Line 102-121: We test the constructor taking const char* for the corner case that an empty string is passed
 - Line 123-141: We test the constructor taking const char* for the corner case that a nullptr is passed
 
-### Set up test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_SET_UP_TEST_PROJECT_CONFIGURATION}
+### Set up test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_SET_UP_TEST_PROJECT_CONFIGURATION}
 
 We'll fill in the CMake file for the test project. This will be very similar to the CMake file for the main application project.
 
@@ -4054,7 +4054,7 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 111: add_subdirectory(create-image)
 ```
 
-### Add image creation project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_ADD_IMAGE_CREATION_PROJECT_CONFIGURATION}
+### Add image creation project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_ADD_IMAGE_CREATION_PROJECT_CONFIGURATION}
 
 We'll add the CMake file for the test project kernel image. This will be very similar to the CMake file for the main application project kernel image.
 
@@ -4076,7 +4076,7 @@ File: code/libraries/baremetal/test/create-image/CMakeLists.txt
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
-### Update baremetal project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_UPDATE_BAREMETAL_PROJECT_CONFIGURATION}
+### Update baremetal project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_UPDATE_BAREMETAL_PROJECT_CONFIGURATION}
 
 We need to add the test project CMake file to the baremetal project CMake file in order to build the test project.
 
@@ -4089,7 +4089,7 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 152: add_subdirectory(test)
 ```
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -4268,11 +4268,11 @@ Info   Halt (System:122)
 
 As you can see, we have 156 test for the `string` class, which actually have a multitude of this in test cases.
 
-## Writing class tests for serialization - Step 5 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5}
+## Writing class tests for serialization - Step 5 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION___STEP_5}
 
 Let's also reimplement the tests for [16-serializing-and-formatting](#TUTORIAL_16_SERIALIZATION_AND_FORMATTING).
 
-### SerializationTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_SERIALIZATIONTESTCPP}
+### SerializationTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION___STEP_5_SERIALIZATIONTESTCPP}
 
 We'll add the source file containing the serialization tests.
 
@@ -4295,7 +4295,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -4562,7 +4562,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 
 The tests should speak for themselves.
 
-### Update test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_UPDATE_TEST_PROJECT_CONFIGURATION}
+### Update test project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION___STEP_5_UPDATE_TEST_PROJECT_CONFIGURATION}
 
 As we added a new source file, we'll update the test project CMake file.
 
@@ -4580,7 +4580,7 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 42: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION__STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

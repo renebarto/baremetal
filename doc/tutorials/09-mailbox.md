@@ -29,7 +29,7 @@ A logical location for the coherent page is a bit after the last address used by
 Let's first revisit the memory map and add the coherent page information. Then we will add a mamory manager, that for now will only hand out coherent memory pages, and after that we can start using the mailbox.
 We'll finalize by using the mailbox to retrieve board information, such as board type, serial number and memory size.
 
-## Updating the memory map - Step 1 {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1}
+## Updating the memory map - Step 1 {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1}
 
 We need to update the memory map. We discussed the memory map before, in [05-console-uart1](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_3).
 The image below hopefully gives a clearer view on the memory map.
@@ -38,7 +38,7 @@ The image below hopefully gives a clearer view on the memory map.
 
 So, we need to add the coherent region part.
 
-### MemoryMap.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_MEMORYMAPH}
+### MemoryMap.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_MEMORYMAPH}
 
 Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 
@@ -59,9 +59,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 85: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
 
-### Update the application code {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_THE_APPLICATION_CODE}
 
-#### Serialization.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
+#### Serialization.h {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
 
 In order to show which exact addresses we have, let's print them in our application.
 However, we can write characters and strings to the console, but how about integers?
@@ -91,7 +91,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -131,7 +131,7 @@ The value will take `width` characters at most (if zero the space needed is calc
 If `showBase` is true, the base prefix will be added (0b for `base` = 2, 0 for `base` = 8, 0x for `base` = 16).
 If the size of the type would require more characters than strictly needed for the value, and `leadingZeros` is true, the value is prefix with '0' characters.
 
-#### Serialization.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
+#### Serialization.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
 
 We need to implement the `Serialize` function. As we need to write into a fixed size buffer, we need to check whether what we need to write fits.
 
@@ -154,7 +154,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -295,7 +295,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
   - Line 98-138: We print the digits, adding the prefix, and taking into account leading zeros
   - Line 139: We end the string with a null character
 
-#### main.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_THE_APPLICATION_CODE_MAINCPP}
+#### main.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Now we can update the application code and print the memory map.
 
@@ -447,7 +447,7 @@ File: code/applications/demo/src/main.cpp
 
 The code should speak for itself.
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -491,7 +491,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -560,12 +560,12 @@ Wait 5 seconds
 Press r to reboot, h to halt
 ```
 
-## Setting up for memory management - Step 2 {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2}
+## Setting up for memory management - Step 2 {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2}
 
 As a very small first step, we'll create a class with one single method to retrieve the Coherent page for a specified class of usage.
 We will create a class `MemoryManager` for this, that we will extend in later tutorials when actually adding memory management.
 
-### MemoryManager.h {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2_MEMORYMANAGERH}
+### MemoryManager.h {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_MEMORYMANAGERH}
 
 Create the file `code/libraries/baremetal/include/baremetal/MemoryManager.h`
 
@@ -586,7 +586,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -634,7 +634,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 - Line 44-47, we declare an enum type to hold the kind of Coherent Page to request. For now this is only one kind, but this will be extended.
 - Line 55: We define a static method in `MemoryManager` to get the address for a Coherent Page.
 
-### MemoryManager.cpp {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2_MEMORYMANAGERCPP}
+### MemoryManager.cpp {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_MEMORYMANAGERCPP}
 
 Create the file `code/libraries/baremetal/src/MemoryManager.cpp`
 
@@ -655,7 +655,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -695,7 +695,7 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 53: }
 ```
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -741,12 +741,12 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 The behaviour however did not change.
 
-## Adding the mailbox - Step 3 {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3}
+## Adding the mailbox - Step 3 {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3}
 
 We are now ready to add the acutal mailbox. The way it works is quite complex, but there is a pattern. We will take a layered approach here:
 - The first thing we'll do is create an abstract interface for the mailbox called `IMailbox`
@@ -754,7 +754,7 @@ We are now ready to add the acutal mailbox. The way it works is quite complex, b
 - To handle requests to get and set properties we will need to package data in a certain way, we will declare and implement a class `RPIPropertiesInterface` for this
 - Finally to do the actual requests, we add a class `RPIProperties` that will have methods for each of the properties we wish to get or set. We will keep this relatively simple for now
 
-### BCMRegisters.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_BCMREGISTERSH}
+### BCMRegisters.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_BCMREGISTERSH}
 
 As the mailbox implementation will use some specific registers, we need to add these.
 UPdate the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`.
@@ -818,7 +818,7 @@ We'll dive a bit deeper into the information when discussing the actual code.
 
 The Mailbox register addresses are all prefixed with `RPI_MAILBOX`.
 
-### IMailbox.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_IMAILBOXH}
+### IMailbox.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_IMAILBOXH}
 
 Create the file `code/libraries/baremetal/include/baremetal/IMailbox.h`.
 
@@ -839,7 +839,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -911,7 +911,7 @@ As you can see, there are multiple mailboxes available, which are identified by 
 
 For now we will only use channel 8 (`ARM_MAILBOX_CH_PROP_OUT`), channel 9 (`ARM_MAILBOX_CH_PROP_IN`) is currently not used at all.
 
-### Mailbox.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_MAILBOXH}
+### Mailbox.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_MAILBOXH}
 
 Create the file `code/libraries/baremetal/include/baremetal/Mailbox.h`.
 
@@ -932,7 +932,7 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -992,7 +992,7 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 - Line 61: We delcare a private method to read the mailbox
 - Line 62: We delcare a private method to write the mailbox
 -
-### Mailbox.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_MAILBOXCPP}
+### Mailbox.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_MAILBOXCPP}
 
 Create the file: `code/libraries/baremetal/src/Mailbox.cpp`
 
@@ -1013,7 +1013,7 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1126,9 +1126,9 @@ This is because the lower 4 bits are used for the mailbox channel.
 The method then waits until the `RPI_MAILBOX1_STATUS` register signals that it is not full, executing NOP instructions
 And finally, it writs the combination of the address and the mailbox channel to the `RPI_MAILBOX1_WRITE` register
 
-### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE}
 
-#### main.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE_MAINCPP}
+#### main.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Now that we have a mailbox implemented, we can start to use it.
 Let's try to retrieve the board serial number.
@@ -1348,7 +1348,7 @@ If the returned address is the same as the address sent, and the request code si
 - Line 176: We print a failure message if the call fails
 - Line 165: We again synchronize the memory access with other cores and the VC (note the different call / assembly instruction, we will not explain that here, it has to do with releasing and claiming memory)  (`DataMemBarrier()`)
 
-#### Mailbox buffer organization {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE_MAILBOX_BUFFER_ORGANIZATION}
+#### Mailbox buffer organization {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE_MAILBOX_BUFFER_ORGANIZATION}
 
 The images below show the structure of the block sent to and received back from the mailbox.
 
@@ -1365,7 +1365,7 @@ So what it comes down to, is that we fill a buffer, with a 8 byte header,
 followed by all the reqeusts, each having a 12 byte header and then the request specific buffers.
 We end with a special end tag.
 
-#### ARMInstructions.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE_ARMINSTRUCTIONSH}
+#### ARMInstructions.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE_ARMINSTRUCTIONSH}
 
 We used a new instruction `DataMemBarrier()` that needs to be added.
 
@@ -1381,7 +1381,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
 ```
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -1430,7 +1430,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1486,12 +1486,12 @@ Wait 5 seconds
 Press r to reboot, h to halt
 ```
 
-## Adding the properties interface - Step 4 {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4}
+## Adding the properties interface - Step 4 {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4}
 
 So we've seen the mailbox work, but also saw we need to do quite some work to fill the data block correctly.
 Let's introduce a class that can handle all this work for us.
 
-### RPIPropertiesInterface.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_RPIPROPERTIESINTERFACEH}
+### RPIPropertiesInterface.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_RPIPROPERTIESINTERFACEH}
 
 First we'll add a new class.
 
@@ -1514,7 +1514,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1674,7 +1674,7 @@ convert the address, and use the `Mailbox` to perform the call.
 You will notice that the structures declared in Line 101-107, 109-115 and 117-121 use the keyword PACKED. We may be using the keyword align as well later.
 We will add the definitions for this in `Macros.h`. The reason for a definition is to make it possible to redefine for a different compiler.
 
-### Macros.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_MACROSH}
+### Macros.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_MACROSH}
 
 Let's add the definitions for PACKED and ALIGN.
 
@@ -1694,7 +1694,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 51: #define BIT(n)              (1U << (n))
 ```
 
-### RPIPropertiesInterface.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_RPIPROPERTIESINTERFACECPP}
+### RPIPropertiesInterface.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_RPIPROPERTIESINTERFACECPP}
 
 Now we can implement the `RPIPropertiesInterface` class.
 
@@ -1717,7 +1717,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1867,7 +1867,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 
 As you can see, we use a function `memcpy()` here to copy data, which is a standard C function. However, we need to implement it.
 
-### Util.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UTILH}
+### Util.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_UTILH}
 
 Let's add the `memcpy()` function.
 
@@ -1889,7 +1889,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 ...
 ```
 
-### Util.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UTILCPP}
+### Util.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_UTILCPP}
 
 Now we can implement the `memcpy()1 function.
 
@@ -1912,7 +1912,7 @@ File: code/libraries/baremetal/src/Util.cpp
 ...
 ```
 
-### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_UPDATE_THE_APPLICATION_CODE}
 
 Now we can update the application again, to make use of the new `RPIPropertiesInterface` class.
 At the same time, we'll also clean up a bit, we'll remove the code printing the memory map as well.
@@ -1990,7 +1990,7 @@ The code is quite a bit simpler now.
 - Line 32-38: If successful, we print the serial number
 - Line 42: If not we print a failure message
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -2041,7 +2041,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -2056,12 +2056,12 @@ Wait 5 seconds
 Press r to reboot, h to halt
 ```
 
-## Adding the properties interface - Step 5 {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5}
+## Adding the properties interface - Step 5 {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5}
 
 A small improvement would be to hide the handling of the specific struct inside separate code, so our application code can become even simpler.
 Let's introduce a class that can handle this for us. For now, we'll only add functionality for the board serial number, but we'll start adding more soon.
 
-### RPIProperties.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_RPIPROPERTIESH}
+### RPIProperties.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_RPIPROPERTIESH}
 
 Create the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 
@@ -2082,7 +2082,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2129,7 +2129,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 
 We declare the class `RPIProperties` which has a constructor taking a `Mailbox` again, and a method `GetBoardSerial()` which returns the board serial number.
 
-### RPIProperties.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_RPIPROPERTIESCPP}
+### RPIProperties.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_RPIPROPERTIESCPP}
 
 We'll implement the class `RPIProperties`
 
@@ -2152,7 +2152,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2221,12 +2221,12 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
   - Line 64: We call the `GetTag()` method on the `RPIPropertiesInterface`
   - Line 66-68: If the call was successful, we extract the serial number
 
-### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_THE_APPLICATION_CODE}
 
 Now we can update the application again, to it even simpler.
 However, the serial number is 64 bits, and we don't have a serializer for it yet. Let's add it.
 
-#### Serialization.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
+#### Serialization.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONH}
 
 Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
 
@@ -2238,7 +2238,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 ...
 ```
 
-#### Serialization.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
+#### Serialization.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_THE_APPLICATION_CODE_SERIALIZATIONCPP}
 
 We need to implement the `Serialize` function for two different types. As the behaviour is very similar, we will create a third static function that can handle both 32 and 64 bit unsigned values.
 There is one this a little tricky, as we need to calculate a divisor for 64 bit integers, the divisor can overflow. So we need to add a second variable to keep track of the overflowing.
@@ -2344,7 +2344,7 @@ We also calculate the new value for the high part in the loop
 
 You may argue that it is a waste of resources to extend a 32 bit to 64 bits when printing, however this also save a lot of code, and thus memory footprint.
 
-#### main.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_THE_APPLICATION_CODE_MAINCPP}
+#### main.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Update the file `code/applications/demo/src/main.cpp`
 
@@ -2404,7 +2404,7 @@ File: code/applications/demo/src/main.cpp
 Note we removed the inclusion of `RPIPropertiesInterface.h` as we no longer need it.
 The code is again quite a bit simpler.
 
-### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -2457,7 +2457,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE__STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

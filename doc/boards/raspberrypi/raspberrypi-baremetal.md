@@ -1,5 +1,7 @@
 # Raspberry Pi baremetal development {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT}
 
+\todo Sort out and redistribute over other documents
+
 ## Reference material {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_REFERENCE_MATERIAL}
 
  - [Raspberry Pi documentation](https://github.com/raspberrypi/documentation/tree/develop/documentation/asciidoc/computers/raspberry-pi)
@@ -20,7 +22,7 @@
 
 ## SoC for each board {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD}
 
-The Raspberry Pi and Odroid boards uses different types and versions of SoC (System-on-Chip)
+The Raspberry Pi boards uses different types and versions of SoC (System-on-Chip)
 
 | Board                          | SoC       | Processor              | Number of cores |
 |--------------------------------|-----------|------------------------|-----------------|
@@ -43,35 +45,7 @@ The Raspberry Pi and Odroid boards uses different types and versions of SoC (Sys
 | Raspberry Pi Compute Module 4  | BCM2711   | ARM Cortex A72 (ARMv8) | 4 |
 | Raspberry Pi 5B                | BCM2712   | ARM Cortex A76 (ARMv8) | 4 |
 
-Built around a quad-core Arm Cortex-A76
-## Startup {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP}
-
-### Start of execution, loading image {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_START_OF_EXECUTION_LOADING_IMAGE}
-
-At startup, the video core (VC) starts first. It loads start.elf, and executes it, i.e. start.elf is a GPU executable, not an ARM executable.
-The code in the GPU loads the image for execution, which depends on the board and the architecture used:
-
-| Board  | Architecture     | Image            |
-|--------|------------------|------------------|
-| RPI 1  | 32 bit (Arm)     | kernel.img       |
-| RPI 2  | 32 bit (Arm)     | kernel7.img      |
-| RPI 3  | 32 bit (Arm)     | kernel8-32.img   |
-| RPI 3  | 64 bit (AArch64) | kernel8.img      |
-| RPI 4  | 32 bit (Arm)     | kernel7l.img     |
-| RPI 4  | 64 bit (AArch64) | kernel8-rpi4.img |
-
-Once the image is loaded, the GPU resets the ARM, which then starts executing. The start address depends on the architecture:
-
-### CPU execution start address {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU_EXECUTION_START_ADDRESS}
-
-| Architecture     | Start address |
-|------------------|---------------|
-| 32 bit (Arm)     | 0x8000        |
-| 64 bit (AArch64) | 0x80000       |
-
-This is due to the GPU placing a jump opcode at address 0x0000, which is the initial starting point.
-
-### CPU <-> GPU communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU__GPU_COMMUNICATION}
+## CPU <-> GPU communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU___GPU_COMMUNICATION}
 
 CPU and GPU communicate through a mailbox interface:
  - CPU writes data
@@ -82,7 +56,7 @@ CPU and GPU communicate through a mailbox interface:
 
 The mailbox interface is just another peripheral.
 
-### CPU <-> Peripheral communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU__PERIPHERAL_COMMUNICATION}
+### CPU <-> Peripheral communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_STARTUP_CPU___PERIPHERAL_COMMUNICATION}
 
 Every peripheral has a slot of memory mapped I/O (MMIO). The start address depends on the SoC:
 

@@ -385,7 +385,6 @@ Searching for files in directory F:/Projects/Private/baremetal.github/code/libra
 Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/src
 Searching for files in directory F:/Projects/Private/baremetal.github/doc
 Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards/Odroid
 Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards/RaspberryPi
 Searching for files in directory F:/Projects/Private/baremetal.github/doc/cpu
 Searching for files in directory F:/Projects/Private/baremetal.github/doc/firmware

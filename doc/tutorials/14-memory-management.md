@@ -14,7 +14,7 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/14-memory-management.elf`
 - an image in `deploy/Debug/14-memory-management-image`
 
-## Setting up memory management - step 1 {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1}
+## Setting up memory management - step 1 {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1}
 
 As we would like to start using classes that allocate and de-allocate memory, such as a string class. We need to set up for memory management.
 This is going to be both a straightforward and a tricky task, we'll get arround to that.
@@ -29,7 +29,7 @@ We'll start by adding some definitions in both the memory map and the system con
 Then we'll add methods to the `MemoryManager` class for allocating and freeing memory.
 This will depend on a `HeapAllocator` which performs the actual allocation.
 
-### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MAIN_CMAKE_FILE}
+### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_MAIN_CMAKE_FILE}
 
 First let's add some definitions for debugging memory allocation.
 
@@ -106,7 +106,7 @@ If `BAREMETAL_TRACE_MEMORY_DETAIL` is `ON`, we also set `BAREMETAL_MEMORY_TRACIN
 - Line 287: We print the value of `BAREMETAL_TRACE_MEMORY`
 - Line 288: We print the value of `BAREMETAL_TRACE_MEMORY_DETAIL_`
 
-### Synchronization.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYNCHRONIZATIONH}
+### Synchronization.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_SYNCHRONIZATIONH}
 
 We'll add some definitions need for alignment. These have to do with the length of a cache line.
 
@@ -129,7 +129,7 @@ File: code/libraries/baremetal/include/baremetal/Synchronization.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -164,7 +164,7 @@ File: code/libraries/baremetal/include/baremetal/Synchronization.h
 48: #define DATA_CACHE_LINE_LENGTH_MAX  64
 ```
 
-### SysConfig.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSCONFIGH}
+### SysConfig.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_SYSCONFIGH}
 
 We'll add some definitions for heap types and bucket size, which will be explained in a minute.
 
@@ -230,7 +230,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 
 See below in [MemoryMap.h](#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMAPH) for explanation of the heap types.
 
-### MemoryMap.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMAPH}
+### MemoryMap.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_MEMORYMAPH}
 
 We also need to update the memory map. to point to the heap start and end
 
@@ -272,7 +272,7 @@ See also the image below.
 
 <img src="images/memory-map.png" alt="Memory map" width="800"/>
 
-### HeapAllocator.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_HEAPALLOCATORH}
+### HeapAllocator.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_HEAPALLOCATORH}
 
 We will declare a class to handle allocation and freeing of memory for a specific heap (low or high).
 
@@ -295,7 +295,7 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -488,7 +488,7 @@ It returns the cumulative count of freed memory blocks over time
   - Line 148: The method `GetTotalFreeSize()` is only defined when memory tracing is enabled.
 It returns the cumulative size of freed memory blocks over time
 
-### HeapAllocator.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_HEAPALLOCATORCPP}
+### HeapAllocator.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_HEAPALLOCATORCPP}
 
 We implement the methods of the `HeapAllocator` class.
 
@@ -511,7 +511,7 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -935,7 +935,7 @@ The default bucket sizes are:
 - Line 362-370: We implement the method `GetTotalAllocationSize()`
 - Line 376-384: We implement the method `GetTotalFreeSize()`
 
-### MemoryManager.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMANAGERH}
+### MemoryManager.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_MEMORYMANAGERH}
 
 We will extend the `MemoryManager` class with methods to allocate and free memory, retrieve the amount of free heap left, and dump information on allocated and freed memory.
 This also requires making the `MemoryManager` class instantiable. We again choose to make `MemoryManager` a singleton.
@@ -1025,7 +1025,7 @@ This does not take into account the reservations for paging, and the part used f
 - Line 108: We declare the method `DumpStatus()`, which log information on all heaps concerning allocated and freed memory blocks
 - Line 111: We declare the method `GetMemoryManager()`, which initiates the singleton `MemoryManager`
 
-### MemoryManager.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMANAGERCPP}
+### MemoryManager.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_MEMORYMANAGERCPP}
 
 We will implement the added methods for `MemoryManager`.
 
@@ -1270,7 +1270,7 @@ If any heap is selected, the freespace for both heaps is added together
   - Line 226-227: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
 - Line 236-240: We implement the function `GetMemoryManager()`
 
-### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_SYSTEMCPP}
+### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_SYSTEMCPP}
 
 Although not urgently needed yet, we'll need the singleton `MemoryManagement` instance in the `sysinit()` function soon, in order to set up memory mapping.
 So let's go ahead and instantiate the `MemoryManager` there.
@@ -1334,7 +1334,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 207-209: If tracing is requested, we call the `MemoryManager` method `DumpStatus()`
 - Line 213-215: If tracing is requested, we call the `MemoryManager` method `DumpStatus()`
 
-### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_APPLICATION_CODE}
+### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_APPLICATION_CODE}
 
 Let's use the memory allocation and see how it behaves.
 We've set `BAREMETAL_TRACE_MEMORY` and `BAREMETAL_TRACE_MEMORY_DETAIL` to `ON`, so we will get quite a bit of detail on memory allocations.
@@ -1400,7 +1400,7 @@ File: code\applications\demo\src\main.cpp
 - Line 30: We log the status of the memory manager
 - Line 32-33: We free the memory again, and log the status of the memory manager
 
-### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -1471,7 +1471,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1541,12 +1541,12 @@ Press r to reboot, h to halt, p to fail assertion and panic
 hInfo   Halt (System:122)
 ```
 
-## Supporting C/C++ memory allocation - step 2 {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2}
+## Supporting C/C++ memory allocation - step 2 {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2}
 
 In order to use memory allocation in the way we are used to, using either `malloc()`, `calloc()`, `realloc()` and `free()` in C or the `new` and `delete` operators in C++, we need to add them.
 So we'll update `New.h` and `New.cpp` to add functions for C++, and `Util.h` and `Util.cpp` for the C variants.
 
-### Util.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UTILH}
+### Util.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_UTILH}
 
 We will declares the memory allocation functions for C.
 
@@ -1579,7 +1579,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 
 Line 58-61: We add the function declarations for `malloc()`, `calloc()`, `realloc()` and `free()`
 
-### Util.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UTILCPP}
+### Util.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_UTILCPP}
 
 We will implement the added functions.
 
@@ -1639,7 +1639,7 @@ We use any heap, so in case the low heap is exhausted, on Raspberry Pi 4 and hig
 - Line 195-198: We implement `realloc()` by calling `MemoryManager::HeapReAlloc()`
 - Line 204-207: We implement `free()` by calling `MemoryManager::HeapFree()`
 
-### New.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_NEWH}
+### New.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_NEWH}
 
 We will extend the operators `new` and `delete`. We will also add some placement versions, so we can specify the heap to use when allocating.
 
@@ -1667,7 +1667,7 @@ We can then use e.g. `new (HeapType::LOW) X` to allocate an instance of class X 
 - Line 50: We declare the new operator for placement using a pointer. This will place the instance at the specified location
 - Line 51: We declare the new[] operator for placement using a pointer. This will place the instance at the specified location
 
-### New.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_NEWCPP}
+### New.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_NEWCPP}
 
 We will implement the added `new` and `delete` operators.
 
@@ -1795,7 +1795,7 @@ File: code/libraries/baremetal/src/New.cpp
 - Line 141-144: We re-implement the `delete` operator with size using a call to `MemoryManager::HeapFree()`
 - Line 151-154: We implement the `delete[]` operator with size
 
-### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_APPLICATION_CODE}
+### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_APPLICATION_CODE}
 
 Let's use the `malloc()` function and `new` operator.
 
@@ -1879,11 +1879,11 @@ File: code\applications\demo\src\main.cpp
 - Line 47: We log the status of the memory manager
 - Line 48-49: We free the memory again, and log the status of the memory manager
 
-### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we did not add any files, we don't need to update the CMake file.
 
-### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC_MEMORY_ALLOCATION__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -2031,9 +2031,9 @@ You can see that we allocated three blocks of memory and freed them again. Two w
 
 In order to stop overloading the console with memory debug information, let's set the detail to `OFF`
 
-## Switching off debugging for memory management - step 3 {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3}
+## Switching off debugging for memory management - step 3 {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT___STEP_3}
 
-### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_MAIN_CMAKE_FILE}
+### Main CMake file {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT___STEP_3_MAIN_CMAKE_FILE}
 
 ```cmake
 File: CMakeLists.txt
@@ -2043,7 +2043,7 @@ File: CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_MEMORY_MANAGEMENT_SWITCHING_OFF_DEBUGGING_FOR_MEMORY_MANAGEMENT___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

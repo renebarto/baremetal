@@ -23,11 +23,11 @@ So we'll be extending the `Timer` class for this.
 We will start by first creating an interrupt handler, which counts ticks.
 Then we'll introduce `KernelTimer`, which can be used to trigger after a certain amount of time.
 
-## Adding interrupts to the timer - Step 1 {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1}
+## Adding interrupts to the timer - Step 1 {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1}
 
 We'll add some functionality to the `Timer` class for enabling, handling and disabling interrupts on the timer.
 
-### Timer.h {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_TIMERH}
+### Timer.h {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TIMERH}
 
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 
@@ -48,7 +48,7 @@ File: code/libraries/unittest/include/unittest/TestDetails.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -119,7 +119,7 @@ The `TestDetails` class is added to the `unittest` namespace.
   - Line 63: We declare an accessor `SourceFileName()` for the source file name
   - Line 64: We declare an accessor `SourceFileLineNumber()` for the source line number
 
-### TestDetails.cpp {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_TESTDETAILSCPP}
+### TestDetails.cpp {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TESTDETAILSCPP}
 
 Let's implement the `TestDetails` class.
 
@@ -142,7 +142,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -196,7 +196,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 46-53: We implement the default constructor
 - Line 55-62: We implement the non default constructor
 
-### TestBase.h {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_TESTBASEH}
+### TestBase.h {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TESTBASEH}
 
 We will add a base class for each test. All tests will derive from this class, and implement its `RunImpl()` method to run the actual test.
 
@@ -219,7 +219,7 @@ File: code/libraries/unittest/include/unittest/TestBase.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -295,7 +295,7 @@ The `TestBase` class is added to the `unittest` namespace.
 This will ultimately invoke the `RunImpl()` virtual method, which is expected to be overriden by an actual test.
 - Line 72: We declare the overridable `RunImpl()` method
 
-### TestBase.cpp {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_TESTBASECPP}
+### TestBase.cpp {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TESTBASECPP}
 
 We'll implement the `TestBase` class.
 
@@ -318,7 +318,7 @@ File: code/libraries/unittest/src/TestBase.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -382,7 +382,7 @@ File: code/libraries/unittest/src/TestBase.cpp
 - Line 62-65: We provide a first implementation for the `Run()` method
 - Line 67-69: We provide a default implementation for the `RunImpl()` method
 
-### Update CMake file {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_UPDATE_CMAKE_FILE}
 
 As we have now added some source files to the `unittest` library, we need to update its CMake file.
 
@@ -405,7 +405,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_UPDATE_APPLICATION_CODE}
 
 Let's start using the class we just created. We'll add a simple test case by declaring and implementing a class derived from `TestBase`.
 
@@ -482,7 +482,7 @@ File: code/applications/demo/src/main.cpp
   - Line 33-37: We declare and implement an override for the `RunImpl()` method. It simply logs a string
 - Line 45-46: We define an instance of MyTest, and then run the test.
 
-### Configuring, building and debugging {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_21_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging. We'll first switch off the memory debug output to get a cleaner console.
 

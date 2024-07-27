@@ -1,4 +1,4 @@
-# Tutorial 05: First application - using the console - UART1 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1}
+# Tutorial 05: First application - using the console - UART1 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1}
 
 @tableofcontents
 
@@ -12,12 +12,12 @@ See also [here](01-setting-up-for-development.md###Attaching-a-serial-console).
 For this application, we will use UART1, which is the easiest to set up.
 It has less functionality, but for a simple serial console both are equally suitable.
 
-## New tutorial setup {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP}
+## New tutorial setup {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP}
 
 Starting from this tutorial, we will no longer create a copy of everything, but simply use the infrastructure that is already there.
 We will there for add one line to the root CMake file:
 
-### Main CMake file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_MAIN_CMAKE_FILE}
+### Main CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_CMAKE_FILE}
 
 Update the file `CMakeLists.txt`
 
@@ -35,7 +35,7 @@ File: CMakeLists.txt
 
 We add a variable `BUILD_TUTORIALS`, which is OFF by default. You can always set this to ON in your `CMakeSettings.json` file.
 
-### Tutorial CMake file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_TUTORIAL_CMAKE_FILE}
+### Tutorial CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_CMAKE_FILE}
 
 In the tutorial CMake file, we will add the folder for this tutorial.
 
@@ -49,7 +49,7 @@ File: tutorial/CMakeLists.txt
 4: add_subdirectory(05-console-uart1)
 ```
 
-### Main application CMake file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CMAKE_FILE}
+### Main application CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CMAKE_FILE}
 
 The main application's project name will be named after the tutorial, to not conflict with the one in the main code tree:
 
@@ -69,7 +69,7 @@ File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
 ...
 ```
 
-### Main application create-image CMake file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CREATEIMAGE_CMAKE_FILE}
+### Main application create-image CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CREATE_IMAGE_CMAKE_FILE}
 
 Similarly, the main application's create-image folder will have a project name named after the tutorial, to not conflict with the one in the main code tree:
 
@@ -105,7 +105,7 @@ File: tutorial/05-console-uart1/code/applications/demo/create-image/CMakeLists.t
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
-### Baremetal library CMake file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_BAREMETAL_LIBRARY_CMAKE_FILE}
+### Baremetal library CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_BAREMETAL_LIBRARY_CMAKE_FILE}
 
 We will get to the `baremetal` library shortly.
 In the same way, we need to make sure the baremetal library project name is not conflicting, so we add `-05` to the name.
@@ -152,7 +152,7 @@ File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
 ...
 ```
 
-### Tutorial results {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-05.a`
@@ -161,7 +161,7 @@ This tutorial will result in (next to the main project structure):
 
 In every following tutorial, the changes described here will be similar.
 
-## Creating the baremetal library structure - Step 1 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1}
+## Creating the baremetal library structure - Step 1 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1}
 
 We will first start to create a library named baremetal, which will contain all our basic functionality.
 
@@ -218,7 +218,7 @@ The reason for adding an extra directory with the same name as the library under
 
 The name of the subdirectory does not matter much, but clearly it is more readable in code to use the name of the library.
 
-### Creating the library code {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_CREATING_THE_LIBRARY_CODE}
+### Creating the library code {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CREATING_THE_LIBRARY_CODE}
 
 So let's start adding some code for the library, and set up the project for this library.
 
@@ -226,7 +226,7 @@ As we will need to add quite some code, let's do it in small steps.
 
 The first step we'll take is including a header to contain standard ARM instructions, starting with the NOP (No operation) instructions. We will then use this in a loop to wait for a while.
 
-### ARMInstructions.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_ARMINSTRUCTIONSH}
+### ARMInstructions.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_ARMINSTRUCTIONSH}
 
 We add ARM instructions.
 
@@ -249,7 +249,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -287,7 +287,7 @@ This header declares standard ARM instructions.
 For now we will once use the NOP (no operation) instruction.
 More will be added later.
 
-### Dummy.cpp {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_DUMMYCPP}
+### Dummy.cpp {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_DUMMYCPP}
 
 As the baremetal currently has no source files, only a header file, we will create a dummy C++ file to allow for building the library:
 
@@ -297,7 +297,7 @@ File: code/libraries/baremetal/src/Dummy.cpp
 2:
 ```
 
-### Project setup for baremetal {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_PROJECT_SETUP_FOR_BAREMETAL}
+### Project setup for baremetal {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_PROJECT_SETUP_FOR_BAREMETAL}
 
 First let's set up the project for the library:
 
@@ -407,7 +407,7 @@ You will recognize the structure used in the previous demo project, with a one a
 - line 17: We export the `code/libraries/baremetal/include` directory publicly
 - line 34: We export the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h` publicly
 
-### Update application code {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_UPDATE_APPLICATION_CODE}
 
 We will use the NOP instruction (which is part of the baremetal library) in a simple loop:
 
@@ -425,7 +425,7 @@ File: code/applications/demo/src/main.cpp
 10: }
 ```
 
-### Update project setup for demo application {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_UPDATE_PROJECT_SETUP_FOR_DEMO_APPLICATION}
+### Update project setup for demo application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_UPDATE_PROJECT_SETUP_FOR_DEMO_APPLICATION}
 
 We will update the demo application to add a dependency on the baremetal library:
 
@@ -468,7 +468,7 @@ File: code/applications/demo/CMakeLists.txt
 
 - line 26: We add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
 
-### Configure and build {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_CONFIGURE_AND_BUILD}
+### Configure and build {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD}
 
 We are now able to configure the project again, and build it.
 
@@ -674,7 +674,7 @@ Rebuild All succeeded.
 
 The only different steps are step 4 and 5.
 
-#### Removing and re-creating the baremetal library (step 4) {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_CONFIGURE_AND_BUILD_REMOVING_AND_RECREATING_THE_BAREMETAL_LIBRARY_STEP_4}
+#### Removing and re-creating the baremetal library (step 4) {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD_REMOVING_AND_RE_CREATING_THE_BAREMETAL_LIBRARY_STEP_4}
 
 The baremetal library is removed and re-created using the following command:
 
@@ -700,7 +700,7 @@ Here we see a total of 2 commands being performed inside a command shell:
   3. This adds a symbol to the baremetal library
   4. This is again a cd command to the same directory
 
-#### Linking the demo application (step 5) {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_CONFIGURE_AND_BUILD_LINKING_THE_DEMO_APPLICATION_STEP_5}
+#### Linking the demo application (step 5) {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD_LINKING_THE_DEMO_APPLICATION_STEP_5}
 
 ```text
 cmd.exe /C
@@ -724,7 +724,7 @@ This is almost the same as shown before, the only difference is that now, the li
 
 This is due to the added dependency on baremetal in the application's CMake file.
 
-### Running the application {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE__STEP_1_RUNNING_THE_APPLICATION}
+### Running the application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_RUNNING_THE_APPLICATION}
 
 Start QEMU, and start debugging as before, only this time, set a breakpoint on line 47 of start.S.
 
@@ -740,7 +740,7 @@ One important remark however:
 
 <img src="images/visualstudio-debug-assembly-2.png" alt="Debugging assembly code before jumping into main()" width="600"/>
 
-## Creating the library code - step 2 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2}
+## Creating the library code - step 2 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2}
 
 Let's try and write something more useful. We'll write code to set up UART1 and the GPIO pins, and write a string to the console.
 
@@ -752,7 +752,7 @@ In order to access these devices, we'll add a header file with addresses for the
 
 For this header, we also need some standard definitions and types, so we'll add these first.
 
-### Macros.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_MACROSH}
+### Macros.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_MACROSH}
 
 We'll add some basic definitions first.
 
@@ -775,7 +775,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -807,7 +807,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 
 For now, we'll define the macro BIT to define the value of a bit index index n, which is used to identify values of field in registers.
 
-### Types.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_TYPESH}
+### Types.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_TYPESH}
 
 Then we define basic standard types.
 
@@ -830,7 +830,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -900,7 +900,7 @@ This header defines the following types:
 - size types, again both signed and unsigned
 - a volatile variant of the 32 bit unsigned type, as well as a pointer to this type
 
-### BCMRegisters.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_BCMREGISTERSH}
+### BCMRegisters.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_BCMREGISTERSH}
 
 Now we add some registers of the Broadcom SoC in the Raspberry Pi (specifically those for GPIO and UART1 (mini UART).
 This file will include the two header file defines before.
@@ -924,7 +924,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1147,7 +1147,7 @@ as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](p
 
 The Mini UART or UART1 register addresses are all prefixed with `RPI_AUX_MU_`.
 
-### UART1.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1H}
+### UART1.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1H}
 
 We need to declare the UART1 functions.
 
@@ -1170,7 +1170,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1299,7 +1299,7 @@ This header declares the class UART1 inside the namespace baremetal. All types a
 The class has a default constructor, and a method to initialize it. It also declares a method to read and write a character, as well as to write a string.
 The other methods are used to set up the GPIO pins correctly, as part of the Initialize() method.
 
-### UART1.cpp {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1CPP}
+### UART1.cpp {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP}
 
 Finally we need to implement the UART1 functions.
 
@@ -1324,7 +1324,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1591,7 +1591,7 @@ As shown in the comments, the documentation specifies how to set the value. The 
   - This simply iterates through the string and writes the character using the `Write()` method.
   - The only special case is that a line feed (`\n`) in the string is written as a line feed plus carriage return character (`\r` followed by `\n`)
 
-#### SetMode {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1CPP_SETMODE}
+#### SetMode {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETMODE}
 
 The `SetMode()` method used in line 78 and 80 is implemented as:
 ```cpp
@@ -1638,7 +1638,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 - Line 162-168: If the GPIOMode is Input, InputPullDown or InputPullUp, the pull mode on the pin is set accordingly using `SetPullMode()`, and the function is set to Input using `SetFunction()`
 - Line 169-170: If the mode is output, the output is set to off (false, low) using `Off()`
 
-#### SetPullMode {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1CPP_SETPULLMODE}
+#### SetPullMode {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETPULLMODE}
 
 The `SetPullMode()` method is implemented as:
 ```cpp
@@ -1705,7 +1705,7 @@ This means there are 4 registers:
 For input of the map we use the integer conversion of the `GPIOPullMode` enum.
   - Line 218: We write the value to the GPIO pull up/down register
 
-#### SetFunction {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1CPP_SETFUNCTION}
+#### SetFunction {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETFUNCTION}
 
 The `SetFunction()` method is implemented as:
 ```cpp
@@ -1747,7 +1747,7 @@ This means there are 6 registers:
 For input of the map we use the integer conversion of the `GPIOFunction` enum.
 - Line 189: We write the value to the GPIO function select register
 
-#### Off {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UART1CPP_OFF}
+#### Off {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_OFF}
 
 The `Off()` method is implemented as:
 ```cpp
@@ -1786,7 +1786,7 @@ This means there are 2 registers:
 - Line 238: We decide depending on the value whether to use the GPIO set register or GPIO clear register
 - Line 240: We set the corresponding bit in the correct register
 
-### Update Linker Definition file {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_LINKER_DEFINITION_FILE}
+### Update Linker Definition file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_LINKER_DEFINITION_FILE}
 
 We update the `.text` section as we will be changing the startup code. All code except for the startup code will now be in the `.text` section.
 The startup code itself will be in the `.init` section
@@ -1808,7 +1808,7 @@ File: baremetal.ld
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1898,9 +1898,9 @@ File: baremetal.ld
 103: __bss_size = (__bss_end - __bss_start) >> 3;
 ```
 
-### Update startup code {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE}
+### Update startup code {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE}
 
-#### Startup.S {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_STARTUPS}
+#### Startup.S {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_STARTUPS}
 
 As we are going to write to registers, we first need to set up the system such that this is allowed.
 By default, all access to registers on Exception Level 1 (EL1) and below will be trapped, leading to an exception at EL2.
@@ -1932,7 +1932,7 @@ File: code/libraries/baremetal/src/Startup.S
 15: //
 16: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 17: //
-18: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+18: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 19: //
 20: // Permission is hereby granted, free of charge, to any person
 21: // obtaining a copy of this software and associated documentation
@@ -2041,7 +2041,7 @@ This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). The varia
 - Line 103: We set the code stack pointer to this address
 - Line 105: We jump to the main() function
 
-#### Macro armv8_switch_to_el1_m {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M}
+#### Macro armv8_switch_to_el1_m {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M}
 
 The macro armv8_switch_to_el1_m sets up a number of registers for our code to run smoothly. This contains quite to intricate details, so bare with me.
 
@@ -2184,7 +2184,7 @@ This register sets the return address for when a EL2 exception was executed.
 
 As said this is all very intricate and detailed, forcing one to dive into all the details of quite some specific ARM registers. You could also simply decide to accept what was explained here, and use the code.
 
-#### SysConfig.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
+#### SysConfig.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
 
 We add the system configuration header. This header can be used to set certain system parameters, to override the default.
 
@@ -2207,7 +2207,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2270,7 +2270,7 @@ Unless we write heavy graphics applications, 64 Mb for the GPU should be fine
 Just for clarity, you will see the GPU (Graphics Processing Unit) also named VPU (Vector Processing Unit) and VC (VideoCore, which is the name Broadcom uses for this part of the SoC).
 This is all the same thing.
 
-#### MemoryMap.h {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH}
+#### MemoryMap.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH}
 
 We add the defintion of the memory layout for the system. As we are building a baremetal system, we have much more freedom in this, but we also need to take care that the mapping is well defined and complete.
 
@@ -2293,7 +2293,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2356,7 +2356,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 
 This deserves some explanation. The memory map layout is as defined in the next sections
 
-#### Raspberry Pi 3 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_3}
+#### Raspberry Pi 3 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_3}
 
 | Base       | Size       | Contents               | Remarks      |
 |------------|------------|------------------------|--------------|
@@ -2391,7 +2391,7 @@ This deserves some explanation. The memory map layout is as defined in the next 
 | 0x40000000 |            | Local peripherals      |
 | ...        |            |                        |
 
-#### Raspberry Pi 4/5 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_45}
+#### Raspberry Pi 4/5 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_RASPBERRY_PI_45}
 
 | Base        | Size       | Contents                   | Remarks      |
 |-------------|------------|----------------------------|--------------|
@@ -2439,7 +2439,7 @@ Then end (top) of the exception stack for core 0 is `MEM_EXCEPTION_STACK`. This 
 Finally the end of the exception stacks is `MEM_EXCEPTION_STACK_END`.
 As you can see in the tables, there is also heap space, page space, etc. We'll get around to that later.
 
-### Update CMake file for baremetal {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_CMAKE_FILE_FOR_BAREMETAL}
+### Update CMake file for baremetal {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_CMAKE_FILE_FOR_BAREMETAL}
 
 As we've added some files to the baremetal library, and removed Dummy.cpp, we will update the CMake file.
 
@@ -2551,7 +2551,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 104: show_target_properties(${PROJECT_NAME})
 ```
 
-### Update application {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_APPLICATION}
+### Update application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_APPLICATION}
 
 The last thing we need to do is update the application code to actually make use of the functionality we just created.
 So we change the code in main.cpp:
@@ -2573,7 +2573,7 @@ File: code/applications/demo/src/main.cpp
 
 In the main() function, we first create an instance of the UART, then initialize it with a call to `Initialize()`, and finally we write the string "Hello World!\n" to the console. Notice the `\n` character, and remember that we will write the sequency `\r\n` instead of the simple line feed.
 
-### Update CMake file for application {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_CMAKE_FILE_FOR_APPLICATION}
+### Update CMake file for application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_CMAKE_FILE_FOR_APPLICATION}
 
 As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
 
@@ -2600,7 +2600,7 @@ File: code/applications/demo/CMakeLists.txt
 ...
 ```
 
-### Configure and build {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_CONFIGURE_AND_BUILD}
+### Configure and build {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_CONFIGURE_AND_BUILD}
 
 We are now able to configure the project again, and build it.
 
@@ -2797,7 +2797,7 @@ Rebuild All succeeded.
 
 The only difference is that now `Startup.S` is built in baremetal, instead of 'Start.S' in the application, and the `Dummy.cpp` file is now replaced with `UART1.cpp`.
 
-### Running the application - Step 2 {#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_RUNNING_THE_APPLICATION__STEP_2}
+### Running the application - Step 2 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_RUNNING_THE_APPLICATION___STEP_2}
 
 Start QEMU, and start debugging as before.
 

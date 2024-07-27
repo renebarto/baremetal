@@ -2,9 +2,12 @@
 
 @tableofcontents
 
+\todo Complete this, or add the right references.
+
 See [documentation](pdf/arm-architecture-registers.pdf).
 
-This page enumarates the definition of some of the registers inside the ARM processor.
+This page enumerates the definition of some of the registers inside the ARM processor.
+The list will never be complete, please refer to the documentation for that, here I just list very common registers, and registers needed to explain certain code.
 
 ## Register overview {#ARM_REGISTERS_REGISTER_OVERVIEW}
 

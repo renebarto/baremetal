@@ -22,7 +22,7 @@ def EmptyLine(s):
     return not EmptyString(s) and s == "\n"
 
 def ConvertNameToLink(name):
-    result = ''.join([c.upper() if c.isalnum() else '_' for c in name if (c.isalnum() or c == ' ' or c == '_')])
+    result = ''.join([c.upper() if c.isalnum() else '_' for c in name if (c.isalnum() or c == ' ' or c == '_' or c == '-' or c == '+')])
     return result
 
 class MarkDownLinkFixer:

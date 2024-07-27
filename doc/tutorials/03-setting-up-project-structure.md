@@ -270,7 +270,7 @@ Different is the way we pass compiler definitions and options. We use a more gen
 - Line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
 - Line 89: Finally we include the `CMakeLists.txt` for the image creation project.
 
-#### code/applications/demo/create-image CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMOCREATEIMAGE_CMAKE_FILE}
+#### code/applications/demo/create-image CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMOCREATE_IMAGE_CMAKE_FILE}
 
 The CMake file in `code/applications/demo/create-image` defines the project to create the image:
 
@@ -327,7 +327,7 @@ File: code/applications/demo/src/start.S
 14: //
 15: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 16: //
-17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+17: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 18: //
 19: // Permission is hereby granted, free of charge, to any person
 20: // obtaining a copy of this software and associated documentation

@@ -14,7 +14,7 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/20-interrupts.elf`
 - an image in `deploy/Debug/20-interrupts-image`
 
-## Interrupt handling - Step 1 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1}
+## Interrupt handling - Step 1 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1}
 
 The ARM processor supports two different kinds of interrupts:
 
@@ -30,7 +30,7 @@ A context save is not required for servicing a FIQ since it has its own set of b
 
 FIQs are often used for data transfers such as DMA operations.
 
-### ExceptionStub.S {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONSTUBS}
+### ExceptionStub.S {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_EXCEPTIONSTUBS}
 
 In order to support FIQ and IRQ interrupts, we need to update the exception assembly code.
 
@@ -265,7 +265,7 @@ If no handler was set no function is called, and the registers are simply restor
 - Line 306-312: We define the structure s_fiqData, which is 8 byte aligned
 - Line 320: We declare interrupt stub using the `irq_stub` macro, and set its handler to `InterruptHandler()`
 
-### ExceptionHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONHANDLERH}
+### ExceptionHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_EXCEPTIONHANDLERH}
 
 We will move the `InterruptHandler()` function to a new source file, so let's remove it from the exception handler code first.
 
@@ -350,7 +350,7 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 
 - Line 81: We removed the `InterruptHandler()` declaration
 
-### ExceptionHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_EXCEPTIONHANDLERCPP}
+### ExceptionHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_EXCEPTIONHANDLERCPP}
 
 We'll also remove the `InterruptHandler()` function from the source code.
 
@@ -375,7 +375,7 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 
 - Line 66: We removed the `InterruptHandler()` implementation
 
-### InterruptHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_INTERRUPTHANDLERH}
+### InterruptHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_INTERRUPTHANDLERH}
 
 We will add the `InterruptHandler()` function.
 Similar to waht we did for exceptions, we will also declare a class `InterruptSystem`, which is a singleton, and has its own implementation for `InterruptHandler()`.
@@ -401,7 +401,7 @@ File: d:\Projects\baremetal.github\tutorial\20-interrupts\code\libraries\baremet
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -500,7 +500,7 @@ File: d:\Projects\baremetal.github\tutorial\20-interrupts\code\libraries\baremet
   - Line 93: We declate a method `InterruptHandler()` which is called by the global `InterruptHandler()` function
 - Line 96: We declare the function `GetInterruptSystem()`, which creates the singleton instance of the `InterruptSystem` class if needed, and returns a reference to it
 
-### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_INTERRUPTHANDLERCPP}
+### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_INTERRUPTHANDLERCPP}
 
 We'll implement the `InterruptHandler()` function as well as the `InterruptSystem` class.
 
@@ -523,7 +523,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -644,7 +644,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 - Line 108-112: We implement the `InterruptHandler()` method. This will call the handler, if installed
 - Line 120-125: We implement the `GetInterruptSystem()` function
 
-### ARMRegisters.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_ARMREGISTERSH}
+### ARMRegisters.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_ARMREGISTERSH}
 
 Next to the Raspberry Pi registers for peripherals etc., there are also ARM processor registers, but specific for Raspberry Pi.
 The complete set of registers is defined in [documentation](pdf/bcm2836-peripherals.pdf), the most important ones are described in [ARM local device registers](#RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS).
@@ -672,7 +672,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -859,7 +859,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 
 The rest of the registers will be explained as we use them.
 
-### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_UPDATE_CMAKE_FILE}
 
 As we have now added some source files to the `baremetal` library, we need to update its CMake file.
 
@@ -940,7 +940,7 @@ File: d:\Projects\baremetal.github\code\libraries\baremetal\CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_UPDATE_APPLICATION_CODE}
 
 Let's start generating some interrupts. For now, we'll do this all in the `main()` code, we will be moving and generalizing this later.
 
@@ -1040,7 +1040,7 @@ File: code/applications/demo/src/main.cpp
 - Line 65: We disable the timer IRQ
 - Line 67: We unregister the handler function
 
-### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 The application will start the timer, and after 5 seconds stop it again. As we set the timer to tick twice a second, we expect to see 10 ticks happening.
 
@@ -1063,12 +1063,12 @@ Press r to reboot, h to halt
 hInfo   Halt (System:129)
 ```
 
-## Interrupt System - Step 2 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2}
+## Interrupt System - Step 2 {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2}
 
 We'll update the class `InterruptSystem` to enable, disable, and handle interrupts.
 We'll also add support for fast interrupts (FIQ).
 
-### InterruptSystem.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTSYSTEMH}
+### InterruptSystem.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_INTERRUPTSYSTEMH}
 
 Update the file `code/libraries/baremetal/include/baremetal/InterruptSystem.h`
 
@@ -1179,7 +1179,7 @@ File: code/libraries/baremetal/include/baremetal/InterruptSystem.h
 - Line 137: We add the method `CallIRQHandler()` which calls the registered IRQ handler for the IRQ with the specified id
 - Line 145: We declare the FIQData struct instance s_fiqData, which is defined in `ExceptionStub.S'
 
-### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTHANDLERCPP}
+### InterruptHandler.cpp {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_INTERRUPTHANDLERCPP}
 
 Let's update the `InterruptSystem` class.
 
@@ -1490,7 +1490,7 @@ then check whether any of the IRQ 1, IRQ 2 and IRQ basic interrupts are pending,
 So at most one interrupt is handled in each call to `InterruptHandler()`
 - Line 316-329: We implement the `CallIRQHandler()` method. This call the IRQ handler if registered, otherwise disables the interrupt for the future
 
-### Interrupt.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_INTERRUPTH}
+### Interrupt.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_INTERRUPTH}
 
 We'll add definitions for all IRQ and FIQ interrupts.
 
@@ -1513,7 +1513,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupt.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -2098,11 +2098,11 @@ We'll not get into each and every IRQ or FIQ id, but give some descriptions on m
   - Line 562-566: We define all currently supported FIQ for Raspberry 4 and later
   - Line 569: We define the total count of FIQ interrupts supported by the system for Raspberry 4 and later
 
-### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_UPDATE_CMAKE_FILE}
 
 As we have not added any source files to the `baremetal` library, we do not need to update its CMake file.
 
-### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_UPDATE_APPLICATION_CODE}
 
 We'll make a few small changes to use the new `InterruptSystem` implementation.
 
@@ -2154,7 +2154,7 @@ File: code/applications/demo/src/main.cpp
 - Line 37: We replace the code to register the IRQ handler with a single call to `RegisterIRQHandler()`
 - Line 54: We replace the code to unregister the IRQ handler with a single call to `UnregisterIRQHandler()`
 
-### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging. 
 

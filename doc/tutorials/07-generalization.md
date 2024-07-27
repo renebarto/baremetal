@@ -28,14 +28,14 @@ in `tutorial/07-generalization` there is a complete copy of what we work towards
 Its root will clearly be `tutorial/07-generalization`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
-## Generic memory access - Step 1 {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1}
+## Generic memory access - Step 1 {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1}
 
 We'll add an abstract interface `IMemoryAccess` that is implemented by the class `MemoryAccess`.
 We will pass the interface to classes that need to write to memory, such as `UART1` and `System`.
 
 First, let's create the interface.
 
-### IMemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_IMEMORYACCESSH}
+### IMemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_IMEMORYACCESSH}
 
 Let's create the abstract interface first.
 
@@ -58,7 +58,7 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -124,7 +124,7 @@ We have three sets of these methods:
 - one for 16 bit access
 - one for 32 bit access
 
-### MemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSH}
+### MemoryAccess.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_MEMORYACCESSH}
 
 Next we derive from the abstract `IMemoryAccess` interface.
 
@@ -147,7 +147,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -198,7 +198,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 
 So we create a class `MemoryAccess`, derived from `IMemoryAccess`. Next to this, we create an accessor function for the singleton `MemoryAccess` instance.
 
-### MemoryAccess.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_MEMORYACCESSCPP}
+### MemoryAccess.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_MEMORYACCESSCPP}
 
 Next we implement `MemoryAccess`.
 
@@ -221,7 +221,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -314,9 +314,9 @@ As you can see, the implementation is using a reinterpration cast to a uint8 / u
 
 We can now start replacing the direct memory access with calls to the methods of IMemoryAccess.
 
-### Update UART1 code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE}
+### Update UART1 code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_UART1_CODE}
 
-#### UART1.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1H}
+#### UART1.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_UART1_CODE_UART1H}
 
 So, we update UART1 to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor:
 
@@ -354,7 +354,7 @@ This means only our accessor function can create an default instance of UART1, m
 - Line 122-123: We add a method to create an instance with a specific memory access instance injected.
 This can later be used for testing.
 
-#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_UART1_CODE_UART1CPP}
+#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_UART1_CODE_UART1CPP}
 
 Let's update the implementation:
 
@@ -532,9 +532,9 @@ File: code/libraries/baremetal/src/UART1.cpp
 ...
 ```
 
-### Update System code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE}
+### Update System code {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_SYSTEM_CODE}
 
-#### System.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMH}
+#### System.h {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_SYSTEM_CODE_SYSTEMH}
 
 We update System to use IMemoryAccess calls. For this, we will also need to pass in the memory access reference to the constructor.
 Also, we will need to make `Halt()` and `Reboot()` non-static members, as they will need to use the memory access reference.
@@ -573,7 +573,7 @@ This means only our accessor function can create an default instance of System, 
 - Line 59-60: We add a method to create an instance with a specific memory access instance injected.
 This can later be used for testing.
 
-#### System.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_SYSTEM_CODE_SYSTEMCPP}
+#### System.cpp {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_SYSTEM_CODE_SYSTEMCPP}
 
 Let's update the implementation:
 
@@ -656,7 +656,7 @@ File: code/libraries/baremetal/src/System.cpp
 105: }
 ```
 
-### Update project configuration {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 We need to update the CMake file for baremetal.
 
@@ -810,7 +810,7 @@ File: code/libraries/baremetal/include/baremetal/New.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -858,7 +858,7 @@ File: code/libraries/baremetal/src/New.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -930,13 +930,13 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_GENERIC_MEMORY_ACCESS___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code.
 
 The code will not behave differently, but will be more well-structured.
 
-## Separating out GPIO code - Step 2 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2}
+## Separating out GPIO code - Step 2 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2}
 
 Now let's separate out the GPIO functionality. We'll create a new class PhysicalGPIOPin which will implement the functionality.
 
@@ -944,7 +944,7 @@ Raspberry Pi also has virtual GPIO pins, hence the name. We'll cover these later
 
 Again, to enable testing later on, we'll create an abstract interface IGPIOPin, which we'll derive from.
 
-### IGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_IGPIOPINH}
+### IGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_IGPIOPINH}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -965,7 +965,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1081,7 +1081,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 129: } // namespace baremetal
 ```
 
-### PhysicalGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_PHYSICALGPIOPINH}
+### PhysicalGPIOPin.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_PHYSICALGPIOPINH}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -1102,7 +1102,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1186,7 +1186,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 97: } // namespace baremetal
 ```
 
-### PhysicalGPIOPin.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_PHYSICALGPIOPINCPP}
+### PhysicalGPIOPin.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_PHYSICALGPIOPINCPP}
 
 Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 
@@ -1207,7 +1207,7 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1462,11 +1462,11 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 268: } // namespace baremetal
 ```
 
-### Update UART1 code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE}
+### Update UART1 code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_UPDATE_UART1_CODE}
 
 We can now clean up the code for `UART1`, and make use of the `PhysicalGPIOPin` we just implemented.
 
-#### UART1.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE_UART1H}
+#### UART1.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_UPDATE_UART1_CODE_UART1H}
 
 Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
@@ -1487,7 +1487,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1553,7 +1553,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 - Line 46-106: We remove the enum definitions which are now in `IGPIOPin.h`
 - Line 137-149: We remove the methods for GPIO which are noew in 'PhysicalGPIOPin.h`
 
-#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_UART1_CODE_UART1CPP}
+#### UART1.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_UPDATE_UART1_CODE_UART1CPP}
 
 Update the file `code/libraries/baremetal/src/UART1.cpp`.
 
@@ -1574,7 +1574,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1705,7 +1705,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 - Line 90: We now instantiate a local PhysicialGPIOPin instance (we will no longer need it once the GPIO pin is configured) to set up the RxD pin (15)
 - Line 147-253: We can remove the implementation of methods now moved to `PhysicalGPIOPin.cpp`
 
-### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -1745,13 +1745,13 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
 The code will not behave differently, it's just cleaner in its structure.
 
-## Separating out delay code - Step 3 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3}
+## Separating out delay code - Step 3 {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3}
 
 You may have notices that we still have a delay loop in `PhysicalGPIOPin.cpp`.
 This code is also generic, and can be used to perform a busy form of waiting also when rebooting or haldting the system.
@@ -1759,7 +1759,7 @@ It therefore seems wise to separate out this code as well.
 
 We will create a new class Timer, which fornow will only have one method, but we will be using different forms of waiting using the system timer later on, as well as an interrupt based timer.
 
-### Timer.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERH}
+### Timer.h {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_TIMERH}
 
 Let's create the `Timer` class.
 
@@ -1782,7 +1782,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1823,7 +1823,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 54: } // namespace baremetal
 ```
 
-### Timer.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_TIMERCPP}
+### Timer.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_TIMERCPP}
 
 Next we implement `Timer`.
 
@@ -1846,7 +1846,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -1888,7 +1888,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 55: }
 ```
 
-### Update PhysicalGPIOPin code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_UPDATE_PHYSICALGPIOPIN_CODE}
+### Update PhysicalGPIOPin code {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_UPDATE_PHYSICALGPIOPIN_CODE}
 
 We can now remove the implmentation of the delay loop from `PhysicalGPIOPin.cpp`.
 
@@ -1937,7 +1937,7 @@ File: code/libraries/baremetal/src/PhysicialGPIOPin.cpp
 - Line 56-66: We can remove the `WaitCycles()` function.
 - Line 239, 241: We replace the call to `WaitCycles()` with a call to the `Timer` method `WaitCycles()`.
 
-### Adding a wait before system halt or reboot {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_ADDING_A_WAIT_BEFORE_SYSTEM_HALT_OR_REBOOT}
+### Adding a wait before system halt or reboot {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_ADDING_A_WAIT_BEFORE_SYSTEM_HALT_OR_REBOOT}
 
 As we have now isolated the delay loop into the Timer class, we can also use it to implement short delays when halting or rebooting the system, giving the UART1 some time to complete its output.
 
@@ -1979,7 +1979,7 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 91: We wait the specified number of cycles before halting the system
 - Line 111: We wait the specified number of cycles before rebooting the system
 
-### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -2021,7 +2021,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE__STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_DELAY_CODE___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

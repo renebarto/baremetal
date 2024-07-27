@@ -22,11 +22,11 @@ We'll first start by defining a common interface for UART0 and UART1, so that we
 We will then add functionality for setting the UART clock.
 Finally we will add and implement UART0.
 
-## Defining a common interface - Step 1 {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1}
+## Defining a common interface - Step 1 {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE___STEP_1}
 
 In order to be able to use any of UART0 and UART1 for e.g. logging, we need to define a common abstract interface.
 
-### CharDevice.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_CHARDEVICEH}
+### CharDevice.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE___STEP_1_CHARDEVICEH}
 
 Create the file `code/libraries/baremetal/include/baremetal/CharDevice.h`
 
@@ -47,7 +47,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -96,7 +96,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 - Line 52: We declare a pure virtual method `Read()` like we did for UART1
 - Line 54: We declare a pure virtual method `Write()` like we did for UART1
 
-### UART1.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UART1H}
+### UART1.h {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE___STEP_1_UART1H}
 
 We will now derive `UART1` from our new `CharDevice` interface.
 
@@ -155,7 +155,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 
 The code for UART1 does not need any changes.
 
-### Update project configuration {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -191,17 +191,17 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE__STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_10_UART0_DEFINING_A_COMMON_INTERFACE___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
 The application does not behave differently.
 
-## Extending mailbox interface - Step 2 {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2}
+## Extending mailbox interface - Step 2 {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2}
 
 In order to set the clock, we need to extend `RPIProperties`.
 
-### RPIProperties.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESH}
+### RPIProperties.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_RPIPROPERTIESH}
 
 We add the method `SetClockRate()` as well as the type for the clock to set.
 
@@ -237,7 +237,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 69: } // namespace baremetal
 ```
 
-### RPIProperties.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_RPIPROPERTIESCPP}
+### RPIProperties.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_RPIPROPERTIESCPP}
 
 We implement the new method `SetClockRate()`.
 
@@ -284,7 +284,7 @@ You can disable this effect by setting skipTurbo to 1
 - Line 82-93: We implement the method `SetClockRate()`.
 The implementation is comparable to that of `GetBoardSerial()`, we simple create an instance of the struct, fill its fields, and call `GetTag()` on the properties interface
 
-### BCMRegisters.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_BCMREGISTERSH}
+### BCMRegisters.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_BCMREGISTERSH}
 
 We need to add some registers of the Broadcom SoC in the Raspberry Pi for UART0 (or PL011 UART).
 
@@ -339,7 +339,7 @@ More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) r
 
 The Mini UART or UART1 register addresses are all prefixed with `RPI_UART0_`.
 
-### UART0.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0H}
+### UART0.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UART0H}
 
 We declare the class `UART0` which derives from `CharDevice`.
 
@@ -363,7 +363,7 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -431,7 +431,7 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 
 The `UART0` class declaration is identical to the `UART1` class.
 
-### UART0.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UART0CPP}
+### UART0.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UART0CPP}
 
 We implement the class `UART0`.
 
@@ -454,7 +454,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 13: //
 14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later) and Odroid
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
 18: // Permission is hereby granted, free of charge, to any person
 19: // obtaining a copy of this software and associated documentation
@@ -602,9 +602,9 @@ fractional part = 0.170184 * 64 = 10.89 -> 11 = 0xB
 - Line 113-122: The `WriteString()` method is identical to the one for `UART1`
 - Line 124-129: The `GetUART0()` method is almost identical to the one for `UART1`
 
-### Update the application code {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE}
+### Update the application code {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UPDATE_THE_APPLICATION_CODE}
 
-#### main.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_MAINCPP}
+#### main.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
 Let's use UART0 now.
 
@@ -663,7 +663,7 @@ File: code/applications/demo/src/main.cpp
 49: }
 ```
 
-#### System.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_THE_APPLICATION_CODE_SYSTEMCPP}
+#### System.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UPDATE_THE_APPLICATION_CODE_SYSTEMCPP}
 
 As we switch the main application to UART0, we should also switch the code in `System.cpp` to UART0, otherwise we will be suddenly changing the port over, with strange effects.
 
@@ -687,7 +687,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 ```
 
-### Update project configuration {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_UPDATE_PROJECT_CONFIGURATION}
+### Update project configuration {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
 As we added some files to the baremetal project, we need to update its CMake file.
 
@@ -743,7 +743,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE__STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 The code will now write to UART0, which is connected to GPIO pins 14 (Txd) and 15 (RxD) instead of UART1.

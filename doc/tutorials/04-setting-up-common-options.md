@@ -697,7 +697,7 @@ This is only done if verbose output is requested
 - Line 102: We set the search path for standard libraries using `LINK_DIRECTORIES`
 - Line 107: Using the custom CMake function `show_target_properties` we can now print all target properties.
 
-## Update demo-image CMake file {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_UPDATE_DEMOIMAGE_CMAKE_FILE}
+## Update demo-image CMake file {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_UPDATE_DEMO_IMAGE_CMAKE_FILE}
 
 The same way, we can update the demo-image CMake file:
 

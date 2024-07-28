@@ -1288,17 +1288,16 @@ In GDB:
 Remote debugging using localhost:1234
 0x0000000000000000 in ?? ()
 (gdb) load
-Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080000, load size 128
-Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
+Start address 0x0000000000080008, load size 88
+Transfer rate: 42 KB/sec, 88 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/main.cpp:3
-3	    return 0;
+Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
+3           return 0;
 ```
 
 So we ended up in line 3 of the main() function:
@@ -1311,11 +1310,13 @@ File: main.cpp
 4: }
 ```
 
-Next, we step one further, ending up in start.S, and then close down debugging again:
+Next, we step one further, to go to line 4, and then one more, ending up in start.S, and then close down debugging again:
 
 ```gdb
 (gdb) n
-empty_bss () at /home/rene/repo/baremetal.github/start.S:84
+4       }
+(gdb) n
+empty_bss () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project\start.S:84
 84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y

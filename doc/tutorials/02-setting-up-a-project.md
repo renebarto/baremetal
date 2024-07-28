@@ -24,7 +24,7 @@ We'll get to Visual Studio in [Setting up project structure](03-setting-up-proje
 
 ## Create project {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_PROJECT}
 
-In this file we will first create a project:
+In this file we will first create a project. This is done in CMake by adding a file named CMakeLists.txt:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
@@ -85,7 +85,7 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Short explanation:
-- Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source file (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
+- Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source files, for now only containing one source file  (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
 - Line 12-13: We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
 - Line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project we're in, so in this case `02-setting-up-a-project`)
   - This target will build from the source files and headers just specified. The term `${X}` means the value of a variable named X.
@@ -109,9 +109,9 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
 4:     if (CMAKE_HOST_UNIX)
-5:         set(TOOLCHAIN_ROOT "/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf")
+5:         set(TOOLCHAIN_ROOT "/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf")
 6:     else()
-7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf")
+7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf")
 8:     endif()
 9: else()
 10:     set(TOOLCHAIN_ROOT $ENV{BAREMETAL_TOOLCHAIN_ROOT})
@@ -127,7 +127,7 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 20: set(CMAKE_VERBOSE_MAKEFILE ON)
 21: 
 22: set(TOOLCHAIN_PATH ${TOOLCHAIN_ROOT}/bin)
-23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
+23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.3.1)
 24: 
 25: if (CMAKE_HOST_UNIX)
 26:     set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/${TOOL_DESTINATION_PLATFORM}-gcc CACHE FILEPATH "C compiler" FORCE)
@@ -194,9 +194,9 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 2: 
 3: if ("$ENV{BAREMETAL_TOOLCHAIN_ROOT}" STREQUAL "")
 4:     if (CMAKE_HOST_UNIX)
-5:         set(TOOLCHAIN_ROOT "/home/rene/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf")
+5:         set(TOOLCHAIN_ROOT "/home/rene/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf")
 6:     else()
-7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf")
+7:         set(TOOLCHAIN_ROOT "D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf")
 8:     endif()
 9: else()
 10:     set(TOOLCHAIN_ROOT $ENV{BAREMETAL_TOOLCHAIN_ROOT})
@@ -212,6 +212,10 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 20: set(CMAKE_VERBOSE_MAKEFILE ON)
 ```
 
+Note that all paths, even on Windows, use forward slashes. This is a convention in CMake.
+This makes working with CMake more convenient, so stick to this.
+There are some exceptions, such as literal strings.
+
 - Line 1: Here, we include a CMake script to enable forcing the compiler. We need to be able to do this to override the default compiler
 - Line 3-11: We check if there is an existing environment variable `BAREMETAL_TOOLCHAIN_ROOT` set to define the location of the toolchain,
 and otherwise fall back to a default, different for Windows and Linux of course
@@ -223,7 +227,7 @@ In all cases this will be a 64 bit ARM processor, for which the architecture nam
 - Line 16: `TOOL_DESTINATION_PLATFORM` is the so called target triplet / quadruplet.
 It defines the combination of target architecture, vendor if needed, the operating system, and the build type.
 In our case this is `aarch64-none-elf` meaning a 64 bit ARM architecture, with no OS, and with elf output files
--Line 18: We also print the used toolchain root
+- Line 18: We also print the used toolchain root
 - Line 20: We set CMAKE build output to be more verbose
 
 #### Part 2 {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE_PART_2}
@@ -233,7 +237,7 @@ The next part defines the tools to be used, such as the compiler, linker, etc.:
 ```cmake
 File: tutorial/02-setting-up-a-project/baremetal.toolchain
 22: set(TOOLCHAIN_PATH ${TOOLCHAIN_ROOT}/bin)
-23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.2.1)
+23: set(TOOLCHAIN_AUXILIARY_PATH ${TOOLCHAIN_ROOT}/lib/gcc/${TOOL_DESTINATION_PLATFORM}/13.3.1)
 24: 
 25: if (CMAKE_HOST_UNIX)
 26:     set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/${TOOL_DESTINATION_PLATFORM}-gcc CACHE FILEPATH "C compiler" FORCE)
@@ -278,7 +282,7 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 - Line 23: We set the variable `TOOLCHAIN_AUXILIARY_PATH` which is the location of auxiliary libraries used for building
 
 Then depending on the build platform, we define the tools to be used. 
-The part at the end `CACHE FILEPATH "text" FORCE` simply means that the variable is enforced into the CMake cache.
+The part at the end `CACHE FILEPATH "text" FORCE` simply means that the variable is a file path, with a description, which is enforced into the CMake cache.
 
 The CMake cache is a file CMake uses to store project variables for later reference.
 This file is named `CMakeCache.txt`, and is located in teh CMake build directory (explained later).
@@ -321,10 +325,10 @@ if not already done, with the auxiliary libary directory. This contains a bit of
 
 Lastly, we need to set some more standard CMake variable:
 
-- Line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` to signal not to look for executables in the path just specfied
-- Line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` to signal to look for libraries in the path just specfied
-- Line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` to signal to look for include in the path just specfied
-- Line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` to signal to look for packages in the path just specfied
+- Line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` specifies not to look for executables in the path just specified
+- Line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` specifies to look for libraries in the path just specified
+- Line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` specifies to look for include in the path just specified
+- Line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` specifies to look for packages in the path just specified
 
 We now need to use this toolchain file.
 
@@ -334,8 +338,8 @@ On the command line, first configure the build:
 
 ```bat
 cd <project_root_dir>
-del /s /f /q cmake-build/*.*
-rmdir cmake-build
+del /s /f /q cmake-build\*.*
+rmdir /S /Q cmake-build
 mkdir cmake-build
 pushd cmake-build
 cmake ../tutorial/02-setting-up-a-project -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../tutorial/02-setting-up-a-project/baremetal.toolchain
@@ -345,34 +349,49 @@ popd
 Output:
 
 ```text
--- CMake 3.27.8
--- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+-- CMake 3.30.1
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+-- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- The CXX compiler identification is GNU 13.2.1
--- Configuring done (0.5s)
--- Generating done (0.0s)
--- Build files have been written to: D:/Projects/baremetal.github/cmake-build
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- The CXX compiler identification is GNU 13.3.1
+-- The ASM compiler identification is GNU
+-- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- PROJECT_LINK_OPTIONS= -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/link.ld
+-- The C compiler identification is GNU 13.3.1
+--
+**********************************************************************************
+
+--
+## In directory: D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/create-image
+
+** Setting up 02-setting-up-a-project-image **
+
+-- create_image 02-setting-up-a-project-image kernel8.img 02-setting-up-a-project
+-- TARGET_NAME 02-setting-up-a-project.elf
+-- generate D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
+-- Configuring done (0.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: D:/Projects/baremetal.github.shadow/cmake-build
 ```
 
 There may be warnings about unused variables, you can ignore these.
@@ -391,7 +410,7 @@ Next perform the actual build
 
 ```bat
 set ROOT=%CD%
-pushd tutorial/02-setting-up-a-project
+pushd tutorial\02-setting-up-a-project
 cmake --build %ROOT%/cmake-build --target 02-setting-up-a-project
 popd
 ```
@@ -399,18 +418,18 @@ popd
 ```output
 [2/2] Linking CXX executable 02-setting-up-a-project
 FAILED: 02-setting-up-a-project
-cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && cd ."
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-exit.o): in function `exit':
+cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && cd ."
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-closer.o): in function `_close_r':
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-closer.o): in function `_close_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/closer.c:47:(.text._close_r+0x1c): undefined reference to `_close'
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-lseekr.o): in function `_lseek_r':
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-lseekr.o): in function `_lseek_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/lseekr.c:49:(.text._lseek_r+0x24): undefined reference to `_lseek'
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-readr.o): in function `_read_r':
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-readr.o): in function `_read_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/readr.c:49:(.text._read_r+0x24): undefined reference to `_read'
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-writer.o): in function `_write_r':
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-writer.o): in function `_write_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/writer.c:49:(.text._write_r+0x24): undefined reference to `_write'
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1\libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
+D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/sbrkr.c:51:(.text._sbrk_r+0x1c): undefined reference to `_sbrk'
 collect2.exe: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed.
@@ -442,35 +461,35 @@ popd
 Output:
 
 ```text
--- CMake 3.25.1
--- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- CMake 3.29.6
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
--- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
--- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
--- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
--- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
--- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
--- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
--- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
--- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- The CXX compiler identification is GNU 13.2.1
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- The CXX compiler identification is GNU 13.3.1
 -- The ASM compiler identification is GNU
--- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- Configuring done
--- Generating done
+-- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
 -- Build files have been written to: /home/rene/repo/baremetal.github/cmake-build
 ```
 
@@ -498,18 +517,18 @@ popd
 ```output
 [2/2] Linking CXX executable 02-setting-up-a-project
 FAILED: 02-setting-up-a-project
-: && /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && :
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-exit.o): in function `exit':
+: && /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj CMakeFiles/02-setting-up-a-project.dir/start.S.obj -o 02-setting-up-a-project   && :
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: CMakeFiles/02-setting-up-a-project.dir/start.S.obj: in function `_start':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-writer.o): in function `_write_r':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: CMakeFiles/02-setting-up-a-project.dir/start.S.obj: in function `empty_bss':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/writer.c:49:(.text._write_r+0x24): undefined reference to `_write'
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-closer.o): in function `_close_r':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-closer.o): in function `_close_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/closer.c:47:(.text._close_r+0x1c): undefined reference to `_close'
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-lseekr.o): in function `_lseek_r':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-lseekr.o): in function `_lseek_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/lseekr.c:49:(.text._lseek_r+0x24): undefined reference to `_lseek'
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-readr.o): in function `_read_r':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-readr.o): in function `_read_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/readr.c:49:(.text._read_r+0x24): undefined reference to `_read'
-/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/sbrkr.c:51:(.text._sbrk_r+0x1c): undefined reference to `_sbrk'
 collect2: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed.
@@ -555,7 +574,8 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- Line 5: We define a variable `SCRIPTS_DIR` to hold the path to CMake scripts we will be adding (to contain the custom functions)
+- Line 5: We define a variable `SCRIPTS_DIR` to hold the path to CMake scripts we will be adding (to contain the custom functions).
+This variable is added to the CMake cache to make it persistent
 - Line 6: We set the variable `CONFIG_DIR` to denote a build configuration specific directory. For now we'll simply set it to Debug, as we are building for the Debug build configuration
 - Line 7: We define a variable `DEPLOYMENT_DIR` to point to the location where our final image will be.
 This could be the same path as the output directory, however it makes sense to separate intermediate binaries from the final images
@@ -616,6 +636,8 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
 
+\todo Possibly set CPU architecture depending on board type (cortex-a53, a72, a76). For now only cortex-a53 seems to be defined.
+
 So, after the project is defined, we add the following lines:
 - Line 20: We define the variable `PROJECT_TARGET_NAME`, which sets the file name used for our executable to `02-setting-up-a-project.elf`
 - Line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions.
@@ -643,11 +665,11 @@ Here we set the private compiler options to be:
 - Line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories.
 For now, everything is in the same directory, so we leave this empty
 - Line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
-  - ${CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
+  - $\{CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
   - -nostdlib: Do not use the standard C libraries
   - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
-  - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000
-  - -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
+  - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000 (this is always the same for 64 bit architectures)
+  - -T $\{CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
 - Line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
 - Line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
 - Line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
@@ -707,9 +729,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- Line 71: sets the executable name `OUTPUT_NAME`, a standard property
-- Line 72: defines the location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard property
-- Line 73: defines the location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard property
+- Line 71: sets the target executable name `OUTPUT_NAME`, a standard target property
+- Line 72: defines the target location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard target property
+- Line 73: defines the target location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard target property
 
 The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_FOR_CUSTOM_CMAKE_MODULES_AND_BINARY_TREE).
 It is common practice to collect output files together in a binaries tree.
@@ -743,6 +765,7 @@ File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 Without going into too much detail. This function is called `list_to_string`, and has one input (`in`) and one output (`out`) parameter.
 It cycles through the parts of the input variable, and creates a string by adding each part followed by a space.
 Finally it sets the output variable. The `PARENT_SCOPE` is needed to convert the value to outside the function (for the output variable).
+This function is needed as the compiler options are placed in a list, which when converted to a string will be a comma delimited list, not space delimited.
 
 Finally we need to be able to use the function. For this, we need to include the module:
 
@@ -823,24 +846,24 @@ File: tutorial/02-setting-up-a-project/link.ld
 52: 
 53: SECTIONS
 54: {
-55:     /* Code section */
-56:     .text : {
-57:         KEEP(*(.text.boot))
-58:         *(.text* .text.* .gnu.linkonce.t*)
-59: 
-60:         _etext = .;
-61:     } : text
-62: 
-63:     . = SIZEOF_HEADERS;
-64:     /* Executable initialization section */
-65:     .init : {
-66:         *(.init)
-67:     } : init
-68: 
-69:     /* Executable cleanup section */
-70:     .fini : {
-71:         *(.fini)
-72:     } : fini
+55:     . = SIZEOF_HEADERS;
+56:     /* Executable initialization section */
+57:     .init : {
+58:         *(.init)
+59:     } : init
+60: 
+61:     /* Executable cleanup section */
+62:     .fini : {
+63:         *(.fini)
+64:     } : fini
+65: 
+66:     /* Code section */
+67:     . = 0x80000;
+68:     .text : {
+69:         *(.text*)
+70: 
+71:         _etext = .;
+72:     } : text
 73: 
 74:     /* Executable read only data section */
 75:     .rodata : {
@@ -878,28 +901,33 @@ File: tutorial/02-setting-up-a-project/link.ld
 The linker definition file defines the different sections in the executable file.
 
 - Line 41: The `ENTRY(_start)` statement sets the starting point of the executable to the location denoted by label `_start`. We will cover this in a minute.
-- Line 44-51: The `PHDRS` part defines the Program Header Table (refer to [ELF header format](../cpu/arm/elf-format.pdf) for more information)
-- Line 56-61: .text is the code section
+- Line 44-51: The `PHDRS` part defines the Program Header Table (refer to [ELF header format](pdf/elf-format.pdf) for more information)
+- Line 57-59: .init is the initialization section, which contains code with is normally in the crtbegin.o file. We will run into this later on, for now it is empty
+- Line 62-64: .fini is the cleanup section, similarly containing code in crtend.o.
+- Line 67: We set the address to 0x80000, this will be the start address
+- Line 68-72: .text is the code section
   - This section starts with the .text.boot subsection, which is always stored in the executable (`KEEP`).
   - The other subsections (`.text* .text.* .gnu.linkonce.t*`) are only kept as needed.
-- Line 65-67: .init is the initialization section, which contains code with is normally in the crtbegin.o file. We will run into this later on, for now it is empty
-- Line 70-72: .fini is the cleanup section, similarly containing code in crtend.o.
+  - We save the end of the text section in a variable \_etext for later reference
 - Line 75-77: .rodata is the constants section, i.e. it contains data that is read-only
 - Line 80-86: .init_array is the static initializer section.
 It contains a table of functions used to initialize static data, such as constructors of static class objects. This is always stored. We will get to this in [Improving startup and static initialization](06-improving-startup-static-initialization.md)
 - Line 89-91: .data contains read/write data for the executable
 - Line 94-101: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
+We save the start and the end of this section in variables \__bss_start and \__bss_end respectively
 - Line 104: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
+We save the number of 8 byte chunks in a variable \__bss_size (hence the >> 3 operation)
 
 ## Startup assembly code {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE}
 
 The final step is adding startup code.
 
-In order for the CPU to be correctly initialized, and the cores handled correctly, we need to add some assembly code. This code will roughly do the following:
+In order for the CPU to be correctly initialized, and the cores handled correctly, we need to add some assembly code.
+This code will roughly do the following:
 - It will check which core our code is running.
 If it is core 0, we will continue, otherwise we will start a waiting loop, simply waiting for events (one of the events that may happen is shutdown, we need to wait for that).
 Effectively, we simply halt all cores except core 0
-- Next, we set the stack point just below our code (the stack grows down), so that we have a stack to work with
+- Next, we set the stack pointer just below our code (the stack grows down), so that we have a stack to work with
 - Then we initialize the data in the .bss section (see above in [Adding the linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
 - Lastly, we call the main() function defined in [Create source file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_SOURCE_FILE).
 
@@ -974,7 +1002,7 @@ File: tutorial/02-setting-up-a-project/start.S
 65:     // Load bss start
 66:     ldr     x1, =__bss_start
 67:     // Load bss size
-68:     ldr     w2, =__bss_size
+68:     ldr     w2, =__bss_size // In 8 byte chunks, so actual size is __bss_size * 8
 69:     // If bss is empty
 70:     cbz     w2, empty_bss
 71: 
@@ -989,7 +1017,7 @@ File: tutorial/02-setting-up-a-project/start.S
 80:     // jump to C code, should not return
 81: empty_bss:
 82:     bl      main
-83:     // for failsafe, halt this core too
+83:     // For fail safe, halt this core too
 84:     b       waitevent
 ```
 
@@ -1090,7 +1118,7 @@ File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 The function `create_image` takes three parameters:
 - The target to be created (`target`), in this case `02-setting-up-a-project-image`
 - The image filename (`image`), in this case `kernel8.img`
-- The target (`project`) that creates the application to be added to the image, in this case `02-setting-up-a-project.elf`
+- The target (`project`) that creates the application to be added to the image, in this case `02-setting-up-a-project`
 
 Explanation:
 - Line 10: The function shows how it was called
@@ -1199,11 +1227,11 @@ cd <project_root_dir>
 To run GDB:
 ```bat
 cd output\Debug\bin
-D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args 02-setting-up-a-project.elf
+D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args 02-setting-up-a-project.elf
 ```
 
 ```text
-GNU gdb (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.90.20231008-git
+GNU gdb (Arm GNU Toolchain 13.3.rel1 (Build arm-13.24)) 14.2.90.20240526-git
 Copyright (C) 2023 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
@@ -1260,17 +1288,16 @@ In GDB:
 Remote debugging using localhost:1234
 0x0000000000000000 in ?? ()
 (gdb) load
-Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080000, load size 128
-Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
+Start address 0x0000000000080008, load size 88
+Transfer rate: 42 KB/sec, 88 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file /home/rene/repo/baremetal.github/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at /home/rene/repo/baremetal.github/main.cpp:3
-3	    return 0;
+Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
+3           return 0;
 ```
 
 So we ended up in line 3 of the main() function:
@@ -1283,11 +1310,13 @@ File: main.cpp
 4: }
 ```
 
-Next, we step one further, ending up in start.S, and then close down debugging again:
+Next, we step one further, to go to line 4, and then one more, ending up in start.S, and then close down debugging again:
 
 ```gdb
 (gdb) n
-empty_bss () at /home/rene/repo/baremetal.github/start.S:84
+4       }
+(gdb) n
+empty_bss () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project\start.S:84
 84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y

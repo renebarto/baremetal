@@ -1346,3 +1346,6 @@ The program 'demo.elf' has exited with code 0 (0x0).
 ```
 
 Next: [04-setting-up-common-options](04-setting-up-common-options.md)
+
+\todo baremetal.ld should not contain start address: . = 0x80000;
+However tutorial 3 will not work well unless this is set. Possibly keep local link.ld in tutorial 3 for now

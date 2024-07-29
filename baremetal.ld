@@ -64,7 +64,6 @@ SECTIONS
     } : fini
 
     /* Code section */
-    . = 0x80000;
     .text : {
         KEEP(*(.text.boot))
         *(.text* .text.* .gnu.linkonce.t*)

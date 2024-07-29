@@ -1,4 +1,5 @@
 @echo off
+del /S /f /q cmake-Baremetal-Debug\*.*
 rmdir /s /q cmake-Baremetal-Debug
 mkdir cmake-Baremetal-Debug
 pushd cmake-Baremetal-Debug

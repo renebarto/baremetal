@@ -373,27 +373,27 @@ Searching for msc files...
 Searching for dia files...
 Searching for files to exclude
 Searching INPUT for files to process...
-Searching for files in directory F:/Projects/Private/baremetal.github/code
-Searching for files in directory F:/Projects/Private/baremetal.github/code/applications
-Searching for files in directory F:/Projects/Private/baremetal.github/code/applications/demo
-Searching for files in directory F:/Projects/Private/baremetal.github/code/applications/demo/create-image
-Searching for files in directory F:/Projects/Private/baremetal.github/code/applications/demo/src
-Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries
-Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal
-Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/include
-Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/include/baremetal
-Searching for files in directory F:/Projects/Private/baremetal.github/code/libraries/baremetal/src
-Searching for files in directory F:/Projects/Private/baremetal.github/doc
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/boards/RaspberryPi
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/cpu
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/firmware
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/firmware/dts
-Searching for files in directory F:/Projects/Private/baremetal.github/doc/images
+Searching for files in directory F:/Projects/Private/baremetal/code
+Searching for files in directory F:/Projects/Private/baremetal/code/applications
+Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo
+Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo/create-image
+Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo/src
+Searching for files in directory F:/Projects/Private/baremetal/code/libraries
+Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal
+Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/include
+Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/include/baremetal
+Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/src
+Searching for files in directory F:/Projects/Private/baremetal/doc
+Searching for files in directory F:/Projects/Private/baremetal/doc/boards
+Searching for files in directory F:/Projects/Private/baremetal/doc/boards/RaspberryPi
+Searching for files in directory F:/Projects/Private/baremetal/doc/cpu
+Searching for files in directory F:/Projects/Private/baremetal/doc/firmware
+Searching for files in directory F:/Projects/Private/baremetal/doc/firmware/dts
+Searching for files in directory F:/Projects/Private/baremetal/doc/images
 Reading and parsing tag files
 Parsing files
-Preprocessing F:/Projects/Private/baremetal.github/code/applications/demo/src/main.cpp...
-Parsing file F:/Projects/Private/baremetal.github/code/applications/demo/src/main.cpp...
+Preprocessing F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
+Parsing file F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
 
 ...
 
@@ -457,7 +457,7 @@ Searching for msc files...
 Searching for dia files...
 Searching for files to exclude
 Searching INPUT for files to process...
-Searching for files in directory /home/rene/repo/baremetal.github/code
+Searching for files in directory /home/rene/repo/baremetal/code
 ...
 Patching output file 33/33
 lookup cache used 1097/65536 hits=6511 misses=1138

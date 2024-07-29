@@ -847,12 +847,12 @@ If you would now build the code, you would get linker errors:
 ```text
 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe:
  ../output/Debug/lib/libbaremetal.a(System.cpp.obj): in function `baremetal::GetSystem()':
-  D:\Projects\baremetal.github\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x38): undefined reference to `__cxa_guard_acquire'
-  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal.github\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x68): undefined reference to `__cxa_guard_release'
+  D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x38): undefined reference to `__cxa_guard_acquire'
+  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x68): undefined reference to `__cxa_guard_release'
   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: ../output/Debug/lib/libbaremetal.a(System.cpp.obj): in function `baremetal::GetUART()':
-  D:\Projects\baremetal.github\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x138): undefined reference to `__cxa_guard_acquire'
-  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal.github\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x168): undefined reference to `__cxa_guard_release'
-D:\Projects\baremetal.github\cmake-BareMetal-Debug\collect2.exe : error : ld returned 1 exit status
+  D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x138): undefined reference to `__cxa_guard_acquire'
+  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x168): undefined reference to `__cxa_guard_release'
+D:\Projects\baremetal\cmake-BareMetal-Debug\collect2.exe : error : ld returned 1 exit status
 ```
 
 This is due to the fact that the runtime expects to have two functions defined, that deal with static initialization:

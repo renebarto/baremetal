@@ -385,7 +385,7 @@ Create the file `code/libraries/baremetal/include/baremetal/InterruptHandler.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
-File: d:\Projects\baremetal.github\tutorial\20-interrupts\code\libraries\baremetal\include\baremetal\InterruptHandler.h
+File: d:\Projects\baremetal\tutorial\20-interrupts\code\libraries\baremetal\include\baremetal\InterruptHandler.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -868,7 +868,7 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: d:\Projects\baremetal.github\code\libraries\baremetal\CMakeLists.txt
+File: d:\Projects\baremetal\code\libraries\baremetal\CMakeLists.txt
 29: set(PROJECT_SOURCES
 30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp

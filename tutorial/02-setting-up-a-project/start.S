@@ -64,15 +64,15 @@ core0:
     // clear bss
     // Load bss start
     ldr     x1, =__bss_start
-    // Load bss size
-    ldr     w2, =__bss_size
+    // Load bss size (size is number of 8 byte blocks in bss section)
+    ldr     w2, =__bss_size // In 8 byte chunks, so actual size is __bss_size * 8
     // If bss is empty
     cbz     w2, empty_bss
 
 clear_bss_loop:
     // Store 0 in x1 location for 8 bytes, increment x1 by 8
     str     xzr, [x1], #8
-    // Cound down size
+    // Count down number of blocks
     sub     w2, w2, #1
     // Loop as loop as the end is not reached
     cbnz    w2, clear_bss_loop
@@ -80,5 +80,5 @@ clear_bss_loop:
     // jump to C code, should not return
 empty_bss:
     bl      main
-    // for failsafe, halt this core too
+    // for fail safety, halt this core too
     b       waitevent

@@ -7,7 +7,7 @@ it is wise to set up your project in a certain way.
 
 If you're curious to see how this works, or just want to dive directly into the code,
 in `tutorial/03-setting-up-project-structure` there is a complete copy of what we work towards in this section.
-Its root will clearly be `tutorial/03-setting-up-project-structure`. Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
+Its root will clearly be `tutorial/03-setting-up-project-structure`. Please be aware of this when e.g. debugging, the paths in vs.launch.json (used in Visual Studio to specify debug settings) may not match your specific case.
 
 To understand how to approach this, first a bit of information on how CMake projects are structured, and how Visual Studio integrates CMake projects.
 
@@ -100,7 +100,7 @@ We set the `CMAKE_BUILD_TYPE` to Debug if it is not set, and then depending on t
 Debug, or Release, MinSizeRel or RelWithDebInfo.
 - Line 18-19: We then define the variables for the common deployment directory `DEPLOYMENT_DIR` (for image files) and the common binary output directory
 `OUTPUT_BASE_DIR` (for built libraries and executables). Both variables will also be stored in the cache.
-- Line 20-21: New is that we define two variable to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
+- Line 20-21: New is that we define two variables to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
 - Line 23-26: We add some diagnostic printing to identify when the toolchain is being processed.
 - Line 28-29: We define the main project.
 - Line 31: Lastly, we include the CMake file in the code directory.
@@ -143,7 +143,7 @@ File: code/libraries/CMakeLists.txt
 3: 
 ```
 
-As we have no projects in `libraries` yes, we simply print the current directory.
+As we have no projects in `libraries` yet, we simply print the current directory.
 
 #### tutorials CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_TUTORIALS_CMAKE_FILE}
 
@@ -267,7 +267,8 @@ Notice that the main.cpp and start.S are now in the src subdirectory. This keeps
 - Line 49-52: We define the variables `START_GROUP` and `END_GROUP` as before.
 - Line 54-87: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
 Different is the way we pass compiler definitions and options. We use a more generic approach here, where we set the definitions and options per language using so-called generator expressions.
-- Line 86-87: Notice that the directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
+As you can see here we support C, C++ and assembly.
+- Line 86-87: Notice that the target location directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
 - Line 89: Finally we include the `CMakeLists.txt` for the image creation project.
 
 #### code/applications/demo/create-image CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMOCREATE_IMAGE_CMAKE_FILE}
@@ -377,7 +378,7 @@ File: code/applications/demo/src/start.S
 64:     // clear bss
 65:     // Load bss start
 66:     ldr     x1, =__bss_start
-67:     // Load bss size
+67:     // Load bss size (size is number of 8 byte blocks in bss section)
 68:     ldr     w2, =__bss_size
 69:     // If bss is empty
 70:     cbz     w2, empty_bss
@@ -385,7 +386,7 @@ File: code/applications/demo/src/start.S
 72: clear_bss_loop:
 73:     // Store 0 in x1 location for 8 bytes, increment x1 by 8
 74:     str     xzr, [x1], #8
-75:     // Cound down size
+75:     // Count down number of blocks
 76:     sub     w2, w2, #1
 77:     // Loop as loop as the end is not reached
 78:     cbnz    w2, clear_bss_loop
@@ -393,9 +394,8 @@ File: code/applications/demo/src/start.S
 80:     // jump to C code, should not return
 81: empty_bss:
 82:     bl      main
-83:     // for failsafe, halt this core too
+83:     // for fail safety, halt this core too
 84:     b       waitevent
-85: 
 ```
 
 ## Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING}
@@ -411,13 +411,14 @@ We will create a script for Windows and for Linux to configure the build. They w
 ```bat
 File: tools/configure.bat
 1: @echo off
-2: rmdir /s /q cmake-BareMetal-Debug
-3: mkdir cmake-BareMetal-Debug
-4: pushd cmake-BareMetal-Debug
-5: 
-6: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
-7: 
-8: popd
+2: del /S /f /q cmake-Baremetal-Debug\*.*
+3: rmdir /s /q cmake-Baremetal-Debug
+4: mkdir cmake-Baremetal-Debug
+5: pushd cmake-Baremetal-Debug
+6: 
+7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+8: 
+9: popd
 ```
 
 Running the script:
@@ -426,7 +427,7 @@ tools\configure.bat
 ```
 
 ```text
--- CMake 3.27.8
+-- CMake 3.30.1
 --
 ** Setting up project **
 --
@@ -435,48 +436,48 @@ tools\configure.bat
 --
 ** Setting up toolchain **
 --
--- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+-- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- The C compiler identification is GNU 13.2.1
--- The CXX compiler identification is GNU 13.2.1
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+-- The C compiler identification is GNU 13.3.1
+-- The CXX compiler identification is GNU 13.3.1
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github/code
+## In directory: D:/Projects/baremetal/code
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github/code/applications
+## In directory: D:/Projects/baremetal/code/applications
 -- The ASM compiler identification is GNU
--- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github/code/applications/demo
+## In directory: D:/Projects/baremetal/code/applications/demo
 
 ** Setting up demo **
 
@@ -484,21 +485,21 @@ tools\configure.bat
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
+## In directory: D:/Projects/baremetal/code/applications/demo/create-image
 
 ** Setting up demo-image **
 
 -- create_image demo-image kernel8.img demo
 -- TARGET_NAME demo.elf
--- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
+-- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github/code/libraries
--- Configuring done (1.0s)
--- Generating done (0.0s)
--- Build files have been written to: D:/Projects/baremetal.github/cmake-BareMetal-Debug
+## In directory: D:/Projects/baremetal/code/libraries
+-- Configuring done (0.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: D:/Projects/baremetal/cmake-Baremetal-Debug
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX}
@@ -517,38 +518,43 @@ File: tools/configure.sh
 7: popd
 ```
 
+Make sure the script is executable:
+```bash
+chmod +x tools/configure.sh
+```
+
 Running the script:
 ```bat
 tools/configure.sh
 ```
 
 ```text
-~/repo/baremetal.github/cmake-build ~/repo/baremetal.github
--- CMake 3.25.1
--- 
+~/repo/baremetal/cmake-build ~/repo/baremetal
+-- CMake 3.29.6
+--
 ** Setting up project **
 --
--- 
+--
 ##################################################################################
--- 
+--
 ** Setting up toolchain **
 --
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
--- Assembler                
+-- Assembler
 -- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 -- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
 -- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
 -- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
 -- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
 -- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=  
+-- CMAKE_EXE_LINKER_FLAGS=
 -- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
--- Assembler                
+-- Assembler
 -- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 -- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
 -- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
@@ -558,46 +564,46 @@ tools/configure.sh
 -- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
 -- The C compiler identification is GNU 13.2.1
 -- The CXX compiler identification is GNU 13.2.1
--- 
+--
 **********************************************************************************
 
--- 
-## In directory: /home/rene/repo/baremetal.github/code
--- 
+--
+## In directory: /home/rene/repo/baremetal/code
+--
 **********************************************************************************
 
--- 
-## In directory: /home/rene/repo/baremetal.github/code/applications
+--
+## In directory: /home/rene/repo/baremetal/code/applications
 -- The ASM compiler identification is GNU
 -- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- 
+--
 **********************************************************************************
 
--- 
-## In directory: /home/rene/repo/baremetal.github/code/applications/demo
+--
+## In directory: /home/rene/repo/baremetal/code/applications/demo
 
 ** Setting up demo **
 
--- 
+--
 **********************************************************************************
 
--- 
-## In directory: /home/rene/repo/baremetal.github/code/applications/demo/create-image
+--
+## In directory: /home/rene/repo/baremetal/code/applications/demo/create-image
 
 ** Setting up demo-image **
 
 -- create_image demo-image kernel8.img demo
 -- TARGET_NAME demo.elf
--- generate /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img from /home/rene/repo/baremetal.github/output/Debug/bin/demo
--- 
+-- generate /home/rene/repo/baremetal/deploy/Debug/demo-image/kernel8.img from /home/rene/repo/baremetal/output/Debug/bin/demo
+--
 **********************************************************************************
 
--- 
-## In directory: /home/rene/repo/baremetal.github/code/libraries
--- Configuring done
--- Generating done
--- Build files have been written to: /home/rene/repo/baremetal.github/cmake-build
-~/repo/baremetal.github
+--
+## In directory: /home/rene/repo/baremetal/code/libraries
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/rene/repo/baremetal/cmake-build
+~/repo/baremetal
 ```
 
 ### Building a specific target {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET}
@@ -616,6 +622,11 @@ File: tools/build-target.sh
 1: cmake --build cmake-build --target $1
 ```
 
+Make sure the script is executable:
+```bash
+chmod +x tools/build-target.sh
+```
+
 ### Building a specific image {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE}
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS}
@@ -630,6 +641,11 @@ File: tools/build-image.bat
 ```bash
 File: tools/build-image.sh
 1: cmake --build cmake-build --target $1-image
+```
+
+Make sure the script is executable:
+```bash
+chmod +x tools/build-image.sh
 ```
 
 Note we simple add the `-image` suffix to make sure we build the corresponding image.
@@ -651,7 +667,7 @@ tools\build-all.bat
 ```
 
 ```text
-[4/4] Generating D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img
+[4/4] Generating D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
@@ -659,6 +675,11 @@ tools\build-all.bat
 ```bash
 File: tools/build-all.sh
 1: cmake --build cmake-build
+```
+
+Make sure the script is executable:
+```bash
+chmod +x tools/build-all.sh
 ```
 
 Specifying no target means building all targets.
@@ -669,7 +690,51 @@ tools/build-all.sh
 ```
 
 ```text
-[4/4] Generating /home/rene/repo/baremetal.github/deploy/Debug/demo-image/kernel8.img
+[4/4] Generating /home/rene/repo/baremetal/deploy/Debug/demo-image/kernel8.img
+```
+
+### Cleaning all targets {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS}
+
+CMake generates a target for you to clean all build information: `clean`.
+There is no target to clean a specific target though.
+
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS}
+
+```bat
+File: tools/clean-all.bat
+1: cmake --build cmake-BareMetal-Debug --target clean
+```
+
+Running the build:
+```bat
+tools\clean-all.bat
+```
+
+```text
+[1/1] Cleaning all built files...
+Cleaning... 4 files.
+```
+
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
+
+```bash
+File: tools/clean-all.sh
+1: cmake --build cmake-build --target clean
+```
+
+Make sure the script is executable:
+```bash
+chmod +x tools/clean-all.sh
+```
+
+Running the build:
+```bash
+tools/clean-all.sh
+```
+
+```text
+[1/1] Cleaning all built files...
+Cleaning... 4 files.
 ```
 
 ### Starting QEMU {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU}
@@ -712,7 +777,7 @@ tools\startQEMU-image-uart0.bat demo
 ```
 
 ```text
-Change Dir: 'D:/Projects/baremetal.github/cmake-Baremetal-Debug'
+Change Dir: 'D:/Projects/baremetal/cmake-Baremetal-Debug'
 
 Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -v demo
 ninja: no work to do.
@@ -816,13 +881,11 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from D:\Projects\baremetal.github\output\Debug\bin\demo.elf...
+Reading symbols from D:\Projects\baremetal\output\Debug\bin\demo.elf...
 0x0000000000000000 in ?? ()
-Loading section .init, size 0x90 lma 0x80000
-Loading section .text, size 0xa40 lma 0x80090
-Loading section .rodata, size 0x58 lma 0x80ad0
-Start address 0x0000000000080000, load size 2856
-Transfer rate: 398 KB/sec, 714 bytes/write.
+Loading section .text, size 0x58 lma 0x80000
+Start address 0x0000000000080000, load size 88
+Transfer rate: 704 bits in <1 sec, 88 bytes/write.
 (gdb) 
 ```
 
@@ -842,8 +905,8 @@ tools/startgdb.sh demo
 ```
 
 ```text
-GNU gdb (Debian 13.1-3) 13.1
-Copyright (C) 2023 Free Software Foundation, Inc.
+GNU gdb (Ubuntu 12.1-0ubuntu1~22.04.2) 12.1
+Copyright (C) 2022 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
@@ -857,13 +920,12 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from /home/rene/repo/baremetal.github/output/Debug/bin/demo.elf...
+Reading symbols from /home/rene/repo/baremetal/output/Debug/bin/demo.elf...
 0x0000000000000000 in ?? ()
-Loading section .eh_frame, size 0x28 lma 0x158
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080000, load size 128
-Transfer rate: 1024 bits in <1 sec, 64 bytes/write.
-(gdb) 
+Start address 0x0000000000080000, load size 88
+Transfer rate: 704 bits in <1 sec, 88 bytes/write.
+(gdb)
 ```
 
 ## Visual Studio CMake integration {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION}
@@ -936,7 +998,7 @@ File: CMakeSettings.json
 ```
 
 The environments section (line 2) could contain environment variables common for all build configurations, but is left empty here.
-The configurations section (line 4-51) will contain an array of build configurations, here one for every supported build configurations using the baremetal toolchain.
+The configurations section (line 4-51) will contain an array of build configurations, one for every supported build configurations using the baremetal toolchain.
 
 - `name` is the name of the configuration, which is what you will be able to select in the Configurations dropdown box in Visual Studio. This has to be unique.
 - `generator` settings will define how to build a CMake project. This can be one of many, check `cmake --help` for the list.
@@ -980,8 +1042,8 @@ After automatically or manually configuring CMake, the Output panel at the botto
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal.github\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal.github\baremetal.toolchain"  -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal.github" 2>&1"
-1> Working directory: D:\Projects\baremetal.github\cmake-BareMetal-Debug
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DBAREMETAL_CONSOLE_UART0=ON -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal" 2>&1"
+1> Working directory: D:\Projects\baremetal\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- 
 1> [CMake] ** Setting up project **
@@ -991,47 +1053,47 @@ After automatically or manually configuring CMake, the Output panel at the botto
 1> [CMake] -- 
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
-1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] -- The C compiler identification is GNU 13.2.1
-1> [CMake] -- The CXX compiler identification is GNU 13.2.1
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+1> [CMake] -- The C compiler identification is GNU 13.3.1
+1> [CMake] -- The CXX compiler identification is GNU 13.3.1
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code
+1> [CMake] ## In directory: D:/Projects/baremetal/code
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications
 1> [CMake] -- The ASM compiler identification is GNU
-1> [CMake] -- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo **
 1> [CMake] 
@@ -1039,21 +1101,29 @@ After automatically or manually configuring CMake, the Output panel at the botto
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/applications/demo/create-image
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo/create-image
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal.github/output/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal.github/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/baremetal.github/cmake-Baremetal-Debug
+1> [CMake] CMake Warning:
+1> [CMake]   Manually-specified variables were not used by the project:
+1> [CMake] 
+1> [CMake]     BAREMETAL_CONSOLE_UART0
+1> [CMake]     BAREMETAL_TARGET
+1> [CMake]     VERBOSE_BUILD
+1> [CMake] 
+1> [CMake] 
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal/cmake-Baremetal-Debug
 1> Extracted CMake variables.
 1> Extracted source files and headers.
 1> Extracted code model.
@@ -1064,12 +1134,14 @@ After automatically or manually configuring CMake, the Output panel at the botto
 
 If the toolchain was already checked, the output will be shorter.
 
+Notice that Visual Studio uses its own version of CMake: `CMake 3.20.21032501-MSVC_2`
+
 After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure.bat` or `tools/configure.sh` on the command line.
 
 ### Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_BUILDING}
 
 After configuration is done, we can build the project, using `Build->Build All` or `Build->Rebuild All`. This will build or rebuild everything.
-Another option is selecting the project to be built in the dropdown box next to the configuration, "Select Startup Items...".
+Another option is selecting the project to be built in the dropdown box next to the configuration, "Select Startup Item...".
 
 <img src="images/visualstudio-select-build-target.png" alt="Select build target" width="600"/><br/>
 
@@ -1077,7 +1149,7 @@ Another option is selecting the project to be built in the dropdown box next to 
 
 When a build target is selected, it can also be built using `Build->Build <target>` or `Build->Rebuild <target>`
 
-Please be aware that in the current view, `Solution Explorer`, it is not possible to select the `demo-image` target.
+Please be aware that in the current view, `Solution Explorer`, it is not possible to select the `demo-image` target, as it is not an executable.
 
 <img src="images/visualstudio-solution-explorer.png" alt="Solution explorer tab" width="600"/>
 
@@ -1110,7 +1182,7 @@ As you can see, both `demo.elf` and `kernel8.img` have been built.
 
 ### Debugging {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_DEBUGGING}
 
-As already stated in [Debugging](01-setting-up-for-development.md##Debugging) it is possible to debug on a real board using a FTDI JTAG adapter.
+As already stated in [Debugging in tutoral 01](01-setting-up-for-development.md##Debugging) it is possible to debug on a real board using a FTDI JTAG adapter.
 However this is not trivial and will be skipped for now.
 So we'll debug the application from Visual Studio using QEMU.
 
@@ -1138,8 +1210,8 @@ File: .vs/launch.vs.json
 5:     {
 6:       "type": "default",
 7:       "project": "CMakeLists.txt",
-8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal.github\\output\\Debug\\bin\\demo.elf)",
-9:       "name": "demo.elf (D:\\Projects\\baremetal.github\\output\\Debug\\bin\\demo.elf)",
+8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
+9:       "name": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
 10:     }
 11:   ]
 12: }
@@ -1156,8 +1228,8 @@ File: .vs/launch.vs.json
 5:     {
 6:       "type": "cppgdb",
 7:       "project": "CMakeLists.txt",
-8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal.github\\output\\Debug\\bin\\demo.elf)",
-9:       "name": "demo.elf (D:\\Projects\\baremetal.github\\output\\Debug\\bin\\demo.elf)",
+8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
+9:       "name": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
 10:       "program": "demo.elf",
 11:       "request": "launch",
 12:       "stopAtEntry": false,
@@ -1166,7 +1238,7 @@ File: .vs/launch.vs.json
 15:       "MIMode": "gdb",
 16:       "targetArchitecture": "arm64",
 17:       "miDebuggerServerAddress": "localhost:1234",
-18:       "miDebuggerPath": "D:\\Toolchains\\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe",
+18:       "miDebuggerPath": "D:\\Toolchains\\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe",
 19:       "args": []
 20:     }
 21:   ]
@@ -1176,8 +1248,10 @@ File: .vs/launch.vs.json
 Explanation:
 - Line 6: `type` specifies which kind of debugger we are using. For GDB, this must be `cppgdb`
 - Line 7: `project` specifies the kind of project, which is `CMakeLists.txt` for CMake projects (this is initially already correct)
-- Line 8: `projectTarget` is the selected target, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
-- Line 9: `name` is the name of the project, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct)
+- Line 8: `projectTarget` is the selected target, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct).
+Notice that this is a fully qualified path, making it impractical to share this file with other instances.
+- Line 9: `name` is the name of the project, this must be equal to the selected target in the "Select Startup Items..." dropbox box (this is initially already correct).
+Again, this is a fully qualifed path
 - Line 10: `program` is the executable name, in this case `demo.elf`
 - Line 11: `request` is the way the debugger starts the session.
 As we would like to start our application, we use `launch` (it is also possible to attach to a running application)
@@ -1196,10 +1270,10 @@ As we are using a 64 bit ARM archittecture, this is set to `arm64`
 QEMU starts a server on the same machine on port 1234, so we set this to `localhost:1234`
 - Line 18: `miDebuggerPath` specifies the path to the gdb application we are using.
 We'll use the same one as specified before, which is part of the toolchain.
-So we specify `D:\\Toolchains\\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe`
+So we specify `D:\\Toolchains\\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe`
 - Line 19: `args` specifies command line arguments for the application being debugged.
 As our application is baremetal, we have no parameters, so we set it to an empty array `[]`
-- `env` can be used to specify a set of key-value pairs of environment variables passed. We leave this out
+- `env` can be used to specify a set of key-value pairs of environment variables passed to the application. We leave this out
 
 Now, when we save .vs\launch.vs.json, we can start debugging.
 
@@ -1223,7 +1297,7 @@ In the Output tab, we can also see the output of the debugger:
 
 ```text
 =thread-group-added,id="i1"
-GNU gdb (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.90.20231008-git
+GNU gdb (Arm GNU Toolchain 13.3.Rel1 (Build arm-13.24)) 14.2.90.20240526-git
 Copyright (C) 2023 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
@@ -1257,6 +1331,8 @@ You can now step through the code using the normal buttons / keys:
 - Ctrl+F10: Run to cursor
 
 As there is not much to debug, you cannot really step through the code (you will soon end up in `start.S` in the halt loop.
+
+It is also possible to put breakpoints in start.S, so you can step through the assembly.
 
 When you stop debugging, the application will be killed, and QEMU will stop.
 

@@ -376,22 +376,22 @@ Output:
 -- The CXX compiler identification is GNU 13.3.1
 -- The ASM compiler identification is GNU
 -- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- PROJECT_LINK_OPTIONS= -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/link.ld
+-- PROJECT_LINK_OPTIONS= -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/link.ld
 -- The C compiler identification is GNU 13.3.1
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/create-image
+## In directory: D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/create-image
 
 ** Setting up 02-setting-up-a-project-image **
 
 -- create_image 02-setting-up-a-project-image kernel8.img 02-setting-up-a-project
 -- TARGET_NAME 02-setting-up-a-project.elf
--- generate D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from D:/Projects/baremetal.github.shadow/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
+-- generate D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
 -- Configuring done (0.9s)
 -- Generating done (0.1s)
--- Build files have been written to: D:/Projects/baremetal.github.shadow/cmake-build
+-- Build files have been written to: D:/Projects/baremetal.shadow/cmake-build
 ```
 
 There may be warnings about unused variables, you can ignore these.
@@ -490,7 +490,7 @@ Output:
 -- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 -- Configuring done (0.2s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/rene/repo/baremetal.github/cmake-build
+-- Build files have been written to: /home/rene/repo/baremetal/cmake-build
 ```
 
 There may be warnings about unused variables, you can ignore these.
@@ -860,42 +860,43 @@ File: tutorial/02-setting-up-a-project/link.ld
 66:     /* Code section */
 67:     . = 0x80000;
 68:     .text : {
-69:         *(.text*)
-70: 
-71:         _etext = .;
-72:     } : text
-73: 
-74:     /* Executable read only data section */
-75:     .rodata : {
-76:         *(.rodata*)
-77:     } : rodata
-78: 
-79:     /* Executable static initialization section */
-80:     .init_array : {
-81:         __init_start = .;
-82: 
-83:         KEEP(*(.init_array*))
-84: 
-85:         __init_end = .;
-86:     }
-87: 
-88:     /* Executable read/write data section */
-89:     .data : {
-90:         *(.data*)
-91:     } : data
-92: 
-93:     /* Executable uninitialized data section */
-94:     .bss : {
-95:         __bss_start = .;
-96: 
-97:         *(.bss*)
-98:         *(COMMON)
-99: 
-100:         __bss_end = .;
-101:     } : data
-102: }
-103: /* bss size is actual size rounded down to blocks of 8 bytes */
-104: __bss_size = (__bss_end - __bss_start) >> 3;
+69:         KEEP(*(.text.boot))
+70:         *(.text* .text.* .gnu.linkonce.t*)
+71: 
+72:         _etext = .;
+73:     } : text
+74: 
+75:     /* Executable read only data section */
+76:     .rodata : {
+77:         *(.rodata*)
+78:     } : rodata
+79: 
+80:     /* Executable static initialization section */
+81:     .init_array : {
+82:         __init_start = .;
+83: 
+84:         KEEP(*(.init_array*))
+85: 
+86:         __init_end = .;
+87:     }
+88: 
+89:     /* Executable read/write data section */
+90:     .data : {
+91:         *(.data*)
+92:     } : data
+93: 
+94:     /* Executable uninitialized data section */
+95:     .bss : {
+96:         __bss_start = .;
+97: 
+98:         *(.bss*)
+99:         *(COMMON)
+100: 
+101:         __bss_end = .;
+102:     } : data
+103: }
+104: /* bss size is actual size rounded down to blocks of 8 bytes */
+105: __bss_size = (__bss_end - __bss_start) >> 3;
 ```
 
 The linker definition file defines the different sections in the executable file.
@@ -1001,7 +1002,7 @@ File: tutorial/02-setting-up-a-project/start.S
 64:     // clear bss
 65:     // Load bss start
 66:     ldr     x1, =__bss_start
-67:     // Load bss size
+67:     // Load bss size (size is number of 8 byte blocks in bss section)
 68:     ldr     w2, =__bss_size // In 8 byte chunks, so actual size is __bss_size * 8
 69:     // If bss is empty
 70:     cbz     w2, empty_bss
@@ -1009,7 +1010,7 @@ File: tutorial/02-setting-up-a-project/start.S
 72: clear_bss_loop:
 73:     // Store 0 in x1 location for 8 bytes, increment x1 by 8
 74:     str     xzr, [x1], #8
-75:     // Cound down size
+75:     // Count down number of blocks
 76:     sub     w2, w2, #1
 77:     // Loop as loop as the end is not reached
 78:     cbnz    w2, clear_bss_loop
@@ -1017,7 +1018,7 @@ File: tutorial/02-setting-up-a-project/start.S
 80:     // jump to C code, should not return
 81: empty_bss:
 82:     bl      main
-83:     // For fail safe, halt this core too
+83:     // for fail safety, halt this core too
 84:     b       waitevent
 ```
 
@@ -1289,14 +1290,14 @@ Remote debugging using localhost:1234
 0x0000000000000000 in ?? ()
 (gdb) load
 Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080008, load size 88
+Start address 0x0000000000080000, load size 88
 Transfer rate: 42 KB/sec, 88 bytes/write.
 (gdb) b main.cpp:3
-Breakpoint 1 at 0x80050: file D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp, line 3.
+Breakpoint 1 at 0x80050: file D:/Projects/baremetal/tutorial/02-setting-up-a-project/main.cpp, line 3.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
+Thread 1 hit Breakpoint 1, main () at D:/Projects/baremetal/tutorial/02-setting-up-a-project/main.cpp:3
 3           return 0;
 ```
 
@@ -1316,7 +1317,7 @@ Next, we step one further, to go to line 4, and then one more, ending up in star
 (gdb) n
 4       }
 (gdb) n
-empty_bss () at D:/Projects/baremetal.github/tutorial/02-setting-up-a-project\start.S:84
+empty_bss () at D:/Projects/baremetal/tutorial/02-setting-up-a-project\start.S:84
 84	    b       waitevent
 (gdb) kill
 Kill the program being debugged? (y or n) y

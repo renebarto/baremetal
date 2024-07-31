@@ -24,19 +24,22 @@ set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE )
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 
-set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE 
-    -mcpu=cortex-a53 -mlittle-endian -mcmodel=small 
-    -Wall -Wextra -Werror 
+set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE
+    -mcpu=cortex-a53 -mlittle-endian -mcmodel=small
+    -Wall -Wextra -Werror
     -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -Wno-unused-variable -Wno-unused-parameter
     -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++
     -fno-exceptions -fno-rtti -O0 -std=gnu++17
     )
 set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE
+    -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2)
+set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
 
 set(PROJECT_INCLUDE_DIRS_PRIVATE )
 set(PROJECT_INCLUDE_DIRS_PUBLIC )
 
-set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
+set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -Wl,--section-start=.init=0x80000 -T ${CMAKE_SOURCE_DIR}/baremetal.ld -nostdlib -nostartfiles)
 
 set(PROJECT_DEPENDENCIES )
 

@@ -65,7 +65,6 @@ SECTIONS
 
     /* Code section */
     .text : {
-        KEEP(*(.text.boot))
         *(.text* .text.* .gnu.linkonce.t*)
 
         _etext = .;
@@ -84,11 +83,6 @@ SECTIONS
 
         __init_end = .;
     }
-
-    /* Exception handling data */
-    .eh_frame : {
-        *(.eh_frame*)
-    } : data
 
     /* Executable read/write data section */
     .data : {

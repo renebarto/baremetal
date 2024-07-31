@@ -1119,15 +1119,16 @@ File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 20:     message(STATUS "generate ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image} from ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${project}")
 21:     add_custom_command(
 22:         OUTPUT ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
-23:         COMMAND ${CMAKE_OBJCOPY} ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${TARGET_NAME} -O binary ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
-24:         DEPENDS ${project}
-25:         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-26:     )
-27: 
-28:     add_custom_target(${target} ALL DEPENDS 
-29:         ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
-30:         )
-31: endfunction()
+23:         COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}
+24:         COMMAND ${CMAKE_OBJCOPY} ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${TARGET_NAME} -O binary ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
+25:         DEPENDS ${project}
+26:         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+27:     )
+28: 
+29:     add_custom_target(${target} ALL DEPENDS
+30:         ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
+31:         )
+32: endfunction()
 ```
 
 The function `create_image` takes three parameters:
@@ -1142,14 +1143,15 @@ Explanation:
 and stored in variable `TARGET_NAME`
 - Line 18: The property value is printed
 - Line 20: The action to be taken is printed
-- Line 21-26: A custom CMake command is created
+- Line 21-27: A custom CMake command is created
   - Its output is `${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}`.
 This uses the variables `DEPLOYMENT_DIR` and `CONFIG_DIR` defined before, and then adds the name of the application project as a directory, and then the image name
 So the final path will be `deploy/Debug/02-setting-up-a-project/kernel8.img`
-  - The command to be performed uses the `CMAKE_OBJCOPY` tool specified in the toolchain file
+  - The first command to be performed make sure that the deployment directory exists. This uses CMake itself, to make sure this coommand is platform independent
+  - The second command to be performed uses the `CMAKE_OBJCOPY` tool specified in the toolchain file
   - The command depends on our application project.
 The actual command run will be `aarch64-none-elf-objcopy output/Debug/bin/02-setting-up-a-project.elf -O binary deploy/Debug/02-setting-up-a-project/kernel8.img`
-- Line 28-30: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
+- Line 29-31: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
 
 This may all seem complex, but this functionality can be used again later on by simply changing the parameters.
 

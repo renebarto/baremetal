@@ -147,6 +147,9 @@ function(show_target_properties target)
 
             get_target_property(TARGET_OUTPUT_NAME ${target} OUTPUT_NAME)
             display_list("Target output name                : " ${TARGET_OUTPUT_NAME})
+
+            get_target_property(TARGET_CXX_STANDARD ${target} CXX_STANDARD)
+            display_list("Target C++ standard               : " ${TARGET_CXX_STANDARD})
         endif ()
     endif()
 endfunction()

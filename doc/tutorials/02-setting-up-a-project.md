@@ -11,12 +11,13 @@ This chapter will include lots of explanation on how to work with CMake, how cod
 
 The way we configure the project is very specific, verbose and direct, which we will improve later on in [Setting up project structure](03-setting-up-project-structure.md).
 
-First, we create a folder for the project. Let's say `D:\Projects\tutorial\02-setting-up-a-project` on Windows and `~/tutorial/02-setting-up-a-project` on Linux.
-The project and code are already in this location for the GitHub project, so you can either replicate the steps, or read along.
+We will assume you checked out the repo to `D:\Projects\baremetal` for Windows and `~/projects/baremetal` for Linux, of have created this directory to start from fresh.
+First, we create a folder for the project. Let's say `D:\Projects\baremetal\tutorial\02-setting-up-a-project` on Windows and `~/projects/baremetal/tutorial/02-setting-up-a-project` on Linux.
+If you checked ouyt the code from the GitHub project, so you can either replicate the steps, or read along.
 
 In this directory, we first need to create a CMake file, which is named `CMakeLists.txt`. Be careful about the 's' in _Lists_, 
 and also make sure you have the correct casing, especially in Linux.
-Whenever we mention a CMake file, we mean a file named `CMakeLists.txt`.
+Whenever we mention a CMake file, we mean a file named `CMakeLists.txt`. This always has the same name.
 
 As soon as you add this file in Visual Studio, it may detect this is a CMake project and try to configure it.
 This will fail as we don't have the correct contents yet. Don't worry about this.
@@ -38,9 +39,9 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 ```
 
 Explanation:
-- Line 1: We require a minimum version of 3.18 for CMake. There should always be a similar line in the beginning of the main CMake file
+- Line 1: We require a minimum version of 3.18 for CMake. There should always be a similar line in the beginning of the main CMake file (the CMake file in the root directory of the project)
 - Line 3: We print the current version of CMake
-- Line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as language
+- Line 5-7: We define a project named `02-setting-up-a-project`, give it a short description, and specify that it will use C++ and assembly code as programming languages
 
 ## Create source file {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATE_SOURCE_FILE}
 
@@ -58,7 +59,7 @@ For now the application does nothing but return 0. Notice that we have created a
 As we are running a baremetal application, there is no way to specify parameters, except through the kernel parameters file.
 
 We will also need some assembly code to correctly initialize the CPU.
-This will be discussed later, together with the [linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE) and the [startup assembly code](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE) section.
+This will be discussed later, in the [linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE) and the [startup assembly code](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE) section.
 
 ## Add source to project {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_ADD_SOURCE_TO_PROJECT}
 
@@ -78,16 +79,15 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 10:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 11:     )
 12: set(PROJECT_INCLUDES_PUBLIC)
-13: set(PROJECT_INCLUDES_PRIVATE
-14:     )
-15: 
-16: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+13: set(PROJECT_INCLUDES_PRIVATE)
+14: 
+15: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
 
 Short explanation:
-- Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the path to our source files, for now only containing one source file  (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
+- Line 9-11: We define a variable named `PROJECT_SOURCES` that contains the paths to our source files, for now only containing one source file  (`CMAKE_CURRENT_SOURCE_DIR` is the current source directory, so `main.cpp` will be in the same directory as `CMakeLists.txt`)
 - Line 12-13: We define two more variables to contain header files, which are for now empty, `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE`.
-- Line 16: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project we're in, so in this case `02-setting-up-a-project`)
+- Line 15: We create a so-called target in CMake for an executable, with name `PROJECT_NAME` (this is a standard CMake variable denoting the name of the project we're in, so in this case `02-setting-up-a-project`)
   - This target will build from the source files and headers just specified. The term `${X}` means the value of a variable named X.
 
 You will now be able to build the project, however this will be targeting the platform you are currently running on.
@@ -218,7 +218,8 @@ There are some exceptions, such as literal strings.
 
 - Line 1: Here, we include a CMake script to enable forcing the compiler. We need to be able to do this to override the default compiler
 - Line 3-11: We check if there is an existing environment variable `BAREMETAL_TOOLCHAIN_ROOT` set to define the location of the toolchain,
-and otherwise fall back to a default, different for Windows and Linux of course
+and otherwise fall back to a default, different for Windows and Linux of course. The environment variable is a way to override what is in the toolchain file.
+Note that the paths here are absolute paths, so if you have you toolchain in a different directory, either use the environment variable `BAREMETAL_TOOLCHAIN_ROOT` or update the path in the toolchain file
 - Line 13: We set the variable `PLATFORM_BAREMETAL` for convenience later on
 - Line 14: We set the variable `CMAKE_SYSTEM_NAME` which is a standard variable to denote the system we're going to build.
 For baremetal projects this must be set to `Generic`
@@ -228,7 +229,7 @@ In all cases this will be a 64 bit ARM processor, for which the architecture nam
 It defines the combination of target architecture, vendor if needed, the operating system, and the build type.
 In our case this is `aarch64-none-elf` meaning a 64 bit ARM architecture, with no OS, and with elf output files
 - Line 18: We also print the used toolchain root
-- Line 20: We set CMAKE build output to be more verbose
+- Line 20: We set CMake build output to be more verbose
 
 #### Part 2 {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE_PART_2}
 
@@ -279,13 +280,13 @@ File: tutorial/02-setting-up-a-project/baremetal.toolchain
 ```
 
 - Line 22: We set the variable `TOOLCHAIN_PATH` which is the actual location of the tools
-- Line 23: We set the variable `TOOLCHAIN_AUXILIARY_PATH` which is the location of auxiliary libraries used for building
+- Line 23: We set the variable `TOOLCHAIN_AUXILIARY_PATH` which is the location of auxiliary libraries used for building. Notice that the compiler version is part of this path, so if you use a different version, make sure to use the correct directory
 
 Then depending on the build platform, we define the tools to be used. 
 The part at the end `CACHE FILEPATH "text" FORCE` simply means that the variable is a file path, with a description, which is enforced into the CMake cache.
 
 The CMake cache is a file CMake uses to store project variables for later reference.
-This file is named `CMakeCache.txt`, and is located in teh CMake build directory (explained later).
+This file is named `CMakeCache.txt`, and is located in the CMake build directory (explained later).
 - Line 26/38: We set the variable `CMAKE_C_COMPILER` to the path to the C compiler (this is a gcc compiler)
 - Line 27/39: We set the variable `CMAKE_C_COMPILER_FORCED` to the path to the C compiler, but forced to be this compiler
 - Line 29/41: We set the variable `CMAKE_CXX_COMPILER` to the path to the C++ compiler (this could be gcc as well, but it's common to use g++)
@@ -325,10 +326,10 @@ if not already done, with the auxiliary libary directory. This contains a bit of
 
 Lastly, we need to set some more standard CMake variable:
 
-- Line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` specifies not to look for executables in the path just specified
-- Line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` specifies to look for libraries in the path just specified
-- Line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` specifies to look for include in the path just specified
-- Line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` specifies to look for packages in the path just specified
+- Line 74: `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` specifies not to look for executables in the project path
+- Line 75: `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` specifies to look for libraries only in the project path
+- Line 76: `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE` specifies to look for include only in the project path
+- Line 77: `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` specifies to look for packages only in the project path
 
 We now need to use this toolchain file.
 
@@ -376,22 +377,9 @@ Output:
 -- The CXX compiler identification is GNU 13.3.1
 -- The ASM compiler identification is GNU
 -- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- PROJECT_LINK_OPTIONS= -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/link.ld
--- The C compiler identification is GNU 13.3.1
---
-**********************************************************************************
-
---
-## In directory: D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/create-image
-
-** Setting up 02-setting-up-a-project-image **
-
--- create_image 02-setting-up-a-project-image kernel8.img 02-setting-up-a-project
--- TARGET_NAME 02-setting-up-a-project.elf
--- generate D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from D:/Projects/baremetal.shadow/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
 -- Configuring done (0.9s)
 -- Generating done (0.1s)
--- Build files have been written to: D:/Projects/baremetal.shadow/cmake-build
+-- Build files have been written to: D:/Projects/baremetal/cmake-build
 ```
 
 There may be warnings about unused variables, you can ignore these.
@@ -418,18 +406,18 @@ popd
 ```output
 [2/2] Linking CXX executable 02-setting-up-a-project
 FAILED: 02-setting-up-a-project
-cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && cd ."
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-exit.o): in function `exit':
+C:\Windows\system32\cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && cd ."
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-closer.o): in function `_close_r':
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-closer.o): in function `_close_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/closer.c:47:(.text._close_r+0x1c): undefined reference to `_close'
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-lseekr.o): in function `_lseek_r':
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-lseekr.o): in function `_lseek_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/lseekr.c:49:(.text._lseek_r+0x24): undefined reference to `_lseek'
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-readr.o): in function `_read_r':
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-readr.o): in function `_read_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/readr.c:49:(.text._read_r+0x24): undefined reference to `_read'
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-writer.o): in function `_write_r':
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-writer.o): in function `_write_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/writer.c:49:(.text._write_r+0x24): undefined reference to `_write'
-D:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
+D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1\libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13-2/src/newlib-cygwin/newlib/libc/reent/sbrkr.c:51:(.text._sbrk_r+0x1c): undefined reference to `_sbrk'
 collect2.exe: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed.
@@ -461,6 +449,8 @@ popd
 Output:
 
 ```text
+~/repo/baremetal/cmake-build ~/repo/baremetal
+~/repo/baremetal/cmake-build ~/repo/baremetal
 -- CMake 3.29.6
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
@@ -488,9 +478,10 @@ Output:
 -- The CXX compiler identification is GNU 13.3.1
 -- The ASM compiler identification is GNU
 -- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- Configuring done (0.2s)
+-- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/rene/repo/baremetal/cmake-build
+~/repo/baremetal
 ```
 
 There may be warnings about unused variables, you can ignore these.
@@ -515,12 +506,15 @@ popd
 ```
 
 ```output
+~/repo/baremetal/tutorial/02-setting-up-a-project ~/repo/baremetal
 [2/2] Linking CXX executable 02-setting-up-a-project
 FAILED: 02-setting-up-a-project
-: && /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj CMakeFiles/02-setting-up-a-project.dir/start.S.obj -o 02-setting-up-a-project   && :
-/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: CMakeFiles/02-setting-up-a-project.dir/start.S.obj: in function `_start':
+: && /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ -g -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 CMakeFiles/02-setting-up-a-project.dir/main.cpp.obj -o 02-setting-up-a-project   && :
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-exit.o): in function `exit':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/stdlib/exit.c:65:(.text.exit+0x2c): undefined reference to `_exit'
-/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: CMakeFiles/02-setting-up-a-project.dir/start.S.obj: in function `empty_bss':
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
+/data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/sbrkr.c:51:(.text._sbrk_r+0x1c): undefined reference to `_sbrk'
+/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-writer.o): in function `_write_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/writer.c:49:(.text._write_r+0x24): undefined reference to `_write'
 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-closer.o): in function `_close_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/closer.c:47:(.text._close_r+0x1c): undefined reference to `_close'
@@ -528,10 +522,9 @@ FAILED: 02-setting-up-a-project
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/lseekr.c:49:(.text._lseek_r+0x24): undefined reference to `_lseek'
 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-readr.o): in function `_read_r':
 /data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/readr.c:49:(.text._read_r+0x24): undefined reference to `_read'
-/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/lib/libg.a(libc_a-sbrkr.o): in function `_sbrk_r':
-/data/jenkins/workspace/GNU-toolchain/arm-13/src/newlib-cygwin/newlib/libc/reent/sbrkr.c:51:(.text._sbrk_r+0x1c): undefined reference to `_sbrk'
 collect2: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed.
+~/repo/baremetal
 ```
 
 The build command uses CMake again, in a different way (we do this from with the main project directory):
@@ -578,13 +571,13 @@ Explanation:
 This variable is added to the CMake cache to make it persistent
 - Line 6: We set the variable `CONFIG_DIR` to denote a build configuration specific directory. For now we'll simply set it to Debug, as we are building for the Debug build configuration
 - Line 7: We define a variable `DEPLOYMENT_DIR` to point to the location where our final image will be.
-This could be the same path as the output directory, however it makes sense to separate intermediate binaries from the final images
-- Line 8: We set variable `OUTPUT_BASE_DIR` to denote the root for the intermediate binaries.
+This could be the same path as the output directory, however it makes sense to separate built binaries (executables and libraries) from the final images
+- Line 8: We set variable `OUTPUT_BASE_DIR` to denote the root for the built binaries.
 This directory will be used in combination with `CONFIG_DIR` and the target executable name to form the full path for the target executable file.
 By default, CMake will generate all object files, libraries and executables inside the build directory.
 This makes it impractical to find our end results, so we will specify a different directory tree for libraries and executables
 - Line 10-12: We set, if not done yet, the `SCRIPTS_DIR` variable to the location of our custom CMake scripts.
-It is custom practice to create a subfolder `cmake` at the project top level and place the scripts there
+It is common practice to create a subfolder `cmake` at the project top level and place the scripts there
 - Line 14: Lastly, we add the `SCRIPTS_DIR` to the standard CMake search path for CMake modules, `CMAKE_MODULE_PATH`
 
 ### Adding project variables {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_ADDING_PROJECT_VARIABLES}
@@ -593,6 +586,21 @@ We need to add a few lines to our CMakeLists file, to add definitions, compiler 
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
+1: cmake_minimum_required(VERSION 3.18)
+2: 
+3: message(STATUS "CMake ${CMAKE_VERSION}")
+4: 
+5: set(SCRIPTS_DIR "" CACHE STRING "CMake scripts path")
+6: set(CONFIG_DIR Debug)
+7: set(DEPLOYMENT_DIR ${CMAKE_SOURCE_DIR}/../../deploy)
+8: set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/../../output" CACHE STRING "Output directory")
+9: 
+10: if ("${SCRIPTS_DIR}" STREQUAL "")
+11:     set(SCRIPTS_DIR "${CMAKE_SOURCE_DIR}/cmake" CACHE STRING "CMake scripts path" FORCE)
+12: endif()
+13: 
+14: list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
+15: 
 16: project(02-setting-up-a-project
 17:     DESCRIPTION "Application to demonstrate building using CMake"
 18:     LANGUAGES CXX ASM)
@@ -602,50 +610,53 @@ File: tutorial/02-setting-up-a-project/CMakeLists.txt
 22: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE )
 23: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 24: 
-25: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE 
-26:     -mcpu=cortex-a53 -mlittle-endian -mcmodel=small 
-27:     -Wall -Wextra -Werror 
+25: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE
+26:     -mcpu=cortex-a53 -mlittle-endian -mcmodel=small
+27:     -Wall -Wextra -Werror
 28:     -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -Wno-unused-variable -Wno-unused-parameter
 29:     -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++
 30:     -fno-exceptions -fno-rtti -O0 -std=gnu++17
 31:     )
 32: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-33: 
-34: set(PROJECT_INCLUDE_DIRS_PRIVATE )
-35: set(PROJECT_INCLUDE_DIRS_PUBLIC )
+33: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE
+34:     -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2)
+35: set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
 36: 
-37: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -nostdlib -nostartfiles -Wl,--section-start=.init=0x80000 -T ${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
-38: 
-39: set(PROJECT_DEPENDENCIES )
-40: 
-41: set(PROJECT_LIBS
-42:     ${PROJECT_DEPENDENCIES}
-43:     )
-44: set(PROJECT_SOURCES
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+37: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+38: set(PROJECT_INCLUDE_DIRS_PUBLIC )
+39: 
+40: set(PROJECT_LINK_OPTIONS ${CMAKE_EXE_LINKER_FLAGS} -Wl,--section-start=.init=0x80000 -T ${CMAKE_SOURCE_DIR}/link.ld -nostdlib -nostartfiles)
+41: 
+42: set(PROJECT_DEPENDENCIES )
+43: 
+44: set(PROJECT_LIBS
+45:     ${PROJECT_DEPENDENCIES}
 46:     )
 47: 
-48: set(PROJECT_INCLUDES_PUBLIC )
-49: set(PROJECT_INCLUDES_PRIVATE )
-50: 
-51: if (PLATFORM_BAREMETAL)
-52:     set(START_GROUP -Wl,--start-group)
-53:     set(END_GROUP -Wl,--end-group)
-54: endif()
-55: 
-56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+48: set(PROJECT_SOURCES
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+50:     )
+51: set(PROJECT_INCLUDES_PUBLIC)
+52: set(PROJECT_INCLUDES_PRIVATE)
+53: 
+54: if (PLATFORM_BAREMETAL)
+55:     set(START_GROUP -Wl,--start-group)
+56:     set(END_GROUP -Wl,--end-group)
+57: endif()
+58: 
+59: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
-
-\todo Possibly set CPU architecture depending on board type (cortex-a53, a72, a76). For now only cortex-a53 seems to be defined.
 
 So, after the project is defined, we add the following lines:
 - Line 20: We define the variable `PROJECT_TARGET_NAME`, which sets the file name used for our executable to `02-setting-up-a-project.elf`
 - Line 22-23: We define the variables `PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE` and `PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC` which will contain compiler definitions.
 For now these are empty. There are two, as we can have definitions only for this executable (private) and possibly exported to other targets (public).
-As an executable file does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on.
-- Line 25-31: We define the variables `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` and `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options.
+As an executable file does not export anything, this is a bit superfluous, but keeping this structure will prove helpful later on when creating libraries.
+- Line 25-31: We define the variable `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` in the same way to set compiler options.
 Here we set the private compiler options to be:
-  - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture)
+  - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture).
+We cannot specify cortex-a72 or cortex-a76 at this moment, this may change in the future.
+So we always fall back to Cortex-A53 behaviour
   - -Wall: Set warning level to the highest possible level
   - -Wextra: Set warning level to even higher level
   - -Werror: Treat warnings as errors
@@ -660,21 +671,28 @@ Here we set the private compiler options to be:
   - -fno-exceptions: Do not enable exceptions
   - -fno-rtti: Do not use Run Time Type Information
   - -O0: Do not optimize
-  - -std=gnu++17: Support C++17 language
-- Line 32: We set the public compiler options to be empty, meaning we don't export anything
-- Line 34-35: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specific include directories.
+  - -std=gnu++17: Support C\++17 language
+- Line 32: We set the variable `PROJECT_COMPILE_OPTIONS_CXX_PRIVATE` to set the public compiler options to be empty, meaning we don't export anything
+- Line 33-34: We define the variables `PROJECT_COMPILE_OPTIONS_ASM_PRIVATE` in the same way to set assembler options.
+Here we set the private assembler options to be:
+  - -mcpu=cortex-a53 -mlittle-endian -mcmodel=small: Set CPU architecture options for Raspberry Pi 3 (CPU is AMD Cortex-A53, we use small endian architecture)
+  - -O2: Optimize code
+- Line 35: We set the variable `PROJECT_COMPILE_OPTIONS_ASM_PRIVATE` to set the public assembler options to be empty, meaning we don't export anything
+- Line 37-38: We defines the variables `PROJECT_INCLUDE_DIRS_PRIVATE` and `PROJECT_INCLUDE_DIRS_PUBLIC` again in the same way to specify include directories.
 For now, everything is in the same directory, so we leave this empty
-- Line 37: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
+- Line 40: We define the variable `PROJECT_LINK_OPTIONS` to specify linker options
   - $\{CMAKE_EXE_LINKER_FLAGS}: Use the existing linker options (the linker options specified in the [toolchain file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
   - -nostdlib: Do not use the standard C libraries
   - -nostartfiles: Do not use the standard startup files (`crtbegin.o` and `crtend.o`)
-  - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000 (this is always the same for 64 bit architectures)
+  - -Wl,--section-start=.init=0x80000: Define the start address of the executable to be 0x80000 (this is always the same for 64 bit architectures).
+  Note that we specify .init here, meaning that we expect the startup code to be in this section.
+  This is important and should match with the definition in the startup assembly code
   - -T $\{CMAKE_CURRENT_SOURCE_DIR}/link.ld: Use the specified linker definition file (see [Adding linker definition file](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_BUILD_FOR_TARGET_TOOLCHAIN_FILE))
-- Line 39: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
-- Line 41-43: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
-- Line 44-46: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
-- Line 48-49: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
-- Line 51-54: We define two extra variables, only understood by gcc, to group libraries together for correct resolution. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`
+- Line 42: We define a variable `PROJECT_DEPENDENCIES` to hold any libraries we will be depending on. For now this is empty
+- Line 44-45: We define the variable `PROJECT_LIBS` to hold all libraries we will be linking to. This means all dependencies, and all specified standard libraries
+- Line 47-49: We define the variable `PROJECT_SOURCE` to hold the source files to be used for building
+- Line 51-52: We define the variables `PROJECT_INCLUDES_PUBLIC` and `PROJECT_INCLUDES_PRIVATE` to hold the public and private header files to be used for building
+- Line 54-57: We define two extra variables, only understood by gcc, to group libraries together for correct resolution when linking. These are for the start of the grouping `START_GROUP` and the end of the grouping `END_GROUP`
 
 ### Setting up the target {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_THE_TARGET}
 
@@ -682,56 +700,56 @@ We then need to link these variables to the target we're building:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-56: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-57: 
-58: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
-59: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-60: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-61: target_compile_definitions(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE})
-62: target_compile_definitions(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC})
-63: target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE})
-64: target_compile_options(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC})
-65: 
+59: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+60: 
+61: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
+62: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+63: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+64: target_compile_definitions(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE})
+65: target_compile_definitions(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC})
+66: target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE})
+67: target_compile_options(${PROJECT_NAME} PUBLIC  ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC})
+68:
 ```
 
 Explanation:
-- Line 58: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
-- Line 59-60: We specify include directories for both private and public use
-- Line 61-62: We specify compiler definitions for both private and public use
-- Line 63-64: We specify compiler options for both private and public use
+- Line 61: We link to the specified libraries (empty list for now) in a group. Hence `${START_GROUP} ${PROJECT_LIBS} ${END_GROUP}`
+- Line 62-63: We specify include directories for both private and public use
+- Line 64-65: We specify compiler definitions for both private and public use
+- Line 66-67: We specify compiler options for both private and public use
 
 Next we specify the linker options.
 As the options are specified as a list separated by semicolons, and we need to create a string of values separated by spaces, we use a custom function:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-66: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-67: message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
-68: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-69:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-70: endif()
-71: 
+69: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+70: message(STATUS "PROJECT_LINK_OPTIONS=${PROJECT_LINK_OPTIONS_STRING}")
+71: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+72:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+73: endif()
 ```
 
 Explanation:
-- Line 66: Converts the list to a string with spaces are delimiter using the custom functions `list_to_string`. We will define this custom function later on
-- Line 67: prints the string
-- Line 68-70: sets the linker flags, only if the string is not empty
+- Line 69: Converts the list of linker options to a string with spaces as delimiter using the custom functions `list_to_string`.
+We will define this custom function later on. 
+Normal behaviour when converting a list to a string would be to insert semicolons as separators, so we define a special function to fix this
+- Line 70: Prints the string
+- Line 71-73: Sets the linker flags, only if the string is not empty
 
 Lastly, we set the executable file name, and the location of executable files and libraries:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-71: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-72: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
-73: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
-74: 
+74: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+75: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
+76: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
 ```
 
 Explanation:
-- Line 71: sets the target executable name `OUTPUT_NAME`, a standard target property
-- Line 72: defines the target location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard target property
-- Line 73: defines the target location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard target property
+- Line 74: sets the target executable name `OUTPUT_NAME`, a standard target property
+- Line 75: defines the target location for static libraries `ARCHIVE_OUTPUT_DIRECTORY`, a standard target property
+- Line 76: defines the target location for executables `RUNTIME_OUTPUT_DIRECTORY`, a standard target property
 
 The last two lines use the variables `OUTPUT_BASE_DIR` and `CONFIG_DIR` defined before in [Setting up for custom CMake modules and binary tree](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_COMPILER_SETTINGS_SETTING_UP_FOR_CUSTOM_CMAKE_MODULES_AND_BINARY_TREE).
 It is common practice to collect output files together in a binaries tree.
@@ -765,7 +783,7 @@ File: tutorial/02-setting-up-a-project/cmake/functions.cmake
 Without going into too much detail. This function is called `list_to_string`, and has one input (`in`) and one output (`out`) parameter.
 It cycles through the parts of the input variable, and creates a string by adding each part followed by a space.
 Finally it sets the output variable. The `PARENT_SCOPE` is needed to convert the value to outside the function (for the output variable).
-This function is needed as the compiler options are placed in a list, which when converted to a string will be a comma delimited list, not space delimited.
+This function is needed as the linker options are placed in a list, which when converted to a string will be a semicolon delimited list, not space delimited.
 
 Finally we need to be able to use the function. For this, we need to include the module:
 
@@ -858,65 +876,61 @@ File: tutorial/02-setting-up-a-project/link.ld
 64:     } : fini
 65: 
 66:     /* Code section */
-67:     . = 0x80000;
-68:     .text : {
-69:         KEEP(*(.text.boot))
-70:         *(.text* .text.* .gnu.linkonce.t*)
-71: 
-72:         _etext = .;
-73:     } : text
-74: 
-75:     /* Executable read only data section */
-76:     .rodata : {
-77:         *(.rodata*)
-78:     } : rodata
-79: 
-80:     /* Executable static initialization section */
-81:     .init_array : {
-82:         __init_start = .;
+67:     .text : {
+68:         *(.text* .text.* .gnu.linkonce.t*)
+69: 
+70:         _etext = .;
+71:     } : text
+72: 
+73:     /* Executable read only data section */
+74:     .rodata : {
+75:         *(.rodata*)
+76:     } : rodata
+77: 
+78:     /* Executable static initialization section */
+79:     .init_array : {
+80:         __init_start = .;
+81: 
+82:         KEEP(*(.init_array*))
 83: 
-84:         KEEP(*(.init_array*))
-85: 
-86:         __init_end = .;
-87:     }
-88: 
-89:     /* Executable read/write data section */
-90:     .data : {
-91:         *(.data*)
-92:     } : data
-93: 
-94:     /* Executable uninitialized data section */
-95:     .bss : {
-96:         __bss_start = .;
-97: 
-98:         *(.bss*)
-99:         *(COMMON)
-100: 
-101:         __bss_end = .;
-102:     } : data
-103: }
-104: /* bss size is actual size rounded down to blocks of 8 bytes */
-105: __bss_size = (__bss_end - __bss_start) >> 3;
+84:         __init_end = .;
+85:     }
+86: 
+87:     /* Executable read/write data section */
+88:     .data : {
+89:         *(.data*)
+90:     } : data
+91: 
+92:     /* Executable uninitialized data section */
+93:     .bss : {
+94:         __bss_start = .;
+95: 
+96:         *(.bss*)
+97:         *(COMMON)
+98: 
+99:         __bss_end = .;
+100:     } : data
+101: }
+102: /* bss size is actual size rounded down to blocks of 8 bytes */
+103: __bss_size = (__bss_end - __bss_start) >> 3;
 ```
 
 The linker definition file defines the different sections in the executable file.
 
-- Line 41: The `ENTRY(_start)` statement sets the starting point of the executable to the location denoted by label `_start`. We will cover this in a minute.
+- Line 41: The `ENTRY(_start)` statement sets the starting point of the executable to the location denoted by label `_start`. This label need to be defined an will contain the startup code. We will cover this in a minute see [Startup assembly code](#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE).
 - Line 44-51: The `PHDRS` part defines the Program Header Table (refer to [ELF header format](pdf/elf-format.pdf) for more information)
-- Line 57-59: .init is the initialization section, which contains code with is normally in the crtbegin.o file. We will run into this later on, for now it is empty
-- Line 62-64: .fini is the cleanup section, similarly containing code in crtend.o.
-- Line 67: We set the address to 0x80000, this will be the start address
-- Line 68-72: .text is the code section
-  - This section starts with the .text.boot subsection, which is always stored in the executable (`KEEP`).
-  - The other subsections (`.text* .text.* .gnu.linkonce.t*`) are only kept as needed.
+- Line 57-59: .init is the initialization section, which contains code with is normally in the crtbegin.o file. This is also where we will place the startup code (hence the reference to .init in the linker options)
+- Line 62-64: .fini is the cleanup section, similarly containing code in crtend.o. For now this is empty
+- Line 67-71: .text is the code section
+  - This contains subsections (`.text* .text.* .gnu.linkonce.t*`)
   - We save the end of the text section in a variable \_etext for later reference
-- Line 75-77: .rodata is the constants section, i.e. it contains data that is read-only
-- Line 80-86: .init_array is the static initializer section.
+- Line 74-76: .rodata is the constants section, i.e. it contains data that is read-only
+- Line 79-85: .init_array is the static initializer section.
 It contains a table of functions used to initialize static data, such as constructors of static class objects. This is always stored. We will get to this in [Improving startup and static initialization](06-improving-startup-static-initialization.md)
-- Line 89-91: .data contains read/write data for the executable
-- Line 94-101: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
+- Line 89-90: .data contains read/write data for the executable
+- Line 93-100: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
 We save the start and the end of this section in variables \__bss_start and \__bss_end respectively
-- Line 104: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
+- Line 103: data in the .bss section is initialized in chunks of 8 bytes (rounded down to the nearest multiple of 8)
 We save the number of 8 byte chunks in a variable \__bss_size (hence the >> 3 operation)
 
 ## Startup assembly code {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_STARTUP_ASSEMBLY_CODE}
@@ -976,7 +990,7 @@ File: tutorial/02-setting-up-a-project/start.S
 38: //
 39: //------------------------------------------------------------------------------
 40: 
-41: .section ".text.boot"
+41: .section ".init"
 42: 
 43: .global _start
 44: 
@@ -1024,8 +1038,8 @@ File: tutorial/02-setting-up-a-project/start.S
 
 Without going into too much detail, the code performs the following steps:
 
-- Line 41: the startup code is part of the `.text.boot` subsection defined in the linker definition file
-- Line 45: this is the entry point for the \_start function, essentially the entry point of our code
+- Line 41: the startup code is part of the `.init` subsection defined in the linker definition file and the linker options
+- Line 45: this is the entry point for the \_start function, essentially the entry point of our code, as also mentioned in the linker definition file
 - Line 47-51: determine which core the code is running on, and jump to `core0` if the core id is 0. We'll explain the MPIDR_EL1 register, among others, a bit later
 - Line 53-55: in other cases we loop waiting for an event (effectively halting the core)
 - Line 61-62: the stack pointer is set just below the code
@@ -1041,11 +1055,11 @@ We need to add the startup code to the project:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-46: set(PROJECT_SOURCES
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/start.S
-49:     )
-50: 
+49: set(PROJECT_SOURCES
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/start.S
+52:     )
+53: 
 ```
 
 ## Creating an image {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_CREATING_AN_IMAGE}
@@ -1079,7 +1093,7 @@ This depends on the target platform we're building for. Here we create kernel8.i
 - Line 11: We create the variable `IMAGE_NAME` to specify the complete filename of the image
 - Line 13: We call the custom function `create_image` to create a target for the image
 
-The customer function is added to the `functions.cmake` module:
+The custom function is added to the `functions.cmake` module:
 
 ```cmake
 File: tutorial/02-setting-up-a-project/cmake/functions.cmake
@@ -1133,8 +1147,8 @@ and stored in variable `TARGET_NAME`
 This uses the variables `DEPLOYMENT_DIR` and `CONFIG_DIR` defined before, and then adds the name of the application project as a directory, and then the image name
 So the final path will be `deploy/Debug/02-setting-up-a-project/kernel8.img`
   - The command to be performed uses the `CMAKE_OBJCOPY` tool specified in the toolchain file
-  - The command depends on our application project
-The actual command run will be `aarch64-none-elf-objcopy output/Debg/bin/02-setting-up-a-project.elf -O binary deploy/Debug/02-setting-up-a-project/kernel8.img`
+  - The command depends on our application project.
+The actual command run will be `aarch64-none-elf-objcopy output/Debug/bin/02-setting-up-a-project.elf -O binary deploy/Debug/02-setting-up-a-project/kernel8.img`
 - Line 28-30: A custom CMake target `02-setting-up-a-project-image` is created, that depends on the output of the command just created.
 
 This may all seem complex, but this functionality can be used again later on by simply changing the parameters.
@@ -1145,11 +1159,11 @@ We add the following line to this file to include its `create-image` subdirector
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-69: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-70: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
-71: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
-72: 
-73: add_subdirectory(create-image)
+77: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+78: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib)
+79: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin)
+80: 
+81: add_subdirectory(create-image)
 ```
 
 We can now start to build the application and image.
@@ -1248,6 +1262,7 @@ Find the GDB manual and other documentation resources online at:
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from 02-setting-up-a-project.elf...
+(gdb)
 ```
 
 ### Linux {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_DEBUGGING_LINUX}

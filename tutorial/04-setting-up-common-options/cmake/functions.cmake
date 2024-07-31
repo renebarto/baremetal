@@ -90,6 +90,9 @@ function(show_target_properties target)
 
             get_target_property(TARGET_OUTPUT_NAME ${target} OUTPUT_NAME)
             display_list("Target output name                : " ${TARGET_OUTPUT_NAME})
+
+            get_target_property(TARGET_CXX_STANDARD ${target} CXX_STANDARD)
+            display_list("Target C++ standard               : " ${TARGET_CXX_STANDARD})
         endif ()
     endif()
 endfunction()
@@ -108,6 +111,7 @@ function(create_image target image project)
     message(STATUS "generate ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image} from ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${project}")
     add_custom_command(
         OUTPUT ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}
         COMMAND ${CMAKE_OBJCOPY} ${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin/${TARGET_NAME} -O binary ${DEPLOYMENT_DIR}/${CONFIG_DIR}/${target}/${image}
         DEPENDS ${project}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

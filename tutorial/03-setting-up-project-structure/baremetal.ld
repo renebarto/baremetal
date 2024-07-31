@@ -52,16 +52,6 @@ PHDRS
 
 SECTIONS
 {
-    /* Executable start address */
-    /* Code section */
-    . = 0x80000;
-    .text : {
-        KEEP(*(.text.boot))
-        *(.text* .text.* .gnu.linkonce.t*)
-
-        _etext = .;
-    } : text
-
     . = SIZEOF_HEADERS;
     /* Executable initialization section */
     .init : {
@@ -72,6 +62,13 @@ SECTIONS
     .fini : {
         *(.fini)
     } : fini
+
+    /* Code section */
+    .text : {
+        *(.text* .text.* .gnu.linkonce.t*)
+
+        _etext = .;
+    } : text
 
     /* Executable read only data section */
     .rodata : {

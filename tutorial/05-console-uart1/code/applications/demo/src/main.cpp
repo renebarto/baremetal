@@ -7,5 +7,7 @@ int main()
     uart.Initialize();
 
     uart.WriteString("Hello World!\n");
+    for (int i = 0; i < 1000000; ++i)
+        NOP();
     return 0;
 }

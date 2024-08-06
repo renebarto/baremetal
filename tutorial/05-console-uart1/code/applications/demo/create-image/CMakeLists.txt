@@ -1,5 +1,5 @@
 project(05-console-uart1-image
-    DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+    DESCRIPTION "Kernel image for 05-console-uart1 RPI 64 bit bare metal")
 
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")

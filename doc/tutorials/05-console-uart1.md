@@ -7,159 +7,11 @@ Now that we have set up our project structure, integrated with Visual Studio, an
 One of the simplest things to start with is the serial console.
 This is also practical, as using the serial console enables us to write output from the application, and also get input.
 
-There are two serial consoles possible, UART0 and UART1, which can be used in parallel, however it is most common to use one of the two, as they normally use the same GPIO pins (14 and 15).
+There are two serial consoles possible, UART0 and UART1, which cannot be used in parallel, as they use the same GPIO pins.
 See also [here](01-setting-up-for-development.md###Attaching-a-serial-console).
+
 For this application, we will use UART1, which is the easiest to set up.
 It has less functionality, but for a simple serial console both are equally suitable.
-
-## New tutorial setup {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP}
-
-Starting from this tutorial, we will no longer create a copy of everything, but simply use the infrastructure that is already there.
-We will there for add one line to the root CMake file:
-
-### Main CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_CMAKE_FILE}
-
-Update the file `CMakeLists.txt`
-
-```cmake
-File: CMakeLists.txt
-...
-
-218: option(BUILD_TUTORIALS "Build all tutorials" OFF)
-219:
-220: add_subdirectory(code)
-221: if(BUILD_TUTORIALS)
-222:     add_subdirectory(tutorial)
-223: endif()
-```
-
-We add a variable `BUILD_TUTORIALS`, which is OFF by default. You can always set this to ON in your `CMakeSettings.json` file.
-
-### Tutorial CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_CMAKE_FILE}
-
-In the tutorial CMake file, we will add the folder for this tutorial.
-
-Update the file `tutorial/CMakeLists.txt`
-
-```cmake
-File: tutorial/CMakeLists.txt
-1: message(STATUS "\n**********************************************************************************\n")
-2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3:
-4: add_subdirectory(05-console-uart1)
-```
-
-### Main application CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CMAKE_FILE}
-
-The main application's project name will be named after the tutorial, to not conflict with the one in the main code tree:
-
-```cmake
-File: code/applications/demo/CMakeLists.txt
-1: project(demo
-2:     DESCRIPTION "Demo application"
-3:     LANGUAGES CXX ASM)
-...
-```
-
-```cmake
-File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
-1: project(05-console-uart1
-2:     DESCRIPTION "Tutorial 05 Console UART1 application"
-3:     LANGUAGES CXX ASM)
-...
-```
-
-### Main application create-image CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CREATE_IMAGE_CMAKE_FILE}
-
-Similarly, the main application's create-image folder will have a project name named after the tutorial, to not conflict with the one in the main code tree:
-
-```cmake
-File: code/applications/demo/create-image/CMakeLists.txt
-1: project(demo-image
-2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
-3:
-4: message(STATUS "\n**********************************************************************************\n")
-5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6:
-7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8:
-9: set(DEPENDENCY demo)
-10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-11:
-12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
-```
-
-```cmake
-File: tutorial/05-console-uart1/code/applications/demo/create-image/CMakeLists.txt
-1: project(05-console-uart1-image
-2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
-3:
-4: message(STATUS "\n**********************************************************************************\n")
-5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6:
-7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8:
-9: set(DEPENDENCY 05-console-uart1)
-10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-11:
-12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
-```
-
-### Baremetal library CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_BAREMETAL_LIBRARY_CMAKE_FILE}
-
-We will get to the `baremetal` library shortly.
-In the same way, we need to make sure the baremetal library project name is not conflicting, so we add `-05` to the name.
-
-```cmake
-File: code/libraries/baremetal/CMakeLists.txt
-1: message(STATUS "\n**********************************************************************************\n")
-2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3:
-4: project(baremetal
-5: 	DESCRIPTION "Bare metal library"
-6: 	LANGUAGES CXX ASM)
-...
-```
-
-```cmake
-File: tutorial/05-console-uart1/code/libraries/baremetal/CMakeLists.txt
-1: message(STATUS "\n**********************************************************************************\n")
-2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3:
-4: project(baremetal-05
-5:     DESCRIPTION "Bare metal library"
-6:     LANGUAGES CXX ASM)
-...
-```
-
-This also means that the main application project needs to depende on the new version of `baremetal`:
-
-```cmake
-File: code/applications/demo/CMakeLists.txt
-...
-25: set(PROJECT_DEPENDENCIES
-26:     baremetal
-27:     )
-...
-```
-
-```cmake
-File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
-...
-25: set(PROJECT_DEPENDENCIES
-26:     baremetal-05
-27:     )
-...
-```
-
-### Tutorial results {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
-
-This tutorial will result in (next to the main project structure):
-- a library `output/Debug/lib/baremetal-05.a`
-- an application `output/Debug/bin/05-console-uart1.elf`
-- an image in `deploy/Debug/05-console-uart1-image`
-
-In every following tutorial, the changes described here will be similar.
 
 ## Creating the baremetal library structure - Step 1 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1}
 
@@ -434,39 +286,41 @@ File: code/applications/demo/CMakeLists.txt
 1: project(demo
 2:     DESCRIPTION "Demo application"
 3:     LANGUAGES CXX ASM)
-4:
+4: 
 5: message(STATUS "\n**********************************************************************************\n")
 6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-7:
+7: 
 8: message("\n** Setting up ${PROJECT_NAME} **\n")
-9:
+9: 
 10: include(functions)
-11:
+11: 
 12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
-13:
+13: 
 14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
-17: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
-18: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
-19: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
-20: set(PROJECT_INCLUDE_DIRS_PRIVATE )
-21: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-22:
-23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-24:
-25: set(PROJECT_DEPENDENCIES
-26:     baremetal
-27:     )
-28:
-29: set(PROJECT_LIBS
-30:     ${LINKER_LIBRARIES}
-31:     ${PROJECT_DEPENDENCIES}
-32:     )
+17: set(PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC )
+18: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+19: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+20: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+21: set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
+22: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+23: set(PROJECT_INCLUDE_DIRS_PUBLIC )
+24: 
+25: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+26: 
+27: set(PROJECT_DEPENDENCIES
+28:     baremetal
+29:     )
+30: 
+31: set(PROJECT_LIBS
+32:     ${LINKER_LIBRARIES}
+33:     ${PROJECT_DEPENDENCIES}
+34:     )
 ...
 ```
 
-- line 26: We add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
+- line 28: We add a dependency to the baremetal library, such that its exported include directories become available, and we link to this library.
 
 ### Configure and build {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD}
 
@@ -480,163 +334,161 @@ The output for the configure step should be similar to:
 1> Working directory: D:\Projects\baremetal\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ** Setting up project **
 1> [CMake] --
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ##################################################################################
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
-1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] --
-1> [CMake] ** Setting up project **
-1> [CMake] --
-1> [CMake] --
-1> [CMake] ##################################################################################
-1> [CMake] --
-1> [CMake] ** Setting up toolchain **
-1> [CMake] --
-1> [CMake] -- C++ compiler version:    13.2.1
-1> [CMake] -- C compiler version:      13.2.1
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+1> [CMake] -- C++ compiler version:    13.3.1
+1> [CMake] -- C compiler version:      13.3.1
 1> [CMake] -- C++ supported standard:  17
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
-1> [CMake]
+1> [CMake] 
 1> [CMake] ** Setting up demo **
-1> [CMake]
+1> [CMake] 
 1> [CMake] -- Package                           :  demo
 1> [CMake] -- Package description               :  Demo application
-1> [CMake] -- Defines C - public                :
-1> [CMake] -- Defines C - private               :
-1> [CMake] -- Defines C++ - public              :
-1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
-1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       :
-1> [CMake] -- Compiler options C - private      :
-1> [CMake] -- Compiler options C++ - public     :
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             :
-1> [CMake] -- Include dirs - private            :
+1> [CMake] -- Include dirs - public             : 
+1> [CMake] -- Include dirs - private            : 
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
 1> [CMake] -- Source files                      :  D:/Projects/baremetal/code/applications/demo/src/main.cpp D:/Projects/baremetal/code/applications/demo/src/start.S
-1> [CMake] -- Include files - public            :
-1> [CMake] -- Include files - private           :
-1> [CMake] --
+1> [CMake] -- Include files - public            : 
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
 1> [CMake] -- Properties for demo
 1> [CMake] -- Target type                       :  EXECUTABLE
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
 1> [CMake] -- Target exported link libraries    :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target imported dependencies      :
-1> [CMake] -- Target imported link libraries    :
+1> [CMake] -- Target imported dependencies      : 
+1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/baremetal/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  D:/Projects/baremetal/output/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
-1> [CMake] --
+1> [CMake] -- Target C++ standard               :  17
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo/create-image
-1> [CMake]
+1> [CMake] 
 1> [CMake] ** Setting up demo-image **
-1> [CMake]
+1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
 1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
-1> [CMake] -- Defines C - public                :
-1> [CMake] -- Defines C - private               :
-1> [CMake] -- Defines C++ - public              :
-1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG
-1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       :
-1> [CMake] -- Compiler options C - private      :
-1> [CMake] -- Compiler options C++ - public     :
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
+1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal/code/libraries/baremetal/include
-1> [CMake] -- Include dirs - private            :
+1> [CMake] -- Include dirs - private            : 
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
-1> [CMake] -- Dependencies                      :
-1> [CMake] -- Link libs                         :
+1> [CMake] -- Dependencies                      : 
+1> [CMake] -- Link libs                         : 
 1> [CMake] -- Source files                      :  D:/Projects/baremetal/code/libraries/baremetal/src/Dummy.cpp
 1> [CMake] -- Include files - public            :  D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/ARMInstructions.h
-1> [CMake] -- Include files - private           :
-1> [CMake] --
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
-1> [CMake] -- Target imported dependencies      :
-1> [CMake] -- Target imported link libraries    :
+1> [CMake] -- Target imported dependencies      : 
+1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/baremetal/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal
+1> [CMake] -- Target C++ standard               :  17
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
 1> [CMake] -- Build files have been written to: D:/Projects/baremetal/cmake-BareMetal-Debug
@@ -653,26 +505,24 @@ You will notice that now, also the baremetal library is included, and the applic
 We can then build:
 
 ```text
->------ Rebuild All started: Project: baremetal, Configuration: BareMetal-Debug ------
-  [1/1] "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"  -t clean
-  Cleaning... 2 files.
-  [1/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/dummy.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\dummy.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/dummy.cpp.obj -c ../code/libraries/baremetal/src/dummy.cpp
-  [2/6] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [3/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/dummy.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
-  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
-  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
+>------ Build All started: Project: baremetal, Configuration: BareMetal-Debug ------
+  [1/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [2/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [3/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\Dummy.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj -c ../code/libraries/baremetal/src/Dummy.cpp
+  [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
+  [5/6] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
+  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-Debug\code\applications\demo\create-image && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
 
-Rebuild All succeeded.
+Build All succeeded.
 ```
 
-- You can see that the baremetal library's Dummy.cpp file is compiled (step 1)
-- Then the demo application's start.S and main.cpp files are compiled (step 2 and 3).
-- Then the baremetal library is removed and re-created (step 4).
+- You can see that the demo application's start.S and main.cpp files are compiled (step 1 and 2)
+- Then the baremetal library's Dummy.cpp file is compiled (step 3)
+- Then the baremetal library is removed and re-created (step 4)
 - The demo application is linked, using the baremetal library (step 5)
-- And finally the image is created (step 6).
+- And finally the image is created (step 6)
 
-The only different steps are step 4 and 5.
+The only intrinsically different steps are step 4 and 5.
 
 #### Removing and re-creating the baremetal library (step 4) {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD_REMOVING_AND_RE_CREATING_THE_BAREMETAL_LIBRARY_STEP_4}
 
@@ -683,37 +533,37 @@ cmd.exe /C
   "cd . &&
   "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
     -E rm -f ..\output\Debug\lib\libbaremetal.a &&
-    D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe
+    D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe
       qc ..\output\Debug\lib\libbaremetal.a
-      code/libraries/baremetal/CMakeFiles/baremetal.dir/src/dummy.cpp.obj &&
-    D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe
-      ..\output\Debug\lib\libbaremetal.a &&
-    cd ."
+      code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Dummy.cpp.obj && 
+    D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe
+      ..\output\Debug\lib\libbaremetal.a && 
+  cd ."
 ```
 
-Here we see a total of 2 commands being performed inside a command shell:
+Here we see a total of 3 commands being performed inside a command shell:
 
 1. This is just a cd command (actually moving to the same directory)
-2. This is a cmake call to remove the baremetal library, which runs another command shell containing 4 commands:
-  1. This command removes the baremetal library `output\Debug\lib\libbaremetal.a` (relative to the CMake build directory)
-  2. This creates the baremetal library (the options qc mean _quick append_ and _create_)
-  3. This adds a symbol to the baremetal library
-  4. This is again a cd command to the same directory
+2. This is a cmake call to remove and re-create the baremetal library, which runs another command shell containing 4 commands:
+   1. This command removes the baremetal library `output\Debug\lib\libbaremetal.a` (relative to the CMake build directory). We use a CMake internal command to copy with platform differences
+   2. This creates the baremetal library. The ar tool is the archiver, which is used to create static libraries (the options qc mean _quick append_ and _create_)
+   3. This adds a symbol table to the baremetal library
+3. This is again just a cd command (actually moving to the same directory)
 
 #### Linking the demo application (step 5) {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_CONFIGURE_AND_BUILD_LINKING_THE_DEMO_APPLICATION_STEP_5}
 
 ```text
 cmd.exe /C
   "cd . &&
-  D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
+  D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe
     -g
-    -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
+    -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
     -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld
     -nostdlib -nostartfiles
     code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
     code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
     -o ..\output\Debug\bin\demo.elf
-    -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group &&
+    -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && 
   cd ."
 ```
 
@@ -736,7 +586,6 @@ The other cores will not run, as we did not allow them to yet.
 
 One important remark however:
 - The code that sets the stack pointer tends to throw the debugger off balance. So in this case it is better to also set a breakpoint on line 82 of start.S, and simply continue once you get to line 62.
-- Next to this, you might notice a bit of unstable behaviour which we will come to next. This has to do with the startup code.
 
 <img src="images/visualstudio-debug-assembly-2.png" alt="Debugging assembly code before jumping into main()" width="600"/>
 
@@ -747,6 +596,27 @@ Let's try and write something more useful. We'll write code to set up UART1 and 
 In order to set up the console, we will need access to two devices:
 - GPIO to set up the connections for UART1 to GPIO pins 14 and 15
 - UART1 to configure the console and write to it
+
+### Some information
+
+As you can see in [Raspberry PI peripherals GPIO](../boards/raspberrypi/raspberrypi-peripherals-gpio.md), using UART1 means connecting TXD1 (UART1 transmit) to GPIO14 and RXD1 (UART1 receive) to GPIO15.
+For this we need to set the function of GPIO 14 and 15 to alternate function 5.
+As can be seen in [Raspberry Pi periherals Auxiliary](../boards/raspberrypi/raspberrypi-peripherals-aux.md) and [Raspberry Pi periherals UART1](../boards/raspberrypi/raspberrypi-peripherals-uart1.md), we need to set a number of registers:
+- First we need to switch of UART1 so we can program the GPIO pins. So we must write 0 to bit 0 of AUX_ENABLES
+- Then we need to program GPIO 14 and 15
+  - For GPIO 14 we need to write 010 to bits 12-14 of GPFSEL1
+  - For GPIO 15 we need to write 010 to bits 15-17 of GPFSEL1
+- After this is done we can program UART1, so we must write 1 to bit 0 of AUX_ENABLES
+- Then we must disable Tx and Rx by writing 00 to bits 0-1 of RPI_AUX_MU_CNTL
+- We want to set 8 bit mode, so we write 00000011 to RPI_AUX_MU_LCR
+- We want set RTS high, so we write 00000000 to RPI_AUX_MU_MCR
+- For now we disable interrupts so we write 00000000 to RPI_AUX_MU_IER
+- We wish to enable and clear both receive and transmit FIFO, so we write 11000110 to RPI_AUX_MU_IIR
+- We need to set the baudrate. We wish to set it to 115200 baud. There is a difference between Raspberry Pi 3 and 4 or later, in the clock that is used to form the bit clock for UART1
+  - For RPI3 the base clock is 250 MHz. If we calculate 250000000 / 115200 we get 2170. We need to divide this by 8 for the bit count, so that is 271. Then we decrement by 1 leaving a delay count of 270
+  - For RPI4 the base clock is 500 MHz. If we calculate 500000000 / 115200 we get 4340. We need to divide this by 8 for the bit count, so that is 542. Then we decrement by 1 leaving a delay count of 541
+  - Depending on whether we have RPI 3 or a later version, we then write 270 or 541 to RPI_AUX_MU_BAUD
+- Then finally we can enable the Tx and Rx by writing 11 to bits 0-1 of RPI_AUX_MU_CNTL
 
 In order to access these devices, we'll add a header file with addresses for the different registers.
 
@@ -898,12 +768,12 @@ This header defines the following types:
 - 8/16/32/64 bit integer types, both signed an unsigned
 - pointer like types, again both signed and unsigned
 - size types, again both signed and unsigned
-- a volatile variant of the 32 bit unsigned type, as well as a pointer to this type
+- a volatile variant of the 32 bit unsigned type, as well as a pointer to this type. The latter is used to address (32 bit) registers
 
 ### BCMRegisters.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_BCMREGISTERSH}
 
 Now we add some registers of the Broadcom SoC in the Raspberry Pi (specifically those for GPIO and UART1 (mini UART).
-This file will include the two header file defines before.
+This file will include the two headers file defined before.
 
 Create the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 
@@ -1131,13 +1001,13 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 220: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT(0)
 ```
 
-As said, this header defines the address of the GPIO and UART1 registers, as well as values of fields within these registers.
-We will not go into details here, we'll cover this when we use the registers.
+We will not go into details, as it will be quite clear from what was discussed before what the registers are.
 More information on the GPIO registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-gpio.md),
 as well as in the official [Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 89),
 [Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 89),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 65) and
 [Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 14).
+
 As you can see the GPIO register addresses are all prefixed with `RPI_GPIO_`.
 
 More information on the Mini UART (UART1) registers can be found [here](../boards/raspberrypi/raspberrypi-peripherals-aux.md),
@@ -1297,7 +1167,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 This header declares the class UART1 inside the namespace baremetal. All types and functions inside the baremetal library will use this namespace.
 
 The class has a default constructor, and a method to initialize it. It also declares a method to read and write a character, as well as to write a string.
-The other methods are used to set up the GPIO pins correctly, as part of the Initialize() method.
+The other methods are used to set up the GPIO pins correctly, as part of the Initialize() method. These will move somewhere else later on.
 
 ### UART1.cpp {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP}
 
@@ -1538,7 +1408,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 227:         return false;
 228:
 229:     // Output level can be set in input mode for subsequent switch to output
-230:     if (mode >= GPIOMode::AlternateFunction0)
+230:     if (mode >= GPIOMode::Unknown)
 231:         return false;
 232:
 233:     unsigned regOffset = (pinNumber / 32);
@@ -1557,13 +1427,14 @@ File: code/libraries/baremetal/src/UART1.cpp
 ```
 
 For AUX and UART1 register documentation, refer to [Broadcom documentation BCM2837](pdf/bcm2837-peripherals.pdf) (page 14).
-Be aware that some of the documentation for BCM2835 contains errors, which have been update for BCM2837. The Line Control Register (see below) contains such errors.
+Be aware that some of the documentation for BCM2835 contains errors, which have been updated for BCM2837. The Line Control Register (see below) contains such errors.
 
 - Line 46: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
 - Line 48: We define the baremetal namespace again, everything else will be inside this namespace
 - Line 50-63: Note that these lines are only compiled for Raspberry Pi 3, we don't need them for Raspberry Pi 4 and higher
-- Line 51: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
-- Line 53-62: We define a static function `WaitCycles`, that waits the specified number of NOP instructions
+  - Line 51: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles`
+  - Line 53-62: We define a static function `WaitCycles`, that waits the specified number of NOP instructions.
+  For some operations on the GPIO we need to pause a bit, that is what this function is for
 - Line 65-68: We implement the UART1 constructor, which only initializes the `m_initialized` member variable
 - Line 70-100: We implement the `Initialize` method. This invokes the most part of the code
   - Line 73-74: We check whether the class was already initialized (`m_initialized` is true), if so we simply return
@@ -1578,7 +1449,7 @@ Be aware that some of the documentation for BCM2835 contains errors, which have 
   - Line 88: We disable UART1 interrupts by writing to the Interrupt Control Register
   - Line 89: We enable and clear the receive and transmit FIFO buffers by writing to the Interrupt Identity Register
   - Line 91-95: We set the baud rate (speed) to 115200, by writing 270 (Raspberry Pi 3) or 541 (Raspberry Pi 4) to the Baud Rate Register.
-As shown in the comments, the documentation specifies how to set the value. The actual baud rate is 115313, but this is close enough to work well.
+As shown in the comments, the documentation specifies how to set the value. The actual baud rate is 115313, but this is close enough to work well. We also showed the calculate above
   - Line 97: We enable Rx and Tx signals again by writing to the UART1 Control Register
   - Line 99: We set `m_initialized` to true
 - Line 103-113: We implement the `Write` method, which writes a character to UART1
@@ -1703,6 +1574,7 @@ This means there are 4 registers:
   - Line 216: We mask the bits for the selected GPIO pin
   - Line 217: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
 For input of the map we use the integer conversion of the `GPIOPullMode` enum.
+Note that these values are different than for RPI3, hence the mapping
   - Line 218: We write the value to the GPIO pull up/down register
 
 #### SetFunction {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETFUNCTION}
@@ -1745,6 +1617,7 @@ This means there are 6 registers:
 - Line 187: We mask the bits for the selected GPIO pin
 - Line 188: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
 For input of the map we use the integer conversion of the `GPIOFunction` enum.
+This map is not strictly necessary, however it i convenient for readability to define the `GPIOFunction` enum this way
 - Line 189: We write the value to the GPIO function select register
 
 #### Off {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_OFF}
@@ -1758,7 +1631,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 227:         return false;
 228:
 229:     // Output level can be set in input mode for subsequent switch to output
-230:     if (mode >= GPIOMode::AlternateFunction0)
+230:     if (mode >= GPIOMode::Unknown)
 231:         return false;
 232:
 233:     unsigned regOffset = (pinNumber / 32);
@@ -1786,132 +1659,20 @@ This means there are 2 registers:
 - Line 238: We decide depending on the value whether to use the GPIO set register or GPIO clear register
 - Line 240: We set the corresponding bit in the correct register
 
-### Update Linker Definition file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_LINKER_DEFINITION_FILE}
-
-We update the `.text` section as we will be changing the startup code. All code except for the startup code will now be in the `.text` section.
-The startup code itself will be in the `.init` section
-
-```text
-File: baremetal.ld
-1: /*------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
-3: //
-4: // File        : baremetal.ld
-5: //
-6: // Namespace   : -
-7: //
-8: // Class       : -
-9: //
-10: // Description : Linker definition file
-11: //
-12: //------------------------------------------------------------------------------
-13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-15: //
-16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
-17: //
-18: // Permission is hereby granted, free of charge, to any person
-19: // obtaining a copy of this software and associated documentation
-20: // files(the "Software"), to deal in the Software without
-21: // restriction, including without limitation the rights to use, copy,
-22: // modify, merge, publish, distribute, sublicense, and /or sell copies
-23: // of the Software, and to permit persons to whom the Software is
-24: // furnished to do so, subject to the following conditions :
-25: //
-26: // The above copyright notice and this permission notice shall be
-27: // included in all copies or substantial portions of the Software.
-28: //
-29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-36: // DEALINGS IN THE SOFTWARE.
-37: //
-38: //------------------------------------------------------------------------------*/
-39:
-40: /* Executable entry point (defined in start.S) */
-41: ENTRY(_start)
-42:
-43: /* Executable headers */
-44: PHDRS
-45: {
-46:     init PT_LOAD FILEHDR PHDRS FLAGS(RE);
-47:     fini PT_LOAD FILEHDR PHDRS FLAGS(RE);
-48:     text PT_LOAD FILEHDR PHDRS FLAGS(RE);
-49:     rodata PT_LOAD FLAGS(RE);
-50:     data PT_LOAD FLAGS(RWE);
-51: }
-52:
-53: SECTIONS
-54: {
-55:     . = SIZEOF_HEADERS;
-56:     /* Executable initialization section */
-57:     .init : {
-58:         *(.init)
-59:     } : init
-60:
-61:     /* Executable cleanup section */
-62:     .fini : {
-63:         *(.fini)
-64:     } : fini
-65:
-66:     /* Code section */
-67:     .text : {
-68:         *(.text*)
-69:
-70:         _etext = .;
-71:     } : text
-72:
-73:     /* Executable read only data section */
-74:     .rodata : {
-75:         *(.rodata*)
-76:     } : rodata
-77:
-78:     /* Executable static initialization section */
-79:     .init_array : {
-80:         __init_start = .;
-81:
-82:         KEEP(*(.init_array*))
-83:
-84:         __init_end = .;
-85:     }
-86:
-87:     /* Executable read/write data section */
-88:     .data : {
-89:         *(.data*)
-90:     } : data
-91:
-92:     /* Executable uninitialized data section */
-93:     .bss : {
-94:         __bss_start = .;
-95:
-96:         *(.bss*)
-97:         *(COMMON)
-98:
-99:         __bss_end = .;
-100:     } : data
-101: }
-102: /* bss size is actual size rounded down to blocks of 8 bytes */
-103: __bss_size = (__bss_end - __bss_start) >> 3;
-```
-
 ### Update startup code {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE}
 
 #### Startup.S {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_STARTUPS}
 
 As we are going to write to registers, we first need to set up the system such that this is allowed.
+For more information on ARM exception levels, see [AArch64 Exception Model](pdf/Aarch64-exception-mode.pdf).
 By default, all access to registers on Exception Level 1 (EL1) and below will be trapped, leading to an exception at EL2.
+By default (depending on the bootup code, which we will not handle here), we start in EL2.
 
 So we will need to do some programming in assembly to make sure the SoC is set up correctly.
-Also, in order to prepare for running code which used stack and heap, we will change the startup code.
-This code will use a memory map, which will be loaded through two additional headers, which will be covered soon.
+Also, in order to prepare for running code which uses stack and heap, we will change the startup code.
+This code will use a memory map, which will be loaded through two additional headers, that will be covered soon.
 Also, as all applications will be using the same startup code, it is more logical to move this code to the baremetal library.
 We therefore remove `code/applications/demo/src/start.S`, and add a new file `code/libraries/baremetal/src/Startup.S`
-
-This also means we can remove `code/applications/demo/src/start.S`.
 
 ```asm
 File: code/libraries/baremetal/src/Startup.S
@@ -2025,7 +1786,7 @@ File: code/libraries/baremetal/src/Startup.S
 ```
 
 - Line 42: We include `SysConfig.h`. This header will define some defaults, and then include `MemoryMap.h`. Both will be handled in the next sections.
-- Line 44-86: A macro to set the ARM registers correctly, this will be explained in [Macro armv8_switch_to_el1_m](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M)
+- Line 44-86: A macro to set the ARM registers correctly, this will be explained in [Macro armv8_switch_to_el1_m](#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M) below
 - Line 88: Start of the .init section
 - Line 90: Declaration of the _start function, such that it can be linked elsewhere
 - Line 91: Label of the _start function, which is where the function actually starts
@@ -2034,10 +1795,10 @@ This will contain the current exception level in bit 2 and 3, the other bits wil
 - Line 93: We check whether the value read is equal to 4 (i.e. bits 3 and 2 are `01`), which means EL1, otherwise we continue
 - Line 94: If the values are equal, we jump to label EL1, meaning that initialization was already done.
 - Line 96: We load the exception stack address for core 0.
-This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH))
+This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). We will get to interrupts later on. The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH))
 - Line 97: We set the stack pointer for EL1 exceptions to this address
-- Line 99: We switch to EL1 using the macro armv8_switch_to_el1_m. See below in [Macro armv8_switch_to_el1_m](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M)
-- Line 102: We load the kernel stack address. The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](#TUTORIAL_05_FIRST_APPLICATION__USING_THE_CONSOLE__UART1_CREATING_THE_LIBRARY_CODE__STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH))
+- Line 99: We switch to EL1 using the macro armv8_switch_to_el1_m. See below in [Macro armv8_switch_to_el1_m](#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M)
+- Line 102: We load the kernel stack address. The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH))
 - Line 103: We set the code stack pointer to this address
 - Line 105: We jump to the main() function
 
@@ -2103,7 +1864,7 @@ This sets the offset of the virtual timer count relative to the physical timer c
 - Line 53: The register `midr_el1` (Main ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1330) is read and stored in the first parameter.
 This register is read-only and holds information on the chip, such as the manfacturer, the variant, architecture, part number and revision.
 - Line 54: The register `mpidr_el1` (Multiprocessor Affinity Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 1390) is read and stored in the second parameter.
-This register contains the affinity levels. What is comes down to, is that the lowest 7 bits of this register contain the core id.
+This register contains the affinity levels
 - Line 55: We write to register `vpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 2456) the value read from the `midr_el1` register.
 This register is used for virtualization, and has a 64 bit value.
 - Line 56: We write to register `vmpidr_el2` (Virtualization Processor ID Register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 2450) the value read from the `mpidr_el1` register.
@@ -2137,7 +1898,7 @@ The value written will set the following bits:
   - EnIB bit to 0: this feature is not implemented to we set RES0
   - LSMAOE bit to 1: this feature is not implemented to we set RES1
   - nTLSMD bit to 1: this feature is not implemented to we set RES1
-  - ENDA bit to 0: this feature is not implemented to we set RES0
+  - EnDA bit to 0: this feature is not implemented to we set RES0
   - UCI bit to 0: this will trap a set of instructions in EL0
   - EE bit to 0: this sets data access in EL1 to be little endian
   - EOE bit to 0: this sets data access in EL0 to be little endian
@@ -2156,7 +1917,7 @@ The value written will set the following bits:
   - EnRCTX bit to 0: this feature is not implemented to we set RES0
   - UMA bit to 0: this will trap access to the DAIF register from EL0 to EL1
   - SED bit to 0: this will enable use of the SETEND instruction in EL0
-  - ITD bit to 0: this will set EL0 mode to 32 bit
+  - ITD bit to 0: this will enable all 32 bit functionality in EL0 mode
   - nAA bit to 0: this feature is not implemented to we set RES0
   - CP15BEN bit to 0: this will trap DMB, DSB and ISB instructions in EL0 to EL1
   - SA0 bit to 0: this will not check for stack pointer alignment in EL0
@@ -2176,17 +1937,17 @@ The value written will set the following bits:
   - I bit to 1: IRQ interrupt mask is copied
   - F bit to 1: FIQ interrupt mask is copied
   - M[4] bit to 0: execute in 64 bit mode
-  - M[3:0] bits to 00100: set EL1t mode -> move to EL1t
+  - M[3:0] bits to 0100: set EL1t mode -> move to EL1t
 - Line 82-83: We get the address of after the last instruction in the macro, which is the address of the next instruction to be executed after the macro is invoked.
 This is stored in the first parameter, and then written to the register `elr_el2` (Exception Link Register (EL2), see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 525).
 This register sets the return address for when a EL2 exception was executed.
-- Line 84: We return to the exception level set in register `spsr_el2`, which means we move to EL1.
+- Line 84: We return to the exception level set in register `spsr_el2`, which means we move to EL1t.
 
 As said this is all very intricate and detailed, forcing one to dive into all the details of quite some specific ARM registers. You could also simply decide to accept what was explained here, and use the code.
 
 #### SysConfig.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
 
-We add the system configuration header. This header can be used to set certain system parameters, to override the default.
+We add the system configuration header. This header can be used to set certain default system parameters, if they not overriden.
 
 Create the file `code/libraries/baremetal/include/baremetal/SysConfig.h`:
 
@@ -2261,10 +2022,10 @@ For now, this header only defines some parameters:
 - Line 46: The number of cores used in this system. For Raspberry Pi 3 and higher, this is always 4.
 - Line 49: We define the value for one megabyte (Mb), or 1 << 20
 - Line 51: We define the value for one gigabyte (Gb), or 1 << 30
-- Line 56-58: Unless overridden by the build, we set the size for the kernel code to be 2 Mb
+- Line 56-58: Unless overridden by the build, we set the maximum size for the kernel code to be 2 Mb
 - Line 61-63: Unless overridden by the build, we set the GPU memory size to be 64 Mb.
 This splits up the physical memory between the CPU and the GPU.
-Unless we write heavy graphics applications, 64 Mb for the GPU should be fine
+Unless we write graphics heavy applications, 64 Mb for the GPU should be fine
 - Line 65: We then include `MemoryMap.h`. See the next section
 
 Just for clarity, you will see the GPU (Graphics Processing Unit) also named VPU (Vector Processing Unit) and VC (VideoCore, which is the name Broadcom uses for this part of the SoC).
@@ -2272,7 +2033,7 @@ This is all the same thing.
 
 #### MemoryMap.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH}
 
-We add the defintion of the memory layout for the system. As we are building a baremetal system, we have much more freedom in this, but we also need to take care that the mapping is well defined and complete.
+We add the definition of the memory layout for the system. As we are building a baremetal system, we have much more freedom in this, but we also need to take care that the mapping is well defined and complete.
 
 Create the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 
@@ -2332,16 +2093,16 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 52: #define PAGE_RESERVE (16 * MEGABYTE)
 53:
 54: // Size of every page
-55: #define PAGE_SIZE    0x10000
+55: #define PAGE_SIZE    0x10000 // 64Kb
 56:
 57: // Maximum size of the kernel space (if not already specified in SysConfig.h)
 58: #if !defined(KERNEL_MAX_SIZE)
 59: #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 60: #endif
 61: // Memory reserved for the stack (this memory is reserved for every core)
-62: #define KERNEL_STACK_SIZE       0x20000
+62: #define KERNEL_STACK_SIZE       0x20000 // 128 Kb
 63: // Memory reserved for the exception stack (this memory is reserved for every core)
-64: #define EXCEPTION_STACK_SIZE    0x8000
+64: #define EXCEPTION_STACK_SIZE    0x8000  // 32 Kb
 65: // Location where the kernel starts. This is also the location where the code starts
 66: #define MEM_KERNEL_START        0x80000
 67: // End of kernel space (start + size)
@@ -2360,15 +2121,13 @@ This deserves some explanation. The memory map layout is as defined in the next 
 
 | Base       | Size       | Contents               | Remarks      |
 |------------|------------|------------------------|--------------|
-| 0x00000000 | 256 bytes  | ARM stub               | Contains spinlock table for cores 1-3 (start address for each core)
-| 0x00000100 | variable   | ATAGS                  | unused
-| 0x00080000 | 0x00200000 | Kernel image           | 2Mb, can be larger if KERNEL_MAX_SIZE redefined
+| 0x00000000 | 256 bytes  | ARM stub               | Contains spinlock table for cores 1-3 (start address for each core). Discussed later
+| 0x00000100 | variable   | ATAGS                  | unused. This used to be the space where the board tags we stored
+| 0x00080000 | 0x00200000 | Kernel image           | 2Mb, can be larger if KERNEL_MAX_SIZE redefined. Start address is defined by `MEM_KERNEL_START`
 |            |            | .init                  | Startup code
 |            |            | .text                  | Code
 |            |            | .rodata                | Read only data
 |            |            | .init_array            | Static construction functions
-|            |            | .ARM.exidx             | ARM exception index
-|            |            | .eh_frame              | unused
 |            |            | .data                  | Read/write data
 |            |            | .bss                   | Uninitialized data
 | 0x00280000 |            | End of kernel image    | Defined by `MEM_KERNEL_END`
@@ -2395,17 +2154,15 @@ This deserves some explanation. The memory map layout is as defined in the next 
 
 | Base        | Size       | Contents                   | Remarks      |
 |-------------|------------|----------------------------|--------------|
-| 0x000000000 | 0x00000100 | ARM stub                   | Contains spinlock table for cores 1-3 (start address for each core)
+| 0x000000000 | 0x00000100 | ARM stub                   | Contains spinlock table for cores 1-3 (start address for each core). Discussed later
 | 0x000000100 | variable   | ATAGS                      | unused
-| 0x00006F000 | 0x00001000 | EL3 stack                  | Stack for exception level 3
-| 0x000070000 | 0x00000800 | Exception vector table EL3 | Contains lookup table for exception level 3 handling
-| 0x000080000 | 0x00200000 | Kernel image               | 2Mb, can be larger if KERNEL_MAX_SIZE redefined. Start address is defined by `MEM_KERNEL_START`. Start address is defined by `MEM_KERNEL_START`
+| 0x00006F000 | 0x00001000 | EL3 stack                  | Stack for exception level 3. Discussed later
+| 0x000070000 | 0x00000800 | Exception vector table EL3 | Contains lookup table for exception level 3 handling. Discussed later
+| 0x000080000 | 0x00200000 | Kernel image               | 2Mb, can be larger if KERNEL_MAX_SIZE redefined. Start address is defined by `MEM_KERNEL_START`
 |             |            | .init                      | Startup code
 |             |            | .text                      | Code
 |             |            | .rodata                    | Read only data
 |             |            | .init_array                | Static construction functions
-|             |            | .ARM.exidx                 | ARM exception index
-|             |            | .eh_frame                  | unused
 |             |            | .data                      | Read/write data
 |             |            | .bss                       | Uninitialized data
 | 0x000280000 |            | End of kernel image        | Defined by `MEM_KERNEL_END`
@@ -2424,18 +2181,21 @@ This deserves some explanation. The memory map layout is as defined in the next 
 | ????????    | 0x01000000 | Page allocator             | Range for page allocation (using palloc()). Size if defined as `PAGE_RESERVE`. Discussed later
 | 0x03C000000 | 0x04000000 | GPU memory                 | Depending on split location (64 Mb GPU memory in this example) (mapped to different range by memory management unit). This address is defined as `ARM_MEM_SIZE`
 | 0x040000000 | variable   | high heap allocator        | Memory above 1Gb can be used for high heap, but is unused above 0xC0000000 (3 Gb). Discussed later
-| 0x080000000 |            | End of physical RAM        | Raspberry Pi 4 can have 2, 4 or 8 Gb of RAM. This is for 2 Gb version
-| 0x0FC000000 | 0x04000000 | Peripherals                |
+| 0x080000000 |            | End of physical RAM        | Raspberry Pi 4/5 can have 2, 4 or 8 Gb of RAM. This is for 2 Gb version
+| 0x0FC000000 | 0x04000000 | Peripherals                | Notice the different peripheral mapping address from Raspberry Pi 3
 | 0x100000000 |            | End of physical RAM        | For 4 Gb version
 | 0x200000000 |            | End of physical RAM        | For 8 Gb version
 | ...         |            |                            |
 | 0x600000000 | 64 MByte   | xHCI controller            | mapped from 0x600000000
 
 In other words, the code space is between `MEM_KERNEL_START` and `MEM_KERNEL_END`
+
 Then follows the stack space for cores 0, 1, 2, and 3 (separate for every core)
-Then end (top) of the stack for core 0 is `MEM_KERNEL_STACK`. This is the value set in line 102 of `Startup.S`
-After this the stack space for exception and interrupt handling is allocated for cores 0, 1, 2, and 3 (separate for every core)
-Then end (top) of the exception stack for core 0 is `MEM_EXCEPTION_STACK`. This is the value set in line 96 of `Startup.S`
+Then end (top) of the stack for core 0 is `MEM_KERNEL_STACK`. This is the value used in line 102 of `Startup.S`
+
+After this the stack space for exception and interrupt handling is allocated for cores 0, 1, 2, and 3 (separate for every core).
+Then end (top) of the exception stack for core 0 is `MEM_EXCEPTION_STACK`. This is the value used in line 96 of `Startup.S`
+
 Finally the end of the exception stacks is `MEM_EXCEPTION_STACK_END`.
 As you can see in the tables, there is also heap space, page space, etc. We'll get around to that later.
 
@@ -2560,18 +2320,23 @@ So we change the code in main.cpp:
 File: code/applications/demo/src/main.cpp
 1: #include <baremetal/ARMInstructions.h>
 2: #include <baremetal/UART1.h>
-3:
+3: 
 4: int main()
 5: {
 6:     baremetal::UART1 uart;
 7:     uart.Initialize();
-8:
+8: 
 9:     uart.WriteString("Hello World!\n");
-10:     return 0;
-11: }
+10:     for (int i = 0; i < 1000000; ++i)
+11:         NOP();
+12:     return 0;
+13: }
 ```
 
-In the main() function, we first create an instance of the UART, then initialize it with a call to `Initialize()`, and finally we write the string "Hello World!\n" to the console. Notice the `\n` character, and remember that we will write the sequency `\r\n` instead of the simple line feed.
+In the main() function, we first create an instance of the UART, then initialize it with a call to `Initialize()`, and finally we write the string "Hello World!\n" to the console.
+Notice the `\n` character, and remember that we will write the sequency `\r\n` instead of the simple line feed.
+
+After we write the text to UART1, we wait a while before returning, to give the UART1 some time to actually send the data. Otherwise you may end up with half the characters on a real device.
 
 ### Update CMake file for application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_CMAKE_FILE_FOR_APPLICATION}
 
@@ -2608,136 +2373,137 @@ The output for the configure step should be similar to:
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\tutorial\05-console-uart1\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\tutorial\05-console-uart1\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal\tutorial\05-console-uart1" 2>&1"
-1> Working directory: D:\Projects\baremetal\tutorial\05-console-uart1\cmake-BareMetal-Debug
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal" 2>&1"
+1> Working directory: D:\Projects\baremetal\cmake-BareMetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ** Setting up project **
 1> [CMake] --
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ##################################################################################
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
-1> [CMake] -- TOOLCHAIN_ROOT           D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
-1> [CMake] -- C++ compiler version:    13.2.1
-1> [CMake] -- C compiler version:      13.2.1
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+1> [CMake] -- C++ compiler version:    13.3.1
+1> [CMake] -- C compiler version:      13.3.1
 1> [CMake] -- C++ supported standard:  17
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
-1> [CMake]
+1> [CMake] 
 1> [CMake] ** Setting up demo **
-1> [CMake]
+1> [CMake] 
 1> [CMake] -- Package                           :  demo
 1> [CMake] -- Package description               :  Demo application
-1> [CMake] -- Defines C - public                :
-1> [CMake] -- Defines C - private               :
-1> [CMake] -- Defines C++ - public              :
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       :
-1> [CMake] -- Compiler options C - private      :
-1> [CMake] -- Compiler options C++ - public     :
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             :
-1> [CMake] -- Include dirs - private            :
+1> [CMake] -- Include dirs - public             : 
+1> [CMake] -- Include dirs - private            : 
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
 1> [CMake] -- Source files                      :  D:/Projects/baremetal/code/applications/demo/src/main.cpp
-1> [CMake] -- Include files - public            :
-1> [CMake] -- Include files - private           :
-1> [CMake] --
+1> [CMake] -- Include files - public            : 
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
 1> [CMake] -- Properties for demo
 1> [CMake] -- Target type                       :  EXECUTABLE
-1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_TARGET=RPI3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
+1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target options                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter> $<$<COMPILE_LANGUAGE:ASM>:-mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
 1> [CMake] -- Target exported link libraries    :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target imported dependencies      :
-1> [CMake] -- Target imported link libraries    :
+1> [CMake] -- Target imported dependencies      : 
+1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/baremetal/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  D:/Projects/baremetal/output/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
-1> [CMake] --
+1> [CMake] -- Target C++ standard               :  17
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo/create-image
-1> [CMake]
+1> [CMake] 
 1> [CMake] ** Setting up demo-image **
-1> [CMake]
+1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
 1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries
-1> [CMake] --
+1> [CMake] -- 
 1> [CMake] **********************************************************************************
-1> [CMake]
-1> [CMake] --
+1> [CMake] 
+1> [CMake] -- 
 1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
-1> [CMake] -- Defines C - public                :
-1> [CMake] -- Defines C - private               :
-1> [CMake] -- Defines C++ - public              :
+1> [CMake] -- Defines C - public                : 
+1> [CMake] -- Defines C - private               : 
+1> [CMake] -- Defines C++ - public              : 
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       :
-1> [CMake] -- Compiler options C - private      :
-1> [CMake] -- Compiler options C++ - public     :
+1> [CMake] -- Compiler options C - public       : 
+1> [CMake] -- Compiler options C - private      : 
+1> [CMake] -- Compiler options C++ - public     : 
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             :  D:/Projects/baremetal/code/libraries/baremetal/include
-1> [CMake] -- Include dirs - private            :
+1> [CMake] -- Include dirs - private            : 
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
-1> [CMake] -- Dependencies                      :
-1> [CMake] -- Link libs                         :
+1> [CMake] -- Dependencies                      : 
+1> [CMake] -- Link libs                         : 
 1> [CMake] -- Source files                      :  D:/Projects/baremetal/code/libraries/baremetal/src/Startup.S D:/Projects/baremetal/code/libraries/baremetal/src/UART1.cpp
-1> [CMake] -- Include files - public            :  D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/ARMInstructions.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/BCMRegisters.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/Macros.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/MemoryMap.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/SysConfig.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/Types.h D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/UART1.h
-1> [CMake] -- Include files - private           :
-1> [CMake] --
+1> [CMake] -- Include files - public            :  D:/Projects/baremetal/code/libraries/baremetal/include/baremetal/ARMInstructions.h
+1> [CMake] -- Include files - private           : 
+1> [CMake] -- 
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
@@ -2745,22 +2511,28 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target include dirs private       :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  D:/Projects/baremetal/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
-1> [CMake] -- Target imported dependencies      :
-1> [CMake] -- Target imported link libraries    :
+1> [CMake] -- Target imported dependencies      : 
+1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/baremetal/output/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal
+1> [CMake] -- Target C++ standard               :  17
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/baremetal/tutorial
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
 1> [CMake] -- Build files have been written to: D:/Projects/baremetal/cmake-BareMetal-Debug
@@ -2776,20 +2548,20 @@ We can then build:
 
 ```text
 >------ Rebuild All started: Project: baremetal, Configuration: BareMetal-Debug ------
-  [1/1] "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"  -t clean
+  [1/1] C:\PROGRA~2\MICROS~2\2019\COMMUN~1\Common7\IDE\COMMON~1\MICROS~1\CMake\Ninja\ninja.exe  -t clean 
   Cleaning... 6 files.
-  [1/6] D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\Startup.S.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj -c ../code/libraries/baremetal/src/Startup.S
-  [2/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [3/6] D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DPLATFORM_BAREMETAL -DRPI_TARGET=3 -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\UART1.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -c ../code/libraries/baremetal/src/UART1.cpp
-  [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
-  [5/6] cmd.exe /C "cd . && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
-  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-Debug\code\applications\demo\create-image && D:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
+  [1/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [2/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\Startup.S.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj -c ../code/libraries/baremetal/src/Startup.S
+  [3/6] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG -I../code/libraries/baremetal/include -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -MF code\libraries\baremetal\CMakeFiles\baremetal.dir\src\UART1.cpp.obj.d -o code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj -c ../code/libraries/baremetal/src/UART1.cpp
+  [4/6] cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f ..\output\Debug\lib\libbaremetal.a && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe qc ..\output\Debug\lib\libbaremetal.a  code/libraries/baremetal/CMakeFiles/baremetal.dir/src/Startup.S.obj code/libraries/baremetal/CMakeFiles/baremetal.dir/src/UART1.cpp.obj && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ranlib.exe ..\output\Debug\lib\libbaremetal.a && cd ."
+  [5/6] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -o ..\output\Debug\bin\demo.elf  -Wl,--start-group  ../output/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
+  [6/6] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-Debug\code\applications\demo\create-image && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
 
 Rebuild All succeeded.
 ```
 
-- You can see that the baremetal library's Startup.S file is compiled (step 1)
-- Then the demo application's main.cpp files is compiled (step 2).
+- Then the demo application's main.cpp files is compiled (step 1).
+- You can see that the baremetal library's Startup.S file is compiled (step 2)
 - Then the baremetal library's UART1.cpp files is compiled (step 3).
 - Then the baremetal library is removed and re-created (step 4).
 - The demo application is linked, using the baremetal library (step 5)
@@ -2811,5 +2583,155 @@ qemu: QEMU: Terminated via GDBstub
 You will also notice that when you end the application, it is restarted again. This has to do with how QEMU runs our system. We will get to restarting and halting the system later.
 
 Unless something worthwhile can be mentioned, we will not describe building and running / debugging in detail any longer.
+
+## New tutorial setup {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP}
+
+Starting from this tutorial, we will no longer create a copy of everything, but simply use the infrastructure that is already there.
+We will therefore add three lines to the root CMake file:
+
+### Main CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_CMAKE_FILE}
+
+Update the file `CMakeLists.txt`
+
+```cmake
+File: CMakeLists.txt
+...
+
+229: option(BUILD_TUTORIALS "Build all tutorials" ON)
+230: 
+231: add_subdirectory(code)
+232: if(BUILD_TUTORIALS)
+233:     add_subdirectory(tutorial)
+234: endif()
+```
+
+We add a variable `BUILD_TUTORIALS`, which is OFF by default. You can always set this to ON in your `CMakeSettings.json` file.
+
+### Tutorial CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_CMAKE_FILE}
+
+In the tutorial CMake file, we will add the folder for this tutorial.
+
+Update the file `tutorial/CMakeLists.txt`
+
+```cmake
+File: tutorial/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3:
+4: add_subdirectory(05-console-uart1)
+```
+
+### Main application CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CMAKE_FILE}
+
+The main application's project name will be named after the tutorial, to not conflict with the one in the main code tree.
+Also the description is changed:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+1: project(demo
+2:     DESCRIPTION "Demo application"
+3:     LANGUAGES CXX ASM)
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
+1: project(05-console-uart1
+2:     DESCRIPTION "Tutorial 05 Console UART1 application"
+3:     LANGUAGES CXX ASM)
+...
+```
+
+### Main application create-image CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_MAIN_APPLICATION_CREATE_IMAGE_CMAKE_FILE}
+
+Similarly, the main application's create-image folder will have a project name named after the tutorial, to not conflict with the one in the main code tree.
+Also the description is changed:
+
+```cmake
+File: code/applications/demo/create-image/CMakeLists.txt
+1: project(demo-image
+2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+3:
+4: message(STATUS "\n**********************************************************************************\n")
+5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+6:
+7: message("\n** Setting up ${PROJECT_NAME} **\n")
+8:
+9: set(DEPENDENCY demo)
+10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+11:
+12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/create-image/CMakeLists.txt
+1: project(05-console-uart1-image
+2:     DESCRIPTION "Kernel image for 05-console-uart1 RPI 64 bit bare metal")
+3:
+4: message(STATUS "\n**********************************************************************************\n")
+5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+6:
+7: message("\n** Setting up ${PROJECT_NAME} **\n")
+8:
+9: set(DEPENDENCY 05-console-uart1)
+10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
+11:
+12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
+```
+
+### Baremetal library CMake file {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_BAREMETAL_LIBRARY_CMAKE_FILE}
+
+In the same way, we need to make sure the baremetal library project name is not conflicting, so we add `-05` to the name.
+
+```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3:
+4: project(baremetal
+5: 	DESCRIPTION "Bare metal library"
+6: 	LANGUAGES CXX ASM)
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/libraries/baremetal/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3:
+4: project(baremetal-05
+5:     DESCRIPTION "Bare metal library"
+6:     LANGUAGES CXX ASM)
+...
+```
+
+This also means that the main application project needs to depende on the new version of `baremetal`:
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+...
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal
+27:     )
+...
+```
+
+```cmake
+File: tutorial/05-console-uart1/code/applications/demo/CMakeLists.txt
+...
+25: set(PROJECT_DEPENDENCIES
+26:     baremetal-05
+27:     )
+...
+```
+
+### Tutorial results {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+
+This tutorial will result in (next to the main project structure):
+- a library `output/Debug/lib/baremetal-05.a`
+- an application `output/Debug/bin/05-console-uart1.elf`
+- an image in `deploy/Debug/05-console-uart1-image`
+
+In every following tutorial, the changes described here will be similar.
 
 Next: [06-improving-startup-static-initialization](06-improving-startup-static-initialization.md)

@@ -11,6 +11,7 @@
 | DSI                 | Display Serial Interface, a specification by MIPI (Mobile Industry Processor Interface) alliance for communication between display and host system
 | EEPROM              | Electrically Erasible Programmable Read Only Memory, a permanent storage device that can be electronically rewritten
 | GPIO                | General Purpose I/O, a name for logical signals which can be used to connect sensors and actuators
+| GPU                 | Graphics Processing Unit
 | HAT                 | Hardware At Top, an extension of Raspberry Pi boards by stacking other boards on top of the GPIO header. Be aware, only one HAT can be added
 | HDMI                | High-Definition Multimedia Interface, Standard Audio / Video interface
 | HW                  | Hardware / Electronics
@@ -32,4 +33,6 @@
 | STL                 | Standard Template Library, a C++ support library containing standardized classes according to the ISO C++ standard
 | UART                | Universal Asynchronous Receiver-Transmitter, a standard for serial point to point communication between computers
 | USB                 | Universal Serial Bus, a standard serial computer bus
+| VC                  | Abbreviation for VideoCore
 | VideoCore           | Name of the GPU built in to the Raspberry Pi SoCs
+| VPU                 | Vector Processing Unit, another name for GPU

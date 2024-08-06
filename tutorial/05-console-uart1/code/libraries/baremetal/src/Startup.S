@@ -47,7 +47,7 @@
     mrs \xreg1, cnthctl_el2
     orr \xreg1, \xreg1, #0x3            // Enable EL1 access to timers
     msr cnthctl_el2, \xreg1
-    msr  cntvoff_el2, xzr
+    msr cntvoff_el2, xzr
 
     // Initilize MPID/MPIDR registers
     mrs \xreg1, midr_el1

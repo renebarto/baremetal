@@ -51,3 +51,5 @@ Also refer to [aux device](#RASPBERRY_PI_AUXILIARY_PERIPHERAL).
 |                 |                 | 2     | Enable RTS receive auto flow control  | R/W | Enable receive auto flow-control using RTS<br/>1 = de-assert RTS if FIFO reaches auto flow level<br/>0 = RTS level determined by AUX_MU_MCR_REG bit 1<br/>Reset level: 0
 |                 |                 | 1     | Transmit enable                       | R/W | Enable transmit<br/>1 = enabled<br/>0 = disabled<br/>Reset level: 1
 |                 |                 | 0     | Receive enable                        | R/W | Enable receive<br/>1 = enabled<br/>0 = disabled<br/>Reset level: 1
+| AUX_MU_BAUD_REG | Base+0x00215068 | 31:16 | -                                     | -   | Reserved (write 0, read X)
+|                 |                 | 15:0  | Baudrate counter                      | R/W | Baud rate delay counter<br/>Reset level: 0

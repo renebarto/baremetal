@@ -227,7 +227,7 @@ bool UART1::Off(uint8 pinNumber, GPIOMode mode)
         return false;
 
     // Output level can be set in input mode for subsequent switch to output
-    if (mode >= GPIOMode::AlternateFunction0)
+    if (mode >= GPIOMode::Unknown)
         return false;
 
     unsigned regOffset = (pinNumber / 32);

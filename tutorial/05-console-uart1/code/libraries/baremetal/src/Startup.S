@@ -102,6 +102,12 @@ EL1:
     ldr x0, =MEM_KERNEL_STACK           // main thread runs in EL1t and uses sp_el0
     mov sp, x0                          // init its stack
 
-    b main                              // Jump to main()
+    bl      main                        // Jump to main()
+    // For fail safety, halt this core too
+    b       waitevent
+
+waitevent:
+    wfe
+    b       waitevent
 
 // End

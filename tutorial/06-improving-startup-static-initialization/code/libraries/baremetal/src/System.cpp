@@ -61,13 +61,16 @@ void System::Halt()
 {
     GetUART1().WriteString("Halt\n");
 
+    for (int i = 0; i < 1000000; ++i)
+        NOP();
+
     // power off the SoC (GPU + CPU)
     auto r = *(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
-    r |= 0x555; // partition 63 used to indicate halt
-    *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
+    r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;              // Clear partition bits
+    r |= RPI_PARTITIONVALUE(63);                        // Partition 63 used to indicate halt
+    *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);   // Boot from partition 63 (halt)
     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
-    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTS_PART_CLEAR);
+    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 
     for (;;) // Satisfy [[noreturn]]
     {
@@ -83,12 +86,15 @@ void System::Reboot()
     DisableIRQs();
     DisableFIQs();
 
+    for (int i = 0; i < 1000000; ++i)
+        NOP();
+
     // power off the SoC (GPU + CPU)
     auto r = *(RPI_PWRMGT_RSTS);
-    r &= ~0xFFFFFAAA;
-    *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+    r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;              // Clear partition bits
+    *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);   // Boot from partition 0
     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
-    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTS_PART_CLEAR);
+    *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 
     for (;;) // Satisfy [[noreturn]]
     {

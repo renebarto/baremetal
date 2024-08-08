@@ -99,5 +99,3 @@ SECTIONS
         __bss_end = .;
     } : data
 }
-/* bss size is actual size rounded down to blocks of 8 bytes */
-__bss_size = (__bss_end - __bss_start) >> 3;

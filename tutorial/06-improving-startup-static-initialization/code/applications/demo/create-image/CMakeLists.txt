@@ -1,5 +1,5 @@
 project(06-improving-startup-static-initialization-image
-    DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
+    DESCRIPTION "Kernel image for 06-improving-startup-static-initialization RPI 64 bit bare metal")
 
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")

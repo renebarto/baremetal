@@ -1134,7 +1134,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 107: class UART1
 108: {
 109: private:
-110:     bool            m_initialized;
+110:     bool m_initialized;
 111:
 112: public:
 113:     // Constructs a default UART1 instance.
@@ -1716,73 +1716,79 @@ File: code/libraries/baremetal/src/Startup.S
 38: // DEALINGS IN THE SOFTWARE.
 39: //
 40: //------------------------------------------------------------------------------
-41:
+41: 
 42: #include <baremetal/SysConfig.h>
-43:
+43: 
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
-45:
+45: 
 46:     // Initialize Generic Timers
-47:     mrs \xreg1, cnthctl_el2
-48:     orr \xreg1, \xreg1, #0x3            // Enable EL1 access to timers
-49:     msr cnthctl_el2, \xreg1
-50:     msr cntvoff_el2, xzr
-51:
+47:     mrs     \xreg1, cnthctl_el2
+48:     orr     \xreg1, \xreg1, #0x3        // Enable EL1 access to timers
+49:     msr     cnthctl_el2, \xreg1
+50:     msr     cntvoff_el2, xzr
+51: 
 52:     // Initilize MPID/MPIDR registers
-53:     mrs \xreg1, midr_el1
-54:     mrs \xreg2, mpidr_el1
-55:     msr vpidr_el2, \xreg1
-56:     msr vmpidr_el2, \xreg2
-57:
+53:     mrs     \xreg1, midr_el1
+54:     mrs     \xreg2, mpidr_el1
+55:     msr     vpidr_el2, \xreg1
+56:     msr     vmpidr_el2, \xreg2
+57: 
 58:     // Disable coprocessor traps
-59:     mov \xreg1, #0x33ff
-60:     msr cptr_el2, \xreg1                // Disable coprocessor traps to EL2
-61:     msr hstr_el2, xzr                   // Disable coprocessor traps to EL2
-62:     mov \xreg1, #3 << 20
-63:     msr cpacr_el1, \xreg1               // Enable FP/SIMD at EL1
-64:
+59:     mov     \xreg1, #0x33ff
+60:     msr     cptr_el2, \xreg1            // Disable coprocessor traps to EL2
+61:     msr     hstr_el2, xzr               // Disable coprocessor traps to EL2
+62:     mov     \xreg1, #3 << 20
+63:     msr     cpacr_el1, \xreg1           // Enable FP/SIMD at EL1
+64: 
 65:     // Initialize HCR_EL2
-66:     mov \xreg1, #(1 << 31)              // 64bit EL1
-67:     msr hcr_el2, \xreg1
-68:
+66:     mov     \xreg1, #(1 << 31)          // 64bit EL1
+67:     msr     hcr_el2, \xreg1
+68: 
 69:     // SCTLR_EL1 initialization
 70:     //
 71:     // setting RES1 bits (29,28,23,22,20,11) to 1
 72:     // and RES0 bits (31,30,27,21,17,13,10,6) +
 73:     // UCI,EE,EOE,WXN,nTWE,nTWI,UCT,DZE,I,UMA,SED,ITD,
 74:     // CP15BEN,SA0,SA,C,A,M to 0
-75:     mov \xreg1, #0x0800
-76:     movk \xreg1, #0x30d0, lsl #16
-77:     msr sctlr_el1, \xreg1
-78:
+75:     mov     \xreg1, #0x0800
+76:     movk    \xreg1, #0x30d0, lsl #16
+77:     msr     sctlr_el1, \xreg1
+78: 
 79:     // Return to the EL1_SP1 mode from EL2
-80:     mov \xreg1, #0x3c4
-81:     msr spsr_el2, \xreg1                // EL1_SP0 | D | A | I | F
-82:     adr \xreg1, label1
-83:     msr elr_el2, \xreg1
+80:     mov     \xreg1, #0x3c4
+81:     msr     spsr_el2, \xreg1            // EL1_SP0 | D | A | I | F
+82:     adr     \xreg1, label1
+83:     msr     elr_el2, \xreg1
 84:     eret
 85: label1:
 86: .endm
-87:
+87: 
 88: .section .init
-89:
+89: 
 90:     .globl _start
 91: _start:                                 // normally entered from armstub8 in EL2 after boot
-92:     mrs x0, CurrentEL                   // check if already in EL1t mode?
-93:     cmp x0, #4
-94:     beq EL1
-95:
-96:     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
-97:     msr sp_el1, x0                      // init their stack
-98:
+92:     mrs     x0, CurrentEL               // check if already in EL1t mode?
+93:     cmp     x0, #4
+94:     beq     EL1
+95: 
+96:     ldr     x0, =MEM_EXCEPTION_STACK    // IRQ, FIQ and exception handler run in EL1h
+97:     msr     sp_el1, x0                  // init their stack
+98: 
 99:     armv8_switch_to_el1_m x0, x1
-100:
+100: 
 101: EL1:
-102:     ldr x0, =MEM_KERNEL_STACK           // main thread runs in EL1t and uses sp_el0
-103:     mov sp, x0                          // init its stack
-104:
-105:     b main                              // Jump to main()
-106:
-107: // End
+102:     ldr     x0, =MEM_KERNEL_STACK       // main thread runs in EL1t and uses sp_el0
+103:     mov     sp, x0                      // init its stack
+104: 
+105:     bl      main                        // Jump to main()
+106:     // For fail safety, halt this core too
+107:     b       waitevent
+108: 
+109: waitevent:
+110:     wfe
+111:     b       waitevent
+112: 
+113: // End
 ```
 
 - Line 42: We include `SysConfig.h`. This header will define some defaults, and then include `MemoryMap.h`. Both will be handled in the next sections.
@@ -1801,6 +1807,11 @@ This is also used for FIQ (fast interrupt) and IRQ (normal interrupt). We will g
 - Line 102: We load the kernel stack address. The variable referenced here is defined in `MemoryMap.h` (see [MemoryMap.h](#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MEMORYMAPH))
 - Line 103: We set the code stack pointer to this address
 - Line 105: We jump to the main() function
+- Line 107: After we return we start the waitevent loop as we did before to halt core 0
+- Line 109-111: This is the waitevent loop, which waits for events and then loops back
+
+Note that in this version of the startup code, we do not halt other cores. However, unless core 0 fires up the other cores, these are never started
+Note also, that we no longer use the `__bss_size` variable. We can therefore remove it from `baremetal.ld`.
 
 #### Macro armv8_switch_to_el1_m {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_MACRO_ARMV8_SWITCH_TO_EL1_M}
 
@@ -1809,49 +1820,49 @@ The macro armv8_switch_to_el1_m sets up a number of registers for our code to ru
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
-45:
+45: 
 46:     // Initialize Generic Timers
-47:     mrs \xreg1, cnthctl_el2
-48:     orr \xreg1, \xreg1, #0x3            // Enable EL1 access to timers
-49:     msr cnthctl_el2, \xreg1
-50:     msr cntvoff_el2, xzr
-51:
+47:     mrs     \xreg1, cnthctl_el2
+48:     orr     \xreg1, \xreg1, #0x3        // Enable EL1 access to timers
+49:     msr     cnthctl_el2, \xreg1
+50:     msr     cntvoff_el2, xzr
+51: 
 52:     // Initilize MPID/MPIDR registers
-53:     mrs \xreg1, midr_el1
-54:     mrs \xreg2, mpidr_el1
-55:     msr vpidr_el2, \xreg1
-56:     msr vmpidr_el2, \xreg2
-57:
+53:     mrs     \xreg1, midr_el1
+54:     mrs     \xreg2, mpidr_el1
+55:     msr     vpidr_el2, \xreg1
+56:     msr     vmpidr_el2, \xreg2
+57: 
 58:     // Disable coprocessor traps
-59:     mov \xreg1, #0x33ff
-60:     msr cptr_el2, \xreg1                // Disable coprocessor traps to EL2
-61:     msr hstr_el2, xzr                   // Disable coprocessor traps to EL2
-62:     mov \xreg1, #3 << 20
-63:     msr cpacr_el1, \xreg1               // Enable FP/SIMD at EL1
-64:
+59:     mov     \xreg1, #0x33ff
+60:     msr     cptr_el2, \xreg1            // Disable coprocessor traps to EL2
+61:     msr     hstr_el2, xzr               // Disable coprocessor traps to EL2
+62:     mov     \xreg1, #3 << 20
+63:     msr     cpacr_el1, \xreg1           // Enable FP/SIMD at EL1
+64: 
 65:     // Initialize HCR_EL2
-66:     mov \xreg1, #(1 << 31)              // 64bit EL1
-67:     msr hcr_el2, \xreg1
-68:
+66:     mov     \xreg1, #(1 << 31)          // 64bit EL1
+67:     msr     hcr_el2, \xreg1
+68: 
 69:     // SCTLR_EL1 initialization
 70:     //
 71:     // setting RES1 bits (29,28,23,22,20,11) to 1
 72:     // and RES0 bits (31,30,27,21,17,13,10,6) +
 73:     // UCI,EE,EOE,WXN,nTWE,nTWI,UCT,DZE,I,UMA,SED,ITD,
 74:     // CP15BEN,SA0,SA,C,A,M to 0
-75:     mov \xreg1, #0x0800
-76:     movk \xreg1, #0x30d0, lsl #16
-77:     msr sctlr_el1, \xreg1
-78:
+75:     mov     \xreg1, #0x0800
+76:     movk    \xreg1, #0x30d0, lsl #16
+77:     msr     sctlr_el1, \xreg1
+78: 
 79:     // Return to the EL1_SP1 mode from EL2
-80:     mov \xreg1, #0x3c4
-81:     msr spsr_el2, \xreg1                // EL1_SP0 | D | A | I | F
-82:     adr \xreg1, label1
-83:     msr elr_el2, \xreg1
+80:     mov     \xreg1, #0x3c4
+81:     msr     spsr_el2, \xreg1            // EL1_SP0 | D | A | I | F
+82:     adr     \xreg1, label1
+83:     msr     elr_el2, \xreg1
 84:     eret
 85: label1:
 86: .endm
-87:
+87: 
 ```
 
 - Line 47: The register `cnthctl_el2` (Counter-timer Hypervisor Control register, see [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 224) is read.
@@ -1944,6 +1955,25 @@ This register sets the return address for when a EL2 exception was executed.
 - Line 84: We return to the exception level set in register `spsr_el2`, which means we move to EL1t.
 
 As said this is all very intricate and detailed, forcing one to dive into all the details of quite some specific ARM registers. You could also simply decide to accept what was explained here, and use the code.
+
+#### Update baremetal.ld {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
+
+As said, we no longer use the variable `__bss_size`. So we will remove it from `baremetal.ld`.
+
+Update the file `baremetal.ld`:
+```cpp
+...
+92:     /* Executable uninitialized data section */
+93:     .bss : {
+94:         __bss_start = .;
+95: 
+96:         *(.bss*)
+97:         *(COMMON)
+98: 
+99:         __bss_end = .;
+100:     } : data
+101: }
+```
 
 #### SysConfig.h {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
 
@@ -2340,7 +2370,7 @@ After we write the text to UART1, we wait a while before returning, to give the 
 
 ### Update CMake file for application {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_CMAKE_FILE_FOR_APPLICATION}
 
-As we have now added `Startup.S` to the baremetal library, we can remove `Start.S` from the application. Next, we can update the CMake file for application.
+As we have now added `Startup.S` to the baremetal library, we can remove `start.S` from the application. Next, we can update the CMake file for application.
 
 ```cmake
 File: code/applications/demo/CMakeLists.txt
@@ -2567,7 +2597,7 @@ Rebuild All succeeded.
 - The demo application is linked, using the baremetal library (step 5)
 - And finally the image is created (step 6).
 
-The only difference is that now `Startup.S` is built in baremetal, instead of 'Start.S' in the application, and the `Dummy.cpp` file is now replaced with `UART1.cpp`.
+The only difference is that now `Startup.S` is built in baremetal, instead of 'start.S' in the application, and the `Dummy.cpp` file is now replaced with `UART1.cpp`.
 
 ### Running the application - Step 2 {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_RUNNING_THE_APPLICATION___STEP_2}
 

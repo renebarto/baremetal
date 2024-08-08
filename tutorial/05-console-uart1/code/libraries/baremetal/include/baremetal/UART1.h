@@ -107,7 +107,7 @@ enum class GPIOPullMode
 class UART1
 {
 private:
-    bool            m_initialized;
+    bool m_initialized;
 
 public:
     // Constructs a default UART1 instance.

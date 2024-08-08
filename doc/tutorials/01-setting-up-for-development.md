@@ -348,7 +348,7 @@ Refer to [Fixed: Prolific PL2303TA USB to Serial Windows 11 Problem](https://emb
 - Make sure you have a terminal application to communicate with the serial to USB device
   - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) has built in support on Windows, or you can download Teraterm (be careful of the source though)
   - [Teraterm](https://tera-term.en.lo4d.com/download) is my personal favorite, but the download sites seem a bit less trustworthy nowadays
-  - One Linux there are quite a few applications available, e.g. screen, minicom, gtkterm
+  - One Linux there are quite a few applications available, e.g. screen, gtkterm
 - Make sure you have the correct device assigned (COMx on Windows, /dev/ttyusbx on Linux) and the correct settings (115200N81, or 115200 baud, no stop bits, 8 data bits, 1 start bit)
 
 <img src="images/usb-rs232.jpg" alt="USB-to-serial example" width="400"/>

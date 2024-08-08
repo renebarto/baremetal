@@ -44,7 +44,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 109:     friend UART1& GetUART1();
 110:
 111: private:
-112:     bool            m_initialized;
+112:     bool m_initialized;
 113:
 114: public:
 115:     // Constructs a default UART1 instance.
@@ -77,7 +77,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 ```
 
 - line 109: We declare a friend function `GetUART1()` to the UART1 class.
-- line 139: We declare the actual function `GetUART1()` to the UART1 class, which returns a reference to an instance of UART1.
+- line 139: We declare the actual function `GetUART1()`, which returns a reference to an instance of UART1.
 
 ### Update UART1.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_UPDATE_UART1CPP}
 
@@ -100,7 +100,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 253: } // namespace baremetal
 ```
 
-We define a variable named `s_uart` here, and in the `GetUART1()` function, we first call `Initialize()` on it (which guards against multiple initialization), and then return the intstance.
+We define a variable named `s_uart` here, and in the `GetUART1()` function, we first call `Initialize()` on it (which guards against multiple initialization), and then return the instance.
 We should have defined `s_uart` as static, but that does not work so far, as we cannot inititialize static variables yet. We'll get to that.
 
 ### System.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_SYSTEMH}
@@ -329,26 +329,30 @@ File: code/libraries/baremetal/src/System.cpp
 123: #endif
 ```
 
-- Line 50-55: We define a variable named `s_system` here, and in the `GetSystem()` function and return the intstance.
+- Line 50: We define a variable named `s_system` here
+- Line 52-55: We define the `GetSystem()` function to return the intstance `s_system`.
 We should have defined `s_system` as static, but that does not work so far, as we cannot inititialize static variables yet. We'll get to that.
 - Line 57-59: We implement the `System` constructor.
 - Line 61-70: We implement `System::Halt()`. This simply prints and then ends up in an endless loop waiting for events.
 This also calls some functions (actually assembly instructions) that we will implement shortly.
 - Line 72-84: We implement `System::Reboot()`. This simply prints and then ends up in an endless loop waiting for events.
-This also calls some functions (actually assembly instructions) that we will implement shortly.
+As part of the execution we disable fast interrupts (FIQ) and normal interrupts (IRQ).
+Note that the functions `DisableFIQs` and `DisableIRQs` still need to be implemented.
+This also calls some other assembly functions that we will implement shortly.
 - Line 86-89: We enter the `C` linkage region.
-- Line 91-119: We implements `sysinit()`.
+- Line 91-118: We implements `sysinit()`.
   - Line 93: We enable fast interrupts (FIQ). Note that the function `EnableFIQs` still needs to be implemented.
   - Line 94: We enable normal interrupts (IRQ). Note that the function `EnableIRQs` still needs to be implemented.
   - Line 97-98: We declare the variables for the bss section, they are defined in `baremetal.ld`
-  - Line 100: We clear the bss section with a call to the standard C function memset.
-Note that the function `memset` still needs to be implemented.
-  - Line 104-107: We perform a sanity check that our memory region contains the full bss section. If not, we halt the system.
-  - Line 109: We write the first line to the UART.
-  - Line 111: We forward declare `main()`.
-  - Line 113: We call `main()`. If it returned `ReturnCode::ExitReboot`, we call `System::Reboot` on the singleton System object
-  - Line 118: Otherwise we call `System::Halt` on the singleton System object
-- Line 121-123: We exit the `C` linkage region again.
+  - Line 99: We clear the bss section with a call to the standard C function memset.
+Note that the function `memset` (normally a standard function) still needs to be implemented.
+Note also that we no longer use the __bss_size variable. We can remove this.
+  - Line 103-106: We perform a sanity check that our memory region contains the full bss section. If not, we halt the system.
+  - Line 108: We write the first line to the UART.
+  - Line 110: We forward declare `main()`.
+  - Line 112-115: We call `main()`. If it returned `ReturnCode::ExitReboot`, we call `System::Reboot` on the singleton System object
+  - Line 117: Otherwise we call `System::Halt` on the singleton System object
+- Line 120-122: We exit the `C` linkage region again.
 
 Notice that we include a new header in the top of the source:
 
@@ -489,6 +493,9 @@ File: code/libraries/baremetal/src/Util.cpp
 51: }
 ```
 
+This function should speak for itself. It sets the buffer starting at `buffer` for `length` bytes to `value` for each byte.
+Then it returns the pointer to the buffer.
+
 ### ARMInstructions.h {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_ARMINSTRUCTIONSH}
 
 We will add some more assembly instructions which were used in `System.cpp`.
@@ -520,6 +527,16 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 - Line 58: This instruction disables interrupts
 - Line 60: This instruction enables fast interrupts
 - Line 62: This instruction disables fast interrupts
+
+The latter four functions make use of the DAIF register. This register is used to set interrupt flags:
+- D: Process state D mask
+- A: SError interrupt mask bit
+- I: IRQ mask bit.
+- F: FIQ mask bit.
+
+These bits are manipulated by writing to the DAIFSet or DAIFClr registers.
+
+For more information see [DAIF register](#ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER).
 
 ### Update startup code {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_UPDATE_STARTUP_CODE}
 
@@ -638,7 +655,8 @@ File: code/libraries/baremetal/src/Startup.S
 107: // End
 ```
 
-The only difference is that we call `sysinit()` instead of `main()` when starting the system.
+The only difference is that we call jump to `sysinit()` instead of calling `main()` when starting the system.
+We no longer start the waitevent loop, as this will be handled in the System methods.
 
 ### Update project configuration {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
@@ -682,14 +700,16 @@ File: code/applications/demo/src/main.cpp
 1: #include <baremetal/ARMInstructions.h>
 2: #include <baremetal/System.h>
 3: #include <baremetal/UART1.h>
-4:
+4: 
 5: using namespace baremetal;
-6:
+6: 
 7: int main()
 8: {
 9:     GetUART1().WriteString("Hello World!\n");
-10:     return static_cast<int>(ReturnCode::ExitHalt);
-11: }
+10:     for (int i = 0; i < 1000000; ++i)
+11:         NOP();
+12:     return static_cast<int>(ReturnCode::ExitHalt);
+13: }
 ```
 
 ### Configure, build and debug {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_CONFIGURE_BUILD_AND_DEBUG}
@@ -697,12 +717,11 @@ File: code/applications/demo/src/main.cpp
 The project will not behave much different from before, but will print more information to the console:
 
 ```text
-(qemu:7684): Gtk-WARNING **: 23:05:33.587: Could not load a pixbuf from icon theme.
+(qemu:22652): Gtk-WARNING **: 22:46:40.953: Could not load a pixbuf from icon theme.
 This may indicate that pixbuf loaders or the mime database could not be found.
 Starting up
 Hello World!
 Halt
-qemu: QEMU: Terminated via GDBstub
 ```
 
 The first printed line is done in `sysinit()`, the call to `GetUART1()` will initialize the UART.
@@ -845,14 +864,13 @@ We will call the `Initialize()` method, which will be called every time the func
 If you would now build the code, you would get linker errors:
 
 ```text
-D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe:
- ../output/Debug/lib/libbaremetal.a(System.cpp.obj): in function `baremetal::GetSystem()':
-  D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x38): undefined reference to `__cxa_guard_acquire'
-  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x68): undefined reference to `__cxa_guard_release'
-  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: ../output/Debug/lib/libbaremetal.a(System.cpp.obj): in function `baremetal::GetUART()':
-  D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x138): undefined reference to `__cxa_guard_acquire'
-  D:/toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.2.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal\cmake-Baremetal-Debug/../code/libraries/baremetal/src/System.cpp:87:(.text+0x168): undefined reference to `__cxa_guard_release'
-D:\Projects\baremetal\cmake-BareMetal-Debug\collect2.exe : error : ld returned 1 exit status
+  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: ../output/Debug/lib/libbaremetal.a(System.cpp.obj): in function `baremetal::GetSystem()':
+  D:\Projects\baremetal.test\cmake-BareMetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x38): undefined reference to `__cxa_guard_acquire'
+  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal.test\cmake-BareMetal-Debug/../code/libraries/baremetal/src/System.cpp:52:(.text+0x68): undefined reference to `__cxa_guard_release'
+  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: ../output/Debug/lib/libbaremetal.a(UART1.cpp.obj): in function `baremetal::GetUART1()':
+  D:\Projects\baremetal.test\cmake-BareMetal-Debug/../code/libraries/baremetal/src/UART1.cpp:247:(.text+0x6f8): undefined reference to `__cxa_guard_acquire'
+  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/../lib/gcc/aarch64-none-elf/13.3.1/../../../../aarch64-none-elf/bin/ld.exe: D:\Projects\baremetal.test\cmake-BareMetal-Debug/../code/libraries/baremetal/src/UART1.cpp:247:(.text+0x728): undefined reference to `__cxa_guard_release'
+D:\Projects\baremetal.test\cmake-BareMetal-Debug\collect2.exe : error : ld returned 1 exit status
 ```
 
 This is due to the fact that the runtime expects to have two functions defined, that deal with static initialization:
@@ -988,8 +1006,8 @@ We define three functions here, of which one is not currently used.
   - We are passed in an object pointer, which points to a two byte structure.
     - The first byte states whether it has been initialized
     - The second byte states whether it is currently in use for initialization
-  - We check whether the object is already initialized, if so we return.
-  - We set the in-use flag
+  - We check whether the object is already initialized, if so we return 0 to indicate initialization is not needed.
+  - We set the in-use flag and return 1 to indicate initialization is needed
 - Line 106-110: We implement `__cxa_guard_release` which releases an object for static initialization
   - We set the initialized flag
   - We clear the in-use flag
@@ -1036,14 +1054,13 @@ Update the file code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
-
 52: // End address for Raspberry PI BCM I/O
 53: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
-54:
+54: 
 55: //---------------------------------------------
 56: // Raspberry Pi Power Management
 57: //---------------------------------------------
-58:
+58: 
 59: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
 60: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
 61: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
@@ -1052,17 +1069,19 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 64: #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
 65: #define RPI_PWRMGT_RSTC_REBOOT          0x00000020
 66: #define RPI_PWRMGT_RSTC_RESET           0x00000102
-67: #define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
-68:
-69: //---------------------------------------------
-70: // Raspberry Pi GPIO
+67: #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
+68: // Partition value bits are interspersed with 0 bits
+69: #define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01)  << 0 | (((x) >> 1) & 0x01) << 2 |  (((x) >> 2) & 0x01) << 4 |  (((x) >> 3) & 0x01) << 6 |  (((x) >> 4) & 0x01) << 8 |  (((x) >> 5) & 0x01) << 10
+70: 
 71: //---------------------------------------------
-
+72: // Raspberry Pi GPIO
+73: //---------------------------------------------
 ...
 ```
 
 We will not go into the details of these registers, as they are not officially described as far as I know.
-We will simply use proven code to implement halt and reboot.
+There is code in Raspberry Pi OS that also controls these registers, but without much documentation. See [here](https://github.com/raspberrypi/linux/blob/rpi-6.6.y/drivers/watchdog/bcm2835_wdt.c).
+We will simply use proven working code to implement halt and reboot.
 
 ### System.cpp {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT___STEP_3_SYSTEMCPP}
 
@@ -1073,36 +1092,40 @@ Update the file code/libraries/baremetal/src/System.cpp
 ```cpp
 File: code/libraries/baremetal/src/System.cpp
 ...
-
 60: void System::Halt()
 61: {
 62:     GetUART1().WriteString("Halt\n");
-63:
-64:     // power off the SoC (GPU + CPU)
-65:     auto r = *(RPI_PWRMGT_RSTS);
-66:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
-67:     r |= 0x555; // partition 63 used to indicate halt
-68:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);
-69:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
-70:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-71:
-72:     for (;;) // Satisfy [[noreturn]]
-73:     {
-74:         DataSyncBarrier();
-75:         WaitForInterrupt();
-76:     }
-77: }
-
+63: 
+64:     for (int i = 0; i < 1000000; ++i)
+65:         NOP();
+66: 
+67:     // power off the SoC (GPU + CPU)
+68:     auto r = *(RPI_PWRMGT_RSTS);
+69:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;              // Clear partition bits
+70:     r |= RPI_PARTITIONVALUE(63);                        // Partition 63 used to indicate halt
+71:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);   // Boot from partition 63 (halt)
+72:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+73:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+74: 
+75:     for (;;) // Satisfy [[noreturn]]
+76:     {
+77:         DataSyncBarrier();
+78:         WaitForInterrupt();
+79:     }
+80: }
+81: 
 ...
 ```
 
-- Line 65: So we read the register `RPI_PWRMGT_RSTS` (probably means reset status)
-- Line 66: We mask out bits 1, 3, 5, 7, 9, 11.
-These 6 bits seem to indicate the partition we're booting from. This is normally 0, but all 1's is a special case.
-- Line 67: We set the partition to boot from to 63, to enforce a halt.
-- Line 68: We write the result to the `RPI_PWRMGT_RSTS` register, we apparently need to add a magic number to the value.
-- Line 69: We write to the watchdog timer, presumably the value is the magic number with 10 added for 10 seconds.
-- Line 70: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
+- Line 64-65: We wait a bit to make sure the console output is sent
+- Line 68: So we read the register `RPI_PWRMGT_RSTS` (probably means reset status)
+- Line 69: We mask out bits 1, 3, 5, 7, 9, 11. These contain the sector value
+These 6 bits indicate the partition we're booting from. 
+This is normally 0, but all 1's is a special case (sector 63 means halt)
+- Line 70: We set the partition to boot from to 63, to enforce a halt
+- Line 71: We write the result to the `RPI_PWRMGT_RSTS` register, we apparently need to add a magic number to the value.
+- Line 72: We write to the watchdog timer, presumably the value is the magic number with 1 added for 1 seconds.
+- Line 73: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
 
 #### Implement System::System() {#TUTORIAL_06_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT___STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMSYSTEM}
 
@@ -1111,28 +1134,29 @@ Update the file code/libraries/baremetal/src/System.cpp
 ```cpp
 File: code/libraries/baremetal/src/System.cpp
 ...
-
-79: void System::Reboot()
-80: {
-81:     GetUART1().WriteString("Reboot\n");
-82:
-83:     DisableIRQs();
-84:     DisableFIQs();
-85:
-86:     // power off the SoC (GPU + CPU)
-87:     auto r = *(RPI_PWRMGT_RSTS);
-88:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
-89:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-90:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
-91:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-92:
-93:     for (;;) // Satisfy [[noreturn]]
-94:     {
-95:         DataSyncBarrier();
-96:         WaitForInterrupt();
-97:     }
-98: }
-
+82: void System::Reboot()
+83: {
+84:     GetUART1().WriteString("Reboot\n");
+85: 
+86:     DisableIRQs();
+87:     DisableFIQs();
+88: 
+89:     for (int i = 0; i < 1000000; ++i)
+90:         NOP();
+91: 
+92:     // power off the SoC (GPU + CPU)
+93:     auto r = *(RPI_PWRMGT_RSTS);
+94:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;              // Clear partition bits
+95:     *(RPI_PWRMGT_RSTS) = (RPI_PWRMGT_WDOG_MAGIC | r);   // Boot from partition 0
+96:     *(RPI_PWRMGT_WDOG) = (RPI_PWRMGT_WDOG_MAGIC | 1);
+97:     *(RPI_PWRMGT_RSTC) = (RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+98: 
+99:     for (;;) // Satisfy [[noreturn]]
+100:     {
+101:         DataSyncBarrier();
+102:         WaitForInterrupt();
+103:     }
+104: }
 ...
 ```
 
@@ -1198,7 +1222,7 @@ Press r to reboot, h to halt
 hHalt
 ```
 
-On a physical board, you will see two undesired effects:
+If we do not add the waiting loop, on a physical board, you will see two undesired effects:
 
 ```text
 Hello World!
@@ -1210,6 +1234,8 @@ Press r to reboot, h to halt
 ```
 
 First, you will see strange characters being written, second, you will see that the string `Reboot` or `Halt` is not fully displayed.
-This has to do with the fact that we need to give the UART some time to do its work. We'll get around to that when we dive into timers.
+This has to do with the fact that we need to give the UART some time to do its work.
+That is why we add the wait loop.
+We'll get around to improving this when we dive into timers.
 
 Next: [07-generalization](07-generalization.md)

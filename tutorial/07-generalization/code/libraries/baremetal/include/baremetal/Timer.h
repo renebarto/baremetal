@@ -42,7 +42,7 @@
 #include <baremetal/Types.h>
 
 namespace baremetal {
-    
+
 // For now holds only busy waiting
 class Timer
 {

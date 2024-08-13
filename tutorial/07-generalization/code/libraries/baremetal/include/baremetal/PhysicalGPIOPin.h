@@ -48,12 +48,12 @@ namespace baremetal {
 class PhysicalGPIOPin : public IGPIOPin
 {
 private:
-    uint8                 m_pinNumber;
-    GPIOMode              m_mode;
-    GPIOFunction          m_function;
-    GPIOPullMode          m_pullMode;
-    bool                  m_value;
-    IMemoryAccess& m_memoryAccess;
+    uint8           m_pinNumber;
+    GPIOMode        m_mode;
+    GPIOFunction    m_function;
+    GPIOPullMode    m_pullMode;
+    bool            m_value;
+    IMemoryAccess&  m_memoryAccess;
 
 public:
     // Creates a virtual GPIO pin

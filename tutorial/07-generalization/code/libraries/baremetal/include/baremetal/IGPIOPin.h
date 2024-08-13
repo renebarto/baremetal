@@ -43,32 +43,6 @@
 
 namespace baremetal {
 
-// GPIO mode
-enum class GPIOMode
-{
-    // GPIO used as input
-    Input,
-    // GPIO used as output
-    Output,
-    // GPIO used as input, using pull-up
-    InputPullUp,
-    // GPIO used as input, using pull-down
-    InputPullDown,
-    // GPIO used as Alternate Function 0.
-    AlternateFunction0,
-    // GPIO used as Alternate Function 1.
-    AlternateFunction1,
-    // GPIO used as Alternate Function 2.
-    AlternateFunction2,
-    // GPIO used as Alternate Function 3.
-    AlternateFunction3,
-    // GPIO used as Alternate Function 4.
-    AlternateFunction4,
-    // GPIO used as Alternate Function 5.
-    AlternateFunction5,
-    Unknown,
-};
-
 // GPIO function
 enum class GPIOFunction
 {
@@ -100,6 +74,32 @@ enum class GPIOPullMode
     PullDown,
     // GPIO pull mode pull-up
     PullUp,
+    Unknown,
+};
+
+// GPIO mode
+enum class GPIOMode
+{
+    // GPIO used as input
+    Input,
+    // GPIO used as output
+    Output,
+    // GPIO used as input, using pull-up
+    InputPullUp,
+    // GPIO used as input, using pull-down
+    InputPullDown,
+    // GPIO used as Alternate Function 0.
+    AlternateFunction0,
+    // GPIO used as Alternate Function 1.
+    AlternateFunction1,
+    // GPIO used as Alternate Function 2.
+    AlternateFunction2,
+    // GPIO used as Alternate Function 3.
+    AlternateFunction3,
+    // GPIO used as Alternate Function 4.
+    AlternateFunction4,
+    // GPIO used as Alternate Function 5.
+    AlternateFunction5,
     Unknown,
 };
 

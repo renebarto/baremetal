@@ -11,20 +11,6 @@ The list will never be complete, please refer to the documentation for that, her
 
 ## Register overview {#ARM_REGISTERS_REGISTER_OVERVIEW}
 
-| Register name | Width | Acc | Reset value | Meaning |
-|---------------|-------|-----|-------------|---------|
-| MIDR_EL1      | 32    | R   | 0x410FD083  | Provides identification information for the processor, including an implementer code for the device and a device ID number.
-| MPIDR_EL1     | 64    | R   | 0x80000003  | Provides an additional core identification mechanism for scheduling purposes in a cluster system. EDDEVAFF0 is a read-only copy of MPIDR_EL1[31:0] accessible from the external debug interface.
-| L2CTLR_EL1    | 32    | R/W | ?           | L2 Control register
-| DAIF          | 64    | R/W | 0x000003C0  | Interrupt Mask Bits
-| DAIFClr       | 4     | R/W | 0x00000000  | Interrupt Mask Bits Set Register
-| DAIFSet       | 4     | R/W | 0x00000000  | Interrupt Mask Bits Reset Register
-| CNTFRQ_EL0    | 64    |
-| CNTPCT_EL0    | 64    |
-| CNTP_CTL_EL0  | 64    | R/W
-| CNTP_CVAL_EL0 | 64    |
-| CTR_EL0       | 64    | R   |             | Cache Type Register, EL0
-
 ### Common registers {#ARM_REGISTERS_REGISTER_OVERVIEW_COMMON_REGISTERS}
 
 <table>
@@ -47,8 +33,8 @@ SPSel.SP   Current stack pointer<br>
 <tr><td>DAIFSet      <td>4    <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Set Register                        <td></tr>
 <tr><td>CNTFRQ_EL0   <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Frequency register (EL0)                  <td>This register is provided so that software can discover the frequency of the system counter. It must be programmed with this value as part of system initialization. The value of the register is not interpreted by hardware.</tr>
 <tr><td>CNTPCT_EL0   <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Count register (EL0)             <td>Holds the 64-bit physical count value.</tr>
-<tr><td>CNTP_CTL_EL0 <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer Control register (EL0)     <td>Control register for the EL1 physical timer.</tr>
-<tr><td>CNTP_CVAL_EL0<td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer CompareValue register (EL0)<td>Holds the compare value for the EL1 physical timer.</tr>
+<tr><td>CNTP_CTL_EL0 <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer Control register (EL0)     <td>Control register for the EL0 physical timer.<br>Bit 2: If 1, compare value condition is met, if 0, it is not met (yet)<br>Bit 1: If 1, interrupt on timer condition is masked, if 0, the interrupt is not masked<br>Bit 0: If 1, the timer is enabled, if 0, it is disabled</tr>
+<tr><td>CNTP_CVAL_EL0<td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer CompareValue register (EL0)<td>Holds the compare value for the EL0 physical timer.</tr>
 <tr><td>CTR_EL0      <td>4    <td>R/W<td>0x00000000 <td>Cache Type Register (EL0)                               <td>Provides information about the architecture of the caches.</tr>
 </table>
 

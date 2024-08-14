@@ -77,13 +77,16 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 ```
 
 - Line 46: We forward declare IMemoryAccess, as this class will need it for memory access
-- Line 52: We declare the friend function `GetTimer()`, much like `GetUART1()` and `GetSystem()` before. This function will return the singleton instance of the Timer
-- Line 55: We add a class variable for the memory access
+- Line 52: We declare the friend function `GetTimer()`, much like `GetUART1()` and `GetSystem()` before.
+This function will return the singleton instance of the Timer
+- Line 55: We add a member variable for the memory access
 - Line 58: We declare a private constructor (called by `GetTimer()`)
-- Line 62: We declare a public constructor for testing
-- Line 67-69: We add a method to request the timer count in case we use the BCM2835 (SoC) timer. As this method needs memory access, we use the IMemoryAccess interface, so this method needs to have an instance
-- Line 73: We add a method to delay for a specified number of milliseconds
-- Line 76: We add a method to delay for a specified number of microseconds
+- Line 62: We declare a public constructor for testing taking a reference to an `IMemoryAccess` implementation
+- Line 65: We keep the already existing `WaitCycles()` method implementation
+- Line 67-69: We add a method `GetSystemTimer()` to request the timer count in case we use the BCM2835 (SoC) timer.
+As this method needs memory access, we use the IMemoryAccess interface, so this method needs to have an instance
+- Line 73: We add a method `WaitMilliSeconds()` to delay for a specified number of milliseconds
+- Line 76: We add a method `WaitMicroSeconds()` to delay for a specified number of microseconds
 - Line 80: We declare the getter function `GetTimer()`
 
 ### Timer.cpp {#TUTORIAL_08_TIMER_USING_THE_SYSTEM_TIMER_TIMERCPP}
@@ -233,11 +236,11 @@ File: code/libraries/baremetal/src/Timer.cpp
 - Line 43: We need to use some registers for the system timer (still to be defined), so we will include `BCMRegisters.h`
 - Line 44: We will also need to include `MemoryAccess.h`
 - Line 46-48: We add some convenience definitions to convert between seconds, milliseconds and microseconds
-- Line 52-55: We implement the default constructor, using the standard singleton `MemoryAccess` instance
-- Line 57-60: We implement the specific test constructor, where the memory access instance is passed as a parameter
+- Line 52-55: We implement the private default constructor, using the standard singleton `MemoryAccess` instance
+- Line 57-60: We implement the public constructor, where the memory access instance is passed as a parameter
 - Line 73-76: We implement the `WaitMilliSeconds()` method by simply called `WaitMicroSeconds()`
-- Line 79-96: We implement the `WaitMicroSeconds()` method in case we don't use the physical system timer, using ARM registers
-  - Line 85: We read the timer frequency. Default, this is 54 MHz
+- Line 79-96: We implement the `WaitMicroSeconds()` method in case we don't use the physical system timer (`USE_PHYSICAL_COUNTER` is not defined), using ARM registers
+  - Line 85: We read the timer frequency. Default, this is 54 MHz.
 `GetTimerFrequency()` is an ARM instruction to read the counter frequency register `CNTFRQ_EL0`, which returns the counter frequency in ticks per second.
 This needs to be added
   - Line 87: We read the current counter value.
@@ -246,11 +249,12 @@ This needs to be added
   - Line 89: We calculate the number of counter ticks to wait by first calculating the number of ticks per microsecond, and then multiplying by the number of microseconds to wait.
 It would be more accurate to first multiply, however we might get an overflow
   - Line 92-95: We read the current count value, and loop as long as the number of ticks has not passed
-  - Line 99-114: We need to implement the `GetSystemTimer()` to retrieve the current system timer count
+- Line 99-114: When we do use the physical timer (`USE_PHYSICAL_COUNTER` is defined), we need to implement the `GetSystemTimer()` method to retrieve the current system timer count
     - Line 104-105: We read the 64 bit system timer value
     - Line 107-111: The high word might have changed during the read, so in case it is read different, we read again. This prevents strange wrap-around errors
-    - Line 113: We combine the two 32 bit words into a 64 bit value
-- Line 116-126: We implement the `WaitMicroSeconds()` method in case we use the physical system timer, using BCM registers. The System timer updates every microsecond
+    - Line 113: We combine the two 32 bit words into a 64 bit value, and return this as the tick count
+- Line 116-126: We implement the `WaitMicroSeconds()` method in case we use the physical system timer (`USE_PHYSICAL_COUNTER` is defined), using BCM registers.
+The system timer updates every microsecond
   - Line 118: We read the current system timer value
   - Line 121-125: We loop (while executing NOP instructions) while number of microseconds has not elapsed
 - Line 129-133: We implement the getter function `GetTimer()`, which returns a reference to the singleton Timer instance.
@@ -276,7 +280,7 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 72: #define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
 73:
 74: // IStatus bit, flags if Physical counter-timer condition is met.
-75: #define CNTP_CTL_EL0_STATUS BIT(2)
+75: #define CNTP_CTL_EL0_ISTATUS BIT(2)
 76: // IMask bit, flags if interrupts for Physical counter-timer are masked.
 77: #define CNTP_CTL_EL0_IMASK BIT(1)
 78: // Enable bit, flags if Physical counter-timer is enabled.
@@ -302,6 +306,8 @@ See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 293.
 See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 298.
 - Line 84: We define `SetTimerControl()`. It writes the Counter-timer Physical Timer CompareValue (`CNTP_CVAL_EL0`) register.
 See [ARM architecture registers](pdf/ARM-architecture-registers.pdf), page 298.
+
+See also [here](#ARM_REGISTERS_REGISTER_OVERVIEW_COMMON_REGISTERS).
 
 Only the first two functions are currently used.
 
@@ -331,10 +337,11 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ```
 
 More information on the System Timer registers can be found in the
-[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 172),
-[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 172),
-[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 142).
-It is currently unclear whether the System Timer is present in the same shape in Raspberry Pi 5.
+[Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2835-peripherals.pdf) (page 173),
+[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 142),
+[Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 142).
+For Raspberry Pi 5, there is a TICKS device, that also generates ticks for a clock.
+It behaves differently however, and is still to be described / implemented.
 
 As you can see the System timer register addresses are all prefixed with `RPI_SYSTMR_`.
 
@@ -411,11 +418,12 @@ Update the file `CMakeLists.txt`.
 ```cmake
 File: CMakeLists.txt
 ...
-64: set(DEFINES_C
-65:     PLATFORM_BAREMETAL
-66:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-67:     USE_PHYSICAL_COUNTER
-68:     )
+70: set(DEFINES_C
+71:     PLATFORM_BAREMETAL
+72:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+73:     USE_PHYSICAL_COUNTER
+74:     )
+75: 
 ...
 ```
 

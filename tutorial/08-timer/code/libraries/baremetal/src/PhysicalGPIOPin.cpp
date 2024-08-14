@@ -199,28 +199,6 @@ GPIOPullMode PhysicalGPIOPin::GetPullMode()
     return m_pullMode;
 }
 
-void PhysicalGPIOPin::SetFunction(GPIOFunction function)
-{
-    // Check if pin is assigned
-    if (m_pinNumber >= NUM_GPIO)
-        return;
-
-    // Check if mode is valid
-    if (function >= GPIOFunction::Unknown)
-        return;
-
-    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10);
-    uint32  shift = (m_pinNumber % 10) * 3;
-
-    static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-
-    uint32 value = m_memoryAccess.Read32(selectRegister);
-    value &= ~(7 << shift);
-    value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-    m_memoryAccess.Write32(selectRegister, value);
-    m_function = function;
-}
-
 void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
 {
     // Check if pin is assigned
@@ -253,6 +231,28 @@ void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
 #endif
 
     m_pullMode = pullMode;
+}
+
+void PhysicalGPIOPin::SetFunction(GPIOFunction function)
+{
+    // Check if pin is assigned
+    if (m_pinNumber >= NUM_GPIO)
+        return;
+
+    // Check if mode is valid
+    if (function >= GPIOFunction::Unknown)
+        return;
+
+    regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10);
+    uint32  shift = (m_pinNumber % 10) * 3;
+
+    static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+
+    uint32 value = m_memoryAccess.Read32(selectRegister);
+    value &= ~(7 << shift);
+    value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+    m_memoryAccess.Write32(selectRegister, value);
+    m_function = function;
 }
 
 } // namespace baremetal

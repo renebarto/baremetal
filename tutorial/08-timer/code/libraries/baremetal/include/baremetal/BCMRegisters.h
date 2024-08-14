@@ -77,7 +77,9 @@
 #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
 #define RPI_PWRMGT_RSTC_REBOOT          0x00000020
 #define RPI_PWRMGT_RSTC_RESET           0x00000102
-#define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
+#define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
+// Partition value bits are interspersed with 0 bits
+#define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01)  << 0 | (((x) >> 1) & 0x01) << 2 |  (((x) >> 2) & 0x01) << 4 |  (((x) >> 3) & 0x01) << 6 |  (((x) >> 4) & 0x01) << 8 |  (((x) >> 5) & 0x01) << 10
 
 //---------------------------------------------
 // Raspberry Pi GPIO

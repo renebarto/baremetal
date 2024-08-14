@@ -1,6 +1,6 @@
 # Raspberry Pi System timer {#RASPBERRY_PI_SYSTEM_TIMER}
 
-See [documentation](pdf/bcm2837-peripherals.pdf), page 173
+See [documentation](pdf/bcm2837-peripherals.pdf), page 172
 
 <table>
 <caption id="System_timer_registers">System timer registers</caption>

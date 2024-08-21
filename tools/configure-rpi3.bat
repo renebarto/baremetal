@@ -4,6 +4,6 @@ rmdir /s /q cmake-Baremetal-Debug
 mkdir cmake-Baremetal-Debug
 pushd cmake-Baremetal-Debug
 
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI3 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 
 popd

@@ -411,22 +411,39 @@ We will create a script for Windows and for Linux to configure the build. They w
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS}
 
+For Raspberry Pi 3:
+
 ```bat
-File: tools/configure.bat
+File: tools/configure-rpi3.bat
 1: @echo off
 2: del /S /f /q cmake-Baremetal-Debug\*.*
 3: rmdir /s /q cmake-Baremetal-Debug
 4: mkdir cmake-Baremetal-Debug
 5: pushd cmake-Baremetal-Debug
 6: 
-7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI3 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+8: 
+9: popd
+```
+
+For Raspberry Pi 4:
+
+```bat
+File: tools/configure-rpi4.bat
+1: @echo off
+2: del /S /f /q cmake-Baremetal-Debug\*.*
+3: rmdir /s /q cmake-Baremetal-Debug
+4: mkdir cmake-Baremetal-Debug
+5: pushd cmake-Baremetal-Debug
+6: 
+7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI4 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 8: 
 9: popd
 ```
 
 Running the script:
 ```bat
-tools\configure.bat
+tools\configure-rpi3.bat
 ```
 
 ```text
@@ -509,14 +526,28 @@ tools\configure.bat
 
 We will leave the Linux scripts as with build directory `cmake-build`, as we will still build on the command line there.
 
-tools/configure.sh:
+For Raspberry Pi 3:
+
 ```bash
-File: tools/configure.sh
+File: tools/configure-rpi3.sh
 1: rm -rf cmake-build/
 2: mkdir cmake-build
 3: pushd cmake-build
 4: 
-5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI3 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+6: 
+7: popd
+```
+
+For Raspberry Pi 4:
+
+```bash
+File: tools/configure-rpi4.sh
+1: rm -rf cmake-build/
+2: mkdir cmake-build
+3: pushd cmake-build
+4: 
+5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI4 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 6: 
 7: popd
 ```
@@ -1131,7 +1162,7 @@ If the toolchain was already checked, the output will be shorter.
 
 Notice that Visual Studio uses its own version of CMake: `CMake 3.20.21032501-MSVC_2`
 
-After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure.bat` or `tools/configure.sh` on the command line.
+After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure-rpi[3|4}.bat` or `tools/configure.sh-rpi[3|4}` on the command line.
 
 ### Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_BUILDING}
 

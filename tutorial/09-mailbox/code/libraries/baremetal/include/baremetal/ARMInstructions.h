@@ -12,9 +12,9 @@
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
-// 
+//
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
-// 
+//
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
 // files(the "Software"), to deal in the Software without
@@ -34,7 +34,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 //------------------------------------------------------------------------------
 
 #pragma once
@@ -74,7 +74,7 @@
 #define SetTimerControl(value)          asm volatile ("msr CNTP_CTL_EL0, %0" :: "r" (value))
 
 // IStatus bit, flags if Physical counter-timer condition is met.
-#define CNTP_CTL_EL0_STATUS BIT(2)
+#define CNTP_CTL_EL0_ISTATUS BIT(2)
 // IMask bit, flags if interrupts for Physical counter-timer are masked.
 #define CNTP_CTL_EL0_IMASK BIT(1)
 // Enable bit, flags if Physical counter-timer is enabled.
@@ -84,3 +84,4 @@
 #define GetTimerCompareValue(value)     asm volatile ("mrs %0, CNTP_CVAL_EL0" : "=r" (value))
 // Set Physical counter-timer comparison value.
 #define SetTimerCompareValue(value)     asm volatile ("msr CNTP_CVAL_EL0, %0" :: "r" (value))
+

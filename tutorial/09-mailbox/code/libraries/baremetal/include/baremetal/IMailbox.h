@@ -48,7 +48,7 @@ enum class MailboxChannel
 {
     ARM_MAILBOX_CH_POWER = 0,       // Power management
     ARM_MAILBOX_CH_FB = 1,          // Frame buffer
-    ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+    ARM_MAILBOX_CH_VUART = 2,       // Virtual UART
     ARM_MAILBOX_CH_VCHIQ = 3,
     ARM_MAILBOX_CH_LEDS = 4,
     ARM_MAILBOX_CH_BTNS = 5,

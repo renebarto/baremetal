@@ -19,14 +19,14 @@ This tutorial will result in (next to the main project structure):
 Before we can work on the other serial console(s), such as UART0 on Raspberry Pi 3 and UART0, 2, 3, 4, 5 on Raspberry Pi 4, we need to use the Raspberry Pi mailbox.
 
 The mailbox is a mechanism to communicate between the ARM cores and the GPU. As you can read in [System startup](../system-startup.md), the GPU is the first part that becomes active after power on.
-It runs the firmware, has detailed information on the system and can control some of the peripherals. And, of course, it can rendering to the screen.
+It runs the firmware, has detailed information on the system and can control some of the peripherals. And, of course, it can render to the screen.
 
 In order to use the mailbox, we need to establish a common address between ARM and GPU to exchange information. This is done through a so-called Coherent page.
 We can decide the location of this page, but need to convert the address for the GPU such that it can find the page.
 
 A logical location for the coherent page is a bit after the last address used by our code.
 
-Let's first revisit the memory map and add the coherent page information. Then we will add a mamory manager, that for now will only hand out coherent memory pages, and after that we can start using the mailbox.
+Let's first revisit the memory map and add the coherent page information. Then we will add a memory manager, that for now will only hand out coherent memory pages, and after that we can start using the mailbox.
 We'll finalize by using the mailbox to retrieve board information, such as board type, serial number and memory size.
 
 ## Updating the memory map - Step 1 {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1}
@@ -55,7 +55,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 81: #define COHERENT_REGION_SIZE 4 * MEGABYTE
 82: #endif
 83:
-84: // Region reserved for coherent memory rounded to 1 Mb
+84: // Region reserved for coherent memory rounded to 1 Mb, with >= 1Mb gap
 85: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
 
@@ -66,7 +66,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 In order to show which exact addresses we have, let's print them in our application.
 However, we can write characters and strings to the console, but how about integers?
 In standard C we would use `printf()`, in C++ we would use the stream insertion operator, but we don't have those.
-So we'll have to write something ourselves. We could simply look around for a `printf()` implementation, but what's the fun in that?
+So we'll have to write something ourselves. We could simply look around for a `printf()` implementation, but where's the fun in that?
 
 So let's start adding a header for our serialization routines.
 
@@ -126,7 +126,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 48: } // namespace baremetal
 ```
 
-- Line 46: We declare a function that write a 32 bit unsigned integer value into a `buffer`, with a maximum `bufferSize` (including the trailing null character).
+- Line 46: We declare a function that writes a 32 bit unsigned integer value into a `buffer`, with a maximum `bufferSize` (including the trailing null character).
 The value will take `width` characters at most (if zero the space needed is calculated), it will use a `base` which can be between 2 and 36 (so e.g. 16 for hexadecimal).
 If `showBase` is true, the base prefix will be added (0b for `base` = 2, 0 for `base` = 8, 0x for `base` = 16).
 If the size of the type would require more characters than strictly needed for the value, and `leadingZeros` is true, the value is prefix with '0' characters.
@@ -263,37 +263,33 @@ File: code/libraries/baremetal/src/Serialization.cpp
 122:             *bufferPtr++ = '0';
 123:         }
 124:     }
-125:     else
+125:     while (numDigits > 0)
 126:     {
-127:         if (numDigits == 0)
-128:         {
-129:             *bufferPtr++ = '0';
-130:         }
+127:         int digit = (value / divisor) % base;
+128:         *bufferPtr++ = GetDigit(digit);
+129:         --numDigits;
+130:         divisor /= base;
 131:     }
-132:     while (numDigits > 0)
-133:     {
-134:         int digit = (value / divisor) % base;
-135:         *bufferPtr++ = GetDigit(digit);
-136:         --numDigits;
-137:         divisor /= base;
-138:     }
-139:     *bufferPtr++ = '\0';
-140: }
-141:
-142: } // namespace baremetal
+132:     *bufferPtr++ = '\0';
+133: }
+134: 
+135: } // namespace baremetal
+136: 
 ```
 
 - Line 44: We define a value `Uppercase` which can be set to false to print hexadecimal values with lowercase letters. The default is uppercase.
-- Line 46-49: We return a 'digit' for the `value` specified. So `0`..`9` for 0 to 9, `A`..`Z` for 10 to 35, or lower case if `uppercase` is false.
-- Line 51-65: We determine how many digits are needed to represent a type of size `bits` in base `base`. This uses a log2 implementation for integers
+- Line 46-49: We return a 'digit' for the `value` specified. So `0`..`9` for 0 to 9, `A`..`Z` for 10 to 35, or `a`..`z` if `Uppercase` is false.
+- Line 51-65: We determine how many digits are needed to represent a type of size `bits` in base `base`. This uses a log`<n>` implementation for integers
 - Line 67-140: The actual Serialize function
   - Line 69-70: We do a sanity check on the base
   - Line 75-84: We calculate how many digits are needed to represent the value using the base specified.
-  Meanwhile we calculate a maximum divisor, while keeping the last, which we reset to when the condition turns false
+  Meanwhile we calculate a maximum divisor, while keeping the last, which we use when the condition turns false
   - Line 86-92: We set the minimum number of digits needed to 1, we take the prefix into account if desired, and if the width is specified, that is the minimum.
   - Line 93-94: We do a sanity check to see whether the characters to be written fit in the buffer
-  - Line 98-138: We print the digits, adding the prefix, and taking into account leading zeros
-  - Line 139: We end the string with a null character
+  - Line 98-115: We print the prefix if needed
+  - Line 116-124: We print the leading zeros if needed
+  - Line 125-131: We print the digits
+  - Line 132: We end the string with a null character
 
 #### main.cpp {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
@@ -445,7 +441,7 @@ File: code/applications/demo/src/main.cpp
 140: }
 ```
 
-The code should speak for itself.
+The code should speak for itself. Notice that this code is very verbose. We'll improve that later.
 
 ### Update project configuration {#TUTORIAL_09_MAILBOX_UPDATING_THE_MEMORY_MAP___STEP_1_UPDATE_PROJECT_CONFIGURATION}
 
@@ -532,6 +528,7 @@ Press r to reboot, h to halt
 For Raspberry Pi 4:
 
 ```text
+Starting up
 Hello World!
 ------------------------------------------------- 0x0000080000 MEM_KERNEL_START
  Kernel image : Size 0x0000200000
@@ -632,9 +629,11 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 ```
 
 - Line 44-47, we declare an enum type to hold the kind of Coherent Page to request. For now this is only one kind, but this will be extended.
-- Line 55: We define a static method in `MemoryManager` to get the address for a Coherent Page.
+- Line 55: We define a static method `GetCoherentPage()` in `MemoryManager` to get the address for a Coherent Page.
 
 ### MemoryManager.cpp {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_MEMORYMANAGERCPP}
+
+Let's implement this method.
 
 Create the file `code/libraries/baremetal/src/MemoryManager.cpp`
 
@@ -694,6 +693,9 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 52:     return pageAddress;
 53: }
 ```
+
+- Line 48: We take the addres of the start of the coherent memory region
+- Line 50: we multiply the integer value of the specific slot by the `PAGE_SIZE`, which is 64 Kb.
 
 ### Update project configuration {#TUTORIAL_09_MAILBOX_SETTING_UP_FOR_MEMORY_MANAGEMENT___STEP_2_UPDATE_PROJECT_CONFIGURATION}
 
@@ -781,7 +783,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 62: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 ...
 77: //---------------------------------------------
-78: // Mailbox registers
+78: // Raspberry Pi Mailbox registers
 79: //---------------------------------------------
 80:
 81: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
@@ -789,20 +791,23 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 83: #define RPI_MAILBOX0_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000010)
 84: #define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
 85: #define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
-86: #define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
+86: #define RPI_MAILBOX0_CONFIG             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
 87: #define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
-88: #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
-89: #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
-90: #define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
-91: #define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
-92: #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
-93: #define RPI_MAILBOX_STATUS_FULL         BIT(31)
-94: #define RPI_MAILBOX_REQUEST             0
-95:
+88: #define RPI_MAILBOX1_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000030)
+89: #define RPI_MAILBOX1_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000034)
+90: #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
+91: #define RPI_MAILBOX1_CONFIG             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000003C)
+92: #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
+93: #define RPI_MAILBOX_RESPONSE_ERROR      BIT(31) | BIT(0)
+94: #define RPI_MAILBOX_TAG_RESPONSE        BIT(31)
+95: #define RPI_MAILBOX_STATUS_EMPTY        BIT(30)
+96: #define RPI_MAILBOX_STATUS_FULL         BIT(31)
+97: #define RPI_MAILBOX_REQUEST             0
+98: 
 ```
 
-- Line 45:  We define the address of the VC mapped to ARM address space for cached usage (we will not use this)
-- Line 46:  We define the address of the VC mapped to ARM address space for uncached usage
+- Line 45:  We define the address of the VC mapped to ARM address space when L2 caching is enabled (we will not use this)
+- Line 46:  We define the address of the VC mapped to ARM address space when L2 caching is disabled
 - Line 48:  We define the address of the VC mapped to ARM address we will use (the uncached variant)
 - Line 51:  We define a macro to convert an ARM address to the GPU / VC
 - Line 52:  We define a macro to convert an GPU / VC address to the ARM
@@ -874,7 +879,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 48: {
 49:     ARM_MAILBOX_CH_POWER = 0,       // Power management
 50:     ARM_MAILBOX_CH_FB = 1,          // Frame buffer
-51:     ARM_MAILBOX_CH_VUART = 2,       // Virtual UART?
+51:     ARM_MAILBOX_CH_VUART = 2,       // Virtual UART
 52:     ARM_MAILBOX_CH_VCHIQ = 3,
 53:     ARM_MAILBOX_CH_LEDS = 4,
 54:     ARM_MAILBOX_CH_BTNS = 5,
@@ -976,9 +981,9 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 57:     uintptr WriteRead(uintptr address) override;
 58:
 59: private:
-60:     void   Flush();
+60:     void    Flush();
 61:     uintptr Read();
-62:     void   Write(uintptr data);
+62:     void    Write(uintptr data);
 63: };
 64:
 65: } // namespace baremetal
@@ -987,11 +992,11 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 - Line 51-52: We keep a MailboxChannel (the mailbox channel ID) as well as a reference to the MemoryAccess instance both passed in to the constructor
 - Line 55: We declare a constructor
 - Line 57: We declare the mailbox interaction method, which is a write-read cycle.
-- This will send the address passed to the mailbox through its registers, and then read back the result when ready.
+This will send the address passed to the mailbox through its registers, and then read back the result when ready.
 - Line 60: We declare a private method to clear the mailbox
 - Line 61: We delcare a private method to read the mailbox
 - Line 62: We delcare a private method to write the mailbox
--
+
 ### Mailbox.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_MAILBOXCPP}
 
 Create the file: `code/libraries/baremetal/src/Mailbox.cpp`
@@ -1346,7 +1351,7 @@ If the returned address is the same as the address sent, and the request code si
 - Line 159-165: We print the values we receive from the mailbox
 - Line 166-172: We print a success message and the serial number if the call succeeeds
 - Line 176: We print a failure message if the call fails
-- Line 165: We again synchronize the memory access with other cores and the VC (note the different call / assembly instruction, we will not explain that here, it has to do with releasing and claiming memory)  (`DataMemBarrier()`)
+- Line 179: We again synchronize the memory access with other cores and the VC (note the different call / assembly instruction, we will not explain that here, it has to do with releasing and claiming memory)  (`DataMemBarrier()`)
 
 #### Mailbox buffer organization {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE_MAILBOX_BUFFER_ORGANIZATION}
 
@@ -1356,13 +1361,13 @@ The images below show the structure of the block sent to and received back from 
 
 <img src="images/mailbox-structure-receive.png"  alt="Mailbox block structure receive" width="1000"/>
 
-In general, the structure of the block remains the same. Every tag stays in the same location, if it is handled successfully, bit 31 of the request // response code is set.
+In general, the structure of the block remains the same. Every tag stays in the same location, if it is handled successfully, bit 31 of the request / response code is set.
 Bit 31 of request code is set to 1. If all tag requests were handled successfully, bit 0 of request code is set to 0, if something failed it is set to 1.
 
-Notice that the size in the tag only covers the tag buffer, but the buffer size in the complete block covers everything.
+Notice that the size in the tag only covers the tag buffer, but the buffer size in the complete block covers everything, including the header.
 
 So what it comes down to, is that we fill a buffer, with a 8 byte header,
-followed by all the reqeusts, each having a 12 byte header and then the request specific buffers.
+followed by all the requests, each having a 12 byte header and then the request specific buffers.
 We end with a special end tag.
 
 #### ARMInstructions.h {#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE_ARMINSTRUCTIONSH}
@@ -1435,6 +1440,9 @@ File: code/libraries/baremetal/CMakeLists.txt
 We can now configure and build our code, and start debugging.
 
 You will see the printout of the values sent to the mailbox, and the values returned, as well as the board serial number.
+In QEMU you will get a serial number 0000000000000000 as it is not implemented
+
+On my Raspberry Pi 3B:
 
 ```text
 Starting up
@@ -1459,9 +1467,60 @@ Hello World!
  Core 3 exception stack : Size 0x0000008000
 ------------------------------------------------- 0x0000320000 MEM_EXCEPTION_STACK_END
  Unused
-------------------------------------------------- 0x0000500000 MEM_COHERENT_REGION
- Coherent region : Size 0x0000400000
-------------------------------------------------- 0x0000900000
+----------h--------------------------------------- 0x0000500000 MEM_COHERENT_REGION
+ Coherent region : Size 0x0000100000
+------------------------------------------------- 0x0000600000
+Send
+0x00000020
+0x00000000
+0x00010004
+0x00000008
+0x00000000
+0x00000000
+0x00000000
+0x00000000
+Receive
+0x00000020
+0x80000000
+0x00010004
+0x00000008
+0x80000008
+0xC3D6D0CB
+0x00000000
+0x00000000
+Mailbox call succeeded
+Serial: 00000000C3D6D0CB
+Wait 5 seconds
+Press r to reboot, h to halt
+```
+
+On my Raspberry Pi 4B:
+```text
+Starting up
+Hello World!
+------------------------------------------------- 0x0000080000 MEM_KERNEL_START
+ Kernel image : Size 0x0000200000
+------------------------------------------------- 0x0000280000 MEM_KERNEL_END
+ Core 0 stack : Size 0x0000020000
+------------------------------------------------- 0x00002A0000 MEM_KERNEL_STACK
+ Core 1 stack : Size 0x0000020000
+------------------------------------------------- 0x00002C0000
+ Core 2 stack : Size 0x0000020000
+------------------------------------------------- 0x00002E0000
+ Core 3 stack : Size 0x0000020000
+------------------------------------------------- 0x0000300000
+ Core 0 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000308000 MEM_EXCEPTION_STACK
+ Core 1 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000310000
+ Core 2 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000318000
+ Core 3 exception stack : Size 0x0000008000
+------------------------------------------------- 0x0000320000 MEM_EXCEPTION_STACK_END
+ Unused
+----------h--------------------------------------- 0x0000500000 MEM_COHERENT_REGION
+ Coherent region : Size 0x0000100000
+------------------------------------------------- 0x0000600000
 Send
 0x00000020
 0x00000000
@@ -1647,16 +1706,16 @@ This contains the fields for the mailbox buffer shown in the image in [the appli
   - bufferSize: The total buffer size of all tags, and the mailbox buffer header, including padding
   - requestCode: The mailbox request code (always set to 0 on request)
   - tags: The space used for the tags, as a placeholder
-  - Notice that this struct has properties PACKED and ALIGN(16)
+  - Notice that this struct has property `PACKED`
 - Line 109-115: We declare a structure for the property tag `Property`.
 This contains the fields for the tag shown in the image in [the application update section above](#TUTORIAL_09_MAILBOX_ADDING_THE_MAILBOX__STEP_3_UPDATE_THE_APPLICATION_CODE):
   - tagID: The property tag id
   - tagBufferSize: The size of the tag buffer
   - tagRequestResponse: The tag request / response code
   - tagBuffer: The tag buffer contents, as a placeholder
-  - Notice that this struct has property PACKED
+  - Notice that this struct has property `PACKED`
 - Line 117-121: We declare a structure for the a simple property `PropertySimple` which only holds a single 32 bit value.
-This will also be used for sanity checks on the tag sizes
+This will also be used for sanity checks on the tag sizes. Again this has the property `PACKED`
 - Line 123-137: We declare the RPIPropertiesInterface class.
   - Line 126: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
   - Line 129: We declare the constructor, which receives a Mailbox instance
@@ -1671,8 +1730,10 @@ We will declare types for this per property
 This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page,
 convert the address, and use the `Mailbox` to perform the call.
 
-You will notice that the structures declared in Line 101-107, 109-115 and 117-121 use the keyword PACKED. We may be using the keyword align as well later.
-We will add the definitions for this in `Macros.h`. The reason for a definition is to make it possible to redefine for a different compiler.
+You will notice that the structures declared in Line 101-107, 109-115 and 117-121 use the keyword `PACKED`.
+We may be using the keyword `ALIGN` as well later.
+We will add the definitions for this in `Macros.h`.
+The reason for a definition is to make it possible to redefine for a different compiler.
 
 ### Macros.h {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_MACROSH}
 
@@ -1837,14 +1898,14 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 - Line 54-67: We implement the `GetTag()` method.
   - Line 56-57: We fill in the tag data, and return false if the sanity check fails
   - Line 59-64: We request the property, which will return true if successful. If this fails, we return false
-  - Line 66: We check whether the tag result is as expected
+  - Line 66: We check whether the tag result is as expected, and return true if ok, false if the check fails
 - Line 69-78: We implement the private `CheckTagResult()` method
   - Line 71: We cast the tag pointer to a `Property` struct so we can evaluate it easily
   - Line 73-74: We check that bit 31 on the tag request / response field is set. This flags successful handling of the tag
   - Line 76-77: We check that the size returned in the tag request / response field is not zero
 - Line 80-91: We implement the private `FillTag()` method
   - Line 82-83: We do a sanity check that the tag pointer is not null, and the size is at least the minimum. If not, we return false
-  - Line 85: We cast the tag pointer to a `Property` struct so we can evaluate it easily
+  - Line 85: We cast the tag pointer to a `Property` struct so we can fill it easily
   - Line 86: We set the tagID
   - Line 87: We set the tag buffer size (which is the size of the tag - the header size)
   - Line 88: We set the tag request code
@@ -1860,7 +1921,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
   - Line 109: We set the end tag ID
   - Line 110: We perform a sync using `DataSyncBarrier()` as before
   - Line 113: We convert the mailbox buffer address to VC address space as before
-  - Line 114-117: We can `WriteRead()` on the mailbox, and check the return value. If not the same as the address we passed in, we return false
+  - Line 114-117: We call `WriteRead()` on the mailbox, and check the return value. If not the same as the address we passed in, we return false
   - Line 119: We perform a sync using `DataMemBarrier()` as before
   - Line 121-124: We check that the requestCode is equal to success `0x80000000`, and return false if not
   - Line 126: We copy the tag contents back to the tag
@@ -1891,7 +1952,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 
 ### Util.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_UTILCPP}
 
-Now we can implement the `memcpy()1 function.
+Now we can implement the `memcpy()` function.
 
 Update the file `code/libraries/baremetal/src/Util.cpp`.
 
@@ -2213,8 +2274,9 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 74: } // namespace baremetal
 ```
 
-- Line 48-52: We declare the same `PropertySerial` struct
-- Line 54: We implement the `RPIProperties` constructor, which is again quite straightforward. We store the `Mailbox` reference for use in the methods
+- Line 48-52: We declare the same `PropertySerial` struct as we did before in the application code
+- Line 54-57: We implement the `RPIProperties` constructor, which is again quite straightforward.
+We store the `Mailbox` reference for use in the methods
 - Line 59-72: We implement the method `GetBoardSerial()`
   - Line 61: We instantiate a `ProperySerial` struct
   - Line 62: We instantiate a RPIPropertiesInterface
@@ -2248,21 +2310,27 @@ Create the file `code/libraries/baremetal/src/Serialization.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Serialization.cpp
 ...
+44: static bool           Uppercase = true;
+45: 
+46: static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+47: 
+48: static constexpr char GetDigit(uint8 value)
+...
 69: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
 70: {
 71:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 72: }
-73:
+73: 
 74: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
 75: {
 76:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
 77: }
-78:
+78: 
 79: static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
 80: {
 81:     if ((base < 2) || (base > 36))
 82:         return;
-83:
+83: 
 84:     int       numDigits = 0;
 85:     uint64    divisor = 1;
 86:     uint64    divisorLast = 1;
@@ -2277,7 +2345,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 95:         ++numDigits;
 96:     }
 97:     divisor = divisorLast;
-98:
+98: 
 99:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 100:     if (showBase)
 101:     {
@@ -2287,9 +2355,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 105:         numChars = absWidth;
 106:     if (numChars > bufferSize - 1) // Leave one character for \0
 107:         return;
-108:
+108: 
 109:     char* bufferPtr = buffer;
-110:
+110: 
 111:     if (showBase)
 112:     {
 113:         if (base == 2)
@@ -2332,17 +2400,19 @@ File: code/libraries/baremetal/src/Serialization.cpp
 150:     }
 151:     *bufferPtr++ = '\0';
 152: }
+153: 
 ```
 
 The implementation is similar to before, the main difference is keeping track of the divisor overflow:
 - Line 69-72: We call the internal function `SerializeInternal()` while passing 32 as the last parameter to print a 32 bit value
 - Line 74-77: We call the internal function `SerializeInternal()` while passing 64 as the last parameter to print a 64 bit value
-- Line 87: We add a new variable to take the high part (above 64 bits) of the divisor
-- Line 89: The number of bits is now passed in as a parameter
-- Line 90-96: We check whether the high part is not zero, and end the loop in that case.
+- Line 79-152: We implement `SerializeInternal()`
+    - Line 87: We add a new variable to take the high part (above 64 bits) of the divisor
+    - Line 89: The number of bits is now passed in as a parameter
+    - Line 90-97: We check whether the high part is not zero, and end the loop in that case.
 We also calculate the new value for the high part in the loop
 
-You may argue that it is a waste of resources to extend a 32 bit to 64 bits when printing, however this also save a lot of code, and thus memory footprint.
+You may argue that it is a waste of resources to extend a 32 bit to 64 bits when printing, however this also save a lot of code, and thus memory footprint, next to simply having less code to maintain.
 
 #### main.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_5_UPDATE_THE_APPLICATION_CODE_MAINCPP}
 
@@ -2467,7 +2537,7 @@ The output will be the same as before.
 Starting up
 Hello World!
 Mailbox call succeeded
-Serial: 00000000000000000
+Serial: C3D6D0CB
 Wait 5 seconds
 Press r to reboot, h to halt
 ```

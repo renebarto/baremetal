@@ -41,7 +41,7 @@
 
 // Default RAM memory size (minimum size as of RPI 3)
 #define MEM_SIZE (1024 * MEGABYTE)
-// Part of RAM mapped to GPU (minimum size is 64Mb)
+// Part of RAM mapped to GPU (minimum size is 64Mb) (if not already specified in SysConfig.h)
 #if !defined(GPU_MEM_SIZE)
 #define GPU_MEM_SIZE (64 * MEGABYTE) // set in config.txt
 #endif
@@ -52,16 +52,16 @@
 #define PAGE_RESERVE (16 * MEGABYTE)
 
 // Size of every page
-#define PAGE_SIZE    0x10000
+#define PAGE_SIZE    0x10000 // 64Kb
 
 // Maximum size of the kernel space (if not already specified in SysConfig.h)
 #if !defined(KERNEL_MAX_SIZE)
 #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
 // Memory reserved for the stack (this memory is reserved for every core)
-#define KERNEL_STACK_SIZE       0x20000
+#define KERNEL_STACK_SIZE       0x20000 // 128 Kb
 // Memory reserved for the exception stack (this memory is reserved for every core)
-#define EXCEPTION_STACK_SIZE    0x8000
+#define EXCEPTION_STACK_SIZE    0x8000  // 32 Kb
 // Location where the kernel starts. This is also the location where the code starts
 #define MEM_KERNEL_START        0x80000
 // End of kernel space (start + size)
@@ -81,5 +81,5 @@
 #define COHERENT_REGION_SIZE 4 * MEGABYTE
 #endif
 
-// Region reserved for coherent memory rounded to 1 Mb
+// Region reserved for coherent memory rounded to 1 Mb, with >= 1Mb gap
 #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))

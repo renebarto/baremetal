@@ -25,7 +25,7 @@ int main()
     {
         uart.WriteString("Mailbox call succeeded\n");
         uart.WriteString("Serial: ");
-        Serialize(buffer, sizeof(buffer), serial, 0, 16, false, true);
+        Serialize(buffer, sizeof(buffer), serial, 8, 16, false, true);
         uart.WriteString(buffer);
         uart.WriteString("\n");
     }

@@ -57,9 +57,9 @@ public:
     uintptr WriteRead(uintptr address) override;
 
 private:
-    void   Flush();
+    void    Flush();
     uintptr Read();
-    void   Write(uintptr data);
+    void    Write(uintptr data);
 };
 
 } // namespace baremetal

@@ -744,10 +744,10 @@ Cleaning... 4 files.
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS}
 
-Start QEMU listening to UART0
+Start QEMU listening to UART0 on Raspberry Pi 3
 
 ```bat
-File: tools/startQEMU-image-uart0.bat
+File: tools/startQEMU-image-uart0-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
@@ -755,10 +755,10 @@ File: tools/startQEMU-image-uart0.bat
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
-Start QEMU listening to UART1
+Start QEMU listening to UART1 on Raspberry Pi 3
 
 ```bat
-File: tools/startQEMU-image-uart1.bat
+File: tools/startQEMU-image-uart1-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
@@ -766,9 +766,31 @@ File: tools/startQEMU-image-uart1.bat
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
+Start QEMU listening to UART0 on Raspberry Pi 4
+
+```bat
+File: tools/startQEMU-image-uart0-rpi4.bat
+1: @echo off
+2: set thisdir=%~dp0
+3: 
+4: call %thisdir%\build-target %1
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
+```
+
+Start QEMU listening to UART1 on Raspberry Pi 4
+
+```bat
+File: tools/startQEMU-image-uart1-rpi4.bat
+1: @echo off
+2: set thisdir=%~dp0
+3: 
+4: call %thisdir%\build-target %1
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
+```
+
 Explanation:
 - We switch echo-ing off
-- We start QEMU here to emulate Raspberry Pi 3B
+- We start QEMU here to emulate Raspberry Pi 3B or Raspberry Pi 4B
 - We use the specified image for the kernel.
 - We redirect output to stdout for UART0 (`-serial stdio -s`) or UART1 (`-serial null -serial stdio -s`)
 - We do not start the system immediately, but let it wait for gdb (`-S`)
@@ -792,8 +814,7 @@ This may indicate that pixbuf loaders or the mime database could not be found.
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX}
 
-Start QEMU listening to UART0
-
+Start QEMU listening to UART0 on Raspberry Pi 3
 
 ```bash
 File: tools/startQEMU-image-uart0.sh
@@ -807,7 +828,20 @@ File: tools/startQEMU-image-uart0.sh
 8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
 ```
 
-Start QEMU listening to UART1
+Start QEMU listening to UART1 on Raspberry Pi 3
+
+```bash
+File: tools/startQEMU-image-uart1.sh
+1: thisdir=$(dirname "$0")
+2: echo thisdir=$thisdir
+3: 
+4: echo "$thisdir/build-target.sh $1"
+5: $thisdir/build-target.sh $1
+6: 
+7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
+8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
+9: 
+```
 
 ```bash
 File: tools/startQEMU-image-uart1.sh
@@ -823,7 +857,7 @@ File: tools/startQEMU-image-uart1.sh
 ```
 
 Explanation:
-- We start QEMU here to emulate Raspberry Pi 3B
+- We start QEMU here to emulate Raspberry Pi 3B (Raspberry Pi 4B is not supported on Linux so far)
 - We use the specified image for the kernel. 
 - We redirect output to stdout for UART0 (`-serial stdio -s`) or UART1 (`-serial null -serial stdio -s`)
 - We do not start the system immediately, but let it wait for gdb (`-S`).

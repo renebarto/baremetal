@@ -60,11 +60,7 @@ This means that code will contain a copyright, but you are free to use it in whi
 
 @todo
 - Check if bug in Visual Studio 2022 is fixed
-- Build demo for RPI 4
-- Try out Raspberry Pi 4 emulation in QEMU
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add description of how to use JTAG device with Raspberry Pi, using e.g. [Macoy Madson's page](https://macoy.me/blog/programming/RaspberryPi5Debugging)
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-- Add logger, inject character device
-- Add retrieval of system information
 - Add clang format and git hook for commit

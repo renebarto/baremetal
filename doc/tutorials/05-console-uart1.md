@@ -907,7 +907,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 126: #endif
 127:
 128: //---------------------------------------------
-129: // Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
+129: // Raspberry Pi auxiliary peripheral (SPI1 / SPI2 / UART1)
 130: //---------------------------------------------
 131:
 132: // Raspberry Pi Auxilary registers base address
@@ -918,7 +918,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 137: #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 138:
 139: //---------------------------------------------
-140: // Raspberry Pi auxilary mini UART registers (UART1)
+140: // Raspberry Pi auxiliary mini UART (UART1)
 141: //---------------------------------------------
 142:
 143: // Raspberry Pi Mini UART (UART1) I/O register

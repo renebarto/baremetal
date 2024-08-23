@@ -4,4 +4,4 @@ echo %script_dir%
 cd %script_dir%
 
 %script_drive%
-tools\startQEMU-image-uart1.bat demo
+tools\startQEMU-image-uart0-rpi3.bat demo

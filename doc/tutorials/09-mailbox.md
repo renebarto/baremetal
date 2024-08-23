@@ -783,7 +783,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 62: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 ...
 77: //---------------------------------------------
-78: // Raspberry Pi Mailbox registers
+78: // Raspberry Pi Mailbox
 79: //---------------------------------------------
 80:
 81: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880

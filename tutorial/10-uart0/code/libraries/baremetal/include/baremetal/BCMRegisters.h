@@ -75,7 +75,7 @@
 #define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
 
 //---------------------------------------------
-// Mailbox registers
+// Raspberry Pi Mailbox
 //---------------------------------------------
 
 #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
@@ -181,7 +181,7 @@
 #endif
 
 //---------------------------------------------
-// UART0 registers
+// Raspberry Pi UART0
 //---------------------------------------------
 
 // Raspberry Pi UART0 registers base address
@@ -215,7 +215,7 @@
 #define RPI_UART0_FR_TX_EMPTY         BIT(5)
 
 //---------------------------------------------
-// Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
+// Raspberry Pi auxiliary peripheral (SPI1 / SPI2 / UART1)
 //---------------------------------------------
 
 // Raspberry Pi Auxilary registers base address
@@ -226,7 +226,7 @@
 #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
 //---------------------------------------------
-// Raspberry Pi auxilary mini UART registers (UART1)
+// Raspberry Pi auxiliary mini UART (UART1)
 //---------------------------------------------
 
 // Raspberry Pi Mini UART (UART1) I/O register

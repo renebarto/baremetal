@@ -17,7 +17,7 @@ This tutorial will result in (next to the main project structure):
 ## UART0 {#TUTORIAL_10_UART0_UART0}
 
 Now that we have the mailbox implemented, we can start to add UART0.
-The reason for this is that UART0 needs a clock frequency set, that has to be done through the mailbox.
+The reason for this is that UART0 needs a clock frequency set, which has to be done through the mailbox.
 We'll first start by defining a common interface for UART0 and UART1, so that we can use them interchangeably.
 We will then add functionality for setting the UART clock.
 Finally we will add and implement UART0.
@@ -150,7 +150,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 
 - Line 42: We need to include `CharDevice.h`. This indirectly includes `Types.h`.
 - Line 51: We derive from `CharDevice`
-- Line 69: We declare the `Read()` method as overriding the method on the interface
+- Line 70: We declare the `Read()` method as overriding the method on the interface
 - Line 72: We declare the `Write()` method as overriding the method on the interface
 
 The code for UART1 does not need any changes.
@@ -293,51 +293,50 @@ Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
-183: //---------------------------------------------
-184: // UART0 registers
-185: //---------------------------------------------
-186:
-187: // Raspberry Pi UART0 registers base address
-188: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
-189: // Raspberry Pi UART0 data register (R/W)
-190: #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
-191: // Raspberry Pi UART0 flag register (R/W)
-192: #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
-193: // Raspberry Pi UART0 integer baud rate divisor register (R/W)
-194: #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
-195: // Raspberry Pi UART0 factional baud rate divisor register (R/W)
-196: #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
-197: // Raspberry Pi UART0 line control register (R/W)
-198: #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
-199: // Raspberry Pi UART0 control register register (R/W)
-200: #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
-201: // Raspberry Pi UART0 interrupt FIFO level select register (R/W)
-202: #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
-203: // Raspberry Pi UART0 interrupt mask set/clear register (R/W)
-204: #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
-205: // Raspberry Pi UART0 raw interrupt status register (R/W)
-206: #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
-207: // Raspberry Pi UART0 masked interrupt status  register (R/W)
-208: #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
-209: // Raspberry Pi UART0 interrupt clear register (R/W)
-210: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
-211: // Raspberry Pi UART0 DMA control register (R/W)
-212: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
-213:
-214: #define RPI_UART0_FR_RX_READY         BIT(4)
-215: #define RPI_UART0_FR_TX_EMPTY         BIT(5)
-216:
+188: //---------------------------------------------
+189: // Raspberry Pi UART0
+190: //---------------------------------------------
+191: 
+192: // Raspberry Pi UART0 registers base address
+193: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
+194: // Raspberry Pi UART0 data register (R/W)
+195: #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
+196: // Raspberry Pi UART0 flag register (R/W)
+197: #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
+198: // Raspberry Pi UART0 integer baud rate divisor register (R/W)
+199: #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
+200: // Raspberry Pi UART0 factional baud rate divisor register (R/W)
+201: #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
+202: // Raspberry Pi UART0 line control register (R/W)
+203: #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
+204: // Raspberry Pi UART0 control register register (R/W)
+205: #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
+206: // Raspberry Pi UART0 interrupt FIFO level select register (R/W)
+207: #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
+208: // Raspberry Pi UART0 interrupt mask set/clear register (R/W)
+209: #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
+210: // Raspberry Pi UART0 raw interrupt status register (R/W)
+211: #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
+212: // Raspberry Pi UART0 masked interrupt status  register (R/W)
+213: #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
+214: // Raspberry Pi UART0 interrupt clear register (R/W)
+215: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
+216: // Raspberry Pi UART0 DMA control register (R/W)
+217: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
+218: 
+219: #define RPI_UART0_FR_RX_READY         BIT(4)
+220: #define RPI_UART0_FR_TX_EMPTY         BIT(5)
+221: 
 ...
 ```
 
 We will not go into details here, we'll cover this when we use the registers.
-More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_UART0) as well as in the official
-[Broadcom documentation BCM2835 (Raspberry Pi 1/2)](pdf/bcm2835-peripherals.pdf) (page 175),
+More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_UART0) as well as in the official 
 [Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2837-peripherals.pdf) (page 175),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 144) and
-[Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/rp1-peripherals.pdf) (page 34)
+[Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 34)
 
-The Mini UART or UART1 register addresses are all prefixed with `RPI_UART0_`.
+The UART0 register addresses are all prefixed with `RPI_UART0_`.
 
 ### UART0.h {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UART0H}
 
@@ -347,7 +346,6 @@ Create the file `code/libraries/baremetal/include/baremetal/UART0.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART0.h
-File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremetal\UART0.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -429,7 +427,7 @@ File: f:\Projects\Private\baremetal.tmp\code\libraries\baremetal\include\baremet
 79: } // namespace baremetal
 ```
 
-The `UART0` class declaration is identical to the `UART1` class.
+The `UART0` class declaration is almost identical to the `UART1` class.
 
 ### UART0.cpp {#TUTORIAL_10_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_UART0CPP}
 
@@ -576,7 +574,7 @@ The implementation is very similar to that for `UART1`
 
 - Line 42-47: We also need to include `Mailbox.h` and `RPIProperties.h`
 - Line 51-55: The default constructor is identical to the one for `UART1`
-- Line 57-61: The non default constructor is identical to the one for `UART1`
+- Line 57-61: The constructor taking a MemoryAccess instance is identical to the one for `UART1`
 - Line 64-85: The `Initialize()` method is similar to the one for `UART1`
   - Line 69: Disabling the UART uses a different register and value
   - Line 71-74: We set the clock rate for the UART clock to 4 MHz, so that we can set up the baud rate correctly
@@ -753,7 +751,7 @@ In the end, the visible behaviour does not change.
 Starting up
 Hello World!
 Mailbox call succeeded
-Serial: 10000000D18E8B28
+Serial: C3D6D0CB
 Wait 5 seconds
 Press r to reboot, h to halt
 ```

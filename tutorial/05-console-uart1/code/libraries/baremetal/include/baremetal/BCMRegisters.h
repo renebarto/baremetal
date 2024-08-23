@@ -126,7 +126,7 @@
 #endif
 
 //---------------------------------------------
-// Raspberry Pi auxilary registers (SPI1 / SPI2 / UART1)
+// Raspberry Pi auxiliary peripheral (SPI1 / SPI2 / UART1)
 //---------------------------------------------
 
 // Raspberry Pi Auxilary registers base address
@@ -137,7 +137,7 @@
 #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
 //---------------------------------------------
-// Raspberry Pi auxilary mini UART registers (UART1)
+// Raspberry Pi auxiliary mini UART (UART1)
 //---------------------------------------------
 
 // Raspberry Pi Mini UART (UART1) I/O register

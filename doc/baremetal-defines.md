@@ -70,5 +70,5 @@ Determines type of platform to build for:
 ### USE_PHYSICAL_COUNTER {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER}
 
 Determines whether to use BCM2835 System Timer instead of ARM timer:
-- not defined: User ARM timer
+- not defined: Use ARM timer
 - defined: Use BCM2835 System Timer

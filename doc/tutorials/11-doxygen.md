@@ -4,9 +4,19 @@
 
 ## New tutorial setup {#TUTORIAL_11_DOXYGEN_NEW_TUTORIAL_SETUP}
 
-This tutorial will not add any code, the changes will be reflected in the overall project structure.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/11-doxygen`.
+In the same way, the project names are adapted to make sure there are no conflicts.
+
+### Tutorial results {#TUTORIAL_11_DOXYGEN_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+
+This tutorial will result in (next to the main project structure):
+- a library `output/Debug/lib/baremetal-11.a`
+- an application `output/Debug/bin/11-logger.elf`
+- an image in `deploy/Debug/121logger-image`
 
 ## An intermezzo {#TUTORIAL_11_DOXYGEN_AN_INTERMEZZO}
+
+This tutorial will not add any code, the changes will be reflected in the overall project structure.
 
 Now that we have already created quite some code, let's focus a bit on documentation.
 If you're not interested in this part, feel free to skip to the next tutorial.
@@ -30,7 +40,7 @@ We'll decide to install the package in both Windows and Linux, as in that case, 
 
 ### Windows {#TUTORIAL_11_DOXYGEN_INSTALLING_DOXYGEN_WINDOWS}
 
-We will install the latest `Doxygen` available at the moment, 1.10.0.
+We will install the latest `Doxygen` available at the moment, 1.12.0.
 Download the installer [here](https://www.doxygen.nl/files/doxygen-1.10.0-setup.exe), and run it.
 You might be warned that `Doxygen` is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
 
@@ -62,12 +72,12 @@ doxygen -v
 The command should execute without error, and print the version of `Doxygen`:
 
 ```text
-1.10.0 (ebc57c6dd303a980bd19dd74b8b61c8f3f5180ca)
+1.12.0 (c73f5d30f9e8b1df5ba15a1d064ff2067cbb8267)
 ```
 
 ### Linux {#TUTORIAL_11_DOXYGEN_INSTALLING_DOXYGEN_LINUX}
 
-On Linux, simply run apt to install:
+On Linux, simply run apt to install (the latest version depends on your distribution, in my case it was 1.9.4):
 
 ```bash
 sudo apt install doxygen
@@ -129,8 +139,8 @@ Graphviz (dot) is a visualization tool that will enable `Doxygen` to create diag
 
 ### Windows {#TUTORIAL_11_DOXYGEN_INSTALLING_GRAPHVIZ_WINDOWS}
 
-We will install the latest Graphviz available for Windows at the moment, 9.0.0.
-Download the installer [here](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/9.0.0/windows_10_cmake_Release_graphviz-install-9.0.0-win64.exe), and run it.
+We will install the latest Graphviz available for Windows at the moment, 12.1.0.
+Download the installer from their [site](https://graphviz.org/download/), or [here](https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/12.1.0/windows_10_cmake_Release_graphviz-install-12.1.0-win64.exe) for the current latest version, and run it.
 You might be warned that `Doxygen` is not commonly downloaded, you can safely ignore this, and decide to keep the file in your browser, and if Windows Defender pops up, again you can safely ignore this and run the file.
 
 <img src="images/graphviz-install-1.png" alt="Installing Graphviz 1" width="500"/>
@@ -165,12 +175,12 @@ dot -V
 The command should execute without error, and print the version of Graphviz:
 
 ```text
-dot - graphviz version 9.0.0 (20230911.1827)
+dot - graphviz version 12.1.0 (20240811.2233)
 ```
 
 ### Linux {#TUTORIAL_11_DOXYGEN_INSTALLING_GRAPHVIZ_LINUX}
 
-On Linux, simply run apt to install:
+On Linux, simply run apt to install (version dependent on your distribution, in my case 2.43.0):
 
 ```bash
 sudo apt install graphviz
@@ -267,7 +277,7 @@ Some items worth changing:
 | HTML_HEADER            | Sets a HTML header if desired                        | `doxygen/header.html`
 | HTML_FOOTER            | Sets a HTML footer if desired                        | `doxygen/footer.html`
 | HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | `doxygen/stylesheet.css`
-| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| `pdf/bcm2835-peripherals.pdf`
+| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| 
 | HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | `120`
 | HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | `160`
 | GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | `YES`
@@ -298,13 +308,14 @@ All full URLs work correctly of course, but often you will want to use local fil
 To resolved this, we place all images in a single directory `doc/images`, and PDF files in `doc/pdf`, and always use the relative link to the `images` or `pdf` directory, so e.g. `images/xxx.png`.
 In every folder that needs links to images, in this case:
 
-- doc
-- doc/tutorials
+- doc (is the actual root folder for images and pdf folders)
 - doc/boards/raspberrypi
+- doc/cpu/arm
+- doc/tutorials
 
 We make sure to have the `images` and `pdf` directories available.
 For the `doc` folder the subfolders `doc/images` and `doc/pdf` are present as they contain the actual files, so that is trivial.
-For the other two, we create a symlink to the `doc/images` folder names `images`, and to the `doc/pdf` folder names `pdf`.
+For the other three, we create a symlink to the `doc/images` folder names `images`, and to the `doc/pdf` folder names `pdf`.
 This only has to be done once.
 
 ### Windows {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN_WINDOWS}
@@ -323,6 +334,11 @@ pushd doc\boards\raspberrypi
 mklink /D images ..\..\images
 mklink /D pdf ..\..\pdf
 popd
+
+pushd doc\cpu\arm
+mklink /D images ..\..\images
+mklink /D pdf ..\..\pdf
+popd
 ```
 
 ### Linux {#TUTORIAL_11_DOXYGEN_A_CAVEAT_WITH_DOXYGEN_LINUX}
@@ -338,6 +354,11 @@ ln -s ../pdf pdf
 popd
 
 pushd doc/boards/raspberrypi
+ln -s ../../images images
+ln -s ../../pdf pdf
+popd
+
+pushd doc/cpu/arm
 ln -s ../../images images
 ln -s ../../pdf pdf
 popd
@@ -364,7 +385,7 @@ tools\run-doxygen.bat
 ```
 
 ```text
-Doxygen version used: 1.10.0 (ebc57c6dd303a980bd19dd74b8b61c8f3f5180ca)
+Doxygen version used: 1.12.0 (c73f5d30f9e8b1df5ba15a1d064ff2067cbb8267)
 Searching for include files...
 Searching for example files...
 Searching for images...
@@ -373,36 +394,19 @@ Searching for msc files...
 Searching for dia files...
 Searching for files to exclude
 Searching INPUT for files to process...
-Searching for files in directory F:/Projects/Private/baremetal/code
-Searching for files in directory F:/Projects/Private/baremetal/code/applications
-Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo
-Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo/create-image
-Searching for files in directory F:/Projects/Private/baremetal/code/applications/demo/src
-Searching for files in directory F:/Projects/Private/baremetal/code/libraries
-Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal
-Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/include
-Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/include/baremetal
-Searching for files in directory F:/Projects/Private/baremetal/code/libraries/baremetal/src
-Searching for files in directory F:/Projects/Private/baremetal/doc
-Searching for files in directory F:/Projects/Private/baremetal/doc/boards
-Searching for files in directory F:/Projects/Private/baremetal/doc/boards/RaspberryPi
-Searching for files in directory F:/Projects/Private/baremetal/doc/cpu
-Searching for files in directory F:/Projects/Private/baremetal/doc/firmware
-Searching for files in directory F:/Projects/Private/baremetal/doc/firmware/dts
-Searching for files in directory F:/Projects/Private/baremetal/doc/images
+Searching for files in directory D:/Projects/baremetal.github.shadow/code
+...
 Reading and parsing tag files
 Parsing files
 Preprocessing F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
 Parsing file F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
-
 ...
-
 finalizing index lists...
 writing tag file...
 Running plantuml with JAVA...
 Running dot...
-type lookup cache used 1065/65536 hits=5179 misses=1106
-symbol lookup cache used 887/65536 hits=5013 misses=887
+type lookup cache used 4103/65536 hits=34733 misses=4329
+symbol lookup cache used 4322/65536 hits=29644 misses=4322
 finished...
 ```
 
@@ -410,7 +414,7 @@ finished...
 
 Create the file `tools/run-doxygen.sh`
 
-```bat
+```bash
 doxygen doxygen/doxygen.conf
 rm -rf doxygen/html/images
 mkdir -p doxygen/html/images
@@ -568,7 +572,7 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 116: } // namespace baremetal
 ```
 
-I've documented the code as far as I could, so you should now see all documentation in the Doxugen generated web pages.
+I've documented the code as far as I could, so you should now see all documentation in the Doxygen generated web pages.
 The code at this point is also copied into `tutorial/11-doxygen`.
 
 You will see some special tags in the source code, as well as in Markdown documents:
@@ -616,6 +620,10 @@ The link will show the information collected for the file:
 - detailed desription
 
 <img src="images/doxygen-file-information.png" alt="Doxygen information for a file" width="800"/>
+
+Clicking on the link `Go to the source code of this file` will bring you to a copy of the code, but with the tags filtered out, making the code easier to read.
+
+<img src="images/doxygen-file-source.png" alt="Doxygen source of a file" width="800"/>
 
 ### brief and summary tags {#TUTORIAL_11_DOXYGEN_VIEWING_DOXYGEN_OUTPUT_BRIEF_AND_SUMMARY_TAGS}
 
@@ -701,7 +709,7 @@ See [Running using Netboot](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_M
 Create a network boot SD card, e.g. using [CircleNetboot](https://github.com/probonopd/CircleNetboot) and start the system.
 ```
 
-So there are three ways to reference an internal or externel document:
+So there are three ways to reference an internal or external document:
 
 - Using a full URL like `@ref url` in code or `[description](url)` in Markdown
 - Using a reference tag like `@ref tag` in code or `[description](#tag)` in Markdown

@@ -55,7 +55,7 @@ enum class MailboxChannel
     ARM_MAILBOX_CH_POWER = 0,
     /// Frame buffer
     ARM_MAILBOX_CH_FB = 1,
-    /// Virtual UART?
+    /// Virtual UART
     ARM_MAILBOX_CH_VUART = 2,
     /// ?
     ARM_MAILBOX_CH_VCHIQ = 3,

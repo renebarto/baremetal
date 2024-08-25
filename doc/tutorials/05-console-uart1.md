@@ -597,7 +597,7 @@ In order to set up the console, we will need access to two devices:
 - GPIO to set up the connections for UART1 to GPIO pins 14 and 15
 - UART1 to configure the console and write to it
 
-### Some information
+### Some information {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_SOME_INFORMATION}
 
 As you can see in [Raspberry PI peripherals GPIO](../boards/raspberrypi/raspberrypi-peripherals-gpio.md), using UART1 means connecting TXD1 (UART1 transmit) to GPIO14 and RXD1 (UART1 receive) to GPIO15.
 For this we need to set the function of GPIO 14 and 15 to alternate function 5.
@@ -907,7 +907,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 126: #endif
 127:
 128: //---------------------------------------------
-129: // Raspberry Pi auxiliary peripheral (SPI1 / SPI2 / UART1)
+129: // Raspberry Pi auxiliary (SPI1 / SPI2 / UART1)
 130: //---------------------------------------------
 131:
 132: // Raspberry Pi Auxilary registers base address
@@ -917,41 +917,41 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 136: // Raspberry Pi Auxiliary Enable register
 137: #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 138:
-139: //---------------------------------------------
-140: // Raspberry Pi auxiliary mini UART (UART1)
-141: //---------------------------------------------
-142:
-143: // Raspberry Pi Mini UART (UART1) I/O register
-144: #define RPI_AUX_MU_IO                 reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
-145: // Raspberry Pi Mini UART (UART1) Interrupt Enable register
-146: #define RPI_AUX_MU_IER                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
-147: // Raspberry Pi Mini UART (UART1) Interrupt Identify register
-148: #define RPI_AUX_MU_IIR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
-149: // Raspberry Pi Mini UART (UART1) Line Control register
-150: #define RPI_AUX_MU_LCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
-151: // Raspberry Pi Mini UART (UART1) Modem Control register
-152: #define RPI_AUX_MU_MCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
-153: // Raspberry Pi Mini UART (UART1) Line Status register
-154: #define RPI_AUX_MU_LSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
-155: // Raspberry Pi Mini UART (UART1) Modem Status register
-156: #define RPI_AUX_MU_MSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
-157: // Raspberry Pi Mini UART (UART1) Scratch register
-158: #define RPI_AUX_MU_SCRATCH            reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
-159: // Raspberry Pi Mini UART (UART1) Extra Control register
-160: #define RPI_AUX_MU_CNTL               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
-161: // Raspberry Pi Mini UART (UART1) Extra Status register
-162: #define RPI_AUX_MU_STAT               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
-163: // Raspberry Pi Mini UART (UART1) Baudrate register
-164: #define RPI_AUX_MU_BAUD               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
-165:
-166: // Raspberry Pi Auxiliary Enable register values
-167: // Raspberry Pi Auxiliary Enable register Enable SPI2
-168: #define RPI_AUX_ENABLES_SPI2          BIT(2)
-169: // Raspberry Pi Auxiliary Enable register Enable SPI1
-170: #define RPI_AUX_ENABLES_SPI1          BIT(1)
-171: // Raspberry Pi Auxiliary Enable register Enable UART1
-172: #define RPI_AUX_ENABLES_UART1         BIT(0)
-173:
+139: // Raspberry Pi Auxiliary Enable register values
+140: // Raspberry Pi Auxiliary Enable register Enable SPI2
+141: #define RPI_AUX_ENABLES_SPI2          BIT(2)
+142: // Raspberry Pi Auxiliary Enable register Enable SPI1
+143: #define RPI_AUX_ENABLES_SPI1          BIT(1)
+144: // Raspberry Pi Auxiliary Enable register Enable UART1
+145: #define RPI_AUX_ENABLES_UART1         BIT(0)
+146: 
+147: //---------------------------------------------
+148: // Raspberry Pi auxiliary mini UART (UART1)
+149: //---------------------------------------------
+150: 
+151: // Raspberry Pi Mini UART (UART1) I/O register
+152: #define RPI_AUX_MU_IO                 reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
+153: // Raspberry Pi Mini UART (UART1) Interrupt Enable register
+154: #define RPI_AUX_MU_IER                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
+155: // Raspberry Pi Mini UART (UART1) Interrupt Identify register
+156: #define RPI_AUX_MU_IIR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
+157: // Raspberry Pi Mini UART (UART1) Line Control register
+158: #define RPI_AUX_MU_LCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
+159: // Raspberry Pi Mini UART (UART1) Modem Control register
+160: #define RPI_AUX_MU_MCR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
+161: // Raspberry Pi Mini UART (UART1) Line Status register
+162: #define RPI_AUX_MU_LSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
+163: // Raspberry Pi Mini UART (UART1) Modem Status register
+164: #define RPI_AUX_MU_MSR                reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
+165: // Raspberry Pi Mini UART (UART1) Scratch register
+166: #define RPI_AUX_MU_SCRATCH            reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
+167: // Raspberry Pi Mini UART (UART1) Extra Control register
+168: #define RPI_AUX_MU_CNTL               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
+169: // Raspberry Pi Mini UART (UART1) Extra Status register
+170: #define RPI_AUX_MU_STAT               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
+171: // Raspberry Pi Mini UART (UART1) Baudrate register
+172: #define RPI_AUX_MU_BAUD               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
+173: 
 174: // Raspberry Pi Mini UART (UART1) Interrupt Enable register values
 175: // Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts
 176: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT(1)

@@ -1122,14 +1122,14 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include <baremetal/IGPIOPin.h>
 43: #include <baremetal/MemoryAccess.h>
-44:
+44: 
 45: namespace baremetal {
-46:
+46: 
 47: // Physical GPIO pin (i.e. available on GPIO header)
 48: class PhysicalGPIOPin : public IGPIOPin
 49: {
@@ -1140,50 +1140,49 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 54:     GPIOPullMode    m_pullMode;
 55:     bool            m_value;
 56:     IMemoryAccess&  m_memoryAccess;
-57:
+57: 
 58: public:
 59:     // Creates a virtual GPIO pin
 60:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
-61:     // PhysicalGPIOPin(const PhysicalGPIOPin &other);
-62:
-63:     // Creates a virtual GPIO pin
-64:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
-65:
-66:     uint8 GetPinNumber() const override;
-67:     // Assign a GPIO pin
-68:     bool AssignPin(uint8 pinNumber) override;
-69:
-70:     // Switch GPIO on
-71:     void On() override;
-72:     // Switch GPIO off
-73:     void Off() override;
-74:     // Get GPIO value
-75:     bool Get() override;
-76:     // Set GPIO on (true) or off (false)
-77:     void Set(bool on) override;
-78:     // Invert GPIO value on->off off->on
-79:     void Invert() override;
-80:
-81:     // Get the mode for the GPIO pin
-82:     GPIOMode GetMode();
-83:     // Set the mode for the GPIO pin
-84:     bool SetMode(GPIOMode mode);
-85:     // Get GPIO pin function
-86:     GPIOFunction GetFunction();
-87:     // Get GPIO pin pull mode
-88:     GPIOPullMode GetPullMode();
-89:     // Set GPIO pin pull mode
-90:     void SetPullMode(GPIOPullMode pullMode);
-91:
-92: private:
-93:     // Set GPIO pin function
-94:     void SetFunction(GPIOFunction function);
-95: };
-96:
-97: } // namespace baremetal
+61: 
+62:     // Creates a virtual GPIO pin
+63:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+64: 
+65:     uint8 GetPinNumber() const override;
+66:     // Assign a GPIO pin
+67:     bool AssignPin(uint8 pinNumber) override;
+68: 
+69:     // Switch GPIO on
+70:     void On() override;
+71:     // Switch GPIO off
+72:     void Off() override;
+73:     // Get GPIO value
+74:     bool Get() override;
+75:     // Set GPIO on (true) or off (false)
+76:     void Set(bool on) override;
+77:     // Invert GPIO value on->off off->on
+78:     void Invert() override;
+79: 
+80:     // Get the mode for the GPIO pin
+81:     GPIOMode GetMode();
+82:     // Set the mode for the GPIO pin
+83:     bool SetMode(GPIOMode mode);
+84:     // Get GPIO pin function
+85:     GPIOFunction GetFunction();
+86:     // Get GPIO pin pull mode
+87:     GPIOPullMode GetPullMode();
+88:     // Set GPIO pin pull mode
+89:     void SetPullMode(GPIOPullMode pullMode);
+90: 
+91: private:
+92:     // Set GPIO pin function
+93:     void SetFunction(GPIOFunction function);
+94: };
+95: 
+96: } // namespace baremetal
 ```
 
-- Line 48-95: We delcare the class `PhysicalGPIOPin` which inherits from `IGPIOPin`
+- Line 48-94: We delcare the class `PhysicalGPIOPin` which inherits from `IGPIOPin`
   - Line 51: We declare a member variable `m_pinNumber` to hold the assigned pin number (0..53)
   - Line 52: We declare a member variable `m_mode` to hold GPIO pin mode
   - Line 53: We declare a member variable `m_function` to hold GPIO pin function
@@ -1191,20 +1190,20 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
   - Line 55: We declare a member variable `m_value` to hold the current GPIO pin state for reading back the value of an output pin
   - Line 56: We declare a member variable `m_memoryAccess` to hold the memory access interface reference
   - Line 60: We declare a constructor which uses take a `MemoryAccess` instance, by default the singleton instance
-  - Line 64: We declare a constructor which takes a pin number, a mode, and a `MemoryAccess` instance, by default the singleton instance
-  - Line 66: We override the `GetPinNumber()` method
-  - Line 68: We override the `AssignPin()` method
-  - Line 71: We override the `On()` method
-  - Line 73: We override the `Off()` method
-  - Line 75: We override the `Get()` method
-  - Line 77: We override the `Set()` method
-  - Line 79: We override the `Invert()` method
-  - Line 82: We declare a method `GetMode()` to retrieve the GPIO pin mode
-  - Line 84: We declare a method `SetMode()` to set the GPIO pin mode
-  - Line 79: We declare a method `GetFunction()` to retrieve the GPIO pin function
-  - Line 79: We declare a method `GetPullMode()` to retrieve the GPIO pin pull mode
-  - Line 79: We declare a method `SetPullMode()` to set the GPIO pin pull mode mode
-  - Line 79: We declare a private method `setFunction()` to set the GPIO pin function
+  - Line 63: We declare a constructor which takes a pin number, a mode, and a `MemoryAccess` instance, by default the singleton instance
+  - Line 65: We override the `GetPinNumber()` method
+  - Line 67: We override the `AssignPin()` method
+  - Line 70: We override the `On()` method
+  - Line 72: We override the `Off()` method
+  - Line 74: We override the `Get()` method
+  - Line 76: We override the `Set()` method
+  - Line 78: We override the `Invert()` method
+  - Line 81: We declare a method `GetMode()` to retrieve the GPIO pin mode
+  - Line 83: We declare a method `SetMode()` to set the GPIO pin mode
+  - Line 85: We declare a method `GetFunction()` to retrieve the GPIO pin function
+  - Line 87: We declare a method `GetPullMode()` to retrieve the GPIO pin pull mode
+  - Line 89: We declare a method `SetPullMode()` to set the GPIO pin pull mode mode
+  - Line 93: We declare a private method `SetFunction()` to set the GPIO pin function
 
 ### PhysicalGPIOPin.cpp {#TUTORIAL_07_GENERALIZATION_SEPARATING_OUT_GPIO_CODE___STEP_2_PHYSICALGPIOPINCPP}
 

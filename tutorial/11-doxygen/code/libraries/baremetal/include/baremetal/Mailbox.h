@@ -68,9 +68,19 @@ public:
     uintptr WriteRead(uintptr address) override;
 
 private:
-    void   Flush();
+    /// <summary>
+    /// Empty queue
+    /// </summary>
+    void    Flush();
+    /// <summary>
+    /// Read from mailbox
+    /// </summary>
+    /// <returns>Pointer read</returns>
     uintptr Read();
-    void   Write(uintptr data);
+    /// Write to mailbox
+    /// </summary>
+    /// <returns>Pointer to write</returns>
+    void    Write(uintptr data);
 };
 
 } // namespace baremetal

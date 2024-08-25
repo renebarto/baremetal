@@ -105,12 +105,18 @@
 #define RPI_MAILBOX0_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000014)
 /// @brief Raspberry Pi Mailbox 0 (incoming) Status register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX0_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000018)
-/// @brief Raspberry Pi Mailbox Configuration register. See @ref RASPBERRY_PI_MAILBOX
+/// @brief Raspberry Pi Mailbox 0 (incoming) Configuration register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_CONFIG              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000001C)
 /// @brief Raspberry Pi Mailbox 1 (outgoing) Write register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX1_WRITE              reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000020)
+/// @brief Raspberry Pi Mailbox 1 (incoming) Poll register. See @ref RASPBERRY_PI_MAILBOX
+#define RPI_MAILBOX1_POLL               reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000030)
+/// @brief Raspberry Pi Mailbox 1 (incoming) Sender register. See @ref RASPBERRY_PI_MAILBOX
+#define RPI_MAILBOX1_SENDER             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000034)
 /// @brief Raspberry Pi Mailbox 1 (outgoing) Status register. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX1_STATUS             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000038)
+/// @brief Raspberry Pi Mailbox 1 (outgoing) Configuration register. See @ref RASPBERRY_PI_MAILBOX
+#define RPI_MAILBOX1_CONFIG             reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000003C)
 /// @brief Raspberry Pi Mailbox buffer requestCode success value. See @ref RASPBERRY_PI_MAILBOX
 #define RPI_MAILBOX_RESPONSE_SUCCESS    BIT(31)
 /// @brief Raspberry Pi Mailbox buffer requestCode failure value
@@ -150,7 +156,9 @@
 /// @brief Raspberry Pi Power management watchdog timer reset code
 #define RPI_PWRMGT_RSTC_RESET           0x00000102
 /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
-#define RPI_PWRMGT_RSTS_PART_CLEAR      0xFFFFFAAA
+#define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
+// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
+#define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01)  << 0 | (((x) >> 1) & 0x01) << 2 |  (((x) >> 2) & 0x01) << 4 |  (((x) >> 3) & 0x01) << 6 |  (((x) >> 4) & 0x01) << 8 |  (((x) >> 5) & 0x01) << 10
 
 //---------------------------------------------
 // Raspberry Pi GPIO

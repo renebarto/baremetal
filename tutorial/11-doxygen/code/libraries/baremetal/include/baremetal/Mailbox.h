@@ -68,18 +68,8 @@ public:
     uintptr WriteRead(uintptr address) override;
 
 private:
-    /// <summary>
-    /// Empty queue
-    /// </summary>
     void    Flush();
-    /// <summary>
-    /// Read from mailbox
-    /// </summary>
-    /// <returns>Pointer read</returns>
     uintptr Read();
-    /// Write to mailbox
-    /// </summary>
-    /// <returns>Pointer to write</returns>
     void    Write(uintptr data);
 };
 

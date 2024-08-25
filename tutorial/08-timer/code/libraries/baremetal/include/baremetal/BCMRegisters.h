@@ -165,8 +165,16 @@
 // Raspberry Pi Auxiliary Enable register
 #define RPI_AUX_ENABLES               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
+// Raspberry Pi Auxiliary Enable register values
+// Raspberry Pi Auxiliary Enable register Enable SPI2
+#define RPI_AUX_ENABLES_SPI2          BIT(2)
+// Raspberry Pi Auxiliary Enable register Enable SPI1
+#define RPI_AUX_ENABLES_SPI1          BIT(1)
+// Raspberry Pi Auxiliary Enable register Enable UART1
+#define RPI_AUX_ENABLES_UART1         BIT(0)
+
 //---------------------------------------------
-// Raspberry Pi auxilary mini UART registers (UART1)
+// Raspberry Pi auxiliary mini UART (UART1)
 //---------------------------------------------
 
 // Raspberry Pi Mini UART (UART1) I/O register

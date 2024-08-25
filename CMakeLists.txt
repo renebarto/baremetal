@@ -60,6 +60,7 @@ elseif (BAREMETAL_TARGET STREQUAL "RPI5")
 else()
     message(FATAL_ERROR "Incorrect target ${BAREMETAL_TARGET} specified, must be RPI3, RPI4 or RPI5")
 endif()
+
 option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
 option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)

@@ -148,7 +148,7 @@ File: code/libraries/CMakeLists.txt
 
 As we have no projects in `libraries` yet, we simply print the current directory.
 
-#### tutorial CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_TUTORIALS_CMAKE_FILE}
+#### tutorial CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT_TUTORIAL_CMAKE_FILE}
 
 The `tutorial` CMake file for now will also simply print the current directory.
 
@@ -727,12 +727,12 @@ tools/build-all.sh
 [4/4] Generating /home/rene/repo/baremetal/deploy/Debug/demo-image/kernel8.img
 ```
 
-### Cleaning all targets {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS}
+### Cleaning all targets {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS}
 
 CMake generates a target for you to clean all build information: `clean`.
 There is no target to clean a specific target though.
 
-#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS}
+#### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS}
 
 ```bat
 File: tools/clean-all.bat
@@ -749,7 +749,7 @@ tools\clean-all.bat
 Cleaning... 4 files.
 ```
 
-#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
+#### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX}
 
 ```bash
 File: tools/clean-all.sh

@@ -466,7 +466,7 @@ This can also come in handy when trying to figure out which source is compiled w
 - Line 33-35: Finally, we set the variable `BAREMETAL_TARGET`, if not set already, to 3, to make it default to Raspberry Pi 3.
 - Line 37-45: We check the variable `BAREMETAL_TARGET`, and print the platform we're building for.
 
-### Standard definitions for linker {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES_ADDING_SOME_VARIABLES}
+### Standard definitions for linker {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_COMMON_COMPILER_DIRECTIVES_STANDARD_DEFINITIONS_FOR_LINKER}
 
 In the demo project in [02-setting-up-a-project](02-setting-up-a-project.md) uses two CMake variables to define the start and end of a linker group. As this will come back for each executable. we will move this definition to the main CMake file:
 
@@ -919,7 +919,7 @@ D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aa
 The first part is the compiler call, the rest are command line parameters for the compiler.
 For the startup code (which is assembly), this is `aarch64-none-elf-gcc.exe` (or in Linux `aarch64-none-elf-gcc`).
 
-#### Assembler definitions {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_COMPILER_DEFINITIONS}
+#### Assembler definitions {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ASSEMBLER_DEFINITIONS}
 
 The -D options specify all compiler definitions.
 You will recognize the options specified in CMakeSettings.json: `"cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3"`.
@@ -974,7 +974,7 @@ File: CMakeLists.txt
 198:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ```
 
-#### Assmbler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_COMPILER_OPTIONS}
+#### Assmbler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ASSMBLER_OPTIONS}
 
 The complete list below are all compiler options:
 
@@ -1042,7 +1042,7 @@ File: CMakeLists.txt
 -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d
 ```
  
-#### Actual assembly {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ACTUAL_COMPILATION}
+#### Actual assembly {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ACTUAL_ASSEMBLY}
 
 The final parameters determine the source files compiled, and the resulting object file:
 

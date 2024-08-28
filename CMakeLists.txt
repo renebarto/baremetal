@@ -16,7 +16,9 @@ get_git_tag(GIT_TAG)
 
 message(STATUS "Tag found: ${GIT_TAG}")
 
-string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
+if (NOT "${GIT_TAG}" STREQUAL "")
+    string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
+endif()
 
 if("${VERSION_NUMBER}" STREQUAL "")
     set(VERSION_NUMBER 0.0.0)

@@ -68,7 +68,7 @@ function(parse_version version_number version_major version_minor version_level 
         "${VERSION_MINOR}" STREQUAL "" OR
         "${VERSION_LEVEL}" STREQUAL "" OR
         "${VERSION_BUILD}" STREQUAL "")
-        message(SEND_ERROR "Incorrectly specified MSI number: ${version_number}")
+        message(SEND_ERROR "Incorrectly specified version number: ${version_number}")
     endif()
 endfunction()
 

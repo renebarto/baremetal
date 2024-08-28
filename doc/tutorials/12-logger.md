@@ -25,7 +25,7 @@ LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
 ```
 
 For this, we will need to be able to set a default logger device, by injecting an instance of a `CharDevice`, and then enable printing to that device, much like `printf()`.
-Later on, we can add the screen or something else as a device for logging as well.
+Later on, we can add the screen or maybe a file as a device for logging as well.
 In order to enable writing variable argument lists, we will need to use strings, which grow automatically as needed.
 This then means we need to be able to allocate heap memory.
 Also, we will need a way to retrieve the current time.
@@ -100,36 +100,37 @@ Update `CMakeLists.txt`:
 ```cmake
 File: CMakeLists.txt
 ...
-44: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-45: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+47: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+48: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+49: 
 ...
-66: set(DEFINES_C
-67:     PLATFORM_BAREMETAL
-68:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-69:     USE_PHYSICAL_COUNTER
-70:     )
-71: if (BAREMETAL_CONSOLE_UART0)
-72:     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART0)
-73: endif()
-74: if (BAREMETAL_CONSOLE_UART1)
-75:     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART1)
-76: endif()
+73: set(DEFINES_C
+74:     PLATFORM_BAREMETAL
+75:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+76:     USE_PHYSICAL_COUNTER
+77:     )
+78: if (BAREMETAL_CONSOLE_UART0)
+79:     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART0)
+80: endif()
+81: if (BAREMETAL_CONSOLE_UART1)
+82:     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART1)
+83: endif()
 ...
-227: message(STATUS "Baremetal settings:")
-228: message(STATUS "-- RPI target:          ${BAREMETAL_RPI_TARGET}")
-229: message(STATUS "-- Architecture options:${BAREMETAL_ARCH_CPU_OPTIONS}")
-230: message(STATUS "-- Kernel name:         ${BAREMETAL_TARGET_KERNEL}")
-231: message(STATUS "-- Kernel load address: ${BAREMETAL_LOAD_ADDRESS}")
-232: message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
-233: message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
-234:
+239: message(STATUS "Baremetal settings:")
+240: message(STATUS "-- RPI target:          ${BAREMETAL_RPI_TARGET}")
+241: message(STATUS "-- Architecture options:${BAREMETAL_ARCH_CPU_OPTIONS}")
+242: message(STATUS "-- Kernel name:         ${BAREMETAL_TARGET_KERNEL}")
+243: message(STATUS "-- Kernel load address: ${BAREMETAL_LOAD_ADDRESS}")
+244: message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
+245: message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
+246: 
 ...
 ```
 
-- Line 44-45: We define the two new variables, and set them to off by default
-- Line 71-73: If `BAREMETAL_CONSOLE_UART0` is set to on, We add the definition `BAREMETAL_CONSOLE_UART0`
-- Line 74-76: If `BAREMETAL_CONSOLE_UART1` is set to on, We add the definition `BAREMETAL_CONSOLE_UART1`
-- Line 227-233: We also print the current settings for all relevant variables
+- Line 47-48: We define the two new variables, and set them to off by default
+- Line 78-80: If `BAREMETAL_CONSOLE_UART0` is set to on, We add the definition `BAREMETAL_CONSOLE_UART0`
+- Line 81-83: If `BAREMETAL_CONSOLE_UART1` is set to on, We add the definition `BAREMETAL_CONSOLE_UART1`
+- Line 239-245: We also print the current settings for all relevant variables
 
 ### Console.h {#TUTORIAL_12_LOGGER_CONSOLE___STEP_1_CONSOLEH}
 
@@ -266,18 +267,22 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 ```
 
 - Line 53-89: We declare an enum type for the foreground or background color
-- Line 94-128: We declare the `Console` class
-  - Line 100: We declare the `GetConsole()` function as a friend to the class
-  - Line 104: We declare a member variable to hold the actual character device used for the console
+- Line 94-120: We declare the `Console` class
+  - Line 100: We declare the `GetConsole()` function as a friend to the class.
+  This will again create a singleton instance
+  - Line 104: We declare a member variable to hold the actual character device used for the console.
+  In this case we use a pointer so that we can also point to nothing
   - Line 106: We declare the constructor, which is private, so `GetConsole()` needs to be called to create an instance
-  - Line 109: We declare the method `AssignDevice()` to assign or reassign an device to the console
-  - Line 110: We declare the method `SetTerminalColor()` to set the foreground and background color for the console. This outputs ANSI color codes
-  - Line 111: We declare the method `ResetTerminalColor()` to reset the foreground and background color for the console. This outputs ANSI color codes
+  - Line 109: We declare the method `AssignDevice()` to assign or reassign a device to the console
+  - Line 110: We declare the method `SetTerminalColor()` to set the foreground and background color for the console.
+  This outputs ANSI color codes
+  - Line 111: We declare the method `ResetTerminalColor()` to reset the foreground and background color for the console.
+  This outputs ANSI color codes
   - Line 113: We declare the method `Write()` to write a string with the foreground and background color specified
   - Line 114: We declare the method `Write()` to write a string without setting the color
   - Line 116: We declare the method `ReadChar()` to read a character from the console
   - Line 117: We declare the method `WriteChar()` to write a character to the console
-- Line 122: We declare the accessor for the `Console` class. This will create an instance if needed, initialize it, and return a reference.
+- Line 122: We declare the accessor `GetConsole()` for the `Console` class. This will create an instance if needed, initialize it, and return a reference.
 
 ### Console.cpp {#TUTORIAL_12_LOGGER_CONSOLE___STEP_1_CONSOLECPP}
 
@@ -523,15 +528,18 @@ File: code/libraries/baremetal/src/Console.cpp
 236: } // namespace baremetal
 ```
 
-- Line 58-89: Implements a color conversion to an ANSI color code. Not that normal and bright colors use the same code, but have a different prefix.
-- Line 95-98: Implements the constructor
-- Line 104-107: Implements the method `AssignDevice()`
+- Line 58-89: Implements a conversion from a color to an ANSI color code.
+Note that normal and bright colors use the same code, but have a different prefix.
+- Line 95-98: Implements the constructor.
+- Line 104-107: Implements the method `AssignDevice()`.
 - Line 114-142: Implements the method `SetTerminalColor()`. Here we see that normal and light foreground colors use a different prefix, and similarly for background colors.
 - Line 147-150: Implements the method `ResetTerminalColor()`, which simply calls `SetTerminalColor()` with default arguments.
-- Line 158-173: Implements the `Write()` method for a string with color specification. This is simply a combination of setting colors, writing the string, and resetting colors.
-The only exception is that we wait for the bool inUse to became false. This is a very simple locking mechanism that will prevent multiple cores writing to the console at the same time, to organize output a bit better.
+- Line 158-173: Implements the `Write()` method for a string with color specification.
+This is simply a combination of setting colors, writing the string, and resetting colors.
+The only exception is that we wait for the bool inUse to become false. This is a very simple locking mechanism that will prevent multiple cores writing to the console at the same time, to organize output a bit better.
 We'll get to that when we actually start using multiple cores.
 - Line 179-188: Implements the `Write()` method for a string with no color specification.
+Notice that this is very similar to writing a string in `UART0` and `UART1`.
 - Line 194-1202: Implements the `ReadChar()` method.
 - Line 208-214: Implements the `WriteChar()` method.
 - Line 222-234: Implements the `GetConsole()` function.
@@ -541,23 +549,23 @@ and if both are not defined, we set the console to a nullptr device.
 
 ### Serialization.h {#TUTORIAL_12_LOGGER_CONSOLE___STEP_1_SERIALIZATIONH}
 
-We need to add serialization of an 8 bit unsigned integer.
+We need to add serialization of an 8 bit unsigned integer (or byte).
 
 Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
 
 ```text
 File: code/libraries/baremetal/include/baremetal/Serialization.h
-47: namespace baremetal {
-48:
-49: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
-50: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
-51: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
-52:
-53: } // namespace baremetal
-54:
+44: namespace baremetal {
+45: 
+46: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
+47: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
+48: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
+49: 
+50: } // namespace baremetal
+51: 
 ```
 
-- Line 49: Declares a function similar to the existing two, for a 8 bit unsigned integer
+- Line 46: Declares a function similar to the existing two, for a 8 bit unsigned integer
 
 ### Serialization.cpp {#TUTORIAL_12_LOGGER_CONSOLE___STEP_1_SERIALIZATIONCPP}
 
@@ -612,57 +620,59 @@ File: code/applications/demo/src/main.cpp
 8: #include <baremetal/Serialization.h>
 9: #include <baremetal/System.h>
 10: #include <baremetal/Timer.h>
-11:
+11: 
 12: using namespace baremetal;
-13:
+13: 
 14: int main()
 15: {
 16:     auto& console = GetConsole();
 17:     console.Write("Hello World!\n", ConsoleColor::Yellow);
-18:
+18: 
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIProperties properties(mailbox);
-22:
+22: 
 23:     uint64 serial{};
 24:     if (properties.GetBoardSerial(serial))
 25:     {
 26:         console.Write("Mailbox call succeeded\n");
 27:         console.Write("Serial: ");
-28:         console.Write(serial, 0, 16, false, true);
-29:         console.Write("\n");
-30:     }
-31:     else
-32:     {
-33:         console.Write("Mailbox call failed\n", ConsoleColor::Red);
-34:     }
-35:
-36:     console.Write("Wait 5 seconds\n");
-37:     Timer::WaitMilliSeconds(5000);
-38:
-39:     console.Write("Press r to reboot, h to halt\n");
-40:     char ch{};
-41:     while ((ch != 'r') && (ch != 'h'))
-42:     {
-43:         ch = console.ReadChar();
-44:         console.WriteChar(ch);
-45:     }
-46:
-47:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-48: }
+28:         Serialize(buffer, sizeof(buffer), serial, 8, 16, false, true);
+29:         console.Write(buffer);
+30:         console.Write("\n");
+31:     }
+32:     else
+33:     {
+34:         console.Write("Mailbox call failed\n", ConsoleColor::Red);
+35:     }
+36: 
+37:     console.Write("Wait 5 seconds\n");
+38:     Timer::WaitMilliSeconds(5000);
+39: 
+40:     console.Write("Press r to reboot, h to halt\n");
+41:     char ch{};
+42:     while ((ch != 'r') && (ch != 'h'))
+43:     {
+44:         ch = console.ReadChar();
+45:         console.WriteChar(ch);
+46:     }
+47: 
+48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+49: }
 ```
 
 - Line 16: We retrieve the singleton Console instance
 - Line 17: We use the console to print the `Hello World!` string, but now in color
 - Line 26-27: We again print the string through the console, in default color
-- Line 28: We can now use the console directly to print the serial number
-- Line 29: We again print the string through the console, in default color
-- Line 33: We again print the string through the console, in red this time
-- Line 36-45: We again use the console instead of the UART0 instance
+- Line 28: We serialize the serial number to a buffer
+- Line 29: We print the contents of the buffer to the console
+- Line 30: We print the literal string through the console, in default color
+- Line 34: We print the literal string through the console, in red this time
+- Line 37-46: We again use the console instead of the UART0 instance
 
 ### System.cpp {#TUTORIAL_12_LOGGER_CONSOLE___STEP_1_SYSTEMCPP}
 
-As we switch the main application to the console, we should also switch the code in `System.cpp` to the console, otherwise we will be suddenly checking the port over, with strange effects.
+As we switch the main application to the console, we should also switch the code in `System.cpp` to the console, otherwise might be using a different device for output, with strange effects.
 
 Update the file `code/libraries/baremetal/src/System.cpp`
 
@@ -683,22 +693,22 @@ File: code/libraries/baremetal/src/System.cpp
 116: {
 117:     GetConsole().Write("Halt\n", ConsoleColor::Cyan);
 118:     Timer::WaitMilliSeconds(WaitTime);
-119:
+119: 
 120:     // power off the SoC (GPU + CPU)
 121:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-122:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
-123:     r |= 0x555; // partition 63 used to indicate halt
+122:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
+123:     r |= RPI_PARTITIONVALUE(63);                        // Partition 63 used to indicate halt
 124:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
-125:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+125:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
 126:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-127:
+127: 
 128:     for (;;) // Satisfy [[noreturn]]
 129:     {
 130:         DataSyncBarrier();
 131:         WaitForInterrupt();
 132:     }
 133: }
-134:
+134: 
 135: /// <summary>
 136: /// Reboots the system. This function will not return
 137: /// </summary>
@@ -706,17 +716,17 @@ File: code/libraries/baremetal/src/System.cpp
 139: {
 140:     GetConsole().Write("Reboot\n", ConsoleColor::Cyan);
 141:     Timer::WaitMilliSeconds(WaitTime);
-142:
+142: 
 143:     DisableIRQs();
 144:     DisableFIQs();
-145:
+145: 
 146:     // power off the SoC (GPU + CPU)
 147:     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
-148:     r &= ~RPI_PWRMGT_RSTS_PART_CLEAR;
+148:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
 149:     m_memoryAccess.Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-150:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 1);
+150:     m_memoryAccess.Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
 151:     m_memoryAccess.Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-152:
+152: 
 153:     for (;;) // Satisfy [[noreturn]]
 154:     {
 155:         DataSyncBarrier();
@@ -763,7 +773,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 ```
 
-Note that line number have changed due to the `Doxygen` comments that were added.
+Note that line numbers have changed due to the `Doxygen` comments that were added.
 
 - Line 44: We include the Console header
 - Line 117: We write to the console, in cyan color
@@ -841,7 +851,7 @@ The application will now print output in color:
 In order to introduce the actual logging functionality, we would like to be able to print using variable arguments,
 much like the standard C `printf()` function.
 
-For variable arguments, we need to be able to handle these. Normally we would have functions or definitions such as `va_start`, `va_end` and `va_arg` for this, by inclusing `stdarg.h`.
+For variable arguments, we need to be able to handle these. Normally we would have functions or definitions such as `va_start`, `va_end` and `va_arg` for this, by including `stdarg.h`.
 Luckily, GCC offers these as builtin functions.
 We will then need to implement formatting of strings to a buffer, using format strings like `printf()` uses.
 We'll also want to support printing version information, so we'll provide for a way to pass on the version in the build, and make a string out of it.
@@ -1040,364 +1050,366 @@ File: code/libraries/baremetal/src/Format.cpp
 46: 
 47: const size_t BufferSize = 1024;
 48: 
-49: 
-50: /// <summary>
-51: /// Append a character to the buffer
-52: /// </summary>
-53: /// <param name="buffer">Buffer to write to</param>
-54: /// <param name="bufferSize">Size of the buffer</param>
-55: /// <param name="c">Character to append</param>
-56: static void Append(char* buffer, size_t bufferSize, char c)
-57: {
-58:     size_t len = strlen(buffer);
-59:     char* p = buffer + len;
-60:     if (static_cast<size_t>(p - buffer) < bufferSize)
-61:     {
-62:         *p++ = c;
-63:     }
-64:     if (static_cast<size_t>(p - buffer) < bufferSize)
-65:     {
-66:         *p = '\0';
-67:     }
-68: }
-69: 
-70: /// <summary>
-71: /// Append a set of identical characters to the buffer
-72: /// </summary>
-73: /// <param name="buffer">Buffer to write to</param>
-74: /// <param name="bufferSize">Size of the buffer</param>
-75: /// <param name="count">Number of characters to append</param>
-76: /// <param name="c">Character to append</param>
-77: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
-78: {
-79:     size_t len = strlen(buffer);
-80:     char* p = buffer + len;
-81:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
-82:     {
-83:         *p++ = c;
-84:         --count;
-85:     }
-86:     if (static_cast<size_t>(p - buffer) < bufferSize)
-87:     {
-88:         *p = '\0';
-89:     }
-90: }
-91: 
-92: /// <summary>
-93: /// Append a string to the buffer
-94: /// </summary>
-95: /// <param name="buffer">Buffer to write to</param>
-96: /// <param name="bufferSize">Size of the buffer</param>
-97: /// <param name="str">String to append</param>
-98: static void Append(char* buffer, size_t bufferSize, const char* str)
-99: {
-100:     strncat(buffer, str, bufferSize);
-101: }
-102: 
-103: void Format(char* buffer, size_t bufferSize, const char* format, ...)
-104: {
-105:     va_list var;
-106:     va_start(var, format);
-107: 
-108:     FormatV(buffer, bufferSize, format, var);
-109: 
-110:     va_end(var);
-111: }
-112: 
-113: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args)
-114: {
-115:     buffer[0] = '\0';
-116: 
-117:     while (*format != '\0')
-118:     {
-119:         if (*format == '%')
-120:         {
-121:             if (*++format == '%')
-122:             {
-123:                 Append(buffer, bufferSize, '%');
-124:                 format++;
-125:                 continue;
-126:             }
-127: 
-128:             bool alternate = false;
-129:             if (*format == '#')
-130:             {
-131:                 alternate = true;
-132:                 format++;
-133:             }
-134: 
-135:             bool left = false;
-136:             if (*format == '-')
-137:             {
-138:                 left = true;
-139:                 format++;
-140:             }
-141: 
-142:             bool leadingZero = false;
-143:             if (*format == '0')
-144:             {
-145:                 leadingZero = true;
-146:                 format++;
-147:             }
-148: 
-149:             size_t width = 0;
-150:             while (('0' <= *format) && (*format <= '9'))
-151:             {
-152:                 width = width * 10 + (*format - '0');
-153:                 format++;
-154:             }
-155: 
-156:             unsigned precision = 6;
-157:             if (*format == '.')
-158:             {
-159:                 format++;
-160:                 precision = 0;
-161:                 while ('0' <= *format && *format <= '9')
-162:                 {
-163:                     precision = precision * 10 + (*format - '0');
-164: 
-165:                     format++;
-166:                 }
-167:             }
-168: 
-169:             bool haveLong{};
-170:             bool haveLongLong{};
-171: 
-172:             if (*format == 'l')
-173:             {
-174:                 if (*(format + 1) == 'l')
-175:                 {
-176:                     haveLongLong = true;
-177: 
-178:                     format++;
-179:                 }
-180:                 else
-181:                 {
-182:                     haveLong = true;
-183:                 }
-184: 
-185:                 format++;
-186:             }
-187: 
-188:             switch (*format)
-189:             {
-190:             case 'c':
-191:                 {
-192:                     char ch = static_cast<char>(va_arg(args, int));
-193:                     if (left)
-194:                     {
-195:                         Append(buffer, bufferSize, ch);
-196:                         if (width > 1)
-197:                         {
-198:                             Append(buffer, bufferSize, width - 1, ' ');
-199:                         }
-200:                     }
-201:                     else
-202:                     {
-203:                         if (width > 1)
-204:                         {
-205:                             Append(buffer, bufferSize, width - 1, ' ');
-206:                         }
-207:                         Append(buffer, bufferSize, ch);
-208:                     }
-209:                 }
-210:                 break;
-211: 
-212:             case 'd':
-213:             case 'i':
-214:                 if (haveLongLong)
-215:                 {
-216:                     char str[BufferSize]{};
-217:                     Serialize(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
-218:                     Append(buffer, bufferSize, str);
-219:                 }
-220:                 else if (haveLong)
-221:                 {
-222:                     char str[BufferSize]{};
-223:                     Serialize(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
-224:                     Append(buffer, bufferSize, str);
-225:                 }
-226:                 else
-227:                 {
-228:                     char str[BufferSize]{};
-229:                     Serialize(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
-230:                     Append(buffer, bufferSize, str);
-231:                 }
-232:                 break;
-233: 
-234:             case 'f':
-235:                 {
-236:                     char str[BufferSize]{};
-237:                     Serialize(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
-238:                     Append(buffer, bufferSize, str);
-239:                 }
-240:                 break;
-241: 
-242:             case 'b':
-243:                 if (alternate)
-244:                 {
-245:                     Append(buffer, bufferSize, "0b");
-246:                 }
-247:                 if (haveLongLong)
-248:                 {
-249:                     char str[BufferSize]{};
-250:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
-251:                     Append(buffer, bufferSize, str);
-252:                 }
-253:                 else if (haveLong)
-254:                 {
-255:                     char str[BufferSize]{};
-256:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
-257:                     Append(buffer, bufferSize, str);
-258:                 }
-259:                 else
-260:                 {
-261:                     char str[BufferSize]{};
-262:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
-263:                     Append(buffer, bufferSize, str);
-264:                 }
-265:                 break;
-266: 
-267:             case 'o':
-268:                 if (alternate)
-269:                 {
-270:                     Append(buffer, bufferSize, '0');
-271:                 }
-272:                 if (haveLongLong)
-273:                 {
-274:                     char str[BufferSize]{};
-275:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
-276:                     Append(buffer, bufferSize, str);
-277:                 }
-278:                 else if (haveLong)
-279:                 {
-280:                     char str[BufferSize]{};
-281:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
-282:                     Append(buffer, bufferSize, str);
-283:                 }
-284:                 else
-285:                 {
-286:                     char str[BufferSize]{};
-287:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
-288:                     Append(buffer, bufferSize, str);
-289:                 }
-290:                 break;
-291: 
-292:             case 's':
-293:                 {
-294:                     char str[BufferSize]{};
-295:                     Serialize(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
-296:                     Append(buffer, bufferSize, str);
-297:                 }
-298:                 break;
-299: 
-300:             case 'u':
-301:                 if (haveLongLong)
-302:                 {
-303:                     char str[BufferSize]{};
-304:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
-305:                     Append(buffer, bufferSize, str);
-306:                 }
-307:                 else if (haveLong)
-308:                 {
-309:                     char str[BufferSize]{};
-310:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
-311:                     Append(buffer, bufferSize, str);
-312:                 }
-313:                 else
-314:                 {
-315:                     char str[BufferSize]{};
-316:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
-317:                     Append(buffer, bufferSize, str);
-318:                 }
-319:                 break;
-320: 
-321:             case 'x':
-322:             case 'X':
-323:                 if (alternate)
-324:                 {
-325:                     Append(buffer, bufferSize, "0x");
-326:                 }
-327:                 if (haveLongLong)
-328:                 {
-329:                     char str[BufferSize]{};
-330:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
-331:                     Append(buffer, bufferSize, str);
-332:                 }
-333:                 else if (haveLong)
-334:                 {
-335:                     char str[BufferSize]{};
-336:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
-337:                     Append(buffer, bufferSize, str);
-338:                 }
-339:                 else
-340:                 {
-341:                     char str[BufferSize]{};
-342:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
-343:                     Append(buffer, bufferSize, str);
-344:                 }
-345:                 break;
-346: 
-347:             case 'p':
-348:                 if (alternate)
-349:                 {
-350:                     Append(buffer, bufferSize, "0x");
-351:                 }
-352:                 {
-353:                     char str[BufferSize]{};
-354:                     Serialize(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
-355:                     Append(buffer, bufferSize, str);
-356:                 }
-357:                 break;
-358: 
-359:             default:
-360:                 Append(buffer, bufferSize, '%');
-361:                 Append(buffer, bufferSize, *format);
-362:                 break;
-363:             }
-364:         }
-365:         else
-366:         {
-367:             Append(buffer, bufferSize, *format);
-368:         }
-369: 
-370:         format++;
-371:     }
-372: }
-373: 
-374: } // namespace baremetal
+49: /// <summary>
+50: /// Append a character to the buffer
+51: /// </summary>
+52: /// <param name="buffer">Buffer to write to</param>
+53: /// <param name="bufferSize">Size of the buffer</param>
+54: /// <param name="c">Character to append</param>
+55: static void Append(char* buffer, size_t bufferSize, char c)
+56: {
+57:     size_t len = strlen(buffer);
+58:     char* p = buffer + len;
+59:     if (static_cast<size_t>(p - buffer) < bufferSize)
+60:     {
+61:         *p++ = c;
+62:     }
+63:     if (static_cast<size_t>(p - buffer) < bufferSize)
+64:     {
+65:         *p = '\0';
+66:     }
+67: }
+68: 
+69: /// <summary>
+70: /// Append a set of identical characters to the buffer
+71: /// </summary>
+72: /// <param name="buffer">Buffer to write to</param>
+73: /// <param name="bufferSize">Size of the buffer</param>
+74: /// <param name="count">Number of characters to append</param>
+75: /// <param name="c">Character to append</param>
+76: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
+77: {
+78:     size_t len = strlen(buffer);
+79:     char* p = buffer + len;
+80:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
+81:     {
+82:         *p++ = c;
+83:         --count;
+84:     }
+85:     if (static_cast<size_t>(p - buffer) < bufferSize)
+86:     {
+87:         *p = '\0';
+88:     }
+89: }
+90: 
+91: /// <summary>
+92: /// Append a string to the buffer
+93: /// </summary>
+94: /// <param name="buffer">Buffer to write to</param>
+95: /// <param name="bufferSize">Size of the buffer</param>
+96: /// <param name="str">String to append</param>
+97: static void Append(char* buffer, size_t bufferSize, const char* str)
+98: {
+99:     strncat(buffer, str, bufferSize);
+100: }
+101: 
+102: void Format(char* buffer, size_t bufferSize, const char* format, ...)
+103: {
+104:     va_list var;
+105:     va_start(var, format);
+106: 
+107:     FormatV(buffer, bufferSize, format, var);
+108: 
+109:     va_end(var);
+110: }
+111: 
+112: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args)
+113: {
+114:     buffer[0] = '\0';
+115: 
+116:     while (*format != '\0')
+117:     {
+118:         if (*format == '%')
+119:         {
+120:             if (*++format == '%')
+121:             {
+122:                 Append(buffer, bufferSize, '%');
+123:                 format++;
+124:                 continue;
+125:             }
+126: 
+127:             bool alternate = false;
+128:             if (*format == '#')
+129:             {
+130:                 alternate = true;
+131:                 format++;
+132:             }
+133: 
+134:             bool left = false;
+135:             if (*format == '-')
+136:             {
+137:                 left = true;
+138:                 format++;
+139:             }
+140: 
+141:             bool leadingZero = false;
+142:             if (*format == '0')
+143:             {
+144:                 leadingZero = true;
+145:                 format++;
+146:             }
+147: 
+148:             size_t width = 0;
+149:             while (('0' <= *format) && (*format <= '9'))
+150:             {
+151:                 width = width * 10 + (*format - '0');
+152:                 format++;
+153:             }
+154: 
+155:             unsigned precision = 6;
+156:             if (*format == '.')
+157:             {
+158:                 format++;
+159:                 precision = 0;
+160:                 while ('0' <= *format && *format <= '9')
+161:                 {
+162:                     precision = precision * 10 + (*format - '0');
+163: 
+164:                     format++;
+165:                 }
+166:             }
+167: 
+168:             bool haveLong{};
+169:             bool haveLongLong{};
+170: 
+171:             if (*format == 'l')
+172:             {
+173:                 if (*(format + 1) == 'l')
+174:                 {
+175:                     haveLongLong = true;
+176: 
+177:                     format++;
+178:                 }
+179:                 else
+180:                 {
+181:                     haveLong = true;
+182:                 }
+183: 
+184:                 format++;
+185:             }
+186: 
+187:             switch (*format)
+188:             {
+189:             case 'c':
+190:                 {
+191:                     char ch = static_cast<char>(va_arg(args, int));
+192:                     if (left)
+193:                     {
+194:                         Append(buffer, bufferSize, ch);
+195:                         if (width > 1)
+196:                         {
+197:                             Append(buffer, bufferSize, width - 1, ' ');
+198:                         }
+199:                     }
+200:                     else
+201:                     {
+202:                         if (width > 1)
+203:                         {
+204:                             Append(buffer, bufferSize, width - 1, ' ');
+205:                         }
+206:                         Append(buffer, bufferSize, ch);
+207:                     }
+208:                 }
+209:                 break;
+210: 
+211:             case 'd':
+212:             case 'i':
+213:                 if (haveLongLong)
+214:                 {
+215:                     char str[BufferSize]{};
+216:                     Serialize(str, BufferSize, va_arg(args, int64), left ? -width : width, 10, false, leadingZero);
+217:                     Append(buffer, bufferSize, str);
+218:                 }
+219:                 else if (haveLong)
+220:                 {
+221:                     char str[BufferSize]{};
+222:                     Serialize(str, BufferSize, va_arg(args, int32), left ? -width : width, 10, false, leadingZero);
+223:                     Append(buffer, bufferSize, str);
+224:                 }
+225:                 else
+226:                 {
+227:                     char str[BufferSize]{};
+228:                     Serialize(str, BufferSize, va_arg(args, int), left ? -width : width, 10, false, leadingZero);
+229:                     Append(buffer, bufferSize, str);
+230:                 }
+231:                 break;
+232: 
+233:             case 'f':
+234:                 {
+235:                     char str[BufferSize]{};
+236:                     Serialize(str, BufferSize, va_arg(args, double), left ? -width : width, precision);
+237:                     Append(buffer, bufferSize, str);
+238:                 }
+239:                 break;
+240: 
+241:             case 'b':
+242:                 if (alternate)
+243:                 {
+244:                     Append(buffer, bufferSize, "0b");
+245:                 }
+246:                 if (haveLongLong)
+247:                 {
+248:                     char str[BufferSize]{};
+249:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 2, false, leadingZero);
+250:                     Append(buffer, bufferSize, str);
+251:                 }
+252:                 else if (haveLong)
+253:                 {
+254:                     char str[BufferSize]{};
+255:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 2, false, leadingZero);
+256:                     Append(buffer, bufferSize, str);
+257:                 }
+258:                 else
+259:                 {
+260:                     char str[BufferSize]{};
+261:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 2, false, leadingZero);
+262:                     Append(buffer, bufferSize, str);
+263:                 }
+264:                 break;
+265: 
+266:             case 'o':
+267:                 if (alternate)
+268:                 {
+269:                     Append(buffer, bufferSize, '0');
+270:                 }
+271:                 if (haveLongLong)
+272:                 {
+273:                     char str[BufferSize]{};
+274:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 8, false, leadingZero);
+275:                     Append(buffer, bufferSize, str);
+276:                 }
+277:                 else if (haveLong)
+278:                 {
+279:                     char str[BufferSize]{};
+280:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 8, false, leadingZero);
+281:                     Append(buffer, bufferSize, str);
+282:                 }
+283:                 else
+284:                 {
+285:                     char str[BufferSize]{};
+286:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 8, false, leadingZero);
+287:                     Append(buffer, bufferSize, str);
+288:                 }
+289:                 break;
+290: 
+291:             case 's':
+292:                 {
+293:                     char str[BufferSize]{};
+294:                     Serialize(str, BufferSize, va_arg(args, const char*), left ? -width : width, false);
+295:                     Append(buffer, bufferSize, str);
+296:                 }
+297:                 break;
+298: 
+299:             case 'u':
+300:                 if (haveLongLong)
+301:                 {
+302:                     char str[BufferSize]{};
+303:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 10, false, leadingZero);
+304:                     Append(buffer, bufferSize, str);
+305:                 }
+306:                 else if (haveLong)
+307:                 {
+308:                     char str[BufferSize]{};
+309:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 10, false, leadingZero);
+310:                     Append(buffer, bufferSize, str);
+311:                 }
+312:                 else
+313:                 {
+314:                     char str[BufferSize]{};
+315:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 10, false, leadingZero);
+316:                     Append(buffer, bufferSize, str);
+317:                 }
+318:                 break;
+319: 
+320:             case 'x':
+321:             case 'X':
+322:                 if (alternate)
+323:                 {
+324:                     Append(buffer, bufferSize, "0x");
+325:                 }
+326:                 if (haveLongLong)
+327:                 {
+328:                     char str[BufferSize]{};
+329:                     Serialize(str, BufferSize, va_arg(args, uint64), left ? -width : width, 16, false, leadingZero);
+330:                     Append(buffer, bufferSize, str);
+331:                 }
+332:                 else if (haveLong)
+333:                 {
+334:                     char str[BufferSize]{};
+335:                     Serialize(str, BufferSize, va_arg(args, uint32), left ? -width : width, 16, false, leadingZero);
+336:                     Append(buffer, bufferSize, str);
+337:                 }
+338:                 else
+339:                 {
+340:                     char str[BufferSize]{};
+341:                     Serialize(str, BufferSize, va_arg(args, unsigned), left ? -width : width, 16, false, leadingZero);
+342:                     Append(buffer, bufferSize, str);
+343:                 }
+344:                 break;
+345: 
+346:             case 'p':
+347:                 if (alternate)
+348:                 {
+349:                     Append(buffer, bufferSize, "0x");
+350:                 }
+351:                 {
+352:                     char str[BufferSize]{};
+353:                     Serialize(str, BufferSize, va_arg(args, unsigned long long), left ? -width : width, 16, false, leadingZero);
+354:                     Append(buffer, bufferSize, str);
+355:                 }
+356:                 break;
+357: 
+358:             default:
+359:                 Append(buffer, bufferSize, '%');
+360:                 Append(buffer, bufferSize, *format);
+361:                 break;
+362:             }
+363:         }
+364:         else
+365:         {
+366:             Append(buffer, bufferSize, *format);
+367:         }
+368: 
+369:         format++;
+370:     }
+371: }
+372: 
+373: } // namespace baremetal
 ```
 
 - Line 47: We define a buffer size, to define the buffer, but also to check against writing outside the buffer.
-- Line 56-68: Implements the function `Append()` for writing a single character to the buffer, checked for overflow
-- Line 77-90: Implements the function `Append()` for writing multiple of a single character to the buffer, checked for overflow
-- Line 98-101: Implements the function `Append()` for writing a string to the buffer, checked for overflow
-- Line 103-111: Implements the `Format()` function, using the ellipsis operator. This simple creates a `va_list` from the arguments, and calls the other version of `Format()`
-- Line 113-372: Implements the `Format()` function, using the `va_list` argument
-  - Line 115: We make sure to have an empty buffer
-  - Line 117: We scan through the format string
-  - Line 119: If the format character is `%` this is a special format operator
-    - Line 121-126: In case the format string holds `%%` we see this as verbatim `%`, so we add that character
-    - Line 128-133: If the next character is `#` we see this as an alternative version, signalling to add the prefix (only for base 2, 8, 16 integers), and advance
-    - Line 135-140: If the next character is `-` we left-align the value, and advance
-    - Line 142-147: If the next character is `0` we use leading zeros to fill up the value to its normal length, and advance
-    - Line 149-154: If more digits follow, e.g. `%12` or `%012`, we extract the width of the value to be printed, and advance
-    - Line 156-167: If a decimal point follows, we expect this to be a floating point value, and expect the next digits to specify the length of the fraction.
+- Line 55-67: Implements the function `Append()` for writing a single character to the buffer, checked for overflow.
+- Line 76-89: Implements the function `Append()` for writing multiple instances of a single character to the buffer, checked for overflow.
+- Line 97-100: Implements the function `Append()` for writing a string to the buffer, checked for overflow.
+This uses a standard C function strncat, which we will need to define.
+- Line 102-110: Implements the `Format()` function, using the ellipsis operator. This simple creates a `va_list` from the arguments, and calls the other version of `Format()`.
+- Line 112-371: Implements the `Format()` function, using the `va_list` argument.
+  - Line 114: We make sure to have an empty buffer
+  - Line 115: We scan through the format string
+  - Line 118: If the format character is `%` this is a special format operator
+    - Line 120-125: In case the format string holds `%%` we see this as verbatim `%`, so we add that character
+    - Line 127-132: If the next character is `#` we see this as an alternative version, signalling to add the prefix (only for base 2, 8, 16 integers), and advance
+    - Line 134-139: If the next character is `-` we left-align the value, and advance
+    - Line 141-146: If the next character is `0` we use leading zeros to fill up the value to its normal length, and advance
+    - Line 144-153: If more digits follow, e.g. `%12` or `%012`, we extract the width of the value to be printed, and advance
+    - Line 155-166: If a decimal point follows, we expect this to be a floating point value, and expect the next digits to specify the length of the fraction.
     We read all digits, calculate the fraction length, and advance
-    - Line 169-186: If the next character is `l` this is seen as a specification for a `long` (32 bit) value (only for integer values).
+    - Line 168-185: If the next character is `l` this is seen as a specification for a `long` (32 bit) value (only for integer values).
 If another `l` follows, we see this as a `long long` (64 bit) value
-    - Line 190-210: If the format character is a `c` we print the value as a character
-    - Line 212-232: If the format character is a `d` or `i` we print the value as a signed integer, taking into account the `l` or `ll` prefix
-    - Line 234-250: If the format character is a `f` we print the value as a double, taking into account the precision if set
-    - Line 242-265: If the format character is a `b` we print the value as a binary unsigned integer, taking into account the `#`, `l` or `ll` prefix.
+    - Line 189-209: If the format character is a `c` we print the value as a character
+    - Line 211-231: If the format character is a `d` or `i` we print the value as a signed integer, taking into account the `l` or `ll` prefix
+    - Line 233-239: If the format character is a `f` we print the value as a double, taking into account the precision if set.
+  Note that this is different from normal `printf()` behaviour, where %f means float, and %lf means double
+    - Line 241-264: If the format character is a `b` we print the value as a binary unsigned integer, taking into account the `#`, `l` or `ll` prefix.
 Note that this is an addition to `printf()` behaviour
-    - Line 267-290: If the format character is a `o` we print the value as a octal unsigned integer, taking into account the `#`, `l` or `ll` prefix.
+    - Line 266-289: If the format character is a `o` we print the value as a octal unsigned integer, taking into account the `#`, `l` or `ll` prefix.
 Note that this is an addition to `printf()` behaviour
-    - Line 292-298: If the format character is a `s` we print the value as a string
-    - Line 300-319: If the format character is a `u` we print the value as a decimal unsigned integer, taking into account the `l` or `ll` prefix
-    - Line 321-345: If the format character is a `x` or `X` we print the value as a hexadecimal unsigned integer, taking into account the `#`, `l` or `ll` prefix
-    - Line 347-357: If the format character is a `p` we print the value as a pointer, meaning it is printed as a 64 bit unsigned integer
-  - Line 365-368: If the format character is not `%` we simply add the character
+    - Line 291-297: If the format character is a `s` we print the value as a string
+    - Line 299-318: If the format character is a `u` we print the value as a decimal unsigned integer, taking into account the `l` or `ll` prefix
+    - Line 320-344: If the format character is a `x` or `X` we print the value as a hexadecimal unsigned integer, taking into account the `#`, `l` or `ll` prefix
+    - Line 346-356: If the format character is a `p` we print the value as a pointer, meaning it is printed as a 64 bit unsigned integer
+    - Line 365-368: Otherwise we simple print `%` and the character
+    - Line 364-367: If the format character is not `%` we simply add the character
 
 ## Adding the Logger class - Step 3 {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3}
 
@@ -1421,62 +1433,68 @@ File: CMakeLists.txt
 16:
 17: message(STATUS "Tag found: ${GIT_TAG}")
 18:
-19: string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
-20:
-21: if("${VERSION_NUMBER}" STREQUAL "")
-22:     set(VERSION_NUMBER 0.0.0)
-23: endif()
-24:
-25: parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
-26:
-27: set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
-28: message(STATUS "Version: ${VERSION_COMPOSED}")
-29:
+19: if (NOT "${GIT_TAG}" STREQUAL "")
+20:     string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
+21: endif()
+22: 
+23: if("${VERSION_NUMBER}" STREQUAL "")
+24:     set(VERSION_NUMBER 0.0.0)
+25: endif()
+26: 
+27: parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
+28: 
+29: set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
+30: message(STATUS "Version: ${VERSION_COMPOSED}")
+31: 
 ...
-61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
+66: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+67: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+68: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 ...
-82: if (BAREMETAL_COLOR_LOGGING)
-83:     set(BAREMETAL_COLOR_OUTPUT 1)
-84: else ()
-85:     set(BAREMETAL_COLOR_OUTPUT 0)
-86: endif()
-87: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-88:
+91: if (BAREMETAL_COLOR_LOGGING)
+92:     set(BAREMETAL_COLOR_OUTPUT 1)
+93: else ()
+94:     set(BAREMETAL_COLOR_OUTPUT 0)
+95: endif()
+96: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+97: 
+98: set(DEFINES_C
+99:     PLATFORM_BAREMETAL
+100:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+101:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+102:     USE_PHYSICAL_COUNTER
+103:     BAREMETAL_MAJOR=${VERSION_MAJOR}
+104:     BAREMETAL_MINOR=${VERSION_MINOR}
+105:     BAREMETAL_LEVEL=${VERSION_LEVEL}
+106:     BAREMETAL_BUILD=${VERSION_BUILD}
+107:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
+108:     )
+109: 
 ...
-89: set(DEFINES_C
-90:     PLATFORM_BAREMETAL
-91:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-92:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
-93:     USE_PHYSICAL_COUNTER
-94:     BAREMETAL_MAJOR=${VERSION_MAJOR}
-95:     BAREMETAL_MINOR=${VERSION_MINOR}
-96:     BAREMETAL_LEVEL=${VERSION_LEVEL}
-97:     BAREMETAL_BUILD=${VERSION_BUILD}
-98:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
-99:     )
-...
-263: message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
-264: message(STATUS "-- Version major:       ${VERSION_MAJOR}")
-265: message(STATUS "-- Version minor:       ${VERSION_MINOR}")
-266: message(STATUS "-- Version level:       ${VERSION_LEVEL}")
-267: message(STATUS "-- Version build:       ${VERSION_BUILD}")
-268: message(STATUS "-- Version composed:    ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}")
+275: message(STATUS "-- Debug ouput to UART0:${BAREMETAL_CONSOLE_UART0}")
+276: message(STATUS "-- Debug ouput to UART1:${BAREMETAL_CONSOLE_UART1}")
+277: message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
+278: message(STATUS "-- Version major:       ${VERSION_MAJOR}")
+279: message(STATUS "-- Version minor:       ${VERSION_MINOR}")
+280: message(STATUS "-- Version level:       ${VERSION_LEVEL}")
+281: message(STATUS "-- Version build:       ${VERSION_BUILD}")
+282: message(STATUS "-- Version composed:    ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}")
+283: 
 ```
 
 - Line 13: We include the CMake utility functions
 - Line 15: We use a utility function (to be defined) `get_git_tag` to retrieve the latest tag in `Git` and store it in variable `GIT_TAG`
 - Line 17: We print the tag retrieved
-- Line 19: We match the tag to the pattern `digit+.digit+.digit+` and ignore the rest. This is stored in the variable `VERSION_NUMBER`
-- Line 21-23: If the version extracted is empty, we set it to the default `0.0.0`
-- Line 25: We use a utility function (to be defined) `parse_version` to extract the components from the version.
-The components are stored respectively in variables `VERSION_MAJOR`, `VERSION_MINOR`, `VERSION_LEVEL` and `VERSION_BUILD`
-- Line 27-28: We recompose the version from the components into variable `VERSION_COMPOSED`, and print it
-- Line 63: We define the variable `BAREMETAL_COLOR_LOGGING` which is `ON` by default
-- Line 82-86: If `BAREMETAL_COLOR_LOGGING` is `ON`, we set the variable `BAREMETAL_COLOR_OUTPUT` to 1, otherwise we set it to 0
-- Line 89-99: We add compiler definitions using the version components, the composed version, and the ANSI color log output selection
-- Line 263-268: We print the variable settings for ANSI color log output, and version information
+- Line 19-21: If we found a tag, we match it to the pattern `digit+.digit+.digit+` and ignore the rest. This is stored in the variable `VERSION_NUMBER`
+- Line 23-25: If the version extracted is empty, we set it to the default `0.0.0`
+- Line 27: We use a utility function (to be defined) `parse_version` to extract the components from the version.
+The components are stored respectively in variables `VERSION_MAJOR`, `VERSION_MINOR`, `VERSION_LEVEL` and `VERSION_BUILD`.
+Notice that we have 4 components to the version, so for now the last one will always be equal to 0
+- Line 29-30: We recompose the version from the components into variable `VERSION_COMPOSED`, and print it
+- Line 68: We define the variable `BAREMETAL_COLOR_LOGGING` which is `ON` by default
+- Line 91-95: If `BAREMETAL_COLOR_LOGGING` is `ON`, we set the variable `BAREMETAL_COLOR_OUTPUT` to 1, otherwise we set it to 0
+- Line 98-108: We add compiler definitions using the version components, the composed version, and the ANSI color log output selection
+- Line 277-282: We print the variable settings for ANSI color log output, and version information
 
 #### Adding functionality to the CMake utility file {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_ADDING_VERSION_INFORMATION_ADDING_FUNCTIONALITY_TO_THE_CMAKE_UTILITY_FILE}
 
@@ -1540,13 +1558,14 @@ File: cmake/functions.cmake
 68:         "${VERSION_MINOR}" STREQUAL "" OR
 69:         "${VERSION_LEVEL}" STREQUAL "" OR
 70:         "${VERSION_BUILD}" STREQUAL "")
-71:         message(SEND_ERROR "Incorrectly specified MSI number: ${version_number}")
+71:         message(SEND_ERROR "Incorrectly specified version number: ${version_number}")
 72:     endif()
 73: endfunction()
+74: 
 ...
 ```
 
-- Line 18-35: We define the function `get_git_tag` which returns the latest tag
+- Line 18-34: We define the function `get_git_tag` which returns the latest tag
   - Line 19-23: Depending on the platform, we determine the executable for git.
 On Linux, we can simple try to find the package, on Windows, we assume that it is installed in `C:\Program Files\git`.
   - Line 24-28: We run git to get tags matching `<digit>+.<digit>+.<digit>+` and take the one from `HEAD`, i.e. the latest version.
@@ -1627,8 +1646,8 @@ File: code/libraries/baremetal/include/baremetal/Version.h
 49: #define BAREMETAL_MAJOR_VERSION     BAREMETAL_MAJOR
 50: /// @brief Minor version number (specified by define at compile time)
 51: #define BAREMETAL_MINOR_VERSION     BAREMETAL_MINOR
-52: /// @brief patch version number (specified by define at compile time)
-53: #define BAREMETAL_PATCH_VERSION     BAREMETAL_LEVEL
+52: /// @brief Level version number (specified by define at compile time)
+53: #define BAREMETAL_LEVEL_VERSION     BAREMETAL_LEVEL
 54: /// @brief Version string
 55: #define BAREMETAL_VERSION_STRING    GetVersion()
 56: 
@@ -1718,7 +1737,7 @@ File: code/libraries/baremetal/src/Version.cpp
 62: {
 63:     if (!s_baremetalVersionSetupDone)
 64:     {
-65:         Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+65:         Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
 66:         s_baremetalVersionSetupDone = true;
 67:     }
 68: }
@@ -1733,7 +1752,7 @@ File: code/libraries/baremetal/src/Version.cpp
 77: }
 ```
 
-- Line 59-51: We define the local variable `s_baremetalVersionString` and its size
+- Line 49-51: We define the local variable `s_baremetalVersionString` and its size
 - Line 61-68: We implement `SetupVersion()`, which prints a formatted string to `s_baremetalVersionString`
 - Line 74-77: We implement `GetVersion(), which simply returns the string `s_baremetalVersionString`
 
@@ -1868,11 +1887,11 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 ```
 
 - Line 54-66: We declare an enum type `LogSeverity` to signify the logging level
-- Line 73-101: We declare the `Logger` class
+- Line 73-99: We declare the `Logger` class
   - Line 79: We declare the `GetLogger()` function as a friend
   - Line 83: The member variable `m_initialized` is used to guard against multiple initializations
-  - Line 85: We keep a pointer to the `Timer` instance which will be used to request the current time for logging
-  - Line 87: We keep a reference to the `Console` instance
+  - Line 85: We keep a pointer in the member variable `m_timer` to the `Timer` instance which will be used to request the current time for logging
+  - Line 87: We keep a reference in the member variable `m_console` to the `Console` instance
   - Line 89: The member variable `m_level` is used as a reference level for logging.
   Any log statements with a priority equal to or higher than `m_level` (with a value equal to or lower than `m_level`) will be shown, others will be ignored
   - Line 91: We declare the constructor for `Logger`
@@ -1976,7 +1995,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 78:         return true;
 79:     SetupVersion();
 80:     m_initialized = true; // Stop reentrant calls from happening
-81:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi" /*GetMachineInfo().GetName()*/);
+81:     LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi");
 82: 
 83:     return true;
 84: }
@@ -2113,9 +2132,9 @@ File: code/libraries/baremetal/src/Logger.cpp
   - Line 79: We use the function `SetupVersion()` from `Version.h` to set up the version string
   - Line 81: We use the `Logger` itself to log the first message, stating the platform name and its version
 - Line 90-93: We implement the `SetLogLevel()` method. This simply set the maximum log level for filtering
-- Line 102-108: We implement the `Write()` method. This simply call `WriteV()` after setting up the variable argument list
+- Line 102-108: We implement the `Write()` method. This simply calls `WriteV()` after setting up the variable argument list
 - Line 118-197: We implement the `WriteV()` method
-  - Line 120-121: If the severity level passed in is to high (priority too low) we simply return without printing
+  - Line 120-121: If the severity level passed in is too high (priority too low) we simply return without printing
   - Line 123-124: We define a buffer to hold the line to write
   - Line 126-127: We print source name and line number into a separate buffer
   - Line 129-130: We print the message with arguments into a separate buffer
@@ -2176,11 +2195,662 @@ File: code/libraries/baremetal/src/Timer.cpp
 
 So for now we simply return an empty string. Updating the clock will take some more effort, which will be done later.
 
+### Extending the serialization functions {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_EXTENDING_THE_SERIALIZATION_FUNCTIONS}
+
+#### Serialization.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_EXTENDING_THE_SERIALIZATION_FUNCTIONS_SERIALIZATIONH}
+
+As we with to convert more types to string due to the variable arguments, we need to extend the set of serialization functions.
+We'll be adding functions for `int32`, `int64`, `long long`, `unsigned long long`, `const char*` and `double`.
+
+Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Serialization.h
+49: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
+50: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
+51: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
+52: 
+53: void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros);
+54: void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros);
+55: /// <summary>
+56: /// Serialize long long int value, type specific specialization
+57: /// </summary>
+58: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+59: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+60: /// <param name="value">Value to be serialized</param>
+61: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+62: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+63: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+64: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+65: inline void Serialize(char* buffer, size_t bufferSize, long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+66: {
+67:     Serialize(buffer, bufferSize, static_cast<int64>(value), width, base, showBase, leadingZeros);
+68: }
+69: /// <summary>
+70: /// Serialize unsigned long long int value, type specific specialization
+71: /// </summary>
+72: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+73: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+74: /// <param name="value">Value to be serialized</param>
+75: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+76: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+77: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+78: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+79: inline void Serialize(char* buffer, size_t bufferSize, unsigned long long value, int width = 0, int base = 10, bool showBase = false, bool leadingZeros = false)
+80: {
+81:     Serialize(buffer, bufferSize, static_cast<uint64>(value), width, base, showBase, leadingZeros);
+82: }
+83: void Serialize(char* buffer, size_t bufferSize, const char* value, int width, bool quote);
+84: void Serialize(char* buffer, size_t bufferSize, double value, int width, int precision);
+85: 
+86: } // namespace baremetal
+```
+
+- Line 53: We declare a serialization function for int32 (signed 32 bit integer)
+- Line 54: We declare a serialization function for int64 (signed 64 bit integer)
+- Line 65-68: We declare a serialization function for long long (this is mostly equal to int64, but the compiler sees it as a different type)
+- Line 79-82: We declare a serialization function for unsigned long long (this is mostly equal to uint64, but the compiler sees it as a different type)
+- Line 83: We declare a serialization function for const char* (for strings)
+- Line 84: We declare a serialization function for double
+
+#### Serialization.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_EXTENDING_THE_SERIALIZATION_FUNCTIONS_SERIALIZATIONCPP}
+
+Let's implement the new functions.
+
+Update the file `code/libraries/baremetal/src/Serialization.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/Serialization.cpp
+46: namespace baremetal {
+47: 
+48: /// @brief Write characters with base above 10 as uppercase or not
+49: static bool           Uppercase = true;
+50: 
+51: static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+52: static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+53: 
+54: /// <summary>
+55: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
+56: /// </summary>
+57: /// <param name="value">Digit value</param>
+58: /// <returns>Converted digit character</returns>
+59: static constexpr char GetDigit(uint8 value)
+60: {
+61:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
+62: }
+63: 
+64: /// <summary>
+65: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
+66: /// </summary>
+67: /// <param name="bits">Size of integer in bits</param>
+68: /// <param name="base">Base to be used</param>
+69: /// <returns>Maximum amount of digits needed</returns>
+70: static constexpr int BitsToDigits(int bits, int base)
+71: {
+72:     int result = 0;
+73:     uint64 value = 0xFFFFFFFFFFFFFFFF;
+74:     if (bits < 64)
+75:         value &= ((1ULL << bits) - 1);
+76: 
+77:     while (value > 0)
+78:     {
+79:         value /= base;
+80:         result++;
+81:     }
+82: 
+83:     return result;
+84: }
+85: 
+86: /// <summary>
+87: /// Serialize a 8 bit unsigned value to buffer.
+88: ///
+89: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+90: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+91: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+92: ///
+93: /// Base is the digit base, which can range from 2 to 36.
+94: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+95: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+96: /// </summary>
+97: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+98: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+99: /// <param name="value">Value to be serialized</param>
+100: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+101: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+102: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+103: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+104: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros)
+105: {
+106:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 8);
+107: }
+108: 
+109: /// <summary>
+110: /// Serialize a 32 bit signed value to buffer.
+111: ///
+112: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+113: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+114: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+115: ///
+116: /// Base is the digit base, which can range from 2 to 36.
+117: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+118: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+119: /// </summary>
+120: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+121: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+122: /// <param name="value">Value to be serialized</param>
+123: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+124: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+125: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+126: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+127: void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros)
+128: {
+129:     SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+130: }
+131: 
+132: /// <summary>
+133: /// Serialize a 32 bit unsigned value to buffer.
+134: ///
+135: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+136: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+137: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+138: ///
+139: /// Base is the digit base, which can range from 2 to 36.
+140: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+141: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+142: /// </summary>
+143: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+144: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+145: /// <param name="value">Value to be serialized</param>
+146: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+147: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+148: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+149: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+150: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
+151: {
+152:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+153: }
+154: 
+155: /// <summary>
+156: /// Serialize a 64 bit signed value to buffer.
+157: ///
+158: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+159: /// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+160: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+161: ///
+162: /// Base is the digit base, which can range from 2 to 36.
+163: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+164: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+165: /// </summary>
+166: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+167: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+168: /// <param name="value">Value to be serialized</param>
+169: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+170: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+171: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+172: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+173: void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros)
+174: {
+175:     SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+176: }
+177: 
+178: /// <summary>
+179: /// Serialize a 64 bit unsigned value to buffer.
+180: ///
+181: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+182: /// Width specifies the minimum width in characters. The value is always written right aligned.
+183: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+184: ///
+185: /// Base is the digit base, which can range from 2 to 36.
+186: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+187: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+188: /// </summary>
+189: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+190: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+191: /// <param name="value">Value to be serialized</param>
+192: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+193: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+194: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+195: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+196: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+197: {
+198:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+199: }
+200: 
+201: /// <summary>
+202: /// Serialize a double value to buffer. The value will be printed as a fixed point number.
+203: ///
+204: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, the string is terminated to hold maximum bufferSize - 1 characters.
+205: /// Width is currently unused.
+206: /// Precision specifies the number of digits behind the decimal pointer
+207: /// </summary>
+208: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+209: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+210: /// <param name="value">Value to be serialized</param>
+211: /// <param name="width">Unused</param>
+212: /// <param name="precision">Number of digits after the decimal point to use</param>
+213: void Serialize(char* buffer, size_t bufferSize, double value, int width, int precision)
+214: {
+215:     bool negative{};
+216:     if (value < 0)
+217:     {
+218:         negative = true;
+219:         value = -value;
+220:     }
+221: 
+222:     if (bufferSize == 0)
+223:         return;
+224: 
+225:     // We can only print values with integral parts up to what uint64 can hold
+226:     if (value > static_cast<double>(static_cast<uint64>(-1)))
+227:     {
+228:         strncpy(buffer, "overflow", bufferSize);
+229:         return;
+230:     }
+231: 
+232:     *buffer = '\0';
+233:     if (negative)
+234:         strncpy(buffer, "-", bufferSize);
+235: 
+236:     uint64 integralPart = static_cast<uint64>(value);
+237:     const size_t TmpBufferSize = 32;
+238:     char tmpBuffer[TmpBufferSize];
+239:     Serialize(tmpBuffer, TmpBufferSize, integralPart, 0, 10, false, false);
+240:     strncat(buffer, tmpBuffer, bufferSize);
+241:     const int MaxPrecision = 7;
+242: 
+243:     if (precision != 0)
+244:     {
+245:         strncat(buffer, ".", bufferSize);
+246: 
+247:         if (precision > MaxPrecision)
+248:         {
+249:             precision = MaxPrecision;
+250:         }
+251: 
+252:         uint64 precisionPower10 = 1;
+253:         for (int i = 1; i <= precision; i++)
+254:         {
+255:             precisionPower10 *= 10;
+256:         }
+257: 
+258:         value -= static_cast<double>(integralPart);
+259:         value *= static_cast<double>(precisionPower10);
+260: 
+261:         Serialize(tmpBuffer, TmpBufferSize, static_cast<uint64>(value), 0, 10, false, false);
+262:         strncat(buffer, tmpBuffer, bufferSize);
+263:         precision -= strlen(tmpBuffer);
+264:         while (precision--)
+265:         {
+266:             strncat(buffer, "0", bufferSize);
+267:         }
+268:     }
+269: }
+270: 
+271: /// <summary>
+272: /// Serialize a const char * value to buffer. The value can be quoted.
+273: ///
+274: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+275: /// If quote is true, the string is printed within double quotes (\")
+276: /// </summary>
+277: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+278: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+279: /// <param name="value">String to be serialized</param>
+280: /// <param name="width">Unused</param>
+281: /// <param name="quote">If true, value is printed between double quotes, if false, no quotes are used</param>
+282: void Serialize(char* buffer, size_t bufferSize, const char* value, int width, bool quote)
+283: {
+284:     size_t numChars = strlen(value);
+285:     if (quote)
+286:         numChars += 2;
+287: 
+288:     // Leave one character for \0
+289:     if (numChars > bufferSize - 1)
+290:         return;
+291: 
+292:     char* bufferPtr = buffer;
+293: 
+294:     if (quote)
+295:         *bufferPtr++ = '\"';
+296:     while (*value)
+297:     {
+298:         *bufferPtr++ = *value++;
+299:     }
+300:     if (quote)
+301:         *bufferPtr++ = '\"';
+302: }
+303: 
+304: /// <summary>
+305: /// Internal serialization function, to be used for all signed values.
+306: ///
+307: /// Serialize a signed value to buffer.
+308: ///
+309: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+310: /// Width specifies the minimum width in characters. The value is always written right aligned.
+311: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+312: ///
+313: /// Base is the digit base, which can range from 2 to 36.
+314: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+315: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+316: /// </summary>
+317: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+318: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+319: /// <param name="value">Value to be serialized</param>
+320: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+321: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+322: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+323: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+324: /// <param name="numBits">Specifies the number of bits used for the value</param>
+325: static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+326: {
+327:     if ((base < 2) || (base > 36))
+328:         return;
+329: 
+330:     int       numDigits = 0;
+331:     bool      negative = (value < 0);
+332:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
+333:     uint64    divisor = 1;
+334:     uint64    divisorLast = 1;
+335:     size_t    absWidth = (width < 0) ? -width : width;
+336:     const int maxDigits = BitsToDigits(numBits, base);
+337:     while ((absVal >= divisor) && (numDigits <= maxDigits))
+338:     {
+339:         divisorLast = divisor;
+340:         divisor *= base;
+341:         ++numDigits;
+342:     }
+343:     divisor = divisorLast;
+344: 
+345:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+346:     if (showBase)
+347:     {
+348:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+349:     }
+350:     if (negative)
+351:     {
+352:         numChars++;
+353:     }
+354:     if (absWidth > numChars)
+355:         numChars = absWidth;
+356:     // Leave one character for \0
+357:     if (numChars > bufferSize - 1)
+358:         return;
+359: 
+360:     char* bufferPtr = buffer;
+361:     if (negative)
+362:     {
+363:         *bufferPtr++ = '-';
+364:     }
+365: 
+366:     if (showBase)
+367:     {
+368:         if (base == 2)
+369:         {
+370:             *bufferPtr++ = '0';
+371:             *bufferPtr++ = 'b';
+372:         }
+373:         else if (base == 8)
+374:         {
+375:             *bufferPtr++ = '0';
+376:         }
+377:         else if (base == 16)
+378:         {
+379:             *bufferPtr++ = '0';
+380:             *bufferPtr++ = 'x';
+381:         }
+382:     }
+383:     if (leadingZeros)
+384:     {
+385:         if (absWidth == 0)
+386:             absWidth = maxDigits;
+387:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+388:         {
+389:             *bufferPtr++ = '0';
+390:         }
+391:     }
+392:     else
+393:     {
+394:         if (numDigits == 0)
+395:         {
+396:             *bufferPtr++ = '0';
+397:         }
+398:     }
+399:     while (numDigits > 0)
+400:     {
+401:         int digit = (absVal / divisor) % base;
+402:         *bufferPtr++ = GetDigit(digit);
+403:         --numDigits;
+404:         divisor /= base;
+405:     }
+406:     *bufferPtr++ = '\0';
+407: }
+408: 
+409: /// <summary>
+410: /// Internal serialization function, to be used for all unsigned values.
+411: ///
+412: /// Serialize a unsigned value to buffer.
+413: ///
+414: /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
+415: /// Width specifies the minimum width in characters. The value is always written right aligned.
+416: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+417: ///
+418: /// Base is the digit base, which can range from 2 to 36.
+419: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+420: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+421: /// </summary>
+422: /// <param name="buffer">Pointer to buffer receiving the characters written</param>
+423: /// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
+424: /// <param name="value">Value to be serialized</param>
+425: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+426: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+427: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+428: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+429: /// <param name="numBits">Specifies the number of bits used for the value</param>
+430: static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+431: {
+432:     if ((base < 2) || (base > 36))
+433:         return;
+434: 
+435:     int       numDigits = 0;
+436:     uint64    divisor = 1;
+437:     uint64    divisorLast = 1;
+438:     uint64    divisorHigh = 0;
+439:     size_t    absWidth = (width < 0) ? -width : width;
+440:     const int maxDigits = BitsToDigits(numBits, base);
+441:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
+442:     {
+443:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+444:         divisorLast = divisor;
+445:         divisor *= base;
+446:         ++numDigits;
+447:     }
+448:     divisor = divisorLast;
+449: 
+450:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+451:     if (showBase)
+452:     {
+453:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+454:     }
+455:     if (absWidth > numChars)
+456:         numChars = absWidth;
+457:     // Leave one character for \0
+458:     if (numChars > bufferSize - 1)
+459:         return;
+460: 
+461:     char* bufferPtr = buffer;
+462: 
+463:     if (showBase)
+464:     {
+465:         if (base == 2)
+466:         {
+467:             *bufferPtr++ = '0';
+468:             *bufferPtr++ = 'b';
+469:         }
+470:         else if (base == 8)
+471:         {
+472:             *bufferPtr++ = '0';
+473:         }
+474:         else if (base == 16)
+475:         {
+476:             *bufferPtr++ = '0';
+477:             *bufferPtr++ = 'x';
+478:         }
+479:     }
+480:     if (leadingZeros)
+481:     {
+482:         if (absWidth == 0)
+483:             absWidth = maxDigits;
+484:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+485:         {
+486:             *bufferPtr++ = '0';
+487:         }
+488:     }
+489:     else
+490:     {
+491:         if (numDigits == 0)
+492:         {
+493:             *bufferPtr++ = '0';
+494:         }
+495:     }
+496:     while (numDigits > 0)
+497:     {
+498:         int digit = (value / divisor) % base;
+499:         *bufferPtr++ = GetDigit(digit);
+500:         --numDigits;
+501:         divisor /= base;
+502:     }
+503:     *bufferPtr++ = '\0';
+504: }
+505: 
+506: } // namespace baremetal
+```
+
+- Line 51: We declare a static function `SerializeInternalUInt()`, which is equal to the previous `SerializeInternal()` function.
+- Line 52: We declare a static function `SerializeInternalInt()`, which is the version of `SerializeInternal()` for signed integers.
+- Line 104-107: Serialization for uint8 now uses `SerializeInternalUInt()`
+- Line 127-130: Serialization for int32 uses `SerializeInternalInt()`
+- Line 150-153: Serialization for uint32 now uses `SerializeInternalUInt()`
+- Line 173-176: Serialization for int64 uses `SerializeInternalInt()`
+- Line 196-199: Serialization for uint64 now uses `SerializeInternalUInt()`
+- Line 213-269: We implement `Serialize()` for double.
+Note that we use `strncpy()` and `strlen()` next to `strncat()`
+- Line 282-302: We implement `Serialize()` for const char*
+- Line 325-407: We implement `SerializeInternalInt()`. The main difference with `SerializeInternalUInt()` is that we can have negative value
+- Line 430-506: We implement `SerializeInternalUInt()`, which is the same as the previous `SerializeInternal()` function
+
+### Updating the utility functions {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_UPDATING_THE_UTILITY_FUNCTIONS}
+
+#### Util.h {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_UPDATING_THE_UTILITY_FUNCTIONS_UTILH}
+
+We need to add the function `strncat()` for the `Logger` class, and `strlen()` and `strncpy()` for serialization.
+You may recognize these as standard C functions.
+
+Update the file `code/libraries/baremetal/include/baremetal/Util.h`
+
+```cpp
+File: code/libraries/baremetal/include/baremetal/Util.h
+54: size_t strlen(const char* str);
+55: char* strncpy(char* dest, const char* src, size_t maxLen);
+56: char* strncat(char* dest, const char* src, size_t maxLen);
+57: 
+```
+
+#### Util.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_UPDATING_THE_UTILITY_FUNCTIONS_UTILCPP}
+
+Let's implement the new functions.
+
+Update the file `code/libraries/baremetal/src/Util.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/Util.cpp
+82: /// <summary>
+83: /// Standard C strlen function. Calculates the length of a string, in other words the index to the first '\0' character
+84: /// </summary>
+85: /// <param name="str">String for which to calculate the length</param>
+86: /// <returns>Length of the string</returns>
+87: size_t strlen(const char* str)
+88: {
+89:     size_t result = 0;
+90: 
+91:     while (*str++)
+92:     {
+93:         result++;
+94:     }
+95: 
+96:     return result;
+97: }
+98: 
+99: /// <summary>
+100: /// Standard C strncpy function. Copies a string, up to maxLen characters. If maxLen characters are used, the last character is replaced by '\0'
+101: /// </summary>
+102: /// <param name="dest">Pointer to destination buffer</param>
+103: /// <param name="src">Pointer to source buffer</param>
+104: /// <param name="maxLen">Maximum number of characters to copy</param>
+105: /// <returns>Pointer to destination buffer</returns>
+106: char* strncpy(char* dest, const char* src, size_t maxLen)
+107: {
+108:     char* p = dest;
+109: 
+110:     while (maxLen > 0)
+111:     {
+112:         if (*src == '\0')
+113:         {
+114:             break;
+115:         }
+116: 
+117:         *p++ = *src++;
+118:         maxLen--;
+119:     }
+120: 
+121:     if (maxLen == 0)
+122:     {
+123:         p = dest + maxLen - 1;
+124:     }
+125:     if (p >= dest)
+126:         *p = '\0';
+127: 
+128:     return dest;
+129: }
+130: 
+131: /// <summary>
+132: /// Standard C strncat function. Appends a string to the destination, up to maxLen characters. If maxLen characters are used, the last character is replaced by '\0'
+133: /// </summary>
+134: /// <param name="dest">Pointer to destination buffer</param>
+135: /// <param name="src">Pointer to source buffer</param>
+136: /// <param name="maxLen">Maximum number of characters to copy</param>
+137: /// <returns>Pointer to destination buffer</returns>
+138: char* strncat(char* dest, const char* src, size_t maxLen)
+139: {
+140:     char* p = dest;
+141: 
+142:     while ((maxLen > 0) && *p)
+143:     {
+144:         p++;
+145:         maxLen--;
+146:     }
+147: 
+148:     while ((maxLen > 0) && *src)
+149:     {
+150:         *p++ = *src++;
+151:         maxLen--;
+152:     }
+153: 
+154:     if (maxLen == 0)
+155:     {
+156:         p = dest + maxLen - 1;
+157:     }
+158:     if (p >= dest)
+159:         *p = '\0';
+160: 
+161:     return dest;
+162: }
+163: 
+```
+
 ### Using the Logger class {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_USING_THE_LOGGER_CLASS}
 
 #### System.cpp {#TUTORIAL_12_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_3_USING_THE_LOGGER_CLASS_SYSTEMCPP}
 
-We will be using the logger in the `sysinit()` function, to instanntiate it and print the first log message.
+We will be using the logger in the `sysinit()` function, to instantiate it and print the first log message.
 Also, we will print logging info in `Halt()` and `Reboot()`.
 
 Update the file `code/libraries/baremetal/src/System.cpp`
@@ -2247,7 +2917,7 @@ File: code/applications/demo/src/main.cpp
 9: #include <baremetal/Serialization.h>
 10: #include <baremetal/System.h>
 11: #include <baremetal/Timer.h>
-F2:
+12:
 13: LOG_MODULE("main");
 14:
 15: using namespace baremetal;
@@ -2291,7 +2961,7 @@ F2:
 - Line 13: We use `LOG_MODULE` to set the logging name to `main`
 - Line 20: We use `LOG_DEBUG` in this case (to show the color differences) to log the `Hello World!` message
 - Line 29-30: We can now use the variable arguments to shorten the logging for the serial number.
-Notice that we use the format string `%016llx` to write a zero leading 16 digit hexedecimal representation of the serial number
+Notice that we use the format string `%016llx` to write a zero leading 16 digit hexedecimal representation of the serial number, using a signed 64 bit integer
 - Line 34: We use `LOG_ERROR` to write an error message if the mailbox call fails
 - Line 37: We use `LOG_INFO` to write the message
 
@@ -2368,7 +3038,7 @@ We can now configure and build our code, and start debugging.
 
 The application will now print output in color, depending on the log severity level, and also print source name and line number:
 
-<img src="images/tutorial-12-logger.png" alt="Console output" width="600"/>
+<img src="images/tutorial-12-logger.png" alt="Console output" width="800"/>
 
 ## Assertion - Step 4 {#TUTORIAL_12_LOGGER_ASSERTION___STEP_4}
 
@@ -2456,7 +3126,7 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 
 - Line 52: If we build for release, we simply ignore the assertion
 - Line 54: We declare the assertion failure function `AssertionFailed()`.
-This will call the assertion failure handler, which log a `Panic` message and halts the system by default
+This will call the assertion failure handler, which log a `Panic` message and halts the system by default, unless a custom asstion failure handler is installed
 - Line 57: We declare the prototype of the assertion failure handler function `AssertionCallback`
 - Line 59: We declare the function `ResetAssertionCallback()` which resets the assertion failure handler to the default
 - Line 60: We declare the function `SetAssertionCallback()` which sets a custom assertion failure handler
@@ -2570,6 +3240,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 100: } // namespace baremetal
 ```
 
+- Line 53: We declare a static function `AssertionFailedDefault()` as the default assertion failure function
 - Line 58: We define a static variable to point to the set assertion failure handler function, which is set to `AssertionFailedDefault()` by default
 - Line 66-70: We implement the function `AssertionFailed()` which is called when the `assert()` macro fails.
 This will call the set assertion failure handler function
@@ -2735,9 +3406,8 @@ We can now configure and build our code, and start debugging.
 
 When pressing the `p` key, the application will assert and halt:
 
-<img src="images/tutorial-12-assert.png" alt="Console output" width="700"/>
+<img src="images/tutorial-12-assert.png" alt="Console output" width="800"/>
 
 We can now start adding sanity checks that fail assertion if not successful.
 
 Next: [13-board-information](13-board-information.md)
-

@@ -1,5 +1,7 @@
 # Tutorial 03: Setting up project structure {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE}
 
+\todo Update build for RPI3 / 4
+
 @tableofcontents
 
 In order to start larger scale development, as well as to use Visual Studio for CMake project development for baremetal platforms,
@@ -411,7 +413,7 @@ We will create a script for Windows and for Linux to configure the build. They w
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS}
 
-For Raspberry Pi 3:
+##### Raspberry Pi 3
 
 ```bat
 File: tools/configure-rpi3.bat
@@ -426,15 +428,15 @@ File: tools/configure-rpi3.bat
 9: popd
 ```
 
-For Raspberry Pi 4:
+##### Raspberry Pi 4
 
 ```bat
 File: tools/configure-rpi4.bat
 1: @echo off
-2: del /S /f /q cmake-Baremetal-Debug\*.*
-3: rmdir /s /q cmake-Baremetal-Debug
-4: mkdir cmake-Baremetal-Debug
-5: pushd cmake-Baremetal-Debug
+2: del /S /f /q cmake-Baremetal-RPI4-Debug\*.*
+3: rmdir /s /q cmake-Baremetal-RPI4-Debug
+4: mkdir cmake-Baremetal-RPI4-Debug
+5: pushd cmake-Baremetal-RPI4-Debug
 6: 
 7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI4 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 8: 
@@ -526,7 +528,7 @@ tools\configure-rpi3.bat
 
 We will leave the Linux scripts as with build directory `cmake-build`, as we will still build on the command line there.
 
-For Raspberry Pi 3:
+##### Raspberry Pi 3
 
 ```bash
 File: tools/configure-rpi3.sh
@@ -539,13 +541,13 @@ File: tools/configure-rpi3.sh
 7: popd
 ```
 
-For Raspberry Pi 4:
+##### Raspberry Pi 4
 
 ```bash
 File: tools/configure-rpi4.sh
-1: rm -rf cmake-build/
-2: mkdir cmake-build
-3: pushd cmake-build
+1: rm -rf cmake-build-rpi4/
+2: mkdir cmake-build-rpi4
+3: pushd cmake-build-rpi4
 4: 
 5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI4 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 6: 
@@ -554,12 +556,12 @@ File: tools/configure-rpi4.sh
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/configure.sh
+chmod +x tools/configure-rpi3.sh
 ```
 
 Running the script:
 ```bat
-tools/configure.sh
+tools/configure-rpi3.sh
 ```
 
 ```text
@@ -644,42 +646,85 @@ tools/configure.sh
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS}
 
+##### Raspberry Pi 3
+
 ```bat
-File: tools/build-target.bat
+File: tools/build-target-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug --target %1
 ```
 
+##### Raspberry Pi 4
+
+```bat
+File: tools/build-target-rpi4.bat
+1: cmake --build cmake-BareMetal-RPI4-Debug --target %1
+```
+
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX}
+
+##### Raspberry Pi 3
 
 ```bash
 File: tools/build-target.sh
 1: cmake --build cmake-build --target $1
 ```
 
+##### Raspberry Pi 4
+
+```bash
+File: tools/build-target.sh
+1: cmake --build cmake-build-rpi4 --target $1
+```
+
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-target.sh
+chmod +x tools/build-target-rpi3.sh
+chmod +x tools/build-target-rpi4.sh
 ```
 
 ### Building a specific image {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE}
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS}
 
+##### Raspberry Pi 3
+
 ```bat
-File: tools/build-image.bat
-1: cmake --build cmake-BareMetal-Debug --target %1-image
+File: tools/build-image-rpi3.bat
+1: set thisdir=%~dp0
+2: build-target-rpi3 %1-image
+```
+
+##### Raspberry Pi 4
+
+```bat
+File: tools/build-image-rpi4.bat
+1: set thisdir=%~dp0
+2: build-target-rpi4 %1-image
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX}
 
+##### Raspberry Pi 3
+
 ```bash
-File: tools/build-image.sh
-1: cmake --build cmake-build --target $1-image
+File: tools/build-image-rpi3.sh
+1: thisdir=$(dirname "$0")
+2: $thisdir/build-target-rpi3 $1-image
+
+```
+
+##### Raspberry Pi 4
+
+```bash
+File: tools/build-image-rpi4.sh
+1: thisdir=$(dirname "$0")
+2: $thisdir/build-target-rpi4 $1-image
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-image.sh
+chmod +x tools/build-image-rpi3.sh
+chmod +x tools/build-image-rpi4.sh
 ```
 
 Note we simple add the `-image` suffix to make sure we build the corresponding image.
@@ -688,16 +733,25 @@ Note we simple add the `-image` suffix to make sure we build the corresponding i
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS}
 
+##### RaspberryPi 3
+
 ```bat
-File: tools/build-all.bat
+File: tools/build-all-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug
+```
+
+##### RaspberryPi 4
+
+```bat
+File: tools/build-all-rpi4.bat
+1: cmake --build cmake-BareMetal-RPI4-Debug
 ```
 
 Specifying no target means building all targets.
 
 Running the build:
 ```bat
-tools\build-all.bat
+tools\build-all-rpi3.bat
 ```
 
 ```text
@@ -706,21 +760,31 @@ tools\build-all.bat
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
 
+##### RaspberryPi 3
+
 ```bash
-File: tools/build-all.sh
+File: tools/build-all-rpi3.sh
 1: cmake --build cmake-build
+```
+
+##### RaspberryPi 4
+
+```bash
+File: tools/build-all-rpi4.sh
+1: cmake --build cmake-build-rpi4
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-all.sh
+chmod +x tools/build-all-rpi3.sh
+chmod +x tools/build-all-rpi4.sh
 ```
 
 Specifying no target means building all targets.
 
 Running the build:
 ```bash
-tools/build-all.sh
+tools/build-all-rpi.sh
 ```
 
 ```text
@@ -734,14 +798,23 @@ There is no target to clean a specific target though.
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS}
 
+##### RaspberryPi 3
+
 ```bat
-File: tools/clean-all.bat
+File: tools/clean-all-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug --target clean
+```
+
+##### RaspberryPi 4
+
+```bat
+File: tools/clean-all-rpi4.bat
+1: cmake --build cmake-BareMetal-RPI4-Debug --target clean
 ```
 
 Running the build:
 ```bat
-tools\clean-all.bat
+tools\clean-all-rpi3.bat
 ```
 
 ```text
@@ -751,19 +824,29 @@ Cleaning... 4 files.
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX}
 
+##### RaspberryPi 3
+
 ```bash
-File: tools/clean-all.sh
+File: tools/clean-all-rpi3.sh
 1: cmake --build cmake-build --target clean
+```
+
+##### RaspberryPi 4
+
+```bash
+File: tools/clean-all-rpi4.sh
+1: cmake --build cmake-build-rpi4 --target clean
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/clean-all.sh
+chmod +x tools/clean-all-rpi3.sh
+chmod +x tools/clean-all-rpi4.sh
 ```
 
 Running the build:
 ```bash
-tools/clean-all.sh
+tools/clean-all-rpi3.sh
 ```
 
 ```text
@@ -775,47 +858,47 @@ Cleaning... 4 files.
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS}
 
-Start QEMU listening to UART0 on Raspberry Pi 3
+##### Start QEMU listening to UART0 on Raspberry Pi 3
 
 ```bat
 File: tools/startQEMU-image-uart0-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target %1
+4: call %thisdir%\build-target-rpi3 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
-Start QEMU listening to UART1 on Raspberry Pi 3
+##### Start QEMU listening to UART1 on Raspberry Pi 3
 
 ```bat
 File: tools/startQEMU-image-uart1-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target %1
+4: call %thisdir%\build-target-rpi3 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
-Start QEMU listening to UART0 on Raspberry Pi 4
+##### Start QEMU listening to UART0 on Raspberry Pi 4
 
 ```bat
 File: tools/startQEMU-image-uart0-rpi4.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target %1
+4: call %thisdir%\build-target-rpi4 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
-Start QEMU listening to UART1 on Raspberry Pi 4
+##### Start QEMU listening to UART1 on Raspberry Pi 4
 
 ```bat
 File: tools/startQEMU-image-uart1-rpi4.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target %1
+4: call %thisdir%\build-target-rpi4 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
@@ -827,9 +910,10 @@ Explanation:
 - We do not start the system immediately, but let it wait for gdb (`-S`)
 - QEMU will start a gdb server at port 1234
 
-When starting QEMU on UART0:
+When starting QEMU with UART0 on Raspberry Pi 3:
+
 ```bat
-tools\startQEMU-image-uart0.bat demo
+tools\startQEMU-image-uart0-rpi3.bat demo
 ```
 
 ```text
@@ -845,7 +929,9 @@ This may indicate that pixbuf loaders or the mime database could not be found.
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX}
 
-Start QEMU listening to UART0 on Raspberry Pi 3
+As stated, at the moment of writing this tutorial, Linux only support emulation of Raspberry Pi 3.
+
+##### Start QEMU listening to UART0 on Raspberry Pi 3
 
 ```bash
 File: tools/startQEMU-image-uart0.sh
@@ -859,20 +945,7 @@ File: tools/startQEMU-image-uart0.sh
 8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
 ```
 
-Start QEMU listening to UART1 on Raspberry Pi 3
-
-```bash
-File: tools/startQEMU-image-uart1.sh
-1: thisdir=$(dirname "$0")
-2: echo thisdir=$thisdir
-3: 
-4: echo "$thisdir/build-target.sh $1"
-5: $thisdir/build-target.sh $1
-6: 
-7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
-8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
-9: 
-```
+##### Start QEMU listening to UART1 on Raspberry Pi 3
 
 ```bash
 File: tools/startQEMU-image-uart1.sh

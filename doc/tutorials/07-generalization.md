@@ -1122,14 +1122,14 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/IGPIOPin.h>
 43: #include <baremetal/MemoryAccess.h>
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: // Physical GPIO pin (i.e. available on GPIO header)
 48: class PhysicalGPIOPin : public IGPIOPin
 49: {
@@ -1140,7 +1140,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 54:     GPIOPullMode    m_pullMode;
 55:     bool            m_value;
 56:     IMemoryAccess&  m_memoryAccess;
-57: 
+57:
 58: public:
 59:     // Creates a virtual GPIO pin
 60:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());

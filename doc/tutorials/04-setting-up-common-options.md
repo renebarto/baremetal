@@ -974,7 +974,7 @@ File: CMakeLists.txt
 198:     set(LINKER_OPTIONS ${LINKER_OPTIONS_DEBUG})
 ```
 
-#### Assmbler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ASSMBLER_OPTIONS}
+#### Assembler options {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_CONFIGURE_AND_BUILD_COMPILING_STARTUP_CODE_ASSEMBLER_OPTIONS}
 
 The complete list below are all compiler options:
 
@@ -1466,7 +1466,13 @@ Here we see a 2 commands being performed inside a command shell:
 Start QEMU listening to UART1 for the demo project:
 
 ```bat
-tools\startQEMU-image-uart1.bat demo
+tools\startQEMU-image-uart0-rpi3.bat demo
+```
+
+or
+
+```bat
+tools\startQEMU-image-uart0-rpi4.bat demo
 ```
 
 Start debugging as shown in [Visual Studio CMake integration](#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION). Make sure the demo applications is selected as startup project.

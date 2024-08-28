@@ -1956,7 +1956,7 @@ This register sets the return address for when a EL2 exception was executed.
 
 As said this is all very intricate and detailed, forcing one to dive into all the details of quite some specific ARM registers. You could also simply decide to accept what was explained here, and use the code.
 
-#### Update baremetal.ld {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_SYSCONFIGH}
+#### Update baremetal.ld {#TUTORIAL_05_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE_UPDATE_BAREMETALLD}
 
 As said, we no longer use the variable `__bss_size`. So we will remove it from `baremetal.ld`.
 

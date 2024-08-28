@@ -17,7 +17,7 @@ This tutorial will result in (next to the main project structure):
 ## Retrieving board information {#TUTORIAL_13_BOARD_INFORMATION_RETRIEVING_BOARD_INFORMATION}
 
 In order to start with memory management, we need to know how much memory is available.
-Next to this, we wish to have insight in the actual hardware, we're running on.
+Next to this, we wish to have insight in the actual hardware we're running on.
 
 So let's gather some information, and print it.
 
@@ -39,45 +39,45 @@ Update the file `CMakeLists.txt`.
 ```cmake
 File: CMakeLists.txt
 ...
-61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
+66: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+67: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+68: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
+69: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
 ...
-83: if (BAREMETAL_COLOR_LOGGING)
-84:     set(BAREMETAL_COLOR_OUTPUT 1)
-85: else ()
-86:     set(BAREMETAL_COLOR_OUTPUT 0)
-87: endif()
-88: if (BAREMETAL_TRACE_DEBUG)
-89:     set(BAREMETAL_DEBUG_TRACING 1)
-90: else ()
-91:     set(BAREMETAL_DEBUG_TRACING 0)
-92: endif()
-93: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-94:
-95: set(DEFINES_C
-96:     PLATFORM_BAREMETAL
-97:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-98:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
-99:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
-100:     USE_PHYSICAL_COUNTER
-101:     BAREMETAL_MAJOR=${VERSION_MAJOR}
-102:     BAREMETAL_MINOR=${VERSION_MINOR}
-103:     BAREMETAL_LEVEL=${VERSION_LEVEL}
-104:     BAREMETAL_BUILD=${VERSION_BUILD}
-105:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
-106:     )
+92: if (BAREMETAL_COLOR_LOGGING)
+93:     set(BAREMETAL_COLOR_OUTPUT 1)
+94: else ()
+95:     set(BAREMETAL_COLOR_OUTPUT 0)
+96: endif()
+97: if (BAREMETAL_TRACE_DEBUG)
+98:     set(BAREMETAL_DEBUG_TRACING 1)
+99: else ()
+100:     set(BAREMETAL_DEBUG_TRACING 0)
+101: endif()
+102: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+103: 
+104: set(DEFINES_C
+105:     PLATFORM_BAREMETAL
+106:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+107:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+108:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
+109:     USE_PHYSICAL_COUNTER
+110:     BAREMETAL_MAJOR=${VERSION_MAJOR}
+111:     BAREMETAL_MINOR=${VERSION_MINOR}
+112:     BAREMETAL_LEVEL=${VERSION_LEVEL}
+113:     BAREMETAL_BUILD=${VERSION_BUILD}
+114:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
+115:     )
 ...
-270: message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
-271: message(STATUS "-- Debug tracing output:${BAREMETAL_TRACE_DEBUG}")
+284: message(STATUS "-- Color log output:    ${BAREMETAL_COLOR_LOGGING}")
+285: message(STATUS "-- Debug tracing output:${BAREMETAL_TRACE_DEBUG}")
 ...
 ```
 
-- Line 64: We add the variable `BAREMETAL_TRACE_DEBUG` which will enable debug trace output. It is set to `OFF` by default.
-- Line 88-92: We set variable `BAREMETAL_DEBUG_TRACING` to 1 if `BAREMETAL_TRACE_DEBUG` is `ON`, and 0 otherwise
-- Line 99: We set the compiler definition `BAREMETAL_DEBUG_TRACING` to the value of the `BAREMETAL_DEBUG_TRACING` variable
-- Line 271: We print the value of the `BAREMETAL_TRACE_DEBUG` variable
+- Line 69: We add the variable `BAREMETAL_TRACE_DEBUG` which will enable debug trace output. It is set to `OFF` by default.
+- Line 97-101: We set variable `BAREMETAL_DEBUG_TRACING` to 1 if `BAREMETAL_TRACE_DEBUG` is `ON`, and 0 otherwise
+- Line 108: We set the compiler definition `BAREMETAL_DEBUG_TRACING` to the value of the `BAREMETAL_DEBUG_TRACING` variable
+- Line 285: We print the value of the `BAREMETAL_TRACE_DEBUG` variable
 
 ### RPIProperties.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESH}
 
@@ -283,340 +283,346 @@ Update the file `code/libraries/baremetal/src/RPIProperties.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/RPIProperties.cpp
 ...
-66: /// <summary>
-67: /// Mailbox property tag structure for requesting MAC address.
-68: /// </summary>
-69: struct PropertyMACAddress
-70: {
-71:     /// Tag ID, must be equal to PROPTAG_GET_MAC_ADDRESS.
-72:     Property tag;
-73:     /// MAC Address (6 bytes)
-74:     uint8    address[6];
-75:     /// Padding to align to 4 bytes
-76:     uint8    padding[2];
-77: } PACKED;
-78:
-79: /// <summary>
-80: /// Mailbox property tag structure for requesting memory information.
-81: /// </summary>
-82: struct PropertyMemory
-83: {
-84:     /// Tag ID, must be equal to PROPTAG_GET_ARM_MEMORY or PROPTAG_GET_VC_MEMORY.
-85:     Property tag;
-86:     /// Base address
-87:     uint32   baseAddress;
-88:     /// Size in bytes
-89:     uint32   size;
-90: } PACKED;
-91:
+40: #include <baremetal/RPIProperties.h>
+41: #include <baremetal/BCMRegisters.h>
+42: #include <baremetal/Logger.h>
+43: #include <baremetal/RPIPropertiesInterface.h>
+44: #include <baremetal/Util.h>
 ...
-117: /// <summary>
-118: /// Retrieve FW revision number
-119: /// </summary>
-120: /// <param name="revision">FW revision (out)</param>
-121: /// <returns>Return true on success, false on failure</returns>
-122: bool RPIProperties::GetFirmwareRevision(uint32& revision)
-123: {
-124:     PropertySimple         tag{};
-125:     RPIPropertiesInterface interface(m_mailbox);
-126:
-127:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_FIRMWARE_REVISION, &tag, sizeof(tag));
-128:
-129: #if BAREMETAL_DEBUG_TRACING
-130:     LOG_DEBUG("GetFirmwareRevision");
-131:
-132:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-133: #endif
-134:     if (result)
-135:     {
-136:         revision = tag.value;
-137: #if BAREMETAL_DEBUG_TRACING
-138:         LOG_DEBUG("Revision: %08lx", tag.value);
-139: #endif
-140:     }
-141:
-142:     return result;
-143: }
-144:
-145: /// <summary>
-146: /// Retrieve Raspberry Pi board model
-147: /// </summary>
-148: /// <param name="model">Board model (out)</param>
-149: /// <returns>Return true on success, false on failure</returns>
-150: bool RPIProperties::GetBoardModel(BoardModel& model)
-151: {
-152:     PropertySimple         tag{};
-153:     RPIPropertiesInterface interface(m_mailbox);
-154:
-155:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_MODEL, &tag, sizeof(tag));
-156:
-157: #if BAREMETAL_DEBUG_TRACING
-158:     LOG_DEBUG("GetBoardModel");
-159:
-160:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-161: #endif
-162:     if (result)
-163:     {
-164:         model = static_cast<BoardModel>(tag.value);
-165: #if BAREMETAL_DEBUG_TRACING
-166:         LOG_DEBUG("Model: %08lx", tag.value);
-167: #endif
-168:     }
-169:
-170:     return result;
-171: }
-172:
-173: /// <summary>
-174: /// Retrieve Raspberry Pi board revision
-175: /// </summary>
-176: /// <param name="revision">Board revision (out)</param>
-177: /// <returns>Return true on success, false on failure</returns>
-178: bool RPIProperties::GetBoardRevision(BoardRevision& revision)
-179: {
-180:     PropertySimple         tag{};
-181:     RPIPropertiesInterface interface(m_mailbox);
-182:
-183:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_REVISION, &tag, sizeof(tag));
-184:
-185: #if BAREMETAL_DEBUG_TRACING
-186:     LOG_DEBUG("GetBoardRevision");
-187:
-188:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-189: #endif
-190:     if (result)
-191:     {
-192:         revision = static_cast<BoardRevision>(tag.value);
-193: #if BAREMETAL_DEBUG_TRACING
-194:         LOG_DEBUG("Revision: %08lx", tag.value);
-195: #endif
-196:     }
-197:
-198:     return result;
-199: }
-200:
-201: /// <summary>
-202: /// Retrieve network MAC address
-203: /// </summary>
-204: /// <param name="address">MAC address (out)</param>
-205: /// <returns>Return true on success, false on failure</returns>
-206: bool RPIProperties::GetBoardMACAddress(uint8 address[6])
-207: {
-208:     PropertyMACAddress     tag{};
-209:     RPIPropertiesInterface interface(m_mailbox);
-210:
-211:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_MAC_ADDRESS, &tag, sizeof(tag));
-212:
-213: #if BAREMETAL_DEBUG_TRACING
-214:     LOG_DEBUG("GetBoardMACAddress");
-215:
-216:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-217: #endif
-218:     if (result)
-219:     {
-220:         memcpy(address, tag.address, sizeof(tag.address));
-221: #if BAREMETAL_DEBUG_TRACING
-222:         LOG_DEBUG("Address:");
-223:         GetConsole().Write(address, sizeof(tag.address));
-224: #endif
-225:     }
-226:
-227:     return result;
-228: }
-229:
-230: /// <summary>
-231: /// Request board serial number
-232: /// </summary>
-233: /// <param name="serial">On return, set to serial number, if successful</param>
-234: /// <returns>Return true on success, false on failure</returns>
-235: bool RPIProperties::GetBoardSerial(uint64 &serial)
-236: {
-237:     PropertySerial         tag{};
-238:     RPIPropertiesInterface interface(m_mailbox);
-239:
-240:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
-241:
-242: #if BAREMETAL_DEBUG_TRACING
-243:     LOG_DEBUG("GetBoardSerial");
-244:
-245:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-246: #endif
-247:     if (result)
-248:     {
-249:         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
-250: #if BAREMETAL_DEBUG_TRACING
-251:         LOG_DEBUG("Serial: %016llx", serial);
-252: #endif
-253:     }
-254:
-255:     return result;
-256: }
-257:
-258: /// <summary>
-259: /// Retrieve ARM assigned memory base address and size
-260: /// </summary>
-261: /// <param name="baseAddress">ARM assigned base address (out)</param>
-262: /// <param name="size">ARM assigned memory size in bytes (out)</param>
-263: /// <returns>Return true on success, false on failure</returns>
-264: bool RPIProperties::GetARMMemory(uint32& baseAddress, uint32& size)
-265: {
-266:     PropertyMemory         tag{};
-267:     RPIPropertiesInterface interface(m_mailbox);
-268:
-269:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_ARM_MEMORY, &tag, sizeof(tag));
-270:
-271: #if BAREMETAL_DEBUG_TRACING
-272:     LOG_DEBUG("GetARMMemory");
-273:
-274:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-275: #endif
-276:     if (result)
-277:     {
-278:         baseAddress = tag.baseAddress;
-279:         size = tag.size;
-280: #if BAREMETAL_DEBUG_TRACING
-281:         LOG_DEBUG("Base address: %08lx", baseAddress);
-282:         LOG_DEBUG("Size:         %08lx", size);
-283: #endif
-284:     }
-285:
-286:     return result;
-287: }
-288:
-289: /// <summary>
-290: /// Retrieve VideoCore assigned memory base address and size
-291: /// </summary>
-292: /// <param name="baseAddress">VideoCore assigned base address (out)</param>
-293: /// <param name="size">VideoCore assigned memory size in bytes (out)</param>
-294: /// <returns>Return true on success, false on failure</returns>
-295: bool RPIProperties::GetVCMemory(uint32& baseAddress, uint32& size)
-296: {
-297:     PropertyMemory         tag{};
-298:     RPIPropertiesInterface interface(m_mailbox);
-299:
-300:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_VC_MEMORY, &tag, sizeof(tag));
-301:
-302: #if BAREMETAL_DEBUG_TRACING
-303:     LOG_DEBUG("GetARMMemory");
-304:
-305:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-306: #endif
-307:     if (result)
-308:     {
-309:         baseAddress = tag.baseAddress;
-310:         size = tag.size;
-311: #if BAREMETAL_DEBUG_TRACING
-312:         LOG_DEBUG("Base address: %08lx", baseAddress);
-313:         LOG_DEBUG("Size:         %08lx", size);
-314: #endif
-315:     }
-316:
-317:     return result;
-318: }
-319:
-320: /// <summary>
-321: /// Get clock rate for specified clock
-322: /// </summary>
-323: /// <param name="clockID">ID of clock for which frequency is to be retrieved</param>
-324: /// <param name="freqHz">Clock frequencyy in Hz (out)</param>
-325: /// <returns>Return true on success, false on failure</returns>
-326: bool RPIProperties::GetClockRate(ClockID clockID, uint32& freqHz)
-327: {
-328:     PropertyClockRate      tag{};
-329:     RPIPropertiesInterface interface(m_mailbox);
-330:
-331:     tag.clockID = static_cast<uint32>(clockID);
-332:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
-333:
-334: #if BAREMETAL_DEBUG_TRACING
-335:     LOG_DEBUG("GetClockRate");
-336:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
-337:
-338:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-339: #endif
-340:     if (result)
-341:     {
-342:         freqHz = tag.rate;
-343: #if BAREMETAL_DEBUG_TRACING
-344:         LOG_DEBUG("Rate:       %08lx", tag.rate);
-345: #endif
-346:     }
-347:
-348:     return result;
-349: }
-350:
-351: /// <summary>
-352: /// Get measured clock rate for specified clock
-353: /// </summary>
-354: /// <param name="clockID">ID of clock for which frequency is to be retrieved</param>
-355: /// <param name="freqHz">Clock frequencyy in Hz (out)</param>
-356: /// <returns>Return true on success, false on failure</returns>
-357: bool RPIProperties::GetMeasuredClockRate(ClockID clockID, uint32& freqHz)
-358: {
-359:     PropertyClockRate      tag{};
-360:     RPIPropertiesInterface interface(m_mailbox);
-361:
-362:     tag.clockID = static_cast<uint32>(clockID);
-363:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
-364:
-365: #if BAREMETAL_DEBUG_TRACING
-366:     LOG_DEBUG("GetMeasuredClockRate");
-367:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
-368:
-369:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
-370: #endif
-371:     if (result)
-372:     {
-373:         freqHz = tag.rate;
-374: #if BAREMETAL_DEBUG_TRACING
-375:         LOG_DEBUG("Rate:       %08lx", tag.rate);
-376: #endif
-377:     }
-378:
-379:     return result;
-380: }
-381:
-382: /// <summary>
-383: /// Set clock rate for specified clock
-384: /// </summary>
-385: /// <param name="clockID">ID of clock to be set</param>
-386: /// <param name="freqHz">Clock frequencyy in Hz</param>
-387: /// <param name="skipTurbo">When true, do not switch to turbo setting if ARM clock is above default.
-388: /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.</param>
-389: /// <returns>Return true on success, false on failure</returns>
-390: bool RPIProperties::SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo)
-391: {
-392:     PropertyClockRate      tag{};
-393:     RPIPropertiesInterface interface(m_mailbox);
-394:
-395:     tag.clockID   = static_cast<uint32>(clockID);
-396:     tag.rate      = freqHz;
-397:     tag.skipTurbo = skipTurbo;
-398:     auto result   = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
-399:
-400:     // Do not write to console here, as this call is needed to set up the console
-401:
-402:     return result;
-403: }
-404:
-405: } // namespace baremetal
-...
+78: /// <summary>
+79: /// Mailbox property tag structure for requesting MAC address.
+80: /// </summary>
+81: struct PropertyMACAddress
+82: {
+83:     /// Tag ID, must be equal to PROPTAG_GET_MAC_ADDRESS.
+84:     Property tag;
+85:     /// MAC Address (6 bytes)
+86:     uint8    address[6];
+87:     /// Padding to align to 4 bytes
+88:     uint8    padding[2];
+89: } PACKED;
+90: 
+91: /// <summary>
+92: /// Mailbox property tag structure for requesting memory information.
+93: /// </summary>
+94: struct PropertyMemory
+95: {
+96:     /// Tag ID, must be equal to PROPTAG_GET_ARM_MEMORY or PROPTAG_GET_VC_MEMORY.
+97:     Property tag;
+98:     /// Base address
+99:     uint32   baseAddress;
+100:     /// Size in bytes
+101:     uint32   size;
+102: } PACKED;
+103: 
+104: ...
+113: /// <summary>
+114: /// Retrieve FW revision number
+115: /// </summary>
+116: /// <param name="revision">FW revision (out)</param>
+117: /// <returns>Return true on success, false on failure</returns>
+118: bool RPIProperties::GetFirmwareRevision(uint32& revision)
+119: {
+120:     PropertySimple         tag{};
+121:     RPIPropertiesInterface interface(m_mailbox);
+122: 
+123:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_FIRMWARE_REVISION, &tag, sizeof(tag));
+124: 
+125: #if BAREMETAL_DEBUG_TRACING
+126:     LOG_DEBUG("GetFirmwareRevision");
+127: 
+128:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+129: #endif
+130:     if (result)
+131:     {
+132:         revision = tag.value;
+133: #if BAREMETAL_DEBUG_TRACING
+134:         LOG_DEBUG("Revision: %08lx", tag.value);
+135: #endif
+136:     }
+137: 
+138:     return result;
+139: }
+140: 
+141: /// <summary>
+142: /// Retrieve Raspberry Pi board model
+143: /// </summary>
+144: /// <param name="model">Board model (out)</param>
+145: /// <returns>Return true on success, false on failure</returns>
+146: bool RPIProperties::GetBoardModel(BoardModel& model)
+147: {
+148:     PropertySimple         tag{};
+149:     RPIPropertiesInterface interface(m_mailbox);
+150: 
+151:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_MODEL, &tag, sizeof(tag));
+152: 
+153: #if BAREMETAL_DEBUG_TRACING
+154:     LOG_DEBUG("GetBoardModel");
+155: 
+156:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+157: #endif
+158:     if (result)
+159:     {
+160:         model = static_cast<BoardModel>(tag.value);
+161: #if BAREMETAL_DEBUG_TRACING
+162:         LOG_DEBUG("Model: %08lx", tag.value);
+163: #endif
+164:     }
+165: 
+166:     return result;
+167: }
+168: 
+169: /// <summary>
+170: /// Retrieve Raspberry Pi board revision
+171: /// </summary>
+172: /// <param name="revision">Board revision (out)</param>
+173: /// <returns>Return true on success, false on failure</returns>
+174: bool RPIProperties::GetBoardRevision(BoardRevision& revision)
+175: {
+176:     PropertySimple         tag{};
+177:     RPIPropertiesInterface interface(m_mailbox);
+178: 
+179:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_REVISION, &tag, sizeof(tag));
+180: 
+181: #if BAREMETAL_DEBUG_TRACING
+182:     LOG_DEBUG("GetBoardRevision");
+183: 
+184:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+185: #endif
+186:     if (result)
+187:     {
+188:         revision = static_cast<BoardRevision>(tag.value);
+189: #if BAREMETAL_DEBUG_TRACING
+190:         LOG_DEBUG("Revision: %08lx", tag.value);
+191: #endif
+192:     }
+193: 
+194:     return result;
+195: }
+196: 
+197: /// <summary>
+198: /// Retrieve network MAC address
+199: /// </summary>
+200: /// <param name="address">MAC address (out)</param>
+201: /// <returns>Return true on success, false on failure</returns>
+202: bool RPIProperties::GetBoardMACAddress(uint8 address[6])
+203: {
+204:     PropertyMACAddress     tag{};
+205:     RPIPropertiesInterface interface(m_mailbox);
+206: 
+207:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_MAC_ADDRESS, &tag, sizeof(tag));
+208: 
+209: #if BAREMETAL_DEBUG_TRACING
+210:     LOG_DEBUG("GetBoardMACAddress");
+211: 
+212:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+213: #endif
+214:     if (result)
+215:     {
+216:         memcpy(address, tag.address, sizeof(tag.address));
+217: #if BAREMETAL_DEBUG_TRACING
+218:         LOG_DEBUG("Address:");
+219:         GetConsole().Write(address, sizeof(tag.address));
+220: #endif
+221:     }
+222: 
+223:     return result;
+224: }
+225: 
+226: /// <summary>
+227: /// Request board serial number
+228: /// </summary>
+229: /// <param name="serial">On return, set to serial number, if successful</param>
+230: /// <returns>Return true on success, false on failure</returns>
+231: bool RPIProperties::GetBoardSerial(uint64 &serial)
+232: {
+233:     PropertySerial         tag{};
+234:     RPIPropertiesInterface interface(m_mailbox);
+235: 
+236:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
+237: 
+238: #if BAREMETAL_DEBUG_TRACING
+239:     LOG_DEBUG("GetBoardSerial");
+240: 
+241:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+242: #endif
+243:     if (result)
+244:     {
+245:         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
+246: #if BAREMETAL_DEBUG_TRACING
+247:         LOG_DEBUG("Serial: %016llx", serial);
+248: #endif
+249:     }
+250: 
+251:     return result;
+252: }
+253: 
+254: /// <summary>
+255: /// Retrieve ARM assigned memory base address and size
+256: /// </summary>
+257: /// <param name="baseAddress">ARM assigned base address (out)</param>
+258: /// <param name="size">ARM assigned memory size in bytes (out)</param>
+259: /// <returns>Return true on success, false on failure</returns>
+260: bool RPIProperties::GetARMMemory(uint32& baseAddress, uint32& size)
+261: {
+262:     PropertyMemory         tag{};
+263:     RPIPropertiesInterface interface(m_mailbox);
+264: 
+265:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_ARM_MEMORY, &tag, sizeof(tag));
+266: 
+267: #if BAREMETAL_DEBUG_TRACING
+268:     LOG_DEBUG("GetARMMemory");
+269: 
+270:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+271: #endif
+272:     if (result)
+273:     {
+274:         baseAddress = tag.baseAddress;
+275:         size = tag.size;
+276: #if BAREMETAL_DEBUG_TRACING
+277:         LOG_DEBUG("Base address: %08lx", baseAddress);
+278:         LOG_DEBUG("Size:         %08lx", size);
+279: #endif
+280:     }
+281: 
+282:     return result;
+283: }
+284: 
+285: /// <summary>
+286: /// Retrieve VideoCore assigned memory base address and size
+287: /// </summary>
+288: /// <param name="baseAddress">VideoCore assigned base address (out)</param>
+289: /// <param name="size">VideoCore assigned memory size in bytes (out)</param>
+290: /// <returns>Return true on success, false on failure</returns>
+291: bool RPIProperties::GetVCMemory(uint32& baseAddress, uint32& size)
+292: {
+293:     PropertyMemory         tag{};
+294:     RPIPropertiesInterface interface(m_mailbox);
+295: 
+296:     auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_VC_MEMORY, &tag, sizeof(tag));
+297: 
+298: #if BAREMETAL_DEBUG_TRACING
+299:     LOG_DEBUG("GetARMMemory");
+300: 
+301:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+302: #endif
+303:     if (result)
+304:     {
+305:         baseAddress = tag.baseAddress;
+306:         size = tag.size;
+307: #if BAREMETAL_DEBUG_TRACING
+308:         LOG_DEBUG("Base address: %08lx", baseAddress);
+309:         LOG_DEBUG("Size:         %08lx", size);
+310: #endif
+311:     }
+312: 
+313:     return result;
+314: }
+315: 
+316: /// <summary>
+317: /// Get clock rate for specified clock
+318: /// </summary>
+319: /// <param name="clockID">ID of clock for which frequency is to be retrieved</param>
+320: /// <param name="freqHz">Clock frequencyy in Hz (out)</param>
+321: /// <returns>Return true on success, false on failure</returns>
+322: bool RPIProperties::GetClockRate(ClockID clockID, uint32& freqHz)
+323: {
+324:     PropertyClockRate      tag{};
+325:     RPIPropertiesInterface interface(m_mailbox);
+326: 
+327:     tag.clockID = static_cast<uint32>(clockID);
+328:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
+329: 
+330: #if BAREMETAL_DEBUG_TRACING
+331:     LOG_DEBUG("GetClockRate");
+332:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
+333: 
+334:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+335: #endif
+336:     if (result)
+337:     {
+338:         freqHz = tag.rate;
+339: #if BAREMETAL_DEBUG_TRACING
+340:         LOG_DEBUG("Rate:       %08lx", tag.rate);
+341: #endif
+342:     }
+343: 
+344:     return result;
+345: }
+346: 
+347: /// <summary>
+348: /// Get measured clock rate for specified clock
+349: /// </summary>
+350: /// <param name="clockID">ID of clock for which frequency is to be retrieved</param>
+351: /// <param name="freqHz">Clock frequencyy in Hz (out)</param>
+352: /// <returns>Return true on success, false on failure</returns>
+353: bool RPIProperties::GetMeasuredClockRate(ClockID clockID, uint32& freqHz)
+354: {
+355:     PropertyClockRate      tag{};
+356:     RPIPropertiesInterface interface(m_mailbox);
+357: 
+358:     tag.clockID = static_cast<uint32>(clockID);
+359:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
+360: 
+361: #if BAREMETAL_DEBUG_TRACING
+362:     LOG_DEBUG("GetMeasuredClockRate");
+363:     LOG_DEBUG("Clock ID:   %08lx", tag.clockID);
+364: 
+365:     LOG_DEBUG("Result: %s", result ? "OK" : "Fail");
+366: #endif
+367:     if (result)
+368:     {
+369:         freqHz = tag.rate;
+370: #if BAREMETAL_DEBUG_TRACING
+371:         LOG_DEBUG("Rate:       %08lx", tag.rate);
+372: #endif
+373:     }
+374: 
+375:     return result;
+376: }
+377: 
+378: /// <summary>
+379: /// Set clock rate for specified clock
+380: /// </summary>
+381: /// <param name="clockID">ID of clock to be set</param>
+382: /// <param name="freqHz">Clock frequencyy in Hz</param>
+383: /// <param name="skipTurbo">When true, do not switch to turbo setting if ARM clock is above default.
+384: /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.</param>
+385: /// <returns>Return true on success, false on failure</returns>
+386: bool RPIProperties::SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo)
+387: {
+388:     PropertyClockRate      tag{};
+389:     RPIPropertiesInterface interface(m_mailbox);
+390: 
+391:     tag.clockID   = static_cast<uint32>(clockID);
+392:     tag.rate      = freqHz;
+393:     tag.skipTurbo = skipTurbo;
+394:     auto result   = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
+395: 
+396:     // Do not write to console here, as this call is needed to set up the console
+397: 
+398:     return result;
+399: }
+400: 
+401: } // namespace baremetal
 ```
 
-- Line 69-77: We declare the tag structure to hold the MAC addres `PropertyMACAddress`
-- Line 82-90: We declare the tag structure to memory information `PropertyMemory`
-- Line 122-143: We implement the member function `GetFirmwareRevision()`.
+- Line 42: We need to include the header for the `Logger` class
+- Line 81-89: We declare the tag structure to hold the MAC addres `PropertyMACAddress`
+- Line 94-102: We declare the tag structure to memory information `PropertyMemory`
+- Line 118-139: We implement the member function `GetFirmwareRevision()`.
 Note that debug statements are added, which print more information in case `BAREMETAL_DEBUG_TRACING` is defined
-- Line 150-171: We implement the member function `GetBoardModel()`
-- Line 178-199: We implement the member function `GetBoardRevision()`
-- Line 206-228: We implement the member function `GetBoardMACAddress()`
-- Line 235-256: We add tracing information to the member function `GetBoardSerial()`
-- Line 264-287: We implement the member function `GetARMMemory()`
-- Line 295-318: We implement the member function `GetVCMemory()`
-- Line 326-349: We implement the member function `GetClockRate()`.
+- Line 146-167: We implement the member function `GetBoardModel()`
+- Line 174-195: We implement the member function `GetBoardRevision()`
+- Line 202-224: We implement the member function `GetBoardMACAddress()`
+- Line 231-252: We add tracing information to the member function `GetBoardSerial()`
+- Line 260-283: We implement the member function `GetARMMemory()`
+- Line 291-314: We implement the member function `GetVCMemory()`
+- Line 322-345: We implement the member function `GetClockRate()`.
 Note that this re-uses the property structure `PropertyClockRate`
-- Line 357-380: We implement the member function `GetMeasuredClockRate()`.
+- Line 353-376: We implement the member function `GetMeasuredClockRate()`.
 Note that this re-uses the property structure `PropertyClockRate`
-- Line 390-403: Note that we do not add tracing to the method `SetClockRate()`.
+- Line 386-399: Note that we do not add tracing to the method `SetClockRate()`.
 This is because we need to set the clock rate in order to set up UART0
 
 ### MachineInfo.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOH}
@@ -683,13 +689,13 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 54: {
 55:     /// @ brief BCM2835 as used in Raspberry Pi Model 1 boards
 56:     BCM2835,
-57:     /// @ brief BCM2835 as used in older Raspberry Pi Model 2 boards
+57:     /// @ brief BCM2836 as used in older Raspberry Pi Model 2 boards
 58:     BCM2836,
-59:     /// @ brief BCM2835 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
+59:     /// @ brief BCM2837 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
 60:     BCM2837,
-61:     /// @ brief BCM2835 as used in Raspberry Pi Model 4 boards
+61:     /// @ brief BCM2711 as used in Raspberry Pi Model 4 boards
 62:     BCM2711,
-63:     /// @ brief BCM2835 as used in Raspberry Pi Model 5 boards
+63:     /// @ brief BCM2712 as used in Raspberry Pi Model 5 boards
 64:     BCM2712,
 65:     /// @brief SoC unknown / not set / invalid
 66:     Unknown,
@@ -788,7 +794,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
   - Line 128: We declare the method `GetFWRevision()` which returns the board firmware revision
   - Line 129: We declare the method `GetMACAddress()` which returns the ethernet MAC address
   - Line 130: We declare the method `GetARMMemoryBaseAddress()` which returns the ARM assign memory base address (normally 0)
-  - Line 131: We declare the method `GetARMMemorySize()` which returns the ARM assigned memory size in bytes (up to 1Gb border)
+  - Line 131: We declare the method `GetARMMemorySize()` which returns the ARM assigned memory size in bytes (up to the 1 Gb border, memory above 1 Gb is not specified here)
   - Line 132: We declare the method `GetVCMemoryBaseAddress()` which returns the VideoCore assigned memory base address
   - Line 133: We declare the method `GetVCMemorySize()` which returns the VideoCore assigned memory size in bytes
   - Line 134: We declare the method `GetClockRate()` which returns the clock rate for the specified clock ID
@@ -1013,239 +1019,241 @@ File: code/libraries/baremetal/src/MachineInfo.cpp
 208:         {
 209:             GetConsole().Write("Failed to retrieve MAC address\n");
 210:         }
-211:         if (!properties.GetARMMemory(m_armBaseAddress, m_armMemorySize))
-212:         {
-213:             GetConsole().Write("Failed to retrieve ARM memory info\n");
-214:         }
-215:         if (!properties.GetVCMemory(m_vcBaseAddress, m_vcMemorySize))
-216:         {
-217:             GetConsole().Write("Failed to retrieve VC memory info\n");
-218:         }
-219: 
-220:         unsigned type = (static_cast<unsigned>(m_revisionRaw) >> 4) & 0xFF;
-221:         size_t   index{};
-222:         size_t   count = sizeof(s_boardInfo) / sizeof(s_boardInfo[0]);
-223:         for (index = 0; index < count; ++index)
-224:         {
-225:             if (s_boardInfo[index].type == type)
-226:             {
-227:                 break;
-228:             }
-229:         }
-230: 
-231:         if (index >= count)
-232:         {
-233:             return false;
-234:         }
-235: 
-236:         m_boardModel         = s_boardInfo[index].model;
-237:         m_boardModelMajor    = s_boardInfo[index].majorRevision;
-238:         m_boardModelRevision = (static_cast<unsigned>(m_revisionRaw) & 0xF) + 1;
-239:         m_SoCType            = static_cast<SoCType>((static_cast<unsigned>(m_revisionRaw) >> 12) & 0xF);
-240:         m_ramSize            = 256 << ((static_cast<unsigned>(m_revisionRaw) >> 20) & 7);
-241:         if (m_boardModel == BoardModel::RaspberryPi_BRelease2MB512 && m_ramSize == 256)
-242:         {
-243:             m_boardModel = (m_boardModelRevision == 1) ? BoardModel::RaspberryPi_BRelease1MB256 : BoardModel::RaspberryPi_BRelease2MB256;
-244:         }
-245:         if (static_cast<unsigned>(m_SoCType) >= static_cast<unsigned>(SoCType::Unknown))
-246:         {
-247:             m_SoCType = SoCType::Unknown;
-248:         }
-249: 
-250:         m_initialized = true;
-251:     }
-252:     return true;
-253: }
-254: 
-255: /// <summary>
-256: /// Returns board model
-257: /// </summary>
-258: /// <returns>Board model</returns>
-259: BoardModel MachineInfo::GetModel()
-260: {
-261:     return m_boardModel;
-262: }
-263: 
-264: /// <summary>
-265: /// Returns board name
-266: /// </summary>
-267: /// <returns>Board name</returns>
-268: const char *MachineInfo::GetName()
-269: {
-270:     return m_boardName[static_cast<size_t>(m_boardModel)];
-271: }
-272: 
-273: /// <summary>
-274: /// Returns the major board model number
-275: /// </summary>
-276: /// <returns>Major board model number</returns>
-277: uint32 MachineInfo::GetModelMajor()
-278: {
-279:     return m_boardModelMajor;
-280: }
-281: 
-282: /// <summary>
-283: /// Returns the board model revision
-284: /// </summary>
-285: /// <returns>Board model revision</returns>
-286: uint32 MachineInfo::GetModelRevision()
-287: {
-288:     return m_boardModelRevision;
-289: }
-290: 
-291: /// <summary>
-292: /// Returns the SoC type
-293: /// </summary>
-294: /// <returns>SoC type</returns>
-295: SoCType MachineInfo::GetSoCType()
-296: {
-297:     return m_SoCType;
-298: }
-299: 
-300: /// <summary>
-301: /// Returns the SoC name
-302: /// </summary>
-303: /// <returns>SoC name</returns>
-304: const char *MachineInfo::GetSoCName()
-305: {
-306:     return s_SoCName[static_cast<size_t>(m_SoCType)];
-307: }
-308: 
-309: /// <summary>
-310: /// Returns the amount of RAM on board in Mb
-311: /// </summary>
-312: /// <returns>RAM size in Mb</returns>
-313: uint32 MachineInfo::GetRAMSize()
-314: {
-315:     return m_ramSize;
-316: }
-317: 
-318: /// <summary>
-319: /// Returns the board serial number
-320: /// </summary>
-321: /// <returns>Board serial number</returns>
-322: uint64 MachineInfo::GetSerial()
-323: {
-324:     return m_boardSerial;
-325: }
-326: 
-327: /// <summary>
-328: /// Returns the board FW revision
-329: /// </summary>
-330: /// <returns>Board FW revision</returns>
-331: uint32 MachineInfo::GetFWRevision()
-332: {
-333:     return m_fwRevision;
-334: }
-335: 
-336: /// <summary>
-337: /// Returns the raw board revision
-338: /// </summary>
-339: /// <returns>Raw board revision</returns>
-340: BoardRevision MachineInfo::GetBoardRevision()
-341: {
-342:     return m_revisionRaw;
-343: }
-344: 
-345: /// <summary>
-346: /// Returns the MAC address for the network interface
-347: /// </summary>
-348: /// <param name="macAddress">Network MAC address</param>
-349: void MachineInfo::GetMACAddress(uint8 macAddress[6])
-350: {
-351:     memcpy(macAddress, m_macAddress, sizeof(m_macAddress));
-352: }
-353: 
-354: /// <summary>
-355: /// Returns the ARM memory base address
-356: /// </summary>
-357: /// <returns>ARM memory base address</returns>
-358: uint32 MachineInfo::GetARMMemoryBaseAddress()
-359: {
-360:     return m_armBaseAddress;
-361: }
-362: 
-363: /// <summary>
-364: /// Returns the amount of memory assigned to the ARM cores in bytes
-365: /// </summary>
-366: /// <returns>Amount of memory assigned to the ARM cores in bytes</returns>
-367: uint32 MachineInfo::GetARMMemorySize()
-368: {
-369:     return m_armMemorySize;
-370: }
-371: 
-372: /// <summary>
-373: /// Returns the VideoCore memory base address
-374: /// </summary>
-375: /// <returns>VideoCore memory base address</returns>
-376: uint32 MachineInfo::GetVCMemoryBaseAddress()
-377: {
-378:     return m_vcBaseAddress;
-379: }
-380: 
-381: /// <summary>
-382: /// Returns the amount of memory assigned to the VideoCore in bytes
-383: /// </summary>
-384: /// <returns>Amount of memory assigned to the VideoCore in bytes</returns>
-385: uint32 MachineInfo::GetVCMemorySize()
-386: {
-387:     return m_vcMemorySize;
-388: }
-389: 
-390: /// <summary>
-391: /// Determine and return the clock rate for a specific clock, or return an estimate
-392: /// </summary>
-393: /// <param name="clockID"></param>
-394: /// <returns></returns>
-395: unsigned MachineInfo::GetClockRate(ClockID clockID) const
-396: {
-397:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
-398:     RPIProperties properties(mailbox);
-399:     uint32        clockRate{};
-400:     if (properties.GetClockRate(clockID, clockRate))
-401:         return clockRate;
-402:     if (properties.GetMeasuredClockRate(clockID, clockRate))
+211: 
+212:         if (!properties.GetARMMemory(m_armBaseAddress, m_armMemorySize))
+213:         {
+214:             GetConsole().Write("Failed to retrieve ARM memory info\n");
+215:         }
+216:         
+217:         if (!properties.GetVCMemory(m_vcBaseAddress, m_vcMemorySize))
+218:         {
+219:             GetConsole().Write("Failed to retrieve VC memory info\n");
+220:         }
+221: 
+222:         unsigned type = (static_cast<unsigned>(m_revisionRaw) >> 4) & 0xFF;
+223:         size_t   index{};
+224:         size_t   count = sizeof(s_boardInfo) / sizeof(s_boardInfo[0]);
+225:         for (index = 0; index < count; ++index)
+226:         {
+227:             if (s_boardInfo[index].type == type)
+228:             {
+229:                 break;
+230:             }
+231:         }
+232: 
+233:         if (index >= count)
+234:         {
+235:             return false;
+236:         }
+237: 
+238:         m_boardModel         = s_boardInfo[index].model;
+239:         m_boardModelMajor    = s_boardInfo[index].majorRevision;
+240:         m_boardModelRevision = (static_cast<unsigned>(m_revisionRaw) & 0xF) + 1;
+241:         m_SoCType            = static_cast<SoCType>((static_cast<unsigned>(m_revisionRaw) >> 12) & 0xF);
+242:         m_ramSize            = 256 << ((static_cast<unsigned>(m_revisionRaw) >> 20) & 7);
+243:         if (m_boardModel == BoardModel::RaspberryPi_BRelease2MB512 && m_ramSize == 256)
+244:         {
+245:             m_boardModel = (m_boardModelRevision == 1) ? BoardModel::RaspberryPi_BRelease1MB256 : BoardModel::RaspberryPi_BRelease2MB256;
+246:         }
+247:         if (static_cast<unsigned>(m_SoCType) >= static_cast<unsigned>(SoCType::Unknown))
+248:         {
+249:             m_SoCType = SoCType::Unknown;
+250:         }
+251: 
+252:         m_initialized = true;
+253:     }
+254:     return true;
+255: }
+256: 
+257: /// <summary>
+258: /// Returns board model
+259: /// </summary>
+260: /// <returns>Board model</returns>
+261: BoardModel MachineInfo::GetModel()
+262: {
+263:     return m_boardModel;
+264: }
+265: 
+266: /// <summary>
+267: /// Returns board name
+268: /// </summary>
+269: /// <returns>Board name</returns>
+270: const char *MachineInfo::GetName()
+271: {
+272:     return m_boardName[static_cast<size_t>(m_boardModel)];
+273: }
+274: 
+275: /// <summary>
+276: /// Returns the major board model number
+277: /// </summary>
+278: /// <returns>Major board model number</returns>
+279: uint32 MachineInfo::GetModelMajor()
+280: {
+281:     return m_boardModelMajor;
+282: }
+283: 
+284: /// <summary>
+285: /// Returns the board model revision
+286: /// </summary>
+287: /// <returns>Board model revision</returns>
+288: uint32 MachineInfo::GetModelRevision()
+289: {
+290:     return m_boardModelRevision;
+291: }
+292: 
+293: /// <summary>
+294: /// Returns the SoC type
+295: /// </summary>
+296: /// <returns>SoC type</returns>
+297: SoCType MachineInfo::GetSoCType()
+298: {
+299:     return m_SoCType;
+300: }
+301: 
+302: /// <summary>
+303: /// Returns the SoC name
+304: /// </summary>
+305: /// <returns>SoC name</returns>
+306: const char *MachineInfo::GetSoCName()
+307: {
+308:     return s_SoCName[static_cast<size_t>(m_SoCType)];
+309: }
+310: 
+311: /// <summary>
+312: /// Returns the amount of RAM on board in Mb
+313: /// </summary>
+314: /// <returns>RAM size in Mb</returns>
+315: uint32 MachineInfo::GetRAMSize()
+316: {
+317:     return m_ramSize;
+318: }
+319: 
+320: /// <summary>
+321: /// Returns the board serial number
+322: /// </summary>
+323: /// <returns>Board serial number</returns>
+324: uint64 MachineInfo::GetSerial()
+325: {
+326:     return m_boardSerial;
+327: }
+328: 
+329: /// <summary>
+330: /// Returns the board FW revision
+331: /// </summary>
+332: /// <returns>Board FW revision</returns>
+333: uint32 MachineInfo::GetFWRevision()
+334: {
+335:     return m_fwRevision;
+336: }
+337: 
+338: /// <summary>
+339: /// Returns the raw board revision
+340: /// </summary>
+341: /// <returns>Raw board revision</returns>
+342: BoardRevision MachineInfo::GetBoardRevision()
+343: {
+344:     return m_revisionRaw;
+345: }
+346: 
+347: /// <summary>
+348: /// Returns the MAC address for the network interface
+349: /// </summary>
+350: /// <param name="macAddress">Network MAC address</param>
+351: void MachineInfo::GetMACAddress(uint8 macAddress[6])
+352: {
+353:     memcpy(macAddress, m_macAddress, sizeof(m_macAddress));
+354: }
+355: 
+356: /// <summary>
+357: /// Returns the ARM memory base address
+358: /// </summary>
+359: /// <returns>ARM memory base address</returns>
+360: uint32 MachineInfo::GetARMMemoryBaseAddress()
+361: {
+362:     return m_armBaseAddress;
+363: }
+364: 
+365: /// <summary>
+366: /// Returns the amount of memory assigned to the ARM cores in bytes
+367: /// </summary>
+368: /// <returns>Amount of memory assigned to the ARM cores in bytes</returns>
+369: uint32 MachineInfo::GetARMMemorySize()
+370: {
+371:     return m_armMemorySize;
+372: }
+373: 
+374: /// <summary>
+375: /// Returns the VideoCore memory base address
+376: /// </summary>
+377: /// <returns>VideoCore memory base address</returns>
+378: uint32 MachineInfo::GetVCMemoryBaseAddress()
+379: {
+380:     return m_vcBaseAddress;
+381: }
+382: 
+383: /// <summary>
+384: /// Returns the amount of memory assigned to the VideoCore in bytes
+385: /// </summary>
+386: /// <returns>Amount of memory assigned to the VideoCore in bytes</returns>
+387: uint32 MachineInfo::GetVCMemorySize()
+388: {
+389:     return m_vcMemorySize;
+390: }
+391: 
+392: /// <summary>
+393: /// Determine and return the clock rate for a specific clock, or return an estimate
+394: /// </summary>
+395: /// <param name="clockID"></param>
+396: /// <returns></returns>
+397: unsigned MachineInfo::GetClockRate(ClockID clockID) const
+398: {
+399:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
+400:     RPIProperties properties(mailbox);
+401:     uint32        clockRate{};
+402:     if (properties.GetClockRate(clockID, clockRate))
 403:         return clockRate;
-404: 
-405:     // if clock rate can not be requested, use a default rate
-406:     unsigned result = 0;
-407: 
-408:     switch (clockID)
-409:     {
-410:     case ClockID::EMMC:
-411:     case ClockID::EMMC2:
-412:         result = 100000000;
-413:         break;
-414: 
-415:     case ClockID::UART:
-416:         result = 48000000;
-417:         break;
-418: 
-419:     case ClockID::CORE:
-420:         result = 300000000; /// \todo Check this
-421:         break;
-422: 
-423:     case ClockID::PIXEL_BVB:
-424:         break;
-425: 
-426:     default:
-427:         assert(0);
-428:         break;
-429:     }
-430: 
-431:     return result;
-432: }
-433: 
-434: /// <summary>
-435: /// Create the singleton MachineInfo instance if needed, initialize it, and return a reference
-436: /// </summary>
-437: /// <returns>Singleton MachineInfo reference</returns>
-438: MachineInfo &baremetal::GetMachineInfo()
-439: {
-440:     static MachineInfo machineInfo;
-441:     machineInfo.Initialize();
-442:     return machineInfo;
-443: }
+404:     if (properties.GetMeasuredClockRate(clockID, clockRate))
+405:         return clockRate;
+406: 
+407:     // if clock rate can not be requested, use a default rate
+408:     unsigned result = 0;
+409: 
+410:     switch (clockID)
+411:     {
+412:     case ClockID::EMMC:
+413:     case ClockID::EMMC2:
+414:         result = 100000000;
+415:         break;
+416: 
+417:     case ClockID::UART:
+418:         result = 48000000;
+419:         break;
+420: 
+421:     case ClockID::CORE:
+422:         result = 300000000; /// \todo Check this
+423:         break;
+424: 
+425:     case ClockID::PIXEL_BVB:
+426:         break;
+427: 
+428:     default:
+429:         assert(0);
+430:         break;
+431:     }
+432: 
+433:     return result;
+434: }
+435: 
+436: /// <summary>
+437: /// Create the singleton MachineInfo instance if needed, initialize it, and return a reference
+438: /// </summary>
+439: /// <returns>Singleton MachineInfo reference</returns>
+440: MachineInfo &baremetal::GetMachineInfo()
+441: {
+442:     static MachineInfo machineInfo;
+443:     machineInfo.Initialize();
+444:     return machineInfo;
+445: }
 ```
 
 - Line 54-62: We declare a structure `BoardInfo` to hold information for the different board models.
@@ -1254,40 +1262,40 @@ This is used to map the raw board revision code to a board model
 - Line 92-116: We define an array of strings to map board models to names
 - Line 123-131: We define an array of strings to map SoC types to names
 - Line 136-153: We implement the default constructor
-- Line 159-176: We implement the custom constructor
+- Line 159-176: We implement the constructor taking a `MemoryAccess` instance
 - Line 185-253: We implement the `Initialize()` method
   - Line 189-190: We set up the mailbox
   - Line 192-195: We request the firmware revision number
   - Line 197-200: We request the board revision number
   - Line 202-205: We request the board serial number
   - Line 207-210: We request the MAC address
-  - Line 211-214: We request the ARM assigned memory information
-  - Line 215-218: We request the VideoCore assigned memory information
-  - Line 220-229: We do some trickery to extract a type code (bits 4-11 of the revision number) and look up the board information
-  - Line 236-237: We set the board model and board major revision number from the board information found
-  - Line 238: We extract the board revision number (bits 0 to 3)
-  - Line 239: We extract the SoC type (bit 12 to 15)
-  - Line 240: We extract the RAM size (bits 20-22)
-  - Line 241-244: We adjust for some special cases for Raspberry Pi 1 and 2
-  - Line 245-248: We check whether the SoC type is valid
-- Line 259-262: We implement the `GetModel()` method which simply returns the saved board model
-- Line 268-271: We implement the `GetName()` method which returns the name for the board model
-- Line 277-280: We implement the `GetModelMajor()` method which simply returns the saved board major revision number
-- Line 286-289: We implement the `GetModelRevision()` method which simply returns the saved board revision number
-- Line 295-298: We implement the `GetSoCType()` method which simply returns the saved SoC type
-- Line 304-307: We implement the `GetSoCName()` method which returns the name of the SoC type
-- Line 313-316: We implement the `GetRAMSize()` method which simply returns the saved memory size
-- Line 322-325: We implement the `GetSerial()` method which simply returns the saved board serial number
-- Line 331-334: We implement the `GetFWRevision()` method which simply returns the saved firmware revision number
-- Line 340-343: We implement the `GetBoardRevision()` method which simply returns the saved raw board revision code
-- Line 349-352: We implement the `GetMACAddress()` method which simply returns the saved MAC address
-- Line 358-361: We implement the `GetARMMemoryBaseAddress()` method which simply returns the saved ARM memory base address
-- Line 367-370: We implement the `GetARMMemorySize()` method which simply returns the saved ARM memory size
-- Line 376-379: We implement the `GetVCMemoryBaseAddress()` method which simply returns the saved VideoCore memory base address
-- Line 385-388: We implement the `GetVCMemorySize()` method which simply returns the saved VideoCore memory size
-- Line 395-432: We implement the `GetClockRate()` method, which tries to request the set clock rate,
+  - Line 212-215: We request the ARM assigned memory information
+  - Line 217-220: We request the VideoCore assigned memory information
+  - Line 222-231: We do some trickery to extract a type code (bits 4-11 of the revision number) and look up the board information
+  - Line 238-239: We set the board model and board major revision number from the board information found
+  - Line 240: We extract the board revision number (bits 0 to 3)
+  - Line 241: We extract the SoC type (bit 12 to 15)
+  - Line 242: We extract the RAM size (bits 20-22)
+  - Line 243-246: We adjust for some special cases for Raspberry Pi 1 and 2
+  - Line 247-250: We check whether the SoC type is valid
+- Line 261-264: We implement the `GetModel()` method which simply returns the saved board model
+- Line 270-273: We implement the `GetName()` method which returns the name for the board model
+- Line 279-282: We implement the `GetModelMajor()` method which simply returns the saved board major revision number
+- Line 288-291: We implement the `GetModelRevision()` method which simply returns the saved board revision number
+- Line 297-300: We implement the `GetSoCType()` method which simply returns the saved SoC type
+- Line 306-309: We implement the `GetSoCName()` method which returns the name of the SoC type
+- Line 315-318: We implement the `GetRAMSize()` method which simply returns the saved memory size
+- Line 324-327: We implement the `GetSerial()` method which simply returns the saved board serial number
+- Line 333-336: We implement the `GetFWRevision()` method which simply returns the saved firmware revision number
+- Line 342-345: We implement the `GetBoardRevision()` method which simply returns the saved raw board revision code
+- Line 351-354: We implement the `GetMACAddress()` method which simply returns the saved MAC address
+- Line 360-363: We implement the `GetARMMemoryBaseAddress()` method which simply returns the saved ARM memory base address
+- Line 369-372: We implement the `GetARMMemorySize()` method which simply returns the saved ARM memory size
+- Line 378-381: We implement the `GetVCMemoryBaseAddress()` method which simply returns the saved VideoCore memory base address
+- Line 387-390: We implement the `GetVCMemorySize()` method which simply returns the saved VideoCore memory size
+- Line 397-434: We implement the `GetClockRate()` method, which tries to request the set clock rate,
 if not available the measured clock rate, and if all fails an estimate of the clock frequency
-- Line 438-443: We implement the `GetMachineInfo()` function
+- Line 440-445: We implement the `GetMachineInfo()` function
 
 ### Logger.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_LOGGERCPP}
 
@@ -1401,7 +1409,7 @@ We can now configure and build our code, and start debugging.
 
 The application will now print the message at `Logger` initialization time using the actual board and SoC name:
 
-<img src="images/tutorial-13-logger.png" alt="Console output" width="700"/>
+<img src="images/tutorial-13-logger.png" alt="Console output" width="800"/>
 
 Next: [14-memory-management](14-memory-management.md)
 

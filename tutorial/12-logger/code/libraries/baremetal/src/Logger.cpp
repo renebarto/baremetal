@@ -78,7 +78,7 @@ bool Logger::Initialize()
         return true;
     SetupVersion();
     m_initialized = true; // Stop reentrant calls from happening
-    LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi" /*GetMachineInfo().GetName()*/);
+    LOG_INFO(BAREMETAL_NAME " %s started on %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi");
 
     return true;
 }

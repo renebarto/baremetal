@@ -302,7 +302,7 @@
 #define RPI_UART0_FR_TX_EMPTY         BIT(5)
 
 //---------------------------------------------
-// Raspberry Pi auxiliary peripheral (SPI1 / SPI2 / UART1)
+// Raspberry Pi auxiliary (SPI1 / SPI2 / UART1)
 //---------------------------------------------
 
 /// @brief Raspberry Pi Auxilary registers base address. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL

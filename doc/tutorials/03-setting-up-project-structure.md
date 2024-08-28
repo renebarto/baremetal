@@ -413,7 +413,7 @@ We will create a script for Windows and for Linux to configure the build. They w
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS}
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS_RASPBERRY_PI_3}
 
 ```bat
 File: tools/configure-rpi3.bat
@@ -428,7 +428,7 @@ File: tools/configure-rpi3.bat
 9: popd
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS_RASPBERRY_PI_4}
 
 ```bat
 File: tools/configure-rpi4.bat
@@ -528,7 +528,7 @@ tools\configure-rpi3.bat
 
 We will leave the Linux scripts as with build directory `cmake-build`, as we will still build on the command line there.
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX_RASPBERRY_PI_3}
 
 ```bash
 File: tools/configure-rpi3.sh
@@ -541,7 +541,7 @@ File: tools/configure-rpi3.sh
 7: popd
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX_RASPBERRY_PI_4}
 
 ```bash
 File: tools/configure-rpi4.sh
@@ -646,14 +646,14 @@ tools/configure-rpi3.sh
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS}
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS_RASPBERRY_PI_3}
 
 ```bat
 File: tools/build-target-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug --target %1
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS_RASPBERRY_PI_4}
 
 ```bat
 File: tools/build-target-rpi4.bat
@@ -662,14 +662,14 @@ File: tools/build-target-rpi4.bat
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX}
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX_RASPBERRY_PI_3}
 
 ```bash
 File: tools/build-target.sh
 1: cmake --build cmake-build --target $1
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX_RASPBERRY_PI_4}
 
 ```bash
 File: tools/build-target.sh
@@ -686,7 +686,7 @@ chmod +x tools/build-target-rpi4.sh
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS}
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS_RASPBERRY_PI_3}
 
 ```bat
 File: tools/build-image-rpi3.bat
@@ -694,7 +694,7 @@ File: tools/build-image-rpi3.bat
 2: build-target-rpi3 %1-image
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS_RASPBERRY_PI_4}
 
 ```bat
 File: tools/build-image-rpi4.bat
@@ -704,7 +704,7 @@ File: tools/build-image-rpi4.bat
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX}
 
-##### Raspberry Pi 3
+##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX_RASPBERRY_PI_3}
 
 ```bash
 File: tools/build-image-rpi3.sh
@@ -713,7 +713,7 @@ File: tools/build-image-rpi3.sh
 
 ```
 
-##### Raspberry Pi 4
+##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX_RASPBERRY_PI_4}
 
 ```bash
 File: tools/build-image-rpi4.sh
@@ -733,14 +733,14 @@ Note we simple add the `-image` suffix to make sure we build the corresponding i
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS}
 
-##### RaspberryPi 3
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS_RASPBERRYPI_3}
 
 ```bat
 File: tools/build-all-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug
 ```
 
-##### RaspberryPi 4
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS_RASPBERRYPI_4}
 
 ```bat
 File: tools/build-all-rpi4.bat
@@ -760,14 +760,14 @@ tools\build-all-rpi3.bat
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX}
 
-##### RaspberryPi 3
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX_RASPBERRYPI_3}
 
 ```bash
 File: tools/build-all-rpi3.sh
 1: cmake --build cmake-build
 ```
 
-##### RaspberryPi 4
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX_RASPBERRYPI_4}
 
 ```bash
 File: tools/build-all-rpi4.sh
@@ -798,14 +798,14 @@ There is no target to clean a specific target though.
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS}
 
-##### RaspberryPi 3
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS_RASPBERRYPI_3}
 
 ```bat
 File: tools/clean-all-rpi3.bat
 1: cmake --build cmake-BareMetal-Debug --target clean
 ```
 
-##### RaspberryPi 4
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS_RASPBERRYPI_4}
 
 ```bat
 File: tools/clean-all-rpi4.bat
@@ -824,14 +824,14 @@ Cleaning... 4 files.
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX}
 
-##### RaspberryPi 3
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX_RASPBERRYPI_3}
 
 ```bash
 File: tools/clean-all-rpi3.sh
 1: cmake --build cmake-build --target clean
 ```
 
-##### RaspberryPi 4
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX_RASPBERRYPI_4}
 
 ```bash
 File: tools/clean-all-rpi4.sh
@@ -858,7 +858,7 @@ Cleaning... 4 files.
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS}
 
-##### Start QEMU listening to UART0 on Raspberry Pi 3
+##### Start QEMU listening to UART0 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART0_ON_RASPBERRY_PI_3}
 
 ```bat
 File: tools/startQEMU-image-uart0-rpi3.bat
@@ -869,7 +869,7 @@ File: tools/startQEMU-image-uart0-rpi3.bat
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
-##### Start QEMU listening to UART1 on Raspberry Pi 3
+##### Start QEMU listening to UART1 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_3}
 
 ```bat
 File: tools/startQEMU-image-uart1-rpi3.bat
@@ -880,7 +880,7 @@ File: tools/startQEMU-image-uart1-rpi3.bat
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
-##### Start QEMU listening to UART0 on Raspberry Pi 4
+##### Start QEMU listening to UART0 on Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART0_ON_RASPBERRY_PI_4}
 
 ```bat
 File: tools/startQEMU-image-uart0-rpi4.bat
@@ -891,7 +891,7 @@ File: tools/startQEMU-image-uart0-rpi4.bat
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
-##### Start QEMU listening to UART1 on Raspberry Pi 4
+##### Start QEMU listening to UART1 on Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_4}
 
 ```bat
 File: tools/startQEMU-image-uart1-rpi4.bat
@@ -931,7 +931,7 @@ This may indicate that pixbuf loaders or the mime database could not be found.
 
 As stated, at the moment of writing this tutorial, Linux only support emulation of Raspberry Pi 3.
 
-##### Start QEMU listening to UART0 on Raspberry Pi 3
+##### Start QEMU listening to UART0 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX_START_QEMU_LISTENING_TO_UART0_ON_RASPBERRY_PI_3}
 
 ```bash
 File: tools/startQEMU-image-uart0.sh
@@ -945,7 +945,7 @@ File: tools/startQEMU-image-uart0.sh
 8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
 ```
 
-##### Start QEMU listening to UART1 on Raspberry Pi 3
+##### Start QEMU listening to UART1 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_3}
 
 ```bash
 File: tools/startQEMU-image-uart1.sh

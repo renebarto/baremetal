@@ -978,18 +978,21 @@ File: code/libraries/baremetal/include/baremetal/Format.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: #include <baremetal/StdArg.h>
-43: #include <baremetal/Types.h>
-44:
-45: namespace baremetal {
-46:
-47: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args);
-48: void Format(char* buffer, size_t bufferSize, const char* format, ...);
-49:
-50: } // namespace baremetal
+41: 
+42: /// @file
+43: /// Formatting functionality
+44: 
+45: #include <baremetal/StdArg.h>
+46: #include <baremetal/Types.h>
+47: 
+48: namespace baremetal {
+49: 
+50: void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args);
+51: void Format(char* buffer, size_t bufferSize, const char* format, ...);
+52: 
+53: } // namespace baremetal
 ```
 
 ### Format.cpp {#TUTORIAL_12_LOGGER_PRINTING_A_FORMATTED_STRING___STEP_2_FORMATCPP}

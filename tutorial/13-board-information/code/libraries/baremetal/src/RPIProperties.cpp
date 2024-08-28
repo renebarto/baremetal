@@ -38,7 +38,6 @@
 //------------------------------------------------------------------------------
 
 #include <baremetal/RPIProperties.h>
-
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/Logger.h>
 #include <baremetal/RPIPropertiesInterface.h>
@@ -61,6 +60,22 @@ struct PropertySerial
     Property tag;
     /// The requested serial number/ This is a 64 bit unsigned number, divided up into two times a 32 bit number
     uint32   serial[2];
+} PACKED;
+
+/// <summary>
+/// Mailbox property tag structure for requesting board serial number.
+/// </summary>
+struct PropertyClockRate
+{
+    /// @brief Tag ID, must be equal to PROPTAG_GET_CLOCK_RATE, PROPTAG_GET_MAX_CLOCK_RATE, PROPTAG_GET_MIN_CLOCK_RATE, PROPTAG_GET_CLOCK_RATE_MEASURED or PROPTAG_SET_CLOCK_RATE.
+    Property tag;
+    /// @brief Clock ID, selected the clock for which information is requested or set
+    uint32   clockID;
+    /// @brief Requested or set clock frequency, in Hz
+    uint32   rate;
+    /// @brief If 1, do not switch to turbo setting if ARM clock is above default.
+    /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.
+    uint32   skipTurbo;
 } PACKED;
 
 /// <summary>
@@ -87,22 +102,6 @@ struct PropertyMemory
     uint32   baseAddress;
     /// Size in bytes
     uint32   size;
-} PACKED;
-
-/// <summary>
-/// Mailbox property tag structure for requesting board serial number.
-/// </summary>
-struct PropertyClockRate
-{
-    /// @brief Tag ID, must be equal to PROPTAG_GET_CLOCK_RATE, PROPTAG_GET_MAX_CLOCK_RATE, PROPTAG_GET_MIN_CLOCK_RATE, PROPTAG_GET_CLOCK_RATE_MEASURED or PROPTAG_SET_CLOCK_RATE.
-    Property tag;
-    /// @brief Clock ID, selected the clock for which information is requested or set
-    uint32   clockID;
-    /// @brief Requested or set clock frequency, in Hz
-    uint32   rate;
-    /// @brief If 1, do not switch to turbo setting if ARM clock is above default.
-    /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.
-    uint32   skipTurbo;
 } PACKED;
 
 /// <summary>

@@ -48,7 +48,7 @@
 // Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
 #define ARM_MEM_SIZE (MEM_SIZE - GPU_MEM_SIZE) // normally overwritten
 
-// Memory reserved for paging
+// Memory reserved for paging. Paging memory is placed just below the low heap
 #define PAGE_RESERVE (16 * MEGABYTE)
 
 // Size of every page

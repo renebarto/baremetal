@@ -401,33 +401,33 @@ File: code/libraries/baremetal/src/String.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/String.h>
-41:
+41: 
 42: #include <baremetal/Assert.h>
 43: #include <baremetal/Logger.h>
 44: #include <baremetal/Util.h>
-45:
+45: 
 46: /// @file
 47: /// string class implementation
-48:
+48: 
 49: using namespace baremetal;
-50:
+50: 
 51: /// @brief Minimum allocation size for any string
 52: static constexpr size_t MinimumAllocationSize = 64;
-53:
+53: 
 54: /// @brief Maximum string size (largest 256Mb - 1 due to largest heap allocation block size)
 55: static constexpr size_t MaximumStringSize = 0x80000 - 1;
-56:
+56: 
 57: const size_t string::npos = static_cast<size_t>(-1);
 58: /// @brief Constant null character, using as string terminator, and also returned as a reference for const methods where nothing can be returned
 59: static const string::ValueType NullCharConst = '\0';
 60: /// @brief Non-constant null character, returned as a reference for const methods where nothing can be returned (always reinitialized before returning)
 61: static string::ValueType NullChar = '\0';
-62:
+62: 
 63: /// @brief Define log name
 64: LOG_MODULE("String");
-65:
+65: 
 66: /// <summary>
 67: /// Default constructor
 68: ///
@@ -439,7 +439,7 @@ File: code/libraries/baremetal/src/String.cpp
 74:     , m_allocatedSize{}
 75: {
 76: }
-77:
+77: 
 78: /// <summary>
 79: /// Destructor
 80: ///
@@ -447,1428 +447,1422 @@ File: code/libraries/baremetal/src/String.cpp
 82: /// </summary>
 83: string::~string()
 84: {
-85: #if BAREMETAL_MEMORY_TRACING_DETAIL
-86:     if (m_buffer != nullptr)
-87:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
-88: #endif
-89:     delete[] m_buffer;
-90: }
-91:
-92: /// <summary>
-93: /// Constructor
-94: ///
-95: /// Initializes the string with the specified string.
-96: /// </summary>
-97: /// <param name="str">string to initialize with</param>
-98: string::string(const ValueType* str)
-99:     : m_buffer{}
-100:     , m_end{}
-101:     , m_allocatedSize{}
-102: {
-103:     if (str == nullptr)
-104:         return;
-105:     auto size = strlen(str);
-106:     if (reallocate(size + 1))
-107:     {
-108:         strncpy(m_buffer, str, size);
-109:     }
-110:     m_end = m_buffer + size;
-111:     m_buffer[size] = NullCharConst;
-112: }
-113:
-114: /// <summary>
-115: /// Constructor
-116: ///
-117: /// Initializes the string with up to count characters in the specified string. A null character is always added.
-118: /// </summary>
-119: /// <param name="str">string to initialize with</param>
-120: /// <param name="count">Maximum number of characters from str to initialize with. If count is larger than the actual string length, only the string length is used</param>
-121: string::string(const ValueType* str, size_t count)
-122:     : m_buffer{}
-123:     , m_end{}
-124:     , m_allocatedSize{}
-125: {
-126:     if (str == nullptr)
-127:         return;
-128:     auto size = strlen(str);
-129:     if (count < size)
-130:         size = count;
-131:     if (reallocate(size + 1))
-132:     {
-133:         strncpy(m_buffer, str, size);
-134:     }
-135:     m_end = m_buffer + size;
-136:     m_buffer[size] = NullCharConst;
-137: }
-138:
-139: /// <summary>
-140: /// Constructor
-141: ///
-142: /// Initializes the string with the specified count times the specified character. A null character is always added.
-143: /// </summary>
-144: /// <param name="count">Number of characters of value ch to initialized with</param>
-145: /// <param name="ch">Character to initialize with</param>
-146: string::string(size_t count, ValueType ch)
-147:     : m_buffer{}
-148:     , m_end{}
-149:     , m_allocatedSize{}
-150: {
-151:     auto size = count;
-152:     if (size > MaximumStringSize)
-153:         size = MaximumStringSize;
-154:     if (reallocate(size + 1))
-155:     {
-156:         memset(m_buffer, ch, size);
-157:     }
-158:     m_end = m_buffer + size;
-159:     m_buffer[size] = NullCharConst;
-160: }
-161:
-162: /// <summary>
-163: /// Copy constructor
-164: ///
-165: /// Initializes the string with the specified string value.
-166: /// </summary>
-167: /// <param name="other">string to initialize with</param>
-168: string::string(const string& other)
-169:     : m_buffer{}
-170:     , m_end{}
-171:     , m_allocatedSize{}
-172: {
-173:     auto size = other.length();
-174:     if (reallocate(size + 1))
-175:     {
-176:         strncpy(m_buffer, other.data(), size);
-177:     }
-178:     m_end = m_buffer + size;
-179:     m_buffer[size] = NullCharConst;
-180: }
-181:
-182: /// <summary>
-183: /// Move constructor
-184: ///
-185: /// Initializes the string by moving the contents from the specified string value.
-186: /// </summary>
-187: /// <param name="other">string to initialize with</param>
-188: string::string(string&& other)
-189:     : m_buffer{other.m_buffer}
-190:     , m_end{other.m_end}
-191:     , m_allocatedSize{other.m_allocatedSize}
-192: {
-193:     other.m_buffer = nullptr;
-194:     other.m_end = nullptr;
-195:     other.m_allocatedSize = 0;
-196: }
-197:
-198: /// <summary>
-199: /// Constructor
-200: ///
-201: /// Initializes the string with the substring starting at specified position, for the specified number of characters, from the specified string value.
-202: /// </summary>
-203: /// <param name="other">string to initialize with</param>
-204: /// <param name="pos">Position in other to start copying charaters from</param>
-205: /// <param name="count">Maximum number of characters to copy from other. Default is until end of string. If pos + count is larger than the actual length of the string, string string is copied until the end</param>
-206: string::string(const string& other, size_t pos, size_t count /*= npos*/)
-207:     : m_buffer{}
-208:     , m_end{}
-209:     , m_allocatedSize{}
-210: {
-211:     if (pos >= other.length())
-212:         return;
-213:     auto size = other.length() - pos;
-214:     if (count < size)
-215:         size = count;
-216:     if (reallocate(size + 1))
-217:     {
-218:         strncpy(m_buffer, other.data() + pos, size);
-219:     }
-220:     m_end = m_buffer + size;
-221:     m_buffer[size] = NullCharConst;
-222: }
-223:
-224: /// <summary>
-225: /// Const character cast operator
-226: ///
-227: /// Returns the pointer to the start of the string.
-228: /// </summary>
-229: string::operator const ValueType* () const
-230: {
-231:     return data();
-232: }
-233:
-234: /// <summary>
-235: /// Assignment operator
-236: ///
-237: /// Assigns the specified string value to the string.
-238: /// </summary>
-239: /// <param name="str">string value to assign to the string</param>
-240: /// <returns>A reference to the string</returns>
-241: string& string::operator = (const ValueType* str)
-242: {
-243:     return assign(str);
-244: }
-245:
-246: /// <summary>
-247: /// Assignment operator
-248: ///
-249: /// Assigns the specified string value to the string.
-250: /// </summary>
-251: /// <param name="str">string value to assign to the string</param>
-252: /// <returns>A reference to the string</returns>
-253: string& string::operator = (const string& str)
-254: {
-255:     return assign(str);
-256: }
-257:
-258: /// <summary>
-259: /// Move operator
-260: ///
-261: /// Assigns the specified string value to the string by moving the contents of the specified string.
-262: /// </summary>
-263: /// <param name="str">string value to assign to the string</param>
-264: /// <returns>A reference to the string</returns>
-265: string& string::operator = (string&& str)
-266: {
-267:     if (&str != this)
-268:     {
-269:         m_buffer = str.m_buffer;
-270:         m_end = str.m_end;
-271:         m_allocatedSize = str.m_allocatedSize;
-272:         str.m_buffer = nullptr;
-273:         str.m_end = nullptr;
-274:         str.m_allocatedSize = 0;
-275:     }
-276:     return *this;
-277: }
-278:
-279: /// <summary>
-280: /// Non-const iterator to the start of the string
-281: ///
-282: /// Iterator is initialized with the start of the string. This has the prototype needed to used an iterator in for (auto x : string).
-283: /// </summary>
-284: /// <returns>iterator to the value type, acting as the start of the string</returns>
-285: iterator<string::ValueType> string::begin()
-286: {
-287:     return iterator(m_buffer, m_end);
-288: }
-289:
-290: /// <summary>
-291: /// Non-const iterator to the end of the string + 1
-292: ///
-293: /// Iterator is initialized with one position beyound the end of the string. This has the prototype needed to used an iterator in for (auto x : string).
-294: /// </summary>
-295: /// <returns>iterator to the value type, acting as the end of the string</returns>
-296: iterator<string::ValueType> string::end()
-297: {
-298:     return iterator(m_end, m_end);
-299: }
-300:
-301: /// <summary>
-302: /// Const iterator to the start of the string
-303: ///
-304: /// Iterator is initialized with the start of the string. This has the prototype needed to used an iterator in for (auto x : string).
-305: /// </summary>
-306: /// <returns>const_iterator to the value type, acting as the start of the string</returns>
-307: const_iterator<string::ValueType> string::begin() const
-308: {
-309:     return const_iterator(m_buffer, m_end);
-310: }
-311:
-312: /// <summary>
-313: /// Const iterator to the end of the string + 1
-314: ///
-315: /// Iterator is initialized with one position beyound the end of the string. This has the prototype needed to used an iterator in for (auto x : string).
-316: /// </summary>
-317: /// <returns>const_iterator to the value type, acting as the end of the string</returns>
-318: const_iterator<string::ValueType> string::end() const
-319: {
-320:     return const_iterator(m_end, m_end);
-321: }
-322:
-323: /// <summary>
-324: /// assign a string value
-325: ///
-326: /// Assigns the specified string value to the string
-327: /// </summary>
-328: /// <param name="str">string value to assign to the string</param>
-329: /// <returns>A reference to the string</returns>
-330: string& string::assign(const ValueType* str)
-331: {
-332:     size_t size{};
-333:     if (str != nullptr)
+85:     delete[] m_buffer;
+86: }
+87: 
+88: /// <summary>
+89: /// Constructor
+90: ///
+91: /// Initializes the string with the specified string.
+92: /// </summary>
+93: /// <param name="str">string to initialize with</param>
+94: string::string(const ValueType* str)
+95:     : m_buffer{}
+96:     , m_end{}
+97:     , m_allocatedSize{}
+98: {
+99:     if (str == nullptr)
+100:         return;
+101:     auto size = strlen(str);
+102:     if (reallocate(size + 1))
+103:     {
+104:         strncpy(m_buffer, str, size);
+105:     }
+106:     m_end = m_buffer + size;
+107:     m_buffer[size] = NullCharConst;
+108: }
+109: 
+110: /// <summary>
+111: /// Constructor
+112: ///
+113: /// Initializes the string with up to count characters in the specified string. A null character is always added.
+114: /// </summary>
+115: /// <param name="str">string to initialize with</param>
+116: /// <param name="count">Maximum number of characters from str to initialize with. If count is larger than the actual string length, only the string length is used</param>
+117: string::string(const ValueType* str, size_t count)
+118:     : m_buffer{}
+119:     , m_end{}
+120:     , m_allocatedSize{}
+121: {
+122:     if (str == nullptr)
+123:         return;
+124:     auto size = strlen(str);
+125:     if (count < size)
+126:         size = count;
+127:     if (reallocate(size + 1))
+128:     {
+129:         strncpy(m_buffer, str, size);
+130:     }
+131:     m_end = m_buffer + size;
+132:     m_buffer[size] = NullCharConst;
+133: }
+134: 
+135: /// <summary>
+136: /// Constructor
+137: ///
+138: /// Initializes the string with the specified count times the specified character. A null character is always added.
+139: /// </summary>
+140: /// <param name="count">Number of characters of value ch to initialized with</param>
+141: /// <param name="ch">Character to initialize with</param>
+142: string::string(size_t count, ValueType ch)
+143:     : m_buffer{}
+144:     , m_end{}
+145:     , m_allocatedSize{}
+146: {
+147:     auto size = count;
+148:     if (size > MaximumStringSize)
+149:         size = MaximumStringSize;
+150:     if (reallocate(size + 1))
+151:     {
+152:         memset(m_buffer, ch, size);
+153:     }
+154:     m_end = m_buffer + size;
+155:     m_buffer[size] = NullCharConst;
+156: }
+157: 
+158: /// <summary>
+159: /// Copy constructor
+160: ///
+161: /// Initializes the string with the specified string value.
+162: /// </summary>
+163: /// <param name="other">string to initialize with</param>
+164: string::string(const string& other)
+165:     : m_buffer{}
+166:     , m_end{}
+167:     , m_allocatedSize{}
+168: {
+169:     auto size = other.length();
+170:     if (reallocate(size + 1))
+171:     {
+172:         strncpy(m_buffer, other.data(), size);
+173:     }
+174:     m_end = m_buffer + size;
+175:     m_buffer[size] = NullCharConst;
+176: }
+177: 
+178: /// <summary>
+179: /// Move constructor
+180: ///
+181: /// Initializes the string by moving the contents from the specified string value.
+182: /// </summary>
+183: /// <param name="other">string to initialize with</param>
+184: string::string(string&& other)
+185:     : m_buffer{other.m_buffer}
+186:     , m_end{other.m_end}
+187:     , m_allocatedSize{other.m_allocatedSize}
+188: {
+189:     other.m_buffer = nullptr;
+190:     other.m_end = nullptr;
+191:     other.m_allocatedSize = 0;
+192: }
+193: 
+194: /// <summary>
+195: /// Constructor
+196: ///
+197: /// Initializes the string with the substring starting at specified position, for the specified number of characters, from the specified string value.
+198: /// </summary>
+199: /// <param name="other">string to initialize with</param>
+200: /// <param name="pos">Position in other to start copying charaters from</param>
+201: /// <param name="count">Maximum number of characters to copy from other. Default is until end of string. If pos + count is larger than the actual length of the string, string string is copied until the end</param>
+202: string::string(const string& other, size_t pos, size_t count /*= npos*/)
+203:     : m_buffer{}
+204:     , m_end{}
+205:     , m_allocatedSize{}
+206: {
+207:     if (pos >= other.length())
+208:         return;
+209:     auto size = other.length() - pos;
+210:     if (count < size)
+211:         size = count;
+212:     if (reallocate(size + 1))
+213:     {
+214:         strncpy(m_buffer, other.data() + pos, size);
+215:     }
+216:     m_end = m_buffer + size;
+217:     m_buffer[size] = NullCharConst;
+218: }
+219: 
+220: /// <summary>
+221: /// Const character cast operator
+222: ///
+223: /// Returns the pointer to the start of the string.
+224: /// </summary>
+225: string::operator const ValueType* () const
+226: {
+227:     return data();
+228: }
+229: 
+230: /// <summary>
+231: /// Assignment operator
+232: ///
+233: /// Assigns the specified string value to the string.
+234: /// </summary>
+235: /// <param name="str">string value to assign to the string</param>
+236: /// <returns>A reference to the string</returns>
+237: string& string::operator = (const ValueType* str)
+238: {
+239:     return assign(str);
+240: }
+241: 
+242: /// <summary>
+243: /// Assignment operator
+244: ///
+245: /// Assigns the specified string value to the string.
+246: /// </summary>
+247: /// <param name="str">string value to assign to the string</param>
+248: /// <returns>A reference to the string</returns>
+249: string& string::operator = (const string& str)
+250: {
+251:     return assign(str);
+252: }
+253: 
+254: /// <summary>
+255: /// Move operator
+256: ///
+257: /// Assigns the specified string value to the string by moving the contents of the specified string.
+258: /// </summary>
+259: /// <param name="str">string value to assign to the string</param>
+260: /// <returns>A reference to the string</returns>
+261: string& string::operator = (string&& str)
+262: {
+263:     if (&str != this)
+264:     {
+265:         m_buffer = str.m_buffer;
+266:         m_end = str.m_end;
+267:         m_allocatedSize = str.m_allocatedSize;
+268:         str.m_buffer = nullptr;
+269:         str.m_end = nullptr;
+270:         str.m_allocatedSize = 0;
+271:     }
+272:     return *this;
+273: }
+274: 
+275: /// <summary>
+276: /// Non-const iterator to the start of the string
+277: ///
+278: /// Iterator is initialized with the start of the string. This has the prototype needed to used an iterator in for (auto x : string).
+279: /// </summary>
+280: /// <returns>iterator to the value type, acting as the start of the string</returns>
+281: iterator<string::ValueType> string::begin()
+282: {
+283:     return iterator(m_buffer, m_end);
+284: }
+285: 
+286: /// <summary>
+287: /// Non-const iterator to the end of the string + 1
+288: ///
+289: /// Iterator is initialized with one position beyound the end of the string. This has the prototype needed to used an iterator in for (auto x : string).
+290: /// </summary>
+291: /// <returns>iterator to the value type, acting as the end of the string</returns>
+292: iterator<string::ValueType> string::end()
+293: {
+294:     return iterator(m_end, m_end);
+295: }
+296: 
+297: /// <summary>
+298: /// Const iterator to the start of the string
+299: ///
+300: /// Iterator is initialized with the start of the string. This has the prototype needed to used an iterator in for (auto x : string).
+301: /// </summary>
+302: /// <returns>const_iterator to the value type, acting as the start of the string</returns>
+303: const_iterator<string::ValueType> string::begin() const
+304: {
+305:     return const_iterator(m_buffer, m_end);
+306: }
+307: 
+308: /// <summary>
+309: /// Const iterator to the end of the string + 1
+310: ///
+311: /// Iterator is initialized with one position beyound the end of the string. This has the prototype needed to used an iterator in for (auto x : string).
+312: /// </summary>
+313: /// <returns>const_iterator to the value type, acting as the end of the string</returns>
+314: const_iterator<string::ValueType> string::end() const
+315: {
+316:     return const_iterator(m_end, m_end);
+317: }
+318: 
+319: /// <summary>
+320: /// assign a string value
+321: ///
+322: /// Assigns the specified string value to the string
+323: /// </summary>
+324: /// <param name="str">string value to assign to the string</param>
+325: /// <returns>A reference to the string</returns>
+326: string& string::assign(const ValueType* str)
+327: {
+328:     size_t size{};
+329:     if (str != nullptr)
+330:     {
+331:         size = strlen(str);
+332:     }
+333:     if ((size + 1) > m_allocatedSize)
 334:     {
-335:         size = strlen(str);
-336:     }
-337:     if ((size + 1) > m_allocatedSize)
-338:     {
-339:         if (!reallocate(size + 1))
-340:             return *this;
+335:         if (!reallocate(size + 1))
+336:             return *this;
+337:     }
+338:     if (str != nullptr)
+339:     {
+340:         strncpy(m_buffer, str, size);
 341:     }
-342:     if (str != nullptr)
-343:     {
-344:         strncpy(m_buffer, str, size);
-345:     }
-346:     m_end = m_buffer + size;
-347:     m_buffer[size] = NullCharConst;
-348:     return *this;
-349: }
-350:
-351: /// <summary>
-352: /// assign a string value
-353: ///
-354: /// Assigns the specified string value, up to the specified count of characters, to the string.
-355: /// </summary>
-356: /// <param name="str">string value to assign to the string</param>
-357: /// <param name="count">Maximum number of characters to copy from the string. If count is larger than the string length, the length of the string is used</param>
-358: /// <returns>A reference to the string</returns>
-359: string& string::assign(const ValueType* str, size_t count)
-360: {
-361:     size_t size{};
-362:     if (str != nullptr)
-363:     {
-364:         size = strlen(str);
-365:     }
-366:     if (count < size)
-367:         size = count;
-368:     if ((size + 1) > m_allocatedSize)
-369:     {
-370:         if (!reallocate(size + 1))
-371:             return *this;
+342:     m_end = m_buffer + size;
+343:     m_buffer[size] = NullCharConst;
+344:     return *this;
+345: }
+346: 
+347: /// <summary>
+348: /// assign a string value
+349: ///
+350: /// Assigns the specified string value, up to the specified count of characters, to the string.
+351: /// </summary>
+352: /// <param name="str">string value to assign to the string</param>
+353: /// <param name="count">Maximum number of characters to copy from the string. If count is larger than the string length, the length of the string is used</param>
+354: /// <returns>A reference to the string</returns>
+355: string& string::assign(const ValueType* str, size_t count)
+356: {
+357:     size_t size{};
+358:     if (str != nullptr)
+359:     {
+360:         size = strlen(str);
+361:     }
+362:     if (count < size)
+363:         size = count;
+364:     if ((size + 1) > m_allocatedSize)
+365:     {
+366:         if (!reallocate(size + 1))
+367:             return *this;
+368:     }
+369:     if (str != nullptr)
+370:     {
+371:         strncpy(m_buffer, str, size);
 372:     }
-373:     if (str != nullptr)
-374:     {
-375:         strncpy(m_buffer, str, size);
-376:     }
-377:     m_end = m_buffer + size;
-378:     m_buffer[size] = NullCharConst;
-379:     return *this;
-380: }
-381:
-382: /// <summary>
-383: /// assign a string value
-384: ///
-385: /// Assigns a string containing the specified count times the specified characters to the string
-386: /// </summary>
-387: /// <param name="count">Number copies of ch to copy to the string</param>
-388: /// <param name="ch">Character to initialize with</param>
-389: /// <returns>A reference to the string</returns>
-390: string& string::assign(size_t count, ValueType ch)
-391: {
-392:     auto size = count;
-393:     if (size > MaximumStringSize)
-394:         size = MaximumStringSize;
-395:     if ((size + 1) > m_allocatedSize)
-396:     {
-397:         if (!reallocate(size + 1))
-398:             return *this;
-399:     }
-400:     memset(m_buffer, ch, size);
-401:     m_end = m_buffer + size;
-402:     m_buffer[size] = NullCharConst;
-403:     return *this;
-404: }
-405:
-406: /// <summary>
-407: /// assign a string value
-408: ///
-409: /// Assigns the specified string value to the string
-410: /// </summary>
-411: /// <param name="str">string value to assign to the string</param>
-412: /// <returns>A reference to the string</returns>
-413: string& string::assign(const string& str)
-414: {
-415:     auto size = str.length();
-416:     if ((size + 1) > m_allocatedSize)
-417:     {
-418:         if (!reallocate(size + 1))
-419:             return *this;
-420:     }
-421:     strncpy(m_buffer, str.data(), size);
-422:     m_end = m_buffer + size;
-423:     m_buffer[size] = NullCharConst;
-424:     return *this;
-425: }
-426:
-427: /// <summary>
-428: /// assign a string value
-429: ///
-430: /// Assigns the substring start from the specified position for the specified count of characters of specified string value to the string
-431: /// </summary>
-432: /// <param name="str">string value to assign to the string</param>
-433: /// <param name="pos">Starting position of substring to copy from str</param>
-434: /// <param name="count">Maximum number of characters to copy from str.
-435: /// Default is until end of string. If pos + count is larger than the stirn length, characters are copied until end of string</param>
-436: /// <returns>A reference to the string</returns>
-437: string& string::assign(const string& str, size_t pos, size_t count /*= npos*/)
-438: {
-439:     if (str.empty())
-440:         return assign(str);
-441:
-442:     if (pos < str.length())
-443:     {
-444:         auto size = str.length() - pos;
-445:         if (count < size)
-446:             size = count;
-447:         if ((size + 1) > m_allocatedSize)
-448:         {
-449:             if (!reallocate(size + 1))
-450:                 return *this;
-451:         }
-452:         strncpy(m_buffer, str.data() + pos, size);
-453:         m_end = m_buffer + size;
-454:         m_buffer[size] = NullCharConst;
-455:     }
-456:     return *this;
-457: }
-458:
-459: /// <summary>
-460: /// Return the character at specified position
-461: /// </summary>
-462: /// <param name="pos">Position in string</param>
-463: /// <returns>Returns a non-const reference to the character at offset pos. If the position pos is outside the string, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
-464: string::ValueType& string::at(size_t pos)
-465: {
-466:     if (pos >= length())
-467:     {
-468:         NullChar = NullCharConst;
-469:         return NullChar;
-470:     }
-471:     return m_buffer[pos];
-472: }
-473:
-474: /// <summary>
-475: /// Return the character at specified position
-476: /// </summary>
-477: /// <param name="pos">Position in string</param>
-478: /// <returns>Returns a const reference to the character at offset pos. If the position pos is outside the string, a reference to a const null character is returned (NullCharConst)</returns>
-479: const string::ValueType& string::at(size_t pos) const
-480: {
-481:     if (pos >= length())
-482:         return NullCharConst;
-483:     return m_buffer[pos];
-484: }
-485:
-486: /// <summary>
-487: /// Return the first character
-488: /// </summary>
-489: /// <returns>Returns a non-const reference to the first character in the string. If the string is empty, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
-490: string::ValueType& string::front()
-491: {
-492:     if (empty())
-493:     {
-494:         NullChar = NullCharConst;
-495:         return NullChar;
-496:     }
-497:     return *m_buffer;
-498: }
-499:
-500: /// <summary>
-501: /// Return the first character
-502: /// </summary>
-503: /// <returns>Returns a const reference to the first character in the string. If the string is empty, a reference to a const null character is returned (NullCharConst)</returns>
-504: const string::ValueType& string::front() const
-505: {
-506:     if (empty())
-507:         return NullCharConst;
-508:     return *m_buffer;
-509: }
-510:
-511: /// <summary>
-512: /// Return the last character
-513: /// </summary>
-514: /// <returns>Returns a non-const reference to the last character in the string. If the string is empty, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
-515: string::ValueType& string::back()
-516: {
-517:     if (empty())
-518:     {
-519:         NullChar = NullCharConst;
-520:         return NullChar;
-521:     }
-522:     return *(m_end - 1);
-523: }
-524:
-525: /// <summary>
-526: /// Return the last character
-527: /// </summary>
-528: /// <returns>Returns a const reference to the last character in the string. If the string is empty, a reference to a const null character is returned (NullCharConst)</returns>
-529: const string::ValueType& string::back() const
-530: {
-531:     if (empty())
-532:         return NullCharConst;
-533:     return *(m_end - 1);
-534: }
-535:
-536: /// <summary>
-537: /// Return the character at specified position
-538: /// </summary>
-539: /// <param name="pos">Position in string</param>
-540: /// <returns>Returns a non-const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
-541: string::ValueType& string::operator[] (size_t pos)
-542: {
-543:     if (pos >= size())
-544:     {
-545:         NullChar = '\0';
-546:         return NullChar;
-547:     }
-548:     return m_buffer[pos];
-549: }
-550:
-551: /// <summary>
-552: /// Return the character at specified position
-553: /// </summary>
-554: /// <param name="pos">Position in string</param>
-555: /// <returns>Returns a const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
-556: const string::ValueType& string::operator[] (size_t pos) const
-557: {
-558:     if (pos >= size())
-559:         return NullCharConst;
-560:     return m_buffer[pos];
-561: }
-562:
-563: /// <summary>
-564: /// Return the buffer pointer
-565: /// </summary>
-566: /// <returns>Returns a non-const pointer to the buffer. If the buffer is not allocated, a pointer to a non-const null character (NullChar, initialized before returning) is returned</returns>
-567: string::ValueType* string::data()
-568: {
-569:     NullChar = NullCharConst;
-570:     return (m_buffer == nullptr) ? &NullChar : m_buffer;
-571: }
-572:
-573: /// <summary>
-574: /// Return the buffer pointer
-575: /// </summary>
-576: /// <returns>Returns a const pointer to the buffer. If the buffer is not allocated, a pointer to a const null character (NullCharConst) is returned</returns>
-577: const string::ValueType* string::data() const
-578: {
-579:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
-580: }
-581:
-582: /// <summary>
-583: /// Return the buffer pointer
-584: /// </summary>
-585: /// <returns>Returns a const pointer to the buffer. If the buffer is not allocated, a pointer to a const null character (NullCharConst) is returned</returns>
-586: const string::ValueType* string::c_str() const
-587: {
-588:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
-589: }
-590:
-591: /// <summary>
-592: /// Determine whether string is empty.
-593: /// </summary>
-594: /// <returns>Returns true when the string is empty (not allocated or no contents), false otherwise</returns>
-595: bool string::empty() const
-596: {
-597:     return m_end == m_buffer;
-598: }
-599:
-600: /// <summary>
-601: /// Return the size of the string
-602: ///
-603: /// This method is the equivalent of length().
-604: /// </summary>
-605: /// <returns>Returns the size (or length) of the string</returns>
-606: size_t string::size() const
-607: {
-608:     return m_end - m_buffer;
-609: }
-610:
-611: /// <summary>
-612: /// Return the length of the string
-613: ///
-614: /// This method is the equivalent of size().
-615: /// </summary>
-616: /// <returns>Returns the size (or length) of the string</returns>
-617: size_t string::length() const
-618: {
-619:     return m_end - m_buffer;
-620: }
-621:
-622: /// <summary>
-623: /// Return the capacity of the string
-624: ///
-625: /// The capacity is the size of the allocated buffer. The string can grow to that length before it needs to be re-allocated.
-626: /// </summary>
-627: /// <returns>Returns the size (or length) of the string</returns>
-628: size_t string::capacity() const
-629: {
-630:     return m_allocatedSize;
-631: }
-632:
-633: /// <summary>
-634: /// Reserved a buffer capacity
-635: ///
-636: /// Allocates a buffer of specified size
-637: /// </summary>
-638: /// <param name="newCapacity"></param>
-639: /// <returns>Returns the capacity of the string</returns>
-640: size_t string::reserve(size_t newCapacity)
-641: {
-642:     reallocate_allocation_size(newCapacity);
-643:     return m_allocatedSize;
-644: }
-645:
-646: /// <summary>
-647: /// append operator
-648: ///
-649: /// Appends a character to the string
-650: /// </summary>
-651: /// <param name="ch">Character to append</param>
-652: /// <returns>Returns a reference to the string</returns>
-653: string& string::operator +=(ValueType ch)
-654: {
-655:     append(1, ch);
-656:     return *this;
-657: }
-658:
-659: /// <summary>
-660: /// append operator
-661: ///
-662: /// Appends a string to the string
-663: /// </summary>
-664: /// <param name="str">string to append</param>
-665: /// <returns>Returns a reference to the string</returns>
-666: string& string::operator +=(const string& str)
-667: {
-668:     append(str);
-669:     return *this;
-670: }
-671:
-672: /// <summary>
-673: /// append operator
-674: ///
-675: /// Appends a string to the string
-676: /// </summary>
-677: /// <param name="str">string to append. If nullptr the nothing is appended</param>
-678: /// <returns>Returns a reference to the string</returns>
-679: string& string::operator +=(const ValueType* str)
-680: {
-681:     append(str);
-682:     return *this;
-683: }
-684:
-685: /// <summary>
-686: /// append operator
-687: ///
-688: /// Appends a sequence of count times the same character ch to the string
-689: /// </summary>
-690: /// <param name="count">Number of characters to append</param>
-691: /// <param name="ch">Character to append</param>
-692: void string::append(size_t count, ValueType ch)
-693: {
-694:     auto len = length();
-695:     auto strLength = count;
-696:     if (strLength > MaximumStringSize - len)
-697:         strLength = MaximumStringSize - len;
-698:     auto size = len + strLength;
-699:     if ((size + 1) > m_allocatedSize)
-700:     {
-701:         if (!reallocate(size + 1))
-702:             return;
-703:     }
-704:     memset(m_buffer + len, ch, strLength);
-705:     m_end = m_buffer + size;
-706:     m_buffer[size] = NullCharConst;
-707: }
-708:
-709: /// <summary>
-710: /// append operator
-711: ///
-712: /// Appends a string to the string
-713: /// </summary>
-714: /// <param name="str">string to append</param>
-715: void string::append(const string& str)
-716: {
-717:     auto len = length();
-718:     auto strLength = str.length();
-719:     auto size = len + strLength;
-720:     if ((size + 1) > m_allocatedSize)
-721:     {
-722:         if (!reallocate(size + 1))
-723:             return;
-724:     }
-725:     strncpy(m_buffer + len, str.data(), strLength);
-726:     m_end = m_buffer + size;
-727:     m_buffer[size] = NullCharConst;
-728: }
-729:
-730: /// <summary>
-731: /// append operator
-732: ///
-733: /// Appends a substring of str to the string
-734: /// </summary>
-735: /// <param name="str">string to append from</param>
-736: /// <param name="pos">Start position in str to copy characters from</param>
-737: /// <param name="count">Number of characters to copy from str. Default is until the end of the string. If count is larger than the string length, characters are copied up to the end of the string</param>
-738: void string::append(const string& str, size_t pos, size_t count /*= npos*/)
-739: {
-740:     if (pos >= str.length())
-741:         return;
-742:     auto strLength = str.length();
-743:     auto strCount = strLength - pos;
-744:     if (count < strCount)
-745:         strCount = count;
-746:     auto len = length();
-747:     auto size = len + strCount;
-748:     if ((size + 1) > m_allocatedSize)
-749:     {
-750:         if (!reallocate(size + 1))
-751:             return;
-752:     }
-753:     strncpy(m_buffer + len, str.data() + pos, strCount);
-754:     m_end = m_buffer + size;
-755:     m_buffer[size] = NullCharConst;
-756: }
-757:
-758: /// <summary>
-759: /// append operator
-760: ///
-761: /// Appends a string to the string
-762: /// </summary>
-763: /// <param name="str">string to append. If nullptr the nothing is appended</param>
-764: void string::append(const ValueType* str)
-765: {
-766:     if (str == nullptr)
-767:         return;
-768:     auto len = length();
-769:     auto strLength = strlen(str);
-770:     auto size = len + strLength;
-771:     if ((size + 1) > m_allocatedSize)
-772:     {
-773:         if (!reallocate(size + 1))
-774:             return;
-775:     }
-776:     strncpy(m_buffer + len, str, strLength);
-777:     m_end = m_buffer + size;
-778:     m_buffer[size] = NullCharConst;
-779: }
-780:
-781: /// <summary>
-782: /// append operator
-783: ///
-784: /// Appends a number of characters from str to the string
-785: /// </summary>
-786: /// <param name="str">string to append. If nullptr the nothing is appended</param>
-787: /// <param name="count">Number of characters to copy from str. If count is larger than the string length, the complete string is copied</param>
-788: void string::append(const ValueType* str, size_t count)
-789: {
-790:     if (str == nullptr)
-791:         return;
-792:     auto len = length();
-793:     auto strLength = strlen(str);
-794:     auto strCount = count;
-795:     if (strCount > strLength)
-796:         strCount = strLength;
-797:     auto size = len + strCount;
-798:     if ((size + 1) > m_allocatedSize)
-799:     {
-800:         if (!reallocate(size + 1))
-801:             return;
-802:     }
-803:     strncpy(m_buffer + len, str, strCount);
-804:     m_end = m_buffer + size;
-805:     m_buffer[size] = NullCharConst;
-806: }
-807:
-808: /// <summary>
-809: /// clear the string
-810: ///
-811: /// Clears the contents of the string, but does not free or reallocate the buffer
-812: /// </summary>
-813: void string::clear()
-814: {
-815:     if (!empty())
-816:     {
-817:         m_end = m_buffer;
-818:         m_buffer[0] = NullCharConst;
-819:     }
-820: }
-821:
-822: /// <summary>
-823: /// find a substring in the string
-824: ///
-825: /// If empty string, always finds the string.
-826: /// </summary>
-827: /// <param name="str">Substring to find</param>
-828: /// <param name="pos">Starting position in string to start searching</param>
-829: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
-830: size_t string::find(const string& str, size_t pos /*= 0*/) const
-831: {
-832:     auto len = length();
-833:     auto patternLength = str.length();
-834:     if (pos >= len)
-835:         return npos;
-836:     auto needle = str.data();
-837:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
-838:     {
-839:         if (memcmp(haystack, needle, patternLength) == 0)
-840:             return haystack - m_buffer;
-841:     }
-842:     return npos;
-843: }
-844:
-845: /// <summary>
-846: /// find a substring in the string
-847: ///
-848: /// If nullptr or empty string, always finds the string.
-849: /// </summary>
-850: /// <param name="str">Substring to find</param>
-851: /// <param name="pos">Starting position in string to start searching</param>
-852: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
-853: size_t string::find(const ValueType* str, size_t pos /*= 0*/) const
-854: {
-855:     size_t strLength{};
-856:     if (str != nullptr)
-857:     {
-858:         strLength = strlen(str);
-859:     }
-860:     auto len = length();
-861:     auto patternLength = strLength;
-862:     if (pos >= len)
-863:         return npos;
-864:     auto needle = str;
-865:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
-866:     {
-867:         if (memcmp(haystack, needle, patternLength) == 0)
-868:             return haystack - m_buffer;
-869:     }
-870:     return npos;
-871: }
-872:
-873: /// <summary>
-874: /// find a substring in the string
-875: ///
-876: /// If nullptr or empty string, always finds the string.
-877: /// </summary>
-878: /// <param name="str">Substring to find</param>
-879: /// <param name="pos">Starting position in string to start searching</param>
-880: /// <param name="count">Number of characters from str to compare</param>
-881: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
-882: size_t string::find(const ValueType* str, size_t pos, size_t count) const
-883: {
-884:     size_t strLength{};
-885:     if (str != nullptr)
-886:     {
-887:         strLength = strlen(str);
-888:     }
-889:     auto len = length();
-890:     auto patternLength = strLength;
-891:     if (pos >= len)
-892:         return npos;
-893:     if (count < patternLength)
-894:         patternLength = count;
-895:     auto needle = str;
-896:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
-897:     {
-898:         if (memcmp(haystack, needle, patternLength) == 0)
-899:             return haystack - m_buffer;
-900:     }
-901:     return npos;
-902: }
-903:
-904: /// <summary>
-905: /// find a character in the string
-906: /// </summary>
-907: /// <param name="ch">Character to find</param>
-908: /// <param name="pos">Starting position in string to start searching</param>
-909: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
-910: size_t string::find(ValueType ch, size_t pos /*= 0*/) const
-911: {
-912:     auto len = length();
-913:     if (pos >= len)
-914:         return npos;
-915:     for (const ValueType* haystack = data() + pos; haystack <= m_end; ++haystack)
-916:     {
-917:         if (*haystack == ch)
-918:             return haystack - m_buffer;
-919:     }
-920:     return npos;
-921: }
-922:
-923: /// <summary>
-924: /// Check whether string starts with character
-925: /// </summary>
-926: /// <param name="ch">Character to find</param>
-927: /// <returns>Returns true if ch is first character in string, false otherwise</returns>
-928: bool string::starts_with(ValueType ch) const
-929: {
-930:     if (empty())
-931:         return false;
-932:     return m_buffer[0] == ch;
-933: }
-934:
-935: /// <summary>
-936: /// Check whether string starts with substring
-937: /// </summary>
-938: /// <param name="str">SubString to find</param>
-939: /// <returns>Returns true if str is first part of string, false otherwise</returns>
-940: bool string::starts_with(const string& str) const
-941: {
-942:     auto len = length();
-943:     auto strLength = str.length();
-944:     if (strLength >= len)
-945:         return false;
-946:
-947:     return memcmp(data(), str.data(), strLength) == 0;
-948: }
-949:
-950: /// <summary>
-951: /// Check whether string starts with substring
-952: /// </summary>
-953: /// <param name="str">SubString to find</param>
-954: /// <returns>Returns true if str is first part of string, false otherwise</returns>
-955: bool string::starts_with(const ValueType* str) const
-956: {
-957:     size_t strLength{};
-958:     if (str != nullptr)
-959:     {
-960:         strLength = strlen(str);
-961:     }
-962:     auto len = length();
-963:     if (strLength >= len)
-964:         return false;
-965:
-966:     return memcmp(data(), str, strLength) == 0;
-967: }
-968:
-969: /// <summary>
-970: /// Check whether string ends with character
-971: /// </summary>
-972: /// <param name="ch">Character to find</param>
-973: /// <returns>Returns true if ch is last character in string, false otherwise</returns>
-974: bool string::ends_with(ValueType ch) const
-975: {
-976:     if (empty())
-977:         return false;
-978:     return m_buffer[length() - 1] == ch;
-979: }
-980:
-981: /// <summary>
-982: /// Check whether string ends with substring
-983: /// </summary>
-984: /// <param name="str">SubString to find</param>
-985: /// <returns>Returns true if str is last part of string, false otherwise</returns>
-986: bool string::ends_with(const string& str) const
-987: {
-988:     auto len = length();
-989:     auto strLength = str.length();
-990:     if (strLength >= len)
-991:         return false;
-992:
-993:     return memcmp(m_end - strLength, str.data(), strLength) == 0;
-994: }
-995:
-996: /// <summary>
-997: /// Check whether string ends with substring
-998: /// </summary>
-999: /// <param name="str">SubString to find</param>
-1000: /// <returns>Returns true if str is last part of string, false otherwise</returns>
-1001: bool string::ends_with(const ValueType* str) const
-1002: {
-1003:     size_t strLength{};
-1004:     if (str != nullptr)
-1005:     {
-1006:         strLength = strlen(str);
-1007:     }
-1008:     auto len = length();
-1009:     if (strLength >= len)
-1010:         return false;
-1011:
-1012:     return memcmp(m_end - strLength, str, strLength) == 0;
-1013: }
-1014:
-1015: /// <summary>
-1016: /// Check whether string contains character
-1017: /// </summary>
-1018: /// <param name="ch">Character to find</param>
-1019: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
-1020: bool string::contains(ValueType ch) const
-1021: {
-1022:     return find(ch) != npos;
-1023: }
-1024:
-1025: /// <summary>
-1026: /// Check whether string contains substring
-1027: /// </summary>
-1028: /// <param name="str">Substring to find</param>
-1029: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
-1030: bool string::contains(const string& str) const
-1031: {
-1032:     return find(str) != npos;
-1033: }
-1034:
-1035: /// <summary>
-1036: /// Check whether string contains substring
-1037: /// </summary>
-1038: /// <param name="str">Substring to find</param>
-1039: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
-1040: bool string::contains(const ValueType* str) const
-1041: {
-1042:     return find(str) != npos;
-1043: }
-1044:
-1045: /// <summary>
-1046: /// Return substring
-1047: /// </summary>
-1048: /// <param name="pos">Starting position of substring in string</param>
-1049: /// <param name="count">length of substring to return. If count is larger than the number of characters available from position pos, the rest of the string is returned</param>
-1050: /// <returns>Returns the substring at position [pos, pos + count), if available </returns>
-1051: string string::substr(size_t pos /*= 0*/, size_t count /*= npos*/) const
-1052: {
-1053:     string result;
-1054:     auto size = length() - pos;
-1055:     if (pos < length())
-1056:     {
-1057:         if (count < size)
-1058:             size = count;
-1059:         result.reallocate(size + 1);
-1060:         memcpy(result.data(), data() + pos, size);
-1061:         result.m_end = result.m_buffer + size;
-1062:         result.data()[size] = NullCharConst;
-1063:     }
-1064:
-1065:     return result;
-1066: }
-1067:
-1068: /// <summary>
-1069: /// Case sensitive equality to string
-1070: /// </summary>
-1071: /// <param name="other">string to compare to</param>
-1072: /// <returns>Returns true if the strings are equal, false otherwise</returns>
-1073: bool string::equals(const string& other) const
-1074: {
-1075:     return compare(other) == 0;
-1076: }
-1077:
-1078: /// <summary>
-1079: /// Case sensitive equality to string
-1080: /// </summary>
-1081: /// <param name="other">string to compare to</param>
-1082: /// <returns>Returns true if the strings are equal, false otherwise</returns>
-1083: bool string::equals(const ValueType* other) const
-1084: {
-1085:     if (other == nullptr)
-1086:         return empty();
-1087:     if (length() != strlen(other))
-1088:         return false;
-1089:     return strcmp(data(), other) == 0;
-1090: }
-1091:
-1092: /// <summary>
-1093: /// Case insensitive equality to string
-1094: /// </summary>
-1095: /// <param name="other">string to compare to</param>
-1096: /// <returns>Returns true if the strings are equal, false otherwise</returns>
-1097: bool string::equals_case_insensitive(const string& other) const
-1098: {
-1099:     if (length() != other.length())
-1100:         return false;
-1101:     if (empty())
-1102:         return true;
-1103:     return strcasecmp(data(), other.data()) == 0;
-1104: }
-1105:
-1106: /// <summary>
-1107: /// Case insensitive equality to string
-1108: /// </summary>
-1109: /// <param name="other">string to compare to</param>
-1110: /// <returns>Returns true if the strings are equal, false otherwise</returns>
-1111: bool string::equals_case_insensitive(const ValueType* other) const
-1112: {
-1113:     if (other == nullptr)
-1114:         return empty();
-1115:     if (length() != strlen(other))
-1116:         return false;
-1117:     return strcasecmp(data(), other) == 0;
-1118: }
-1119:
-1120: /// <summary>
-1121: /// Case sensitive compare to string
-1122: ///
-1123: /// Compares the complete string, character by character
-1124: /// </summary>
-1125: /// <param name="str">string to compare to</param>
-1126: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1127: int string::compare(const string& str) const
-1128: {
-1129:     if (empty())
-1130:     {
-1131:         if (str.empty())
-1132:             return 0;
-1133:         return -1;
-1134:     }
-1135:     if (str.empty())
-1136:         return 1;
-1137:
-1138:     return strcmp(data(), str.data());
-1139: }
-1140:
-1141: /// <summary>
-1142: /// Case sensitive compare to string
-1143: ///
-1144: /// Compares the substring from pos to pos+count to str
-1145: /// </summary>
-1146: /// <param name="pos">Starting position of substring to compare to str</param>
-1147: /// <param name="count">Number of characters in substring to compare to str</param>
-1148: /// <param name="str">string to compare to</param>
-1149: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1150: int string::compare(size_t pos, size_t count, const string& str) const
-1151: {
-1152:     return substr(pos, count).compare(str);
-1153: }
-1154:
-1155: /// <summary>
-1156: /// Case sensitive compare to string
-1157: ///
-1158: /// Compares the substring from pos to pos+count to the substring from strPos to strPos+strCount of str
-1159: /// </summary>
-1160: /// <param name="pos">Starting position of substring to compare to str</param>
-1161: /// <param name="count">Number of characters in substring to compare to str</param>
-1162: /// <param name="str">string to compare to</param>
-1163: /// <param name="strPos">Starting position of substring of str to compare</param>
-1164: /// <param name="strCount">Number of characters in substring of str to compare</param>
-1165: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1166: int string::compare(size_t pos, size_t count, const string& str, size_t strPos, size_t strCount /*= npos*/) const
-1167: {
-1168:     return substr(pos, count).compare(str.substr(strPos, strCount));
-1169: }
-1170:
-1171: /// <summary>
-1172: /// Case sensitive compare to string
-1173: ///
-1174: /// Compares the complete string to str
-1175: /// </summary>
-1176: /// <param name="str">string to compare to</param>
-1177: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1178: int string::compare(const ValueType* str) const
-1179: {
-1180:     size_t strLength{};
-1181:     if (str != nullptr)
-1182:         strLength = strlen(str);
-1183:     if (empty())
-1184:     {
-1185:         if (strLength == 0)
-1186:             return 0;
-1187:         return -1;
-1188:     }
-1189:     if (strLength == 0)
-1190:         return 1;
-1191:
-1192:     return strcmp(data(), str);
-1193: }
-1194:
-1195: /// <summary>
-1196: /// Case sensitive compare to string
-1197: ///
-1198: /// Compares the substring from pos to pos+count to str
-1199: /// </summary>
-1200: /// <param name="pos">Starting position of substring to compare to str</param>
-1201: /// <param name="count">Number of characters in substring to compare to str</param>
-1202: /// <param name="str">string to compare to</param>
-1203: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1204: int string::compare(size_t pos, size_t count, const ValueType* str) const
-1205: {
-1206:     size_t strLength{};
-1207:     if (str != nullptr)
-1208:         strLength = strlen(str);
-1209:
-1210:     auto len = length();
-1211:     if (pos >= len)
-1212:         len = 0;
-1213:     len -= pos;
-1214:     if (count < len)
-1215:         len = count;
-1216:     if (len == 0)
-1217:     {
-1218:         if (strLength == 0)
-1219:             return 0;
-1220:         return -1;
-1221:     }
-1222:     if (strLength == 0)
-1223:         return 1;
-1224:
-1225:     auto maxLen = strLength;
-1226:     if (maxLen < len)
-1227:         maxLen = len;
-1228:     return strncmp(data() + pos, str, maxLen);
-1229: }
-1230:
-1231: /// <summary>
-1232: /// Case sensitive compare to string
-1233: ///
-1234: /// Compares the substring from pos to pos+count to the first strCount characters of str
-1235: /// </summary>
-1236: /// <param name="pos">Starting position of substring to compare to str</param>
-1237: /// <param name="count">Number of characters in substring to compare to str</param>
-1238: /// <param name="str">string to compare to</param>
-1239: /// <param name="strCount">Number of characters in substring of str to compare</param>
-1240: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
-1241: int string::compare(size_t pos, size_t count, const ValueType* str, size_t strCount) const
-1242: {
-1243:     size_t strLength{};
-1244:     if (str != nullptr)
-1245:         strLength = strlen(str);
-1246:
-1247:     auto len = length();
-1248:     if (pos >= len)
-1249:         len = 0;
-1250:     len -= pos;
-1251:     if (count < len)
-1252:         len = count;
-1253:
-1254:     if (strCount < strLength)
-1255:         strLength = strCount;
-1256:
-1257:     if (len == 0)
-1258:     {
-1259:         if (strLength == 0)
-1260:             return 0;
-1261:         return -1;
-1262:     }
-1263:     if (strLength == 0)
-1264:         return 1;
-1265:
-1266:     auto maxLen = strLength;
-1267:     if (maxLen < len)
-1268:         maxLen = len;
-1269:     return strncmp(data() + pos, str, maxLen);
-1270: }
-1271:
-1272: /// <summary>
-1273: /// replace substring
-1274: ///
-1275: /// Replaces the substring from pos to pos+count with str
-1276: /// </summary>
-1277: /// <param name="pos">Starting position of substring to replace</param>
-1278: /// <param name="count">Number of characters in substring to replace</param>
-1279: /// <param name="str">string to replace with</param>
-1280: /// <returns>Returns the reference to the resulting string</returns>
-1281: string& string::replace(size_t pos, size_t count, const string& str)
-1282: {
-1283:     string result = substr(0, pos) + str + substr(pos + count);
-1284:     assign(result);
-1285:     return *this;
-1286: }
-1287:
-1288: /// <summary>
-1289: /// replace substring
-1290: ///
-1291: /// Replaces the substring from pos to pos+count with the substring from strPos to strPos+strCount of str
-1292: /// </summary>
-1293: /// <param name="pos">Starting position of substring to replace</param>
-1294: /// <param name="count">Number of characters in substring to replace</param>
-1295: /// <param name="str">string to replace with</param>
-1296: /// <param name="strPos">Starting position of substring of str to replace with</param>
-1297: /// <param name="strCount">Number of characters in substring of str to replace with</param>
-1298: /// <returns>Returns the reference to the resulting string</returns>
-1299: string& string::replace(size_t pos, size_t count, const string& str, size_t strPos, size_t strCount /*= npos*/)
-1300: {
-1301:     string result = substr(0, pos) + str.substr(strPos, strCount) + substr(pos + count);
-1302:     assign(result);
-1303:     return *this;
-1304: }
-1305:
-1306: /// <summary>
-1307: /// replace substring
-1308: ///
-1309: /// Replaces the substring from pos to pos+count with str
-1310: /// </summary>
-1311: /// <param name="pos">Starting position of substring to replace</param>
-1312: /// <param name="count">Number of characters in substring to replace</param>
-1313: /// <param name="str">string to replace with</param>
-1314: /// <returns>Returns the reference to the resulting string</returns>
-1315: string& string::replace(size_t pos, size_t count, const ValueType* str)
-1316: {
-1317:     string result = substr(0, pos) + str + substr(pos + count);
-1318:     assign(result);
-1319:     return *this;
-1320: }
-1321:
-1322: /// <summary>
-1323: /// replace substring
-1324: ///
-1325: /// Replaces the substring from pos to pos+count with the first strCount characters of str
-1326: /// </summary>
-1327: /// <param name="pos">Starting position of substring to replace</param>
-1328: /// <param name="count">Number of characters in substring to replace</param>
-1329: /// <param name="str">string to replace with</param>
-1330: /// <param name="strCount">Number of characters in substring to replace with</param>
-1331: /// <returns>Returns the reference to the resulting string</returns>
-1332: string& string::replace(size_t pos, size_t count, const ValueType* str, size_t strCount)
-1333: {
-1334:     string result = substr(0, pos) + string(str, strCount) + substr(pos + count);
-1335:     assign(result);
-1336:     return *this;
-1337: }
-1338:
-1339: /// <summary>
-1340: /// replace substring
-1341: ///
-1342: /// Replaces the substring from pos to pos+count with ch
-1343: /// </summary>
-1344: /// <param name="pos">Starting position of substring to replace</param>
-1345: /// <param name="count">Number of characters in substring to replace</param>
-1346: /// <param name="ch">Characters to replace with</param>
-1347: /// <returns>Returns the reference to the resulting string</returns>
-1348: string& string::replace(size_t pos, size_t count, ValueType ch)
-1349: {
-1350:     return replace(pos, count, ch, 1);
-1351: }
-1352:
-1353: /// <summary>
-1354: /// replace substring
-1355: ///
-1356: /// Replaces the substring from pos to pos+count with a sequence of chCount copies of ch
-1357: /// </summary>
-1358: /// <param name="pos">Starting position of substring to replace</param>
-1359: /// <param name="count">Number of characters in substring to replace</param>
-1360: /// <param name="ch">Characters to replace with</param>
-1361: /// <param name="chCount">Number of copies of ch to replace with</param>
-1362: /// <returns>Returns the reference to the resulting string</returns>
-1363: string& string::replace(size_t pos, size_t count, ValueType ch, size_t chCount)
-1364: {
-1365:     string result = substr(0, pos) + string(chCount, ch) + substr(pos + count);
-1366:     assign(result);
-1367:     return *this;
-1368: }
-1369:
-1370: /// <summary>
-1371: /// replace substring
-1372: ///
-1373: /// Replaces all instances of the substring oldStr (if existing) with newStr
-1374: /// </summary>
-1375: /// <param name="oldStr">string to find in string</param>
-1376: /// <param name="newStr">string to replace with</param>
-1377: /// <returns>Returns the number of times the string was replaced</returns>
-1378: int string::replace(const string& oldStr, const string& newStr)
-1379: {
-1380:     size_t pos = find(oldStr);
-1381:     size_t oldLength = oldStr.length();
-1382:     size_t newLength = newStr.length();
-1383:     int count = 0;
-1384:     while (pos != npos)
-1385:     {
-1386:         replace(pos, oldLength, newStr);
-1387:         pos += newLength;
-1388:         pos = find(oldStr, pos);
-1389:         count++;
-1390:     }
-1391:     return count;
-1392: }
-1393:
-1394: /// <summary>
-1395: /// replace substring
-1396: ///
-1397: /// Replaces all instances of the substring oldStr (if existing) with newStr
-1398: /// </summary>
-1399: /// <param name="oldStr">string to find in string</param>
-1400: /// <param name="newStr">string to replace with</param>
-1401: /// <returns>Returns the number of times the string was replaced</returns>
-1402: int string::replace(const ValueType* oldStr, const ValueType* newStr)
-1403: {
-1404:     if ((oldStr == nullptr) || (newStr == nullptr))
-1405:         return 0;
-1406:     size_t pos = find(oldStr);
-1407:     size_t oldLength = strlen(oldStr);
-1408:     size_t newLength = strlen(newStr);
-1409:     int count = 0;
-1410:     while (pos != npos)
-1411:     {
-1412:         replace(pos, oldLength, newStr);
-1413:         pos += newLength;
-1414:         pos = find(oldStr, pos);
-1415:         count++;
-1416:     }
-1417:     return count;
-1418: }
-1419:
-1420: /// <summary>
-1421: /// Align string
-1422: ///
-1423: /// Pads the string on the left (width > 0) or on the right (width < 0) up to a length of width characters. If the string is larger than width characters, it is not modified.
-1424: /// </summary>
-1425: /// <param name="width">length of target string. If width < 0, the string is padded to the right with spaces up to -width characters.
-1426: /// if width > 0, the string is padded to the left with space up to width characters</param>
-1427: /// <returns>Returns the number of times the string was replaced</returns>
-1428: string string::align(int width) const
-1429: {
-1430:     string result;
-1431:     int    absWidth = (width > 0) ? width : -width;
-1432:     auto   len = length();
-1433:     if (static_cast<size_t>(absWidth) > len)
-1434:     {
-1435:         if (width < 0)
+373:     m_end = m_buffer + size;
+374:     m_buffer[size] = NullCharConst;
+375:     return *this;
+376: }
+377: 
+378: /// <summary>
+379: /// assign a string value
+380: ///
+381: /// Assigns a string containing the specified count times the specified characters to the string
+382: /// </summary>
+383: /// <param name="count">Number copies of ch to copy to the string</param>
+384: /// <param name="ch">Character to initialize with</param>
+385: /// <returns>A reference to the string</returns>
+386: string& string::assign(size_t count, ValueType ch)
+387: {
+388:     auto size = count;
+389:     if (size > MaximumStringSize)
+390:         size = MaximumStringSize;
+391:     if ((size + 1) > m_allocatedSize)
+392:     {
+393:         if (!reallocate(size + 1))
+394:             return *this;
+395:     }
+396:     memset(m_buffer, ch, size);
+397:     m_end = m_buffer + size;
+398:     m_buffer[size] = NullCharConst;
+399:     return *this;
+400: }
+401: 
+402: /// <summary>
+403: /// assign a string value
+404: ///
+405: /// Assigns the specified string value to the string
+406: /// </summary>
+407: /// <param name="str">string value to assign to the string</param>
+408: /// <returns>A reference to the string</returns>
+409: string& string::assign(const string& str)
+410: {
+411:     auto size = str.length();
+412:     if ((size + 1) > m_allocatedSize)
+413:     {
+414:         if (!reallocate(size + 1))
+415:             return *this;
+416:     }
+417:     strncpy(m_buffer, str.data(), size);
+418:     m_end = m_buffer + size;
+419:     m_buffer[size] = NullCharConst;
+420:     return *this;
+421: }
+422: 
+423: /// <summary>
+424: /// assign a string value
+425: ///
+426: /// Assigns the substring start from the specified position for the specified count of characters of specified string value to the string
+427: /// </summary>
+428: /// <param name="str">string value to assign to the string</param>
+429: /// <param name="pos">Starting position of substring to copy from str</param>
+430: /// <param name="count">Maximum number of characters to copy from str.
+431: /// Default is until end of string. If pos + count is larger than the stirn length, characters are copied until end of string</param>
+432: /// <returns>A reference to the string</returns>
+433: string& string::assign(const string& str, size_t pos, size_t count /*= npos*/)
+434: {
+435:     if (str.empty())
+436:         return assign(str);
+437: 
+438:     if (pos < str.length())
+439:     {
+440:         auto size = str.length() - pos;
+441:         if (count < size)
+442:             size = count;
+443:         if ((size + 1) > m_allocatedSize)
+444:         {
+445:             if (!reallocate(size + 1))
+446:                 return *this;
+447:         }
+448:         strncpy(m_buffer, str.data() + pos, size);
+449:         m_end = m_buffer + size;
+450:         m_buffer[size] = NullCharConst;
+451:     }
+452:     return *this;
+453: }
+454: 
+455: /// <summary>
+456: /// Return the character at specified position
+457: /// </summary>
+458: /// <param name="pos">Position in string</param>
+459: /// <returns>Returns a non-const reference to the character at offset pos. If the position pos is outside the string, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
+460: string::ValueType& string::at(size_t pos)
+461: {
+462:     if (pos >= length())
+463:     {
+464:         NullChar = NullCharConst;
+465:         return NullChar;
+466:     }
+467:     return m_buffer[pos];
+468: }
+469: 
+470: /// <summary>
+471: /// Return the character at specified position
+472: /// </summary>
+473: /// <param name="pos">Position in string</param>
+474: /// <returns>Returns a const reference to the character at offset pos. If the position pos is outside the string, a reference to a const null character is returned (NullCharConst)</returns>
+475: const string::ValueType& string::at(size_t pos) const
+476: {
+477:     if (pos >= length())
+478:         return NullCharConst;
+479:     return m_buffer[pos];
+480: }
+481: 
+482: /// <summary>
+483: /// Return the first character
+484: /// </summary>
+485: /// <returns>Returns a non-const reference to the first character in the string. If the string is empty, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
+486: string::ValueType& string::front()
+487: {
+488:     if (empty())
+489:     {
+490:         NullChar = NullCharConst;
+491:         return NullChar;
+492:     }
+493:     return *m_buffer;
+494: }
+495: 
+496: /// <summary>
+497: /// Return the first character
+498: /// </summary>
+499: /// <returns>Returns a const reference to the first character in the string. If the string is empty, a reference to a const null character is returned (NullCharConst)</returns>
+500: const string::ValueType& string::front() const
+501: {
+502:     if (empty())
+503:         return NullCharConst;
+504:     return *m_buffer;
+505: }
+506: 
+507: /// <summary>
+508: /// Return the last character
+509: /// </summary>
+510: /// <returns>Returns a non-const reference to the last character in the string. If the string is empty, a reference to a non-const null character is returned (NullChar, is reinitialized before returning)</returns>
+511: string::ValueType& string::back()
+512: {
+513:     if (empty())
+514:     {
+515:         NullChar = NullCharConst;
+516:         return NullChar;
+517:     }
+518:     return *(m_end - 1);
+519: }
+520: 
+521: /// <summary>
+522: /// Return the last character
+523: /// </summary>
+524: /// <returns>Returns a const reference to the last character in the string. If the string is empty, a reference to a const null character is returned (NullCharConst)</returns>
+525: const string::ValueType& string::back() const
+526: {
+527:     if (empty())
+528:         return NullCharConst;
+529:     return *(m_end - 1);
+530: }
+531: 
+532: /// <summary>
+533: /// Return the character at specified position
+534: /// </summary>
+535: /// <param name="pos">Position in string</param>
+536: /// <returns>Returns a non-const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
+537: string::ValueType& string::operator[] (size_t pos)
+538: {
+539:     if (pos >= size())
+540:     {
+541:         NullChar = '\0';
+542:         return NullChar;
+543:     }
+544:     return m_buffer[pos];
+545: }
+546: 
+547: /// <summary>
+548: /// Return the character at specified position
+549: /// </summary>
+550: /// <param name="pos">Position in string</param>
+551: /// <returns>Returns a const reference to the character at offset pos. If the position pos is outside the string, the result is undetermined</returns>
+552: const string::ValueType& string::operator[] (size_t pos) const
+553: {
+554:     if (pos >= size())
+555:         return NullCharConst;
+556:     return m_buffer[pos];
+557: }
+558: 
+559: /// <summary>
+560: /// Return the buffer pointer
+561: /// </summary>
+562: /// <returns>Returns a non-const pointer to the buffer. If the buffer is not allocated, a pointer to a non-const null character (NullChar, initialized before returning) is returned</returns>
+563: string::ValueType* string::data()
+564: {
+565:     NullChar = NullCharConst;
+566:     return (m_buffer == nullptr) ? &NullChar : m_buffer;
+567: }
+568: 
+569: /// <summary>
+570: /// Return the buffer pointer
+571: /// </summary>
+572: /// <returns>Returns a const pointer to the buffer. If the buffer is not allocated, a pointer to a const null character (NullCharConst) is returned</returns>
+573: const string::ValueType* string::data() const
+574: {
+575:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
+576: }
+577: 
+578: /// <summary>
+579: /// Return the buffer pointer
+580: /// </summary>
+581: /// <returns>Returns a const pointer to the buffer. If the buffer is not allocated, a pointer to a const null character (NullCharConst) is returned</returns>
+582: const string::ValueType* string::c_str() const
+583: {
+584:     return (m_buffer == nullptr) ? &NullCharConst : m_buffer;
+585: }
+586: 
+587: /// <summary>
+588: /// Determine whether string is empty.
+589: /// </summary>
+590: /// <returns>Returns true when the string is empty (not allocated or no contents), false otherwise</returns>
+591: bool string::empty() const
+592: {
+593:     return m_end == m_buffer;
+594: }
+595: 
+596: /// <summary>
+597: /// Return the size of the string
+598: ///
+599: /// This method is the equivalent of length().
+600: /// </summary>
+601: /// <returns>Returns the size (or length) of the string</returns>
+602: size_t string::size() const
+603: {
+604:     return m_end - m_buffer;
+605: }
+606: 
+607: /// <summary>
+608: /// Return the length of the string
+609: ///
+610: /// This method is the equivalent of size().
+611: /// </summary>
+612: /// <returns>Returns the size (or length) of the string</returns>
+613: size_t string::length() const
+614: {
+615:     return m_end - m_buffer;
+616: }
+617: 
+618: /// <summary>
+619: /// Return the capacity of the string
+620: ///
+621: /// The capacity is the size of the allocated buffer. The string can grow to that length before it needs to be re-allocated.
+622: /// </summary>
+623: /// <returns>Returns the size (or length) of the string</returns>
+624: size_t string::capacity() const
+625: {
+626:     return m_allocatedSize;
+627: }
+628: 
+629: /// <summary>
+630: /// Reserved a buffer capacity
+631: ///
+632: /// Allocates a buffer of specified size
+633: /// </summary>
+634: /// <param name="newCapacity"></param>
+635: /// <returns>Returns the capacity of the string</returns>
+636: size_t string::reserve(size_t newCapacity)
+637: {
+638:     reallocate_allocation_size(newCapacity);
+639:     return m_allocatedSize;
+640: }
+641: 
+642: /// <summary>
+643: /// append operator
+644: ///
+645: /// Appends a character to the string
+646: /// </summary>
+647: /// <param name="ch">Character to append</param>
+648: /// <returns>Returns a reference to the string</returns>
+649: string& string::operator +=(ValueType ch)
+650: {
+651:     append(1, ch);
+652:     return *this;
+653: }
+654: 
+655: /// <summary>
+656: /// append operator
+657: ///
+658: /// Appends a string to the string
+659: /// </summary>
+660: /// <param name="str">string to append</param>
+661: /// <returns>Returns a reference to the string</returns>
+662: string& string::operator +=(const string& str)
+663: {
+664:     append(str);
+665:     return *this;
+666: }
+667: 
+668: /// <summary>
+669: /// append operator
+670: ///
+671: /// Appends a string to the string
+672: /// </summary>
+673: /// <param name="str">string to append. If nullptr the nothing is appended</param>
+674: /// <returns>Returns a reference to the string</returns>
+675: string& string::operator +=(const ValueType* str)
+676: {
+677:     append(str);
+678:     return *this;
+679: }
+680: 
+681: /// <summary>
+682: /// append operator
+683: ///
+684: /// Appends a sequence of count times the same character ch to the string
+685: /// </summary>
+686: /// <param name="count">Number of characters to append</param>
+687: /// <param name="ch">Character to append</param>
+688: void string::append(size_t count, ValueType ch)
+689: {
+690:     auto len = length();
+691:     auto strLength = count;
+692:     if (strLength > MaximumStringSize - len)
+693:         strLength = MaximumStringSize - len;
+694:     auto size = len + strLength;
+695:     if ((size + 1) > m_allocatedSize)
+696:     {
+697:         if (!reallocate(size + 1))
+698:             return;
+699:     }
+700:     memset(m_buffer + len, ch, strLength);
+701:     m_end = m_buffer + size;
+702:     m_buffer[size] = NullCharConst;
+703: }
+704: 
+705: /// <summary>
+706: /// append operator
+707: ///
+708: /// Appends a string to the string
+709: /// </summary>
+710: /// <param name="str">string to append</param>
+711: void string::append(const string& str)
+712: {
+713:     auto len = length();
+714:     auto strLength = str.length();
+715:     auto size = len + strLength;
+716:     if ((size + 1) > m_allocatedSize)
+717:     {
+718:         if (!reallocate(size + 1))
+719:             return;
+720:     }
+721:     strncpy(m_buffer + len, str.data(), strLength);
+722:     m_end = m_buffer + size;
+723:     m_buffer[size] = NullCharConst;
+724: }
+725: 
+726: /// <summary>
+727: /// append operator
+728: ///
+729: /// Appends a substring of str to the string
+730: /// </summary>
+731: /// <param name="str">string to append from</param>
+732: /// <param name="pos">Start position in str to copy characters from</param>
+733: /// <param name="count">Number of characters to copy from str. Default is until the end of the string. If count is larger than the string length, characters are copied up to the end of the string</param>
+734: void string::append(const string& str, size_t pos, size_t count /*= npos*/)
+735: {
+736:     if (pos >= str.length())
+737:         return;
+738:     auto strLength = str.length();
+739:     auto strCount = strLength - pos;
+740:     if (count < strCount)
+741:         strCount = count;
+742:     auto len = length();
+743:     auto size = len + strCount;
+744:     if ((size + 1) > m_allocatedSize)
+745:     {
+746:         if (!reallocate(size + 1))
+747:             return;
+748:     }
+749:     strncpy(m_buffer + len, str.data() + pos, strCount);
+750:     m_end = m_buffer + size;
+751:     m_buffer[size] = NullCharConst;
+752: }
+753: 
+754: /// <summary>
+755: /// append operator
+756: ///
+757: /// Appends a string to the string
+758: /// </summary>
+759: /// <param name="str">string to append. If nullptr the nothing is appended</param>
+760: void string::append(const ValueType* str)
+761: {
+762:     if (str == nullptr)
+763:         return;
+764:     auto len = length();
+765:     auto strLength = strlen(str);
+766:     auto size = len + strLength;
+767:     if ((size + 1) > m_allocatedSize)
+768:     {
+769:         if (!reallocate(size + 1))
+770:             return;
+771:     }
+772:     strncpy(m_buffer + len, str, strLength);
+773:     m_end = m_buffer + size;
+774:     m_buffer[size] = NullCharConst;
+775: }
+776: 
+777: /// <summary>
+778: /// append operator
+779: ///
+780: /// Appends a number of characters from str to the string
+781: /// </summary>
+782: /// <param name="str">string to append. If nullptr the nothing is appended</param>
+783: /// <param name="count">Number of characters to copy from str. If count is larger than the string length, the complete string is copied</param>
+784: void string::append(const ValueType* str, size_t count)
+785: {
+786:     if (str == nullptr)
+787:         return;
+788:     auto len = length();
+789:     auto strLength = strlen(str);
+790:     auto strCount = count;
+791:     if (strCount > strLength)
+792:         strCount = strLength;
+793:     auto size = len + strCount;
+794:     if ((size + 1) > m_allocatedSize)
+795:     {
+796:         if (!reallocate(size + 1))
+797:             return;
+798:     }
+799:     strncpy(m_buffer + len, str, strCount);
+800:     m_end = m_buffer + size;
+801:     m_buffer[size] = NullCharConst;
+802: }
+803: 
+804: /// <summary>
+805: /// clear the string
+806: ///
+807: /// Clears the contents of the string, but does not free or reallocate the buffer
+808: /// </summary>
+809: void string::clear()
+810: {
+811:     if (!empty())
+812:     {
+813:         m_end = m_buffer;
+814:         m_buffer[0] = NullCharConst;
+815:     }
+816: }
+817: 
+818: /// <summary>
+819: /// find a substring in the string
+820: ///
+821: /// If empty string, always finds the string.
+822: /// </summary>
+823: /// <param name="str">Substring to find</param>
+824: /// <param name="pos">Starting position in string to start searching</param>
+825: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
+826: size_t string::find(const string& str, size_t pos /*= 0*/) const
+827: {
+828:     auto len = length();
+829:     auto patternLength = str.length();
+830:     if (pos >= len)
+831:         return npos;
+832:     auto needle = str.data();
+833:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
+834:     {
+835:         if (memcmp(haystack, needle, patternLength) == 0)
+836:             return haystack - m_buffer;
+837:     }
+838:     return npos;
+839: }
+840: 
+841: /// <summary>
+842: /// find a substring in the string
+843: ///
+844: /// If nullptr or empty string, always finds the string.
+845: /// </summary>
+846: /// <param name="str">Substring to find</param>
+847: /// <param name="pos">Starting position in string to start searching</param>
+848: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
+849: size_t string::find(const ValueType* str, size_t pos /*= 0*/) const
+850: {
+851:     size_t strLength{};
+852:     if (str != nullptr)
+853:     {
+854:         strLength = strlen(str);
+855:     }
+856:     auto len = length();
+857:     auto patternLength = strLength;
+858:     if (pos >= len)
+859:         return npos;
+860:     auto needle = str;
+861:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
+862:     {
+863:         if (memcmp(haystack, needle, patternLength) == 0)
+864:             return haystack - m_buffer;
+865:     }
+866:     return npos;
+867: }
+868: 
+869: /// <summary>
+870: /// find a substring in the string
+871: ///
+872: /// If nullptr or empty string, always finds the string.
+873: /// </summary>
+874: /// <param name="str">Substring to find</param>
+875: /// <param name="pos">Starting position in string to start searching</param>
+876: /// <param name="count">Number of characters from str to compare</param>
+877: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
+878: size_t string::find(const ValueType* str, size_t pos, size_t count) const
+879: {
+880:     size_t strLength{};
+881:     if (str != nullptr)
+882:     {
+883:         strLength = strlen(str);
+884:     }
+885:     auto len = length();
+886:     auto patternLength = strLength;
+887:     if (pos >= len)
+888:         return npos;
+889:     if (count < patternLength)
+890:         patternLength = count;
+891:     auto needle = str;
+892:     for (const ValueType* haystack = data() + pos; haystack <= m_end - patternLength; ++haystack)
+893:     {
+894:         if (memcmp(haystack, needle, patternLength) == 0)
+895:             return haystack - m_buffer;
+896:     }
+897:     return npos;
+898: }
+899: 
+900: /// <summary>
+901: /// find a character in the string
+902: /// </summary>
+903: /// <param name="ch">Character to find</param>
+904: /// <param name="pos">Starting position in string to start searching</param>
+905: /// <returns>Location of first character in string of match if found, string::npos if not found</returns>
+906: size_t string::find(ValueType ch, size_t pos /*= 0*/) const
+907: {
+908:     auto len = length();
+909:     if (pos >= len)
+910:         return npos;
+911:     for (const ValueType* haystack = data() + pos; haystack <= m_end; ++haystack)
+912:     {
+913:         if (*haystack == ch)
+914:             return haystack - m_buffer;
+915:     }
+916:     return npos;
+917: }
+918: 
+919: /// <summary>
+920: /// Check whether string starts with character
+921: /// </summary>
+922: /// <param name="ch">Character to find</param>
+923: /// <returns>Returns true if ch is first character in string, false otherwise</returns>
+924: bool string::starts_with(ValueType ch) const
+925: {
+926:     if (empty())
+927:         return false;
+928:     return m_buffer[0] == ch;
+929: }
+930: 
+931: /// <summary>
+932: /// Check whether string starts with substring
+933: /// </summary>
+934: /// <param name="str">SubString to find</param>
+935: /// <returns>Returns true if str is first part of string, false otherwise</returns>
+936: bool string::starts_with(const string& str) const
+937: {
+938:     auto len = length();
+939:     auto strLength = str.length();
+940:     if (strLength >= len)
+941:         return false;
+942: 
+943:     return memcmp(data(), str.data(), strLength) == 0;
+944: }
+945: 
+946: /// <summary>
+947: /// Check whether string starts with substring
+948: /// </summary>
+949: /// <param name="str">SubString to find</param>
+950: /// <returns>Returns true if str is first part of string, false otherwise</returns>
+951: bool string::starts_with(const ValueType* str) const
+952: {
+953:     size_t strLength{};
+954:     if (str != nullptr)
+955:     {
+956:         strLength = strlen(str);
+957:     }
+958:     auto len = length();
+959:     if (strLength >= len)
+960:         return false;
+961: 
+962:     return memcmp(data(), str, strLength) == 0;
+963: }
+964: 
+965: /// <summary>
+966: /// Check whether string ends with character
+967: /// </summary>
+968: /// <param name="ch">Character to find</param>
+969: /// <returns>Returns true if ch is last character in string, false otherwise</returns>
+970: bool string::ends_with(ValueType ch) const
+971: {
+972:     if (empty())
+973:         return false;
+974:     return m_buffer[length() - 1] == ch;
+975: }
+976: 
+977: /// <summary>
+978: /// Check whether string ends with substring
+979: /// </summary>
+980: /// <param name="str">SubString to find</param>
+981: /// <returns>Returns true if str is last part of string, false otherwise</returns>
+982: bool string::ends_with(const string& str) const
+983: {
+984:     auto len = length();
+985:     auto strLength = str.length();
+986:     if (strLength >= len)
+987:         return false;
+988: 
+989:     return memcmp(m_end - strLength, str.data(), strLength) == 0;
+990: }
+991: 
+992: /// <summary>
+993: /// Check whether string ends with substring
+994: /// </summary>
+995: /// <param name="str">SubString to find</param>
+996: /// <returns>Returns true if str is last part of string, false otherwise</returns>
+997: bool string::ends_with(const ValueType* str) const
+998: {
+999:     size_t strLength{};
+1000:     if (str != nullptr)
+1001:     {
+1002:         strLength = strlen(str);
+1003:     }
+1004:     auto len = length();
+1005:     if (strLength >= len)
+1006:         return false;
+1007: 
+1008:     return memcmp(m_end - strLength, str, strLength) == 0;
+1009: }
+1010: 
+1011: /// <summary>
+1012: /// Check whether string contains character
+1013: /// </summary>
+1014: /// <param name="ch">Character to find</param>
+1015: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
+1016: bool string::contains(ValueType ch) const
+1017: {
+1018:     return find(ch) != npos;
+1019: }
+1020: 
+1021: /// <summary>
+1022: /// Check whether string contains substring
+1023: /// </summary>
+1024: /// <param name="str">Substring to find</param>
+1025: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
+1026: bool string::contains(const string& str) const
+1027: {
+1028:     return find(str) != npos;
+1029: }
+1030: 
+1031: /// <summary>
+1032: /// Check whether string contains substring
+1033: /// </summary>
+1034: /// <param name="str">Substring to find</param>
+1035: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
+1036: bool string::contains(const ValueType* str) const
+1037: {
+1038:     return find(str) != npos;
+1039: }
+1040: 
+1041: /// <summary>
+1042: /// Return substring
+1043: /// </summary>
+1044: /// <param name="pos">Starting position of substring in string</param>
+1045: /// <param name="count">length of substring to return. If count is larger than the number of characters available from position pos, the rest of the string is returned</param>
+1046: /// <returns>Returns the substring at position [pos, pos + count), if available </returns>
+1047: string string::substr(size_t pos /*= 0*/, size_t count /*= npos*/) const
+1048: {
+1049:     string result;
+1050:     auto size = length() - pos;
+1051:     if (pos < length())
+1052:     {
+1053:         if (count < size)
+1054:             size = count;
+1055:         result.reallocate(size + 1);
+1056:         memcpy(result.data(), data() + pos, size);
+1057:         result.m_end = result.m_buffer + size;
+1058:         result.data()[size] = NullCharConst;
+1059:     }
+1060: 
+1061:     return result;
+1062: }
+1063: 
+1064: /// <summary>
+1065: /// Case sensitive equality to string
+1066: /// </summary>
+1067: /// <param name="other">string to compare to</param>
+1068: /// <returns>Returns true if the strings are equal, false otherwise</returns>
+1069: bool string::equals(const string& other) const
+1070: {
+1071:     return compare(other) == 0;
+1072: }
+1073: 
+1074: /// <summary>
+1075: /// Case sensitive equality to string
+1076: /// </summary>
+1077: /// <param name="other">string to compare to</param>
+1078: /// <returns>Returns true if the strings are equal, false otherwise</returns>
+1079: bool string::equals(const ValueType* other) const
+1080: {
+1081:     if (other == nullptr)
+1082:         return empty();
+1083:     if (length() != strlen(other))
+1084:         return false;
+1085:     return strcmp(data(), other) == 0;
+1086: }
+1087: 
+1088: /// <summary>
+1089: /// Case insensitive equality to string
+1090: /// </summary>
+1091: /// <param name="other">string to compare to</param>
+1092: /// <returns>Returns true if the strings are equal, false otherwise</returns>
+1093: bool string::equals_case_insensitive(const string& other) const
+1094: {
+1095:     if (length() != other.length())
+1096:         return false;
+1097:     if (empty())
+1098:         return true;
+1099:     return strcasecmp(data(), other.data()) == 0;
+1100: }
+1101: 
+1102: /// <summary>
+1103: /// Case insensitive equality to string
+1104: /// </summary>
+1105: /// <param name="other">string to compare to</param>
+1106: /// <returns>Returns true if the strings are equal, false otherwise</returns>
+1107: bool string::equals_case_insensitive(const ValueType* other) const
+1108: {
+1109:     if (other == nullptr)
+1110:         return empty();
+1111:     if (length() != strlen(other))
+1112:         return false;
+1113:     return strcasecmp(data(), other) == 0;
+1114: }
+1115: 
+1116: /// <summary>
+1117: /// Case sensitive compare to string
+1118: ///
+1119: /// Compares the complete string, character by character
+1120: /// </summary>
+1121: /// <param name="str">string to compare to</param>
+1122: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1123: int string::compare(const string& str) const
+1124: {
+1125:     if (empty())
+1126:     {
+1127:         if (str.empty())
+1128:             return 0;
+1129:         return -1;
+1130:     }
+1131:     if (str.empty())
+1132:         return 1;
+1133: 
+1134:     return strcmp(data(), str.data());
+1135: }
+1136: 
+1137: /// <summary>
+1138: /// Case sensitive compare to string
+1139: ///
+1140: /// Compares the substring from pos to pos+count to str
+1141: /// </summary>
+1142: /// <param name="pos">Starting position of substring to compare to str</param>
+1143: /// <param name="count">Number of characters in substring to compare to str</param>
+1144: /// <param name="str">string to compare to</param>
+1145: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1146: int string::compare(size_t pos, size_t count, const string& str) const
+1147: {
+1148:     return substr(pos, count).compare(str);
+1149: }
+1150: 
+1151: /// <summary>
+1152: /// Case sensitive compare to string
+1153: ///
+1154: /// Compares the substring from pos to pos+count to the substring from strPos to strPos+strCount of str
+1155: /// </summary>
+1156: /// <param name="pos">Starting position of substring to compare to str</param>
+1157: /// <param name="count">Number of characters in substring to compare to str</param>
+1158: /// <param name="str">string to compare to</param>
+1159: /// <param name="strPos">Starting position of substring of str to compare</param>
+1160: /// <param name="strCount">Number of characters in substring of str to compare</param>
+1161: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1162: int string::compare(size_t pos, size_t count, const string& str, size_t strPos, size_t strCount /*= npos*/) const
+1163: {
+1164:     return substr(pos, count).compare(str.substr(strPos, strCount));
+1165: }
+1166: 
+1167: /// <summary>
+1168: /// Case sensitive compare to string
+1169: ///
+1170: /// Compares the complete string to str
+1171: /// </summary>
+1172: /// <param name="str">string to compare to</param>
+1173: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1174: int string::compare(const ValueType* str) const
+1175: {
+1176:     size_t strLength{};
+1177:     if (str != nullptr)
+1178:         strLength = strlen(str);
+1179:     if (empty())
+1180:     {
+1181:         if (strLength == 0)
+1182:             return 0;
+1183:         return -1;
+1184:     }
+1185:     if (strLength == 0)
+1186:         return 1;
+1187: 
+1188:     return strcmp(data(), str);
+1189: }
+1190: 
+1191: /// <summary>
+1192: /// Case sensitive compare to string
+1193: ///
+1194: /// Compares the substring from pos to pos+count to str
+1195: /// </summary>
+1196: /// <param name="pos">Starting position of substring to compare to str</param>
+1197: /// <param name="count">Number of characters in substring to compare to str</param>
+1198: /// <param name="str">string to compare to</param>
+1199: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1200: int string::compare(size_t pos, size_t count, const ValueType* str) const
+1201: {
+1202:     size_t strLength{};
+1203:     if (str != nullptr)
+1204:         strLength = strlen(str);
+1205: 
+1206:     auto len = length();
+1207:     if (pos >= len)
+1208:         len = 0;
+1209:     len -= pos;
+1210:     if (count < len)
+1211:         len = count;
+1212:     if (len == 0)
+1213:     {
+1214:         if (strLength == 0)
+1215:             return 0;
+1216:         return -1;
+1217:     }
+1218:     if (strLength == 0)
+1219:         return 1;
+1220: 
+1221:     auto maxLen = strLength;
+1222:     if (maxLen < len)
+1223:         maxLen = len;
+1224:     return strncmp(data() + pos, str, maxLen);
+1225: }
+1226: 
+1227: /// <summary>
+1228: /// Case sensitive compare to string
+1229: ///
+1230: /// Compares the substring from pos to pos+count to the first strCount characters of str
+1231: /// </summary>
+1232: /// <param name="pos">Starting position of substring to compare to str</param>
+1233: /// <param name="count">Number of characters in substring to compare to str</param>
+1234: /// <param name="str">string to compare to</param>
+1235: /// <param name="strCount">Number of characters in substring of str to compare</param>
+1236: /// <returns>Returns 0 if the strings are equal (case sensitive), -1 if str is larger, 1 if it is smaller</returns>
+1237: int string::compare(size_t pos, size_t count, const ValueType* str, size_t strCount) const
+1238: {
+1239:     size_t strLength{};
+1240:     if (str != nullptr)
+1241:         strLength = strlen(str);
+1242: 
+1243:     auto len = length();
+1244:     if (pos >= len)
+1245:         len = 0;
+1246:     len -= pos;
+1247:     if (count < len)
+1248:         len = count;
+1249: 
+1250:     if (strCount < strLength)
+1251:         strLength = strCount;
+1252: 
+1253:     if (len == 0)
+1254:     {
+1255:         if (strLength == 0)
+1256:             return 0;
+1257:         return -1;
+1258:     }
+1259:     if (strLength == 0)
+1260:         return 1;
+1261: 
+1262:     auto maxLen = strLength;
+1263:     if (maxLen < len)
+1264:         maxLen = len;
+1265:     return strncmp(data() + pos, str, maxLen);
+1266: }
+1267: 
+1268: /// <summary>
+1269: /// replace substring
+1270: ///
+1271: /// Replaces the substring from pos to pos+count with str
+1272: /// </summary>
+1273: /// <param name="pos">Starting position of substring to replace</param>
+1274: /// <param name="count">Number of characters in substring to replace</param>
+1275: /// <param name="str">string to replace with</param>
+1276: /// <returns>Returns the reference to the resulting string</returns>
+1277: string& string::replace(size_t pos, size_t count, const string& str)
+1278: {
+1279:     string result = substr(0, pos) + str + substr(pos + count);
+1280:     assign(result);
+1281:     return *this;
+1282: }
+1283: 
+1284: /// <summary>
+1285: /// replace substring
+1286: ///
+1287: /// Replaces the substring from pos to pos+count with the substring from strPos to strPos+strCount of str
+1288: /// </summary>
+1289: /// <param name="pos">Starting position of substring to replace</param>
+1290: /// <param name="count">Number of characters in substring to replace</param>
+1291: /// <param name="str">string to replace with</param>
+1292: /// <param name="strPos">Starting position of substring of str to replace with</param>
+1293: /// <param name="strCount">Number of characters in substring of str to replace with</param>
+1294: /// <returns>Returns the reference to the resulting string</returns>
+1295: string& string::replace(size_t pos, size_t count, const string& str, size_t strPos, size_t strCount /*= npos*/)
+1296: {
+1297:     string result = substr(0, pos) + str.substr(strPos, strCount) + substr(pos + count);
+1298:     assign(result);
+1299:     return *this;
+1300: }
+1301: 
+1302: /// <summary>
+1303: /// replace substring
+1304: ///
+1305: /// Replaces the substring from pos to pos+count with str
+1306: /// </summary>
+1307: /// <param name="pos">Starting position of substring to replace</param>
+1308: /// <param name="count">Number of characters in substring to replace</param>
+1309: /// <param name="str">string to replace with</param>
+1310: /// <returns>Returns the reference to the resulting string</returns>
+1311: string& string::replace(size_t pos, size_t count, const ValueType* str)
+1312: {
+1313:     string result = substr(0, pos) + str + substr(pos + count);
+1314:     assign(result);
+1315:     return *this;
+1316: }
+1317: 
+1318: /// <summary>
+1319: /// replace substring
+1320: ///
+1321: /// Replaces the substring from pos to pos+count with the first strCount characters of str
+1322: /// </summary>
+1323: /// <param name="pos">Starting position of substring to replace</param>
+1324: /// <param name="count">Number of characters in substring to replace</param>
+1325: /// <param name="str">string to replace with</param>
+1326: /// <param name="strCount">Number of characters in substring to replace with</param>
+1327: /// <returns>Returns the reference to the resulting string</returns>
+1328: string& string::replace(size_t pos, size_t count, const ValueType* str, size_t strCount)
+1329: {
+1330:     string result = substr(0, pos) + string(str, strCount) + substr(pos + count);
+1331:     assign(result);
+1332:     return *this;
+1333: }
+1334: 
+1335: /// <summary>
+1336: /// replace substring
+1337: ///
+1338: /// Replaces the substring from pos to pos+count with ch
+1339: /// </summary>
+1340: /// <param name="pos">Starting position of substring to replace</param>
+1341: /// <param name="count">Number of characters in substring to replace</param>
+1342: /// <param name="ch">Characters to replace with</param>
+1343: /// <returns>Returns the reference to the resulting string</returns>
+1344: string& string::replace(size_t pos, size_t count, ValueType ch)
+1345: {
+1346:     return replace(pos, count, ch, 1);
+1347: }
+1348: 
+1349: /// <summary>
+1350: /// replace substring
+1351: ///
+1352: /// Replaces the substring from pos to pos+count with a sequence of chCount copies of ch
+1353: /// </summary>
+1354: /// <param name="pos">Starting position of substring to replace</param>
+1355: /// <param name="count">Number of characters in substring to replace</param>
+1356: /// <param name="ch">Characters to replace with</param>
+1357: /// <param name="chCount">Number of copies of ch to replace with</param>
+1358: /// <returns>Returns the reference to the resulting string</returns>
+1359: string& string::replace(size_t pos, size_t count, ValueType ch, size_t chCount)
+1360: {
+1361:     string result = substr(0, pos) + string(chCount, ch) + substr(pos + count);
+1362:     assign(result);
+1363:     return *this;
+1364: }
+1365: 
+1366: /// <summary>
+1367: /// replace substring
+1368: ///
+1369: /// Replaces all instances of the substring oldStr (if existing) with newStr
+1370: /// </summary>
+1371: /// <param name="oldStr">string to find in string</param>
+1372: /// <param name="newStr">string to replace with</param>
+1373: /// <returns>Returns the number of times the string was replaced</returns>
+1374: int string::replace(const string& oldStr, const string& newStr)
+1375: {
+1376:     size_t pos = find(oldStr);
+1377:     size_t oldLength = oldStr.length();
+1378:     size_t newLength = newStr.length();
+1379:     int count = 0;
+1380:     while (pos != npos)
+1381:     {
+1382:         replace(pos, oldLength, newStr);
+1383:         pos += newLength;
+1384:         pos = find(oldStr, pos);
+1385:         count++;
+1386:     }
+1387:     return count;
+1388: }
+1389: 
+1390: /// <summary>
+1391: /// replace substring
+1392: ///
+1393: /// Replaces all instances of the substring oldStr (if existing) with newStr
+1394: /// </summary>
+1395: /// <param name="oldStr">string to find in string</param>
+1396: /// <param name="newStr">string to replace with</param>
+1397: /// <returns>Returns the number of times the string was replaced</returns>
+1398: int string::replace(const ValueType* oldStr, const ValueType* newStr)
+1399: {
+1400:     if ((oldStr == nullptr) || (newStr == nullptr))
+1401:         return 0;
+1402:     size_t pos = find(oldStr);
+1403:     size_t oldLength = strlen(oldStr);
+1404:     size_t newLength = strlen(newStr);
+1405:     int count = 0;
+1406:     while (pos != npos)
+1407:     {
+1408:         replace(pos, oldLength, newStr);
+1409:         pos += newLength;
+1410:         pos = find(oldStr, pos);
+1411:         count++;
+1412:     }
+1413:     return count;
+1414: }
+1415: 
+1416: /// <summary>
+1417: /// Align string
+1418: ///
+1419: /// Pads the string on the left (width > 0) or on the right (width < 0) up to a length of width characters. If the string is larger than width characters, it is not modified.
+1420: /// </summary>
+1421: /// <param name="width">length of target string. If width < 0, the string is padded to the right with spaces up to -width characters.
+1422: /// if width > 0, the string is padded to the left with space up to width characters</param>
+1423: /// <returns>Returns the number of times the string was replaced</returns>
+1424: string string::align(int width) const
+1425: {
+1426:     string result;
+1427:     int    absWidth = (width > 0) ? width : -width;
+1428:     auto   len = length();
+1429:     if (static_cast<size_t>(absWidth) > len)
+1430:     {
+1431:         if (width < 0)
+1432:         {
+1433:             result = *this + string(static_cast<unsigned int>(-width) - len, ' ');
+1434:         }
+1435:         else
 1436:         {
-1437:             result = *this + string(static_cast<unsigned int>(-width) - len, ' ');
+1437:             result = string(static_cast<unsigned int>(width) - len, ' ') + *this;
 1438:         }
-1439:         else
-1440:         {
-1441:             result = string(static_cast<unsigned int>(width) - len, ' ') + *this;
-1442:         }
-1443:     }
-1444:     else
-1445:         result = *this;
-1446:     return result;
-1447: }
-1448:
-1449: /// <summary>
-1450: /// Allocate or re-allocate string to have a capacity of requestedLength characters
-1451: /// </summary>
-1452: /// <param name="requestedLength">Amount of characters in the string to allocate space for</param>
-1453: /// <returns>True if successful, false otherwise</returns>
-1454: bool string::reallocate(size_t requestedLength)
-1455: {
-1456:     auto requestedSize = requestedLength;
-1457:     auto allocationSize = NextPowerOf2((requestedSize < MinimumAllocationSize) ? MinimumAllocationSize : requestedSize);
-1458:
-1459:     if (!reallocate_allocation_size(allocationSize))
-1460:         return false;
-1461:     return true;
-1462: }
-1463:
-1464: /// <summary>
-1465: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
-1466: /// </summary>
-1467: /// <param name="allocationSize">Amount of bytes to allocate space for</param>
-1468: /// <returns>True if successful, false otherwise</returns>
-1469: bool string::reallocate_allocation_size(size_t allocationSize)
-1470: {
-1471:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
-1472:     if (newBuffer == nullptr)
-1473:     {
-1474:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
-1475:         return false;
-1476:     }
-1477:     m_buffer = newBuffer;
-1478: #if BAREMETAL_MEMORY_TRACING_DETAIL
-1479:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
-1480: #endif
-1481:     if (m_end == nullptr)
-1482:         m_end = m_buffer;
-1483:     if (m_end > m_buffer + allocationSize)
-1484:         m_end = m_buffer + allocationSize;
-1485:     m_allocatedSize = allocationSize;
-1486:     return true;
-1487: }
+1439:     }
+1440:     else
+1441:         result = *this;
+1442:     return result;
+1443: }
+1444: 
+1445: /// <summary>
+1446: /// Allocate or re-allocate string to have a capacity of requestedLength characters
+1447: /// </summary>
+1448: /// <param name="requestedLength">Amount of characters in the string to allocate space for</param>
+1449: /// <returns>True if successful, false otherwise</returns>
+1450: bool string::reallocate(size_t requestedLength)
+1451: {
+1452:     auto requestedSize = requestedLength;
+1453:     auto allocationSize = NextPowerOf2((requestedSize < MinimumAllocationSize) ? MinimumAllocationSize : requestedSize);
+1454: 
+1455:     if (!reallocate_allocation_size(allocationSize))
+1456:         return false;
+1457:     return true;
+1458: }
+1459: 
+1460: /// <summary>
+1461: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
+1462: /// </summary>
+1463: /// <param name="allocationSize">Amount of bytes to allocate space for</param>
+1464: /// <returns>True if successful, false otherwise</returns>
+1465: bool string::reallocate_allocation_size(size_t allocationSize)
+1466: {
+1467:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
+1468:     if (newBuffer == nullptr)
+1469:     {
+1470:         return false;
+1471:     }
+1472:     m_buffer = newBuffer;
+1473:     if (m_end == nullptr)
+1474:         m_end = m_buffer;
+1475:     if (m_end > m_buffer + allocationSize)
+1476:         m_end = m_buffer + allocationSize;
+1477:     m_allocatedSize = allocationSize;
+1478:     return true;
+1479: }
 ```
 
 As you can see, this is a very extensive class.
 A few remarks:
 - Line 52: We use a minimum allocation size of 64, meaning that every string will have storage space for 63 characters plus a null character for termination, at the least.
-- Line 55: We define a constant `MaximumStringSize`. We limit strings to a maximum length, which is one less than the largest heap block that can be allocated
+- Line 55: We define a constant `MaximumStringSize`. We limit strings to a maximum length, which is one less than the largest heap block that can be allocated in the default bucket sizes (512 Kb)
 - Line 59: We use a special static variable `NullCharConst` when we need to return something constant, but the string is not allocated.
 - Line 61: Similarly, we use a special static variable `NullChar` when we need to return something non constant, but the string is not allocated.
 This variable is non-const, so will have to be initialized every time we return it, to make sure it is still a null character.
 - Line 188-196: We implement a move constructor, even though we do not have the `std::move` operation which is part of the standard C++ library.
 The compiler however will sometimes use the move constructor to optimize
-- Line 265-277: We implement a move assignment, even though we do not have the `std::move` operation which is part of the standard C++ library.
-The compiler however will sometimes use the move constructor to optimize
-- Line 285-299: We use our own version of a iterator template, which we'll get to, to enable creating the begin() and end() methods. These allow us to use the standard c++ `for (x : string)` construct
+- Line 265-277: We implement a move assignment, similar to the move constructor
+- Line 285-299: We use our own version of a iterator template, which we'll get to, to enable creating the begin() and end() methods.
+These allow us to use e.g. the standard c++ `for (x : string)` construct. We'll have to define this iterator ourselves in a minute
 - Line 307-321: We also use our own version of a const_iterator template for const iterators, which we'll get to, to enable creating the begin() and end() const methods.
 - Line 1020-1043: We also have the `contains()` methods, which are new to C++23, however they are quite convenient
-- Line 1073-1118: We use the methods `equals()` and `equals_case_insensititive()` to compare strings. Both are not standard, but convenient
+- Line 1073-1118: We use the methods `equals()` and `equals_case_insensititive()` to compare strings. Both are not standard, but convenient.
+These use the stand C functions `strcmp()` and `strcasecmp()`, which we will need to declare and define.
 - Line 1378-1418: We implement two extra variants of `replace()` (replacing multiple instances of a string) for convenience
-- Line 1428-1447: Again for convenience, we implement the `align()` method. We'll be using this later on for aligning strings when formatting
+- Line 1428-1447: Again for convenience, we implement the `align()` method. We'll be using this later on for aligning strings when formatting.
+If the width is negative, we align to the left, if it is positive we align to the right.
 
 ### Iterator.h {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_ITERATORH}
 
@@ -2085,10 +2079,11 @@ File: code/libraries/baremetal/include/baremetal/Iterator.h
 ```
 
 Again, we will not go into any detail, the classes should speak for themselves.
+We define both the `iterator` and `const_iterator` templates here._
 
 ### Util.h {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_UTILH}
 
-As our implementation of the `string` class needs some additional string specific functionality, we'll add a number of standard C library functions for this/
+We need to declare and define the standard C functions `strcmp()` and `strcasecmp()` for our implementation of the `string` class.
 
 Update the file `code/libraries/baremetal/include/baremetal/Util.h`
 
@@ -2149,7 +2144,7 @@ File: code/libraries/baremetal/include/baremetal/Util.h
 - Line 53: We add the standard `memcmp()` function
 - Line 55-56: We add the standard `toupper()` amd `tolower()` functions
 - Line 58-61: We add the standard `strcmp()` (compare strings to end of string), `strncmp()` (compare strings with maximum size), and the case insensitive variants `strcasecmp()` and `strncasecmp()`
-- Line 79-89: We add an inline function `NextPowerOf2Bits()` to compute the number of bits b required to hold a value n, so 2^b >= n
+- Line 79-89: We add an inline function `NextPowerOf2Bits()` to compute the number of significant bits in n, the number of bits b required to hold a value n, so 2^b >= n
 - Line 96-99: We add an inline function `NextPowerOf2()` to compute the value x larger or equal to a number n, such that x is a power of 2
 
 ### Util.cpp {#TUTORIAL_15_STRING_CREATING_A_STRING_CLASS_UTILCPP}
@@ -2222,6 +2217,7 @@ File: code/libraries/baremetal/src/Util.cpp
 142:
 143:     return c;
 144: }
+145:
 ...
 163: /// <summary>
 164: /// Compare two strings
@@ -2392,6 +2388,8 @@ File: code/libraries/baremetal/src/Util.cpp
 329:
 330:     return 0;
 331: }
+332:
+...
 ```
 
 The new functions added should be self-explanatory.
@@ -2512,8 +2510,8 @@ File: code\applications\demo\src\main.cpp
 34:     string s9{ "" };
 35:     string s10{ nullptr, 3 };
 36:
-37:     LOG_INFO("s1");
-38:     for (auto ch : s1)
+37:     LOG_INFO("s4");
+38:     for (auto ch : s4)
 39:     {
 40:         LOG_INFO("%c", ch);
 41:     }
@@ -2924,12 +2922,14 @@ File: code\applications\demo\src\main.cpp
 446: }
 ```
 
-As you can see the code has grown quite abit due to all the tests that we perform.
+As you can see the code has grown quite a bit due to all the tests we perform.
 
 - Line 11: we need to include `String.h`
 - Line 26-35: We construct some strings, in different ways, to cover all the variants of constructors
-- Line 37-41: We use a for loop to iterate through the characters in the string. This will use the `begin()` and `end()` methods
-- Line 42-51: We check whether the strings are initialized as expected. Notice that we use the `assert` macro here
+- Line 37-41: We use a for loop to iterate through the characters in a string.
+This will use the `begin()` and `end()` methods
+- Line 42-51: We check whether the strings are initialized as expected.
+Notice that we use the `assert` macro here
 - Line 53-65: We test assignment operators
 - Line 67-86: We test the `assign()` methods
 - Line 88-99: We test the `at()`, `front()`, `back()`, `capacity()` and `reserve()` methods, as well as the index operator `[]`
@@ -2952,26 +2952,42 @@ As you can see the code has grown quite abit due to all the tests that we perfor
 We can now configure and build our code, and start debugging.
 
 The application will print the characters in the string "bbbb" in log statements.
-Next to this nothing special is shown, as the tests will all succeed. If a test were to fail, the assertion would fire, and the application would crash.
+Next to this nothing special is shown, except for the memory status at start and end of the application, as the tests will all succeed.
+If a test were to fail, the assertion would fire, and the application would crash.
 This is a way to test code, however we'd like to see all of the failure found in our code, not have the first one crash the application.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:82)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Starting up (System:201)
 Debug  Hello World! (main:24)
 Info   s4 (main:37)
@@ -2981,7 +2997,39 @@ Info   b (main:40)
 Info   b (main:40)
 Info   Wait 5 seconds (main:432)
 Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
+hDebug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    14 (HeapAllocator:273)
+Debug  Max #allocations:        26 (HeapAllocator:274)
+Debug  Current #allocated bytes:896 (HeapAllocator:275)
+Debug  Total #allocated blocks: 107 (HeapAllocator:276)
+Debug  Total #allocated bytes:  7808 (HeapAllocator:277)
+Debug  Total #freed blocks:     93 (HeapAllocator:278)
+Debug  Total #freed bytes:      6912 (HeapAllocator:279)
+Debug  malloc(64): 14 blocks (max 25) total alloc #blocks = 106, #bytes = 6784, total free #blocks = 92, #bytes = 5888 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Info   Halt (System:122)
 ```
 
 Next: [16-serializing-and-formatting](16-serializing-and-formatting.md)

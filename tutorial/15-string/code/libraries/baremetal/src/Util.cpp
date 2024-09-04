@@ -87,8 +87,8 @@ void* memcpy(void* dest, const void* src, size_t length)
 /// <param name="buffer1">Pointer to first memory buffer</param>
 /// <param name="buffer2">Pointer to second memory buffer</param>
 /// <param name="length">Number of bytes to compare</param>
-/// <returns>Returns 0 if the two regions are equal, 
-/// 1 if the values in the first buffer are greater, 
+/// <returns>Returns 0 if the two regions are equal,
+/// 1 if the values in the first buffer are greater,
 /// -1 if the values in the second buffer are greater</returns>
 int memcmp(const void* buffer1, const void* buffer2, size_t length)
 {
@@ -165,8 +165,8 @@ size_t strlen(const char* str)
 /// </summary>
 /// <param name="str1">Pointer to first string</param>
 /// <param name="str2">Pointer to second string</param>
-/// <returns>Returns 0 if the two strings are equal, 
-/// 1 if the values in the first string are greater, 
+/// <returns>Returns 0 if the two strings are equal,
+/// 1 if the values in the first string are greater,
 /// -1 if the values in the second string are greater</returns>
 int strcmp(const char* str1, const char* str2)
 {
@@ -202,8 +202,8 @@ int strcmp(const char* str1, const char* str2)
 /// </summary>
 /// <param name="str1">Pointer to first string</param>
 /// <param name="str2">Pointer to second string</param>
-/// <returns>Returns 0 is the two strings are equal ignoring case, 
-/// 1 if the values in the first string are greater, 
+/// <returns>Returns 0 is the two strings are equal ignoring case,
+/// 1 if the values in the first string are greater,
 /// -1 if the values in the second string are greater</returns>
 int strcasecmp(const char* str1, const char* str2)
 {
@@ -244,8 +244,8 @@ int strcasecmp(const char* str1, const char* str2)
 /// <param name="str1">Pointer to first string</param>
 /// <param name="str2">Pointer to second string</param>
 /// <param name="maxLen">Maximum number of characters to compare</param>
-/// <returns>Returns 0 is the two strings are equal, 
-/// 1 if the values in the first string are greater, 
+/// <returns>Returns 0 is the two strings are equal,
+/// 1 if the values in the first string are greater,
 /// -1 if the values in the second string are greater</returns>
 int strncmp(const char* str1, const char* str2, size_t maxLen)
 {
@@ -288,8 +288,8 @@ int strncmp(const char* str1, const char* str2, size_t maxLen)
 /// <param name="str1">Pointer to first string</param>
 /// <param name="str2">Pointer to second string</param>
 /// <param name="maxLen">Maximum number of characters to compare</param>
-/// <returns>Returns 0 is the two strings are equal ignoring case, 
-/// 1 if the values in the first string are greater, 
+/// <returns>Returns 0 is the two strings are equal ignoring case,
+/// 1 if the values in the first string are greater,
 /// -1 if the values in the second string are greater</returns>
 int strncasecmp(const char* str1, const char* str2, size_t maxLen)
 {
@@ -407,7 +407,7 @@ void* malloc(size_t size)
 
 /// <summary>
 /// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
-/// 
+///
 /// The memory allocated is num x size bytes
 /// </summary>
 /// <param name="num">Number of cells to allocate memory for</param>

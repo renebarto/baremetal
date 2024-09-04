@@ -286,6 +286,7 @@ Some items worth changing:
 | SKIP_FUNCTION_MACROS   | If set ignores function like macros. Requires ENABLE_PREPROCESSING to be set | `NO`
 | HIDE_UNDOC_RELATIONS   | If set ignores inheritance and usage of items that are not documented | `NO`
 | HAVE_DOT               | Set if you have dot (Graphviz) installed. This will enable generation of e.g. inheritance diagrams in the documentation | `YES`
+| STRIP_CODE_COMMENTS    | If set hides comments from code in code blocks in markdown | `NO`
 
 In addition to the settings described in the table above, we make sure to set the `HTML_EXTRA_FILES` to all additional files in our repo.
 We don't need to add Markdown (`.md`) files, they will automatically be found if they are in the trees or files specified for `INPUT`.

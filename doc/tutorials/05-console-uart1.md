@@ -2119,7 +2119,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 48: // Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
 49: #define ARM_MEM_SIZE (MEM_SIZE - GPU_MEM_SIZE) // normally overwritten
 50:
-51: // Memory reserved for paging
+51: // Memory reserved for paging. Paging memory is placed just below the low heap
 52: #define PAGE_RESERVE (16 * MEGABYTE)
 53:
 54: // Size of every page

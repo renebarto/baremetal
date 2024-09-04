@@ -50,9 +50,9 @@
 namespace baremetal {
 
 /// <summary>
- /// Constructs a RPI properties interface object
- /// </summary>
- /// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
+/// Constructs a RPI properties interface object
+/// </summary>
+/// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
 RPIPropertiesInterface::RPIPropertiesInterface(IMailbox &mailbox)
     : m_mailbox{mailbox}
 {

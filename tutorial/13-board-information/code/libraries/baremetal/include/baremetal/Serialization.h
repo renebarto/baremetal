@@ -51,6 +51,7 @@ void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int bas
 void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
 void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros);
 void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros);
+
 /// <summary>
 /// Serialize long long int value, type specific specialization
 /// </summary>

@@ -52,7 +52,6 @@ static bool           Uppercase = true;
 static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 
-
 /// <summary>
 /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
 /// </summary>

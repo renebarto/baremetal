@@ -73,7 +73,7 @@ struct HeapBlockHeader
     uint8            align[HEAP_BLOCK_ALIGN - 16];
     /// @brief Start of actual allocated block
     uint8            data[0];
-} 
+}
 /// @brief Just specifies the struct is packed
 PACKED;
 

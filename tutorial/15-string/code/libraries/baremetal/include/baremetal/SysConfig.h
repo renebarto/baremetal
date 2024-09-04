@@ -51,7 +51,7 @@
 #define GIGABYTE 0x40000000ULL
 
 /// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
-/// 
+///
 /// If your kernel image contains big data areas it may be required to
 /// increase this value. The value must be a multiple of 16 KByte.
 #ifndef KERNEL_MAX_SIZE

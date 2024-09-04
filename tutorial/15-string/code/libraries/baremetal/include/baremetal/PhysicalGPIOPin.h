@@ -54,17 +54,17 @@ class PhysicalGPIOPin : public IGPIOPin
 {
 private:
     /// @brief Configured GPIO pin number (0..53)
-    uint8                 m_pinNumber;
+    uint8           m_pinNumber;
     /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
-    GPIOMode              m_mode;
+    GPIOMode        m_mode;
     /// @brief Configured GPIO function.
-    GPIOFunction          m_function;
+    GPIOFunction    m_function;
     /// @brief Configured GPIO pull mode (only for input function).
-    GPIOPullMode          m_pullMode;
+    GPIOPullMode    m_pullMode;
     /// @brief Current value of the GPIO pin (true for on, false for off).
-    bool                  m_value;
+    bool            m_value;
     /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
+    IMemoryAccess&  m_memoryAccess;
 
 public:
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());

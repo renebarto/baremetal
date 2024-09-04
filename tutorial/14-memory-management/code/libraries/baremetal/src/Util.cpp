@@ -175,7 +175,7 @@ void* malloc(size_t size)
 
 /// <summary>
 /// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
-/// 
+///
 /// The memory allocated is num x size bytes
 /// </summary>
 /// <param name="num">Number of cells to allocate memory for</param>

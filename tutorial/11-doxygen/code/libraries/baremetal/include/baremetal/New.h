@@ -43,3 +43,6 @@
 /// Basic memory allocation functions
 
 #include <baremetal/Types.h>
+
+void operator delete(void* block) noexcept;
+void operator delete(void* block, size_t size) noexcept;

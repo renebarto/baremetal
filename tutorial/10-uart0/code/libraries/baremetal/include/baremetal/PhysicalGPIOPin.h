@@ -58,7 +58,6 @@ private:
 public:
     // Creates a virtual GPIO pin
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
-    // PhysicalGPIOPin(const PhysicalGPIOPin &other);
 
     // Creates a virtual GPIO pin
     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());

@@ -131,7 +131,7 @@ void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int bas
 /// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
 /// Width specifies the minimum width in characters. The value is always written right aligned. 
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-/// 
+///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.

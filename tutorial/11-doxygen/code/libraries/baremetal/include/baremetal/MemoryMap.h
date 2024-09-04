@@ -58,16 +58,16 @@
 #define PAGE_RESERVE (16 * MEGABYTE)
 
 /// @brief Size of every page
-#define PAGE_SIZE    0x10000
+#define PAGE_SIZE    0x10000 // 64Kb
 
 /// @brief Maximum size of the kernel space (if not already specified in SysConfig.h)
 #if !defined(KERNEL_MAX_SIZE)
 #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
 /// @brief Memory reserved for the stack (this memory is reserved for every core)
-#define KERNEL_STACK_SIZE       0x20000
+#define KERNEL_STACK_SIZE       0x20000 // 128 Kb
 /// @brief Memory reserved for the exception stack (this memory is reserved for every core)
-#define EXCEPTION_STACK_SIZE    0x8000
+#define EXCEPTION_STACK_SIZE    0x8000  // 32 Kb
 /// @brief Location where the kernel starts. This is also the location where the code starts
 #define MEM_KERNEL_START        0x80000
 /// @brief End of kernel space (start + size)
@@ -80,8 +80,8 @@
 #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))
 
 #if BAREMETAL_RPI_TARGET == 3
-/// @brief Region reserved for coherent memory
-#define COHERENT_REGION_SIZE 1 * MEGABYTE (memory shared between ARM and GPU). We reserve 1 Mb, but make sure then end is rounded
+/// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 1 Mb, but make sure then end is rounded
+#define COHERENT_REGION_SIZE 1 * MEGABYTE
 #else
 /// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
 #define COHERENT_REGION_SIZE 4 * MEGABYTE

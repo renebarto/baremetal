@@ -28,7 +28,7 @@ int main()
     LOG_INFO("DMA heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::ANY));
 
     auto ptr = memoryManager.HeapAllocate(4, HeapType::LOW);
-    LOG_INFO("Allocated block %llx", ptr);
+    LOG_INFO("Allocated block %p", ptr);
     memoryManager.DumpStatus();
 
     memoryManager.HeapFree(ptr);
@@ -37,13 +37,13 @@ int main()
     class X {};
 
     X* x = new (HeapType::LOW) X;
-    LOG_INFO("Allocated block %llx", x);
+    LOG_INFO("Allocated block %p", x);
     memoryManager.DumpStatus();
     delete x;
     memoryManager.DumpStatus();
 
-    void*p = malloc(256);
-    LOG_INFO("Allocated block %llx", p);
+    void* p = malloc(256);
+    LOG_INFO("Allocated block %p", p);
     memoryManager.DumpStatus();
     free(p);
     memoryManager.DumpStatus();

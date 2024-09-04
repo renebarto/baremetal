@@ -39,7 +39,6 @@
 
 #include <baremetal/New.h>
 
-#include <baremetal/MemoryManager.h>
 #include <baremetal/SysConfig.h>
 
 /// @file

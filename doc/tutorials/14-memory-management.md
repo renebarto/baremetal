@@ -16,7 +16,7 @@ This tutorial will result in (next to the main project structure):
 
 ## Setting up memory management - step 1 {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1}
 
-As we would like to start using classes that allocate and de-allocate memory, such as a string class. We need to set up for memory management.
+As we would like to start using classes that allocate and de-allocate memory, such as a string class, we need to set up for memory management.
 This is going to be both a straightforward and a tricky task, we'll get arround to that.
 
 At times it may seem that we're reimplementing functionality that you are already used to from the C and C++ standard libraries.
@@ -38,73 +38,76 @@ Update the file `CMakeLists.txt`
 ```cmake
 File: CMakeLists.txt
 ...
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
-65: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" ON)
+66: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+67: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+68: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
+69: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
+70: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
+71: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" ON)
 ...
-90: if (BAREMETAL_TRACE_DEBUG)
-91:     set(BAREMETAL_DEBUG_TRACING 1)
-92: else ()
-93:     set(BAREMETAL_DEBUG_TRACING 0)
-94: endif()
-95: if (BAREMETAL_TRACE_MEMORY)
-96:     set(BAREMETAL_MEMORY_TRACING 1)
-97: else ()
-98:     set(BAREMETAL_MEMORY_TRACING 0)
-99: endif()
-100: if (BAREMETAL_TRACE_MEMORY_DETAIL)
-101:     set(BAREMETAL_MEMORY_TRACING 1)
-102:     set(BAREMETAL_MEMORY_TRACING_DETAIL 1)
-103: else ()
-104:     set(BAREMETAL_MEMORY_TRACING_DETAIL 0)
-105: endif()
-106: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-107:
-108: set(DEFINES_C
-109:     PLATFORM_BAREMETAL
-110:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-111:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
-112:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
-113:     BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
-114:     BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
-115:     USE_PHYSICAL_COUNTER
-116:     BAREMETAL_MAJOR=${VERSION_MAJOR}
-117:     BAREMETAL_MINOR=${VERSION_MINOR}
-118:     BAREMETAL_LEVEL=${VERSION_LEVEL}
-119:     BAREMETAL_BUILD=${VERSION_BUILD}
-120:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
-121:     )
-122:
+99: if (BAREMETAL_TRACE_DEBUG)
+100:     set(BAREMETAL_DEBUG_TRACING 1)
+101: else ()
+102:     set(BAREMETAL_DEBUG_TRACING 0)
+103: endif()
+104: if (BAREMETAL_TRACE_MEMORY)
+105:     set(BAREMETAL_MEMORY_TRACING 1)
+106: else ()
+107:     set(BAREMETAL_MEMORY_TRACING 0)
+108: endif()
+109: if (BAREMETAL_TRACE_MEMORY_DETAIL)
+110:     set(BAREMETAL_MEMORY_TRACING 1)
+111:     set(BAREMETAL_MEMORY_TRACING_DETAIL 1)
+112: else ()
+113:     set(BAREMETAL_MEMORY_TRACING_DETAIL 0)
+114: endif()
+115: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+116: 
+117: set(DEFINES_C
+118:     PLATFORM_BAREMETAL
+119:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+120:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+121:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
+122:     BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
+123:     BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
+124:     USE_PHYSICAL_COUNTER
+125:     BAREMETAL_MAJOR=${VERSION_MAJOR}
+126:     BAREMETAL_MINOR=${VERSION_MINOR}
+127:     BAREMETAL_LEVEL=${VERSION_LEVEL}
+128:     BAREMETAL_BUILD=${VERSION_BUILD}
+129:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
+130:     )
 ...
-278: message(STATUS "Baremetal settings:")
-279: message(STATUS "-- RPI target:                      ${BAREMETAL_RPI_TARGET}")
-280: message(STATUS "-- Architecture options:            ${BAREMETAL_ARCH_CPU_OPTIONS}")
-281: message(STATUS "-- Kernel name:                     ${BAREMETAL_TARGET_KERNEL}")
-282: message(STATUS "-- Kernel load address:             ${BAREMETAL_LOAD_ADDRESS}")
-283: message(STATUS "-- Debug ouput to UART0:            ${BAREMETAL_CONSOLE_UART0}")
-284: message(STATUS "-- Debug ouput to UART1:            ${BAREMETAL_CONSOLE_UART1}")
-285: message(STATUS "-- Color log output:                ${BAREMETAL_COLOR_LOGGING}")
-286: message(STATUS "-- Debug tracing output:            ${BAREMETAL_TRACE_DEBUG}")
-287: message(STATUS "-- Memory tracing output:           ${BAREMETAL_TRACE_MEMORY}")
-288: message(STATUS "-- Detailed memory tracing output:  ${BAREMETAL_TRACE_MEMORY_DETAIL}")
-289: message(STATUS "-- Version major:                   ${VERSION_MAJOR}")
-290: message(STATUS "-- Version minor:                   ${VERSION_MINOR}")
-291: message(STATUS "-- Version level:                   ${VERSION_LEVEL}")
-292: message(STATUS "-- Version build:                   ${VERSION_BUILD}")
-293: message(STATUS "-- Version composed:                ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}")
+292: message(STATUS "Baremetal settings:")
+293: message(STATUS "-- RPI target:                      ${BAREMETAL_RPI_TARGET}")
+294: message(STATUS "-- Architecture options:            ${BAREMETAL_ARCH_CPU_OPTIONS}")
+295: message(STATUS "-- Kernel name:                     ${BAREMETAL_TARGET_KERNEL}")
+296: message(STATUS "-- Kernel load address:             ${BAREMETAL_LOAD_ADDRESS}")
+297: message(STATUS "-- Debug ouput to UART0:            ${BAREMETAL_CONSOLE_UART0}")
+298: message(STATUS "-- Debug ouput to UART1:            ${BAREMETAL_CONSOLE_UART1}")
+299: message(STATUS "-- Color log output:                ${BAREMETAL_COLOR_LOGGING}")
+300: message(STATUS "-- Debug tracing output:            ${BAREMETAL_TRACE_DEBUG}")
+301: message(STATUS "-- Memory tracing output:           ${BAREMETAL_TRACE_MEMORY}")
+302: message(STATUS "-- Detailed memory tracing output:  ${BAREMETAL_TRACE_MEMORY_DETAIL}")
+303: message(STATUS "-- Version major:                   ${VERSION_MAJOR}")
+304: message(STATUS "-- Version minor:                   ${VERSION_MINOR}")
+305: message(STATUS "-- Version level:                   ${VERSION_LEVEL}")
+306: message(STATUS "-- Version build:                   ${VERSION_BUILD}")
+307: message(STATUS "-- Version composed:                ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}")
 ...
 ```
 
-- Line 65: We add a variable `BAREMETAL_TRACE_MEMORY` that enables tracing memory functions. We'll set it to `ON` for now
-- Line 66: We add a variable `BAREMETAL_TRACE_MEMORY_DETAIL_` that enables tracing memory functions at more detail. We'll set it to `ON` for now
-- Line 95-99: We set variable `BAREMETAL_MEMORY_TRACING` to 1 if `BAREMETAL_TRACE_MEMORY` is `ON`, and 0 otherwise
-- Line 100-105: We set variable `BAREMETAL_MEMORY_TRACING_DETAIL` to 1 if `BAREMETAL_TRACE_MEMORY_DETAIL` is `ON`, and 0 otherwise.
+- Line 70: We add a variable `BAREMETAL_TRACE_MEMORY` that enables tracing memory allocation functions.
+We'll set it to `ON` for now
+- Line 71: We add a variable `BAREMETAL_TRACE_MEMORY_DETAIL_` that enables tracing memory allocation functions in more detail.
+We'll set it to `ON` for now
+- Line 104-108: We set variable `BAREMETAL_MEMORY_TRACING` to 1 if `BAREMETAL_TRACE_MEMORY` is `ON`, and 0 otherwise
+- Line 109-114: We set variable `BAREMETAL_MEMORY_TRACING_DETAIL` to 1 if `BAREMETAL_TRACE_MEMORY_DETAIL` is `ON`, and 0 otherwise.
 If `BAREMETAL_TRACE_MEMORY_DETAIL` is `ON`, we also set `BAREMETAL_MEMORY_TRACING` to 1
-- Line 113: We set the compiler definition `BAREMETAL_MEMORY_TRACING` to the value of the `BAREMETAL_MEMORY_TRACING` variable
-- Line 114: We set the compiler definition `BAREMETAL_MEMORY_TRACING_DETAIL` to the value of the `BAREMETAL_MEMORY_TRACING_DETAIL` variable
-- Line 287: We print the value of `BAREMETAL_TRACE_MEMORY`
-- Line 288: We print the value of `BAREMETAL_TRACE_MEMORY_DETAIL_`
+- Line 122: We set the compiler definition `BAREMETAL_MEMORY_TRACING` to the value of the `BAREMETAL_MEMORY_TRACING` variable
+- Line 123: We set the compiler definition `BAREMETAL_MEMORY_TRACING_DETAIL` to the value of the `BAREMETAL_MEMORY_TRACING_DETAIL` variable
+- Line 301: We print the value of `BAREMETAL_TRACE_MEMORY`
+- Line 302: We print the value of `BAREMETAL_TRACE_MEMORY_DETAIL_`
 
 ### Synchronization.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_SYNCHRONIZATIONH}
 
@@ -226,9 +229,28 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 
 - Line 71: We create a definition `HEAP_DEFAULT_NEW` if not already defined. This specifies the heap to use for normal (i.e. non placement) calls to new() operators.
 - Line 80: We create a definition `HEAP_DEFAULT_MALLOC` if not already defined. This specifies the heap to use for calls to the malloc() function.
-- Line 98: We create a definition `HEAP_BLOCK_BUCKET_SIZES` if not already defined. This specifies the heap buckets sizes as a comma separated list
+- Line 98: We create a definition `HEAP_BLOCK_BUCKET_SIZES` if not already defined. This specifies the heap buckets sizes as a comma separated list.
+If a memory block of size n is needed, the list will be searched to find the first size larger than or equal to n.
+So here, the sizes for blocks allocated are:
+  - 64 bytes
+  - 1 Kbyte
+  - 4 Kbyte
+  - 16 Kbyte
+  - 64 Kbyte
+  - 256 Kbyte
+  - 512 Kbyte
+  - Any size allocated larger than the largest block is allocated differently, but never returned. This is the limitation of the poor man's solution we implement
 
-See below in [MemoryMap.h](#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT__STEP_1_MEMORYMAPH) for explanation of the heap types.
+We will define an enum type in a second named `HeapType`, which specifies the heap to be used for a certain function. We distinguish two heap types:
+- Low heap, which is the memory available for allocation below 1 Gb.
+As Raspberry Pi 3 only has 1 Gb of RAM, this is the only type for that board.
+- High heap, which is the memory available for allocation above 1 Gb.
+This will reach up to the end of RAM (excluding reserved addresses), to a maximum of 3Gb.
+The reason for this limit is that DMA can only address up to that address range.
+
+The reason for the split between low and high heap is that the memory assigned to the VideoCore for graphics is at the end of the 1 Gb range.
+So we will use the memory range from just above the coherent memory region up to 1 Gb, minus the memory assign to VideoCore to the low heap.
+The high heap will range from 1 Gb up to max. 3 Gb, as far as physical memory is available.
 
 ### MemoryMap.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_MEMORYMAPH}
 
@@ -253,16 +275,6 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 102: #endif
 103:
 ```
-
-We will define an enum type in a second named `HeapType`, which specifies the heap to be used for a certain function. We distinguish two heap types:
-- Low heap, which is the memory available for allocation below 1 Gb. As Raspberry Pi 3 only has 1 Gb of RAM, this is the only type for that board.
-- High heap, which is the memory available for allocation above 1 Gb.
-This will reach up to the end of RAM (excluding reserved addresses), to a maximum of 3Gb.
-The reasong for this limit is that DMA can only address up to that address range.
-
-The reason for the split between low and high heap is that the memory assign to the VideoCore for graphics is at the end of the 1Gb range.
-So we will use the memory range from just above the coherent memory region up to 1Gb, minus the memory assign to VideoCore, minus the memory reserved for paging to the low heap
-The high heap will range from 1Gb up to max 3Gb, as far as physical memory is available.
 
 - Line 94: We define the start of the low heap, `MEM_HEAP_START` to be directly after the coherent memory region
 - Line 98: For Raspberry Pi 4 or higher, we define the start of the high heap, `MEM_HIGHMEM_START`
@@ -435,18 +447,19 @@ File: code/libraries/baremetal/include/baremetal/HeapAllocator.h
 ```
 
 - Line 43: We include `Synchronization.h` for the definition of the cache line length
-- Line 52: We define `HEAP_BLOCK_ALIGN` which signifies the alignment of allocated memory blocks
+- Line 52: We define `HEAP_BLOCK_ALIGN` which signifies the alignment of allocated memory blocks.
+This depends on the cache line length for performance reasons
 - Line 54: We define `HEAP_ALIGN_MASK` which is used to check whether a memory block is indeed aligned correctly
 - Line 57: We define `HEAP_BLOCK_MAX_BUCKETS` which signifies the maximum number of buckets used for memory allocation.
-Think of the buckets as sizes for allocated memory blocks.
+This is the maximum length for the list of different bucket sizes.
 We select the minimum buckets size which can hold the requested memory block, and allocate within that bucket.
-- Line 62-76: We declare a structure to administer memory block information
+- Line 62-78: We declare a structure to administer memory block information
   - Line 65: The member `magic` is used as a magic number to check against corruption of the memory block information
   - Line 67: We define the magic number `HEAP_BLOCK_MAGIC` to be used (the hex version of the string 'BLMC')
   - Line 69: The member `size` is the size of the allocated memory
   - Line 71: The member `next` is a pointer to the next allocated memory block in a linked list
-  - Line 73: The member `align` makes sure that the data that follows is aligned to `HEAP_BLOCK_ALIGN` bytes.
-The memory block administration therefore uses 64 bytes of memory
+  - Line 73: The member `align` adds padding to make sure that the data that follows is aligned to `HEAP_BLOCK_ALIGN` bytes.
+The struct data itself is 4 + 4 + 8 bytes. The memory block administration therefore uses `HEAP_BLOCK_ALIGN` bytes of memory
   - Line 75: The member `data` is a placeholder for the actual allocated memory
 - Line 83-103: We declare a structure to administer bucket information
   - Line 86: The member `size` is the size of the bucket (the memory block excluding its administration needs to fit in a bucket).
@@ -458,19 +471,19 @@ The amount of memory used is therefore the bucket size plus the size of the memo
   - Line 97: The member `totalFreedCount` is only defined when memory tracing is enabled. It holds the cumulative number of blocks freed in a bucket over time
   - Line 99: The member `totalFreed` is only defined when memory tracing is enabled. It holds the cumulative amount of memory freed in a bucket over time
   - Line 102: The member `freeList` points to the first memory block administration of a list of blocks that were freed and not yet re-used
-- Line 103-145: We declare the class `HeapAllocator`
+- Line 108-150: We declare the class `HeapAllocator`
   - Line 112: The member `m_heapName` holds the name of the heap for debugging purposes. This is passed to the constructor
   - Line 114: The member `m_next` holds the pointer to the next address that is still free for allocation
   - Line 116: The member `m_limit` holds the pointer to one byte beyond the last address available for the heap
-  - Line 118: The member `m_reserve` holds an amount of memory reserved for other purposes (e.g. allocated a block that does not fit in any bucket)
+  - Line 118: The member `m_reserve` holds an amount of memory reserved for other purposes (e.g. a block allocated that does not fit in any bucket)
   - Line 120: The member `m_buckets` holds the pointers to the first memory block information for each bucket
   - Line 123: The static member `s_bucketSizes` holds the size of each bucket. Any values equal to 0 are unused buckets
   - Line 130: We declare the constructor, which received the heap name
   - Line 132: We declare the `Setup()` method, which is used to set the start address, size, and reserved space for the heap
-  - Line 134: We declare the `GetFreeSpace()` method, which returns the amount of unused memory space in the heap (excluding returned an unused previously allocated blocks)
+  - Line 134: We declare the `GetFreeSpace()` method, which returns the amount of unused memory space in the heap (excluding returned any unused returned previously allocated blocks)
   - Line 135: We declare the `Allocate()` method, which allocates a block of memory, and returns the pointer to the memory block
   - Line 136: We declare the `Rellocate()` method, which reallocates a block of memory (allocates a block of the newly requested size, copies the contents, and frees the original), and returns the pointer to the new memory block
-  - Line 137: We declare the `Free()` method, which frees a block of memory
+  - Line 137: We declare the `Free()` method, which frees an allocated block of memory
   - Line 140: The method `DumpStatus()` is only defined when memory tracing is enabled.
 It logs information on the currently allocated and free memory blocks
   - Line 142: The method `GetCurrentAllocatedBlockCount()` is only defined when memory tracing is enabled.
@@ -482,9 +495,9 @@ It returns the maximum count of allocated memory blocks over time
   - Line 145: The method `GetTotalAllocatedBlockCount()` is only defined when memory tracing is enabled.
 It returns the cumulative count of allocated memory blocks over time
   - Line 146: The method `GetTotalFreedBlockCount()` is only defined when memory tracing is enabled.
-It returns the cumulative size of allocated memory blocks over time
-  - Line 147: The method `GetTotalAllocationSize()` is only defined when memory tracing is enabled
 It returns the cumulative count of freed memory blocks over time
+  - Line 147: The method `GetTotalAllocationSize()` is only defined when memory tracing is enabled
+It returns the cumulative size of allocated memory blocks over time
   - Line 148: The method `GetTotalFreeSize()` is only defined when memory tracing is enabled.
 It returns the cumulative size of freed memory blocks over time
 
@@ -902,11 +915,11 @@ The default bucket sizes are:
   - Line 89: We save the reserved space
   - Line 91: Only if `BAREMETAL_MEMORY_TRACING` is defined: We dump the current memory management status to the log
 - Line 100-103: We implement the method `GetFreeSpace()` which returns the available space left
-- Line 112-190: We implement the method `Allocate()`
+- Line 112-183: We implement the method `Allocate()`
   - Line 114-117: We add a sanity check to verify that the memory manager is set up
   - Line 119-137: We find the smallest bucket that supports the requested size
   - Line 139-148: We check whether there is a block within the selected bucket that was freed before, so we can re-use it
-  - Line 150-182: If no block can be re-used, we allocate a new one
+  - Line 150-175: If no block can be re-used, we allocate a new one
     - Line 151: We use the first available address in free space
     - Line 153-154: We calculate the next available address in free space (we add the size of the administration block and the requested size rounded up to the heap alignment)
     - Line 156-164: If the next available address would no longer fit in the available space, we fail by returning nullptr, after logging an error
@@ -923,15 +936,16 @@ The default bucket sizes are:
   - Line 218: We copy the contents of the current block into the new one (not that this only happens when we grow the block)
   - Line 220: We free the old memory block
 - Line 230-264: We implement the method `Free()`
-  - Line 232-234: If the memory block is nullptr, we simply return
+  - Line 232-235: If the memory block is nullptr, we simply return
   - Line 237-238: We get hold of the memory block administration and check for a valid magic number
   - Line 240-259: We look up the bucket this block block belongs to and add it to the list of free memory blocks for that bucket
   - Line 261-263: Note that when a block was allocated that does not fit in any bucket, that memory is lost
+- Line 270-286: We implement the method `DumpStatus()`
 - Line 292-300: We implement the method `GetCurrentAllocatedBlockCount()`
 - Line 306-314: We implement the method `GetCurrentAllocationSize()`
 - Line 320-328: We implement the method `GetMaxAllocatedBlockCount()`
 - Line 334-342: We implement the method `GetTotalAllocatedBlockCount()`
-- Line 348-355: We implement the method `GetTotalFreedBlockCount()`
+- Line 348-356: We implement the method `GetTotalFreedBlockCount()`
 - Line 362-370: We implement the method `GetTotalAllocationSize()`
 - Line 376-384: We implement the method `GetTotalFreeSize()`
 
@@ -939,6 +953,8 @@ The default bucket sizes are:
 
 We will extend the `MemoryManager` class with methods to allocate and free memory, retrieve the amount of free heap left, and dump information on allocated and freed memory.
 This also requires making the `MemoryManager` class instantiable. We again choose to make `MemoryManager` a singleton.
+We will also add the definition for the `HeapType` now.
+
 The `sysinit()` function will create the `MemoryManager` instance, as it will be needed very early in the startup process.
 
 Update the file `code/libraries/baremetal/include/baremetal/MemoryManager.h`
@@ -1013,15 +1029,15 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 - Line 60-70: We declare the enum `HeapType` which signifies the type of heap to be used for allocation
 - Line 85: We declare the friend function `GetMemoryManager()` which instantiates and returns the singleton MemoryManager instance (which will be create in the `sysinit()` function in `System.cpp`)
 - Line 89: The member `m_memSize` signifies the amount of memory available for the ARM CPU up to 1 Gb in bytes.
-This does not take into account the reservations for paging, and the part used for other means before the heap.
-- Line 91: The member `m_memSizeHigh` signifies the amount of mmemory above 1 Gb, up the maximum of 3 Gb
+This holds the total ARM memory available, and therefore does not take into account the reservations we need to make for paging, and the part used for other means before the heap.
+- Line 91: The member `m_memSizeHigh` signifies the amount of memory above 1 Gb, up the maximum of 3 Gb
 - Line 94: The member `m_heapLow` is the low heap
 - Line 97: The member `m_heapHigh` is only defined for Raspberry Pi 4 and higher, is the high heap
 - Line 99: We declare the private constructor for `MemoryManager`. This can only be called by `GetMemoryManager()`
 - Line 104: We declare the method `HeapAllocate()`, which allocates memory of the requested size, in the requested heap
 - Line 105: We declare the method `HeapReAllocate()`, which re-allocates a memory block to the requested size
 - Line 106: We declare the method `HeapFree()`, which frees a memory block
-- Line 107: We declare the method `GetHeapFreeSpace()`, which returned available memory in all heaps
+- Line 107: We declare the method `GetHeapFreeSpace()`, which returns available memory in all heaps
 - Line 108: We declare the method `DumpStatus()`, which log information on all heaps concerning allocated and freed memory blocks
 - Line 111: We declare the method `GetMemoryManager()`, which initiates the singleton `MemoryManager`
 
@@ -1154,95 +1170,92 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 157:     {
 158:         return memoryManager.m_heapLow.ReAllocate(block, size);
 159:     }
-160:     else
-161:     {
-162:         return memoryManager.m_heapHigh.ReAllocate(block, size);
-163:     }
-164: #else
-165:     return memoryManager.m_heapLow.ReAllocate(block, size);
-166: #endif
-167: }
-168:
-169: /// <summary>
-170: /// Free (de-allocate) block of memory.
-171: /// </summary>
-172: /// <param name="block">Memory block to be freed</param>
-173: void MemoryManager::HeapFree(void* block)
-174: {
-175:     auto& memoryManager = GetMemoryManager();
-176: #if BAREMETAL_RPI_TARGET >= 4
-177:     if (reinterpret_cast<uintptr>(block) < MEM_HIGHMEM_START)
-178:     {
-179:         memoryManager.m_heapLow.Free(block);
-180:     }
-181:     else
-182:     {
-183:         memoryManager.m_heapHigh.Free(block);
-184:     }
-185: #else
-186:     memoryManager.m_heapLow.Free(block);
-187: #endif
-188: }
-189:
-190: /// <summary>
-191: /// Calculate and return the amount of free (unallocated) space for the specified heap
-192: /// </summary>
-193: /// <param name="type">Heap to return free space for</param>
-194: /// <returns>Free space of the memory region, which is not allocated by blocks.</returns>
-195: size_t MemoryManager::GetHeapFreeSpace(HeapType type)
-196: {
-197:     auto& memoryManager = GetMemoryManager();
-198: #if BAREMETAL_RPI_TARGET >= 4
-199:     switch (type)
-200:     {
-201:     case HeapType::LOW:     return memoryManager.m_heapLow.GetFreeSpace();
-202:     case HeapType::HIGH:    return memoryManager.m_heapHigh.GetFreeSpace();
-203:     case HeapType::ANY:     return memoryManager.m_heapLow.GetFreeSpace() + memoryManager.m_heapHigh.GetFreeSpace();
-204:     default:                return 0;
-205:     }
-206: #else
-207:     switch (type)
-208:     {
-209:     case HeapType::LOW:
-210:     case HeapType::ANY:     return memoryManager.m_heapLow.GetFreeSpace();
-211:     default:                return 0;
-212:     }
-213: #endif
-214: }
-215:
-216: /// <summary>
-217: /// Display the current status of all heap allocators
-218: /// </summary>
-219: void MemoryManager::DumpStatus()
-220: {
-221: #if BAREMETAL_MEMORY_TRACING
-222:     auto& memoryManager = GetMemoryManager();
-223:     LOG_DEBUG("Low heap:");
-224:     memoryManager.m_heapLow.DumpStatus();
-225: #if BAREMETAL_RPI_TARGET >= 4
-226:     LOG_DEBUG("High heap:");
-227:     memoryManager.m_heapHigh.DumpStatus();
-228: #endif
-229: #endif
-230: }
-231: 
-232: /// <summary>
-233: /// Construct the singleton MemoryManager instance if needed, and return a reference to the instance
-234: /// </summary>
-235: /// <returns>Reference to the singleton MemoryManager</returns>
-236: MemoryManager& baremetal::GetMemoryManager()
-237: {
-238:     static MemoryManager instance;
-239:     return instance;
-240: }
+160:     return memoryManager.m_heapHigh.ReAllocate(block, size);
+161: #else
+162:     return memoryManager.m_heapLow.ReAllocate(block, size);
+163: #endif
+164: }
+165: 
+166: /// <summary>
+167: /// Free (de-allocate) block of memory.
+168: /// </summary>
+169: /// <param name="block">Memory block to be freed</param>
+170: void MemoryManager::HeapFree(void* block)
+171: {
+172:     auto& memoryManager = GetMemoryManager();
+173: #if BAREMETAL_RPI_TARGET >= 4
+174:     if (reinterpret_cast<uintptr>(block) < MEM_HIGHMEM_START)
+175:     {
+176:         memoryManager.m_heapLow.Free(block);
+177:     }
+178:     else
+179:     {
+180:         memoryManager.m_heapHigh.Free(block);
+181:     }
+182: #else
+183:     memoryManager.m_heapLow.Free(block);
+184: #endif
+185: }
+186: 
+187: /// <summary>
+188: /// Calculate and return the amount of free (unallocated) space for the specified heap
+189: /// </summary>
+190: /// <param name="type">Heap to return free space for</param>
+191: /// <returns>Free space of the memory region, which is not allocated by blocks.</returns>
+192: size_t MemoryManager::GetHeapFreeSpace(HeapType type)
+193: {
+194:     auto& memoryManager = GetMemoryManager();
+195: #if BAREMETAL_RPI_TARGET >= 4
+196:     switch (type)
+197:     {
+198:     case HeapType::LOW:     return memoryManager.m_heapLow.GetFreeSpace();
+199:     case HeapType::HIGH:    return memoryManager.m_heapHigh.GetFreeSpace();
+200:     case HeapType::ANY:     return memoryManager.m_heapLow.GetFreeSpace() + memoryManager.m_heapHigh.GetFreeSpace();
+201:     default:                return 0;
+202:     }
+203: #else
+204:     switch (type)
+205:     {
+206:     case HeapType::LOW:
+207:     case HeapType::ANY:     return memoryManager.m_heapLow.GetFreeSpace();
+208:     default:                return 0;
+209:     }
+210: #endif
+211: }
+212: 
+213: /// <summary>
+214: /// Display the current status of all heap allocators
+215: /// </summary>
+216: void MemoryManager::DumpStatus()
+217: {
+218: #if BAREMETAL_MEMORY_TRACING
+219:     auto& memoryManager = GetMemoryManager();
+220:     LOG_DEBUG("Low heap:");
+221:     memoryManager.m_heapLow.DumpStatus();
+222: #if BAREMETAL_RPI_TARGET >= 4
+223:     LOG_DEBUG("High heap:");
+224:     memoryManager.m_heapHigh.DumpStatus();
+225: #endif
+226: #endif
+227: }
+228: 
+229: /// <summary>
+230: /// Construct the singleton MemoryManager instance if needed, and return a reference to the instance
+231: /// </summary>
+232: /// <returns>Reference to the singleton MemoryManager</returns>
+233: MemoryManager& baremetal::GetMemoryManager()
+234: {
+235:     static MemoryManager instance;
+236:     return instance;
+237: }
 ```
 
 - Line 42-45: We need to include `Assert.h`, `Logger.h` and `MachineInfo.h`
 - Line 60-99: We implement the constructor for the `MemoryManager` class
   - Line 68-76: We get the `MachineInfo` instance and retrieve the ARM CPU base memory address and allocated size.
-If the returned size is 0, we default to the full memory with 64 Mb allocated to the VideoCore
+If the returned size is 0, we default to the full memory (1 Gb) with 64 Mb allocated to the VideoCore
   - Line 78-79: We perform a sanity check, and assign the low heap memory size
-  - Line 81-82: We substract the low heap start as well as the space reserved for paging, and set up the low heap
+  - Line 81-82: We substract the low heap start as well as the space reserved for paging, and set up the low heap (we keep a reserve of 256 Kb)
   - Line 84-98: In case of Raspberry Pi 4 or higher, we set up the high heap
     - Line 85: We retrieve the total RAM size
     - Line 86-97: If larger that 1Gb, we determine the high end of the memory and limit it to 3Gb, we then subtract the first 1 Gb and set up the high heap
@@ -1251,24 +1264,24 @@ If the returned size is 0, we default to the full memory with 64 Mb allocated to
   - Line 127-135: In case of Raspberry Pi 4 or higher, we allow for high heap selection, and allocate accordingly
 If any heap was selected, we first attempt to claim from the low heap, if that fails we try the high heap
   - Line 137-142: In case of Raspberry Pi 3, we only allow the low heap
-- Line 152-167: We implement the method `HeapReAllocate()`
+- Line 152-164: We implement the method `HeapReAllocate()`
   - Line 154: As this is a static method, we retrieve the `MemoryManager` instance
-  - Line 156-163: In case of Raspberry Pi 4 or higher, we check which heap to access, and call `ReAllocate()` on it
-  - Line 165: In case of Raspberry Pi 3, we call `ReAllocate()` on the low heap
-- Line 173-188: We implement the method `HeapFree()`
-  - Line 175: As this is a static method, we retrieve the `MemoryManager` instance
-  - Line 177-184: In case of Raspberry Pi 4 or higher, we check which heap to access, and call `Free()` on it
-  - Line 186: In case of Raspberry Pi 3, we call `Free()` on the low heap
-- Line 195-214: We implement the method `GetHeapFreeSpace()`
-  - Line 197: As this is a static method, we retrieve the `MemoryManager` instance
-  - Line 199-205: In case of Raspberry Pi 4 or higher, depending on the selected heap, we call `GetFreeSpace()` on it.
+  - Line 156-160: In case of Raspberry Pi 4 or higher, we check which heap to access, and call `ReAllocate()` on it
+  - Line 162: In case of Raspberry Pi 3, we call `ReAllocate()` on the low heap
+- Line 170-185: We implement the method `HeapFree()`
+  - Line 172: As this is a static method, we retrieve the `MemoryManager` instance
+  - Line 174-181: In case of Raspberry Pi 4 or higher, we check which heap to access, and call `Free()` on it
+  - Line 183: In case of Raspberry Pi 3, we call `Free()` on the low heap
+- Line 192-211: We implement the method `GetHeapFreeSpace()`
+  - Line 194: As this is a static method, we retrieve the `MemoryManager` instance
+  - Line 196-202: In case of Raspberry Pi 4 or higher, depending on the selected heap, we call `GetFreeSpace()` on it.
 If any heap is selected, the freespace for both heaps is added together
-  - Line 207-212: In case of Raspberry Pi 3, we call `GetFreeSpace()` on the low heap
-- Line 219-228: We implement the method `DumpStatus()`
-  - Line 222: As this is a static method, we retrieve the `MemoryManager` instance
-  - Line 223-224: We call `DumpStatus()` on the low heap
-  - Line 226-227: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
-- Line 236-240: We implement the function `GetMemoryManager()`
+  - Line 204-209: In case of Raspberry Pi 3, we call `GetFreeSpace()` on the low heap
+- Line 216-227: We implement the method `DumpStatus()`
+  - Line 219: As this is a static method, we retrieve the `MemoryManager` instance
+  - Line 220-221: We call `DumpStatus()` on the low heap
+  - Line 223-224: In case of Raspberry Pi 4 or higher, we call `DumpStatus()` on the high heap.
+- Line 233-237: We implement the function `GetMemoryManager()`
 
 ### System.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SETTING_UP_MEMORY_MANAGEMENT___STEP_1_SYSTEMCPP}
 
@@ -1478,68 +1491,149 @@ We can now configure and build our code, and start debugging.
 The application will allocate memory, and show that one block of memory is allocated and freed again:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:82)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Starting up (System:201)
 Debug  Hello World! (main:21)
-Info   Heap space available: 983564288 bytes (main:24)
-Info   High heap space available: 0 bytes (main:25)
-Info   DMA heap space available: 983564288 bytes (main:26)
-Debug  Allocate 64 bytes at 0000000000600040 (HeapAllocator:169)
-Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:170)
-Info   Allocated block 600040 (main:29)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:64 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Free 64 bytes at 0000000000600040 (HeapAllocator:249)
-Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:250)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     1 (HeapAllocator:275)
-Debug  Total #freed bytes:      64 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Info   Wait 5 seconds (main:42)
+Info   Heap space available: 980418560 bytes (main:24)
+Info   High heap space available: 1073741824 bytes (main:25)
+Info   DMA heap space available: 2054160384 bytes (main:26)
+Debug  Allocate 64 bytes at 0000000000900040 (HeapAllocator:172)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:173)
+Info   Allocated block 900040 (main:29)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:64 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 64 bytes at 0000000000900040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Info   Wait 5 seconds (main:35)
 Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
+hDebug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Info   Halt (System:122)
 ```
+
+We see that even though we only allocate 4 bytes, as the minimum bucket size is 64 bytes, that amount of memory is allocated.
 
 ## Supporting C/C++ memory allocation - step 2 {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2}
 
@@ -1588,56 +1682,65 @@ Update the file `code/libraries/baremetal/src/Util.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Util.cpp
 ...
-165:
-166: /// <summary>
-167: /// Allocates a block of memory of the desired size.
-168: /// </summary>
-169: /// <param name="size">The desired size of the memory block</param>
-170: /// <returns></returns>
-171: void* malloc(size_t size)
-172: {
-173:     return baremetal::MemoryManager::HeapAllocate(size, HeapType::ANY);
-174: }
-175:
-176: /// <summary>
-177: /// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
-178: ///
-179: /// The memory allocated is num x size bytes
-180: /// </summary>
-181: /// <param name="num">Number of cells to allocate memory for</param>
-182: /// <param name="size">Size of each cell</param>
-183: /// <returns></returns>
-184: void* calloc(size_t num, size_t size)
-185: {
-186:     return malloc(num * size);
-187: }
-188:
-189: /// <summary>
-190: /// Re-allocates memory previously allocated with malloc() or calloc() to a new size
-191: /// </summary>
-192: /// <param name="ptr">Pointer to memory block to be re-allocated</param>
-193: /// <param name="new_size">The desired new size of the memory block</param>
-194: /// <returns></returns>
-195: void* realloc(void* ptr, size_t new_size)
-196: {
-197:     return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
-198: }
-199:
-200: /// <summary>
-201: /// Frees memory previously allocated with malloc() or calloc()
-202: /// </summary>
-203: /// <param name="ptr">Pointer to memory block to be freed</param>
-204: void free(void* ptr)
-205: {
-206:     baremetal::MemoryManager::HeapFree(ptr);
-207: }
+40: #include <baremetal/Util.h>
+41: 
+42: #include <baremetal/MemoryManager.h>
+43: 
+44: /// @file
+45: /// Standard C library utility functions implementation
+46: 
+...
+163:
+164: /// <summary>
+165: /// Allocates a block of memory of the desired size.
+166: /// </summary>
+167: /// <param name="size">The desired size of the memory block</param>
+168: /// <returns></returns>
+169: void* malloc(size_t size)
+170: {
+171:     return baremetal::MemoryManager::HeapAllocate(size, HeapType::ANY);
+172: }
+173: 
+174: /// <summary>
+175: /// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
+176: ///
+177: /// The memory allocated is num x size bytes
+178: /// </summary>
+179: /// <param name="num">Number of cells to allocate memory for</param>
+180: /// <param name="size">Size of each cell</param>
+181: /// <returns></returns>
+182: void* calloc(size_t num, size_t size)
+183: {
+184:     return malloc(num * size);
+185: }
+186: 
+187: /// <summary>
+188: /// Re-allocates memory previously allocated with malloc() or calloc() to a new size
+189: /// </summary>
+190: /// <param name="ptr">Pointer to memory block to be re-allocated</param>
+191: /// <param name="new_size">The desired new size of the memory block</param>
+192: /// <returns></returns>
+193: void* realloc(void* ptr, size_t new_size)
+194: {
+195:     return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
+196: }
+197: 
+198: /// <summary>
+199: /// Frees memory previously allocated with malloc() or calloc()
+200: /// </summary>
+201: /// <param name="ptr">Pointer to memory block to be freed</param>
+202: void free(void* ptr)
+203: {
+204:     baremetal::MemoryManager::HeapFree(ptr);
+205: }
 ```
 
-- Line 171-174: We implement `malloc()` by calling `MemoryManager::HeapAlloc()`
+- Line 42: We need to include `MemoryManager.h` for declaration of the `MemoryManager` class
+- Line 169-172: We implement `malloc()` by calling `MemoryManager::HeapAlloc()`
 We use any heap, so in case the low heap is exhausted, on Raspberry Pi 4 and higher we will use the high heap
-- Line 184-187: We implement `calloc()` by calling `malloc()` with num x size
-- Line 195-198: We implement `realloc()` by calling `MemoryManager::HeapReAlloc()`
-- Line 204-207: We implement `free()` by calling `MemoryManager::HeapFree()`
+- Line 182-185: We implement `calloc()` by calling `malloc()` with num x size
+- Line 193-196: We implement `realloc()` by calling `MemoryManager::HeapReAlloc()`
+- Line 202-205: We implement `free()` by calling `MemoryManager::HeapFree()`
 
 ### New.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_NEWH}
 
@@ -1650,22 +1753,33 @@ File: code/libraries/baremetal/include/baremetal/New.h
 ...
 42: /// @file
 43: /// Basic memory allocation functions
-44:
+44: 
 45: #include <baremetal/MemoryManager.h>
 46: #include <baremetal/Types.h>
-47:
+47: 
 48: void* operator new (size_t size, HeapType type);
 49: void* operator new[](size_t size, HeapType type);
 50: void* operator new (size_t size, void* address);
 51: void* operator new[](size_t size, void* address);
-52:
+52: void* operator new (size_t size);
+53: void* operator new[](size_t size);
+54: 
+55: void operator delete(void* block) noexcept;
+56: void operator delete[](void* address) noexcept;
+57: void operator delete(void* block, size_t size) noexcept;
+58: void operator delete[](void* address, size_t size) noexcept;
+59: 
 ```
 
 - Line 48: We declare the new operator for placement using a heap specification.
 We can then use e.g. `new (HeapType::LOW) X` to allocate an instance of class X in the low heap.
-- Line 49: We declare the new[] operator for placement using a heap specification
+- Line 49: We declare the array new[] operator for placement using a heap specification
 - Line 50: We declare the new operator for placement using a pointer. This will place the instance at the specified location
-- Line 51: We declare the new[] operator for placement using a pointer. This will place the instance at the specified location
+- Line 51: We declare the array new[] operator for placement using a pointer. This will place the instance at the specified location
+- Line 52: We declare the standard new operator
+- Line 53: We declare the standard new[] operator
+- Line 56: We declare a array delete[] operator
+- Line 58: We declare a array delete[] operator with specified size
 
 ### New.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_NEWCPP}
 
@@ -1676,124 +1790,133 @@ Update the file `code/libraries/baremetal/src/New.cpp`
 ```cpp
 File: code/libraries/baremetal/src/New.cpp
 ...
-48: using namespace baremetal;
-49:
-50: /// <summary>
-51: /// Class specific placement allocation for single value.
-52: /// </summary>
-53: /// <param name="size">Size of block to allocate in bytes</param>
-54: /// <param name="type">Heap type to allocate from</param>
-55: /// <returns>Pointer to allocated block of memory or nullptr</returns>
-56: void* operator new (size_t size, HeapType type)
-57: {
-58: 	return MemoryManager::HeapAllocate(size, type);
-59: }
-60:
-61: /// <summary>
-62: /// Class specific placement allocation for array.
-63: /// </summary>
-64: /// <param name="size">Size of block to allocate in bytes</param>
-65: /// <param name="type">Heap type to allocate from</param>
-66: /// <returns>Pointer to allocated block of memory or nullptr</returns>
-67: void* operator new[](size_t size, HeapType type)
-68: {
-69: 	return MemoryManager::HeapAllocate(size, type);
-70: }
-71:
-72: /// <summary>
-73: /// Non allocating placement allocation for single value.
-74: /// </summary>
-75: /// <param name="size">Size of block to allocate in bytes</param>
-76: /// <param name="address">Address to be used</param>
-77: /// <returns>Pointer to block of memory</returns>
-78: void* operator new (size_t size, void* address)
-79: {
-80: 	return address;
-81: }
-82:
-83: /// <summary>
-84: /// Non allocating placement allocation for array.
-85: /// </summary>
-86: /// <param name="size">Size of block to allocate in bytes</param>
-87: /// <param name="address">Address to be used</param>
-88: /// <returns>Pointer to block of memory</returns>
-89: void* operator new[](size_t size, void* address)
-90: {
-91: 	return address;
-92: }
-93:
-94: /// <summary>
-95: /// Standard allocation for single value.
-96: ///
-97: /// Allocates from default heap.
-98: /// </summary>
-99: /// <param name="size">Size of block to allocate in bytes</param>
-100: /// <returns>Pointer to allocated block of memory or nullptr</returns>
-101: void* operator new (size_t size)
-102: {
-103: 	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
-104: }
-105:
-106: /// <summary>
-107: /// Standard allocation for array.
-108: ///
-109: /// Allocates from default heap.
-110: /// </summary>
-111: /// <param name="size">Size of block to allocate in bytes</param>
-112: /// <returns>Pointer to allocated block of memory or nullptr</returns>
-113: void* operator new[](size_t size)
-114: {
-115: 	return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
-116: }
-117:
-118: /// <summary>
-119: /// Standard de-allocation for single value.
-120: /// </summary>
-121: /// <param name="address">Block to free</param>
-122: void operator delete (void* address) noexcept
-123: {
-124: 	MemoryManager::HeapFree(address);
-125: }
-126:
-127: /// <summary>
-128: /// Standard de-allocation for array.
-129: /// </summary>
-130: /// <param name="address">Block to free</param>
-131: void operator delete[](void* address) noexcept
-132: {
-133: 	MemoryManager::HeapFree(address);
-134: }
-135:
-136: /// <summary>
-137: /// Standard de-allocation with size for single value.
-138: /// </summary>
-139: /// <param name="address">Block to free</param>
-140: void operator delete (void* address, size_t /*size*/) noexcept
-141: {
-142: 	MemoryManager::HeapFree(address);
-143: }
-144:
-145: /// <summary>
-146: /// Standard de-allocation for array.
-147: /// </summary>
-148: /// <param name="address">Block to free</param>
-149: //// <param name="size">Size of block to free</param>
-150: void operator delete[](void* address, size_t /*size*/) noexcept
-151: {
-152: 	MemoryManager::HeapFree(address);
-153: }
+File: d:\Projects\baremetal.test\code\libraries\baremetal\src\New.cpp
+40: #include <baremetal/New.h>
+41: 
+42: #include <baremetal/SysConfig.h>
+43: 
+44: /// @file
+45: /// Basic memory allocation functions implementation
+46: 
+47: using namespace baremetal;
+48: 
+49: /// <summary>
+50: /// Class specific placement allocation for single value.
+51: /// </summary>
+52: /// <param name="size">Size of block to allocate in bytes</param>
+53: /// <param name="type">Heap type to allocate from</param>
+54: /// <returns>Pointer to allocated block of memory or nullptr</returns>
+55: void* operator new (size_t size, HeapType type)
+56: {
+57:     return MemoryManager::HeapAllocate(size, type);
+58: }
+59: 
+60: /// <summary>
+61: /// Class specific placement allocation for array.
+62: /// </summary>
+63: /// <param name="size">Size of block to allocate in bytes</param>
+64: /// <param name="type">Heap type to allocate from</param>
+65: /// <returns>Pointer to allocated block of memory or nullptr</returns>
+66: void* operator new[](size_t size, HeapType type)
+67: {
+68:     return MemoryManager::HeapAllocate(size, type);
+69: }
+70: 
+71: /// <summary>
+72: /// Non allocating placement allocation for single value.
+73: /// </summary>
+74: /// <param name="size">Size of block to allocate in bytes</param>
+75: /// <param name="address">Address to be used</param>
+76: /// <returns>Pointer to block of memory</returns>
+77: void* operator new (size_t size, void* address)
+78: {
+79:     return address;
+80: }
+81: 
+82: /// <summary>
+83: /// Non allocating placement allocation for array.
+84: /// </summary>
+85: /// <param name="size">Size of block to allocate in bytes</param>
+86: /// <param name="address">Address to be used</param>
+87: /// <returns>Pointer to block of memory</returns>
+88: void* operator new[](size_t size, void* address)
+89: {
+90:     return address;
+91: }
+92: 
+93: /// <summary>
+94: /// Standard allocation for single value.
+95: ///
+96: /// Allocates from default heap.
+97: /// </summary>
+98: /// <param name="size">Size of block to allocate in bytes</param>
+99: /// <returns>Pointer to allocated block of memory or nullptr</returns>
+100: void* operator new (size_t size)
+101: {
+102:     return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
+103: }
+104: 
+105: /// <summary>
+106: /// Standard allocation for array.
+107: ///
+108: /// Allocates from default heap.
+109: /// </summary>
+110: /// <param name="size">Size of block to allocate in bytes</param>
+111: /// <returns>Pointer to allocated block of memory or nullptr</returns>
+112: void* operator new[](size_t size)
+113: {
+114:     return MemoryManager::HeapAllocate(size, HEAP_DEFAULT_NEW);
+115: }
+116: 
+117: /// <summary>
+118: /// Standard de-allocation for single value.
+119: /// </summary>
+120: /// <param name="address">Block to free</param>
+121: void operator delete (void* address) noexcept
+122: {
+123:     MemoryManager::HeapFree(address);
+124: }
+125: 
+126: /// <summary>
+127: /// Standard de-allocation for array.
+128: /// </summary>
+129: /// <param name="address">Block to free</param>
+130: void operator delete[](void* address) noexcept
+131: {
+132:     MemoryManager::HeapFree(address);
+133: }
+134: 
+135: /// <summary>
+136: /// Standard de-allocation with size for single value.
+137: /// </summary>
+138: /// <param name="address">Block to free</param>
+139: void operator delete (void* address, size_t /*size*/) noexcept
+140: {
+141:     MemoryManager::HeapFree(address);
+142: }
+143: 
+144: /// <summary>
+145: /// Standard de-allocation for array.
+146: /// </summary>
+147: /// <param name="address">Block to free</param>
+148: //// <param name="size">Size of block to free</param>
+149: void operator delete[](void* address, size_t /*size*/) noexcept
+150: {
+151:     MemoryManager::HeapFree(address);
+152: }
 ```
 
-- Line 56-59: We implement the `new` operator for placement with heap specification
-- Line 67-70: We implement the `new[]` operator for placement with heap specification
-- Line 78-81: We implement the `new` placement operator
-- Line 89-92: We implement the `new[]` placement operator
-- Line 101-104: We implement the normal `new` operator
-- Line 113-116: We implement the normal `new[]` operator
-- Line 122-125: We re-implement the standard `delete` operator using a call to `MemoryManager::HeapFree()`
-- Line 131-134: We implement the standard `delete[]` operator
-- Line 141-144: We re-implement the `delete` operator with size using a call to `MemoryManager::HeapFree()`
-- Line 151-154: We implement the `delete[]` operator with size
+- Line 42: We need to include `SysConfig.h` for the definitions on the heap types
+- Line 55-58: We implement the `new` operator with heap specification
+- Line 66-69: We implement the `new[]` operator with heap specification
+- Line 77-80: We implement the placement `new` operator
+- Line 88-91: We implement the placement `new[]` operator
+- Line 100-103: We implement the standard `new` operator
+- Line 112-115: We implement the standard `new[]` operator
+- Line 121-124: We re-implement the standard `delete` operator using a call to `MemoryManager::HeapFree()`
+- Line 130-133: We implement the standard `delete[]` operator
+- Line 139-142: We re-implement the `delete` operator with size using a call to `MemoryManager::HeapFree()`
+- Line 149-152: We implement the `delete[]` operator with size
 
 ### Application code {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_APPLICATION_CODE}
 
@@ -1833,7 +1956,7 @@ File: code\applications\demo\src\main.cpp
 28:     LOG_INFO("DMA heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::ANY));
 29:
 30:     auto ptr = memoryManager.HeapAllocate(4, HeapType::LOW);
-31:     LOG_INFO("Allocated block %llx", ptr);
+31:     LOG_INFO("Allocated block %p", ptr);
 32:     memoryManager.DumpStatus();
 33:
 34:     memoryManager.HeapFree(ptr);
@@ -1842,13 +1965,13 @@ File: code\applications\demo\src\main.cpp
 37:     class X {};
 38:
 39:     X* x = new (HeapType::LOW) X;
-40:     LOG_INFO("Allocated block %llx", x);
+40:     LOG_INFO("Allocated block %p", x);
 41:     memoryManager.DumpStatus();
 42:     delete x;
 43:     memoryManager.DumpStatus();
 44:
-45:     void*p = malloc(256);
-46:     LOG_INFO("Allocated block %llx", p);
+45:     void* p = malloc(256);
+46:     LOG_INFO("Allocated block %p", p);
 47:     memoryManager.DumpStatus();
 48:     free(p);
 49:     memoryManager.DumpStatus();
@@ -1890,144 +2013,288 @@ We can now configure and build our code, and start debugging.
 The application will allocate memory, and show that one block of memory is allocated and freed again:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:82)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Starting up (System:201)
 Debug  Hello World! (main:23)
-Info   Heap space available: 983564288 bytes (main:26)
-Info   High heap space available: 0 bytes (main:27)
-Info   DMA heap space available: 983564288 bytes (main:28)
-Debug  Allocate 64 bytes at 0000000000600040 (HeapAllocator:169)
-Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:170)
-Info   Allocated block 600040 (main:31)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:64 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Free 64 bytes at 0000000000600040 (HeapAllocator:249)
-Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:250)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     1 (HeapAllocator:275)
-Debug  Total #freed bytes:      64 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Reuse 64 bytes at 0000000000600040 (HeapAllocator:142)
-Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:143)
-Info   Allocated block 600040 (main:40)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:64 (HeapAllocator:272)
-Debug  Total #allocated blocks: 2 (HeapAllocator:273)
-Debug  Total #allocated bytes:  128 (HeapAllocator:274)
-Debug  Total #freed blocks:     1 (HeapAllocator:275)
-Debug  Total #freed bytes:      64 (HeapAllocator:276)
-Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 1, #bytes = 64 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Free 64 bytes at 0000000000600040 (HeapAllocator:249)
-Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:250)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 2 (HeapAllocator:273)
-Debug  Total #allocated bytes:  128 (HeapAllocator:274)
-Debug  Total #freed blocks:     2 (HeapAllocator:275)
-Debug  Total #freed bytes:      128 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Allocate 1024 bytes at 00000000006000C0 (HeapAllocator:169)
-Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:170)
-Info   Allocated block 6000C0 (main:46)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        2 (HeapAllocator:271)
-Debug  Current #allocated bytes:1024 (HeapAllocator:272)
-Debug  Total #allocated blocks: 3 (HeapAllocator:273)
-Debug  Total #allocated bytes:  1152 (HeapAllocator:274)
-Debug  Total #freed blocks:     2 (HeapAllocator:275)
-Debug  Total #freed bytes:      128 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Free 1024 bytes at 00000000006000C0 (HeapAllocator:249)
-Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:250)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        2 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 3 (HeapAllocator:273)
-Debug  Total #allocated bytes:  1152 (HeapAllocator:274)
-Debug  Total #freed blocks:     3 (HeapAllocator:275)
-Debug  Total #freed bytes:      1152 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Heap space available: 980418560 bytes (main:26)
+Info   High heap space available: 1073741824 bytes (main:27)
+Info   DMA heap space available: 2054160384 bytes (main:28)
+Debug  Allocate 64 bytes at 0000000000900040 (HeapAllocator:172)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:173)
+Info   Allocated block 900040 (main:31)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:64 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 64 bytes at 0000000000900040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Reuse 64 bytes at 0000000000900040 (HeapAllocator:145)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:146)
+Info   Allocated block 900040 (main:40)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:64 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 64 bytes at 0000000000900040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Allocate 1024 bytes at 0000000040000040 (HeapAllocator:172)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:173)
+Info   Allocated block 40000040 (main:46)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:1024 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 1024 bytes at 0000000040000040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      1024 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Wait 5 seconds (main:51)
 Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
+hDebug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      1024 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Info   Halt (System:122)
 ```
 
-You can see that we allocated three blocks of memory and freed them again. Two were of size 64, one was of size 1024.
+You can see that we allocated three blocks of memory and freed them again. Two were of size 64, one was of size 1024, due to bucket sizes.
+Notice also that the second allocation re-uses the memory allocated in the first allocation, as it was placed in the bucket's frree list.
 
 In order to stop overloading the console with memory debug information, let's set the detail to `OFF`
 
@@ -2038,8 +2305,8 @@ In order to stop overloading the console with memory debug information, let's se
 ```cmake
 File: CMakeLists.txt
 ...
-65: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
+70: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
+71: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
 ...
 ```
 
@@ -2047,133 +2314,288 @@ File: CMakeLists.txt
 
 We can now configure and build our code, and start debugging.
 
-The application will still show quite some information, due to the calls to `DumpStatus()`, but a bit less:
+The application will still show quite some information, due to the calls to `DumpStatus()`, but a bit less.
+Normally we will not be calling `DumpStatus()` on the heap for every allocation.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:79)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:82)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Starting up (System:201)
 Debug  Hello World! (main:23)
-Info   Heap space available: 983564288 bytes (main:26)
-Info   High heap space available: 0 bytes (main:27)
-Info   DMA heap space available: 983564288 bytes (main:28)
-Info   Allocated block 600040 (main:31)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:64 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 1 (HeapAllocator:273)
-Debug  Total #allocated bytes:  64 (HeapAllocator:274)
-Debug  Total #freed blocks:     1 (HeapAllocator:275)
-Debug  Total #freed bytes:      64 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Info   Allocated block 600040 (main:40)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:64 (HeapAllocator:272)
-Debug  Total #allocated blocks: 2 (HeapAllocator:273)
-Debug  Total #allocated bytes:  128 (HeapAllocator:274)
-Debug  Total #freed blocks:     1 (HeapAllocator:275)
-Debug  Total #freed bytes:      64 (HeapAllocator:276)
-Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 1, #bytes = 64 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        1 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 2 (HeapAllocator:273)
-Debug  Total #allocated bytes:  128 (HeapAllocator:274)
-Debug  Total #freed blocks:     2 (HeapAllocator:275)
-Debug  Total #freed bytes:      128 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Info   Allocated block 6000C0 (main:46)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    1 (HeapAllocator:270)
-Debug  Max #allocations:        2 (HeapAllocator:271)
-Debug  Current #allocated bytes:1024 (HeapAllocator:272)
-Debug  Total #allocated blocks: 3 (HeapAllocator:273)
-Debug  Total #allocated bytes:  1152 (HeapAllocator:274)
-Debug  Total #freed blocks:     2 (HeapAllocator:275)
-Debug  Total #freed bytes:      128 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        2 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 3 (HeapAllocator:273)
-Debug  Total #allocated bytes:  1152 (HeapAllocator:274)
-Debug  Total #freed blocks:     3 (HeapAllocator:275)
-Debug  Total #freed bytes:      1152 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Heap space available: 980418560 bytes (main:26)
+Info   High heap space available: 1073741824 bytes (main:27)
+Info   DMA heap space available: 2054160384 bytes (main:28)
+Debug  Allocate 64 bytes at 0000000000900040 (HeapAllocator:172)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:173)
+Info   Allocated block 900040 (main:31)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:64 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 64 bytes at 0000000000900040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  64 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 64, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Reuse 64 bytes at 0000000000900040 (HeapAllocator:145)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:146)
+Info   Allocated block 900040 (main:40)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:64 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      64 (HeapAllocator:279)
+Debug  malloc(64): 1 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 1, #bytes = 64 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 64 bytes at 0000000000900040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Allocate 1024 bytes at 0000000040000040 (HeapAllocator:172)
+Debug  Current #allocations = 1, max #allocations = 1 (HeapAllocator:173)
+Info   Allocated block 40000040 (main:46)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    1 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:1024 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 1 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Free 1024 bytes at 0000000040000040 (HeapAllocator:252)
+Debug  Current #allocations = 0, max #allocations = 1 (HeapAllocator:253)
+Debug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      1024 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Wait 5 seconds (main:51)
 Press r to reboot, h to halt, p to fail assertion and panic
-hInfo   Halt (System:122)
+hDebug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 2 (HeapAllocator:276)
+Debug  Total #allocated bytes:  128 (HeapAllocator:277)
+Debug  Total #freed blocks:     2 (HeapAllocator:278)
+Debug  Total #freed bytes:      128 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 1) total alloc #blocks = 2, #bytes = 128, total free #blocks = 2, #bytes = 128 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        1 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 1 (HeapAllocator:276)
+Debug  Total #allocated bytes:  1024 (HeapAllocator:277)
+Debug  Total #freed blocks:     1 (HeapAllocator:278)
+Debug  Total #freed bytes:      1024 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 1) total alloc #blocks = 1, #bytes = 1024, total free #blocks = 1, #bytes = 1024 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Info   Halt (System:122)
 ```
 
 Next: [15-string](15-string.md)
-

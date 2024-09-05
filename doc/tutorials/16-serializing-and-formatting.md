@@ -336,7 +336,7 @@ File: code/libraries/baremetal/src/Format.cpp
 49: namespace baremetal {
 50: 
 51: /// @brief Write characters with base above 10 as uppercase or not
-52: static bool           Uppercase = true;
+52: static bool Uppercase = true;
 53: 
 54: static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 55: static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
@@ -803,60 +803,7 @@ File: code/libraries/baremetal/src/Format.cpp
 516: /// Size of buffer used by FormatNoAllocV internally
 517: /// </summary>
 518: static const size_t BufferSize = 4096;
-519: 
-520: /// <summary>
-521: /// Append a character to the buffer
-522: /// </summary>
-523: /// <param name="buffer">Buffer to write to</param>
-524: /// <param name="bufferSize">Size of the buffer</param>
-525: /// <param name="c">Character to append</param>
-526: static void Append(char* buffer, size_t bufferSize, char c)
-527: {
-528:     size_t len = strlen(buffer);
-529:     char* p = buffer + len;
-530:     if (static_cast<size_t>(p - buffer) < bufferSize)
-531:     {
-532:         *p++ = c;
-533:     }
-534:     if (static_cast<size_t>(p - buffer) < bufferSize)
-535:     {
-536:         *p = '\0';
-537:     }
-538: }
-539: 
-540: /// <summary>
-541: /// Append a set of identical characters to the buffer
-542: /// </summary>
-543: /// <param name="buffer">Buffer to write to</param>
-544: /// <param name="bufferSize">Size of the buffer</param>
-545: /// <param name="count">Number of characters to append</param>
-546: /// <param name="c">Character to append</param>
-547: static void Append(char* buffer, size_t bufferSize, size_t count, char c)
-548: {
-549:     size_t len = strlen(buffer);
-550:     char* p = buffer + len;
-551:     while ((count > 0) && (static_cast<size_t>(p - buffer) < bufferSize))
-552:     {
-553:         *p++ = c;
-554:         --count;
-555:     }
-556:     if (static_cast<size_t>(p - buffer) < bufferSize)
-557:     {
-558:         *p = '\0';
-559:     }
-560: }
-561: 
-562: /// <summary>
-563: /// Append a string to the buffer
-564: /// </summary>
-565: /// <param name="buffer">Buffer to write to</param>
-566: /// <param name="bufferSize">Size of the buffer</param>
-567: /// <param name="str">String to append</param>
-568: static void Append(char* buffer, size_t bufferSize, const char* str)
-569: {
-570:     strncat(buffer, str, bufferSize);
-571: }
-572: 
+...
 573: /// <summary>
 574: /// Format a string
 575: ///
@@ -1403,6 +1350,7 @@ File: code/libraries/baremetal/src/Format.cpp
 ```
 
 - Line 43: We need the `string` class, so we'll add its header
+- Line 52: We copy the variable Uppercase from `Serialization.cpp`
 - Line 54-55: We copy the functions `SerializeInteralUInt()` and `SerializeInteralInt()` from `Serialization.cpp` and rename `Serialization` to `PrintValue`
 - Line 62-65: We also copy the function `GetDigit()`
 - Line 73-87: We also copy the function `BitsToDigits()`
@@ -1418,10 +1366,12 @@ File: code/libraries/baremetal/src/Format.cpp
 - Line 439-513: We also copy the function `SerializeInternalUInt()` for int32, and rename it to `PrintValueInternalUInt()`
 - Line 526-571: We leave the `Append()` functions as is
 - Line 580-590: We implement the new `Format()` function. This uses `FormatV()`
-- Line 600-825: We implement the new `FormatV()` function. This is a copy of the original `FormatV()`, but appending to a string, instead of into a buffer, and using `Serialize()` calls to serialize data.
+- Line 600-825: We implement the new `FormatV()` function.
+This is a copy of the original `FormatV()`, but appending to a string, instead of into a buffer, and using `Serialize()` calls to serialize data.
 The string is finally returned
 - Line 835-843: We rename the old `Format()` to `FormatNoAlloc()` and change the call to `FormatNoAllocV()`
-- Line 854-1113: We rename the old `FormatV()` to `FormatNoAllocV()`. The implementation only changes in the calls to `Serialize()` being replaced with calls to the internal `PrintValue()` functions)
+- Line 854-1113: We rename the old `FormatV()` to `FormatNoAllocV()`.
+The implementation only changes in the calls to `Serialize()` being replaced with calls to the internal `PrintValue()` functions)
 
 ## Updating serializers - Step 2 {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2}
 
@@ -1512,8 +1462,10 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 - Line 62-65: We implement the specialization to serialize a boolean as an inline function
 - Line 67: We declare the specialization for char
 - Line 68-75: We declare the specializations for all integer types. Note that we've added some more to make the list complete
-- Line 86-89: We implement the specialization for long long as a inline function. Notice that as before, we simply re-use the version for int64
-- Line 99-102: We implement the specialization for unsigned long long as a inline function. Notice that as before, we simply re-use the version for uint64
+- Line 86-89: We implement the specialization for long long as a inline function.
+-Notice that as before, we simply re-use the version for int64
+- Line 99-102: We implement the specialization for unsigned long long as a inline function.
+Notice that as before, we simply re-use the version for uint64
 - Line 103-104: We declare the specializations for floating point types. Note that we've added float here as well
 - Line 105-106: We declare the specializations for strings. Note that we've added a serialization for `string` here as well as the `const char*` version
 - Line 107-108: We declare the specializations for pointers. Any pointer can be simply cast to either `void*` or `const void*`. Pointers will simply be serialized by printing their address as a hexadecimal value
@@ -1537,7 +1489,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 47: namespace baremetal {
 48: 
 49: /// @brief Write characters with base above 10 as uppercase or not
-50: static bool           Uppercase = true;
+50: static bool Uppercase = true;
 51: 
 52: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 53: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
@@ -1583,609 +1535,609 @@ File: code/libraries/baremetal/src/Serialization.cpp
 93: /// <param name="value">Value to be serialized</param>
 94: /// <param name="width">Minimum width in characters, if negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 95: /// <returns>Serialized string value</returns>
-96: 
-97: string Serialize(char value, int width)
-98: {
-99:     string result;
-100: 
-101:     int    numDigits = 0;
-102:     bool   negative = (value < 0);
-103:     uint64 absVal = static_cast<uint64>(negative ? -value : value);
-104:     uint64 divisor = 1;
-105:     int    absWidth = (width < 0) ? -width : width;
-106:     while (absVal >= divisor)
-107:     {
-108:         divisor *= 10;
-109:         ++numDigits;
-110:     }
-111: 
-112:     if (numDigits == 0)
-113:     {
-114:         result = "0";
-115:         return result;
-116:     }
-117:     if (negative)
-118:     {
-119:         result += '-';
-120:         absWidth--;
-121:     }
-122:     while (numDigits > 0)
-123:     {
-124:         divisor /= 10;
-125:         int digit = (absVal / divisor) % 10;
-126:         result += GetDigit(digit);
-127:         --numDigits;
-128:     }
-129:     return result.align(width);
-130: }
-131: 
-132: /// <summary>
-133: /// Serialize a 8 bit signed value to string.
-134: ///
-135: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-136: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-137: ///
-138: /// Base is the digit base, which can range from 2 to 36.
-139: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-140: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-141: /// </summary>
-142: /// <param name="value">Value to be serialized</param>
-143: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-144: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-145: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-146: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-147: /// <returns>Serialized string value</returns>
-148: string Serialize(int8 value, int width, int base, bool showBase, bool leadingZeros)
-149: {
-150:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 8);
-151: }
-152: 
-153: /// <summary>
-154: /// Serialize a 8 bit unsigned value to string.
-155: ///
-156: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-157: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-158: ///
-159: /// Base is the digit base, which can range from 2 to 36.
-160: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-161: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-162: /// </summary>
-163: /// <param name="value">Value to be serialized</param>
-164: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-165: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-166: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-167: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-168: /// <returns>Serialized string value</returns>
-169: string Serialize(uint8 value, int width, int base, bool showBase, bool leadingZeros)
-170: {
-171:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 8);
-172: }
-173: 
-174: /// <summary>
-175: /// Serialize a 16 bit signed value to string.
-176: ///
-177: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-178: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-179: ///
-180: /// Base is the digit base, which can range from 2 to 36.
-181: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-182: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-183: /// </summary>
-184: /// <param name="value">Value to be serialized</param>
-185: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-186: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-187: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-188: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-189: /// <returns>Serialized string value</returns>
-190: string Serialize(int16 value, int width, int base, bool showBase, bool leadingZeros)
-191: {
-192:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 16);
-193: }
-194: 
-195: /// <summary>
-196: /// Serialize a 16 bit unsigned value to string.
-197: ///
-198: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-199: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-200: ///
-201: /// Base is the digit base, which can range from 2 to 36.
-202: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-203: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-204: /// </summary>
-205: /// <param name="value">Value to be serialized</param>
-206: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-207: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-208: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-209: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-210: /// <returns>Serialized string value</returns>
-211: string Serialize(uint16 value, int width, int base, bool showBase, bool leadingZeros)
-212: {
-213:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 16);
-214: }
-215: 
-216: /// <summary>
-217: /// Serialize a 32 bit signed value to string.
-218: ///
-219: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-220: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-221: ///
-222: /// Base is the digit base, which can range from 2 to 36.
-223: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-224: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-225: /// </summary>
-226: /// <param name="value">Value to be serialized</param>
-227: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-228: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-229: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-230: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-231: /// <returns>Serialized string value</returns>
-232: string Serialize(int32 value, int width, int base, bool showBase, bool leadingZeros)
-233: {
-234:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 32);
-235: }
-236: 
-237: /// <summary>
-238: /// Serialize a 32 bit unsigned value to string.
-239: ///
-240: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-241: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-242: ///
-243: /// Base is the digit base, which can range from 2 to 36.
-244: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-245: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-246: /// </summary>
-247: /// <param name="value">Value to be serialized</param>
-248: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-249: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-250: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-251: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-252: /// <returns>Serialized string value</returns>
-253: string Serialize(uint32 value, int width, int base, bool showBase, bool leadingZeros)
-254: {
-255:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 32);
-256: }
-257: 
-258: /// <summary>
-259: /// Serialize a 64 bit signed value to string.
-260: ///
-261: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-262: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-263: ///
-264: /// Base is the digit base, which can range from 2 to 36.
-265: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-266: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-267: /// </summary>
-268: /// <param name="value">Value to be serialized</param>
-269: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-270: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-271: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-272: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-273: /// <returns>Serialized string value</returns>
-274: string Serialize(int64 value, int width, int base, bool showBase, bool leadingZeros)
-275: {
-276:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 64);
-277: }
-278: 
-279: /// <summary>
-280: /// Serialize a 64 bit unsigned value to string.
-281: ///
-282: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-283: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-284: ///
-285: /// Base is the digit base, which can range from 2 to 36.
-286: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-287: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-288: /// </summary>
-289: /// <param name="value">Value to be serialized</param>
-290: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-291: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-292: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-293: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-294: /// <returns>Serialized string value</returns>
-295: string Serialize(uint64 value, int width, int base, bool showBase, bool leadingZeros)
-296: {
-297:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 64);
-298: }
-299: 
-300: /// <summary>
-301: /// Serialize a float value to string. The value will be printed as a fixed point number.
-302: ///
-303: /// Width specifies the minimum width in characters. The value is written right aligned if width is positive, left aligned if width is negative.
-304: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-305: ///
-306: /// Precision specifies the number of digits behind the decimal pointer
-307: /// </summary>
-308: /// <param name="value">Value to be serialized</param>
-309: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-310: /// <param name="precision">Number of digits after the decimal point to use (limited to 7 decimals</param>
-311: /// <returns>Serialized string value</returns>
-312: string Serialize(float value, int width, int precision)
-313: {
-314:     bool negative{};
-315:     if (value < 0)
-316:     {
-317:         negative = true;
-318:         value = -value;
-319:     }
-320: 
-321:     // We can only print values with integral parts up to what uint64 can hold
-322:     if (value > static_cast<float>(static_cast<uint64>(-1)))
-323:     {
-324:         return string("overflow");
-325:     }
-326: 
-327:     string result;
-328:     if (negative)
-329:         result += '-';
-330: 
-331:     uint64 integralPart = static_cast<uint64>(value);
-332:     result += Serialize(integralPart, 0, 10, false, false);
-333:     const int MaxPrecision = 7;
-334: 
-335:     if (precision != 0)
-336:     {
-337:         result += '.';
-338: 
-339:         if (precision > MaxPrecision)
-340:         {
-341:             precision = MaxPrecision;
-342:         }
-343: 
-344:         uint64 precisionPower10 = 1;
-345:         for (int i = 1; i <= precision; i++)
-346:         {
-347:             precisionPower10 *= 10;
-348:         }
-349: 
-350:         value -= static_cast<float>(integralPart);
-351:         value *= static_cast<float>(precisionPower10);
-352: 
-353:         string fractional = Serialize(static_cast<uint64>(value + 0.5F), 0, 10, false, false);
-354:         result += fractional;
-355:         precision -= fractional.length();
-356:         while (precision--)
-357:         {
-358:             result += '0';
-359:         }
-360:     }
-361:     return result.align(width);
-362: }
-363: 
-364: /// <summary>
-365: /// Serialize a double value to string. The value will be printed as a fixed point number.
-366: ///
-367: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-368: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-369: ///
-370: /// Precision specifies the number of digits behind the decimal pointer
-371: /// </summary>
-372: /// <param name="value">Value to be serialized</param>
-373: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-374: /// <param name="precision">Number of digits after the decimal point to use (limited to 10 decimals</param>
-375: /// <returns>Serialized string value</returns>
-376: string Serialize(double value, int width, int precision)
-377: {
-378:     bool negative{};
-379:     if (value < 0)
-380:     {
-381:         negative = true;
-382:         value = -value;
-383:     }
-384: 
-385:     // We can only print values with integral parts up to what uint64 can hold
-386:     if (value > static_cast<double>(static_cast<uint64>(-1)))
-387:     {
-388:         return string("overflow");
-389:     }
-390: 
-391:     string result;
-392:     if (negative)
-393:         result += '-';
-394: 
-395:     uint64 integralPart = static_cast<uint64>(value);
-396:     result += Serialize(integralPart, 0, 10, false, false);
-397:     const int MaxPrecision = 14;
-398: 
-399:     if (precision != 0)
-400:     {
-401:         result += '.';
-402: 
-403:         if (precision > MaxPrecision)
-404:         {
-405:             precision = MaxPrecision;
-406:         }
-407: 
-408:         uint64 precisionPower10 = 1;
-409:         for (int i = 1; i <= precision; i++)
-410:         {
-411:             precisionPower10 *= 10;
-412:         }
-413: 
-414:         value -= static_cast<double>(integralPart);
-415:         value *= static_cast<double>(precisionPower10);
-416: 
-417:         string fractional = Serialize(static_cast<uint64>(value + 0.5), 0, 10, false, false);
-418:         result += fractional;
-419:         precision -= fractional.length();
-420:         while (precision--)
-421:         {
-422:             result += '0';
-423:         }
-424:     }
-425:     return result.align(width);
-426: }
-427: 
-428: /// <summary>
-429: /// Serialize a string to string.
-430: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-431: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-432: /// If requested, the string is placed between double quotes (").
-433: /// </summary>
-434: /// <param name="value">Value to be serialized</param>
-435: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-436: /// <param name="quote">If true places string between double quotes</param>
-437: /// <returns>Serialized string value</returns>
-438: string Serialize(const string& value, int width, bool quote)
-439: {
-440:     string result;
+96: string Serialize(char value, int width)
+97: {
+98:     string result;
+99: 
+100:     int    numDigits = 0;
+101:     bool   negative = (value < 0);
+102:     uint64 absVal = static_cast<uint64>(negative ? -value : value);
+103:     uint64 divisor = 1;
+104:     int    absWidth = (width < 0) ? -width : width;
+105:     while (absVal >= divisor)
+106:     {
+107:         divisor *= 10;
+108:         ++numDigits;
+109:     }
+110: 
+111:     if (numDigits == 0)
+112:     {
+113:         result = "0";
+114:         return result;
+115:     }
+116:     if (negative)
+117:     {
+118:         result += '-';
+119:         absWidth--;
+120:     }
+121:     while (numDigits > 0)
+122:     {
+123:         divisor /= 10;
+124:         int digit = (absVal / divisor) % 10;
+125:         result += GetDigit(digit);
+126:         --numDigits;
+127:     }
+128:     return result.align(width);
+129: }
+130: 
+131: /// <summary>
+132: /// Serialize a 8 bit signed value to string.
+133: ///
+134: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+135: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+136: ///
+137: /// Base is the digit base, which can range from 2 to 36.
+138: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+139: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+140: /// </summary>
+141: /// <param name="value">Value to be serialized</param>
+142: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+143: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+144: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+145: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+146: /// <returns>Serialized string value</returns>
+147: string Serialize(int8 value, int width, int base, bool showBase, bool leadingZeros)
+148: {
+149:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 8);
+150: }
+151: 
+152: /// <summary>
+153: /// Serialize a 8 bit unsigned value to string.
+154: ///
+155: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+156: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+157: ///
+158: /// Base is the digit base, which can range from 2 to 36.
+159: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+160: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+161: /// </summary>
+162: /// <param name="value">Value to be serialized</param>
+163: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+164: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+165: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+166: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+167: /// <returns>Serialized string value</returns>
+168: string Serialize(uint8 value, int width, int base, bool showBase, bool leadingZeros)
+169: {
+170:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 8);
+171: }
+172: 
+173: /// <summary>
+174: /// Serialize a 16 bit signed value to string.
+175: ///
+176: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+177: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+178: ///
+179: /// Base is the digit base, which can range from 2 to 36.
+180: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+181: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+182: /// </summary>
+183: /// <param name="value">Value to be serialized</param>
+184: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+185: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+186: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+187: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+188: /// <returns>Serialized string value</returns>
+189: string Serialize(int16 value, int width, int base, bool showBase, bool leadingZeros)
+190: {
+191:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 16);
+192: }
+193: 
+194: /// <summary>
+195: /// Serialize a 16 bit unsigned value to string.
+196: ///
+197: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+198: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+199: ///
+200: /// Base is the digit base, which can range from 2 to 36.
+201: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+202: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+203: /// </summary>
+204: /// <param name="value">Value to be serialized</param>
+205: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+206: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+207: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+208: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+209: /// <returns>Serialized string value</returns>
+210: string Serialize(uint16 value, int width, int base, bool showBase, bool leadingZeros)
+211: {
+212:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 16);
+213: }
+214: 
+215: /// <summary>
+216: /// Serialize a 32 bit signed value to string.
+217: ///
+218: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+219: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+220: ///
+221: /// Base is the digit base, which can range from 2 to 36.
+222: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+223: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+224: /// </summary>
+225: /// <param name="value">Value to be serialized</param>
+226: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+227: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+228: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+229: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+230: /// <returns>Serialized string value</returns>
+231: string Serialize(int32 value, int width, int base, bool showBase, bool leadingZeros)
+232: {
+233:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 32);
+234: }
+235: 
+236: /// <summary>
+237: /// Serialize a 32 bit unsigned value to string.
+238: ///
+239: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+240: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+241: ///
+242: /// Base is the digit base, which can range from 2 to 36.
+243: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+244: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+245: /// </summary>
+246: /// <param name="value">Value to be serialized</param>
+247: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+248: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+249: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+250: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+251: /// <returns>Serialized string value</returns>
+252: string Serialize(uint32 value, int width, int base, bool showBase, bool leadingZeros)
+253: {
+254:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 32);
+255: }
+256: 
+257: /// <summary>
+258: /// Serialize a 64 bit signed value to string.
+259: ///
+260: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+261: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+262: ///
+263: /// Base is the digit base, which can range from 2 to 36.
+264: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+265: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+266: /// </summary>
+267: /// <param name="value">Value to be serialized</param>
+268: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+269: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+270: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+271: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+272: /// <returns>Serialized string value</returns>
+273: string Serialize(int64 value, int width, int base, bool showBase, bool leadingZeros)
+274: {
+275:     return SerializeInternalInt(value, width, base, showBase, leadingZeros, 64);
+276: }
+277: 
+278: /// <summary>
+279: /// Serialize a 64 bit unsigned value to string.
+280: ///
+281: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+282: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+283: ///
+284: /// Base is the digit base, which can range from 2 to 36.
+285: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+286: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+287: /// </summary>
+288: /// <param name="value">Value to be serialized</param>
+289: /// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+290: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+291: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+292: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+293: /// <returns>Serialized string value</returns>
+294: string Serialize(uint64 value, int width, int base, bool showBase, bool leadingZeros)
+295: {
+296:     return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 64);
+297: }
+298: 
+299: /// <summary>
+300: /// Serialize a float value to string. The value will be printed as a fixed point number.
+301: ///
+302: /// Width specifies the minimum width in characters. The value is written right aligned if width is positive, left aligned if width is negative.
+303: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+304: ///
+305: /// Precision specifies the number of digits behind the decimal pointer
+306: /// </summary>
+307: /// <param name="value">Value to be serialized</param>
+308: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+309: /// <param name="precision">Number of digits after the decimal point to use (limited to 7 decimals</param>
+310: /// <returns>Serialized string value</returns>
+311: string Serialize(float value, int width, int precision)
+312: {
+313:     bool negative{};
+314:     if (value < 0)
+315:     {
+316:         negative = true;
+317:         value = -value;
+318:     }
+319: 
+320:     // We can only print values with integral parts up to what uint64 can hold
+321:     if (value > static_cast<float>(static_cast<uint64>(-1)))
+322:     {
+323:         return string("overflow");
+324:     }
+325: 
+326:     string result;
+327:     if (negative)
+328:         result += '-';
+329: 
+330:     uint64 integralPart = static_cast<uint64>(value);
+331:     result += Serialize(integralPart, 0, 10, false, false);
+332:     const int MaxPrecision = 7;
+333: 
+334:     if (precision != 0)
+335:     {
+336:         result += '.';
+337: 
+338:         if (precision > MaxPrecision)
+339:         {
+340:             precision = MaxPrecision;
+341:         }
+342: 
+343:         uint64 precisionPower10 = 1;
+344:         for (int i = 1; i <= precision; i++)
+345:         {
+346:             precisionPower10 *= 10;
+347:         }
+348: 
+349:         value -= static_cast<float>(integralPart);
+350:         value *= static_cast<float>(precisionPower10);
+351: 
+352:         string fractional = Serialize(static_cast<uint64>(value + 0.5F), 0, 10, false, false);
+353:         result += fractional;
+354:         precision -= fractional.length();
+355:         while (precision--)
+356:         {
+357:             result += '0';
+358:         }
+359:     }
+360:     return result.align(width);
+361: }
+362: 
+363: /// <summary>
+364: /// Serialize a double value to string. The value will be printed as a fixed point number.
+365: ///
+366: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+367: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+368: ///
+369: /// Precision specifies the number of digits behind the decimal pointer
+370: /// </summary>
+371: /// <param name="value">Value to be serialized</param>
+372: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+373: /// <param name="precision">Number of digits after the decimal point to use (limited to 10 decimals</param>
+374: /// <returns>Serialized string value</returns>
+375: string Serialize(double value, int width, int precision)
+376: {
+377:     bool negative{};
+378:     if (value < 0)
+379:     {
+380:         negative = true;
+381:         value = -value;
+382:     }
+383: 
+384:     // We can only print values with integral parts up to what uint64 can hold
+385:     if (value > static_cast<double>(static_cast<uint64>(-1)))
+386:     {
+387:         return string("overflow");
+388:     }
+389: 
+390:     string result;
+391:     if (negative)
+392:         result += '-';
+393: 
+394:     uint64 integralPart = static_cast<uint64>(value);
+395:     result += Serialize(integralPart, 0, 10, false, false);
+396:     const int MaxPrecision = 14;
+397: 
+398:     if (precision != 0)
+399:     {
+400:         result += '.';
+401: 
+402:         if (precision > MaxPrecision)
+403:         {
+404:             precision = MaxPrecision;
+405:         }
+406: 
+407:         uint64 precisionPower10 = 1;
+408:         for (int i = 1; i <= precision; i++)
+409:         {
+410:             precisionPower10 *= 10;
+411:         }
+412: 
+413:         value -= static_cast<double>(integralPart);
+414:         value *= static_cast<double>(precisionPower10);
+415: 
+416:         string fractional = Serialize(static_cast<uint64>(value + 0.5), 0, 10, false, false);
+417:         result += fractional;
+418:         precision -= fractional.length();
+419:         while (precision--)
+420:         {
+421:             result += '0';
+422:         }
+423:     }
+424:     return result.align(width);
+425: }
+426: 
+File: d:\Projects\baremetal.test\code\libraries\baremetal\src\Serialization.cpp
+427: /// <summary>
+428: /// Serialize a string to string.
+429: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+430: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+431: /// If requested, the string is placed between double quotes (").
+432: /// </summary>
+433: /// <param name="value">Value to be serialized</param>
+434: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+435: /// <param name="quote">If true places string between double quotes</param>
+436: /// <returns>Serialized string value</returns>
+437: string Serialize(const string& value, int width, bool quote)
+438: {
+439:     return Serialize(value.data(), width, quote);
+440: }
 441: 
-442:     if (quote)
-443:         result += '\"';
-444:     result += value;
-445:     if (quote)
-446:         result += '\"';
-447: 
-448:     return result.align(width);
-449: }
-450: 
-451: /// <summary>
-452: /// Serialize a string to string
-453: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-454: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-455: /// If requested, the string is placed between double quotes (").
-456: /// </summary>
-457: /// <param name="value">Value to be serialized</param>
-458: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-459: /// <param name="quote">If true places string between double quotes</param>
-460: /// <returns>Serialized string value</returns>
-461: string Serialize(const char* value, int width, bool quote)
-462: {
-463:     return Serialize(string(value), width, quote);
-464: }
-465: 
-466: /// <summary>
-467: /// Serialize a const void pointer to string
-468: ///
-469: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-470: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-471: /// </summary>
-472: /// <param name="value">Value to be serialized</param>
-473: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-474: /// <returns>Serialized string value</returns>
-475: string Serialize(const void* value, int width)
-476: {
-477:     string result;
-478: 
-479:     if (value != nullptr)
-480:     {
-481:         result = Serialize(reinterpret_cast<uintptr>(value), 16, 16, true, true);
-482:     }
-483:     else
-484:     {
-485:         result = "null";
-486:     }
-487: 
-488:     return result.align(width);
-489: }
-490: 
-491: /// <summary>
-492: /// Serialize a void pointer to string.
-493: ///
-494: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-495: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-496: /// </summary>
-497: /// <param name="value">Value to be serialized</param>
-498: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
-499: /// <returns>Serialized string value</returns>
-500: string Serialize(void* value, int width)
-501: {
-502:     return Serialize(const_cast<const void*>(value), width);
-503: }
-504: 
-505: /// <summary>
-506: /// Internal serialization function returning string, to be used for all signed values.
-507: ///
-508: /// Serialize a signed value to string.
-509: ///
-510: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-511: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-512: ///
-513: /// Base is the digit base, which can range from 2 to 36.
-514: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-515: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-516: /// </summary>
-517: /// <param name="value">Value to be serialized</param>
-518: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-519: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-520: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-521: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-522: /// <param name="numBits">Specifies the number of bits used for the value</param>
-523: /// <returns>Serialized stirng</returns>
-524: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-525: {
-526:     if ((base < 2) || (base > 36))
-527:         return {};
-528: 
-529:     int       numDigits = 0;
-530:     bool      negative = (value < 0);
-531:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
-532:     uint64    divisor = 1;
-533:     uint64    divisorHigh = 0;
-534:     uint64    divisorLast = 1;
-535:     size_t    absWidth = (width < 0) ? -width : width;
-536:     const int maxDigits = BitsToDigits(numBits, base);
-537:     while ((divisorHigh == 0) && (absVal >= divisor) && (numDigits <= maxDigits))
-538:     {
-539:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
-540:         divisorLast = divisor;
-541:         divisor *= base;
-542:         ++numDigits;
-543:     }
-544:     divisor = divisorLast;
-545: 
-546:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-547:     if (showBase)
-548:     {
-549:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-550:     }
-551:     if (negative)
-552:     {
-553:         numChars++;
-554:     }
-555:     if (absWidth > numChars)
-556:         numChars = absWidth;
-557:     // Leave one character for \0
-558:     string result;
-559:     result.reserve(numChars + 1);
-560: 
-561:     if (negative)
-562:     {
-563:         result += '-';
-564:     }
-565: 
-566:     if (showBase)
-567:     {
-568:         if (base == 2)
-569:         {
-570:             result += "0b";
-571:         }
-572:         else if (base == 8)
-573:         {
-574:             result += '0';
-575:         }
-576:         else if (base == 16)
-577:         {
-578:             result += "0x";
-579:         }
-580:     }
-581:     if (leadingZeros)
-582:     {
-583:         if (absWidth == 0)
-584:             absWidth = maxDigits;
-585:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-586:         {
-587:             result += '0';
-588:         }
-589:     }
-590:     else
-591:     {
-592:         if (numDigits == 0)
-593:         {
-594:             result += '0';
-595:         }
-596:     }
-597:     while (numDigits > 0)
-598:     {
-599:         int digit = (absVal / divisor) % base;
-600:         result += GetDigit(digit);
-601:         --numDigits;
-602:         divisor /= base;
-603:     }
-604:     return result.align(width);
-605: }
-606: 
-607: /// <summary>
-608: /// Internal serialization function returning string, to be used for all unsigned values.
-609: ///
-610: /// Serialize a unsigned value to string.
-611: ///
-612: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
-613: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
-614: ///
-615: /// Base is the digit base, which can range from 2 to 36.
-616: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
-617: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
-618: /// </summary>
-619: /// <param name="value">Value to be serialized</param>
-620: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
-621: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-622: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
-623: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-624: /// <param name="numBits">Specifies the number of bits used for the value</param>
-625: /// <returns>Serialized stirng</returns>
-626: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
-627: {
-628:     if ((base < 2) || (base > 36))
-629:         return {};
-630: 
-631:     int       numDigits = 0;
-632:     uint64    divisor = 1;
-633:     uint64    divisorLast = 1;
-634:     uint64    divisorHigh = 0;
-635:     size_t    absWidth = (width < 0) ? -width : width;
-636:     const int maxDigits = BitsToDigits(numBits, base);
-637:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
-638:     {
-639:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
-640:         divisorLast = divisor;
-641:         divisor *= base;
-642:         ++numDigits;
-643:     }
-644:     divisor = divisorLast;
-645: 
-646:     size_t numChars = (numDigits > 0) ? numDigits : 1;
-647:     if (showBase)
-648:     {
-649:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
-650:     }
-651:     if (absWidth > numChars)
-652:         numChars = absWidth;
-653:     // Leave one character for \0
-654:     string result;
-655:     result.reserve(numChars + 1);
-656: 
-657:     if (showBase)
-658:     {
-659:         if (base == 2)
-660:         {
-661:             result += "0b";
-662:         }
-663:         else if (base == 8)
-664:         {
-665:             result += '0';
-666:         }
-667:         else if (base == 16)
-668:         {
-669:             result += "0x";
-670:         }
-671:     }
-672:     if (leadingZeros)
-673:     {
-674:         if (absWidth == 0)
-675:             absWidth = maxDigits;
-676:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
-677:         {
-678:             result += '0';
-679:         }
-680:     }
-681:     else
-682:     {
-683:         if (numDigits == 0)
-684:         {
-685:             result += '0';
-686:         }
-687:     }
-688:     while (numDigits > 0)
-689:     {
-690:         int digit = (value / divisor) % base;
-691:         result += GetDigit(digit);
-692:         --numDigits;
-693:         divisor /= base;
-694:     }
-695:     return result.align(width);
-696: }
-697: 
-698: } // namespace baremetal
+442: /// <summary>
+443: /// Serialize a string to string
+444: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+445: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+446: /// If requested, the string is placed between double quotes (").
+447: /// </summary>
+448: /// <param name="value">Value to be serialized</param>
+449: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+450: /// <param name="quote">If true places string between double quotes</param>
+451: /// <returns>Serialized string value</returns>
+452: string Serialize(const char* value, int width, bool quote)
+453: {
+454:     string result;
+455: 
+456:     if (quote)
+457:         result += '\"';
+458:     result += value;
+459:     if (quote)
+460:         result += '\"';
+461: 
+462:     return result.align(width);
+463: }
+464: 
+465: /// <summary>
+466: /// Serialize a const void pointer to string
+467: ///
+468: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+469: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+470: /// </summary>
+471: /// <param name="value">Value to be serialized</param>
+472: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+473: /// <returns>Serialized string value</returns>
+474: string Serialize(const void* value, int width)
+475: {
+476:     string result;
+477: 
+478:     if (value != nullptr)
+479:     {
+480:         result = Serialize(reinterpret_cast<uintptr>(value), 16, 16, true, true);
+481:     }
+482:     else
+483:     {
+484:         result = "null";
+485:     }
+486: 
+487:     return result.align(width);
+488: }
+489: 
+490: /// <summary>
+491: /// Serialize a void pointer to string.
+492: ///
+493: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+494: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+495: /// </summary>
+496: /// <param name="value">Value to be serialized</param>
+497: /// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+498: /// <returns>Serialized string value</returns>
+499: string Serialize(void* value, int width)
+500: {
+501:     return Serialize(const_cast<const void*>(value), width);
+502: }
+503: 
+504: /// <summary>
+505: /// Internal serialization function returning string, to be used for all signed values.
+506: ///
+507: /// Serialize a signed value to string.
+508: ///
+509: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+510: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+511: ///
+512: /// Base is the digit base, which can range from 2 to 36.
+513: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+514: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+515: /// </summary>
+516: /// <param name="value">Value to be serialized</param>
+517: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+518: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+519: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+520: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+521: /// <param name="numBits">Specifies the number of bits used for the value</param>
+522: /// <returns>Serialized stirng</returns>
+523: static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+524: {
+525:     if ((base < 2) || (base > 36))
+526:         return {};
+527: 
+528:     int       numDigits = 0;
+529:     bool      negative = (value < 0);
+530:     uint64    absVal = static_cast<uint64>(negative ? -value : value);
+531:     uint64    divisor = 1;
+532:     uint64    divisorHigh = 0;
+533:     uint64    divisorLast = 1;
+534:     size_t    absWidth = (width < 0) ? -width : width;
+535:     const int maxDigits = BitsToDigits(numBits, base);
+536:     while ((divisorHigh == 0) && (absVal >= divisor) && (numDigits <= maxDigits))
+537:     {
+538:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+539:         divisorLast = divisor;
+540:         divisor *= base;
+541:         ++numDigits;
+542:     }
+543:     divisor = divisorLast;
+544: 
+545:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+546:     if (showBase)
+547:     {
+548:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+549:     }
+550:     if (negative)
+551:     {
+552:         numChars++;
+553:     }
+554:     if (absWidth > numChars)
+555:         numChars = absWidth;
+556:     // Leave one character for \0
+557:     string result;
+558:     result.reserve(numChars + 1);
+559: 
+560:     if (negative)
+561:     {
+562:         result += '-';
+563:     }
+564: 
+565:     if (showBase)
+566:     {
+567:         if (base == 2)
+568:         {
+569:             result += "0b";
+570:         }
+571:         else if (base == 8)
+572:         {
+573:             result += '0';
+574:         }
+575:         else if (base == 16)
+576:         {
+577:             result += "0x";
+578:         }
+579:     }
+580:     if (leadingZeros)
+581:     {
+582:         if (absWidth == 0)
+583:             absWidth = maxDigits;
+584:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+585:         {
+586:             result += '0';
+587:         }
+588:     }
+589:     else
+590:     {
+591:         if (numDigits == 0)
+592:         {
+593:             result += '0';
+594:         }
+595:     }
+596:     while (numDigits > 0)
+597:     {
+598:         int digit = (absVal / divisor) % base;
+599:         result += GetDigit(digit);
+600:         --numDigits;
+601:         divisor /= base;
+602:     }
+603:     return result.align(width);
+604: }
+605: 
+606: /// <summary>
+607: /// Internal serialization function returning string, to be used for all unsigned values.
+608: ///
+609: /// Serialize a unsigned value to string.
+610: ///
+611: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+612: /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+613: ///
+614: /// Base is the digit base, which can range from 2 to 36.
+615: /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+616: /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+617: /// </summary>
+618: /// <param name="value">Value to be serialized</param>
+619: /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+620: /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+621: /// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+622: /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+623: /// <param name="numBits">Specifies the number of bits used for the value</param>
+624: /// <returns>Serialized stirng</returns>
+625: static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+626: {
+627:     if ((base < 2) || (base > 36))
+628:         return {};
+629: 
+630:     int       numDigits = 0;
+631:     uint64    divisor = 1;
+632:     uint64    divisorLast = 1;
+633:     uint64    divisorHigh = 0;
+634:     size_t    absWidth = (width < 0) ? -width : width;
+635:     const int maxDigits = BitsToDigits(numBits, base);
+636:     while ((divisorHigh == 0) && (value >= divisor) && (numDigits <= maxDigits))
+637:     {
+638:         divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
+639:         divisorLast = divisor;
+640:         divisor *= base;
+641:         ++numDigits;
+642:     }
+643:     divisor = divisorLast;
+644: 
+645:     size_t numChars = (numDigits > 0) ? numDigits : 1;
+646:     if (showBase)
+647:     {
+648:         numChars += ((base == 2) || (base == 16)) ? 2 : (base == 8) ? 1 : 0;
+649:     }
+650:     if (absWidth > numChars)
+651:         numChars = absWidth;
+652:     // Leave one character for \0
+653:     string result;
+654:     result.reserve(numChars + 1);
+655: 
+656:     if (showBase)
+657:     {
+658:         if (base == 2)
+659:         {
+660:             result += "0b";
+661:         }
+662:         else if (base == 8)
+663:         {
+664:             result += '0';
+665:         }
+666:         else if (base == 16)
+667:         {
+668:             result += "0x";
+669:         }
+670:     }
+671:     if (leadingZeros)
+672:     {
+673:         if (absWidth == 0)
+674:             absWidth = maxDigits;
+675:         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
+676:         {
+677:             result += '0';
+678:         }
+679:     }
+680:     else
+681:     {
+682:         if (numDigits == 0)
+683:         {
+684:             result += '0';
+685:         }
+686:     }
+687:     while (numDigits > 0)
+688:     {
+689:         int digit = (value / divisor) % base;
+690:         result += GetDigit(digit);
+691:         --numDigits;
+692:         divisor /= base;
+693:     }
+694:     return result.align(width);
+695: }
+696: 
+697: } // namespace baremetal
 ```
 
 - Line 96-129: We implement the char specialization
@@ -2199,8 +2151,8 @@ File: code/libraries/baremetal/src/Serialization.cpp
 - Line 294-297: We implement the uint64 specialization
 - Line 311-361: We implement the float specialization
 - Line 375-425: We implement the double specialization
-- Line 437-448: We implement the string specialization
-- Line 460-463: We implement the const char* specialization
+- Line 437-440: We implement the string specialization
+- Line 452-463: We implement the const char* specialization
 - Line 474-488: We implement the const void* specialization
 - Line 499-502: We implement the void* specialization
 - Line 523-604: We implement internal `SerializeInternalInt()` function
@@ -2293,69 +2245,51 @@ Update the file `code/libraries/baremetal/src/String.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/String.cpp
-42: #include <baremetal/Assert.h>
-43: #include <baremetal/Logger.h>
-44: #include <baremetal/Util.h>
 ...
-59: /// @brief Define log name
-60: LOG_MODULE("String");
-61: 
-62: /// <summary>
-63: /// Default constructor
-64: ///
-65: /// Constructs an empty string.
-66: /// </summary>
-67: string::string()
-68:     : m_buffer{}
-69:     , m_end{}
-70:     , m_allocatedSize{}
-71: {
-72: }
-73: 
-74: /// <summary>
-75: /// Destructor
-76: ///
-77: /// Frees any allocated memory.
-78: /// </summary>
-79: string::~string()
-80: {
-81: #if BAREMETAL_MEMORY_TRACING_DETAIL
-82:     if (m_buffer != nullptr)
-83:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
-84: #endif
-85:     delete[] m_buffer;
-86: }
+78: /// <summary>
+79: /// Destructor
+80: ///
+81: /// Frees any allocated memory.
+82: /// </summary>
+83: string::~string()
+84: {
+85: #if BAREMETAL_MEMORY_TRACING_DETAIL
+86:     if (m_buffer != nullptr)
+87:         LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+88: #endif
+89:     delete[] m_buffer;
+90: }
+91: 
 ...
-1438: /// <summary>
-1439: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
-1440: /// </summary>
-1441: /// <param name="allocationSize">Amount of bytes to allocate space for</param>
-1442: /// <returns>True if successful, false otherwise</returns>
-1443: bool string::reallocate_allocation_size(size_t allocationSize)
-1444: {
-1445:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
-1446:     if (newBuffer == nullptr)
-1447:     {
-1448:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
-1449:         return false;
-1450:     }
-1451:     m_buffer = newBuffer;
-1452: #if BAREMETAL_MEMORY_TRACING_DETAIL
-1453:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
-1454: #endif
-1455:     if (m_end == nullptr)
-1456:         m_end = m_buffer;
-1457:     if (m_end > m_buffer + allocationSize)
-1458:         m_end = m_buffer + allocationSize;
-1459:     m_allocatedSize = allocationSize;
-1460:     return true;
-1461: }
+1464: /// <summary>
+1465: /// Allocate or re-allocate string to have a capacity of allocationSize bytes
+1466: /// </summary>
+1467: /// <param name="allocationSize">Amount of bytes to allocate space for</param>
+1468: /// <returns>True if successful, false otherwise</returns>
+1469: bool string::reallocate_allocation_size(size_t allocationSize)
+1470: {
+1471:     auto newBuffer = reinterpret_cast<ValueType*>(realloc(m_buffer, allocationSize));
+1472:     if (newBuffer == nullptr)
+1473:     {
+1474:         LOG_NO_ALLOC_DEBUG("Alloc failed!");
+1475:         return false;
+1476:     }
+1477:     m_buffer = newBuffer;
+1478: #if BAREMETAL_MEMORY_TRACING_DETAIL
+1479:     LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+1480: #endif
+1481:     if (m_end == nullptr)
+1482:         m_end = m_buffer;
+1483:     if (m_end > m_buffer + allocationSize)
+1484:         m_end = m_buffer + allocationSize;
+1485:     m_allocatedSize = allocationSize;
+1486:     return true;
+1487: }
 ```
 
 ### System.cpp {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_UPDATING_SERIALIZERS___STEP_2_SYSTEMCPP}
 
-We print an overview of the status of memory management at startup (if `BAREMETAL_MEMORY_TRACING` is defined).
-If would be even more helpful, if we would print the memory management status just before halting or rebooting, so we can see whether there is any memory leaked
+We print an overview of the status of memory management at startup and before halt or shutdown (if `BAREMETAL_MEMORY_TRACING` is defined).
 
 Update the file `code/libraries/baremetal/src/System.cpp`
 
@@ -2416,7 +2350,7 @@ File: code/libraries/baremetal/src/Version.cpp
 62: {
 63:     if (!s_baremetalVersionSetupDone)
 64:     {
-65:         FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_PATCH_VERSION);
+65:         FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
 66:         s_baremetalVersionSetupDone = true;
 67:     }
 68: }
@@ -2540,7 +2474,7 @@ File: code\applications\demo\src\main.cpp
 98:     assert(Serialize(d, 18, 7) ==                   "         1.2345679");
 99:     assert(Serialize(d, 18, 12) ==                  "    1.234567890123");
 100:
-101:     string s = "hello world";
+101:     string s("hello world");
 102:     assert(Serialize(s) ==                          "hello world");
 103:     assert(Serialize(s, 15) ==                      "    hello world");
 104:     assert(Serialize(s, -15) ==                     "hello world    ");
@@ -2590,47 +2524,78 @@ We can now configure and build our code, and start debugging.
 You will see an overview of memory management before and after `main()` was run, as we still have `BAREMETAL_MEMORY_TRACING` defined.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:80)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        0 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 0 (HeapAllocator:273)
-Debug  Total #allocated bytes:  0 (HeapAllocator:274)
-Debug  Total #freed blocks:     0 (HeapAllocator:275)
-Debug  Total #freed bytes:      0 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Starting up (System:201)
 Debug  Hello World! (main:24)
 Info   Wait 5 seconds (main:123)
 Press r to reboot, h to halt, p to fail assertion and panic
-hDebug  Low heap: (MemoryManager:222)
-Debug  Heap allocator info:     heaplow (HeapAllocator:269)
-Debug  Current #allocations:    0 (HeapAllocator:270)
-Debug  Max #allocations:        5 (HeapAllocator:271)
-Debug  Current #allocated bytes:0 (HeapAllocator:272)
-Debug  Total #allocated blocks: 276 (HeapAllocator:273)
-Debug  Total #allocated bytes:  17664 (HeapAllocator:274)
-Debug  Total #freed blocks:     276 (HeapAllocator:275)
-Debug  Total #freed bytes:      17664 (HeapAllocator:276)
-Debug  malloc(64): 0 blocks (max 5) total alloc #blocks = 276, #bytes = 17664, total free #blocks = 276, #bytes = 17664 (HeapAllocator:280)
-Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
-Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:280)
+hDebug  Low heap: (MemoryManager:220)
+Debug  Heap allocator info:     heaplow (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        4 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 288 (HeapAllocator:276)
+Debug  Total #allocated bytes:  18432 (HeapAllocator:277)
+Debug  Total #freed blocks:     288 (HeapAllocator:278)
+Debug  Total #freed bytes:      18432 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 4) total alloc #blocks = 288, #bytes = 18432, total free #blocks = 288, #bytes = 18432 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  High heap: (MemoryManager:223)
+Debug  Heap allocator info:     heaphigh (HeapAllocator:272)
+Debug  Current #allocations:    0 (HeapAllocator:273)
+Debug  Max #allocations:        0 (HeapAllocator:274)
+Debug  Current #allocated bytes:0 (HeapAllocator:275)
+Debug  Total #allocated blocks: 0 (HeapAllocator:276)
+Debug  Total #allocated bytes:  0 (HeapAllocator:277)
+Debug  Total #freed blocks:     0 (HeapAllocator:278)
+Debug  Total #freed bytes:      0 (HeapAllocator:279)
+Debug  malloc(64): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(1024): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(4096): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(16384): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(65536): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(262144): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
+Debug  malloc(524288): 0 blocks (max 0) total alloc #blocks = 0, #bytes = 0, total free #blocks = 0, #bytes = 0 (HeapAllocator:283)
 Info   Halt (System:122)
 ```
 
-As you can see we performeed a total of 276 allocations, all blocks were freed again, and all block were 64 bytes max in size.
-At any moment, there were a maximum of 5 blocks allocated.
+As you can see we performeed a total of 288 allocations, all blocks were freed again, and all block were 64 bytes max in size.
+At any moment, there were a maximum of 4 blocks allocated.
 
 Next: [17-unit-test-infrastructure](17-unit-test-infrastructure.md)
 

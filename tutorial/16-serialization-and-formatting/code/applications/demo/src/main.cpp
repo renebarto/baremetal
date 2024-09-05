@@ -98,7 +98,7 @@ int main()
     assert(Serialize(d, 18, 7) ==                   "         1.2345679");
     assert(Serialize(d, 18, 12) ==                  "    1.234567890123");
 
-    string s("hello world");
+    string s = "hello world";
     assert(Serialize(s) ==                          "hello world");
     assert(Serialize(s, 15) ==                      "    hello world");
     assert(Serialize(s, -15) ==                     "hello world    ");

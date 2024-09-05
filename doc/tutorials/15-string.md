@@ -101,7 +101,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 69:     static const size_t npos;
 70:
 71:     string();
-72:     explicit string(const ValueType* str);
+72:     string(const ValueType* str);
 73:     string(const ValueType* str, size_t count);
 74:     string(size_t count, ValueType ch);
 75:     string(const string& other);

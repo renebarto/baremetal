@@ -158,6 +158,7 @@ struct MailboxBuffer
     uint32 requestCode;
     /// @brief Property tags to be handled, ended by end tag (PROPTAG_END). Each tag must be aligned to 4 bytes
     uint8  tags[0];
+    // end tag follows
 } PACKED;
 
 /// @brief Property tag, one for each request

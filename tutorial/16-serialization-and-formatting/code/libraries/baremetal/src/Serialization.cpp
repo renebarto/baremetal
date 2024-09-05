@@ -47,7 +47,7 @@
 namespace baremetal {
 
 /// @brief Write characters with base above 10 as uppercase or not
-static bool           Uppercase = true;
+static bool Uppercase = true;
 
 static string SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 static string SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
@@ -436,15 +436,7 @@ string Serialize(double value, int width, int precision)
 /// <returns>Serialized string value</returns>
 string Serialize(const string& value, int width, bool quote)
 {
-    string result;
-
-    if (quote)
-        result += '\"';
-    result += value;
-    if (quote)
-        result += '\"';
-
-    return result.align(width);
+    return Serialize(value.data(), width, quote);
 }
 
 /// <summary>
@@ -459,7 +451,15 @@ string Serialize(const string& value, int width, bool quote)
 /// <returns>Serialized string value</returns>
 string Serialize(const char* value, int width, bool quote)
 {
-    return Serialize(string(value), width, quote);
+    string result;
+
+    if (quote)
+        result += '\"';
+    result += value;
+    if (quote)
+        result += '\"';
+
+    return result.align(width);
 }
 
 /// <summary>

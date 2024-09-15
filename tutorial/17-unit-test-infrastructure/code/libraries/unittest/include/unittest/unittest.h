@@ -50,9 +50,9 @@
 #include <unittest/CurrentTest.h>
 #include <unittest/DeferredTestReporter.h>
 #include <unittest/Test.h>
-#include <unittest/TestInfo.h>
 #include <unittest/TestDetails.h>
 #include <unittest/TestFixtureInfo.h>
+#include <unittest/TestInfo.h>
 #include <unittest/TestRegistry.h>
 #include <unittest/TestResults.h>
 #include <unittest/TestRunner.h>

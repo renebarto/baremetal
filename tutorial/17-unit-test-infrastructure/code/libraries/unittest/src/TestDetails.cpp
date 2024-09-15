@@ -124,7 +124,6 @@ string TestDetails::TestName() const
 /// <summary>
 /// Return fully qualified test name in format [suite]::[fixture]::[test]
 /// </summary>
-/// <param name="details">Test details</param>
 /// <returns>Resulting string</returns>
 string TestDetails::QualifiedTestName() const
 {
@@ -142,7 +141,6 @@ string TestDetails::SourceFileName() const
 {
     return m_fileName;
 }
-
 
 /// <summary>
 /// Returns test source line number

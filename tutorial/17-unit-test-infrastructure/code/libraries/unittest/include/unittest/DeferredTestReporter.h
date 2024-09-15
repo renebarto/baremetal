@@ -44,7 +44,7 @@
 
 /// @file
 /// Deferred test reporter
-/// 
+///
 /// Saves failures during the test run, so they can be sown in the overview after the complete test run
 
 namespace unittest
@@ -106,7 +106,7 @@ public:
 
 /// <summary>
 /// Deferred test reporter
-/// 
+///
 /// Implements abstract ITestReporter interface
 /// </summary>
 class DeferredTestReporter : public ITestReporter

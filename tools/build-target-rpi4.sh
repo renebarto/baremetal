@@ -1,1 +1,1 @@
-cmake --build cmake-build --target $1
+cmake --build cmake-build-rpi4 --target $1

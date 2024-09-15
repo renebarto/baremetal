@@ -46,33 +46,6 @@
 
 namespace baremetal {
 
-/// @brief GPIO mode
-enum class GPIOMode
-{
-    /// @brief GPIO used as input
-    Input,
-    /// @brief GPIO used as output
-    Output,
-    /// @brief GPIO used as input, using pull-up
-    InputPullUp,
-    /// @brief GPIO used as input, using pull-down
-    InputPullDown,
-    /// @brief GPIO used as Alternate Function 0. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction0,
-    /// @brief GPIO used as Alternate Function 1. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction1,
-    /// @brief GPIO used as Alternate Function 2. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction2,
-    /// @brief GPIO used as Alternate Function 3. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction3,
-    /// @brief GPIO used as Alternate Function 4. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction4,
-    /// @brief GPIO used as Alternate Function 5. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
-    AlternateFunction5,
-    /// @brief GPIO mode unknown / not set / invalid
-    Unknown,
-};
-
 /// @brief GPIO function
 enum class GPIOFunction
 {
@@ -106,6 +79,33 @@ enum class GPIOPullMode
     /// @brief GPIO pull mode pull-up
     PullUp,
     /// @brief GPIO pull mode unknown / not set / invalid
+    Unknown,
+};
+
+/// @brief GPIO mode
+enum class GPIOMode
+{
+    /// @brief GPIO used as input
+    Input,
+    /// @brief GPIO used as output
+    Output,
+    /// @brief GPIO used as input, using pull-up
+    InputPullUp,
+    /// @brief GPIO used as input, using pull-down
+    InputPullDown,
+    /// @brief GPIO used as Alternate Function 0. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction0,
+    /// @brief GPIO used as Alternate Function 1. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction1,
+    /// @brief GPIO used as Alternate Function 2. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction2,
+    /// @brief GPIO used as Alternate Function 3. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction3,
+    /// @brief GPIO used as Alternate Function 4. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction4,
+    /// @brief GPIO used as Alternate Function 5. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction5,
+    /// @brief GPIO mode unknown / not set / invalid
     Unknown,
 };
 

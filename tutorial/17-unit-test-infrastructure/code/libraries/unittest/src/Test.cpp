@@ -39,16 +39,23 @@
 
 #include <unittest/Test.h>
 
+#include <baremetal/Logger.h>
+
 /// @file
 /// Test implementation
 
+using namespace baremetal;
+
 namespace unittest {
+
+LOG_MODULE("Test");
 
 /// <summary>
 /// Actual test implementation
 /// </summary>
 void Test::RunImpl() const
 {
+    LOG_INFO("Test::RunImpl default");
 }
 
 } // namespace unittest

@@ -21,12 +21,14 @@ In tutorials `15-string` and `16-serializing-and-formatting` we have been adding
 Even though we can test our code by using `assert()` macros, it is more convenient to write a framework to execute unit tests, in which they are automatically registered, and organized in different groups.
 We'll follow the following concept here:
 
-- Tests are classes that execute a single test (with possibly multiple test cases), and are self-contained and isolated.
+- Tests are classes that execute a single test (with possibly multiple test assertions), and are self-contained and isolated.
 I.e. they do not need any context, and don't influence the context.
 - Test fixtures are collections of tests that belong together, for example because they test a specific class or group of functionality. A test fixture has a class, which can be used to hold common variables, and allows for a common test setup / teardown.
 - Test suites are collections of test fixtures that belong together, for example because they test a complete library.
 
-We'll use a result class to gather test results, which will then be collected in a results class.
+We'll use a result class to gather test results, which will then be collected in a `Results` class.
+Every test will generate a `Result` instance, that is collected in a list.
+
 A test reporter is a visitor class that is called to print the status of the test run and the results of every test.
 This concept is similar although not exactly the same as the one used by Google Test.
 
@@ -216,32 +218,31 @@ File: code/libraries/unittest/include/unittest/Test.h
 39: 
 40: #pragma once
 41: 
-42: #include <unittest/TestDetails.h>
-43: 
-44: /// @file
-45: /// Test
-46: 
-47: namespace unittest
-48: {
-49: 
-50: /// <summary>
-51: /// Test class
-52: /// </summary>
-53: class Test
-54: {
-55: public:
-56:     Test() = default;
-57:     Test(const Test&) = delete;
-58:     Test(Test&&) = delete;
-59:     virtual ~Test() = default;
-60: 
-61:     Test& operator = (const Test&) = delete;
-62:     Test& operator = (Test&&) = delete;
-63: 
-64:     virtual void RunImpl() const;
-65: };
+42: /// @file
+43: /// Test
+44: 
+45: namespace unittest
+46: {
+47: 
+48: /// <summary>
+49: /// Test class
+50: /// </summary>
+51: class Test
+52: {
+53: public:
+54:     Test() = default;
+55:     Test(const Test&) = delete;
+56:     Test(Test&&) = delete;
+57:     virtual ~Test() = default;
+58: 
+59:     Test& operator = (const Test&) = delete;
+60:     Test& operator = (Test&&) = delete;
+61: 
+62:     virtual void RunImpl() const;
+63: };
+64: 
+65: } // namespace unittest
 66: 
-67: } // namespace unittest
 ```
 
 The `Test` class is added to the `unittest` namespace.
@@ -251,7 +252,8 @@ The `Test` class is added to the `unittest` namespace.
   - Line 57-58: We remove the copy constructor and move constructor
   - Line 59: We declare the destructor with default implementation. This may be important as we will be inheriting from this class
   - Line 61-62: We remove the assignment operators
-  - Line 64: We declare the overridable `RunImpl()` method
+  - Line 64: We declare the overridable `RunImpl()` method.
+This will be called for each test and for each test fixture later on
 
 ### Test.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_TESTCPP}
 
@@ -302,24 +304,30 @@ File: code/libraries/unittest/src/Test.cpp
 39: 
 40: #include <unittest/Test.h>
 41: 
-42: /// @file
-43: /// Test implementation
-44: 
-45: using namespace baremetal;
+42: #include <baremetal/Logger.h>
+43: 
+44: /// @file
+45: /// Test implementation
 46: 
-47: namespace unittest {
+47: using namespace baremetal;
 48: 
-49: /// <summary>
-50: /// Actual test implementation
-51: /// </summary>
-52: void Test::RunImpl() const
-53: {
-54: }
-55: 
-56: } // namespace unittest
+49: namespace unittest {
+50: 
+51: LOG_MODULE("Test");
+52: 
+53: /// <summary>
+54: /// Actual test implementation
+55: /// </summary>
+56: void Test::RunImpl() const
+57: {
+58:     LOG_INFO("In test");
+59: }
+60: 
+61: } // namespace unittest
 ```
 
-As you can see this is a very simple implementation, we simply implement the `RunImpl()` method with an default implementation.
+As you can see this is a very simple implementation, we simply implement the `RunImpl()` method by logging the string `Test::RunImpl default` to the console.
+This is done to distinguish between the default implementation, and an override.
 
 ### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_CMAKE_FILE}
 
@@ -338,6 +346,28 @@ File: code/libraries/unitttest/CMakeLists.txt
 35:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Test.h
 36:     )
 37: set(PROJECT_INCLUDES_PRIVATE )
+...
+```
+
+### Update application CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_CMAKE_FILE}
+
+As we have now added the `unittest` library and wish to use it, we need to add it to the applications dependencies.
+
+Update the file `code/applications/demo/CMakeLists.txt`
+
+```cmake
+File: code/applications/demo/CMakeLists.txt
+...
+27: set(PROJECT_DEPENDENCIES
+28:     unittest
+29:     baremetal
+30:     )
+31: 
+32: set(PROJECT_LIBS
+33:     ${LINKER_LIBRARIES}
+34:     ${PROJECT_DEPENDENCIES}
+35:     )
+36: 
 ...
 ```
 
@@ -398,10 +428,10 @@ File: code/applications/demo/src/main.cpp
 ```
 
 - Line 7: We include the header for `Test`
-- Line 13-18: We declare the class `MyTest` based on `Test`
+- Line 13-18: We declare the class `MyTest` which inherits from `Test`
   - Line 17: We declare an override for the `RunImpl()` method
-- Line 20-22: We implement the `RunImpl()` method for `MyTest`. It simply logs a string
-- Line 29-30: We define an instance of MyTest, and then run the test.
+- Line 20-22: We implement the `RunImpl()` method for `MyTest`. It simply logs a string (different from the default implementation)
+- Line 29-30: We define an instance of `MyTest`, and then run the test.
 
 ### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
@@ -411,19 +441,21 @@ Update the file `CMakeLists.txt`
 
 ```cmake
 ...
-61: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
-62: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
-63: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
-64: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
-65: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
+66: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+67: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+68: option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
+69: option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
+70: option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
+71: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
 ...
 ```
 
 The application will run the test, and therefore show the log output.
 
+As you can see not much happens, we simple run the specified test.
+
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 Info   Running test (main:22)
 Info   Wait 5 seconds (main:32)
@@ -895,9 +927,9 @@ File: code/libraries/unittest/src/CurrentTest.cpp
 ```
 
 - Line 54-58: We implement the `Results()` method.
-This simply returns a pointer to the static variable inside the function, which can the be set and used
+This simply returns a reference to a pointer to the static variable inside the function, which can the be set and used
 - Line 66-70: We implement the `Details()` method.
-This simply returns a pointer to the static variable inside the function, which can the be set and used
+This simply returns a reference to a pointer to the static variable inside the function, which can the be set and used
 
 ### TestInfo.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTINFOH}
 
@@ -977,7 +1009,7 @@ File: code/libraries/unittest/include/unittest/TestInfo.h
 67:     TestInfo();
 68:     TestInfo(const TestInfo&) = delete;
 69:     TestInfo(TestInfo&&) = delete;
-70:     explicit TestInfo(Test* testInstance, const TestDetails& details);
+70:     TestInfo(Test* testInstance, const TestDetails& details);
 71: 
 72:     TestInfo& operator = (const TestInfo&) = delete;
 73:     TestInfo& operator = (TestInfo&&) = delete;
@@ -997,19 +1029,18 @@ File: code/libraries/unittest/include/unittest/TestInfo.h
 The `TestInfo` class is again added to the `unittest` namespace.
 
 - Line 50: We forward declare the `Test` class.
-- Line 51: We forward declare a class `TestResults`. This is the container for all test results during a test run.
+- Line 51: We forward declare the `TestResults` class. This is the container for all test results during a test run.
 We'll get to that in a minute.
-- Line 56-90: We declare the class `TestInfo`
+- Line 56-82: We declare the class `TestInfo`
   - Line 60: We declare the details for the test
   - Line 62: We declare a pointer to the actual test to run
   - Line 64: We declare a pointer to the next test. Tests administration classes will be stored in a linked list
   - Line 67: We declare a default constructor
   - Line 68-69: We remove the copy constructor and move constructor
-  - Line 70-75: We declare an explicit constructor
-  - Line 77-78: We remove the assignment operators
-  - Line 84: We declare and implement a method `Details()` to retrieve details
-  - Line 86: We declare a method `SetTest()` to set the test instance pointer
-  - Line 88: We declare a method `Run()` to run the test and update the test results
+  - Line 70: We declare an constructor taking a pointer to a `Test` instance and `TestDetails`
+  - Line 72-73: We remove the assignment operators
+  - Line 79: We declare and implement a method `Details()` to retrieve details
+  - Line 81: We declare a method `Run()` to run the test and update the test results
 
 ### TestInfo.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_TESTINFOCPP}
 
@@ -1200,21 +1231,23 @@ File: code/applications/demo/src/main.cpp
 
 - Line 8: We include the header for `TestInfo`
 - Line 9: We include the header for `TestResults`
-- Line 32: We define an instance of `TestInfo`, specifying the test name, test fixture name, test suite name, and the source location
-- Line 33: We link the test instance `myTest` to the `TestInfo` instance
+- Line 32: We define an instance `myTest` of type `MyTest`
+- Line 33: We define an instance `myTestInfo` of `TestInfo`, linking to the test instance `myTest`, and specifying the `TestDetails` containing the test name, test fixture name, test suite name, and the source location
 - Line 34: We define an instance of `TestResults`
-- Line 36: We run the test through the `Run()` method of `TestInfo`
+- Line 36: We run the test through the `Run()` method of `TestInfo`.
+This will ultimately call the `RunImpl()` method of the `Test` instance.
 
 ### Configuring, building and debugging {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_ADMINISTRATION___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
 The application will run the test again, and the output is almost identical to the previous step.
+This is because we don't actually use the test details and test results yet.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
-Info   Running test (main:24)
+Info   Running test (main:25)
 Info   Wait 5 seconds (main:38)
 Press r to reboot, h to halt, p to fail assertion and panic
 hInfo   Halt (System:122)
@@ -1330,7 +1363,8 @@ File: code/libraries/unittest/include/unittest/TestFixture.h
   - Line 56-57: We remove the copy and move constructor
   - Line 58: We make the destructor a default implementation
   - Line 60-61: We remove the assignment and move assignment operator
-  - Line 66-70: We declare and implement the virtual `SetUp()` and `TearDown()` methods
+  - Line 66: We declare and implement the virtual `SetUp()` method using a default implementation
+  - Line 70: We declare and implement the virtual `TearDown()` method using a default implementation
 
 As can be seen, nothing else needs to be added for implementation.
 
@@ -1443,7 +1477,8 @@ File: code/libraries/unittest/include/unittest/TestFixtureInfo.h
 99: } // namespace unittest
 ```
 
-- Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test in the fixture
+- Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test in the fixture.
+These are used to iterate over the tests
 - Line 66: The member variable `m_next` is the pointer to the next test fixture. Again, test fixtures are stored in linked list
 - Line 68: The member variable `m_fixtureName` holds the name of the test fixture
 - Line 71: We remove the default constructor
@@ -1620,7 +1655,7 @@ File: code/libraries/unittest/src/TestFixtureInfo.cpp
 ```
 
 - Line 54-60: We implement the constructor
-- Line 67-76: We implement the destructor. This goes through the list of tests, and deletes every one of these. Note that we will therefore need to create the tests on the heap.
+- Line 67-76: We implement the destructor. This goes through the list of tests, and deletes every one of these. Note that we will therefore need to create the tests on the heap
 - Line 84-97: We implement the `AddTest()` method. This will add the test passed in at the end of the list
 - Line 103-111: We implement the `Run()` method. This goes through the list of tests, and calls `Run()` on each
 - Line 117-127: We implement the `CountTests()` method. This goes through the list of tests, and counts them
@@ -2058,7 +2093,7 @@ File: code/applications/demo/src/main.cpp
 - Line 33-53: We declare and implement the class `FixtureMyTest1Helper` which derives from the class `FixtureMyTest` just defined, and implements the constructor and destructor, calling resp. `SetUp()` and `TearDown()`
 This class also defines a `RunImpl()` method, which forms the actual test body for the test MyTest1.
 It is implemented as a call to the `OnTestRun()` method on the `TestResults` instance
-- Line 55-64: We declare and implement the class `MyTest1`, which derives from `Test`, and acts as the placeholders for the fixture test.
+- Line 55-64: We declare and implement the class `MyTest1`, which derives from `Test`, and acts as the placeholder for the fixture test.
 We instantiate it as `myTest1`. Its `RunImpl()` method instantiates `FixtureMyTest1Helper`, and runs its `RunImpl()` method
 - Line 65-73: We declare and implement the class `MyTestInfo1`, which derives from `TestInfo`. Its constructor links the test instance
 - Line 75-95: We declare and implement the class `FixtureTest2Helper` in a similar way as `FixtureMyTest1Helper`
@@ -2078,6 +2113,10 @@ The tests themselves are normally instantiated at static initialization time, so
 - Line 185: We instantiate a `TestInfo`, linked to the `myTest` instance
 - Line 187: We run the test
 
+See also the image below.
+
+<img src="images/unittest-fixture-instantiation.png" alt="Tree view" width="800"/>
+
 This all seems like quite a bit of plumbing just to run three tests in a test fixture and one single test.
 That is why we'll create macros later to do this work for us.
 But it's good to understand what is happening underneath the hood.
@@ -2090,9 +2129,11 @@ The application will run the tests in the test fixture, and therefore show the l
 You'll see that for each test the `RunImpl()` method of `MyTest<x>` runs.
 This then instantiates the `FixtureTest<x>Helper`, and its constructor runs the `FixtureMyTest` method `SetUp()`.
 Then the `RunImpl()` of `FixtureTest<x>Helper` is run, and finally the class is destructed again, leading to the `FixtureMyTest` method `TearDown()` begin run.
+Due to the implementation of `TestInfo::Run()`, the `OnTestStart()` and `OnTestFinish()` methods of the test result are called before and after running the test.
+Note also that the MyTest implementation is placed in the default fixture, and all tests in the default suite, due to the empty fixture / suite names.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 Info   DefaultSuite::FixtureMyTest::MyTest1 Start test (TestResults:68)
 Debug  Test 1 (main:60)
@@ -2101,22 +2142,23 @@ Debug  DefaultSuite::FixtureMyTest::MyTest1 (../code/applications/demo/src/main.
 Debug  MyTest TearDown (main:29)
 Info   DefaultSuite::FixtureMyTest::MyTest1 Finish test (TestResults:81)
 Info   DefaultSuite::FixtureMyTest::MyTest2 Start test (TestResults:68)
-Debug  Test 2 (main:103)
+Debug  Test 2 (main:102)
 Debug  MyTest SetUp (main:25)
-Debug  DefaultSuite::FixtureMyTest::MyTest2 (../code/applications/demo/src/main.cpp:113) --> MyTestHelper 2 (TestResults:76)
+Debug  DefaultSuite::FixtureMyTest::MyTest2 (../code/applications/demo/src/main.cpp:112) --> MyTestHelper 2 (TestResults:76)
 Debug  MyTest TearDown (main:29)
 Info   DefaultSuite::FixtureMyTest::MyTest2 Finish test (TestResults:81)
 Info   DefaultSuite::FixtureMyTest::MyTest3 Start test (TestResults:68)
-Debug  Test 3 (main:146)
+Debug  Test 3 (main:144)
 Debug  MyTest SetUp (main:25)
-Debug  DefaultSuite::FixtureMyTest::MyTest3 (../code/applications/demo/src/main.cpp:156) --> MyTestHelper 3 (TestResults:76)
+Debug  DefaultSuite::FixtureMyTest::MyTest3 (../code/applications/demo/src/main.cpp:154) --> MyTestHelper 3 (TestResults:76)
 Debug  MyTest TearDown (main:29)
 Info   DefaultSuite::FixtureMyTest::MyTest3 Finish test (TestResults:81)
 Info   DefaultSuite::DefaultFixture::MyTest Start test (TestResults:68)
-Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:199) --> Running test (TestResults:76)
+Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:185) --> Running test (TestResults:76)
 Info   DefaultSuite::DefaultFixture::MyTest Finish test (TestResults:81)
-Info   Wait 5 seconds (main:204)
+Info   Wait 5 seconds (main:189)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Adding test suites - Step 5 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_TEST_SUITES___STEP_5}
@@ -2295,10 +2337,11 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 94:     int CountFixtures();
 95:     int CountTests();
 96: 
-97:     void AddFixture(TestFixtureInfo* testFixture);
-98: };
-99: 
-100: } // namespace unittest
+97:     TestFixtureInfo *GetTestFixture(const baremetal::string &fixtureName);
+98:     void AddFixture(TestFixtureInfo* testFixture);
+99: };
+100: 
+101: } // namespace unittest
 ```
 
 - Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test fixture in the test suite
@@ -2306,12 +2349,12 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 - Line 68: The member variable `m_suiteName` holds the name of the test suite
 - Line 71: We remove the default constructor
 - Line 72-73: We remove the copy and move constructors
-- Line 75: We declare the only usable constructor which receives the test suite name
-- Line 76: We declare the destructor
+- Line 74: We declare the only usable constructor which receives the test suite name
+- Line 75: We declare the destructor
 - Line 77-78: We remove the assignment and move assignment operators
 - Line 84: The method `Head()` returns the pointer to the first test fixture in the list
 - Line 90: The method `Name()` returns the test suite name
-- Line 92: The method `Run()` runs all test fixtures in the test suite and update the test results. We'll be revisiting this later
+- Line 92: The method `Run()` runs all test fixtures in the test suite and updates the test results. We'll be revisiting this later
 - Line 94: The method `CountFixtures()` counts and returns the number of test fixtures in the test suite
 - Line 95: The method `CountTests()` counts and returns the number of tests in all test fixtures in the test suite
 - Line 97: The method `GetTestFixture()` finds and returns a test fixture in the list for the test suite, or if not found, creates a new test fixture with the specified name
@@ -3069,7 +3112,7 @@ File: code/applications/demo/src/main.cpp
 - Line 21: We define the namespace Suite1
 - Line 23-26: We define the namespace specific version of `GetSuiteName()`
 - Line 28-40: We declare and implement the class `FixtureMyTest1` which derives from `TestFixture` and implements the `SetUp()` and `TearDown()` methods, simply by logging a message
-- Line 42-62: We declare and implement the class `FixtureMyTest1Helper` which derives from the class `FixtureMyTest` just defined, and implements the constructor and destructor, calling resp. `SetUp()` and `TearDown()`
+- Line 42-62: We declare and implement the class `FixtureMyTest1Helper` which derives from the class `FixtureMyTest1` just defined, and implements the constructor and destructor, calling resp. `SetUp()` and `TearDown()`
 This class also defines a `RunImpl()` method, which forms the actual test body for the test MyTest1.
 It is implemented as a call to the `OnTestRun()` method on the `TestResults` instance
 - Line 64-73: We declare and implement the class `MyTest1`, which derives from `Test`, and acts as the placeholders for the fixture test.
@@ -3090,18 +3133,18 @@ Notice that the constructor uses the `GetSuiteName()` function in `Suite2` to re
 - Line 165-185: We declare and implement the class `FixtureTest3Helper` in a similar way `FixtureMyTest1Helper`
 - Line 187-196: We declare and implement the class `MyTest3` in a similar way as `MyTest1`, and instantiate it as `myTest3`
 - Line 197-205: We declare and implement the class `MyTestInfo3` in a similar way as `MyTestInfo1`.
-Notice that the constructor uses the default `GetSuiteName()` function to retrieve the correct test suite name
+Notice that the constructor uses the default `GetSuiteName()` function to retrieve the correct test suite name, as we have not defined a new namespace
 - Line 208-213: We declare the class `MyTest`, which derives from `Test`
 - Line 215-218: We implement the `RunImpl()` method for `MyTest` as a call to the `OnTestRun()` method on the `TestResults` instance
-- Line 224-226: We instantiate each of `Suite1::MyTestInfo1`, `Suite2::MyTestInfo2` and `MyTestInfo3`, passing in the instance of the corresponding test
-- Line 227-228: We instantiate a `TestFixtureInfo` as the first test fixture, and add `MyTest1`
-- Line 229-230: We instantiate a `TestFixtureInfo` as our second test fixture, and add `MyTest2`
-- Line 231-232: We instantiate a `TestFixtureInfo` as our third test fixture, and add `MyTest3`
+- Line 224-226: We instantiate each of `Suite1::MyTestInfo1`, `Suite2::MyTestInfo2` and `MyTestInfo3` as resp. `test1`, `test2` and `test3`, passing in the instance of the corresponding test
+- Line 227-228: We instantiate a `TestFixtureInfo` as the first test fixture, and add `test1`
+- Line 229-230: We instantiate a `TestFixtureInfo` as our second test fixture, and add `test2`
+- Line 231-232: We instantiate a `TestFixtureInfo` as our third test fixture, and add `test3`
 - Line 234-235: We instantiate a `TestSuiteInfo` as our first test suite (with name `Suite1`), and add the first test fixture
 - Line 236-237: We instantiate a `TestSuiteInfo` as our second test suite (with name `Suite2`), and add the second test fixture
 - Line 238-239: We instantiate a `TestSuiteInfo` as our third test suite (with empty name), and add the third test fixture
 - Line 240-242: We run the test suites
-- Line 243-245: We clean up the test suites. Note that the test suite desctructor deletes all test fixtures and as part of that all tests, so we don't need to (and shouldn't) do that
+- Line 243-245: We clean up the test suites. Note that the test suite destructor deletes all test fixtures and as part of that all tests, so we don't need to (and shouldn't) do that
 - Line 246: We instantiate a `TestInfo`, linked to the `myTest` instance
 - Line 248: We run the test
 
@@ -3115,43 +3158,44 @@ We can now configure and build our code, and start debugging.
 The application will run the tests in the test suite, and therefore show the log output.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 Info   MySuite1 Start suite (TestResults:79)
 Info   MyFixture1 Start fixture (TestResults:97)
-Info   DefaultSuite::MyFixture::MyTest1 Start test (TestResults:115)
-Debug  Test 1 (main:68)
-Debug  MyTest SetUp (main:33)
-Debug  DefaultSuite::MyFixture::MyTest1 (../code/applications/demo/src/main.cpp:78) --> MyTestHelper 1 (TestResults:123)
-Debug  MyTest TearDown (main:37)
-Info   DefaultSuite::MyFixture::MyTest1 Finish test (TestResults:132)
+Info   Suite1::FixtureMyTest1::MyTest1 Start test (TestResults:115)
+Debug  Test 1 (main:69)
+Debug  MyTest SetUp (main:34)
+Debug  Suite1::FixtureMyTest1::MyTest1 (../code/applications/demo/src/main.cpp:79) --> MyTestHelper 1 (TestResults:123)
+Debug  MyTest TearDown (main:38)
+Info   Suite1::FixtureMyTest1::MyTest1 Finish test (TestResults:132)
 Info   MyFixture1 Finish fixture (TestResults:106)
 Info   MySuite1 Finish suite (TestResults:88)
 Info   MySuite2 Start suite (TestResults:79)
 Info   MyFixture2 Start fixture (TestResults:97)
-Info   DefaultSuite::MyFixture::MyTest2 Start test (TestResults:115)
+Info   Suite2::FixtureMyTest2::MyTest2 Start test (TestResults:115)
 Debug  Test 2 (main:134)
 Debug  FixtureMyTest2 SetUp (main:99)
-Debug  DefaultSuite::MyFixture::MyTest2 (../code/applications/demo/src/main.cpp:144) --> MyTestHelper 2 (TestResults:123)
+Debug  Suite2::FixtureMyTest2::MyTest2 (../code/applications/demo/src/main.cpp:144) --> MyTestHelper 2 (TestResults:123)
 Debug  FixtureMyTest2 TearDown (main:103)
-Info   DefaultSuite::MyFixture::MyTest2 Finish test (TestResults:132)
+Info   Suite2::FixtureMyTest2::MyTest2 Finish test (TestResults:132)
 Info   MyFixture2 Finish fixture (TestResults:106)
 Info   MySuite2 Finish suite (TestResults:88)
 Info    Start suite (TestResults:79)
 Info   MyFixture3 Start fixture (TestResults:97)
-Info   DefaultSuite::MyFixture::MyTest3 Start test (TestResults:115)
-Debug  Test 3 (main:193)
-Debug  FixtureMyTest3 SetUp (main:158)
-Debug  DefaultSuite::MyFixture::MyTest3 (../code/applications/demo/src/main.cpp:203) --> MyTestHelper 3 (TestResults:123)
-Debug  FixtureMyTest3 TearDown (main:162)
-Info   DefaultSuite::MyFixture::MyTest3 Finish test (TestResults:132)
+Info   DefaultSuite::FixtureMyTest3::MyTest3 Start test (TestResults:115)
+Debug  Test 3 (main:192)
+Debug  FixtureMyTest3 SetUp (main:157)
+Debug  DefaultSuite::FixtureMyTest3::MyTest3 (../code/applications/demo/src/main.cpp:202) --> MyTestHelper 3 (TestResults:123)
+Debug  FixtureMyTest3 TearDown (main:161)
+Info   DefaultSuite::FixtureMyTest3::MyTest3 Finish test (TestResults:132)
 Info   MyFixture3 Finish fixture (TestResults:106)
 Info    Finish suite (TestResults:88)
 Info   DefaultSuite::DefaultFixture::MyTest Start test (TestResults:115)
-Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:258) --> Running test (TestResults:123)
+Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:246) --> Running test (TestResults:123)
 Info   DefaultSuite::DefaultFixture::MyTest Finish test (TestResults:132)
-Info   Wait 5 seconds (main:263)
+Info   Wait 5 seconds (main:250)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Test registration - Step 6 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6}
@@ -3214,6 +3258,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 ...
 51: const char* TestDetails::DefaultFixtureName = "DefaultFixture";
 52: const char* TestDetails::DefaultSuiteName = "DefaultSuite";
+53:
 ...
 97: /// <summary>
 98: /// Returns test suite name
@@ -3273,6 +3318,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 152: }
 153: 
 154: } // namespace unittest
+
 ```
 
 - Line 42: We include the header for `Format()`
@@ -3280,7 +3326,7 @@ File: code/libraries/unittest/src/TestDetails.cpp
 - Line 101-104: We implement the method `SuiteName()`, now using the default suite name if the name is empty
 - Line 110-113: We implement the method `FixtureName()`, now using the default fixture name if the name is empty
 - Line 119-122: We implement the method `TestName()`
-- Line 128-134: We implement the method `QualifiedTestName()`
+- Line 128-134: We implement the method `QualifiedTestName()`, which buildsa string in the format `<suite>::<fixture>::<test>`
 - Line 140-143: We implement the method `SourceFileName()`
 - Line 149-152: We implement the method `SourceFileLineNumber()`
 
@@ -3399,6 +3445,7 @@ File: code/libraries/unittest/include/unittest/TestRegistry.h
 ```
 
 - Line 57-91: We declare the `Testregistry` class
+  - Line 60: We make `TestRegistrar` a friend class
   - Line 62-64: The member variables `m_head` and `m_tail` store the pointer to the first and last test suite
   - Line 67: We declare the default constructor
   - Line 68-69: We remove the copy and move constructors
@@ -3739,38 +3786,38 @@ Update the file `CMakeLists.txt`
 ```cmake
 File: CMakeLists.txt
 ...
-66: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
-67: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" ON)
-68:
-69: message(STATUS "\n** Setting up project **\n--")
+71: option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
+72: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" ON)
+73: 
+74: message(STATUS "\n** Setting up project **\n--")
 ...
-107: if (BAREMETAL_DEBUG_UNITTEST_REGISTRY)
-108:     set(BAREMETAL_UNITTEST_REGISTRY_TRACING 1)
-109: else ()
-110:     set(BAREMETAL_UNITTEST_REGISTRY_TRACING 0)
-111: endif()
-112: set(BAREMETAL_LOAD_ADDRESS 0x80000)
-113:
-114: set(DEFINES_C
-115:     PLATFORM_BAREMETAL
-116:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
-117:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
-118:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
-119:     BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
-120:     BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
-121:     DEBUG_REGISTRY=${BAREMETAL_UNITTEST_REGISTRY_TRACING}
-122:     USE_PHYSICAL_COUNTER
-123:     BAREMETAL_MAJOR=${VERSION_MAJOR}
-124:     BAREMETAL_MINOR=${VERSION_MINOR}
-125:     BAREMETAL_LEVEL=${VERSION_LEVEL}
-126:     BAREMETAL_BUILD=${VERSION_BUILD}
-127:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
-128:     )
+116: if (BAREMETAL_DEBUG_UNITTEST_REGISTRY)
+117:     set(BAREMETAL_UNITTEST_REGISTRY_TRACING 1)
+118: else ()
+119:     set(BAREMETAL_UNITTEST_REGISTRY_TRACING 0)
+120: endif()
+121: set(BAREMETAL_LOAD_ADDRESS 0x80000)
+122: 
+123: set(DEFINES_C
+124:     PLATFORM_BAREMETAL
+125:     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+126:     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+127:     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
+128:     BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
+129:     BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
+130:     DEBUG_REGISTRY=${BAREMETAL_UNITTEST_REGISTRY_TRACING}
+131:     USE_PHYSICAL_COUNTER
+132:     BAREMETAL_MAJOR=${VERSION_MAJOR}
+133:     BAREMETAL_MINOR=${VERSION_MINOR}
+134:     BAREMETAL_LEVEL=${VERSION_LEVEL}
+135:     BAREMETAL_BUILD=${VERSION_BUILD}
+136:     BAREMETAL_VERSION="${VERSION_COMPOSED}"
+137:     )
 ```
 
-- Line 67: We add a new variable `BAREMETAL_DEBUG_UNITTEST_REGISTRY` and set it to `ON` by default
-- Line 107-111: Dependin on the value of `BAREMETAL_DEBUG_UNITTEST_REGISTRY` we set the variable `BAREMETAL_UNITTEST_REGISTRY_TRACING` to either 1 or 0
-- Line 121: We add a definition for `DEBUG_REGISTRY` using the value of variable `BAREMETAL_UNITTEST_REGISTRY_TRACING`
+- Line 72: We add a new variable `BAREMETAL_DEBUG_UNITTEST_REGISTRY` and set it to `ON` by default
+- Line 116-120: Depending on the value of `BAREMETAL_DEBUG_UNITTEST_REGISTRY` we set the variable `BAREMETAL_UNITTEST_REGISTRY_TRACING` to either 1 or 0
+- Line 130: We add a definition for `DEBUG_REGISTRY` using the value of variable `BAREMETAL_UNITTEST_REGISTRY_TRACING`
 
 ### Update CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_REGISTRATION___STEP_6_UPDATE_CMAKE_FILE}
 
@@ -4062,19 +4109,18 @@ The `RunImpl()` method is now defined later
 - Line 103-123: We declare and implement a class `FixtureMyTest2Helper` as before
 - Line 125-129: We declare the class `MyTest2`as before.
 The `RunImpl()` method is now defined later
-- Line 131: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest2` instance just defined
+- Line 131: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest2` instance just defined, as well as constructed test details
 - Line 133-138: We implement the `RunImpl()` method of `MyTest2` as before
 - Line 140: We end the namespace Suite2 as before
 - Line 142-154: We declare and implement a class `FixtureMyTest3` as before
 - Line 156-176: We declare and implement a class `FixtureMyTest3Helper` as before
 - Line 178-182: We declare the class `MyTest3` as before.
 The `RunImpl()` method is now defined later
-- Line 184: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest3` instance just defined
+- Line 184: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest3` instance just defined, as well as constructed test details
 - Line 186-191: We implement the `RunImpl()` method of `MyTest3` as before
-- Line 226: We retrieve the test registry, and call its `Run()` method
 - Line 193-198: We declare the class `MyTest` as before.
 The `RunImpl()` method is now defined later
-- Line 200: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest` instance just defined
+- Line 200: We create an instance of `TestRegistrar`, which gets the singleton `TestRegistry` instance and a pointer to the `MyTest` instance just defined, as well as constructed test details
 - Line 202-205: We implement the `RunImpl()` method of `MyTest3` as before
 - Line 212: We retrieve the test registry, and call its `Run()` method
 
@@ -4087,57 +4133,58 @@ We can now configure and build our code, and start debugging.
 The application will, at static initialization time, register all the tests, and then run all tests registered.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
-Debug  Register test MyTest1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:218)
-Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:172)
-Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:97)
-Debug  Register test MyTest2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:218)
-Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:172)
-Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:97)
-Debug  Register test MyTest3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:218)
-Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:172)
-Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:97)
-Debug  Register test MyTest in fixture DefaultFixture in suite DefaultSuite (TestRegistry:218)
-Debug  Find suite DefaultSuite ... found (TestRegistry:180)
-Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:97)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
+Debug  Register test MyTest1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:215)
+Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:169)
+Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:96)
+Debug  Register test MyTest2 in fixture FixtureMyTest2 in suite Suite2 (TestRegistry:215)
+Debug  Find suite Suite2 ... not found, creating new object (TestRegistry:169)
+Debug  Fixture FixtureMyTest2 not found, creating new object (TestSuiteInfo:96)
+Debug  Register test MyTest3 in fixture FixtureMyTest3 in suite DefaultSuite (TestRegistry:215)
+Debug  Find suite DefaultSuite ... not found, creating new object (TestRegistry:169)
+Debug  Fixture FixtureMyTest3 not found, creating new object (TestSuiteInfo:96)
+Debug  Register test MyTest in fixture DefaultFixture in suite DefaultSuite (TestRegistry:215)
+Debug  Find suite DefaultSuite ... found (TestRegistry:177)
+Debug  Fixture DefaultFixture not found, creating new object (TestSuiteInfo:96)
 Info   Starting up (System:201)
-Info   Suite1 Start suite (TestResults:100)
-Info   FixtureMyTest1 Start fixture (TestResults:118)
-Info   Suite1::FixtureMyTest1::MyTest1 Start test (TestResults:136)
+Info   Suite1 Start suite (TestResults:79)
+Info   FixtureMyTest1 Start fixture (TestResults:97)
+Info   Suite1::FixtureMyTest1::MyTest1 Start test (TestResults:115)
 Debug  Test 1 (main:75)
 Debug  MyTest SetUp (main:35)
-Debug  Suite1::FixtureMyTest1::MyTest1 (../code/applications/demo/src/main.cpp:71) --> MyTestHelper 1 (TestResults:144)
+Debug  Suite1::FixtureMyTest1::MyTest1 (../code/applications/demo/src/main.cpp:71) --> MyTestHelper 1 (TestResults:123)
 Debug  MyTest TearDown (main:39)
-Info   Suite1::FixtureMyTest1::MyTest1 Finish test (TestResults:153)
-Info   FixtureMyTest1 Finish fixture (TestResults:127)
-Info   Suite1 Finish suite (TestResults:109)
-Info   Suite2 Start suite (TestResults:100)
-Info   FixtureMyTest2 Start fixture (TestResults:118)
-Info   Suite2::FixtureMyTest2::MyTest2 Start test (TestResults:136)
+Info   Suite1::FixtureMyTest1::MyTest1 Finish test (TestResults:132)
+Info   FixtureMyTest1 Finish fixture (TestResults:106)
+Info   Suite1 Finish suite (TestResults:88)
+Info   Suite2 Start suite (TestResults:79)
+Info   FixtureMyTest2 Start fixture (TestResults:97)
+Info   Suite2::FixtureMyTest2::MyTest2 Start test (TestResults:115)
 Debug  Test 2 (main:135)
 Debug  FixtureMyTest2 SetUp (main:95)
-Debug  Suite2::FixtureMyTest2::MyTest2 (../code/applications/demo/src/main.cpp:131) --> MyTestHelper 2 (TestResults:144)
+Debug  Suite2::FixtureMyTest2::MyTest2 (../code/applications/demo/src/main.cpp:131) --> MyTestHelper 2 (TestResults:123)
 Debug  FixtureMyTest2 TearDown (main:99)
-Info   Suite2::FixtureMyTest2::MyTest2 Finish test (TestResults:153)
-Info   FixtureMyTest2 Finish fixture (TestResults:127)
-Info   Suite2 Finish suite (TestResults:109)
-Info   DefaultSuite Start suite (TestResults:100)
-Info   FixtureMyTest3 Start fixture (TestResults:118)
-Info   DefaultSuite::FixtureMyTest3::MyTest3 Start test (TestResults:136)
+Info   Suite2::FixtureMyTest2::MyTest2 Finish test (TestResults:132)
+Info   FixtureMyTest2 Finish fixture (TestResults:106)
+Info   Suite2 Finish suite (TestResults:88)
+Info   DefaultSuite Start suite (TestResults:79)
+Info   FixtureMyTest3 Start fixture (TestResults:97)
+Info   DefaultSuite::FixtureMyTest3::MyTest3 Start test (TestResults:115)
 Debug  Test 3 (main:188)
 Debug  FixtureMyTest3 SetUp (main:148)
-Debug  DefaultSuite::FixtureMyTest3::MyTest3 (../code/applications/demo/src/main.cpp:184) --> MyTestHelper 3 (TestResults:144)
+Debug  DefaultSuite::FixtureMyTest3::MyTest3 (../code/applications/demo/src/main.cpp:184) --> MyTestHelper 3 (TestResults:123)
 Debug  FixtureMyTest3 TearDown (main:152)
-Info   DefaultSuite::FixtureMyTest3::MyTest3 Finish test (TestResults:153)
-Info   FixtureMyTest3 Finish fixture (TestResults:127)
-Info   DefaultFixture Start fixture (TestResults:118)
-Info   DefaultSuite::DefaultFixture::MyTest Start test (TestResults:136)
-Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:200) --> Running test (TestResults:144)
-Info   DefaultSuite::DefaultFixture::MyTest Finish test (TestResults:153)
-Info   DefaultFixture Finish fixture (TestResults:127)
-Info   DefaultSuite Finish suite (TestResults:109)
+Info   DefaultSuite::FixtureMyTest3::MyTest3 Finish test (TestResults:132)
+Info   FixtureMyTest3 Finish fixture (TestResults:106)
+Info   DefaultFixture Start fixture (TestResults:97)
+Info   DefaultSuite::DefaultFixture::MyTest Start test (TestResults:115)
+Debug  DefaultSuite::DefaultFixture::MyTest (../code/applications/demo/src/main.cpp:200) --> Running test (TestResults:123)
+Info   DefaultSuite::DefaultFixture::MyTest Finish test (TestResults:132)
+Info   DefaultFixture Finish fixture (TestResults:106)
+Info   DefaultSuite Finish suite (TestResults:88)
 Info   Wait 5 seconds (main:214)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Test runner and visitor - Step 7 {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7}
@@ -4379,9 +4426,10 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 ```
 
 - Line 66: The member `m_reporter` holds the pointer to the test reporter interface being used
-- Line 68: The member `m_failedTestCount` holds the total failed test count
-- Line 70: The member `m_failureCount` holds the total failure count. A test can have multiple failures
-- Line 72: The member `m_currentTestFailed` is true if any test case for the current test failed
+- Line 68: The member `m_totalTestCount` holds the total number of tests run
+- Line 70: The member `m_failedTestCount` holds the total failed test count
+- Line 72: The member `m_failureCount` holds the total failure count. A test can have multiple failures
+- Line 74: The member `m_currentTestFailed` is true if any test case for the current test failed
 - Line 77: We declare an explicit constructor taking a pointer to a test reporter interface
 - Line 78-79: We remove the copy and move constructors
 - Line 80: We declare the destructor
@@ -4703,36 +4751,37 @@ File: code/libraries/unittest/include/unittest/TestRunner.h
   - Line 76-79: The operator `(const TestFixtureInfo*)` will match to any test fixture
   - Line 84-87: The operator `(const TestSuiteInfo*)` will match to any test suite
 - Line 95-121: We declare a similar struct `InSelection` that holds the same three operators.
-This one however will returns true for a method, if the corresponding test name, test fixture name or test suite name is equal to a set value
+This one however will return true for a method, if the corresponding test name, test fixture name or test suite name is equal to a set value
   - Line 99-103: We declare class variables `m_suitename`, `m_fixtureName` and `m_testName` as a pointer to a string to contain the  test suite name, test fixture name, and test name to use as a filter
   - Line 112-117: We define a constructor, which takes a test suite name, a test fixture name, and a test name, each as a character pointer, which may be nullptr.
 The corresponding values are saved as the test suite name, a test fixture name, and a test name to filter on
-  - Line 118: We declare the operator `(const TestInfo*)` which will return true if the test name is equal to the set filter value `m_testName`
-  - Line 119: We declare the operator `(const TestFixtureInfo*)` which will return true if the test fixture name is equal to the set filter value `m_fixtureName`
-  - Line 120: We declare the operator `(const TestSuiteInfo*)` which will return true if the test suite name is equal to the set filter value `m_suiteName`
+  - Line 118: We declare the operator `(const TestInfo*)` which will return true if the test name is equal to the set filter value `m_testName`, if not null
+  - Line 119: We declare the operator `(const TestFixtureInfo*)` which will return true if the test fixture name is equal to the set filter value `m_fixtureName`, if not null
+  - Line 120: We declare the operator `(const TestSuiteInfo*)` which will return true if the test suite name is equal to the set filter value `m_suiteName`, if not null
 - Line 128-152: We declare the class `TestRunner` which allows to run tests with a set filter, which will use a test reporter instance for reporting
   - Line 132: `m_reporter` stores the passed test reporter instance pointer
-  - Line 134: `m_testResults` stores a pointer to the test results
-  - Line 137: We remove the copy constructor
-  - Line 138: We declare an explicit constructor taking a test reporter instance pointer
-  - Line 139: We declare a destructor
-  - Line 141: We remove the assignment operator
-  - Line 144: We declare a template method `RunTestsIf()` that takes a predicate (which could be an instance of the `True` class or an instance or the `InSelection` class, or any other class that supportes the same three `()` operators).
+  - Line 134: `m_testResults` is the container of the test results
+  - Line 137: We remove the default constructor
+  - Line 138: We remove the copy constructor
+  - Line 139: We declare an explicit constructor taking a test reporter instance pointer
+  - Line 140: We declare a destructor
+  - Line 142: We remove the assignment operator
+  - Line 144-145: We declare a template method `RunTestsIf()` that takes a predicate (which could be an instance of the `True` class, the `InSelection` class, or any other class that supportes the same three `()` operators).
 This method will run any test that matches the predicate passed
-  - Line 147-148: We declare a private template method `Start()` that takes a predicate.
-This collects information on the number of test suites, test fixtures and tests, and report the start of the test run
-  - Line 150-151: We declare a private template method `Finish()` that takes a predicate.
+  - Line 148-149: We declare a private template method `Start()` that takes a predicate.
+This collects information on the number of test suites, test fixtures and tests, and reports the start of the test run
+  - Line 151-152: We declare a private template method `Finish()` that takes a predicate.
 This reports a test run summary and overview, and reports the end of the test run
-- Line 163-171: We implement the `RunTestsIf()` template method.
+- Line 164-172: We implement the `RunTestsIf()` template method.
 This will use the method `RunIf()` to run tests matching the predicate, with the test results passed to fill
-- Line 178-186: We implement the `Start()` template method.
-Note that it runs methods `CountSuitesIf()`, `CountFixturesIf()` and `CountTestsIf()` to count test suites, test fixtures and test, using the predicate.
+- Line 179-187: We implement the `Start()` template method.
+Note that it runs methods `CountSuitesIf()`, `CountFixturesIf()` and `CountTestsIf()` to count test suites, test fixtures and tests, using the predicate.
 We will need to implement those in the `TestRegistry` class
-- Line 194-207: We implement the `Finish()` template method.
+- Line 195-208: We implement the `Finish()` template method.
 Again, the methods `CountSuitesIf()`, `CountFixturesIf()` and `CountTestsIf()` are used to count tests, etc.
 The method returns the number of failures, which is reported back by the `RunTestsIf()` template method
-- Line 209: We declare a function `RunAllTests()` which will simply run all tests and use the passed test reporter for reporting
-- Line 218-223: We define a template function `RunSelectedTests()` which will run all tests matching a predicate and use the passed test reporter for reporting
+- Line 210: We declare a function `RunAllTests()` which will simply run all tests and use the passed test reporter for reporting
+- Line 219-224: We define a template function `RunSelectedTests()` which will run all tests matching a predicate and use the passed test reporter for reporting
 
 ### TestRunner.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRUNNERCPP}
 
@@ -4848,12 +4897,13 @@ File: code/libraries/unittest/src/TestRunner.cpp
 104: } // namespace unittest
 ```
 
-- Line 52-55: We implement the operator `(const TestInfo*)` for `InSelection`. This will return true if the test name matches the filter
-- Line 62-65: We implement the operator `(const TestFixtureInfo*)` for `InSelection`. This will return true if the test fixture name matches the filter
-- Line 72-75: We implement the operator `(const TestSuiteInfo*)` for `InSelection`. This will return true if the test suite name matches the filter
+- Line 52-55: We implement the operator `(const TestInfo*)` for `InSelection`. This will return true if the test name matches the filter, or if the filter is set to nullptr
+- Line 62-65: We implement the operator `(const TestFixtureInfo*)` for `InSelection`. This will return true if the test fixture name matches the filter, or if the filter is set to nullptr
+- Line 72-75: We implement the operator `(const TestSuiteInfo*)` for `InSelection`. This will return true if the test suite name matches the filter, or if the filter is set to nullptr
 - Line 81-85: We define the constructor for `TestRunner`
 - Line 90-92: We define the destructor for `TestRunner`
-- Line 99-102: We implement the function `RunAllTests()`
+- Line 99-102: We implement the function `RunAllTests()`.
+Notice that we use `RunSelectedTests()` with the predicate `True`, meaning all testsw, test fixtures and test suites are in range
 
 ### TestRegistry.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTREGISTRYH}
 
@@ -5259,8 +5309,8 @@ File: code/libraries/unittest/include/unittest/TestSuiteInfo.h
 - Line 94: We replace the `Run()` method with a template `RunIf()` method, taking both a predicate and the `TestResults` to fill
 - Line 98: We add a template method `CountFixturesIf()`
 - Line 99: We add a template method `CountTestsIf()`
-- Line 102: We make the method `GetTestFixture` private, this is why `TestRegistrar` has to become a friend class
-- Line 103: We also make the method `AddFixture` private
+- Line 102: We make the method `GetTestFixture()` private, this is why `TestRegistrar` has to become a friend class
+- Line 103: We also make the method `AddFixture()` private
 - Line 112-125: We implement the `RunIf()` template method.
 Note that we use the method `RunIf()` in the `TestFixtureInfo` class. We'll need to implement it
 - Line 133-144: We implement the `CountFixturesIf()` template method
@@ -6161,8 +6211,8 @@ and "Success: 2 tests passed.\n" otherwise
 - Line 318-325: We implement a static function `TestRunOverviewMessage()`, which returns a string in the form "Failures: 2" in case of failures, and "No failures" otherwise
 - Line 333-336: We implement a static function `TestFailureMessage()`, which returns a string in the form "Suite1\:\:Fixture2\:\:Test3 failure failureText"
 - Line 344-350: We implement a static function `TestSuiteStartMessage()`, which returns a string in the form "2 fixtures from Suite1"
-- Line 358-364: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite (2 fixtures)"
-- Line 372-378: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 test from Fixture1"
+- Line 358-364: We implement a static function `TestSuiteFinishMessage()`, which returns a string in the form "Suite1 (2 fixtures)"
+- Line 372-378: We implement a static function `TestFixtureStartMessage()`, which returns a string in the form "2 tests from Fixture1"
 - Line 386-392: We implement a static function `TestFixtureFinishMessage()`, which returns a string in the form "Fixture1 (2 tests)"
 - Line 400-403: We implement a static function `TestFinishMessage()`, which returns a string containing the fully qualified test name
 
@@ -6476,30 +6526,31 @@ File: code\applications\demo\src\main.cpp
 194: void MyTest::RunImpl() const
 195: {
 196:     LOG_DEBUG("Running test");
-197: }
-198: 
-199: int main()
-200: {
-201:     auto& console = GetConsole();
-202: 
-203:     ConsoleTestReporter reporter;
-204:     RunAllTests(&reporter);
-205: 
-206:     LOG_INFO("Wait 5 seconds");
-207:     Timer::WaitMilliSeconds(5000);
-208: 
-209:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-210:     char ch{};
-211:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-212:     {
-213:         ch = console.ReadChar();
-214:         console.WriteChar(ch);
-215:     }
-216:     if (ch == 'p')
-217:         assert(false);
-218: 
-219:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-220: }
+197:     CurrentTest::Results()->OnTestFailure(*CurrentTest::Details(), "Failure");
+198: }
+199: 
+200: int main()
+201: {
+202:     auto& console = GetConsole();
+203: 
+204:     ConsoleTestReporter reporter;
+205:     RunAllTests(&reporter);
+206: 
+207:     LOG_INFO("Wait 5 seconds");
+208:     Timer::WaitMilliSeconds(5000);
+209: 
+210:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
+211:     char ch{};
+212:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+213:     {
+214:         ch = console.ReadChar();
+215:         console.WriteChar(ch);
+216:     }
+217:     if (ch == 'p')
+218:         assert(false);
+219: 
+220:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+221: }
 ```
 
 - Line 7: We replace all unit test includes by a single one
@@ -6709,7 +6760,7 @@ File: code/libraries/unittest/include/unittest/TestResult.h
 175:     /// Return the list of failures for this test
 176:     /// </summary>
 177:     /// <returns>List of failures for this test</returns>
-178:     const FailureList & Failures() const { return m_failures; }
+178:     const FailureList& Failures() const { return m_failures; }
 179:     /// <summary>
 180:     /// Returns failure flag
 181:     /// </summary>
@@ -6748,7 +6799,7 @@ File: code/libraries/unittest/include/unittest/TestResult.h
   - Line 157: The member variable `m_failures` holds the failure list
   - Line 159: The member variable `m_failed` holds true if at least one failure occurred for this test
   - Line 162: We remove the default constructor
-  - Line 167: We declare an explicit constructor
+  - Line 167: We declare an explicit constructor taking the test details
   - Line 173: We declare the method `AddFailure()` which adds a failure to the list
   - Line 178: We declare and define the method `Failures()` which returns a const reference to the failure list
   - Line 183: We declare and define the method `Failed()` which returns true if a failure occurred
@@ -6846,43 +6897,41 @@ File: code/libraries/unittest/src/TestResult.cpp
 82: void FailureList::Add(const Failure& failure)
 83: {
 84:     auto entry = new FailureEntry(failure);
-85:     if (m_head == nullptr)
+85:     if (m_tail == nullptr)
 86:     {
 87:         m_head = entry;
-88:     }
-89:     else
-90:     {
-91:         auto current = m_head;
-92:         while (current->m_next != nullptr)
-93:             current = current->m_next;
-94:         current->m_next = entry;
-95:     }
-96:     m_tail = entry;
-97: }
-98: 
-99: TestResult::TestResult(const TestDetails& details)
-100:     : m_details{ details }
-101:     , m_failures{}
-102:     , m_failed{}
-103: {
-104: }
-105: 
-106: void TestResult::AddFailure(const Failure& failure)
-107: {
-108:     m_failures.Add(failure);
-109:     m_failed = true;
-110: }
-111: 
-112: } // namespace unittest
+88:         m_tail = entry;
+89:     }
+90:     else
+91:     {
+92:         m_tail->m_next = entry;
+93:         m_tail = entry;
+94:     }
+95: }
+96: 
+97: TestResult::TestResult(const TestDetails& details)
+98:     : m_details{ details }
+99:     , m_failures{}
+100:     , m_failed{}
+101: {
+102: }
+103: 
+104: void TestResult::AddFailure(const Failure& failure)
+105: {
+106:     m_failures.Add(failure);
+107:     m_failed = true;
+108: }
+109: 
+110: } // namespace unittest
 ```
 
 - Line 53-57: We implement the `Failure` constructor
 - Line 59-63: We implement the `FailureEntry` constructor
 - Line 65-69: We implement the `FailureList` constructor
 - Line 71-80: We implement the `FailureList` destructor. This will delete all `FailureEntry` instances in the list
-- Line 82-97: We implement the method `Add()` for `FailureList`. This will create a new `FailureEntry` with the `Failure` in it, and insert at the end of the list
-- Line 99-104: We implement the `TestResult` constructor
-- Line 106-110: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
+- Line 82-95: We implement the method `Add()` for `FailureList`. This will create a new `FailureEntry` with the `Failure` in it, and insert at the end of the list
+- Line 97-102: We implement the `TestResult` constructor
+- Line 104-108: We implement the method `AddFailure()` for `TestResult`. This will add the failure to the list, and set the failed flag to true
 
 ### DeferredTestReporter.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_DEFERREDTESTREPORTERH}
 
@@ -7028,13 +7077,13 @@ File: code/libraries/unittest/include/unittest/DeferredTestReporter.h
 134: } // namespace unittest
 ```
 
-- Line 56-77: We declare the struct `ResultEntry`, which holds a `TestResult`, which we'll declare later, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
+- Line 56-77: We declare the struct `ResultEntry`, which holds a `TestResult`, and a pointer to the next `ResultEntry`. The results entries form a linked list, and are used to gather results for each test
   - Line 61: The member variable `m_result` holds the test result
   - Line 63: The member variable `m_next` holds the pointer to the next `ResultEntry` in the list
   - Line 66: We declare the constructor
   - Line 71: We declare and define the method `GetResult()` which returns the test result
   - Line 76: We declare and define the method `GetNext()` which returns the pointer to the next `ResultEntry` in the list
-- Line 79-105: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
+- Line 82-105: We declare the class `ResultList` which holds a pointer to the first and last `ResultEntry`
   - Line 86-88: The member variables `m_head` and `m_tail` hold a pointer to the beginning and the end of the list, respectively
   - Line 91: We declare the constructor
   - Line 92: We declare the destructor, which will clean up the list of `ResultEntry` instances
@@ -7145,150 +7194,148 @@ File: code/libraries/unittest/src/DeferredTestReporter.cpp
 89: void ResultList::Add(const TestResult& result)
 90: {
 91:     auto entry = new ResultEntry(result);
-92:     if (m_head == nullptr)
+92:     if (m_tail == nullptr)
 93:     {
 94:         m_head = entry;
-95:     }
-96:     else
-97:     {
-98:         auto current = m_head;
-99:         while (current->m_next != nullptr)
-100:             current = current->m_next;
-101:         current->m_next = entry;
-102:     }
-103:     m_tail = entry;
-104: }
-105: 
-106: /// <summary>
-107: /// Start of test run callback (empty)
-108: /// </summary>
-109: /// <param name="numberOfTestSuites">Number of test suites to be run</param>
-110: /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
-111: /// <param name="numberOfTests">Number of tests to be run</param>
-112: void DeferredTestReporter::ReportTestRunStart(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
-113: {
-114: }
-115: 
-116: /// <summary>
-117: /// Finish of test run callback (empty)
-118: /// </summary>
-119: /// <param name="numberOfTestSuites">Number of test suites run</param>
-120: /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
-121: /// <param name="numberOfTests">Number of tests run</param>
-122: void DeferredTestReporter::ReportTestRunFinish(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
-123: {
-124: }
-125: 
-126: /// <summary>
-127: /// Test summary callback (empty)
-128: /// </summary>
-129: /// <param name="results">Test run results</param>
-130: void DeferredTestReporter::ReportTestRunSummary(const TestResults& /*results*/)
-131: {
-132: }
-133: 
-134: /// <summary>
-135: /// Test run overview callback (empty)
-136: /// </summary>
-137: /// <param name="results">Test run results</param>
-138: void DeferredTestReporter::ReportTestRunOverview(const TestResults& /*results*/)
-139: {
-140: }
-141: 
-142: /// <summary>
-143: /// Test suite start callback (empty)
-144: /// </summary>
-145: /// <param name="suiteName">Test suite name</param>
-146: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
-147: void DeferredTestReporter::ReportTestSuiteStart(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
-148: {
-149: }
-150: 
-151: /// <summary>
-152: /// Test suite finish callback (empty)
-153: /// </summary>
-154: /// <param name="suiteName">Test suite name</param>
-155: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
-156: void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
-157: {
-158: }
-159: 
-160: /// <summary>
-161: /// Test fixture start callback (empty)
-162: /// </summary>
-163: /// <param name="fixtureName">Test fixture name</param>
-164: /// <param name="numberOfTests">Number of tests within test fixture</param>
-165: void DeferredTestReporter::ReportTestFixtureStart(const string& /*fixtureName*/, int /*numberOfTests*/)
-166: {
-167: }
-168: 
-169: /// <summary>
-170: /// Test fixture finish callback (empty)
-171: /// </summary>
-172: /// <param name="fixtureName">Test fixture name</param>
-173: /// <param name="numberOfTests">Number of tests within test fixture</param>
-174: void DeferredTestReporter::ReportTestFixtureFinish(const string& /*fixtureName*/, int /*numberOfTests*/)
-175: {
-176: }
-177: 
-178: /// <summary>
-179: /// Test start callback
-180: /// </summary>
-181: /// <param name="details">Test details</param>
-182: void DeferredTestReporter::ReportTestStart(const TestDetails& details)
-183: {
-184:     m_results.Add(TestResult(details));
-185: }
-186: 
-187: /// <summary>
-188: /// Test finish callback (empty)
-189: /// </summary>
-190: /// <param name="details">Test details</param>
-191: /// <param name="success">Test result, true is successful, false is failed</param>
-192: void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
-193: {
-194: }
-195: 
-196: /// <summary>
-197: /// Test failure callback
-198: /// </summary>
-199: /// <param name="details">Test details</param>
-200: /// <param name="failure">Test failure message</param>
-201: void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
-202: {
-203:     TestResult& result = m_results.GetTail()->GetResult();
-204:     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
-205: }
-206: 
-207: /// <summary>
-208: /// Return test result list
-209: /// </summary>
-210: /// <returns>Test result list</returns>
-211: ResultList& DeferredTestReporter::Results()
-212: {
-213:     return m_results;
-214: }
-215: 
-216: } // namespace unittest
+95:         m_tail = entry;
+96:     }
+97:     else
+98:     {
+99:         m_tail->m_next = entry;
+100:         m_tail = entry;
+101:     }
+102: }
+103: 
+104: /// <summary>
+105: /// Start of test run callback (empty)
+106: /// </summary>
+107: /// <param name="numberOfTestSuites">Number of test suites to be run</param>
+108: /// <param name="numberOfTestFixtures">Number of test fixtures to be run</param>
+109: /// <param name="numberOfTests">Number of tests to be run</param>
+110: void DeferredTestReporter::ReportTestRunStart(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
+111: {
+112: }
+113: 
+114: /// <summary>
+115: /// Finish of test run callback (empty)
+116: /// </summary>
+117: /// <param name="numberOfTestSuites">Number of test suites run</param>
+118: /// <param name="numberOfTestFixtures">Number of test fixtures run</param>
+119: /// <param name="numberOfTests">Number of tests run</param>
+120: void DeferredTestReporter::ReportTestRunFinish(int /*numberOfTestSuites*/, int /*numberOfTestFixtures*/, int /*numberOfTests*/)
+121: {
+122: }
+123: 
+124: /// <summary>
+125: /// Test summary callback (empty)
+126: /// </summary>
+127: /// <param name="results">Test run results</param>
+128: void DeferredTestReporter::ReportTestRunSummary(const TestResults& /*results*/)
+129: {
+130: }
+131: 
+132: /// <summary>
+133: /// Test run overview callback (empty)
+134: /// </summary>
+135: /// <param name="results">Test run results</param>
+136: void DeferredTestReporter::ReportTestRunOverview(const TestResults& /*results*/)
+137: {
+138: }
+139: 
+140: /// <summary>
+141: /// Test suite start callback (empty)
+142: /// </summary>
+143: /// <param name="suiteName">Test suite name</param>
+144: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+145: void DeferredTestReporter::ReportTestSuiteStart(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
+146: {
+147: }
+148: 
+149: /// <summary>
+150: /// Test suite finish callback (empty)
+151: /// </summary>
+152: /// <param name="suiteName">Test suite name</param>
+153: /// <param name="numberOfTestFixtures">Number of fixtures within test suite</param>
+154: void DeferredTestReporter::ReportTestSuiteFinish(const string& /*suiteName*/, int /*numberOfTestFixtures*/)
+155: {
+156: }
+157: 
+158: /// <summary>
+159: /// Test fixture start callback (empty)
+160: /// </summary>
+161: /// <param name="fixtureName">Test fixture name</param>
+162: /// <param name="numberOfTests">Number of tests within test fixture</param>
+163: void DeferredTestReporter::ReportTestFixtureStart(const string& /*fixtureName*/, int /*numberOfTests*/)
+164: {
+165: }
+166: 
+167: /// <summary>
+168: /// Test fixture finish callback (empty)
+169: /// </summary>
+170: /// <param name="fixtureName">Test fixture name</param>
+171: /// <param name="numberOfTests">Number of tests within test fixture</param>
+172: void DeferredTestReporter::ReportTestFixtureFinish(const string& /*fixtureName*/, int /*numberOfTests*/)
+173: {
+174: }
+175: 
+176: /// <summary>
+177: /// Test start callback
+178: /// </summary>
+179: /// <param name="details">Test details</param>
+180: void DeferredTestReporter::ReportTestStart(const TestDetails& details)
+181: {
+182:     m_results.Add(TestResult(details));
+183: }
+184: 
+185: /// <summary>
+186: /// Test finish callback (empty)
+187: /// </summary>
+188: /// <param name="details">Test details</param>
+189: /// <param name="success">Test result, true is successful, false is failed</param>
+190: void DeferredTestReporter::ReportTestFinish(const TestDetails& /*details*/, bool /*success*/)
+191: {
+192: }
+193: 
+194: /// <summary>
+195: /// Test failure callback
+196: /// </summary>
+197: /// <param name="details">Test details</param>
+198: /// <param name="failure">Test failure message</param>
+199: void DeferredTestReporter::ReportTestFailure(const TestDetails& details, const string& failure)
+200: {
+201:     TestResult& result = m_results.GetTail()->GetResult();
+202:     result.AddFailure(Failure(details.SourceFileLineNumber(), failure));
+203: }
+204: 
+205: /// <summary>
+206: /// Return test result list
+207: /// </summary>
+208: /// <returns>Test result list</returns>
+209: ResultList& DeferredTestReporter::Results()
+210: {
+211:     return m_results;
+212: }
+213: 
+214: } // namespace unittest
 ```
 
 - Line 56-60: We implement the `ResultEntry` constructor
 - Line 65-69: We implement the `ResultList` constructor
 - Line 74-83: We implement the `ResultList` denstructor
-- Line 89-104: We implement the method `Add` for `ResultList`. This will create a new `ResultEntry` and insert it at the end of the list
-- Line 112-114: We implement the method `ReportTestRunStart` for `DeferredTestReporter`.
+- Line 89-102: We implement the method `Add()` for `ResultList`. This will create a new `ResultEntry` and insert it at the end of the list
+- Line 110-112: We implement the method `ReportTestRunStart()` for `DeferredTestReporter`.
 This does nothing, as `DeferredTestReporter` does not report anything in itself. It simply stores test results 
-- Line 122-124: We implement the method `ReportTestRunFinish` for `DeferredTestReporter`. This again does nothing
-- Line 130-132: We implement the method `ReportTestRunSummary` for `DeferredTestReporter`. This again does nothing
-- Line 138-140: We implement the method `ReportTestRunOverview` for `DeferredTestReporter`. This again does nothing
-- Line 147-149: We implement the method `ReportTestSuiteStart` for `DeferredTestReporter`. This again does nothing
-- Line 156-158: We implement the method `ReportTestSuiteFinish` for `DeferredTestReporter`. This again does nothing
-- Line 165-167: We implement the method `ReportTestFixtureStart` for `DeferredTestReporter`. This again does nothing
-- Line 174-176: We implement the method `ReportTestFixtureFinish` for `DeferredTestReporter`. This again does nothing
-- Line 182-184: We implement the method `ReportTestStart` for `DeferredTestReporter`. This adds a new result to the list
-- Line 192-194: We implement the method `ReportTestFinish` for `DeferredTestReporter`. This again does nothing
-- Line 201-205: We implement the method `ReportTestFailure` for `DeferredTestReporter`. This adds a failure to the list for the current result
-- Line 211-214: We implement the method `Results` for `DeferredTestReporter`
+- Line 120-122: We implement the method `ReportTestRunFinish()` for `DeferredTestReporter`. This again does nothing
+- Line 128-130: We implement the method `ReportTestRunSummary()` for `DeferredTestReporter`. This again does nothing
+- Line 136-138: We implement the method `ReportTestRunOverview()` for `DeferredTestReporter`. This again does nothing
+- Line 145-147: We implement the method `ReportTestSuiteStart()` for `DeferredTestReporter`. This again does nothing
+- Line 154-156: We implement the method `ReportTestSuiteFinish()` for `DeferredTestReporter`. This again does nothing
+- Line 163-165: We implement the method `ReportTestFixtureStart()` for `DeferredTestReporter`. This again does nothing
+- Line 172-174: We implement the method `ReportTestFixtureFinish()` for `DeferredTestReporter`. This again does nothing
+- Line 180-183: We implement the method `ReportTestStart()` for `DeferredTestReporter`. This adds a new result to the list
+- Line 190-192: We implement the method `ReportTestFinish()` for `DeferredTestReporter`. This again does nothing
+- Line 199-203: We implement the method `ReportTestFailure()` for `DeferredTestReporter`. This adds a failure to the list for the current result
+- Line 209-212: We implement the method `Results()` for `DeferredTestReporter`
 
 ### ConsoleTestReport.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_CONSOLETESTREPORTH}
 
@@ -7409,11 +7456,11 @@ File: code/libraries/unittest/src/ConsoleTestReport.cpp
 ...
 ```
 
-- Line 183-186: We reimplement the method `ReportTestStart` by calling the same method in `DeferredTestReporter`
-- Line 193-204: We reimplement the method `ReportTestFinish` by first calling the same method in `DeferredTestReporter`
-- Line 211-214: We reimplement the method `ReportTestFailure` by calling the same method in `DeferredTestReporter`
-- Line 318-342: We reimplement the method `TestRunOverviewMessage` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
-- Line 350-357: We reimplement the method `TestFailureMessage` to print a correct failure message
+- Line 183-186: We reimplement the method `ReportTestStart()` by calling the same method in `DeferredTestReporter`
+- Line 193-204: We reimplement the method `ReportTestFinish()` by first calling the same method in `DeferredTestReporter`, then printing the message as before
+- Line 211-214: We reimplement the method `ReportTestFailure()` by calling the same method in `DeferredTestReporter`
+- Line 318-342: We reimplement the method `TestRunOverviewMessage()` by going through the list of test results, and for any that have failed, going through the list of failures, and appending a test failure message
+- Line 350-357: We reimplement the method `TestFailureMessage()` to print a correct failure message
 
 ### unittest.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_COLLECTING_TEST_INFORMATION___STEP_8_UNITTESTH}
 
@@ -7494,7 +7541,7 @@ The application will run the tests. The reporting will be slightly different, as
 The debug logging will still show, but normally test cases do not log.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Debug  Register test MyTest1 in fixture FixtureMyTest1 in suite Suite1 (TestRegistry:150)
 Debug  Find suite Suite1 ... not found, creating new object (TestRegistry:104)
 Debug  Fixture FixtureMyTest1 not found, creating new object (TestSuiteInfo:97)
@@ -7548,10 +7595,11 @@ Failures:
 [===========] 4 tests from 4 fixtures in 3 suites ran.
 Info   Wait 5 seconds (main:207)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 In the next tutorial we'll start replacing the very verbose code for setting up tests, test fixtures and test suites with macros.
-We'll also introduce macros for the actual test cases, and we'll convert the test we made before for strings and serialization into proper class tests.
+We'll also introduce macros for the actual test cases, and we'll convert the tests we made before for strings and serialization into proper class tests.
 
 Next: [18-writing-unit-tests](18-writing-unit-tests.md)
 

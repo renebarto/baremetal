@@ -47,7 +47,7 @@
 namespace unittest
 {
 
-class Test;
+class TestInfo;
 class TestSuiteInfo;
 class TestResults;
 
@@ -101,6 +101,12 @@ public:
     TestRegistrar(TestRegistry& registry, Test* testInstance, const TestDetails& details);
 };
 
+/// <summary>
+/// Run tests selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <param name="testResults">Test results to be returned</param>
 template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicate, TestResults& testResults)
 {
     TestSuiteInfo* testSuite = Head();
@@ -113,6 +119,12 @@ template <typename Predicate> void TestRegistry::RunIf(const Predicate& predicat
     }
 }
 
+/// <summary>
+/// Count the number of test suites selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test suites selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicate)
 {
     int numberOfTestSuites = 0;
@@ -126,6 +138,12 @@ template <typename Predicate> int TestRegistry::CountSuitesIf(Predicate predicat
     return numberOfTestSuites;
 }
 
+/// <summary>
+/// Count the number of tests fixtures selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of test fixtures selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predicate)
 {
     int numberOfTestFixtures = 0;
@@ -139,6 +157,12 @@ template <typename Predicate> int TestRegistry::CountFixturesIf(Predicate predic
     return numberOfTestFixtures;
 }
 
+/// <summary>
+/// Count the number of tests selected by the predicate
+/// </summary>
+/// <typeparam name="Predicate">Predicate class for test selected</typeparam>
+/// <param name="predicate">Test selection predicate</param>
+/// <returns>Number of tests selected by the predicate</returns>
 template <typename Predicate> int TestRegistry::CountTestsIf(Predicate predicate)
 {
     int numberOfTests = 0;

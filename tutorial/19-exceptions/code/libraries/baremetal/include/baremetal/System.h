@@ -60,9 +60,9 @@ extern uint8 CurrentEL();
 class System
 {
     /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// Construct the singleton system handler if needed, and return a reference to the instance. This is a friend function of class System
     /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
+    /// <returns>Reference to the singleton system handler</returns>
     friend System& GetSystem();
 
 private:

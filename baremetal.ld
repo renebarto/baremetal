@@ -84,7 +84,12 @@ SECTIONS
         __init_end = .;
     }
 
-    /* Executable read/write data section */
+    /* Exception handling data */
+    .eh_frame : {
+        *(.eh_frame*)
+    } : data
+
+/* Executable read/write data section */
     .data : {
         *(.data*)
     } : data

@@ -40,4 +40,4 @@
 #pragma once
 
 // Convert bit index into integer
-#define BIT(n)              (1U << (n))
+#define BIT(n)              (1UL << (n))

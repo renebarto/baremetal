@@ -7,7 +7,7 @@
 //
 // Class       : TestResults
 //
-// Description : Test results
+// Description : Test run results
 //
 //------------------------------------------------------------------------------
 //
@@ -46,8 +46,7 @@
 ///
 /// Results for a complete test run
 
-namespace unittest
-{
+namespace unittest {
 
 class ITestReporter;
 class TestDetails;

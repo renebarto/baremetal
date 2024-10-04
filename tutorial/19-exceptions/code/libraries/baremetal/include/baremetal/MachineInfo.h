@@ -54,13 +54,13 @@ enum class SoCType
 {
     /// @ brief BCM2835 as used in Raspberry Pi Model 1 boards
     BCM2835,
-    /// @ brief BCM2835 as used in older Raspberry Pi Model 2 boards
+    /// @ brief BCM2836 as used in older Raspberry Pi Model 2 boards
     BCM2836,
-    /// @ brief BCM2835 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
+    /// @ brief BCM2837 as used in newer Raspberry Pi Model 2 and Raspberry Pi Model 3 boards
     BCM2837,
-    /// @ brief BCM2835 as used in Raspberry Pi Model 4 boards
+    /// @ brief BCM2711 as used in Raspberry Pi Model 4 boards
     BCM2711,
-    /// @ brief BCM2835 as used in Raspberry Pi Model 5 boards
+    /// @ brief BCM2712 as used in Raspberry Pi Model 5 boards
     BCM2712,
     /// @brief SoC unknown / not set / invalid
     Unknown,

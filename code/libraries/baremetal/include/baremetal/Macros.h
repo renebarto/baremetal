@@ -59,9 +59,9 @@
 
 /// @brief Convert bit index into integer
 /// @param n Bit index
-#define BIT(n)              (1U << (n))
+#define BIT(n)              (1UL << (n))
 
 /// @brief Convert bit range into integer
 /// @param n Start (low) bit index
 /// @param m End (high) bit index
-#define BITS(n,m)           (((1U << (m-n+1)) - 1) << (n))
+#define BITS(n,m)           (((1UL << (m-n+1)) - 1) << (n))

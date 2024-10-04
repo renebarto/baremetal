@@ -43,7 +43,7 @@ Provided to support switching between Secure and Non-secure states.
 - SP (also WSP for 32 bits): Stack pointer
 - PC: Program counter (this is not accessible directly, but needs specific instructions)
 - XZR (also WZR for 32 bits): Zero register
-- There is also a large set of system registers. See [ARM registers](#ARM_REGISTERS), [documentation](pdf/arm-architecture-registers.pdf), and [ARM� Architecture Reference Manual](pdf/AArch64ReferenceManual.1410976032.pdf) for more information.
+- There is also a large set of system registers. See [ARM registers](#ARM_REGISTERS), [documentation](pdf/arm-architecture-registers.pdf), and [ARM Architecture Reference Manual](pdf/AArch64ReferenceManual.1410976032.pdf) for more information.
 
 ### Exception levels in the ARM processor {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTION_LEVELS_IN_THE_ARM_PROCESSOR}
 
@@ -125,9 +125,10 @@ Update the file `code/libraries/baremetal/include/baremetal/Macros.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Macros.h
 64: /// @brief Convert bit range into integer
-65: /// @param n Start (low) bit index
-66: /// @param m End (high) bit index
-67: #define BITS(n,m)           (((1U << (m-n+1)) - 1) << (n))
+65: /// BITS(n, m) results in an integer where bits n to m are set to 1, the rest to 0
+66: /// @param n Start (low) bit index
+67: /// @param m End (high) bit index
+68: #define BITS(n,m)           (((1UL << (m-n+1)) - 1) << (n))
 ```
 
 This defines the `BITS` macro to create a mask for bit sequences (from bit n to up to and including bit m)
@@ -137,7 +138,7 @@ This defines the `BITS` macro to create a mask for bit sequences (from bit n to 
 We already created a header for the ARM specific instructions, but it is also handy to define some fields for specific ARM registers.
 The complete set or ARM registers is documented in [documentation](pdf/arm-architecture-registers.pdf), the most important ones are described in [ARM registers](#ARM_REGISTERS).
 
-We'll add some definitions for some of these registers.
+We'll add definitions for some of these registers.
 
 Update the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`
 
@@ -149,122 +150,127 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 ...
 91: /// @brief Get current exception level
 92: #define GetCurrentEL(value)             asm volatile ("mrs %0, CurrentEL" : "=r" (value))
-93:
-94: /// @brief Get Saved Program Status Register (EL1)
-95: #define GetSPSR_EL1(value)              asm volatile ("mrs %0, SPSR_EL1" : "=r" (value))
-96:
-97: /// @brief Get Exception Syndrome Register (EL1)
-98: #define GetESR_EL1(value)               asm volatile ("mrs %0, ESR_EL1" : "=r" (value))
-99:
-100: /// @brief SPSR_EL1 M[3:0] field bit shift
-101: #define SPSR_EL1_M30_SHIFT 0
-102: /// @brief SPSR_EL1 M[3:0] field bit mask
-103: #define SPSR_EL1_M30_MASK BITS(0,3)
-104: /// @brief SPSR_EL1 M[3:0] field exctraction
-105: #define SPSR_EL1_M30(value) ((value >> SPSR_EL1_M30_SHIFT) & SPSR_EL1_M30_MASK)
-106: /// @brief SPSR_EL1 M[3:0] field value for EL0t mode
-107: #define SPSR_EL1_M30_EL0t 0x0
-108: /// @brief SPSR_EL1 M[3:0] field value for EL1t mode
-109: #define SPSR_EL1_M30_EL1t 0x4
-110: /// @brief SPSR_EL1 M[3:0] field value for EL1h mode
-111: #define SPSR_EL1_M30_EL1h 0x5
-112:
-113: /// @brief ESR_EL1 EC field bit shift
-114: #define ESR_EL1_EC_SHIFT 26
-115: /// @brief ESR_EL1 EC field bit mask
-116: #define ESR_EL1_EC_MASK  BITS(0,5)
-117: /// @brief ESR_EL1 EC field extraction
-118: #define ESR_EL1_EC(value) ((value >> ESR_EL1_EC_SHIFT) & ESR_EL1_EC_MASK)
-119: /// @brief ESR_EL1 EC field value for unknown exception
-120: #define ESR_EL1_EC_UNKNOWN 0x00
-121: /// @brief ESR_EL1 EC field value for trapped WF<x> instruction exception
-122: #define ESR_EL1_EC_TRAPPED_WFx_INSTRUCTION 0x01
-123: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0F
-124: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0F 0x03
-125: /// @brief ESR_EL1 EC field value for MCRR or MRRC instruction exception when coproc = 0x0F
-126: #define ESR_EL1_EC_TRAPPED_MCRR_MRRC_ACCESS_CORPROC_0F 0x04
-127: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0E
-128: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0E 0x05
-129: /// @brief ESR_EL1 EC field value for trapped LDC or STC instruction exception
-130: #define ESR_EL1_EC_TRAPPED_LDC_STC_ACCESS 0x06
-131: /// @brief ESR_EL1 EC field value for unknown SME, SVE, SIMD or Floating pointer instruction exception
-132: #define ESR_EL1_EC_TRAPPED_SME_SVE_SIMD_FP_ACCESS 0x07
-133: /// @brief ESR_EL1 EC field value for trapped LD64<x> or ST64<x> instruction exception
-134: #define ESR_EL1_EC_TRAPPED_LD64x_ST64x_ACCESS 0x0A
-135: /// @brief ESR_EL1 EC field value for trapped MRRC instruction exception when coproc = 0x0C
-136: #define ESR_EL1_EC_TRAPPED_MRRC_ACCESS_COPROC_0E 0x0C
-137: /// @brief ESR_EL1 EC field value for branch target exception
-138: #define ESR_EL1_EC_BRANCH_TARGET_EXCEPTION 0x0D
-139: /// @brief ESR_EL1 EC field value for illegal executions state exception
-140: #define ESR_EL1_EC_ILLEGAL_EXECUTION_STATE 0x0E
-141: /// @brief ESR_EL1 EC field value for trapped SVC 32 bit instruction exception
-142: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_32 0x11
-143: /// @brief ESR_EL1 EC field value for trapped SVC 64 bit instruction exception
-144: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_64 0x15
-145: /// @brief ESR_EL1 EC field value for MCR or MRC 64 bit instruction exception
-146: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_64 0x18
-147: /// @brief ESR_EL1 EC field value for trapped SVE access exception
-148: #define ESR_EL1_EC_TRAPPED_SVE_ACCESS 0x19
-149: /// @brief ESR_EL1 EC field value for trapped TStart access exception
-150: #define ESR_EL1_EC_TRAPPED_TSTART_ACCESS 0x1B
-151: /// @brief ESR_EL1 EC field value for pointer authentication failure exception
-152: #define ESR_EL1_EC_POINTER_AUTHENTICATION_FAILURE 0x1C
-153: /// @brief ESR_EL1 EC field value for trapped SME access exception
-154: #define ESR_EL1_EC_TRAPPED_SME_ACCESS 0x1D
-155: /// @brief ESR_EL1 EC field value for granule protection check exception
-156: #define ESR_EL1_EC_GRANULE_PROTECTION_CHECK 0x1E
-157: /// @brief ESR_EL1 EC field value for instruction abort from lower EL exception
-158: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL 0x20
-159: /// @brief ESR_EL1 EC field value for instruction abort from same EL exception
-160: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_SAME_EL 0x21
-161: /// @brief ESR_EL1 EC field value for PC alignment fault exception
-162: #define ESR_EL1_EC_PC_ALIGNMENT_FAULT 0x22
-163: /// @brief ESR_EL1 EC field value for data abort from lower EL exception
-164: #define ESR_EL1_EC_DATA_ABORT_FROM_LOWER_EL 0x24
-165: /// @brief ESR_EL1 EC field value for data abort from same EL exception
-166: #define ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL 0x25
-167: /// @brief ESR_EL1 EC field value for SP alignment fault exception
-168: #define ESR_EL1_EC_SP_ALIGNMENT_FAULT 0x27
-169: /// @brief ESR_EL1 EC field value for trapped 32 bit FP instruction exception
-170: #define ESR_EL1_EC_TRAPPED_FP_32 0x28
-171: /// @brief ESR_EL1 EC field value for trapped 64 bit FP instruction exception
-172: #define ESR_EL1_EC_TRAPPED_FP_64 0x2C
-173: /// @brief ESR_EL1 EC field value for SError interrupt exception
-174: #define ESR_EL1_EC_SERROR_INTERRUPT 0x2F
-175: /// @brief ESR_EL1 EC field value for Breakpoint from lower EL exception
-176: #define ESR_EL1_EC_BREAKPOINT_FROM_LOWER_EL 0x30
-177: /// @brief ESR_EL1 EC field value for Breakpoint from same EL exception
-178: #define ESR_EL1_EC_BREAKPOINT_FROM_SAME_EL 0x31
-179: /// @brief ESR_EL1 EC field value for SW step from lower EL exception
-180: #define ESR_EL1_EC_SW_STEP_FROM_LOWER_EL 0x32
-181: /// @brief ESR_EL1 EC field value for SW step from same EL exception
-182: #define ESR_EL1_EC_SW_STEP_FROM_SAME_EL 0x33
-183: /// @brief ESR_EL1 EC field value for Watchpoint from lower EL exception
-184: #define ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL 0x34
-185: /// @brief ESR_EL1 EC field value for Watchpoint from same EL exception
-186: #define ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL 0x35
-187: /// @brief ESR_EL1 EC field value for 32 bit BKPT instruction exception
-188: #define ESR_EL1_EC_BKPT_32 0x38
-189: /// @brief ESR_EL1 EC field value for 64 bit BRK instruction exception
-190: #define ESR_EL1_EC_BRK_64 0x3C
-191:
-192: /// @brief ESR_EL1 ISS field bit shift
-193: #define ESR_EL1_ISS_SHIFT 0
-194: /// @brief ESR_EL1 ISS field bit mask
-195: #define ESR_EL1_ISS_MASK  BITS(0,24)
-196: /// @brief ESR_EL1 ISS field extraction
-197: #define ESR_EL1_ISS(value) ((value >> ESR_EL1_ISS_SHIFT) & ESR_EL1_ISS_MASK)
+93: /// @brief SPSR_EL1 M[3:0] field bit shift
+94: #define CURRENT_EL_SHIFT 2
+95: /// @brief SPSR_EL1 M[3:0] field bit mask
+96: #define CURRENT_EL_MASK BITS(2,3)
+97: 
+98: /// @brief Get Saved Program Status Register (EL1)
+99: #define GetSPSR_EL1(value)              asm volatile ("mrs %0, SPSR_EL1" : "=r" (value))
+100: 
+101: /// @brief Get Exception Syndrome Register (EL1)
+102: #define GetESR_EL1(value)               asm volatile ("mrs %0, ESR_EL1" : "=r" (value))
+103: 
+104: /// @brief SPSR_EL1 M[3:0] field bit shift
+105: #define SPSR_EL1_M30_SHIFT 0
+106: /// @brief SPSR_EL1 M[3:0] field bit mask
+107: #define SPSR_EL1_M30_MASK BITS(0,3)
+108: /// @brief SPSR_EL1 M[3:0] field exctraction
+109: #define SPSR_EL1_M30(value) ((value >> SPSR_EL1_M30_SHIFT) & SPSR_EL1_M30_MASK)
+110: /// @brief SPSR_EL1 M[3:0] field value for EL0t mode
+111: #define SPSR_EL1_M30_EL0t 0x0
+112: /// @brief SPSR_EL1 M[3:0] field value for EL1t mode
+113: #define SPSR_EL1_M30_EL1t 0x4
+114: /// @brief SPSR_EL1 M[3:0] field value for EL1h mode
+115: #define SPSR_EL1_M30_EL1h 0x5
+116: 
+117: /// @brief ESR_EL1 EC field bit shift
+118: #define ESR_EL1_EC_SHIFT 26
+119: /// @brief ESR_EL1 EC field bit mask
+120: #define ESR_EL1_EC_MASK  BITS(0,5)
+121: /// @brief ESR_EL1 EC field extraction
+122: #define ESR_EL1_EC(value) ((value >> ESR_EL1_EC_SHIFT) & ESR_EL1_EC_MASK)
+123: /// @brief ESR_EL1 EC field value for unknown exception
+124: #define ESR_EL1_EC_UNKNOWN 0x00
+125: /// @brief ESR_EL1 EC field value for trapped WF<x> instruction exception
+126: #define ESR_EL1_EC_TRAPPED_WFx_INSTRUCTION 0x01
+127: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0F
+128: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0F 0x03
+129: /// @brief ESR_EL1 EC field value for MCRR or MRRC instruction exception when coproc = 0x0F
+130: #define ESR_EL1_EC_TRAPPED_MCRR_MRRC_ACCESS_CORPROC_0F 0x04
+131: /// @brief ESR_EL1 EC field value for MCR or MRC instruction exception when coproc = 0x0E
+132: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_COPROC_0E 0x05
+133: /// @brief ESR_EL1 EC field value for trapped LDC or STC instruction exception
+134: #define ESR_EL1_EC_TRAPPED_LDC_STC_ACCESS 0x06
+135: /// @brief ESR_EL1 EC field value for unknown SME, SVE, SIMD or Floating pointer instruction exception
+136: #define ESR_EL1_EC_TRAPPED_SME_SVE_SIMD_FP_ACCESS 0x07
+137: /// @brief ESR_EL1 EC field value for trapped LD64<x> or ST64<x> instruction exception
+138: #define ESR_EL1_EC_TRAPPED_LD64x_ST64x_ACCESS 0x0A
+139: /// @brief ESR_EL1 EC field value for trapped MRRC instruction exception when coproc = 0x0C
+140: #define ESR_EL1_EC_TRAPPED_MRRC_ACCESS_COPROC_0E 0x0C
+141: /// @brief ESR_EL1 EC field value for branch target exception
+142: #define ESR_EL1_EC_BRANCH_TARGET_EXCEPTION 0x0D
+143: /// @brief ESR_EL1 EC field value for illegal executions state exception
+144: #define ESR_EL1_EC_ILLEGAL_EXECUTION_STATE 0x0E
+145: /// @brief ESR_EL1 EC field value for trapped SVC 32 bit instruction exception
+146: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_32 0x11
+147: /// @brief ESR_EL1 EC field value for trapped SVC 64 bit instruction exception
+148: #define ESR_EL1_EC_TRAPPED_SVC_INSTRUCTION_64 0x15
+149: /// @brief ESR_EL1 EC field value for MCR or MRC 64 bit instruction exception
+150: #define ESR_EL1_EC_TRAPPED_MCR_MRC_ACCESS_64 0x18
+151: /// @brief ESR_EL1 EC field value for trapped SVE access exception
+152: #define ESR_EL1_EC_TRAPPED_SVE_ACCESS 0x19
+153: /// @brief ESR_EL1 EC field value for trapped TStart access exception
+154: #define ESR_EL1_EC_TRAPPED_TSTART_ACCESS 0x1B
+155: /// @brief ESR_EL1 EC field value for pointer authentication failure exception
+156: #define ESR_EL1_EC_POINTER_AUTHENTICATION_FAILURE 0x1C
+157: /// @brief ESR_EL1 EC field value for trapped SME access exception
+158: #define ESR_EL1_EC_TRAPPED_SME_ACCESS 0x1D
+159: /// @brief ESR_EL1 EC field value for granule protection check exception
+160: #define ESR_EL1_EC_GRANULE_PROTECTION_CHECK 0x1E
+161: /// @brief ESR_EL1 EC field value for instruction abort from lower EL exception
+162: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL 0x20
+163: /// @brief ESR_EL1 EC field value for instruction abort from same EL exception
+164: #define ESR_EL1_EC_INSTRUCTION_ABORT_FROM_SAME_EL 0x21
+165: /// @brief ESR_EL1 EC field value for PC alignment fault exception
+166: #define ESR_EL1_EC_PC_ALIGNMENT_FAULT 0x22
+167: /// @brief ESR_EL1 EC field value for data abort from lower EL exception
+168: #define ESR_EL1_EC_DATA_ABORT_FROM_LOWER_EL 0x24
+169: /// @brief ESR_EL1 EC field value for data abort from same EL exception
+170: #define ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL 0x25
+171: /// @brief ESR_EL1 EC field value for SP alignment fault exception
+172: #define ESR_EL1_EC_SP_ALIGNMENT_FAULT 0x27
+173: /// @brief ESR_EL1 EC field value for trapped 32 bit FP instruction exception
+174: #define ESR_EL1_EC_TRAPPED_FP_32 0x28
+175: /// @brief ESR_EL1 EC field value for trapped 64 bit FP instruction exception
+176: #define ESR_EL1_EC_TRAPPED_FP_64 0x2C
+177: /// @brief ESR_EL1 EC field value for SError interrupt exception
+178: #define ESR_EL1_EC_SERROR_INTERRUPT 0x2F
+179: /// @brief ESR_EL1 EC field value for Breakpoint from lower EL exception
+180: #define ESR_EL1_EC_BREAKPOINT_FROM_LOWER_EL 0x30
+181: /// @brief ESR_EL1 EC field value for Breakpoint from same EL exception
+182: #define ESR_EL1_EC_BREAKPOINT_FROM_SAME_EL 0x31
+183: /// @brief ESR_EL1 EC field value for SW step from lower EL exception
+184: #define ESR_EL1_EC_SW_STEP_FROM_LOWER_EL 0x32
+185: /// @brief ESR_EL1 EC field value for SW step from same EL exception
+186: #define ESR_EL1_EC_SW_STEP_FROM_SAME_EL 0x33
+187: /// @brief ESR_EL1 EC field value for Watchpoint from lower EL exception
+188: #define ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL 0x34
+189: /// @brief ESR_EL1 EC field value for Watchpoint from same EL exception
+190: #define ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL 0x35
+191: /// @brief ESR_EL1 EC field value for 32 bit BKPT instruction exception
+192: #define ESR_EL1_EC_BKPT_32 0x38
+193: /// @brief ESR_EL1 EC field value for 64 bit BRK instruction exception
+194: #define ESR_EL1_EC_BRK_64 0x3C
+195: 
+196: /// @brief ESR_EL1 ISS field bit shift
+197: #define ESR_EL1_ISS_SHIFT 0
+198: /// @brief ESR_EL1 ISS field bit mask
+199: #define ESR_EL1_ISS_MASK  BITS(0,24)
+200: /// @brief ESR_EL1 ISS field extraction
+201: #define ESR_EL1_ISS(value) ((value >> ESR_EL1_ISS_SHIFT) & ESR_EL1_ISS_MASK)
 ```
 
 - Line 42: We need to include the macro header for a new definition we're going to use
 - Line 92: We add an instruction to retrieve the value of the `CurrentEL` register, which holds the current exception level
-- Line 95: We add an instruction to retrieve the value of the `SPR_EL1` (Saved Program Status Register EL1), which hold information on the cause of an exception
-- Line 98: We add an instruction to retrieve the value of the `ESR_EL1` (Exception Status Register EL1), which hold information on the cause of an exception
-- Line 100-105: We define the M3:0 field in the `SPSR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 106-111: We define different values for this field
-- Line 113-119: We define the EC field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
-- Line 120-190: We define different values for this field
-- Line 192-197: We define the ISS field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 94-96: We define the mask and shift for the exception level in the CurrentEL register
+- Line 99: We add an instruction to retrieve the value of the `SPSR_EL1` (Saved Program Status Register EL1), which holds information on state of the processor when an exception occurs
+- Line 102: We add an instruction to retrieve the value of the `ESR_EL1` (Exception Status Register EL1), which hold information on the cause of an exception
+- Line 105-109: We define the M3:0 field in the `SPSR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 110-115: We define different values for this field
+- Line 118-122: We define the EC field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
+- Line 124-194: We define different values for this field
+- Line 197-201: We define the ISS field in the `ESR_EL1` register for AArch64. See also [ARM registers](#ARM_REGISTERS)
 
 ### Exception.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONH}
 
@@ -713,7 +719,7 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 112:  */
 113: HVCStub:                                // Return to EL2h mode
 114:     mrs     x0, spsr_el2                // Read Saved Program Status Register (EL2)
-115:     bic     x0, x0, #0xF                // Clear bit 0
+115:     bic     x0, x0, #0xF                // Clear bit 3:0
 116:     mov     x1, #9
 117:     orr     x0, x0, x1                  // Set bit 3 and bit 0 -> EL2h
 118:     msr     spsr_el2, x0                // Write Saved Program Status Register (EL2)
@@ -732,16 +738,16 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 131: //*************************************************
 132: // Abort stubs
 133: //*************************************************
-134:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
-135:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
-136:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
+134:     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   UnexpectedHandler
+135:     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  SynchronousExceptionHandler
+136:     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, SystemErrorHandler
 137: 
 138: // End
 ```
 
 - Line 48-54: We create a macro `vector` to define a vector in the vector table.
-Every vector is aligned to 128 bytes, hence the statement `.align 7` which align by 7 bits, or 128 (1 << 7) bytes.
-The only code we add is a jump to the current stub, passed as `handler`
+Every vector is aligned to 128 bytes, hence the statement `.align 7` which align at 7 bits, or 128 (1 << 7) bytes.
+The only code we add is a jump (branch, b) to the current stub, passed as `handler`
 - Line 56-77: We create a macro `stub` for a generic stub, which saves the system registers `ESR_EL11`, `SPSR_EL1`, `ELR_EL1`, `SP_EL0` and `FAR_EL1` and the registers `x30` (LR) and `SP`, in general purpose registers x0-x6.
 These are then stored on the stack, every time decreasing the stack pointer by 16 bytes.
 Then the exception type passed through `exception` is stored in x0, and the stack pointer in x1.
@@ -751,13 +757,13 @@ This will effectively call the exception handler function `void handler(uint64 e
 This has 16 entries using the macro `vector`, each aligned to 128 bytes, while the complete table is aligned to 2048 (1 << 11) bytes, hence `.align 11`
 - Line 113-119: We implement the hypervisor call stub `HVCStub`.
 The function reads the `SPSR_EL2` system register, and sets it to switch to EL2h exception level, then moves to that that exception level using `eret`.
-This also reset the state of interrupt enables, etc.
+This also resets the state of interrupt enables, etc.
 - Line 123-129: We define the `s_fiqData` structure, aligned to 8 bytes
 - Line 134: We declare unexpected exceptions stub using the `stub` macro, and set its handler to `UnexpectedHandler()`
 - Line 135: We declare synchronous exceptions stub using the `stub` macro, and set its handler to `SynchronousExceptionHandler()`
 - Line 136: We declare system errors stub using the `stub` macro, and set its handler to `SystemErrorHandler()`
 
-Note that this means we need to defined the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`
+Note that this means we need to define the functions `UnexpectedHandler()`, `SynchronousExceptionHandler()`, `SystemErrorHandler()`
 
 ### System.h {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_SYSTEMH}
 
@@ -773,6 +779,7 @@ File: code/libraries/baremetal/include/baremetal/System.h
 53: /// </summary>
 54: /// <returns>Current exception level (0..3)</returns>
 55: extern uint8 CurrentEL();
+56: 
 ...
 ```
 
@@ -789,8 +796,9 @@ File: code/libraries/baremetal/src/System.cpp
 91: {
 92:     uint32 registerValue{};
 93:     GetCurrentEL(registerValue);
-94:     return (registerValue & 0x0000000C) >> 2;
+94:     return (registerValue & CURRENT_EL_MASK) >> CURRENT_EL_SHIFT;
 95: }
+96: 
 ...
 ```
 
@@ -941,6 +949,45 @@ File: baremetal.ld
 ...
 ```
 
+### Startup.S
+
+The exception vector was defined, but we need to use it. As we are running in EL1 normally, we will set the exception vector for EL1.
+This is done through the `vbar_el2` (Vector Base Address Register EL2) or `vbar_el1` (Vector Base Address Register EL1) register depending on the exception level the system was in when the exception occurs.
+See [Arm Architecture Registers](pdf/arm-architecture-registers.pdf), page 2436 and 2439.
+
+Update the file `code/libraries/baremetal/src/Startup.S`
+
+```cmake
+File: code/libraries/baremetal/src/Startup.S
+...
+100: .section .init
+101: 
+102:     .globl _start
+103: _start:                                 // Normally entered from armstub8 in EL2 after boot
+104:     mrs x0, CurrentEL                   // Check if already in EL1t mode?
+105:     cmp x0, #4
+106:     beq EL1
+107: 
+108:     ldr x0, =MEM_EXCEPTION_STACK        // IRQ, FIQ and exception handler run in EL1h
+109:     msr sp_el1, x0                      // Write Stack Pointer (EL1), init El1 stack
+110: 
+111:     ldr	x0, =VectorTable                // Init exception vector table for EL2
+112:     msr	vbar_el2, x0                    // Write Vector Base Address Register (EL2)
+113: 
+114:     armv8_switch_to_el1_m x0, x1        // Move to EL1
+115: 
+116: EL1:
+117:     ldr x0, =MEM_KERNEL_STACK           // Main thread runs in EL1t and uses sp_el0
+118:     mov sp, x0                          // init its stack
+119: 
+120:     ldr	x0, =VectorTable	            // Init exception vector table for EL1
+121:     msr	vbar_el1, x0                    // Write Vector Base Address Register (EL1)
+122: 
+123:     b sysinit                           // Jump to C/C++ code
+124: 
+125: // End
+```
+
 ### Configuring, building and debugging {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
@@ -948,30 +995,33 @@ We can now configure and build our code, and start debugging.
 If we cause a trap, the output will be:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:20)
+Info   Current EL: 1 (main:18)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
-tInfo   SynchronousHandler EC=3C ISS=00003E8 (ExceptionHandler:63)
-Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:63)
-Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
-Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
+tInfo   SynchronousHandler EC=3C ISS=00003E8 (ExceptionHandler:64)
+Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:64)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:64)
 ```
 
 If we cause a memory violation, the output will be:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:20)
+Info   Current EL: 1 (main:18)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
-mInfo   SynchronousHandler EC=25 ISS=0000000 (ExceptionHandler:63)
-Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:63)
-Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
-Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:63)
+mInfo   SynchronousHandler EC=25 ISS=0000000 (ExceptionHandler:64)
+Info   SynchronousHandler EC=21 ISS=0000000 (ExceptionHandler:64)
+Info   SynchronousHandler EC=22 ISS=0000000 (ExceptionHandler:64)
 ```
 
-As can be found in [Arm� Architecture Registers](pdf/arm-architecture-registers.pdf), page 570, exception code 3C stands for "BRK instruction execution in AArch64 state", and on page 571, exception code 25 stands for "Data Abort taken without a change in Exception level."
+As can be found in [Arm Architecture Registers](pdf/arm-architecture-registers.pdf), page 570, exception code 3C stands for "BRK instruction execution in AArch64 state", and on page 571, exception code 25 stands for "Data Abort taken without a change in Exception level."
+
+The exception condition does not get resolved, so after the function returns, a new exception is thrown:
+
+- 21 stands for "Instruction Abort taken without a change in Exception level."
+- 22 stands for "PC alignment fault exception."
 
 ## Exception system - Step 2 {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2}
 
@@ -993,87 +1043,100 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 49: extern "C" {
 50: #endif
 51: 
-52: /// <summary>
-53: /// Exception abort frame
-54: ///
-55: /// Storage for register value in case of exception, in order to recover
-56: /// </summary>
-57: struct AbortFrame
-58: {
-59:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-60:     uint64	esr_el1;
-61:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
-62:     uint64	spsr_el1;
-63:     /// @brief General-purpose register, Link Register
-64:     uint64	x30;
-65:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-66:     uint64	elr_el1;
-67:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-68:     uint64	sp_el0;
-69:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-70:     uint64	sp_el1;
-71:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-72:     uint64	far_el1;
-73:     /// @brief Unused valuem used to align to 64 bytes
-74:     uint64	unused;
-75: }
-76: /// @brief Just specifies the struct is packed
-77: PACKED;
-78: 
-79: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-80: 
-81: #ifdef __cplusplus
-82: }
-83: #endif
-84: 
-85: namespace baremetal {
-86: 
-87: /// <summary>
-88: /// Exception handling system. Handles ARM processor exceptions
-89: /// 
-90: /// This is a singleton class, created as soon as GetExceptionSystem() is called
-91: /// </summary>
-92: class ExceptionSystem
-93: {
-94:     friend ExceptionSystem& GetExceptionSystem();
-95: 
-96: private:
-97:     ExceptionSystem();
-98: 
-99: public:
-100:     ~ExceptionSystem();
-101: 
-102:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
-103: };
-104: 
-105: /// <summary>
-106: /// Injectable exception handler
-107: /// </summary>
-108: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
-109: /// <param name="abortFrame">Stored state information at the time of exception</param>
-110: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
-111: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
-112: 
-113: const char* GetExceptionType(unsigned exceptionID);
-114: 
-115: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+52: /// @brief Exception abort frame
+53: ///
+54: /// Storage for register value in case of exception, in order to recover
+55: struct AbortFrame
+56: {
+57:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+58:     uint64	esr_el1;
+59:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
+60:     uint64	spsr_el1;
+61:     /// @brief General-purpose register, Link Register
+62:     uint64	x30;
+63:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+64:     uint64	elr_el1;
+65:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+66:     uint64	sp_el0;
+67:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+68:     uint64	sp_el1;
+69:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+70:     uint64	far_el1;
+71:     /// @brief Unused valuem used to align to 64 bytes
+72:     uint64	unused;
+73: }
+74: /// @brief Just specifies the struct is packed
+75: PACKED;
+76: 
+77: /// @brief Handles an exception, with the abort frame passed in.
+78: ///
+79: /// The exception handler is called from assembly code (ExceptionStub.S)
+80: /// @param exceptionID Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)
+81: /// @param abortFrame  Filled in AbortFrame instance.
+82: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+83: 
+84: /// @brief Handles an interrupt.
+85: ///
+86: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+87: void InterruptHandler();
+88: 
+89: #ifdef __cplusplus
+90: }
+91: #endif
+92: 
+93: namespace baremetal {
+94: 
+95: /// <summary>
+96: /// Exception handling system. Handles ARM processor exceptions
+97: ///
+98: /// This is a singleton class, created as soon as GetExceptionSystem() is called
+99: /// </summary>
+100: class ExceptionSystem
+101: {
+102:     /// <summary>
+103:     /// Construct the singleton exception system instance if needed, and return a reference to the instance. This is a friend function of class ExceptionSystem
+104:     /// </summary>
+105:     /// <returns>Reference to the singleton system instance</returns>
+106:     friend ExceptionSystem& GetExceptionSystem();
+107: 
+108: private:
+109:     ExceptionSystem();
+110: 
+111: public:
+112:     ~ExceptionSystem();
+113: 
+114:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
+115: };
 116: 
-117: ExceptionSystem& GetExceptionSystem();
-118: 
-119: } // namespace baremetal
+117: /// <summary>
+118: /// Injectable exception handler
+119: /// </summary>
+120: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+121: /// <param name="abortFrame">Stored state information at the time of exception</param>
+122: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
+123: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
+124: 
+125: const char* GetExceptionType(unsigned exceptionID);
+126: 
+127: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+128: 
+129: ExceptionSystem& GetExceptionSystem();
+130: 
+131: } // namespace baremetal
 ```
 
-- Line 79: We change the three exception handlers to a single one, `ExceptionHandler()`
-- Line 92-103: We declare the class `ExceptionSystem`
-  - Line 94: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
-  - Line 97: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
-  - Line 100: We declare the destructor
-  - Line 1102: We declare the method `Throw()` which will be called by `ExceptionHandler()`
-- Line 111: We declare the type for an injectable exception panic handler.
+- Line 82: We change the three exception handlers to a single one, `ExceptionHandler()`
+- Line 87: We declare the interrupt handler, `InterruptHandler()`
+- Line 10-115: We declare the class `ExceptionSystem`
+  - Line 106: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
+  - Line 109: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
+  - Line 112: We declare the destructor
+  - Line 114: We declare the method `Throw()` which will be called by `ExceptionHandler()`
+- Line 123: We declare the type for an injectable exception panic handler.
 This will be call by the `Throw()` method of `ExceptionSystem` if set, and will return true if the system should be halted, false if not
-- Line 113: We declare a helper function `GetExceptionType()` to convert an exception type into a string
-- Line 115: We declare a method to set the exception panice handler, returning the old installed handler, if any
-- Line 117: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
+- Line 125: We declare a helper function `GetExceptionType()` to convert an exception type into a string
+- Line 127: We declare a method to set the exception panic handler, returning the old installed handler, if any
+- Line 129: We declare the function `GetExceptionSystem()` that creates the singleton instance of the `ExceptionSystem` class, if needed
 
 ### ExceptionHandler.cpp {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONHANDLERCPP}
 
@@ -1084,148 +1147,163 @@ Update the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
 ```cpp
 File: code/libraries/baremetal/src/ExceptionHandler.cpp
 ...
-54: /// <summary>
-55: /// Handles an exception, with the abort frame passed in.
-56: ///
-57: /// The exception handler is called from assembly code (ExceptionStub.S)
-58: /// </summary>
-59: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
-60: /// <param name="abortFrame">Filled in AbortFrame instance</param>
-61: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
-62: {
-63:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-64: }
-65: 
-66: namespace baremetal {
+42: #include <baremetal/ARMInstructions.h>
+43: #include <baremetal/Assert.h>
+44: #include <baremetal/Logger.h>
+45: 
+46: /// @file
+47: /// Exception handler function implementation
+48: 
+49: /// @brief Define log name
+50: LOG_MODULE("ExceptionHandler");
+51: 
+52: /// <summary>
+53: /// Handles an exception, with the abort frame passed in.
+54: ///
+55: /// The exception handler is called from assembly code (ExceptionStub.S)
+56: /// </summary>
+57: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
+58: /// <param name="abortFrame">Filled in AbortFrame instance</param>
+59: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+60: {
+61:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
+62: }
+63: 
+64: void InterruptHandler()
+65: {
+66: }
 67: 
-68: /// <summary>
-69: /// Exception panic handler
-70: ///
-71: /// If set, the panic handler is called first, and if it returns false, the system is not halted (as it would by default)
-72: /// </summary>
-73: static ExceptionPanicHandler* s_exceptionPanicHandler{};
-74: 
-75: /// <summary>
-76: /// Names exception types
-77: ///
-78: /// Order must match exception identifiers in baremetal/Exception.h
-79: /// </summary>
-80: static const char* s_exceptionName[] =
-81: {
-82:     "Unexpected exception",
-83:     "Synchronous exception",
-84:     "System error"
-85: };
-86: 
-87: /// <summary>
-88: /// Constructor
-89: ///
-90: /// Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
-91: /// </summary>
-92: ExceptionSystem::ExceptionSystem()
-93: {
-94: }
-95: 
-96: /// <summary>
-97: /// Destructor
-98: /// </summary>
-99: ExceptionSystem::~ExceptionSystem()
-100: {
-101: }
-102: 
-103: /// <summary>
-104: /// Throw an exception to the exception system
-105: /// </summary>
-106: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
-107: /// <param name="abortFrame">Stored state information at the time of exception</param>
-108: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
-109: {
-110:     assert(abortFrame != nullptr);
-111: 
-112:     uint64 sp = abortFrame->sp_el0;
-113:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
-114:     {
-115:         sp = abortFrame->sp_el1;
-116:     }
-117: 
-118:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
-119:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
-120: 
-121:     uint64 FAR = 0;
-122:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
-123:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
-124:     {
-125:         FAR = abortFrame->far_el1;
-126:     }
-127: 
-128:     ReturnCode action = ReturnCode::ExitHalt;
-129:     if (s_exceptionPanicHandler != nullptr)
-130:     {
-131:         action = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
-132:     }
-133: 
-134:     if (action == ReturnCode::ExitHalt)
-135:         LOG_PANIC("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-136:             s_exceptionName[exceptionID],
-137:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-138:     else
-139:     {
-140:         LOG_ERROR("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
-141:             s_exceptionName[exceptionID],
-142:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
-143:         GetSystem().Reboot();
-144:     }
-145: }
-146: 
-147: /// @brief Convert exception ID to a string
-148: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
-149: /// @return String representation of exception ID
-150: const char* GetExceptionType(unsigned exceptionID)
-151: {
-152:     return s_exceptionName[exceptionID];
-153: }
-154: 
-155: /// @brief Register an exception callback function, and return the previous one.
-156: /// @param handler      Exception handler callback function to register
-157: /// @return Previously set exception handler callback function
-158: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler)
-159: {
-160:     auto result = s_exceptionPanicHandler;
-161:     s_exceptionPanicHandler = handler;
-162:     return result;
-163: }
-164: 
-165: /// <summary>
-166: /// Construct the singleton exception system instance if needed, and return a reference to the instance
-167: /// 
-168: /// This is a friend function of class ExceptionSystem
-169: /// </summary>
-170: /// <returns>Reference to the singleton exception system instance</returns>
-171: ExceptionSystem& GetExceptionSystem()
-172: {
-173:     static ExceptionSystem system;
-174:     return system;
-175: }
-176: 
-177: } // namespace baremetal
+68: namespace baremetal {
+69: 
+70: /// <summary>
+71: /// Exception panic handler
+72: ///
+73: /// If set, the panic handler is called first, and if it returns false, the system is not halted (as it would by default)
+74: /// </summary>
+75: static ExceptionPanicHandler* s_exceptionPanicHandler{};
+76: 
+77: /// <summary>
+78: /// Names exception types
+79: ///
+80: /// Order must match exception identifiers in baremetal/Exception.h
+81: /// </summary>
+82: static const char* s_exceptionName[] =
+83: {
+84:     "Unexpected exception",
+85:     "Synchronous exception",
+86:     "System error"
+87: };
+88: 
+89: /// <summary>
+90: /// Constructor
+91: ///
+92: /// Note that the constructor is private, so GetExceptionSystem() is needed to instantiate the exception handling system
+93: /// </summary>
+94: ExceptionSystem::ExceptionSystem()
+95: {
+96: }
+97: 
+98: /// <summary>
+99: /// Destructor
+100: /// </summary>
+101: ExceptionSystem::~ExceptionSystem()
+102: {
+103: }
+104: 
+105: /// <summary>
+106: /// Throw an exception to the exception system
+107: /// </summary>
+108: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+109: /// <param name="abortFrame">Stored state information at the time of exception</param>
+110: void ExceptionSystem::Throw(unsigned exceptionID, AbortFrame* abortFrame)
+111: {
+112:     assert(abortFrame != nullptr);
+113: 
+114:     uint64 sp = abortFrame->sp_el0;
+115:     if (SPSR_EL1_M30(abortFrame->spsr_el1) == SPSR_EL1_M30_EL1h)		// EL1h mode?
+116:     {
+117:         sp = abortFrame->sp_el1;
+118:     }
+119: 
+120:     uint64 EC = ESR_EL1_EC(abortFrame->esr_el1);
+121:     uint64 ISS = ESR_EL1_ISS(abortFrame->esr_el1);
+122: 
+123:     uint64 FAR = 0;
+124:     if ((ESR_EL1_EC_INSTRUCTION_ABORT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_DATA_ABORT_FROM_SAME_EL)
+125:         || (ESR_EL1_EC_WATCHPOINT_FROM_LOWER_EL <= EC && EC <= ESR_EL1_EC_WATCHPOINT_FROM_SAME_EL))
+126:     {
+127:         FAR = abortFrame->far_el1;
+128:     }
+129: 
+130:     ReturnCode action = ReturnCode::ExitHalt;
+131:     if (s_exceptionPanicHandler != nullptr)
+132:     {
+133:         action = (*s_exceptionPanicHandler)(exceptionID, abortFrame);
+134:     }
+135: 
+136:     if (action == ReturnCode::ExitHalt)
+137:         LOG_PANIC("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+138:             s_exceptionName[exceptionID],
+139:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+140:     else
+141:     {
+142:         LOG_ERROR("%s (PC %016llx, EC %016llx, ISS %016llx, FAR %016llx, SP %016llx, LR %016llx, SPSR %016llx)",
+143:             s_exceptionName[exceptionID],
+144:             abortFrame->elr_el1, EC, ISS, FAR, sp, abortFrame->x30, abortFrame->spsr_el1);
+145:         GetSystem().Reboot();
+146:     }
+147: }
+148: 
+149: /// @brief Convert exception ID to a string
+150: /// @param exceptionID  ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)
+151: /// @return String representation of exception ID
+152: const char* GetExceptionType(unsigned exceptionID)
+153: {
+154:     return s_exceptionName[exceptionID];
+155: }
+156: 
+157: /// @brief Register an exception callback function, and return the previous one.
+158: /// @param handler      Exception handler callback function to register
+159: /// @return Previously set exception handler callback function
+160: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler)
+161: {
+162:     auto result = s_exceptionPanicHandler;
+163:     s_exceptionPanicHandler = handler;
+164:     return result;
+165: }
+166: 
+167: /// <summary>
+168: /// Construct the singleton exception system instance if needed, and return a reference to the instance
+169: ///
+170: /// This is a friend function of class ExceptionSystem
+171: /// </summary>
+172: /// <returns>Reference to the singleton exception system instance</returns>
+173: ExceptionSystem& GetExceptionSystem()
+174: {
+175:     static ExceptionSystem system;
+176:     return system;
+177: }
 178: 
+179: } // namespace baremetal
 ```
 
-- Line 61-64: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
-- Line 73: We define a static variable `s_exceptionPanicHandler` to hold the injected exception panic handler pointer.
+- Line 43: As we are going to use `assert()`, we need to include its header
+- Line 59-62: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
+- Line 64-66: We implement the function `ExceptionHandler()` by calling the `Throw()` method on the singleton `ExceptionSystem` instance
+- Line 715: We define a static variable `s_exceptionPanicHandler` to hold the injected exception panic handler pointer.
 It is initialized as nullptr, meaning not handler is installed
-- Line 80-85: We define the mapping `s_exceptionName` from exception type to string
-- Line 92-94: We implement the `ExceptionSystem` constructor
-- Line 99-101: We implement the `ExceptionSystem` destructor
-- Line 108-145: We implement the method `Throw()`
-  - Line 112-116: We determine the stack pointer at the time of the exception, which is the EL0 stack pointer, unless the exception level was EL1h (We can only be in exception level EL0 or EL1, as we specifically move to EL1 in the startup code)
-  - Line 118-119: We extract the EC and ISS fields from the ESR_EL1 register value
-  - Line 122-126: If the exception has an exception code relating to an instruction abort, a data abort or a watchpoint, We get the value of the Fault Address Register, which holds the address which generated the exception
-  - Line 128-132: We call the exception panic handler if installed, setting its return value as the return code. If no handler is installed, the default is to halt
-  - Line 134-144: If we need to halt, we perform a panic log (which will halt the system), otherwise we log an error and reboot
-- Line 150-153: We implement the function `GetExceptionType()`
-- Line 158-163: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
-- Line 171-175: We implement the function `GetExceptionSystem()` in the by now common way
+- Line 82-87: We define the mapping `s_exceptionName` from exception type to string
+- Line 94-96: We implement the `ExceptionSystem` constructor
+- Line 101-103: We implement the `ExceptionSystem` destructor
+- Line 11-147: We implement the method `Throw()`
+  - Line 114-118: We determine the stack pointer at the time of the exception, which is the EL0 stack pointer, unless the exception level was EL1h (We can only be in exception level EL0 or EL1, as we specifically move to EL1 in the startup code)
+  - Line 120-121: We extract the EC and ISS fields from the ESR_EL1 register value
+  - Line 124-128: If the exception has an exception code relating to an instruction abort, a data abort or a watchpoint, We get the value of the Fault Address Register, which holds the address which generated the exception
+  - Line 130-134: We call the exception panic handler if installed, setting its return value as the return code. If no handler is installed, the default is to halt
+  - Line 136-146: If we need to halt, we perform a panic log (which will halt the system), otherwise we log an error and reboot
+- Line 152-155: We implement the function `GetExceptionType()`
+- Line 160-165: We implement the function `RegisterPanicHandler()`, which sets the `s_exceptionPanicHandler` variable, and returns the original value of this variable
+- Line 173-177: We implement the function `GetExceptionSystem()` in the by now common way
 
 ### ExceptionStub.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONSTUBS}
 
@@ -1317,33 +1395,34 @@ We can now configure and build our code, and start debugging.
 If we cause a trap, the output will be:
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:25)
+Info   Current EL: 1 (main:23)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
-tError  Synchronous exception (PC 00000000000808D8, EC 000000000000003C, ISS 00000000000003E8, FAR 0000000000000000, SP 000000000029FFB0, LR 0000000060000304, SPSR 0000000060000304) (ExceptionHandler:137)
+tError  Synchronous exception (PC 00000000000808D8, EC 000000000000003C, ISS 00000000000003E8, FAR 0000000000000000, SP 000000000029FFB0, LR 00000000000808CC, SPSR 0000000060000304) (ExceptionHandler:138)
 Info   Reboot (System:152)
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:25)
+Info   Current EL: 1 (main:23)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
 ```
 
 If we cause a memory violation, the output will be:
 
 ```text
-Info   Reboot (System:152)
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:25)
+Info   Current EL: 1 (main:23)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
-mError  Synchronous exception (PC 00000000000808EC, EC 0000000000000025, ISS 0000000000000000, FAR FFFFFFFFFF000000, SP 000000000029FFB0, LR 0000000060000304, SPSR 0000000060000304) (ExceptionHandler:137)
+mError  Synchronous exception (PC 00000000000808EC, EC 0000000000000025, ISS 0000000000000000, FAR FFFFFFFFFF000000, SP 000000000029FFB0, LR 00000000000808CC, SPSR 0000000060000304) (ExceptionHandler:138)
 Info   Reboot (System:152)
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:208)
-Info   Current EL: 1 (main:25)
+Info   Current EL: 1 (main:23)
 Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation
 ```
+
+As we can see, in the second case the exception was caused by memory address 0xFFFFFFFFFF000000, which is exactly the faulty address we were trying to read from.
 
 In both cases, the system reboots.
 

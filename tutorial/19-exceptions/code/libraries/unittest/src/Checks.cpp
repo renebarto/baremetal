@@ -37,7 +37,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include <unittest/Checks.h>
+#include "unittest/Checks.h"
 
 #include <baremetal/Format.h>
 #include <baremetal/Util.h>
@@ -68,7 +68,7 @@ static bool EqualCaseInsensitive(const string& a, const string& b)
 /// <returns>Result object</returns>
 AssertionResult AssertionSuccess()
 {
-    return AssertionResult(false, string());
+    return AssertionResult(false, string{});
 }
 
 /// <summary>
@@ -76,7 +76,7 @@ AssertionResult AssertionSuccess()
 /// </summary>
 /// <param name="message">Message to be included</param>
 /// <returns>Result object</returns>
-AssertionResult GenericFailure(const baremetal::string& message)
+AssertionResult GenericFailure(const string& message)
 {
     return AssertionResult(true, message);
 }

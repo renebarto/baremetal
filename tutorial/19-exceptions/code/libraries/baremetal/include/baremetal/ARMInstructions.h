@@ -90,6 +90,10 @@
 
 /// @brief Get current exception level
 #define GetCurrentEL(value)             asm volatile ("mrs %0, CurrentEL" : "=r" (value))
+/// @brief SPSR_EL1 M[3:0] field bit shift
+#define CURRENT_EL_SHIFT 2
+/// @brief SPSR_EL1 M[3:0] field bit mask
+#define CURRENT_EL_MASK BITS(2,3)
 
 /// @brief Get Saved Program Status Register (EL1)
 #define GetSPSR_EL1(value)              asm volatile ("mrs %0, SPSR_EL1" : "=r" (value))

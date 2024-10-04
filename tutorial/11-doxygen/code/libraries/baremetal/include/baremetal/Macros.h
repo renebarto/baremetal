@@ -52,4 +52,4 @@
 
 /// @brief Convert bit index into integer
 /// @param n Bit index
-#define BIT(n)              (1U << (n))
+#define BIT(n)              (1UL << (n))

@@ -68,7 +68,7 @@ public:
     TestInfo();
     TestInfo(const TestInfo&) = delete;
     TestInfo(TestInfo&&) = delete;
-    explicit TestInfo(Test* testInstance, const TestDetails& details);
+    TestInfo(Test* testInstance, const TestDetails& details);
 
     TestInfo& operator = (const TestInfo&) = delete;
     TestInfo& operator = (TestInfo&&) = delete;

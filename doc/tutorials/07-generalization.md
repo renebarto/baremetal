@@ -770,7 +770,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 43: #define WEAK                __attribute__ ((weak))
 44:
 45: // Convert bit index into integer
-46: #define BIT(n)              (1U << (n))
+46: #define BIT(n)              (1UL << (n))
 ```
 
 For the delete operators, we will create a new header and source file, to start preparing for memory management.

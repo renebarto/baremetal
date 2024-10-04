@@ -672,7 +672,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 40: #pragma once
 41:
 42: // Convert bit index into integer
-43: #define BIT(n)              (1U << (n))
+43: #define BIT(n)              (1UL << (n))
 ```
 
 For now, we'll define the macro BIT to define the value of a bit index index n, which is used to identify values of field in registers.

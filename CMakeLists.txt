@@ -315,9 +315,7 @@ message(STATUS "-- Version composed:                ${VERSION_MAJOR}.${VERSION_M
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 
-if (BAREMETAL_RPI_TARGET EQUAL 3)
-    add_subdirectory(code)
-endif()
+add_subdirectory(code)
 
 if(BUILD_TUTORIALS)
     add_subdirectory(tutorial)

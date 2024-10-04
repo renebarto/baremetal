@@ -28,6 +28,7 @@ SPSel.SP   Current stack pointer<br>
 <tr><td>ESR_EL1      <td>64   <td>R  <td>?          <td>Exception Syndrome Register (EL1)                       <td>Holds syndrome information for an exception taken to EL1</tr>
 <tr><td>SPSR_EL1     <td>64   <td>R/W<td>?          <td>Saved Program Status Register (EL1)                     <td>Holds the saved process state when an exception is taken to EL1.</tr>
 <tr><td>FAR_EL1      <td>64   <td>R/W<td>?          <td>Fault Address Register (EL1)                            <td>Holds the faulting Virtual Address for all synchronous Instruction or Data Abort, PC alignment fault and Watchpoint exceptions that are taken to EL1.</tr>
+<tr><td>VBAR_EL1     <td>64   <td>R/W<td>?          <td>Vector Base Address Register (EL1)                      <td>Holds the vector base address for the exception vector table for EL1. As this table needs to be aligned to 2048 bytes, the low 11 bits must be 0.</tr>
 <tr><td>DAIF         <td>64   <td>R/W<td>0x000003C0 <td>Interrupt Mask Bits                                     <td>Allows access to the interrupt mask bits.</tr>
 <tr><td>DAIFClr      <td>4    <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Reset Register                      <td></tr>
 <tr><td>DAIFSet      <td>4    <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Set Register                        <td></tr>

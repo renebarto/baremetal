@@ -92,8 +92,11 @@ void InterruptHandler();
 
 namespace baremetal {
 
-/// @brief Exception handling system. Handles ARM processor exceptions
+/// <summary>
+/// Exception handling system. Handles ARM processor exceptions
+///
 /// This is a singleton class, created as soon as GetExceptionSystem() is called
+/// </summary>
 class ExceptionSystem
 {
     /// <summary>

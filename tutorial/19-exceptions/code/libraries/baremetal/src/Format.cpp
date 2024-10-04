@@ -49,7 +49,7 @@
 namespace baremetal {
 
 /// @brief Write characters with base above 10 as uppercase or not
-static bool           Uppercase = true;
+static bool Uppercase = true;
 
 static void PrintValueInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 static void PrintValueInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);

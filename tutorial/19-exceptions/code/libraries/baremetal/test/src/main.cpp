@@ -11,3 +11,4 @@ int main()
 
     return static_cast<int>(ReturnCode::ExitHalt);
 }
+

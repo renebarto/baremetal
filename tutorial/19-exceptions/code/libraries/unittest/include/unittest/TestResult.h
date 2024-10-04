@@ -44,7 +44,7 @@
 
 /// @file
 /// Test result
-/// 
+///
 /// Result of a single test
 
 namespace unittest
@@ -52,7 +52,7 @@ namespace unittest
 
 /// <summary>
 /// Failure
-/// 
+///
 /// Holds information on an occurrred test failure
 /// </summary>
 class Failure
@@ -175,7 +175,7 @@ public:
     /// Return the list of failures for this test
     /// </summary>
     /// <returns>List of failures for this test</returns>
-    const FailureList & Failures() const { return m_failures; }
+    const FailureList& Failures() const { return m_failures; }
     /// <summary>
     /// Returns failure flag
     /// </summary>

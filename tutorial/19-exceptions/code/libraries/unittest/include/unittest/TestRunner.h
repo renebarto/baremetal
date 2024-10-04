@@ -134,6 +134,7 @@ private:
     TestResults m_testResults;
 
 public:
+    TestRunner() = delete;
     TestRunner(const TestRunner&) = delete;
     explicit TestRunner(ITestReporter* reporter);
     ~TestRunner();

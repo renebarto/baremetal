@@ -4360,91 +4360,90 @@ File: code/libraries/unittest/include/unittest/TestResults.h
 46: ///
 47: /// Results for a complete test run
 48: 
-49: namespace unittest
-50: {
-51: 
-52: class ITestReporter;
-53: class TestDetails;
-54: class TestSuiteInfo;
-55: class TestFixtureInfo;
-56: 
-57: /// <summary>
-58: /// Test results
-59: ///
-60: /// Holds the test results for a complete test run
-61: /// </summary>
-62: class TestResults
-63: {
-64: private:
-65:     /// @brief Selected test reporter
-66:     ITestReporter* m_reporter;
-67:     /// @brief Total count fo tests in test run
-68:     int m_totalTestCount;
-69:     /// @brief Total count of failed tests in test run
-70:     int m_failedTestCount;
-71:     /// @brief Total count of failures in test run
-72:     int m_failureCount;
-73:     /// @brief Flag for failure in current test, set to true if at least one failure occurred in the current test
-74:     bool m_currentTestFailed;
-75: 
-76: public:
-77:     explicit TestResults(ITestReporter* reporter = nullptr);
-78:     TestResults(const TestResults&) = delete;
-79:     TestResults(TestResults&&) = delete;
-80:     virtual ~TestResults();
-81: 
-82:     TestResults& operator = (const TestResults&) = delete;
-83:     TestResults& operator = (TestResults&&) = delete;
-84: 
-85:     void OnTestSuiteStart(TestSuiteInfo* suite);
-86:     void OnTestSuiteFinish(TestSuiteInfo* suite);
-87:     void OnTestFixtureStart(TestFixtureInfo* fixture);
-88:     void OnTestFixtureFinish(TestFixtureInfo* fixture);
-89:     void OnTestStart(const TestDetails& details);
-90:     void OnTestFailure(const TestDetails& details, const baremetal::string& message);
-91:     void OnTestFinish(const TestDetails& details);
-92: 
-93:     /// <summary>
-94:     /// Returns the number of tests in the test run
-95:     /// </summary>
-96:     /// <returns>Number of tests in the test run</returns>
-97:     int GetTotalTestCount() const { return m_totalTestCount; }
-98:     /// <summary>
-99:     /// Returns the number of failed tests in the test run
-100:     /// </summary>
-101:     /// <returns>Number of failed tests in the test run</returns>
-102:     int GetFailedTestCount() const { return m_failedTestCount; }
-103:     /// <summary>
-104:     /// Returns the number of failures in the test run
-105:     /// </summary>
-106:     /// <returns>Number of failures in the test run</returns>
-107:     int GetFailureCount() const { return m_failureCount; }
-108: 
-109: };
-110: 
-111: } // namespace unittest
+49: namespace unittest {
+50: 
+51: class ITestReporter;
+52: class TestDetails;
+53: class TestSuiteInfo;
+54: class TestFixtureInfo;
+55: 
+56: /// <summary>
+57: /// Test results
+58: ///
+59: /// Holds the test results for a complete test run
+60: /// </summary>
+61: class TestResults
+62: {
+63: private:
+64:     /// @brief Selected test reporter
+65:     ITestReporter* m_reporter;
+66:     /// @brief Total count fo tests in test run
+67:     int m_totalTestCount;
+68:     /// @brief Total count of failed tests in test run
+69:     int m_failedTestCount;
+70:     /// @brief Total count of failures in test run
+71:     int m_failureCount;
+72:     /// @brief Flag for failure in current test, set to true if at least one failure occurred in the current test
+73:     bool m_currentTestFailed;
+74: 
+75: public:
+76:     explicit TestResults(ITestReporter* reporter = nullptr);
+77:     TestResults(const TestResults&) = delete;
+78:     TestResults(TestResults&&) = delete;
+79:     virtual ~TestResults();
+80: 
+81:     TestResults& operator = (const TestResults&) = delete;
+82:     TestResults& operator = (TestResults&&) = delete;
+83: 
+84:     void OnTestSuiteStart(TestSuiteInfo* suite);
+85:     void OnTestSuiteFinish(TestSuiteInfo* suite);
+86:     void OnTestFixtureStart(TestFixtureInfo* fixture);
+87:     void OnTestFixtureFinish(TestFixtureInfo* fixture);
+88:     void OnTestStart(const TestDetails& details);
+89:     void OnTestFailure(const TestDetails& details, const baremetal::string& message);
+90:     void OnTestFinish(const TestDetails& details);
+91: 
+92:     /// <summary>
+93:     /// Returns the number of tests in the test run
+94:     /// </summary>
+95:     /// <returns>Number of tests in the test run</returns>
+96:     int GetTotalTestCount() const { return m_totalTestCount; }
+97:     /// <summary>
+98:     /// Returns the number of failed tests in the test run
+99:     /// </summary>
+100:     /// <returns>Number of failed tests in the test run</returns>
+101:     int GetFailedTestCount() const { return m_failedTestCount; }
+102:     /// <summary>
+103:     /// Returns the number of failures in the test run
+104:     /// </summary>
+105:     /// <returns>Number of failures in the test run</returns>
+106:     int GetFailureCount() const { return m_failureCount; }
+107: 
+108: };
+109: 
+110: } // namespace unittest
 ```
 
-- Line 66: The member `m_reporter` holds the pointer to the test reporter interface being used
-- Line 68: The member `m_totalTestCount` holds the total number of tests run
-- Line 70: The member `m_failedTestCount` holds the total failed test count
-- Line 72: The member `m_failureCount` holds the total failure count. A test can have multiple failures
-- Line 74: The member `m_currentTestFailed` is true if any test case for the current test failed
-- Line 77: We declare an explicit constructor taking a pointer to a test reporter interface
-- Line 78-79: We remove the copy and move constructors
-- Line 80: We declare the destructor
-- Line 82-83: We remove the assignment and move assignment operators
-- Line 85: The method `OnTestSuiteStart()` marks the start of a test suite run. This will also call `ReportTestSuiteStart()` on the test reporter
-- Line 86: The method `OnTestSuiteFinish()` marks the end of a test suite run. This will also call `ReportTestSuiteFinish()` on the test reporter
-- Line 87: The method `OnTestFixtureStart()` marks the start of a test fixture run. This will also call `ReportTestFixtureStart()` on the test reporter
-- Line 88: The method `OnTestFixtureFinish()` marks the end of a test fixture run. This will also call `ReportTestFixtureFinish()` on the test reporter
-- Line 89: The method `OnTestStart()` marks the start of a test run. This will also call `ReportTestStart()` on the test reporter
-- Line 90: The method `OnTestFailure()` marks the failure in a test run.
+- Line 65: The member `m_reporter` holds the pointer to the test reporter interface being used
+- Line 67: The member `m_totalTestCount` holds the total number of tests run
+- Line 69: The member `m_failedTestCount` holds the total failed test count
+- Line 71: The member `m_failureCount` holds the total failure count. A test can have multiple failures
+- Line 73: The member `m_currentTestFailed` is true if any test case for the current test failed
+- Line 76: We declare an explicit constructor taking a pointer to a test reporter interface
+- Line 77-78: We remove the copy and move constructors
+- Line 79: We declare the destructor
+- Line 81-82: We remove the assignment and move assignment operators
+- Line 84: The method `OnTestSuiteStart()` marks the start of a test suite run. This will also call `ReportTestSuiteStart()` on the test reporter
+- Line 85: The method `OnTestSuiteFinish()` marks the end of a test suite run. This will also call `ReportTestSuiteFinish()` on the test reporter
+- Line 86: The method `OnTestFixtureStart()` marks the start of a test fixture run. This will also call `ReportTestFixtureStart()` on the test reporter
+- Line 87: The method `OnTestFixtureFinish()` marks the end of a test fixture run. This will also call `ReportTestFixtureFinish()` on the test reporter
+- Line 88: The method `OnTestStart()` marks the start of a test run. This will also call `ReportTestStart()` on the test reporter
+- Line 89: The method `OnTestFailure()` marks the failure in a test run.
 This will also call `ReportTestFailure()` on the test reporter. This is the only method from the previous declaration that changed
-- Line 91: The method `OnTestFinish()` marks the end of a test run. This will also call `ReportTestFinish()` on the test reporter
-- Line 97: The method `GetTotalTestCount()` returns the total number of tests run
-- Line 102: The method `GetFailedTestCount()` returns the total number of tests that failed
-- Line 107: The method `GetFailureCount()` returns the total number of failures found. A test can have more than one failure
+- Line 90: The method `OnTestFinish()` marks the end of a test run. This will also call `ReportTestFinish()` on the test reporter
+- Line 96: The method `GetTotalTestCount()` returns the total number of tests run
+- Line 101: The method `GetFailedTestCount()` returns the total number of tests that failed
+- Line 106: The method `GetFailureCount()` returns the total number of failures found. A test can have more than one failure
 
 ### TestResults.cpp {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRESULTSCPP}
 
@@ -4467,115 +4466,114 @@ File: code/libraries/unittest/src/TestResults.cpp
 50: 
 51: using namespace baremetal;
 52: 
-53: namespace unittest
-54: {
-55: 
-56: /// <summary>
-57: /// Constructor
-58: /// </summary>
-59: /// <param name="testReporter">Test reporter to use</param>
-60: TestResults::TestResults(ITestReporter* testReporter)
-61:     : m_reporter{ testReporter }
-62:     , m_totalTestCount{}
-63:     , m_failedTestCount{}
-64:     , m_failureCount{}
-65:     , m_currentTestFailed{}
-66: {
-67: }
-68: 
-69: /// <summary>
-70: /// Destructor
-71: /// </summary>
-72: TestResults::~TestResults()
-73: {
-74: }
-75: 
-76: /// <summary>
-77: /// Start a test suite run
-78: /// </summary>
-79: /// <param name="suite">Test suite to start</param>
-80: void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
-81: {
-82:     if (m_reporter)
-83:         m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
-84: }
-85: 
-86: /// <summary>
-87: /// Finish a test suite run
-88: /// </summary>
-89: /// <param name="suite">Test suite to finish</param>
-90: void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
-91: {
-92:     if (m_reporter)
-93:         m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
-94: }
-95: 
-96: /// <summary>
-97: /// Start a test fixture run
-98: /// </summary>
-99: /// <param name="fixture">Test fixture to start</param>
-100: void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
-101: {
-102:     if (m_reporter)
-103:         m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
-104: }
-105: 
-106: /// <summary>
-107: /// Finish a test fixture run
-108: /// </summary>
-109: /// <param name="fixture">Test fixture to finish</param>
-110: void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
-111: {
-112:     if (m_reporter)
-113:         m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
-114: }
-115: 
-116: /// <summary>
-117: /// Start a test
-118: /// </summary>
-119: /// <param name="details">Test details of test to start</param>
-120: void TestResults::OnTestStart(const TestDetails& details)
-121: {
-122:     ++m_totalTestCount;
-123:     m_currentTestFailed = false;
-124:     if (m_reporter)
-125:         m_reporter->ReportTestStart(details);
-126: }
-127: 
-128: /// <summary>
-129: /// Add a test failure
-130: /// </summary>
-131: /// <param name="details"></param>
-132: /// <param name="message">Test failure string</param>
-133: void TestResults::OnTestFailure(const TestDetails& details, const string& message)
-134: {
-135:     ++m_failureCount;
-136:     if (!m_currentTestFailed)
-137:     {
-138:         ++m_failedTestCount;
-139:         m_currentTestFailed = true;
-140:     }
-141:     if (m_reporter)
-142:         m_reporter->ReportTestFailure(details, message);
-143: }
-144: 
-145: /// <summary>
-146: /// Finish a test
-147: /// </summary>
-148: /// <param name="details">Test details of test to finish</param>
-149: void TestResults::OnTestFinish(const TestDetails& details)
-150: {
-151:     if (m_reporter)
-152:         m_reporter->ReportTestFinish(details, !m_currentTestFailed);
-153: }
-154: 
-155: } // namespace unittest
+53: namespace unittest {
+54: 
+55: /// <summary>
+56: /// Constructor
+57: /// </summary>
+58: /// <param name="testReporter">Test reporter to use</param>
+59: TestResults::TestResults(ITestReporter* testReporter)
+60:     : m_reporter{ testReporter }
+61:     , m_totalTestCount{}
+62:     , m_failedTestCount{}
+63:     , m_failureCount{}
+64:     , m_currentTestFailed{}
+65: {
+66: }
+67: 
+68: /// <summary>
+69: /// Destructor
+70: /// </summary>
+71: TestResults::~TestResults()
+72: {
+73: }
+74: 
+75: /// <summary>
+76: /// Start a test suite run
+77: /// </summary>
+78: /// <param name="suite">Test suite to start</param>
+79: void TestResults::OnTestSuiteStart(TestSuiteInfo* suite)
+80: {
+81:     if (m_reporter)
+82:         m_reporter->ReportTestSuiteStart(suite->Name(), suite->CountFixtures());
+83: }
+84: 
+85: /// <summary>
+86: /// Finish a test suite run
+87: /// </summary>
+88: /// <param name="suite">Test suite to finish</param>
+89: void TestResults::OnTestSuiteFinish(TestSuiteInfo* suite)
+90: {
+91:     if (m_reporter)
+92:         m_reporter->ReportTestSuiteFinish(suite->Name(), suite->CountFixtures());
+93: }
+94: 
+95: /// <summary>
+96: /// Start a test fixture run
+97: /// </summary>
+98: /// <param name="fixture">Test fixture to start</param>
+99: void TestResults::OnTestFixtureStart(TestFixtureInfo* fixture)
+100: {
+101:     if (m_reporter)
+102:         m_reporter->ReportTestFixtureStart(fixture->Name(), fixture->CountTests());
+103: }
+104: 
+105: /// <summary>
+106: /// Finish a test fixture run
+107: /// </summary>
+108: /// <param name="fixture">Test fixture to finish</param>
+109: void TestResults::OnTestFixtureFinish(TestFixtureInfo* fixture)
+110: {
+111:     if (m_reporter)
+112:         m_reporter->ReportTestFixtureFinish(fixture->Name(), fixture->CountTests());
+113: }
+114: 
+115: /// <summary>
+116: /// Start a test
+117: /// </summary>
+118: /// <param name="details">Test details of test to start</param>
+119: void TestResults::OnTestStart(const TestDetails& details)
+120: {
+121:     ++m_totalTestCount;
+122:     m_currentTestFailed = false;
+123:     if (m_reporter)
+124:         m_reporter->ReportTestStart(details);
+125: }
+126: 
+127: /// <summary>
+128: /// Add a test failure
+129: /// </summary>
+130: /// <param name="details"></param>
+131: /// <param name="message">Test failure string</param>
+132: void TestResults::OnTestFailure(const TestDetails& details, const string& message)
+133: {
+134:     ++m_failureCount;
+135:     if (!m_currentTestFailed)
+136:     {
+137:         ++m_failedTestCount;
+138:         m_currentTestFailed = true;
+139:     }
+140:     if (m_reporter)
+141:         m_reporter->ReportTestFailure(details, message);
+142: }
+143: 
+144: /// <summary>
+145: /// Finish a test
+146: /// </summary>
+147: /// <param name="details">Test details of test to finish</param>
+148: void TestResults::OnTestFinish(const TestDetails& details)
+149: {
+150:     if (m_reporter)
+151:         m_reporter->ReportTestFinish(details, !m_currentTestFailed);
+152: }
+153: 
+154: } // namespace unittest
 ```
 
 Most methods are quite straightforward.
 
-- Line 120-126: The `OnTestStart()` method also counts the tests run, and resets the flag whether the test failed
-- Line 133-143: The `OnTestFailure()` method increments the failure count, and if this is the first failure in the test, also increments the failed test count
+- Line 119-125: The `OnTestStart()` method also counts the tests run, and resets the flag whether the test failed
+- Line 132-142: The `OnTestFailure()` method increments the failure count, and if this is the first failure in the test, also increments the failed test count
 
 ### TestRunner.h {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_TEST_RUNNER_AND_VISITOR___STEP_7_TESTRUNNERH}
 

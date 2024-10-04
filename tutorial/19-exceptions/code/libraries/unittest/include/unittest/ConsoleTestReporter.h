@@ -90,7 +90,7 @@ private:
     baremetal::string TestFixtureStartMessage(const baremetal::string& fixtureName, int numberOfTests);
     baremetal::string TestFixtureFinishMessage(const baremetal::string& fixtureName, int numberOfTests);
     baremetal::string TestFailureMessage(const TestResult& result, const Failure& failure);
-    baremetal::string TestFinishMessage(const TestDetails& details, bool success);
+    baremetal::string TestFinishMessage(const TestDetails& test, bool success);
     baremetal::string TestRunSummaryMessage(const TestResults& results);
     baremetal::string TestRunOverviewMessage(const TestResults& results);
 };

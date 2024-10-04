@@ -1752,7 +1752,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 48: #define WEAK                __attribute__ ((weak))
 49:
 50: // Convert bit index into integer
-51: #define BIT(n)              (1U << (n))
+51: #define BIT(n)              (1UL << (n))
 ```
 
 ### RPIPropertiesInterface.cpp {#TUTORIAL_09_MAILBOX_ADDING_THE_PROPERTIES_INTERFACE___STEP_4_RPIPROPERTIESINTERFACECPP}

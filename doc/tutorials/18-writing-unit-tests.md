@@ -18,7 +18,7 @@ This tutorial will result in (next to the main project structure):
 
 As said in the previous tutorial, in tutorials [15-string](#TUTORIAL_15_STRING) and [16-serializing-and-formatting](#TUTORIAL_16_SERIALIZATION_AND_FORMATTING) we have been adding quite some code, and added assertion to verify correctness.
 
-We'll now focus on creating macros to create test suites, test fixtures and test, and for creating actual test cases.
+We'll now focus on creating macros to create test suites, test fixtures and tests, and for creating actual test cases.
 When that is done, we'll convert the tests in the two mentioned tutorials to actual class tests.
 
 ## Adding macros for creating tests, fixtures and suites - Step 1 {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1}
@@ -109,8 +109,8 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 75: class FixtureClass##TestName##Helper : public FixtureClass                                                  \
 76: {                                                                                                           \
 77: public:                                                                                                     \
-78:     FixtureClass##TestName##Helper(const FixtureClass##TestName##Helper &) = delete;                        \
-79:     explicit FixtureClass##TestName##Helper(unittest::TestDetails const & details) :                        \
+78:     FixtureClass##TestName##Helper(const FixtureClass##TestName##Helper&) = delete;                         \
+79:     explicit FixtureClass##TestName##Helper(unittest::TestDetails const& details) :                         \
 80:         m_details{ details }                                                                                \
 81:     {                                                                                                       \
 82:         SetUp();                                                                                            \
@@ -119,9 +119,9 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 85:     {                                                                                                       \
 86:         TearDown();                                                                                         \
 87:     }                                                                                                       \
-88:     FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
+88:     FixtureClass##TestName##Helper& operator = (const FixtureClass##TestName##Helper&) = delete;            \
 89:     void RunImpl() const;                                                                                   \
-90:     unittest::TestDetails const & m_details;                                                                \
+90:     unittest::TestDetails const& m_details;                                                                 \
 91: };                                                                                                          \
 92:                                                                                                             \
 93: class Test##FixtureClass##TestName : public unittest::Test                                                  \
@@ -160,9 +160,9 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 
 - Line 50-59: We define the macro `TEST_EX`. This is used by macro `TEST`,
 The parameters are the name of the test `TestName` and the reference to the singleton `TestRegistry` instance `Registry`.
-- It declares the class `Test<TestName>`, which inherits from `Test`, and defines an instance named `test<TestName>Instance`.
-- It then defines a `TestRegistrar` instance named `registrar<TestName>` which registers the instance `test<TestName>Instance`.
-- It then starts the definition of the `RunImpl()` which is expected to be followed by the actual implementation of the test.
+  - It declares the class `Test<TestName>`, which inherits from `Test`, and defines an instance named `test<TestName>Instance`.
+  - It then defines a `TestRegistrar` instance named `registrar<TestName>` which registers the instance `test<TestName>Instance`.
+  - It then starts the definition of the `RunImpl()` which is expected to be followed by the actual implementation of the test.
 Compare this to the application code we wrote before:
 
 ```cpp
@@ -200,16 +200,34 @@ TEST(MyTest)
 }
 ```
 
+This will translate to:
+
+```cpp
+class TestMyTest : public unittest::Test
+{
+private:
+    virtual void RunImpl() const override;
+} testMyTestInstance;
+
+static unittest::TestRegistrar registrarMyTest(unittest::TestRegistry::GetTestRegistry(), &testMyTestInstance, unittest::TestDetails(baremetal::string("MyTest"), baremetal::string(""), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__));
+
+void TestMyTest::RunImpl() const
+{
+    // Test implementation
+}
+```
+
 - Line 74-106: We define the macro `TEST_FIXTURE_EX`. This is used by macro `TEST_FIXTURE`,
 The parameters are the name of the fixture class `FixtureClass`, the name of the test `TestName` and the reference to the singleton `TestRegistry` instance `Registry`.
-- It declares the class `<FixtureClass><TestName>Helper`, which inherits from the `FixtureClass`, the class we defined for the fixture.
-- It then declares a class `Test<FixtureClass><TestName>`, which inherits from `TestBase`, and defines an instance named `test<FixtureClass><TestName>Instance`.
-- It then defines a `TestRegistrar` instance named `registrar<FixtureClass><TestName>` which registers the instance `test<FixtureClass><TestName>Instance`.
-- It then defines the implement of `RunImpl()` for the class `Test<FixtureClass><TestName>`. This creates and instance of class `<FixtureClass><TestName>Helper`.
-Through the constructor, the `SetUp()` method is called
-- Finally, it then starts the definition of the `RunImpl()` for the class `<FixtureClass><TestName>Helper` which is expected to be followed by the actual implementation of the test.
+  - It declares the class `<FixtureClass><TestName>Helper`, which inherits from the `FixtureClass`, the class we defined for the fixture.
+  - It then declares a class `Test<FixtureClass><TestName>`, which inherits from `Test`, and defines an instance named `test<FixtureClass><TestName>Instance`.
+  - It then defines a `TestRegistrar` instance named `registrar<FixtureClass><TestName>` which registers the instance `test<FixtureClass><TestName>Instance`.
+  - It then defines the implementation of `RunImpl()` for the class `Test<FixtureClass><TestName>`.
+  This creates an instance of class `<FixtureClass><TestName>Helper`.
+Through the constructor, the `SetUp()` method is called.
+Through the desctructor, the `TearDown()` method is called
+  - Finally, it then starts the definition of the `RunImpl()` for the class `<FixtureClass><TestName>Helper` which is expected to be followed by the actual implementation of the test.
 Compare this to the application code we wrote before:
-- When the `RunImpl()` method for the class `Test<FixtureClass><TestName>` exits, the desctructor for `<FixtureClass><TestName>Helper` is called, which runs the `TearDown()` method
 
 ```cpp
 File: code/applications/demo/src/main.cpp
@@ -272,10 +290,10 @@ File: code/applications/demo/src/main.cpp
   - `myTest3` is `test##FixtureClass##TestName##Instance`
   - `registrarFixtureMyTest3` is `registrar##FixtureClass##TestName`
 
-- Line 113: We define the macro `TEST_FIXTURE` which uses `TEST_FIXTURE_EX` to register the test named `TestName` for test firture class `FixtureClass`.
-The parameters are the name of the fixture class `FixtureClass`, the name of the test `TestName`.
+- Line 113: We define the macro `TEST_FIXTURE` which uses `TEST_FIXTURE_EX` to register the test named `TestName` for test fixture class `FixtureClass`.
+The parameters are the name of the fixture class `FixtureClass` and the name of the test `TestName`.
 The `TEST_FIXTURE` macro is intended for tests that do belong to a test fixture.
-The way this macro can be used is as follow:
+The way this macro can be used is as follows:
 
 ```cpp
 class MyFixture
@@ -298,12 +316,68 @@ TEST_FIXTURE(MyFixture, MyTest)
 }
 ```
 
-Of course there can be multiple tests in a fixture, so the `TEST_FIXTURE` macro can be repeated
+This will translate to:
 
-- Line 118-126: We define the macro `TEST_SUITE` which defined a test suite. It create a namespace for the test suite named `SuiteName`, as wel the `GetSuiteName()` function inside the namespace.
+```cpp
+class MyFixture
+    : public TestFixture
+{
+public:
+    void SetUp() override
+    {
+        // Setup code
+    }
+    void TearDown() override
+    {
+        // Teardown code
+    }
+};
+
+class MyFixtureMyTestHelper : public MyFixture
+{
+public:
+    MyFixtureMyTestHelper(const MyFixtureMyTestHelper&) = delete;
+    explicit MyFixtureMyTestHelper(unittest::TestDetails const& details) :
+        m_details{ details }
+    {
+        SetUp();
+    }
+    virtual ~MyFixtureMyTestHelper()
+    {
+        TearDown();
+    }
+    MyFixtureMyTestHelper& operator = (const MyFixtureMyTestHelper&) = delete;
+    void RunImpl() const;
+    unittest::TestDetails const& m_details;
+};
+
+class TestMyFixtureMyTest : public unittest::Test
+{
+private:
+    void RunImpl() const override;
+} testMyFixtureMyTestInstance;
+
+unittest::TestRegistrar registrarMyFixtureMyTest(unittest::TestRegistry::GetTestRegistry(), &testMyFixtureMyTestInstance, TestDetails(baremetal::string("MyTest"), baremetal::string("MyFixture"), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__));
+
+void TestMyFixtureMyTest::RunImpl() const
+{
+    MyFixtureMyTestHelper fixtureHelper(*CurrentTest::Details());
+    fixtureHelper.RunImpl();
+}
+void MyFixture##MyTest##Helper::RunImpl() const
+{
+    // Test implementation
+}
+```
+
+Of course there can be multiple tests in a fixture, so the `TEST_FIXTURE` macro can be repeated.
+There will still only be one declaration of the test fixture class.
+
+- Line 118-126: We define the macro `TEST_SUITE` which defines a test suite.
+It create a namespace for the test suite named `SuiteName`, as wel the `GetSuiteName()` function inside the namespace.
 The only parameter is the name of the test suite `SuiteName`.
-The `TEST_SUITE` macro is intended for create a test suite around tests and test fixtures.
-Compare the defintion of this macro to the application code we wrote before:
+The `TEST_SUITE` macro is intended for creating a test suite around tests and test fixtures.
+Compare the definition of this macro to the application code we wrote before:
 
 ```cpp
 File: code/applications/demo/src/main.cpp
@@ -544,7 +618,7 @@ Update the file `CMakeLists.txt`
 
 ```cpp
 File: CMakeLists.txt
-67: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" OFF)
+72: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" OFF)
 ```
 
 ### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
@@ -554,24 +628,30 @@ We can now configure and build our code, and start debugging.
 The application will run the tests. As we have one failure in `Test3`, and two in `Test4`, we expect to see two failing tests, and three failures in total.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 [===========] Running 4 tests from 4 fixtures in 3 suites.
 [   SUITE   ] Suite1 (1 fixture)
 [  FIXTURE  ] FixtureMyTest1 (1 test)
+Debug  MyTest SetUp (main:23)
 Debug  Suite1::FixtureMyTest1::MyTest1MyTestHelper 1 (main:33)
+Debug  MyTest TearDown (main:27)
 [ SUCCEEDED ] Suite1::FixtureMyTest1::MyTest1
 [  FIXTURE  ] 1 test from FixtureMyTest1
 [   SUITE   ] 1 fixture from Suite1
 [   SUITE   ] Suite2 (1 fixture)
 [  FIXTURE  ] FixtureMyTest2 (1 test)
+Debug  FixtureMyTest2 SetUp (main:47)
 Debug  Suite2::FixtureMyTest2::MyTest2MyTestHelper 2 (main:57)
+Debug  FixtureMyTest2 TearDown (main:51)
 [ SUCCEEDED ] Suite2::FixtureMyTest2::MyTest2
 [  FIXTURE  ] 1 test from FixtureMyTest2
 [   SUITE   ] 1 fixture from Suite2
 [   SUITE   ] DefaultSuite (2 fixtures)
 [  FIXTURE  ] FixtureMyTest3 (1 test)
+Debug  FixtureMyTest3 SetUp (main:68)
 Debug  DefaultSuite::FixtureMyTest3::MyTest3MyTestHelper 3 (main:78)
+Debug  FixtureMyTest3 TearDown (main:72)
 [ SUCCEEDED ] DefaultSuite::FixtureMyTest3::MyTest3
 [  FIXTURE  ] 1 test from FixtureMyTest3
 [  FIXTURE  ] DefaultFixture (1 test)
@@ -587,6 +667,7 @@ Failures:
 [===========] 4 tests from 4 fixtures in 3 suites ran.
 Info   Wait 5 seconds (main:94)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Creating test cases - Step 2 {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2}
@@ -599,10 +680,13 @@ TEST(MyTest)
 {
     bool b{};
     EXPECT_FALSE(b);
-    ASSERT_TRUE(!b);
-    ASSERT_EQ(b, false);
+    EXPECT_TRUE(!b);
+    EXPECT_EQ(b, false);
 }
 ```
+
+These macros are similar to the ones used in Google Test. Google Test defines two versions, `ASSERT_<x>` to immediately terminate the test by throwing an exception, and `EXPECT_<x>` to register the failure but continue running a test.
+As we do not have C++ exceptions for now, we'll only implement the `CHECK_<x>` variants.
 
 Let's create macros to perform these checks, and and a mechanism to trace back the reason for a failure, for example when we expect to have a certain value, what the expected and actual values were.
 
@@ -869,7 +953,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 249: /// Helper class for {ASSERT|EXPECT}_EQ/NE
 250: ///
 251: /// Forms generalized mechanism for calling polymorphic check functions.
-252: /// The template argument lhs_is_null_literal is true iff the first argument to ASSERT_EQ()
+252: /// The template argument lhs_is_null_literal is true iff the first argument to EXPECT_EQ()
 253: /// is a null pointer literal.  The following default implementation is
 254: /// for lhs_is_null_literal being false.
 255: /// </summary>
@@ -914,14 +998,14 @@ File: code/libraries/unittest/include/unittest/Checks.h
 294: } // namespace unittest
 ```
 
-- Line 60-79: We define a struct `AssertionResult` which holds the status for a single assertion.
+- Line 60-79: We define a struct `AssertionResult` which holds the status for a single assertion (check).
   - Line 67-71: We define the constructor
   - Line 73: The member variable `failed` flags whether the assertion failed
-  - Line 75: The member vairbale `message` holds the failure message, if any
+  - Line 75: The member variable `message` holds the failure message, if any
   - Line 78: The `bool()` operator returns the value of `failed`
 - Line 81: We declare a function `AssertionSuccess()` to signify a successful assert
 - Line 82: We declare a function `GenericFailure()` to signify a generic assertion failure (e.g. `FAIL`)
-- Line 83: We declare a function `BooleanFailure()` to signify a assertion failure on a boolean expression (e.g. `ASSERT_FALSE`, `EXPECT_TRUE`)
+- Line 83: We declare a function `BooleanFailure()` to signify a assertion failure on a boolean expression (e.g. `EXPECT_FALSE`)
 - Line 86: We declare a function `EqFailure()` to signify a assertion failure on a equality expression (e.g. `EXPECT_EQ`)
 - Line 90: We declare a function `InEqFailure()` to signify a assertion failure on a inequality expression (e.g. `EXPECT_NE`)
 - Line 101-105: We declare a template function `CheckTrue()` to convert a value to a boolean, returning true if the value is true, or not equal to 0
@@ -1003,7 +1087,7 @@ File: code/libraries/unittest/src/Checks.cpp
 52: /// <returns>Result object</returns>
 53: AssertionResult AssertionSuccess()
 54: {
-55:     return AssertionResult(false, string());
+55:     return AssertionResult(false, string{});
 56: }
 57: 
 58: /// <summary>
@@ -1273,7 +1357,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 - Line 103-108: We define a template function `UniversalPrint` which uses the `Print()` method in the `UniversalPrinter` class
 - Line 114-127: We declare a template class `UniversalTersePrinter` for type `T` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 - Line 132-145: We declare a specialization of `UniversalTersePrinter` for type `T&` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-- Line 153-159: We define a template function `PrintToString()` which uses the `Print()` method of any matching class `UniversalTersePrinter`
+- Line 153-159: We define a template function `PrintToString()` which uses the `Print()` method of any matching class `UniversalTersePrinter`, and returns the resulting string
 
 ### AssertMacros.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_ASSERTMACROSH}
 
@@ -1330,151 +1414,83 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 45: /// @file
 46: /// Assertion macros
 47: 
-48: #ifdef ASSERT_TRUE
-49:     #error unittest redefines ASSERT_TRUE
+48: #ifdef EXPECT_TRUE
+49:     #error unittest redefines EXPECT_TRUE
 50: #endif
 51: 
-52: #ifdef ASSERT_FALSE
-53:     #error unittest redefines ASSERT_FALSE
+52: #ifdef EXPECT_FALSE
+53:     #error unittest redefines EXPECT_FALSE
 54: #endif
 55: 
-56: #ifdef ASSERT_EQ
-57:     #error unittest redefines ASSERT_EQ
+56: #ifdef EXPECT_EQ
+57:     #error unittest redefines EXPECT_EQ
 58: #endif
 59: 
-60: #ifdef ASSERT_NE
-61:     #error unittest redefines ASSERT_NE
+60: #ifdef EXPECT_NE
+61:     #error unittest redefines EXPECT_NE
 62: #endif
 63: 
-64: #ifdef EXPECT_TRUE
-65:     #error unittest redefines EXPECT_TRUE
-66: #endif
-67: 
-68: #ifdef EXPECT_FALSE
-69:     #error unittest redefines EXPECT_FALSE
-70: #endif
+64: /// @brief Generic expect macro. Checks if the argument is true, generates a failure if the check fails
+65: #define UT_EXPECT_RESULT(value) \
+66:     do \
+67:     { \
+68:         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
+69:             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
+70:     } while (0)
 71: 
-72: #ifdef EXPECT_EQ
-73:     #error unittest redefines EXPECT_EQ
-74: #endif
+72: /// @brief Expect predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_EXPECT_RESULT if predicate function returns false
+73: #define EXPECT_PRED_FORMAT1(pred_format, v1) \
+74:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), v1))
 75: 
-76: #ifdef EXPECT_NE
-77:     #error unittest redefines EXPECT_NE
-78: #endif
+76: /// @brief Expect predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_EXPECT_RESULT if predicate function returns false
+77: #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
+78:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
 79: 
-80: /// @brief Generic expect macro. Checks if the argument is true, generates a failure if the check fails
-81: #define UT_EXPECT_RESULT(value) \
-82:     do \
-83:     { \
-84:         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
-85:             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
-86:     } while (0)
-87: /// @brief Generic assert macro. Checks if the argument is true, generates a failure if the check fails, and throws an exception (not implemented yet)
-88: #define UT_ASSERT_RESULT(value) \
-89:     do \
-90:     { \
-91:         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
-92:         { \
-93:             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
-94:             /*throw ::unittest::AssertionFailedException(__FILE__, __LINE__);*/ \
-95:         } \
-96:     } while (0)
-97: 
-98: /// @brief Expect predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_EXPECT_RESULT if predicate function returns false
-99: #define EXPECT_PRED_FORMAT1(pred_format, v1) \
-100:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), v1))
-101: /// @brief Assert predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-102: #define ASSERT_PRED_FORMAT1(pred_format, v1) \
-103:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), v1))
-104: 
-105: /// @brief Expect predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_EXPECT_RESULT if predicate function returns false
-106: #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
-107:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-108: /// @brief Assert predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-109: #define ASSERT_PRED_FORMAT2(pred_format, v1, v2) \
-110:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-111: 
-112: /// @brief Force failure with message
-113: #define FAIL(message) UT_EXPECT_RESULT(GenericFailure(message))
-114: /// @brief Assert that value is true
-115: #define ASSERT_TRUE(value) \
-116:     do \
-117:     { \
-118:         ASSERT_PRED_FORMAT1(::unittest::CheckTrue, value); \
-119:     } while (0)
-120: /// @brief Expect that value is true
-121: #define EXPECT_TRUE(value) \
-122:     do \
-123:     { \
-124:         EXPECT_PRED_FORMAT1(::unittest::CheckTrue, value); \
-125:     } while (0)
-126: 
-127: /// @brief Assert that value is false
-128: #define ASSERT_FALSE(value) \
-129:     do \
-130:     { \
-131:         ASSERT_PRED_FORMAT1(::unittest::CheckFalse, value); \
-132:     } while (0)
-133: /// @brief Expect that value is false
-134: #define EXPECT_FALSE(value) \
-135:     do \
-136:     { \
-137:         EXPECT_PRED_FORMAT1(::unittest::CheckFalse, value); \
-138:     } while (0)
-139: 
-140: /// @brief Assert that actual value is equal to expected value
-141: #define ASSERT_EQ(expected, actual) \
-142:     do \
-143:     { \
-144:         ASSERT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
-145:     } while (0)
-146: /// @brief Expect that actual value is equal to expected value
-147: #define EXPECT_EQ(expected, actual) \
-148:     do \
-149:     { \
-150:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
-151:     } while (0)
-152: 
-153: /// @brief Assert that actual value is not equal to expected value
-154: #define ASSERT_NE(expected, actual) \
-155:     do \
-156:     { \
-157:         ASSERT_PRED_FORMAT2(::unittest::EqHelper::CheckNotEqual, expected, actual); \
-158:     } while (0)
-159: /// @brief Expect that actual value is not equal to expected value
-160: #define EXPECT_NE(expected, actual) \
-161:     do \
-162:     { \
-163:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckNotEqual, expected, actual); \
-164:     } while (0)
+80: /// @brief Force failure with message
+81: #define FAIL(message) UT_EXPECT_RESULT(GenericFailure(message))
+82: /// @brief Expect that value is true
+83: #define EXPECT_TRUE(value) \
+84:     do \
+85:     { \
+86:         EXPECT_PRED_FORMAT1(::unittest::CheckTrue, value); \
+87:     } while (0)
+88: 
+89: /// @brief Expect that value is false
+90: #define EXPECT_FALSE(value) \
+91:     do \
+92:     { \
+93:         EXPECT_PRED_FORMAT1(::unittest::CheckFalse, value); \
+94:     } while (0)
+95: 
+96: /// @brief Expect that actual value is equal to expected value
+97: #define EXPECT_EQ(expected, actual) \
+98:     do \
+99:     { \
+100:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
+101:     } while (0)
+102: 
+103: /// @brief Expect that actual value is not equal to expected value
+104: #define EXPECT_NE(expected, actual) \
+105:     do \
+106:     { \
+107:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckNotEqual, expected, actual); \
+108:     } while (0)
 ```
 
-- Line 48-78: We check whether any of the defines defined in this header are already defined. If so compilation ends with an error
-- Line 81-86: We define a macro `UT_EXPECT_RESULT` which checks if the parameter passed (which is of type `AssertionResult`) has a failure (using the `bool()` method).
+- Line 48-62: We check whether any of the defines defined in this header are already defined. If so compilation ends with an error
+- Line 65-70: We define a macro `UT_EXPECT_RESULT` which checks if the parameter passed (which is of type `AssertionResult`) has a failure (using the `bool()` method).
 If there is a failure, a test failure is added to the current result
-- Line 88-96: We define a macro `UT_ASSERT_RESULT` which checks if the parameter passed (which is of type `AssertionResult`) has a failure (using the `bool()` method).
-If there is a failure, a test failure is added to the current result. Normally an exception would be thrown, however as we don't have exceptions enabled yet, that will wait until later
-- Line 99-100: We define a macro `EXPECT_PRED_FORMAT1` which is passed a check function and a single parameter.
+- Line 73-74: We define a macro `EXPECT_PRED_FORMAT1` which is passed a check function and a single parameter.
 The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
-The single parameter version is used with `CheckTrue()` or `CheckFalse` to check the result of a boolean expression
-- Line 102-103: We define a macro `ASSERT_PRED_FORMAT1` which is passed a check function and a single parameter.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The single parameter version is used with `CheckTrue()` or `CheckFalse` to check the result of a boolean expression
-- Line 106-107: We define a macro `EXPECT_PRED_FORMAT2` which is passed a check function and two parameters.
+The single parameter version is used with `CheckTrue()` or `CheckFalse()` to check the result of a boolean expression
+- Line 76-78: We define a macro `EXPECT_PRED_FORMAT2` which is passed a check function and two parameters.
 The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
 The two parameter version is used with `EqHelper::CheckEqual()` or `EqHelper::CheckNotEqual()` to check the result of a comparison expression
-- Line 109-110: We define a macro `ASSERT_PRED_FORMAT2` which is passed a check function and two parameters.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The two parameter version is used with `EqHelper::CheckEqual()` or `EqHelper::CheckNotEqual()` to check the result of a comparison expression
-- Line 113: We define a macro `FAIL` which uses `UT_EXPECT_RESULT` to return a `GenericFailure`
-- Line 115-119: We define a macro `ASSERT_TRUE` which uses `ASSERT_PRED_FORMAT1` with `CheckTrue` to check if the parameter is true, and generate a `BooleanFailure` if the check fails
-- Line 121-125: We define a macro `EXPECT_TRUE` which uses `EXPECT_PRED_FORMAT1` with `CheckTrue` to check if the parameter is true, and generate a `BooleanFailure` if the check fails
-- Line 128-132: We define a macro `ASSERT_FALSE` which uses `ASSERT_PRED_FORMAT1` with `CheckFalse` to check if the parameter is false, and generate a `BooleanFailure` if the check fails
-- Line 134-138: We define a macro `EXPECT_FALSE` which uses `EXPECT_PRED_FORMAT1` with `CheckFalse` to check if the parameter is false, and generate a `BooleanFailure` if the check fails
-- Line 141-145: We define a macro `ASSERT_EQ` which uses `ASSERT_PRED_FORMAT2` with `EqHelper::CheckEqual` to check if the parameters are equal, and generate a `EqFailure` if the check fails
-- Line 147-151: We define a macro `EXPECT_EQ` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckEqual` to check if the parameters are equal, and generate a `EqFailure` if the check fails
-- Line 154-158: We define a macro `ASSERT_NE` which uses `ASSERT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
-- Line 160-164: We define a macro `EXPECT_NE` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
+- Line 81: We define a macro `FAIL` which uses `UT_EXPECT_RESULT` to return a `GenericFailure`
+- Line 83-87: We define a macro `EXPECT_TRUE` which uses `EXPECT_PRED_FORMAT1` with `CheckTrue` to check if the parameter is true, and generate a `BooleanFailure` if the check fails
+- Line 90-94: We define a macro `EXPECT_FALSE` which uses `EXPECT_PRED_FORMAT1` with `CheckFalse` to check if the parameter is false, and generate a `BooleanFailure` if the check fails
+- Line 97-101: We define a macro `EXPECT_EQ` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckEqual` to check if the parameters are equal, and generate a `EqFailure` if the check fails
+- Line 104-108: We define a macro `EXPECT_NE` which uses `EXPECT_PRED_FORMAT2` with `EqHelper::CheckNotEqual` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
 
 ### unittest.h {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_UNITTESTH}
 
@@ -1650,7 +1666,7 @@ File: code\applications\demo\src\main.cpp
 89: 
 90: TEST(MyTest)
 91: {
-92:     ASSERT_TRUE(false);
+92:     EXPECT_TRUE(false);
 93: }
 94: 
 95: int main()
@@ -1680,8 +1696,7 @@ File: code\applications\demo\src\main.cpp
 - Line 31-34: We change the `Test1` function to a call to `FAIL()`, this will generate a simple failure
 - Line 55-61: We change the `Test2` function to boolean checks. Obviously, `EXPECT_TRUE(false)` and `EXPECT_FALSE(true)` will fail.
 - Line 79-88: We change the `Test3` function to equality checks. Obviously, `EXPECT_EQ(x, y)` and ` EXPECT_NE(y, z)` will fail.
-- Line 90-93: We change the `Test4` function to a failed assertion.
-As said before, this should throw an exception, but for now this is commented out, so it will result in a normal failure, and the test run will continue
+- Line 90-93: We change the `Test4` function to a failed check
 
 ### Configuring, building and debugging {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
 
@@ -1690,21 +1705,27 @@ We can now configure and build our code, and start debugging.
 The application will run the tests.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 [===========] Running 4 tests from 4 fixtures in 3 suites.
 [   SUITE   ] Suite1 (1 fixture)
 [  FIXTURE  ] FixtureMyTest1 (1 test)
+Debug  MyTest SetUp (main:23)
+Debug  MyTest TearDown (main:27)
 [  FAILED   ] Suite1::FixtureMyTest1::MyTest1
 [  FIXTURE  ] 1 test from FixtureMyTest1
 [   SUITE   ] 1 fixture from Suite1
 [   SUITE   ] Suite2 (1 fixture)
 [  FIXTURE  ] FixtureMyTest2 (1 test)
+Debug  FixtureMyTest2 SetUp (main:47)
+Debug  FixtureMyTest2 TearDown (main:51)
 [  FAILED   ] Suite2::FixtureMyTest2::MyTest2
 [  FIXTURE  ] 1 test from FixtureMyTest2
 [   SUITE   ] 1 fixture from Suite2
 [   SUITE   ] DefaultSuite (2 fixtures)
 [  FIXTURE  ] FixtureMyTest3 (1 test)
+Debug  FixtureMyTest3 SetUp (main:71)
+Debug  FixtureMyTest3 TearDown (main:75)
 [  FAILED   ] DefaultSuite::FixtureMyTest3::MyTest3
 [  FIXTURE  ] 1 test from FixtureMyTest3
 [  FIXTURE  ] DefaultFixture (1 test)
@@ -1738,11 +1759,12 @@ Failures:
 [===========] 4 tests from 4 fixtures in 3 suites ran.
 Info   Wait 5 seconds (main:102)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Test assert macro extension - Step 3 {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3}
 
-We can now perform boolean checks and compare integers, but we would also like to be able to compare pointers and strings.
+We can now perform boolean checks and compare integers, but we would also like to be able to compare pointers, strings.
 So we'll extend the macros a bit.
 
 ### Checks.h {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_CHECKSH}
@@ -2010,7 +2032,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 499: } // namespace unittest
 ```
 
-- Line 94-99: We declare a function `CloseFailure()` to signify a assertion failure on comparison between numbers with a fault tolerance
+- Line 94-99: We declare a function `CloseFailure()` to signify a assertion failure on comparison between numbers with a fault tolerance (for floating point numbers)
 - Line 254-255: We declare a new variant of the function `CheckEqualInternal()`, which compares two values `expected` and `actual` of type const char*.
 Their stringified versions are passed as `expectedExpression` and `actualExpression`.
 If the values are considered equal, `AssertionSuccess()` is returned, otherwise, `EqFailure()` is returned
@@ -2092,7 +2114,7 @@ If the values are considered not equal, `AssertionSuccess()` is returned, otherw
 - Line 352-355: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type string and `actual` of type const char*.
 Their stringified versions are passed as `expectedExpression` and `actualExpression`.
 If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
-- Line 356-360: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char* and `actual` of type string.
+- Line 357-360: We declare a new variant of the function `CheckNotEqualInternalIgnoreCase()`, which compares ignoring case two values `expected` of type const char* and `actual` of type string.
 Their stringified versions are passed as `expectedExpression` and `actualExpression`.
 If the values are considered not equal, `AssertionSuccess()` is returned, otherwise, `InEqFailure()` is returned
 - Line 371: We change the class `EqHelper` into a template class that receives a template parameter signifying whether the expected value is a null pointer
@@ -2830,6 +2852,7 @@ Update the file `code/libraries/unittest/include/unittest/PrintValue.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/PrintValue.h
 ...
+48: /// @brief null pointer type
 49: using nullptr_t = decltype(nullptr);
 50: 
 51: /// <summary>
@@ -2956,20 +2979,8 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 172: /// </summary>
 173: /// <param name="str">Value to print</param>
 174: /// <param name="s">Resulting string</param>
-175: inline void PrintTo(const baremetal::string& str, baremetal::string& s)
-176: {
-177:     PrintStringTo(str, s);
-178: }
-179: 
-180: /// <summary>
-181: /// Print a nullptr to string
-182: /// </summary>
-183: /// <param name="s">Resulting string</param>
-184: inline void PrintTo(nullptr_t /*p*/, baremetal::string& s)
-185: {
-186:     PrintStringTo(baremetal::string("null"), s);
-187: }
 ...
+File: d:\Projects\baremetal.test\code\libraries\unittest\include\unittest\PrintValue.h
 216: /// <summary>
 217: /// Universal printer class for reference type, using PrintTo()
 218: /// </summary>
@@ -3088,6 +3099,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 331:         UniversalTersePrinter<const char*>::Print(str, s);
 332:     }
 333: };
+334: 
 ...
 ```
 
@@ -3096,18 +3108,18 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 - Line 76: We declare a variant of `PrintTo()` to print an unsigned char to string
 - Line 82: We declare a variant of `PrintTo()` to print a signed char to string
 - Line 88-91: We define a variant of `PrintTo()` to print a character to string using the function for unsigned char
-- Line 168: We declare a variant of  `PrintTo()` to print a const char* string to string
+- Line 108: We declare a variant of  `PrintTo()` to print a const char* string to string
 - Line 114-117: We define a variant of  `PrintTo()` to print a char* string to string using the print function for const char*
-- Line 126-129: We define a variant of  `PrintTo()` to print a const signed char* pointer to string using the print function for const void*
+- Line 126-129: We define a variant of  `PrintTo()` to print a const signed char* pointer to string using the print function for const void*, which uses the specialization of `Serialize()` for const void*
 - Line 137-140: We define a variant of  `PrintTo()` to print a signed char* pointer to string using the print function for const void*
 - Line 148-151: We define a variant of  `PrintTo()` to print a const unsigned char* pointer to string using the print function for const void*
 - Line 159-162: We define a variant of  `PrintTo()` to print a unsigned char* pointer to string using the print function for const void*
-- Line 169: We declare a function `PrintStringTo()` to print a string to a string
+- Line 170: We declare a function `PrintStringTo()` to print a string to a string
 - Line 175-178: We define a variant of  `PrintTo()` to print a string to a string, which uses `PrintStringTo()`
 - Line 184-187: We define a variant of  `PrintTo()` to print a nullptr to a string, which uses `PrintStringTo()`
 - Line 220-240: We declare a specialization of `UniversalPrinter` for type `T&` that has a single method `Print()` which calls any defined `PrintTo()` function for the value passed to a string, with a prefix to display the address of the string
 - Line 295-315: We declare a template class `UniversalTersePrinter` specialization for type `const char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
-- Line 321-333: We declare a template class `UniversalTersePrinter` specialization for type `char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
+- Line 320-333: We declare a template class `UniversalTersePrinter` specialization for type `char*` that has a single method `Print()` which calls any defined `UniversalPrint()` function for the value passed to a string
 
 ### PrintValue.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_PRINTVALUECPP}
 
@@ -3181,169 +3193,112 @@ Update the file `code/libraries/unittest/include/unittest/AssertMacros.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/AssertMacros.h
 ...
-64: #ifdef ASSERT_NEAR
-65:     #error unittest redefines ASSERT_NEAR
+64: #ifdef EXPECT_NEAR
+65:     #error unittest redefines EXPECT_NEAR
 66: #endif
 67: 
+68: namespace unittest
+69: {
+70: 
+71: namespace internal
+72: {
+73: 
+74: // Two overloaded helpers for checking at compile time whether an
+75: // expression is a null pointer literal (i.e. nullptr or any 0-valued
+76: // compile-time integral constant).  Their return values have
+77: // different sizes, so we can use sizeof() to test which version is
+78: // picked by the compiler.  These helpers have no implementations, as
+79: // we only need their signatures.
+80: //
+81: // Given IsNullLiteralHelper(x), the compiler will pick the first
+82: // version if x can be implicitly converted to Secret*, and pick the
+83: // second version otherwise.  Since Secret is a secret and incomplete
+84: // type, the only expression a user can write that has type Secret* is
+85: // a null pointer literal.  Therefore, we know that x is a null
+86: // pointer literal if and only if the first version is picked by the
+87: // compiler.
+88: class Secret;
+89: /// <summary>
+90: /// Conversion check function to check whether argument is a pointer
+91: /// 
+92: /// Not implemented, never called, only declared for return type size
+93: /// </summary>
+94: /// <param name="p">Argument</param>
+95: /// <returns>Unused</returns>
+96: char IsNullLiteralHelper(Secret* p);
+97: /// <summary>
+98: /// Conversion check function to check whether argument is not a pointer
+99: /// 
+100: /// Not implemented, never called, only declared for return type size
+101: /// </summary>
+102: /// <returns>Unused</returns>
+103: char (&IsNullLiteralHelper(...))[2];
+104: 
+105: } // namespace internal
+106: 
+107: } // namespace unittest
+108: 
 ...
-84: #ifdef EXPECT_NEAR
-85:     #error unittest redefines EXPECT_NEAR
-86: #endif
-87: 
-88: namespace unittest
-89: {
-90: 
-91: namespace internal
-92: {
-93: 
-94: // Two overloaded helpers for checking at compile time whether an
-95: // expression is a null pointer literal (i.e. nullptr or any 0-valued
-96: // compile-time integral constant).  Their return values have
-97: // different sizes, so we can use sizeof() to test which version is
-98: // picked by the compiler.  These helpers have no implementations, as
-99: // we only need their signatures.
-100: //
-101: // Given IsNullLiteralHelper(x), the compiler will pick the first
-102: // version if x can be implicitly converted to Secret*, and pick the
-103: // second version otherwise.  Since Secret is a secret and incomplete
-104: // type, the only expression a user can write that has type Secret* is
-105: // a null pointer literal.  Therefore, we know that x is a null
-106: // pointer literal if and only if the first version is picked by the
-107: // compiler.
-108: class Secret;
-109: /// <summary>
-110: /// Conversion check function to check whether argument is a pointer
-111: /// 
-112: /// Not implemented, never called, only declared for return type size
-113: /// </summary>
-114: /// <param name="p">Argument</param>
-115: /// <returns>Unused</returns>
-116: char IsNullLiteralHelper(Secret* p);
-117: /// <summary>
-118: /// Conversion check function to check whether argument is not a pointer
-119: /// 
-120: /// Not implemented, never called, only declared for return type size
-121: /// </summary>
-122: /// <returns>Unused</returns>
-123: char (&IsNullLiteralHelper(...))[2];
-124: 
-125: } // namespace internal
-126: 
-127: } // namespace unittest
-128: 
-129: 
-130: /// @brief Boolean expression to check whether the argument is a null literal. Returns true if the argument is nullptr, false otherwise
-131: #define IS_NULL_LITERAL(x) \
-132:      (sizeof(::unittest::internal::IsNullLiteralHelper(x)) == 1)
+129: /// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_EXPECT_RESULT if predicate function returns false
+130: #define EXPECT_PRED_FORMAT3(pred_format, v1, v2, v3) \
+131:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
+132: 
 ...
-166: /// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_EXPECT_RESULT if predicate function returns false
-167: #define EXPECT_PRED_FORMAT3(pred_format, v1, v2, v3) \
-168:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-169: /// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-170: #define ASSERT_PRED_FORMAT3(pred_format, v1, v2, v3) \
-171:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-172: 
-...
-201: /// @brief Assert that actual value is equal to expected value
-202: #define ASSERT_EQ(expected, actual) \
-203:     do \
-204:     { \
-205:         ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
-206:     } while (0)
-207: /// @brief Expect that actual value is equal to expected value
-208: #define EXPECT_EQ(expected, actual) \
-209:     do \
-210:     { \
-211:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
-212:     } while (0)
-213: 
-214: /// @brief Assert that actual value is not equal to expected value
-215: #define ASSERT_NE(expected, actual) \
-216:     do \
-217:     { \
-218:         ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
-219:     } while (0)
-220: /// @brief Expect that actual value is not equal to expected value
-221: #define EXPECT_NE(expected, actual) \
-222:     do \
-223:     { \
-224:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
-225:     } while (0)
-226: 
-227: /// @brief Assert that actual value is equal to expected value ignoring case
-228: #define ASSERT_EQ_IGNORE_CASE(expected, actual) \
-229:     do \
-230:     { \
-231:         ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
-232:     } while (0)
-233: /// @brief Expect that actual value is equal to expected value ignoring case
-234: #define EXPECT_EQ_IGNORE_CASE(expected, actual) \
-235:     do \
-236:     { \
-237:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
-238:     } while (0)
-239: 
-240: /// @brief Assert that actual value is not equal to expected value ignoring case
-241: #define ASSERT_NE_IGNORE_CASE(expected, actual) \
-242:     do \
-243:     { \
-244:         ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
-245:     } while (0)
-246: /// @brief Expect that actual value is not equal to expected value ignoring case
-247: #define EXPECT_NE_IGNORE_CASE(expected, actual) \
-248:     do \
-249:     { \
-250:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
-251:     } while (0)
-252: 
-253: /// @brief Assert that actual value is equal to expected value within tolerance (for floating point comparison)
-254: #define ASSERT_NEAR(expected, actual, tolerance) \
-255:     do \
-256:     { \
-257:         ASSERT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
-258:     } while (0)
-259: /// @brief Expect that actual value is equal to expected value within tolerance (for floating point comparison)
-260: #define EXPECT_NEAR(expected, actual, tolerance) \
-261:     do \
-262:     { \
-263:         EXPECT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
-264:     } while (0)
-265: 
-266: /// @brief Assert that value is nullptr
-267: #define ASSERT_NULL(value) ASSERT_EQ(nullptr, value)
-268: /// @brief Expect that value is nullptr
-269: #define EXPECT_NULL(value) EXPECT_EQ(nullptr, value)
-270: /// @brief Assert that value is not nullptr
-271: #define ASSERT_NOT_NULL(value) ASSERT_NE(nullptr, value)
-272: /// @brief Expect that value is not nullptr
-273: #define EXPECT_NOT_NULL(value) EXPECT_NE(nullptr, value)
+149: /// @brief Expect that actual value is equal to expected value
+150: #define EXPECT_EQ(expected, actual) \
+151:     do \
+152:     { \
+153:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
+154:     } while (0)
+155: 
+156: /// @brief Expect that actual value is not equal to expected value
+157: #define EXPECT_NE(expected, actual) \
+158:     do \
+159:     { \
+160:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
+161:     } while (0)
+162: 
+163: /// @brief Expect that actual value is equal to expected value ignoring case
+164: #define EXPECT_EQ_IGNORE_CASE(expected, actual) \
+165:     do \
+166:     { \
+167:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
+168:     } while (0)
+169: 
+170: /// @brief Expect that actual value is not equal to expected value ignoring case
+171: #define EXPECT_NE_IGNORE_CASE(expected, actual) \
+172:     do \
+173:     { \
+174:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
+175:     } while (0)
+176: 
+177: /// @brief Expect that actual value is equal to expected value within tolerance (for floating point comparison)
+178: #define EXPECT_NEAR(expected, actual, tolerance) \
+179:     do \
+180:     { \
+181:         EXPECT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
+182:     } while (0)
+183: 
+184: /// @brief Expect that value is nullptr
+185: #define EXPECT_NULL(value) EXPECT_EQ(nullptr, value)
+186: /// @brief Expect that value is not nullptr
+187: #define EXPECT_NOT_NULL(value) EXPECT_NE(nullptr, value)
 ```
 
-- Line 64-66: We check whether the define `ASSERT_NEAR` is already defined. If so compilation ends with an error
-- Line 84-86: We check whether the define `EXPECT_NEAR` is already defined. If so compilation ends with an error
-- Line 116-123: We declare two functions `IsNullLiteralHelper()`, of which one takes a pointer, and the other takes a variable argument list.
+- Line 64-66: We check whether the define `EXPECT_NEAR` is already defined. If so compilation ends with an error
+- Line 96-103: We declare two functions `IsNullLiteralHelper()`, of which one takes a pointer, and the other takes a variable argument list.
 This is some trickery, to determine if the parameter passed is a nullptr. The first returns a single character, the other a pointer to a char array, resulting in different return types and thus sizes
-- Line 131-132: We define a macro `IS_NULL_LITERAL` which is used to check if a pointer is a null pointer
-- Line 167-168: We define a macro `EXPECT_PRED_FORMAT3` which is passed a check function and three parameters.
+- Line 110-111: We define a macro `IS_NULL_LITERAL` which is used to check if a pointer is a null pointer
+- Line 130-131: We define a macro `EXPECT_PRED_FORMAT3` which is passed a check function and three parameters.
 The check function is called, and the result is passed to `UT_EXPECT_RESULT`.
 The three parameter version is used with `CheckClose()` to check the result of comparison with a tolerance
-- Line 170-171: We define a macro `ASSERT_PRED_FORMAT3` which is passed a check function and three parameters.
-The check function is called, and the result is passed to `UT_ASSERT_RESULT`.
-The three parameter version is used with `CheckClose()` to check the result of comparison with a tolerance
-- Line 202-206: We change the macro `ASSERT_EQ` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 208-212: We change the macro `EXPECT_EQ` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 215-219: We change the macro `ASSERT_NE` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 221-225: We change the macro `EXPECT_NE` to use the `EqHelper` class depending on whether the argument is a nullptr or not
-- Line 228-232: We define a macro `ASSERT_EQ_IGNORE_CASE` which uses `ASSERT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckEqualIgnoreCase` to check if the parameters are not equal, and generate a `EqFailure` if the check fails
-- Line 234-238: We define a macro `EXPECT_EQ_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckEqualIgnoreCase` to check if the parameters are not equal, and generate a `EqFailure` if the check fails
-- Line 241-245: We define a macro `ASSERT_NE_IGNORE_CASE` which uses `ASSERT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
-- Line 247-251: We define a macro `EXPECT_NE_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
-- Line 254-258: We define a macro `ASSERT_NEAR` which uses `ASSERT_PRED_FORMAT3` with `CheckClose` to check if the absolute difference of compared values is within tolerance, and generate a `CloseFailure` if the check fails
-- Line 260-264: We define a macro `EXPECT_NEAR` which uses `EXPECT_PRED_FORMAT3` with `CheckClose` to check if the absolute difference of compared values is within tolerance, and generate a `CloseFailure` if the check fails
-- Line 267: We define a macro `ASSERT_NULL` to check if the parameter is a null pointer, and generate a `EqFailure` if the check fails
-- Line 269: We define a macro `EXPECT_NULL` to check if the parameter is a null pointer, and generate a `EqFailure` if the check fails
-- Line 271: We define a macro `ASSERT_NOT_NULL` to check if the parameter is not a null pointer, and generate a `InEqFailure` if the check fails
-- Line 273: We define a macro `EXPECT_NOT_NULL` to check if the parameter is not a null pointer, and generate a `InEqFailure` if the check fails
+- Line 150-154: We change the macro `EXPECT_EQ` to use the `EqHelper` class depending on whether the argument is a nullptr or not
+- Line 157-161: We change the macro `EXPECT_NE` to use the `EqHelper` class depending on whether the argument is a nullptr or not
+- Line 164-168: We define a macro `EXPECT_EQ_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckEqualIgnoreCase` to check if the parameters are not equal, and generate a `EqFailure` if the check fails
+- Line 171-175: We define a macro `EXPECT_NE_IGNORE_CASE` which uses `EXPECT_PRED_FORMAT2` with `EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase` to check if the parameters are not equal, and generate a `InEqFailure` if the check fails
+- Line 178-182: We define a macro `EXPECT_NEAR` which uses `EXPECT_PRED_FORMAT3` with `CheckClose` to check if the absolute difference of compared values is within tolerance, and generate a `CloseFailure` if the check fails
+- Line 185: We define a macro `EXPECT_NULL` to check if the parameter is a null pointer, and generate a `EqFailure` if the check fails
+- Line 187: We define a macro `EXPECT_NOT_NULL` to check if the parameter is not a null pointer, and generate a `InEqFailure` if the check fails
 
 ### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_UPDATE_PROJECT_CONFIGURATION}
 
@@ -3353,11 +3308,6 @@ Update the file `code/libraries/unittest/CMakeLists.txt`
 
 ```cmake
 File: code/libraries/unittest/CMakeLists.txt
-25: set(PROJECT_LIBS
-26:     ${LINKER_LIBRARIES}
-27:     ${PROJECT_DEPENDENCIES}
-28:     )
-29: 
 30:     set(PROJECT_SOURCES
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
@@ -3400,117 +3350,77 @@ File: code/libraries/unittest/CMakeLists.txt
 
 ### Application code {#TUTORIAL_18_WRITING_UNIT_TESTS_TEST_ASSERT_MACRO_EXTENSION___STEP_3_APPLICATION_CODE}
 
-We'll use `Test` to use the new macros defined.
+We'll use `MyTest` to use the new macros defined.
 
 Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
 File: code\applications\demo\src\main.cpp
 ...
-90: TEST(Test4)
+90: TEST(MyTest)
 91: {
 92:    int* p = nullptr;
 93:    int dd = 123;
 94:    int* q = &dd;
 95:    int* r = &dd;
-96:    ASSERT_NULL(p);
-97:    EXPECT_NULL(p);
-98:    ASSERT_NULL(q);
-99:    EXPECT_NULL(q);
-100:    ASSERT_NOT_NULL(p);
-101:    EXPECT_NOT_NULL(p);
-102:    ASSERT_NOT_NULL(q);
-103:    EXPECT_NOT_NULL(q);
-104:    baremetal::string s1 = "A";
-105:    baremetal::string s2 = "B";
-106:    baremetal::string s3 = "B";
-107:    baremetal::string s4 = "b";
-108:    ASSERT_EQ(s1, s2);
-109:    EXPECT_EQ(s1, s2);
-110:    ASSERT_EQ(s2, s3);
-111:    EXPECT_EQ(s2, s3);
-112:    ASSERT_NE(s1, s2);
-113:    EXPECT_NE(s1, s2);
-114:    ASSERT_NE(s2, s3);
-115:    EXPECT_NE(s2, s3);
-116:    ASSERT_EQ_IGNORE_CASE(s1, s2);
-117:    EXPECT_EQ_IGNORE_CASE(s1, s2);
-118:    ASSERT_EQ_IGNORE_CASE(s2, s3);
-119:    EXPECT_EQ_IGNORE_CASE(s2, s3);
-120:    ASSERT_NE_IGNORE_CASE(s1, s2);
-121:    EXPECT_NE_IGNORE_CASE(s1, s2);
-122:    ASSERT_NE_IGNORE_CASE(s2, s3);
-123:    EXPECT_NE_IGNORE_CASE(s2, s3);
-124:    ASSERT_EQ_IGNORE_CASE(s2, s4);
-125:    EXPECT_EQ_IGNORE_CASE(s2, s4);
-126:    ASSERT_NE_IGNORE_CASE(s2, s4);
-127:    EXPECT_NE_IGNORE_CASE(s2, s4);
-128:    char t[] = { 'A', '\0' };
-129:    char u[] = { 'B', '\0' };
-130:    char v[] = { 'B', '\0' };
-131:    char w[] = { 'b', '\0' };
-132:    const char* tC = "A";
-133:    const char* uC = "B";
-134:    const char* vC = "B";
-135:    const char* wC = "b";
-136:    ASSERT_EQ(t, u);
-137:    EXPECT_EQ(t, u);
-138:    ASSERT_EQ(u, v);
-139:    EXPECT_EQ(u, v);
-140:    ASSERT_EQ(t, u);
-141:    EXPECT_EQ(t, uC);
-142:    ASSERT_EQ(uC, v);
-143:    EXPECT_EQ(uC, vC);
-144:    ASSERT_EQ(t, w);
-145:    EXPECT_EQ(t, wC);
-146:    ASSERT_EQ(uC, w);
-147:    EXPECT_EQ(uC, wC);
-148:    ASSERT_NE(t, u);
-149:    EXPECT_NE(t, u);
-150:    ASSERT_NE(u, v);
-151:    EXPECT_NE(u, v);
-152:    ASSERT_NE(t, u);
-153:    EXPECT_NE(t, uC);
-154:    ASSERT_NE(uC, v);
-155:    EXPECT_NE(uC, vC);
-156:    ASSERT_NE(t, w);
-157:    EXPECT_NE(t, wC);
-158:    ASSERT_NE(uC, w);
-159:    EXPECT_NE(uC, wC);
-160:    ASSERT_EQ_IGNORE_CASE(t, u);
-161:    EXPECT_EQ_IGNORE_CASE(t, u);
-162:    ASSERT_EQ_IGNORE_CASE(u, v);
-163:    EXPECT_EQ_IGNORE_CASE(u, v);
-164:    ASSERT_EQ_IGNORE_CASE(t, u);
-165:    EXPECT_EQ_IGNORE_CASE(t, uC);
-166:    ASSERT_EQ_IGNORE_CASE(uC, v);
-167:    EXPECT_EQ_IGNORE_CASE(uC, vC);
-168:    ASSERT_EQ_IGNORE_CASE(t, w);
-169:    EXPECT_EQ_IGNORE_CASE(t, wC);
-170:    ASSERT_EQ_IGNORE_CASE(uC, w);
-171:    EXPECT_EQ_IGNORE_CASE(uC, wC);
-172:    ASSERT_NE_IGNORE_CASE(t, u);
-173:    EXPECT_NE_IGNORE_CASE(t, u);
-174:    ASSERT_NE_IGNORE_CASE(u, v);
-175:    EXPECT_NE_IGNORE_CASE(u, v);
-176:    ASSERT_NE_IGNORE_CASE(t, u);
-177:    EXPECT_NE_IGNORE_CASE(t, uC);
-178:    ASSERT_NE_IGNORE_CASE(uC, v);
-179:    EXPECT_NE_IGNORE_CASE(uC, vC);
-180:    ASSERT_NE_IGNORE_CASE(t, w);
-181:    EXPECT_NE_IGNORE_CASE(t, wC);
-182:    ASSERT_NE_IGNORE_CASE(uC, w);
-183:    EXPECT_NE_IGNORE_CASE(uC, wC);
-184: 
-185:    double a = 0.123;
-186:    double b = 0.122;
-187:    ASSERT_EQ(a, b);
-188:    EXPECT_EQ(a, b);
-189:    ASSERT_NEAR(a, b, 0.0001);
-190:    EXPECT_NEAR(a, b, 0.0001);
-191:    ASSERT_NEAR(a, b, 0.001);
-192:    EXPECT_NEAR(a, b, 0.001);
-193: }
+96:    EXPECT_NULL(p);
+97:    EXPECT_NULL(q);
+98:    EXPECT_NOT_NULL(p);
+99:    EXPECT_NOT_NULL(q);
+100:    baremetal::string s1 = "A";
+101:    baremetal::string s2 = "B";
+102:    baremetal::string s3 = "B";
+103:    baremetal::string s4 = "b";
+104:    EXPECT_EQ(s1, s2);
+105:    EXPECT_EQ(s2, s3);
+106:    EXPECT_NE(s1, s2);
+107:    EXPECT_NE(s2, s3);
+108:    EXPECT_EQ_IGNORE_CASE(s1, s2);
+109:    EXPECT_EQ_IGNORE_CASE(s2, s3);
+110:    EXPECT_NE_IGNORE_CASE(s1, s2);
+111:    EXPECT_NE_IGNORE_CASE(s2, s3);
+112:    EXPECT_EQ_IGNORE_CASE(s2, s4);
+113:    EXPECT_NE_IGNORE_CASE(s2, s4);
+114:    char t[] = { 'A', '\0' };
+115:    char u[] = { 'B', '\0' };
+116:    char v[] = { 'B', '\0' };
+117:    char w[] = { 'b', '\0' };
+118:    const char* tC = "A";
+119:    const char* uC = "B";
+120:    const char* vC = "B";
+121:    const char* wC = "b";
+122:    EXPECT_EQ(t, u);
+123:    EXPECT_EQ(u, v);
+124:    EXPECT_EQ(t, uC);
+125:    EXPECT_EQ(uC, vC);
+126:    EXPECT_EQ(t, wC);
+127:    EXPECT_EQ(uC, wC);
+128:    EXPECT_NE(t, u);
+129:    EXPECT_NE(u, v);
+130:    EXPECT_NE(t, uC);
+131:    EXPECT_NE(uC, vC);
+132:    EXPECT_NE(t, wC);
+133:    EXPECT_NE(uC, wC);
+134:    EXPECT_EQ_IGNORE_CASE(t, u);
+135:    EXPECT_EQ_IGNORE_CASE(u, v);
+136:    EXPECT_EQ_IGNORE_CASE(t, uC);
+137:    EXPECT_EQ_IGNORE_CASE(uC, vC);
+138:    EXPECT_EQ_IGNORE_CASE(t, wC);
+139:    EXPECT_EQ_IGNORE_CASE(uC, wC);
+140:    EXPECT_NE_IGNORE_CASE(t, u);
+141:    EXPECT_NE_IGNORE_CASE(u, v);
+142:    EXPECT_NE_IGNORE_CASE(t, uC);
+143:    EXPECT_NE_IGNORE_CASE(uC, vC);
+144:    EXPECT_NE_IGNORE_CASE(t, wC);
+145:    EXPECT_NE_IGNORE_CASE(uC, wC);
+146: 
+147:    double a = 0.123;
+148:    double b = 0.122;
+149:    EXPECT_EQ(a, b);
+150:    EXPECT_NEAR(a, b, 0.0001);
+151:    EXPECT_NEAR(a, b, 0.001);
+152: }
+153: 
 ...
 ```
 
@@ -3521,28 +3431,34 @@ We can now configure and build our code, and start debugging.
 The application will run the tests.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 [===========] Running 4 tests from 4 fixtures in 3 suites.
 [   SUITE   ] Suite1 (1 fixture)
 [  FIXTURE  ] FixtureMyTest1 (1 test)
+Debug  MyTest SetUp (main:23)
+Debug  MyTest TearDown (main:27)
 [  FAILED   ] Suite1::FixtureMyTest1::MyTest1
 [  FIXTURE  ] 1 test from FixtureMyTest1
 [   SUITE   ] 1 fixture from Suite1
 [   SUITE   ] Suite2 (1 fixture)
 [  FIXTURE  ] FixtureMyTest2 (1 test)
+Debug  FixtureMyTest2 SetUp (main:47)
+Debug  FixtureMyTest2 TearDown (main:51)
 [  FAILED   ] Suite2::FixtureMyTest2::MyTest2
 [  FIXTURE  ] 1 test from FixtureMyTest2
 [   SUITE   ] 1 fixture from Suite2
 [   SUITE   ] DefaultSuite (2 fixtures)
 [  FIXTURE  ] FixtureMyTest3 (1 test)
+Debug  FixtureMyTest3 SetUp (main:71)
+Debug  FixtureMyTest3 TearDown (main:75)
 [  FAILED   ] DefaultSuite::FixtureMyTest3::MyTest3
 [  FIXTURE  ] 1 test from FixtureMyTest3
 [  FIXTURE  ] DefaultFixture (1 test)
 [  FAILED   ] DefaultSuite::DefaultFixture::MyTest
 [  FIXTURE  ] 1 test from DefaultFixture
 [   SUITE   ] 2 fixtures from DefaultSuite
-FAILURE: 4 out of 4 tests failed (47 failures).
+FAILURE: 4 out of 4 tests failed (26 failures).
 
 Failures:
 ../code/applications/demo/src/main.cpp:33 : Failure in Suite1::FixtureMyTest1::MyTest1: For some reason
@@ -3562,213 +3478,107 @@ Failures:
   Expected not equal to: y
   Which is: 1
 
-../code/applications/demo/src/main.cpp:98 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: q
-  Actual: 0x000000000029CC54
+../code/applications/demo/src/main.cpp:97 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: q
+  Actual: 0x000000000029E50C
   Expected: nullptr
   Which is: null
 
-../code/applications/demo/src/main.cpp:99 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: q
-  Actual: 0x000000000029CC54
-  Expected: nullptr
-  Which is: null
-
-../code/applications/demo/src/main.cpp:100 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: p
+../code/applications/demo/src/main.cpp:98 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: p
   Actual: null
   Expected not equal to: nullptr
   Which is: null
 
-../code/applications/demo/src/main.cpp:101 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: p
-  Actual: null
-  Expected not equal to: nullptr
-  Which is: null
+../code/applications/demo/src/main.cpp:104 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s2
+  Actual: B
+  Expected: s1
+  Which is: A
+
+../code/applications/demo/src/main.cpp:107 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
+  Actual: B
+  Expected not equal to: s2
+  Which is: B
 
 ../code/applications/demo/src/main.cpp:108 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s2
   Actual: B
   Expected: s1
   Which is: A
 
-../code/applications/demo/src/main.cpp:109 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:114 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
+../code/applications/demo/src/main.cpp:111 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
   Actual: B
   Expected not equal to: s2
   Which is: B
 
-../code/applications/demo/src/main.cpp:115 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:116 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:117 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s2
-  Actual: B
-  Expected: s1
-  Which is: A
-
-../code/applications/demo/src/main.cpp:122 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:123 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s3
-  Actual: B
-  Expected not equal to: s2
-  Which is: B
-
-../code/applications/demo/src/main.cpp:126 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s4
+../code/applications/demo/src/main.cpp:113 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s4
   Actual: b
   Expected not equal to: s2
   Which is: B
 
-../code/applications/demo/src/main.cpp:127 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: s4
+../code/applications/demo/src/main.cpp:122 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
+  Actual: B
+  Expected: t
+  Which is: A
+
+../code/applications/demo/src/main.cpp:124 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: uC
+  Actual: B
+  Expected: t
+  Which is: A
+
+../code/applications/demo/src/main.cpp:126 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
   Actual: b
-  Expected not equal to: s2
+  Expected: t
+  Which is: A
+
+../code/applications/demo/src/main.cpp:127 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
+  Actual: b
+  Expected: uC
   Which is: B
 
-../code/applications/demo/src/main.cpp:136 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
+../code/applications/demo/src/main.cpp:129 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
+  Actual: B
+  Expected not equal to: u
+  Which is: B
+
+../code/applications/demo/src/main.cpp:131 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: vC
+  Actual: B
+  Expected not equal to: uC
+  Which is: B
+
+../code/applications/demo/src/main.cpp:134 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
   Actual: B
   Expected: t
   Which is: A
 
-../code/applications/demo/src/main.cpp:137 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
+../code/applications/demo/src/main.cpp:136 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: uC
   Actual: B
   Expected: t
   Which is: A
 
-../code/applications/demo/src/main.cpp:140 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:141 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: uC
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:144 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: w
+../code/applications/demo/src/main.cpp:138 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
   Actual: b
   Expected: t
   Which is: A
+
+../code/applications/demo/src/main.cpp:141 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
+  Actual: B
+  Expected not equal to: u
+  Which is: B
+
+../code/applications/demo/src/main.cpp:143 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: vC
+  Actual: B
+  Expected not equal to: uC
+  Which is: B
 
 ../code/applications/demo/src/main.cpp:145 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
   Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:146 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: w
-  Actual: b
-  Expected: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:147 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
-  Actual: b
-  Expected: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:150 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:151 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:154 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
   Expected not equal to: uC
   Which is: B
 
-../code/applications/demo/src/main.cpp:155 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: vC
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:160 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:161 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:164 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: u
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:165 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: uC
-  Actual: B
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:168 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: w
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:169 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
-  Actual: b
-  Expected: t
-  Which is: A
-
-../code/applications/demo/src/main.cpp:174 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:175 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
-  Expected not equal to: u
-  Which is: B
-
-../code/applications/demo/src/main.cpp:178 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: v
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:179 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: vC
-  Actual: B
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:182 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: w
-  Actual: b
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:183 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: wC
-  Actual: b
-  Expected not equal to: uC
-  Which is: B
-
-../code/applications/demo/src/main.cpp:187 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
+../code/applications/demo/src/main.cpp:149 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
   Actual: 0.12200000000000
   Expected: a
   Which is: 0.12300000000000
 
-../code/applications/demo/src/main.cpp:188 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-
-../code/applications/demo/src/main.cpp:189 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
-  Actual: 0.12200000000000
-  Expected: a
-  Which is: 0.12300000000000
-  Tolerance: 0.0001
-  (+/-) 0.10000000000000
-../code/applications/demo/src/main.cpp:190 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
+../code/applications/demo/src/main.cpp:150 : Failure in DefaultSuite::DefaultFixture::MyTest: Value of: b
   Actual: 0.12200000000000
   Expected: a
   Which is: 0.12300000000000
@@ -3776,15 +3586,16 @@ Failures:
   (+/-) 0.10000000000000
 
 [===========] 4 tests from 4 fixtures in 3 suites ran.
-Info   Wait 5 seconds (main:202)
+Info   Wait 5 seconds (main:161)
 Press r to reboot, h to halt, p to fail assertion and panic
+hInfo   Halt (System:122)
 ```
 
 ## Writing class tests for string - Step 4 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4}
 
 Now that our unit test framework is complete, let's reimplement the tests we created in [15-string](#TUTORIAL_15_STRING).
 First we'll create a folder `test` underneath `code/libraries/baremetal`, and underneath a folder `src`.
-We'll also be creating a CMake file for the tests, as well as the structure for the main application to create a kernel image.
+We'll also be creating a CMake file for the tests, as well as the structure for the test application to create a kernel image.
 
 <img src="images/unittest-add-test-project.png" alt="Tree view" width="400"/>
 
@@ -3854,8 +3665,8 @@ File: code\libraries\baremetal\test\StringTest.cpp
 69: {
 70:     string s;
 71:     EXPECT_TRUE(s.empty());
-72:     ASSERT_NOT_NULL(s.data());
-73:     ASSERT_NOT_NULL(s.c_str());
+72:     EXPECT_NOT_NULL(s.data());
+73:     EXPECT_NOT_NULL(s.c_str());
 74:     EXPECT_EQ('\0', s.data()[0]);
 75:     EXPECT_EQ(size_t{ 0 }, s.size());
 76:     EXPECT_EQ(size_t{ 0 }, s.length());
@@ -3872,8 +3683,8 @@ File: code\libraries\baremetal\test\StringTest.cpp
 87:     string s(text);
 88: 
 89:     EXPECT_FALSE(s.empty());
-90:     ASSERT_NOT_NULL(s.data());
-91:     ASSERT_NOT_NULL(s.c_str());
+90:     EXPECT_NOT_NULL(s.data());
+91:     EXPECT_NOT_NULL(s.c_str());
 92:     EXPECT_NE('\0', s.data()[0]);
 93:     EXPECT_EQ(expectedLength, s.size());
 94:     EXPECT_EQ(expectedLength, s.length());
@@ -3893,8 +3704,8 @@ File: code\libraries\baremetal\test\StringTest.cpp
 108:     string s(text);
 109: 
 110:     EXPECT_TRUE(s.empty());
-111:     ASSERT_NOT_NULL(s.data());
-112:     ASSERT_NOT_NULL(s.c_str());
+111:     EXPECT_NOT_NULL(s.data());
+112:     EXPECT_NOT_NULL(s.c_str());
 113:     EXPECT_EQ('\0', s.data()[0]);
 114:     EXPECT_EQ(expectedLength, s.size());
 115:     EXPECT_EQ(expectedLength, s.length());
@@ -3913,8 +3724,8 @@ File: code\libraries\baremetal\test\StringTest.cpp
 128:     string s(nullptr);
 129: 
 130:     EXPECT_TRUE(s.empty());
-131:     ASSERT_NOT_NULL(s.data());
-132:     ASSERT_NOT_NULL(s.c_str());
+131:     EXPECT_NOT_NULL(s.data());
+132:     EXPECT_NOT_NULL(s.c_str());
 133:     EXPECT_EQ('\0', s.data()[0]);
 134:     EXPECT_EQ(expectedLength, s.size());
 135:     EXPECT_EQ(expectedLength, s.length());
@@ -4096,7 +3907,7 @@ We can now configure and build our code, and start debugging.
 The application will run the tests. All tests should succeed.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 [===========] Running 156 tests from 1 fixture in 1 suite.
 [   SUITE   ] Baremetal (1 fixture)
@@ -4266,7 +4077,7 @@ No failures
 Info   Halt (System:122)
 ```
 
-As you can see, we have 156 test for the `string` class, which actually have a multitude of this in test cases.
+As you can see, we have 156 tests for the `string` class, which have a multiple test cases each.
 
 ## Writing class tests for serialization - Step 5 {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_SERIALIZATION___STEP_5}
 
@@ -4587,7 +4398,7 @@ We can now configure and build our code, and start debugging.
 The application will run all tests, so both stirng test and serialization tests. All tests should succeed.
 
 ```text
-Info   Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:83)
+Info   Baremetal 0.0.0 started on Raspberry Pi 4 Model B (AArch64) using BCM2711 SoC (Logger:83)
 Info   Starting up (System:201)
 [===========] Running 174 tests from 2 fixtures in 1 suite.
 [   SUITE   ] Baremetal (2 fixtures)

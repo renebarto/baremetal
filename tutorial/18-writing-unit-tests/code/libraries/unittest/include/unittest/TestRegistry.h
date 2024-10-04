@@ -47,7 +47,7 @@
 namespace unittest
 {
 
-class Test;
+class TestInfo;
 class TestSuiteInfo;
 class TestResults;
 

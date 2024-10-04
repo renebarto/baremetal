@@ -69,8 +69,8 @@ TEST_FIXTURE(StringTest, ConstructDefault)
 {
     string s;
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(size_t{ 0 }, s.size());
     EXPECT_EQ(size_t{ 0 }, s.length());
@@ -87,8 +87,8 @@ TEST_FIXTURE(StringTest, ConstructConstCharPtr)
     string s(text);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -108,8 +108,8 @@ TEST_FIXTURE(StringTest, ConstructConstCharPtrEmpty)
     string s(text);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -128,8 +128,8 @@ TEST_FIXTURE(StringTest, ConstructNullPtr)
     string s(nullptr);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -150,8 +150,8 @@ TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSize)
     string s(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -172,8 +172,8 @@ TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSizeTooLarge)
     string s(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -194,8 +194,8 @@ TEST_FIXTURE(StringTest, ConstructConstCharPtrAndSizeNpos)
     string s(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -216,8 +216,8 @@ TEST_FIXTURE(StringTest, ConstructCountAndChar)
     string s(length, ch);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -253,8 +253,8 @@ TEST_FIXTURE(StringTest, ConstructCopy)
     string s(other);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -276,8 +276,8 @@ TEST_FIXTURE(StringTest, ConstructCopyEmpty)
     string s(other);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -302,8 +302,8 @@ TEST_FIXTURE(StringTest, ConstructStringFromPos)
     string s(other, pos);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -323,8 +323,8 @@ TEST_FIXTURE(StringTest, ConstructStringFromPosTooLarge)
     string s(other, pos);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -344,8 +344,8 @@ TEST_FIXTURE(StringTest, ConstructStringFromPosNpos)
     string s(other, pos);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -366,8 +366,8 @@ TEST_FIXTURE(StringTest, ConstructStringFromPosWithCount)
     string s(other, pos, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -388,8 +388,8 @@ TEST_FIXTURE(StringTest, ConstructStringFromPosWithCountTooLarge)
     string s(other, pos, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -407,7 +407,7 @@ TEST_FIXTURE(StringTest, ConstCharPtrCastOperator)
 
     string s(text);
 
-    ASSERT_NOT_NULL((const char*)s);
+    EXPECT_NOT_NULL((const char*)s);
     EXPECT_EQ(0, strcmp(text, (const char*)s));
 }
 
@@ -422,8 +422,8 @@ TEST_FIXTURE(StringTest, AssignmentOperatorConstCharPtr)
 
     s = text;
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -445,8 +445,8 @@ TEST_FIXTURE(StringTest, AssignmentOperatorCopy)
 
     s = other;
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -517,8 +517,8 @@ TEST_FIXTURE(StringTest, AssignConstCharPtr)
     s.assign(text);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -540,8 +540,8 @@ TEST_FIXTURE(StringTest, AssignConstCharPtrEmpty)
     s.assign(text);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -561,8 +561,8 @@ TEST_FIXTURE(StringTest, AssignNullPtr)
     s.assign(nullptr);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -584,8 +584,8 @@ TEST_FIXTURE(StringTest, AssignConstCharPtrAndSize)
     s.assign(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -607,8 +607,8 @@ TEST_FIXTURE(StringTest, AssignConstCharPtrAndSizeTooLarge)
     s.assign(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -630,8 +630,8 @@ TEST_FIXTURE(StringTest, AssignConstCharPtrAndSizeNpos)
     s.assign(text, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -653,8 +653,8 @@ TEST_FIXTURE(StringTest, AssignCountAndChar)
     s.assign(length, ch);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -692,8 +692,8 @@ TEST_FIXTURE(StringTest, AssignString)
     s.assign(other);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -716,8 +716,8 @@ TEST_FIXTURE(StringTest, AssignStringEmpty)
     s.assign(other);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -738,8 +738,8 @@ TEST_FIXTURE(StringTest, AssignStringFromPos)
     s.assign(other, pos);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -762,8 +762,8 @@ TEST_FIXTURE(StringTest, AssignStringFromPosTooLarge)
     s.assign(str, pos);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -786,8 +786,8 @@ TEST_FIXTURE(StringTest, AssignStringFromPosNPos)
     s.assign(str, pos);
 
     EXPECT_TRUE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_EQ('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -809,8 +809,8 @@ TEST_FIXTURE(StringTest, AssignStringFromPosWithCount)
     s.assign(other, pos, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -832,8 +832,8 @@ TEST_FIXTURE(StringTest, AssignStringFromPosWithCountTooLarge)
     s.assign(other, pos, length);
 
     EXPECT_FALSE(s.empty());
-    ASSERT_NOT_NULL(s.data());
-    ASSERT_NOT_NULL(s.c_str());
+    EXPECT_NOT_NULL(s.data());
+    EXPECT_NOT_NULL(s.c_str());
     EXPECT_NE('\0', s.data()[0]);
     EXPECT_EQ(expectedLength, s.size());
     EXPECT_EQ(expectedLength, s.length());
@@ -1023,7 +1023,7 @@ TEST_FIXTURE(StringTest, Reserve)
     auto newCapacity = s.capacity();
 
     // Check first, we expect the default capacity to be 64
-    ASSERT_EQ(size_t{ 64 }, oldCapacity);
+    EXPECT_EQ(size_t{ 64 }, oldCapacity);
     EXPECT_NE(oldCapacity, newCapacity);
     EXPECT_EQ(reserveCapacity, newCapacity);
 }

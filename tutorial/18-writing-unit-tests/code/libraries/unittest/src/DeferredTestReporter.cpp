@@ -89,18 +89,16 @@ ResultList::~ResultList()
 void ResultList::Add(const TestResult& result)
 {
     auto entry = new ResultEntry(result);
-    if (m_head == nullptr)
+    if (m_tail == nullptr)
     {
         m_head = entry;
+        m_tail = entry;
     }
     else
     {
-        auto current = m_head;
-        while (current->m_next != nullptr)
-            current = current->m_next;
-        current->m_next = entry;
+        m_tail->m_next = entry;
+        m_tail = entry;
     }
-    m_tail = entry;
 }
 
 /// <summary>

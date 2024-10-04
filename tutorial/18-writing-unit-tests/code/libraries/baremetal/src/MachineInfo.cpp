@@ -208,10 +208,12 @@ bool MachineInfo::Initialize()
         {
             GetConsole().Write("Failed to retrieve MAC address\n");
         }
+
         if (!properties.GetARMMemory(m_armBaseAddress, m_armMemorySize))
         {
             GetConsole().Write("Failed to retrieve ARM memory info\n");
         }
+
         if (!properties.GetVCMemory(m_vcBaseAddress, m_vcMemorySize))
         {
             GetConsole().Write("Failed to retrieve VC memory info\n");

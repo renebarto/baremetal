@@ -46,7 +46,7 @@ namespace unittest {
 
 /// <summary>
 /// Test fixture
-/// 
+///
 /// Forms a replacement of a test, with the addition of SetUp/TearDown functionality
 /// </summary>
 class TestFixture

@@ -7,7 +7,7 @@
 //
 // Class       : TestResults
 //
-// Description : Test results
+// Description : Test run results
 //
 //------------------------------------------------------------------------------
 //

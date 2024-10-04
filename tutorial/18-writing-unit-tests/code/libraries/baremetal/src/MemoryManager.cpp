@@ -54,7 +54,7 @@ LOG_MODULE("MemoryManager");
 
 /// <summary>
 /// Constructs a MemoryManager instance
-/// 
+///
 /// Retrieves amount of physical RAM available, and sets up heap managers for low (below 1Gb) and high (above 3 Gb, only Raspberry Pi 4 or higher) memory.
 /// </summary>
 MemoryManager::MemoryManager()
@@ -157,10 +157,7 @@ void* MemoryManager::HeapReAllocate(void* block, size_t size)	// block may be nu
     {
         return memoryManager.m_heapLow.ReAllocate(block, size);
     }
-    else
-    {
-        return memoryManager.m_heapHigh.ReAllocate(block, size);
-    }
+    return memoryManager.m_heapHigh.ReAllocate(block, size);
 #else
     return memoryManager.m_heapLow.ReAllocate(block, size);
 #endif

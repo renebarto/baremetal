@@ -49,3 +49,10 @@ void* operator new (size_t size, HeapType type);
 void* operator new[](size_t size, HeapType type);
 void* operator new (size_t size, void* address);
 void* operator new[](size_t size, void* address);
+void* operator new (size_t size);
+void* operator new[](size_t size);
+
+void operator delete(void* block) noexcept;
+void operator delete[](void* address) noexcept;
+void operator delete(void* block, size_t size) noexcept;
+void operator delete[](void* address, size_t size) noexcept;

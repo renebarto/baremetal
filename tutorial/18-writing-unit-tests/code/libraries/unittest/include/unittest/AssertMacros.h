@@ -45,26 +45,6 @@
 /// @file
 /// Assertion macros
 
-#ifdef ASSERT_TRUE
-    #error unittest redefines ASSERT_TRUE
-#endif
-
-#ifdef ASSERT_FALSE
-    #error unittest redefines ASSERT_FALSE
-#endif
-
-#ifdef ASSERT_EQ
-    #error unittest redefines ASSERT_EQ
-#endif
-
-#ifdef ASSERT_NE
-    #error unittest redefines ASSERT_NE
-#endif
-
-#ifdef ASSERT_NEAR
-    #error unittest redefines ASSERT_NEAR
-#endif
-
 #ifdef EXPECT_TRUE
     #error unittest redefines EXPECT_TRUE
 #endif
@@ -108,7 +88,7 @@ namespace internal
 class Secret;
 /// <summary>
 /// Conversion check function to check whether argument is a pointer
-/// 
+///
 /// Not implemented, never called, only declared for return type size
 /// </summary>
 /// <param name="p">Argument</param>
@@ -116,7 +96,7 @@ class Secret;
 char IsNullLiteralHelper(Secret* p);
 /// <summary>
 /// Conversion check function to check whether argument is not a pointer
-/// 
+///
 /// Not implemented, never called, only declared for return type size
 /// </summary>
 /// <returns>Unused</returns>
@@ -125,7 +105,6 @@ char (&IsNullLiteralHelper(...))[2];
 } // namespace internal
 
 } // namespace unittest
-
 
 /// @brief Boolean expression to check whether the argument is a null literal. Returns true if the argument is nullptr, false otherwise
 #define IS_NULL_LITERAL(x) \
@@ -138,46 +117,21 @@ char (&IsNullLiteralHelper(...))[2];
         if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
             ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
     } while (0)
-/// @brief Generic assert macro. Checks if the argument is true, generates a failure if the check fails, and throws an exception (not implemented yet)
-#define UT_ASSERT_RESULT(value) \
-    do \
-    { \
-        if (const ::unittest::AssertionResult UT_AssertionResult = (value)) \
-        { \
-            ::unittest::CurrentTest::Results()->OnTestFailure(::unittest::TestDetails(*::unittest::CurrentTest::Details(), __LINE__), UT_AssertionResult.message); \
-            /*throw ::unittest::AssertionFailedException(__FILE__, __LINE__);*/ \
-        } \
-    } while (0)
 
 /// @brief Expect predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_EXPECT_RESULT if predicate function returns false
 #define EXPECT_PRED_FORMAT1(pred_format, v1) \
   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), v1))
-/// @brief Assert predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-#define ASSERT_PRED_FORMAT1(pred_format, v1) \
-  UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), v1))
 
 /// @brief Expect predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_EXPECT_RESULT if predicate function returns false
 #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-/// @brief Assert predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-#define ASSERT_PRED_FORMAT2(pred_format, v1, v2) \
-  UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
 
 /// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_EXPECT_RESULT if predicate function returns false
 #define EXPECT_PRED_FORMAT3(pred_format, v1, v2, v3) \
   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-/// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_ASSERT_RESULT if predicate function returns false
-#define ASSERT_PRED_FORMAT3(pred_format, v1, v2, v3) \
-  UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
 
 /// @brief Force failure with message
 #define FAIL(message) UT_EXPECT_RESULT(GenericFailure(message))
-/// @brief Assert that value is true
-#define ASSERT_TRUE(value) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT1(::unittest::CheckTrue, value); \
-    } while (0)
 /// @brief Expect that value is true
 #define EXPECT_TRUE(value) \
     do \
@@ -185,12 +139,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT1(::unittest::CheckTrue, value); \
     } while (0)
 
-/// @brief Assert that value is false
-#define ASSERT_FALSE(value) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT1(::unittest::CheckFalse, value); \
-    } while (0)
 /// @brief Expect that value is false
 #define EXPECT_FALSE(value) \
     do \
@@ -198,12 +146,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT1(::unittest::CheckFalse, value); \
     } while (0)
 
-/// @brief Assert that actual value is equal to expected value
-#define ASSERT_EQ(expected, actual) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
-    } while (0)
 /// @brief Expect that actual value is equal to expected value
 #define EXPECT_EQ(expected, actual) \
     do \
@@ -211,12 +153,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
     } while (0)
 
-/// @brief Assert that actual value is not equal to expected value
-#define ASSERT_NE(expected, actual) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
-    } while (0)
 /// @brief Expect that actual value is not equal to expected value
 #define EXPECT_NE(expected, actual) \
     do \
@@ -224,12 +160,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
     } while (0)
 
-/// @brief Assert that actual value is equal to expected value ignoring case
-#define ASSERT_EQ_IGNORE_CASE(expected, actual) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
-    } while (0)
 /// @brief Expect that actual value is equal to expected value ignoring case
 #define EXPECT_EQ_IGNORE_CASE(expected, actual) \
     do \
@@ -237,12 +167,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
     } while (0)
 
-/// @brief Assert that actual value is not equal to expected value ignoring case
-#define ASSERT_NE_IGNORE_CASE(expected, actual) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
-    } while (0)
 /// @brief Expect that actual value is not equal to expected value ignoring case
 #define EXPECT_NE_IGNORE_CASE(expected, actual) \
     do \
@@ -250,12 +174,6 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
     } while (0)
 
-/// @brief Assert that actual value is equal to expected value within tolerance (for floating point comparison)
-#define ASSERT_NEAR(expected, actual, tolerance) \
-    do \
-    { \
-        ASSERT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
-    } while (0)
 /// @brief Expect that actual value is equal to expected value within tolerance (for floating point comparison)
 #define EXPECT_NEAR(expected, actual, tolerance) \
     do \
@@ -263,11 +181,7 @@ char (&IsNullLiteralHelper(...))[2];
         EXPECT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
     } while (0)
 
-/// @brief Assert that value is nullptr
-#define ASSERT_NULL(value) ASSERT_EQ(nullptr, value)
 /// @brief Expect that value is nullptr
 #define EXPECT_NULL(value) EXPECT_EQ(nullptr, value)
-/// @brief Assert that value is not nullptr
-#define ASSERT_NOT_NULL(value) ASSERT_NE(nullptr, value)
 /// @brief Expect that value is not nullptr
 #define EXPECT_NOT_NULL(value) EXPECT_NE(nullptr, value)

@@ -75,8 +75,8 @@ void Test##TestName::RunImpl() const
 class FixtureClass##TestName##Helper : public FixtureClass                                                  \
 {                                                                                                           \
 public:                                                                                                     \
-    FixtureClass##TestName##Helper(const FixtureClass##TestName##Helper &) = delete;                        \
-    explicit FixtureClass##TestName##Helper(unittest::TestDetails const & details) :                        \
+    FixtureClass##TestName##Helper(const FixtureClass##TestName##Helper&) = delete;                         \
+    explicit FixtureClass##TestName##Helper(unittest::TestDetails const& details) :                         \
         m_details{ details }                                                                                \
     {                                                                                                       \
         SetUp();                                                                                            \
@@ -85,9 +85,9 @@ public:                                                                         
     {                                                                                                       \
         TearDown();                                                                                         \
     }                                                                                                       \
-    FixtureClass##TestName##Helper & operator = (const FixtureClass##TestName##Helper &) = delete;          \
+    FixtureClass##TestName##Helper& operator = (const FixtureClass##TestName##Helper&) = delete;            \
     void RunImpl() const;                                                                                   \
-    unittest::TestDetails const & m_details;                                                                \
+    unittest::TestDetails const& m_details;                                                                 \
 };                                                                                                          \
                                                                                                             \
 class Test##FixtureClass##TestName : public unittest::Test                                                  \

@@ -346,9 +346,9 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 3: //
 4: // File        : ExceptionHandler.h
 5: //
-6: // Namespace   : -
+6: // Namespace   : baremetal
 7: //
-8: // Class       : -
+8: // Class       : ExceptionSystem
 9: //
 10: // Description : Exception handler
 11: //
@@ -471,8 +471,8 @@ File: code/libraries/baremetal/src/ExceptionHandler.cpp
 5: //
 6: // Namespace   : baremetal
 7: //
-8: // Class       : -
-9: //
+8: // Class       : ExceptionSystem
+: //
 10: // Description : Exception handler
 11: //
 12: //------------------------------------------------------------------------------
@@ -949,7 +949,7 @@ File: baremetal.ld
 ...
 ```
 
-### Startup.S
+### Startup.S {#TUTORIAL_19_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_STARTUPS}
 
 The exception vector was defined, but we need to use it. As we are running in EL1 normally, we will set the exception vector for EL1.
 This is done through the `vbar_el2` (Vector Base Address Register EL2) or `vbar_el1` (Vector Base Address Register EL1) register depending on the exception level the system was in when the exception occurs.

@@ -3,9 +3,9 @@
 //
 // File        : InterruptHandler.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : InterruptSystem
 //
 // Description : Interrupt handler
 //

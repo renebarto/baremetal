@@ -3,9 +3,9 @@
 //
 // File        : ExceptionHandler.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : ExceptionSystem
 //
 // Description : Exception handler
 //

@@ -349,7 +349,7 @@ File: code/libraries/unitttest/CMakeLists.txt
 ...
 ```
 
-### Update application CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_CMAKE_FILE}
+### Update application CMake file {#TUTORIAL_17_UNIT_TEST_INFRASTRUCTURE_ADDING_A_TEST___STEP_2_UPDATE_APPLICATION_CMAKE_FILE}
 
 As we have now added the `unittest` library and wish to use it, we need to add it to the applications dependencies.
 

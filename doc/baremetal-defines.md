@@ -80,3 +80,11 @@ Makes UART1 the default console device.
 Determines whether to use BCM2835 System Timer instead of ARM timer:
 - not defined: Use ARM timer
 - defined: Use BCM2835 System Timer
+
+### SAVE_VFP_REGS_ON_IRQ {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_SAVE_VFP_REGS_ON_IRQ}
+
+If defined, saves all vector floating point register on the stack when handling IRQ, in addition to regular registers.
+
+### SAVE_VFP_REGS_ON_FIQ {#BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_SAVE_VFP_REGS_ON_FIQ}
+
+If defined, saves all vector floating point register on the stack when handling FIQ, in addition to regular registers.

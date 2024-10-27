@@ -38,6 +38,33 @@ Update the file `code/libraries/baremetal/src/ExceptionStub.S`
 
 ```cpp
 File: code/libraries/baremetal/src/ExceptionStub.S
+83:     .globl  VectorTable
+84: VectorTable:
+85: 
+86:     // from current EL with sp_el0 (mode EL0, El1t, El2t, EL3t)
+87:     vector  SynchronousStub
+88:     vector  IRQStub
+89:     vector  FIQStub
+90:     vector  SErrorStub
+91: 
+92:     // from current EL with sp_elx, x != 0  (mode El1h, El2h, EL3h)
+93:     vector  SynchronousStub
+94:     vector  IRQStub
+95:     vector  FIQStub
+96:     vector  SErrorStub
+97: 
+98:     // from lower EL, target EL minus 1 is AArch64
+99:     vector  HVCStub
+100:     vector  UnexpectedStub
+101:     vector  UnexpectedStub
+102:     vector  UnexpectedStub
+103: 
+104:     // from lower EL, target EL minus 1 is AArch32
+105:     vector  UnexpectedStub
+106:     vector  UnexpectedStub
+107:     vector  UnexpectedStub
+108:     vector  UnexpectedStub
+109: 
 110: //*************************************************
 111: // IRQ stub
 112: //*************************************************
@@ -253,6 +280,14 @@ File: code/libraries/baremetal/src/ExceptionStub.S
 322: // End
 ```
 
+- Line 88: We replace `UnexpectedStub` with `IRQStub` in the exception vector table for IRQ exceptions in EL0, El1t, El2t, EL3t.
+This will set the IRQStub as the handler for IRQ exceptions
+- Line 89: We replace `UnexpectedStub` with `FIQStub` in the exception vector table for FIQ exceptions in EL0, El1t, El2t, EL3t.
+This will set the FIQStub as the handler for FIQ exceptions
+- Line 94: We replace `UnexpectedStub` with `IRQStub` in the exception vector table for IRQ exceptions in El1h, El2h, EL3h.
+This will set the IRQStub as the handler for IRQ exceptions
+- Line 95: We replace `UnexpectedStub` with `FIQStub` in the exception vector table for FIQ exceptions in El1h, El2h, EL3h.
+This will set the FIQStub as the handler for FIQ exceptions
 - Line 113-200: We create a macro `irq_stub` for an IRQ interrupt, which saves almost all registers, depending on the define `BAREMETAL_SAVE_VFP_REGS_ON_IRQ`.
 These are then stored on the stack, every time decreasing the stack pointer by 32 or 16 bytes, depending on the registers.
 The FIQ interrupts are enabled while the interrupt is being handled, to allow for priority.
@@ -261,9 +296,36 @@ Then FIQ interrupts are disabled again, and the stub returns to the state before
 This also reset the state of interrupt enables, etc. as well as the exception level. Note that even though we disable FIQ here, returning to the original exception level may enable them again
 - Line 205-291: We implement the FIQ interrupt stub `FIQStub`. This is similar to the normal interrupt stub, however this is not a macro.
 Also, the pointer to the handler is retrieved from a memory area structure `s_fiqData`, as well as the parameter to pass to the handler.
-If no handler was set no function is called, and the registers are simply restored
+If no handler was set no function is called, the FIQ is actually disabled, and the registers are simply restored
 - Line 306-312: We define the structure s_fiqData, which is 8 byte aligned
 - Line 320: We declare interrupt stub using the `irq_stub` macro, and set its handler to `InterruptHandler()`
+
+### CMakeLists.txt
+
+In order to enable or disable saving the VFP register on the stack when handling interrupts, we add some more variables to the root CMake file.
+
+Update the file `CMakeLists.txt`
+
+```cpp
+File: CMakeLists.txt
+72: option(BAREMETAL_DEBUG_UNITTEST_REGISTRY "Enable debug tracing output for unittest registry" OFF)
+73: option(BAREMETAL_SAVE_VFP_REGISTERS_ON_FIQ "Save vector floating point registers on FIQ handling" OFF)
+74: option(BAREMETAL_SAVE_VFP_REGISTERS_ON_IRQ "Save vector floating point registers on IRQ handling" OFF)
+75: 
+76: message(STATUS "\n** Setting up project **\n--")
+...
+143: if (BAREMETAL_CONSOLE_UART1)
+144:     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART1)
+145: endif()
+146: if (BAREMETAL_SAVE_VFP_REGISTERS_ON_FIQ)
+147:     list(APPEND DEFINES_C BAREMETAL_SAVE_VFP_REGS_ON_FIQ)
+148: endif()
+149: if (BAREMETAL_SAVE_VFP_REGISTERS_ON_IRQ)
+150:     list(APPEND DEFINES_C BAREMETAL_SAVE_VFP_REGS_ON_IRQ)
+151: endif()
+152: set(DEFINES_C_DEBUG _DEBUG)
+...
+```
 
 ### ExceptionHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_EXCEPTIONHANDLERH}
 
@@ -359,41 +421,45 @@ Update the file `code/libraries/baremetal/src/ExceptionHandler.cpp`
 ```cpp
 File: code/libraries/baremetal/src/ExceptionHandler.cpp
 ...
-54: // <summary>
-55: /// Handles an exception, with the abort frame passed in.
-56: ///
-57: /// The exception handler is called from assembly code (ExceptionStub.S)
-58: /// </summary>
-59: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
-60: /// <param name="abortFrame">Filled in AbortFrame instance</param>
-61: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
-62: {
-63:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
-64: }
-65: 
+49: /// @brief Define log name
+50: LOG_MODULE("ExceptionHandler");
+51: 
+52: // <summary>
+53: /// Handles an exception, with the abort frame passed in.
+54: ///
+55: /// The exception handler is called from assembly code (ExceptionStub.S)
+56: /// </summary>
+57: /// <param name="exceptionID">Exception type being thrown (one of EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS, EXCEPTION_SYSTEM_ERROR)</param>
+58: /// <param name="abortFrame">Filled in AbortFrame instance</param>
+59: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame)
+60: {
+61:     baremetal::GetExceptionSystem().Throw(exceptionID, abortFrame);
+62: }
+63: 
+64: namespace baremetal {
+...
 ```
 
-- Line 66: We removed the `InterruptHandler()` implementation
+- Line 64: We removed the `InterruptHandler()` implementation
 
 ### InterruptHandler.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_INTERRUPTHANDLERH}
 
-We will add the `InterruptHandler()` function.
+We will add the `InterruptHandler()` function to a new header.
 Similar to waht we did for exceptions, we will also declare a class `InterruptSystem`, which is a singleton, and has its own implementation for `InterruptHandler()`.
-We'll only create the bare minimum for this calss for now, but we'll extend it soon.
+We'll only create the bare minimum for this class for now, but we'll extend it soon.
 
 Create the file `code/libraries/baremetal/include/baremetal/InterruptHandler.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
-File: d:\Projects\baremetal\tutorial\20-interrupts\code\libraries\baremetal\include\baremetal\InterruptHandler.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
 4: // File        : InterruptHandler.h
 5: //
-6: // Namespace   : -
+6: // Namespace   : baremetal
 7: //
-8: // Class       : -
+8: // Class       : InterruptSystem
 9: //
 10: // Description : Interrupt handler
 11: //
@@ -489,7 +555,8 @@ File: d:\Projects\baremetal\tutorial\20-interrupts\code\libraries\baremetal\incl
 - Line 52: We declare the function `InterruptHandler()`
 - Line 63: We declare a callback function type `IRQHandler` to act as the handler for an IRQ
 - Line 69-94: We declare the class `InterruptSystem`
-  - Line 72: The member variable `m_irqHandler` stores the registered handler
+  - Line 72: The member variable `m_irqHandler` stores the registered handler.
+  For now, only one handler can be installed
   - Line 74: The member variable `m_irqHandlerParams` stores the parameter to pass to the registered handler
   - Line 80: We make `GetInterruptSystem()` a friend, so it can call the constructor
   - Line 83: We declare a private default constructor, such that only the `GetInterruptSystem()` function can create an instance
@@ -513,9 +580,9 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 3: //
 4: // File        : InterruptHandler.cpp
 5: //
-6: // Namespace   : -
+6: // Namespace   : baremetal
 7: //
-8: // Class       : -
+8: // Class       : InterruptSystem
 9: //
 10: // Description : Interrupt handler
 11: //
@@ -635,14 +702,18 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 125: }
 ```
 
-- Line 49-52: We implement the `InterruptHandler()` function by called the `InterruptHandler()` method on the singleton `InterruptSystem` instance
+- Line 49-52: We implement the `InterruptHandler()` function by calling the `InterruptHandler()` method on the singleton `InterruptSystem` instance
 - Line 59-63: We implement the constructor
 - Line 68-70: We implement the destructor
 - Line 75-77: We implement the `Initialize()` method. For now this is empty
-- Line 84-90: We implement the `RegisterIRQHandler()` method
-- Line 95-101: We implement the `UnregisterIRQHandler()` method
-- Line 108-112: We implement the `InterruptHandler()` method. This will call the handler, if installed
-- Line 120-125: We implement the `GetInterruptSystem()` function
+- Line 84-90: We implement the `RegisterIRQHandler()` method.
+This checks whether a interrupt function is already registered.
+If not the requested function is registered along with the argument passed
+- Line 95-101: We implement the `UnregisterIRQHandler()` method.
+This simply resets the registered function and its parameter
+- Line 108-112: We implement the `InterruptHandler()` method. This will call the handler, if installed, passing in the parameter
+- Line 120-125: We implement the `GetInterruptSystem()` function.
+This creates an instance of the `InterruptSystem` if needed, and calls its `Initialize()` method
 
 ### ARMRegisters.h {#TUTORIAL_20_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_ARMREGISTERSH}
 
@@ -651,7 +722,7 @@ The complete set of registers is defined in [documentation](pdf/bcm2836-peripher
 
 The ARM specific registers are in a different address range, reaching from 0x40000000 to 0x4003FFFF on Raspberry Pi 3, and 0xFF800000 to 0xFF83FFFF on Raspberry Pi 4 and later.
 
-We'll add the definition for the register we will be using.
+We'll add the definition for the registers we will be using.
 
 Create the file `code/libraries/baremetal/include/baremetal/ARMRegisters.h`
 

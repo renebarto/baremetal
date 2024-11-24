@@ -1,7 +1,9 @@
-.vs/*
 cmake-*/
-output/
 deploy/
+output/
+out/
+.vs/*
+.vscode/
 doc/board/images
 doc/board/pdf
 doc/cpu/images

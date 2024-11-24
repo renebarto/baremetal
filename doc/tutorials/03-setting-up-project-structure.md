@@ -34,11 +34,13 @@ For our specific case, we wish to create kernel images from executables, so we w
 We will slightly change this structure, to allow for more projects to be built, to allow for parallel builds for multiple boards, and also to enable easy integration with Visual Studio.
 
 - First of all, we'll use multiple build directories, one for each build configuration:
-  - cmake-BareMetal-`<board>`-Debug for Debug builds
-  - cmake-BareMetal-`<board>`-Release for Release builds
-  - cmake-BareMetal-`<board>`-RelWithDebInfo for RelWithDebInfo builds
-  - cmake-BareMetal-`<board>`-MinSizeRel for MinSizeRel builds
+  - cmake-Baremetal-`<board>`-Debug for Debug builds
+  - cmake-Baremetal-`<board>`-Release for Release builds
+  - cmake-Baremetal-`<board>`-RelWithDebInfo for RelWithDebInfo builds
+  - cmake-Baremetal-`<board>`-MinSizeRel for MinSizeRel builds
   - where `<board>` is either `RPI3`, `RPI4` or `RPI5`
+- We will also change the output directory to allow for a separate subtree for each target board we build for.
+So if we build for Raspberry Pi 3, the directory for our executable will be `output/RPI3/Debug/bin` instead of `output/Debug/bin`
 - We will copy the custom scripting folder to the project root directory (`<root>/cmake`)
 - We will copy the toolchain file to the root directory (`<root>/baremetal.toolchain`)
 - We will copy the linker definition file to the root directory, and rename it (`<root>/baremetal.ld`)
@@ -49,13 +51,13 @@ For now, there will be no subdirectories, but we will add `CMakeLists.txt` files
 
 <img src="images/project-structure-target.png" alt="Target project structure" width="1000"/>
 
-In order to explain how to populate the new structure, let's start setting up a new application named `demo`, which we will later extend.
+In order to explain how to populate the new structure, let's start setting up a new application named `demo`, which we will extend later.
 
 <img src="images/project-structure-new-project.png" alt="New project structure" width="1000"/>
 
 ### Root CMakeLists.txt {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_ROOT_CMAKELISTSTXT}
 
-The root `CMakeLists.txt` is the starting point for CMake, we will be calling this the root CMake file. 
+The `CMakeLists.txt` file in the root directory is the starting point for CMake, we will be calling this the root CMake file. 
 It contains all global definitions and settings, such as the path to the custom CMake scripts, definition of base output directory,
 and later on also general compiler settings etc.
 It is common practice to create a main project in this file, in order for the toolchain to be processed. We will name it baremetal-main.
@@ -64,6 +66,7 @@ For now, we'll start with the following contents:
 
 ```cmake
 File: CMakeLists.txt
+File: d:\Projects\Private\RaspberryPi\baremetal.github\CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
@@ -81,35 +84,42 @@ File: CMakeLists.txt
 15: endif()
 16: set(CONFIG_DIR ${CMAKE_BUILD_TYPE})
 17: 
-18: set(DEPLOYMENT_DIR "${CMAKE_SOURCE_DIR}/deploy" CACHE STRING "Deployment directory")
-19: set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/output" CACHE STRING "Output directory")
-20: set(OUTPUT_BIN_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin")
-21: set(OUTPUT_LIB_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib")
-22: 
-23: message(STATUS "\n** Setting up project **\n--")
-24: 
-25: message(STATUS "\n##################################################################################")
-26: message(STATUS "\n** Setting up toolchain **\n--")
+18: set(BAREMETAL_TARGET_KERNEL kernel8)
+19: set(BAREMETAL_TARGET RPI3)
+20: 
+21: set(DEPLOYMENT_DIR "${CMAKE_SOURCE_DIR}/deploy" CACHE STRING "Deployment directory")
+22: set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/output/${BAREMETAL_TARGET}" CACHE STRING "Output directory")
+23: set(OUTPUT_BIN_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/bin")
+24: set(OUTPUT_LIB_DIR "${OUTPUT_BASE_DIR}/${CONFIG_DIR}/lib")
+25: 
+26: message(STATUS "\n** Setting up project **\n--")
 27: 
-28: project(baremetal-main
-29:     DESCRIPTION "Baremetal overall project")
+28: message(STATUS "\n##################################################################################")
+29: message(STATUS "\n** Setting up toolchain **\n--")
 30: 
-31: add_subdirectory(code)
+31: project(baremetal-main
+32:     DESCRIPTION "Baremetal overall project")
+33: 
+34: add_subdirectory(code)
+35: add_subdirectory(tutorial)
 ```
 
 Explanation:
 - Line 1: As before we start with the minimum CMake version required
 - Line 3: We then print the current CMake version
-- Line 5-11: We define a cached variables for the script path, and set it to the cmake scripts directory. We then add this path to the `CMAKE_MODULE_PATH`. No news here.
+- Line 5-11: We define a cached variables for the script path, and set it to the CMake scripts directory. We then add this path to the `CMAKE_MODULE_PATH`. No news here.
 - Line 13-16: Different is the way we defined the directory for the build configuration. 
 We set the `CMAKE_BUILD_TYPE` to Debug if it is not set, and then depending on the build configuration set the directory to either
 Debug, or Release, MinSizeRel or RelWithDebInfo.
-- Line 18-19: We then define the variables for the common deployment directory `DEPLOYMENT_DIR` (for image files) and the common binary output directory
+- Line 18: We create the variable `BAREMETAL_TARGET_KERNEL` to specify the base name of the kernel image to create, as before
+- Line 19: We create the variable `BAREMETAL_TARGET` to specify the target board we're building for. For now we'll set this to `RPI3`
+- Line 21-22: We then define the variables for the common deployment directory `DEPLOYMENT_DIR` (for image files) and the common binary output directory
 `OUTPUT_BASE_DIR` (for built libraries and executables). Both variables will also be stored in the cache.
-- Line 20-21: New is that we define two variables to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
-- Line 23-26: We add some diagnostic printing to identify when the toolchain is being processed.
-- Line 28-29: We define the main project.
-- Line 31: Lastly, we include the CMake file in the code directory.
+- Line 23-24: New is that we define two variables to hold the output library path `OUTPUT_LIB_DIR` and output executable path `OUTPUT_BIN_DIR`.
+- Line 26-29: We add some diagnostic printing to identify when the toolchain is being processed.
+- Line 31-32: We define the main project.
+- Line 34: We include the CMake file in the code directory.
+- Line 35: Lastly, we include the CMake file in the tutorial directory.
 
 ### Intermediate directory CMakeLists.txt {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_INTERMEDIATE_DIRECTORY_CMAKELISTSTXT}
 
@@ -258,12 +268,13 @@ File: code/applications/demo/CMakeLists.txt
 86: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
 87: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 88: 
-89: add_subdirectory(create-image)
+89: set(BAREMETAL_EXECUTABLE_TARGET ${PROJECT_NAME})
+90: setup_image(${PROJECT_NAME})
 ```
 
 As you can see, it does pretty much the same as the second part in our 02-setting-up-a-project project. However, some things are slightly different.
 
-- Line 1-3: It defines the project, in this case `demo`. Notice that here we specify both C++ and assembly as source languages.
+- Line 1-3: We define the project, in this case `demo`. Notice that here we specify both C++ and assembly as source languages.
 - Line 5-8: We print the current directory, and also which project we're going to configure.
 - Line 10: We include the functions.cmake custom CMake script
 - Line 12-32: We specify the project target file name, the compiler definitions, compiler options, include directories, and linker options, in the same way as before.
@@ -271,34 +282,14 @@ As you can see, it does pretty much the same as the second part in our 02-settin
 - Line 41-47: We specify which source and header files are used for this application.
 Notice that the main.cpp and start.S are now in the src subdirectory. This keeps project files and source files separated.
 - Line 49-52: We define the variables `START_GROUP` and `END_GROUP` as before.
-- Line 54-87: We define the executable, which files are used to build it, which libraries it links to, which include directories it used, while compiler definitions and options, we again use th same trick to specify the linker options, and then specify the executable name and directories.
+- Line 54-58: We define the executable, which files are used to build it, which libraries it links to, and which include directories it uses, as before.
+- Line 59-78: We define the compiler definitions and options which are used.
 Different is the way we pass compiler definitions and options. We use a more generic approach here, where we set the definitions and options per language using so-called generator expressions.
 As you can see here we support C, C++ and assembly.
-- Line 86-87: Notice that the target location directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`.
-- Line 89: Finally we include the `CMakeLists.txt` for the image creation project.
-
-#### code/applications/demo/create-image CMake file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_CMAKE_PROJECT_STRUCTURE_PROJECT_CMAKELISTSTXT_CODEAPPLICATIONSDEMOCREATE_IMAGE_CMAKE_FILE}
-
-The CMake file in `code/applications/demo/create-image` defines the project to create the image:
-
-```cmake
-File: code/applications/demo/create-image/CMakeLists.txt
-1: project(demo-image
-2:     DESCRIPTION "Kernel image for demo RPI 64 bit bare metal")
-3: 
-4: message(STATUS "\n**********************************************************************************\n")
-5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6: 
-7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8: 
-9: set(BAREMETAL_TARGET_KERNEL kernel8)
-10: set(DEPENDENCY demo)
-11: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-12: 
-13: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
-```
-
-Again this is very much like what we saw for `tutorial/02-setting-up-a-project/create-image`. The only difference is the name of the dependency and the project name.
+- Line 80-87: We define the linker options, using the same trick, and then specify the executable name and directories.
+Notice that the target location directories now use the new variables `OUTPUT_LIB_DIR` and `OUTPUT_BIN_DIR`
+- Line 89: We create the variable `BAREMETAL_EXECUTABLE_TARGET` to save the executable target name, as before
+- Line 90: We call the custom function `setup_image`, as before
 
 ## Adding source file {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_ADDING_SOURCE_FILE}
 
@@ -419,10 +410,10 @@ We will create a script for Windows and for Linux to configure the build. They w
 ```bat
 File: tools/configure-rpi3.bat
 1: @echo off
-2: del /S /f /q cmake-Baremetal-Debug\*.*
-3: rmdir /s /q cmake-Baremetal-Debug
-4: mkdir cmake-Baremetal-Debug
-5: pushd cmake-Baremetal-Debug
+2: del /S /f /q cmake-Baremetal-RPI3-Debug\*.*
+3: rmdir /s /q cmake-Baremetal-RPI3-Debug
+4: mkdir cmake-Baremetal-RPI3-Debug
+5: pushd cmake-Baremetal-RPI3-Debug
 6: 
 7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI3 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 8: 
@@ -444,6 +435,21 @@ File: tools/configure-rpi4.bat
 9: popd
 ```
 
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_WINDOWS_RASPBERRY_PI_5}
+
+```bat
+File: tools/configure-rpi5.bat
+1: @echo off
+2: del /S /f /q cmake-Baremetal-RPI5-Debug\*.*
+3: rmdir /s /q cmake-Baremetal-RPI5-Debug
+4: mkdir cmake-Baremetal-RPI5-Debug
+5: pushd cmake-Baremetal-RPI5-Debug
+6: 
+7: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI5 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+8: 
+9: popd
+```
+
 Running the script:
 ```bat
 tools\configure-rpi3.bat
@@ -459,48 +465,48 @@ tools\configure-rpi3.bat
 --
 ** Setting up toolchain **
 --
--- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
+-- Adding to CMAKE_EXE_LINKER_FLAGS -LF:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
--- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
--- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
--- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
--- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
--- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- The C compiler identification is GNU 13.3.1
--- The CXX compiler identification is GNU 13.3.1
+-- C compiler               D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+-- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+-- Linker                   D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+-- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+-- Std include path         D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -LF:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- The C compiler identification is GNU 13.2.1
+-- The CXX compiler identification is GNU 13.2.1
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal/code
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/code
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal/code/applications
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications
 -- The ASM compiler identification is GNU
--- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+-- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal/code/applications/demo
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications/demo
 
 ** Setting up demo **
 
@@ -508,34 +514,43 @@ tools\configure-rpi3.bat
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal/code/applications/demo/create-image
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications/demo
 
 ** Setting up demo-image **
 
--- create_image demo-image kernel8.img demo
+-- create_image demo-image .img demo
 -- TARGET_NAME demo.elf
--- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
+-- generate D:/Projects/Private/RaspberryPi/baremetal/deploy/Debug/demo-image/.img from D:/Projects/Private/RaspberryPi/baremetal/output/Debug/bin/demo
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/baremetal/code/libraries
--- Configuring done (0.9s)
--- Generating done (0.1s)
--- Build files have been written to: D:/Projects/baremetal/cmake-Baremetal-Debug
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/libraries
+--
+**********************************************************************************
+
+--
+## In directory: D:/Projects/Private/RaspberryPi/baremetal/tutorial
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    BAREMETAL_TARGET
+
+
+-- Build files have been written to: D:/Projects/Private/RaspberryPi/baremetal/cmake-Baremetal-RPI3-Debug
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX}
-
-We will leave the Linux scripts as with build directory `cmake-build`, as we will still build on the command line there.
 
 ##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX_RASPBERRY_PI_3}
 
 ```bash
 File: tools/configure-rpi3.sh
-1: rm -rf cmake-build/
-2: mkdir cmake-build
-3: pushd cmake-build
+1: rm -rf cmake-Baremetal-RPI3-Debug/
+2: mkdir cmake-Baremetal-RPI3-Debug
+3: pushd cmake-Baremetal-RPI3-Debug
 4: 
 5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI3 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 6: 
@@ -546,18 +561,31 @@ File: tools/configure-rpi3.sh
 
 ```bash
 File: tools/configure-rpi4.sh
-1: rm -rf cmake-build-rpi4/
-2: mkdir cmake-build-rpi4
-3: pushd cmake-build-rpi4
+1: rm -rf cmake-Baremetal-RPI4-Debug/
+2: mkdir cmake-Baremetal-RPI4-Debug
+3: pushd cmake-Baremetal-RPI4-Debug
 4: 
 5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI4 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
 6: 
 7: popd
 ```
 
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX_RASPBERRY_PI_5}
+
+```bash
+File: tools/configure-rpi5.sh
+1: rm -rf cmake-Baremetal-RPI5-Debug/
+2: mkdir cmake-Baremetal-RPI5-Debug
+3: pushd cmake-Baremetal-RPI5-Debug
+4: 
+5: cmake .. -G Ninja -DCMAKE_BUILD_TYPE:STRING="Debug" -DBAREMETAL_TARGET=RPI5 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../baremetal.toolchain
+6: 
+7: popd
+```
+
 Make sure the script is executable:
 ```bash
-chmod +x tools/configure-rpi3.sh
+chmod +x tools/configure-*.sh
 ```
 
 Running the script:
@@ -566,8 +594,8 @@ tools/configure-rpi3.sh
 ```
 
 ```text
-~/repo/baremetal/cmake-build ~/repo/baremetal
--- CMake 3.29.6
+~/repo/baremetal/cmake-Baremetal-RPI3-Debug ~/repo/baremetal
+-- CMake 3.30.2
 --
 ** Setting up project **
 --
@@ -576,31 +604,31 @@ tools/configure-rpi3.sh
 --
 ** Setting up toolchain **
 --
--- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
--- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
--- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
--- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
--- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+-- Adding to CMAKE_EXE_LINKER_FLAGS -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
 -- Assembler
--- C compiler               /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
--- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
--- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
--- Linker                   /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
--- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
--- Std include path         /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.2.1
--- The C compiler identification is GNU 13.2.1
--- The CXX compiler identification is GNU 13.2.1
+-- C compiler               /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- C++ compiler             /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++
+-- Archiver                 /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ar
+-- Linker                   /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-ld
+-- ObjCopy                  /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-objcopy
+-- Std include path         /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+-- CMAKE_EXE_LINKER_FLAGS=   -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- The C compiler identification is GNU 13.3.1
+-- The CXX compiler identification is GNU 13.3.1
 --
 **********************************************************************************
 
@@ -612,7 +640,7 @@ tools/configure-rpi3.sh
 --
 ## In directory: /home/rene/repo/baremetal/code/applications
 -- The ASM compiler identification is GNU
--- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
+-- Found assembler: /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc
 --
 **********************************************************************************
 
@@ -625,21 +653,26 @@ tools/configure-rpi3.sh
 **********************************************************************************
 
 --
-## In directory: /home/rene/repo/baremetal/code/applications/demo/create-image
+## In directory: /home/rene/repo/baremetal/code/applications/demo
 
 ** Setting up demo-image **
 
--- create_image demo-image kernel8.img demo
+-- create_image demo-image .img demo
 -- TARGET_NAME demo.elf
--- generate /home/rene/repo/baremetal/deploy/Debug/demo-image/kernel8.img from /home/rene/repo/baremetal/output/Debug/bin/demo
+-- generate /home/rene/repo/baremetal/deploy/Debug/demo-image/.img from /home/rene/repo/baremetal/output/Debug/bin/demo
 --
 **********************************************************************************
 
 --
 ## In directory: /home/rene/repo/baremetal/code/libraries
--- Configuring done (0.3s)
+--
+**********************************************************************************
+
+--
+## In directory: /home/rene/repo/baremetal/tutorial
+-- Configuring done (0.2s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/rene/repo/baremetal/cmake-build
+-- Build files have been written to: /home/rene/repo/baremetal/cmake-Baremetal-RPI3-Debug
 ~/repo/baremetal
 ```
 
@@ -651,14 +684,21 @@ tools/configure-rpi3.sh
 
 ```bat
 File: tools/build-target-rpi3.bat
-1: cmake --build cmake-BareMetal-Debug --target %1
+1: cmake --build cmake-Baremetal-RPI3-Debug --target %1
 ```
 
 ##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS_RASPBERRY_PI_4}
 
 ```bat
 File: tools/build-target-rpi4.bat
-1: cmake --build cmake-BareMetal-RPI4-Debug --target %1
+1: cmake --build cmake-Baremetal-RPI4-Debug --target %1
+```
+
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_WINDOWS_RASPBERRY_PI_5}
+
+```bat
+File: tools/build-target-rpi5.bat
+1: cmake --build cmake-Baremetal-RPI5-Debug --target %1
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX}
@@ -666,21 +706,27 @@ File: tools/build-target-rpi4.bat
 ##### Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX_RASPBERRY_PI_3}
 
 ```bash
-File: tools/build-target.sh
-1: cmake --build cmake-build --target $1
+File: tools/build-target-rpi3.sh
+1: cmake --build cmake-Baremetal-RPI3-Debug --target $1
 ```
 
 ##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX_RASPBERRY_PI_4}
 
 ```bash
-File: tools/build-target.sh
-1: cmake --build cmake-build-rpi4 --target $1
+File: tools/build-target-rpi4.sh
+1: cmake --build cmake-Baremetal-RPI4-Debug --target $1
+```
+
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_TARGET_LINUX_RASPBERRY_PI_5}
+
+```bash
+File: tools/build-target-rpi5.sh
+1: cmake --build cmake-Baremetal-RPI5-Debug --target $1
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-target-rpi3.sh
-chmod +x tools/build-target-rpi4.sh
+chmod +x tools/build-target-*.sh
 ```
 
 ### Building a specific image {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE}
@@ -692,7 +738,7 @@ chmod +x tools/build-target-rpi4.sh
 ```bat
 File: tools/build-image-rpi3.bat
 1: set thisdir=%~dp0
-2: build-target-rpi3 %1-image
+2: %thisdir%\build-target-rpi3 %1-image
 ```
 
 ##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS_RASPBERRY_PI_4}
@@ -700,7 +746,15 @@ File: tools/build-image-rpi3.bat
 ```bat
 File: tools/build-image-rpi4.bat
 1: set thisdir=%~dp0
-2: build-target-rpi4 %1-image
+2: %thisdir%\build-target-rpi4 %1-image
+```
+
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_WINDOWS_RASPBERRY_PI_5}
+
+```bat
+File: tools/build-image-rpi5.bat
+1: set thisdir=%~dp0
+2: %thisdir%\build-target-rpi5 %1-image
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX}
@@ -710,8 +764,7 @@ File: tools/build-image-rpi4.bat
 ```bash
 File: tools/build-image-rpi3.sh
 1: thisdir=$(dirname "$0")
-2: $thisdir/build-target-rpi3 $1-image
-
+2: $thisdir/build-target-rpi3.sh $1-image
 ```
 
 ##### Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX_RASPBERRY_PI_4}
@@ -719,13 +772,20 @@ File: tools/build-image-rpi3.sh
 ```bash
 File: tools/build-image-rpi4.sh
 1: thisdir=$(dirname "$0")
-2: $thisdir/build-target-rpi4 $1-image
+2: $thisdir/build-target-rpi4.sh $1-image
+```
+
+##### Raspberry Pi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_A_SPECIFIC_IMAGE_LINUX_RASPBERRY_PI_5}
+
+```bash
+File: tools/build-image-rpi5.sh
+1: thisdir=$(dirname "$0")
+2: $thisdir/build-target-rpi5.sh $1-image
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-image-rpi3.sh
-chmod +x tools/build-image-rpi4.sh
+chmod +x tools/build-image-*.sh
 ```
 
 Note we simple add the `-image` suffix to make sure we build the corresponding image.
@@ -738,14 +798,21 @@ Note we simple add the `-image` suffix to make sure we build the corresponding i
 
 ```bat
 File: tools/build-all-rpi3.bat
-1: cmake --build cmake-BareMetal-Debug
+1: cmake --build cmake-Baremetal-RPI3-Debug
 ```
 
 ##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS_RASPBERRYPI_4}
 
 ```bat
 File: tools/build-all-rpi4.bat
-1: cmake --build cmake-BareMetal-RPI4-Debug
+1: cmake --build cmake-Baremetal-RPI4-Debug
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_WINDOWS_RASPBERRYPI_5}
+
+```bat
+File: tools/build-all-rpi5.bat
+1: cmake --build cmake-Baremetal-RPI5-Debug
 ```
 
 Specifying no target means building all targets.
@@ -765,20 +832,26 @@ tools\build-all-rpi3.bat
 
 ```bash
 File: tools/build-all-rpi3.sh
-1: cmake --build cmake-build
+1: cmake --build cmake-Baremetal-RPI3-Debug
 ```
 
 ##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX_RASPBERRYPI_4}
 
 ```bash
 File: tools/build-all-rpi4.sh
-1: cmake --build cmake-build-rpi4
+1: cmake --build cmake-Baremetal-RPI4-Debug
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_BUILDING_ALL_TARGETS_LINUX_RASPBERRYPI_5}
+
+```bash
+File: tools/build-all-rpi5.sh
+1: cmake --build cmake-Baremetal-RPI5-Debug
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/build-all-rpi3.sh
-chmod +x tools/build-all-rpi4.sh
+chmod +x tools/build-all-*.sh
 ```
 
 Specifying no target means building all targets.
@@ -790,6 +863,7 @@ tools/build-all-rpi.sh
 
 ```text
 [4/4] Generating /home/rene/repo/baremetal/deploy/Debug/demo-image/kernel8.img
+
 ```
 
 ### Cleaning all targets {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS}
@@ -803,14 +877,21 @@ There is no target to clean a specific target though.
 
 ```bat
 File: tools/clean-all-rpi3.bat
-1: cmake --build cmake-BareMetal-Debug --target clean
+1: cmake --build cmake-Baremetal-RPI3-Debug --target clean
 ```
 
 ##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS_RASPBERRYPI_4}
 
 ```bat
 File: tools/clean-all-rpi4.bat
-1: cmake --build cmake-BareMetal-RPI4-Debug --target clean
+1: cmake --build cmake-Baremetal-RPI4-Debug --target clean
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_WINDOWS_RASPBERRYPI_5}
+
+```bat
+File: tools/clean-all-rpi5.bat
+1: cmake --build cmake-Baremetal-RPI5-Debug --target clean
 ```
 
 Running the build:
@@ -829,20 +910,26 @@ Cleaning... 4 files.
 
 ```bash
 File: tools/clean-all-rpi3.sh
-1: cmake --build cmake-build --target clean
+1: cmake --build cmake-Baremetal-RPI3-Debug --target clean
 ```
 
 ##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX_RASPBERRYPI_4}
 
 ```bash
 File: tools/clean-all-rpi4.sh
-1: cmake --build cmake-build-rpi4 --target clean
+1: cmake --build cmake-Baremetal-RPI4-Debug --target clean
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CLEANING_ALL_TARGETS_LINUX_RASPBERRYPI_5}
+
+```bash
+File: tools/clean-all-rpi5.sh
+1: cmake --build cmake-Baremetal-RPI5-Debug --target clean
 ```
 
 Make sure the script is executable:
 ```bash
-chmod +x tools/clean-all-rpi3.sh
-chmod +x tools/clean-all-rpi4.sh
+chmod +x tools/clean-all-*.sh
 ```
 
 Running the build:
@@ -866,7 +953,7 @@ File: tools/startQEMU-image-uart0-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target-rpi3 %1
+4: call %thisdir%\build-image-rpi3 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
@@ -877,7 +964,7 @@ File: tools/startQEMU-image-uart1-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target-rpi3 %1
+4: call %thisdir%\build-image-rpi3 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
@@ -888,7 +975,7 @@ File: tools/startQEMU-image-uart0-rpi4.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target-rpi4 %1
+4: call %thisdir%\build-image-rpi4 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
 ```
 
@@ -899,7 +986,7 @@ File: tools/startQEMU-image-uart1-rpi4.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: call %thisdir%\build-target-rpi4 %1
+4: call %thisdir%\build-image-rpi4 %1
 5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
 ```
 
@@ -918,13 +1005,9 @@ tools\startQEMU-image-uart0-rpi3.bat demo
 ```
 
 ```text
-Change Dir: 'D:/Projects/baremetal/cmake-Baremetal-Debug'
-
-Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -v demo
 ninja: no work to do.
 
-
-(qemu:5484): Gtk-WARNING **: 18:45:42.919: Could not load a pixbuf from icon theme.
+(qemu:41208): Gtk-WARNING **: 22:04:43.543: Could not load a pixbuf from icon theme.
 This may indicate that pixbuf loaders or the mime database could not be found.
 ```
 
@@ -935,12 +1018,12 @@ As stated, at the moment of writing this tutorial, Linux only support emulation 
 ##### Start QEMU listening to UART0 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX_START_QEMU_LISTENING_TO_UART0_ON_RASPBERRY_PI_3}
 
 ```bash
-File: tools/startQEMU-image-uart0.sh
+File: tools/startQEMU-image-uart0-rpi3.sh
 1: thisdir=$(dirname "$0")
 2: echo thisdir=$thisdir
 3: 
-4: echo "$thisdir/build-target.sh $1"
-5: $thisdir/build-target.sh $1
+4: echo "$thisdir/build-image-rpi3.sh $1"
+5: $thisdir/build-image-rpi3.sh $1
 6: 
 7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
 8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
@@ -953,8 +1036,8 @@ File: tools/startQEMU-image-uart1.sh
 1: thisdir=$(dirname "$0")
 2: echo thisdir=$thisdir
 3: 
-4: echo "$thisdir/build-target.sh $1"
-5: $thisdir/build-target.sh $1
+4: echo "$thisdir/build-image-rpi3.sh $1"
+5: $thisdir/build-image-rpi3.sh $1
 6: 
 7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
 8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
@@ -992,12 +1075,34 @@ load
 
 #### Windows {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_WINDOWS}
 
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_WINDOWS_RASPBERRYPI_3}
+
 ```bat
-File: tools/startgdb.bat
+File: tools/startgdb-rpi3.bat
 1: @echo off
 2: set thisdir=%~dp0
 3: 
-4: D:\Toolchains\arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe -x %thisdir%\gdb-commands.txt -symbols=%CD%\output\Debug\bin\%1.elf --args %CD%\output\Debug\bin\%1.elf
+4: aarch64-none-elf-gdb.exe -x %thisdir%\gdb-commands.txt -symbols=%CD%\output\RPI3\Debug\bin\%1.elf --args %CD%\output\RPI3\Debug\bin\%1.elf
+```
+
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_WINDOWS_RASPBERRYPI_4}
+
+```bat
+File: tools/startgdb-rpi4.bat
+1: @echo off
+2: set thisdir=%~dp0
+3: 
+4: aarch64-none-elf-gdb.exe -x %thisdir%\gdb-commands.txt -symbols=%CD%\output\RPI4\Debug\bin\%1.elf --args %CD%\output\RPI4\Debug\bin\%1.elf
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_WINDOWS_RASPBERRYPI_5}
+
+```bat
+File: tools/startgdb-rpi5.bat
+1: @echo off
+2: set thisdir=%~dp0
+3: 
+4: aarch64-none-elf-gdb.exe -x %thisdir%\gdb-commands.txt -symbols=%CD%\output\RPI5\Debug\bin\%1.elf --args %CD%\output\RPI5\Debug\bin\%1.elf
 ```
 
 We specify the command file, and also the symbol file to load
@@ -1008,7 +1113,7 @@ tools\startgdb.bat demo
 ```
 
 ```text
-GNU gdb (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.90.20231008-git
+GNU gdb (Arm GNU Toolchain 13.3.Rel1 (Build arm-13.24)) 14.2.90.20240526-git
 Copyright (C) 2023 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
@@ -1023,20 +1128,39 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from D:\Projects\baremetal\output\Debug\bin\demo.elf...
+Reading symbols from D:\Projects\Private\RaspberryPi\baremetal.github\output\RPI3\Debug\bin\demo.elf...
 0x0000000000000000 in ?? ()
-Loading section .text, size 0x58 lma 0x80000
+Loading section .init, size 0x50 lma 0x80000
+Loading section .text, size 0x8 lma 0x80050
 Start address 0x0000000000080000, load size 88
-Transfer rate: 704 bits in <1 sec, 88 bytes/write.
-(gdb) 
+Transfer rate: 14 KB/sec, 44 bytes/write.
+(gdb)
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_LINUX}
 
+##### RaspberryPi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_LINUX_RASPBERRYPI_3}
+
 ```bash
-File: tools/startgdb.sh
+File: tools/startgdb-rpi3.sh
 1: rootdir=`pwd`
-2: gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/Debug/bin/$1.elf --args $rootdir/output/Debug/bin/$1.elf
+2: gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/RPI3/Debug/bin/$1.elf --args $rootdir/output/RPI3/Debug/bin/$1.elf
+```
+
+##### RaspberryPi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_LINUX_RASPBERRYPI_4}
+
+```bash
+File: tools/startgdb-rpi4.sh
+1: rootdir=`pwd`
+2: gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/RPI4/Debug/bin/$1.elf --args $rootdir/output/RPI4/Debug/bin/$1.elf
+```
+
+##### RaspberryPi 5 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB_LINUX_RASPBERRYPI_5}
+
+```bash
+File: tools/startgdb-rpi5.sh
+1: rootdir=`pwd`
+2: gdb-multiarch -x $rootdir/tools/gdb-commands.txt -symbols=$rootdir/output/RPI5/Debug/bin/$1.elf --args $rootdir/output/RPI5/Debug/bin/$1.elf
 ```
 
 We specify the command file, and also the symbol file to load
@@ -1047,8 +1171,8 @@ tools/startgdb.sh demo
 ```
 
 ```text
-GNU gdb (Ubuntu 12.1-0ubuntu1~22.04.2) 12.1
-Copyright (C) 2022 Free Software Foundation, Inc.
+GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
+Copyright (C) 2024 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
@@ -1062,11 +1186,12 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from /home/rene/repo/baremetal/output/Debug/bin/demo.elf...
+Reading symbols from /home/rene/repo/baremetal.github/output/RPI3/Debug/bin/demo.elf...
 0x0000000000000000 in ?? ()
-Loading section .text, size 0x58 lma 0x80000
-Start address 0x0000000000080008, load size 88
-Transfer rate: 704 bits in <1 sec, 88 bytes/write.
+Loading section .init, size 0x50 lma 0x80000
+Loading section .text, size 0x8 lma 0x80050
+Start address 0x0000000000080000, load size 88
+Transfer rate: 704 bits in <1 sec, 44 bytes/write.
 (gdb)
 ```
 
@@ -1078,81 +1203,179 @@ When using Visual Studio, there are two methods to integrate CMake projects.
 2. Using `CMakeSettings.json`
 
 For Visual Studio 2019, getting things to work for baremetal development did not go well using `CMakePresets.json`, so we will focus on using `CMakeSettings.json` here.
-Maybe later I will give the first option another go.
+Maybe later I will give the first option another go, as that seems to be the way to go for the future.
 
 `CMakeSettings.json` is a JSON file, containing a section for every platform / build you wish to use. Let's add a baremetal target for every build configuration:
 
 ```json
 File: CMakeSettings.json
 1: {
-2:   "environments": [ {} ],
-3:   "configurations": [
-4:     {
-5:       "name": "BareMetal-Debug",
-6:       "generator": "Ninja",
-7:       "configurationType": "Debug",
-8:       "buildRoot": "${projectDir}\\cmake-${name}",
-9:       "installRoot": "${projectDir}\\output\\install\\${name}",
-10:       "cmakeCommandArgs": "",
-11:       "buildCommandArgs": "",
-12:       "ctestCommandArgs": "",
-13:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-14:       "inheritEnvironments": [ "gcc-arm" ]
-15:     },
-16:     {
-17:       "name": "BareMetal-Release",
-18:       "generator": "Ninja",
-19:       "configurationType": "Release",
-20:       "buildRoot": "${projectDir}\\cmake-${name}",
-21:       "installRoot": "${projectDir}\\output\\install\\${name}",
-22:       "cmakeCommandArgs": "",
-23:       "buildCommandArgs": "",
-24:       "ctestCommandArgs": "",
-25:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-26:       "inheritEnvironments": [ "gcc-arm" ]
-27:     },
-28:     {
-29:       "name": "BareMetal-RelWithDebInfo",
-30:       "generator": "Ninja",
-31:       "configurationType": "RelWithDebInfo",
-32:       "buildRoot": "${projectDir}\\cmake-${name}",
-33:       "installRoot": "${projectDir}\\output\\install\\${name}",
-34:       "cmakeCommandArgs": "",
-35:       "buildCommandArgs": "",
-36:       "ctestCommandArgs": "",
-37:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-38:       "inheritEnvironments": [ "gcc-arm" ]
-39:     },
-40:     {
-41:       "name": "BareMetal-MinSizeRel",
-42:       "generator": "Ninja",
-43:       "configurationType": "MinSizeRel",
-44:       "buildRoot": "${projectDir}\\cmake-${name}",
-45:       "installRoot": "${projectDir}\\output\\install\\${name}",
-46:       "cmakeCommandArgs": "",
-47:       "buildCommandArgs": "",
-48:       "ctestCommandArgs": "",
-49:       "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-50:       "inheritEnvironments": [ "gcc-arm" ]
-51:     }
-52:   ]
-53: }
+2:     "environments": [ {} ],
+3:     "configurations": [
+4:         {
+5:             "name": "Baremetal-RPI3-Debug",
+6:             "generator": "Ninja",
+7:             "configurationType": "Debug",
+8:             "buildRoot": "${projectDir}\\cmake-${name}",
+9:             "installRoot": "${projectDir}\\output\\install\\${name}",
+10:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI3",
+11:             "buildCommandArgs": "",
+12:             "ctestCommandArgs": "",
+13:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+14:             "inheritEnvironments": [ "gcc-arm" ]
+15:         },
+16:         {
+17:             "name": "Baremetal-RPI4-Debug",
+18:             "generator": "Ninja",
+19:             "configurationType": "Debug",
+20:             "buildRoot": "${projectDir}\\cmake-${name}",
+21:             "installRoot": "${projectDir}\\output\\install\\${name}",
+22:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI4",
+23:             "buildCommandArgs": "",
+24:             "ctestCommandArgs": "",
+25:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+26:             "inheritEnvironments": [ "gcc-arm" ]
+27:         },
+28:         {
+29:             "name": "Baremetal-RPI5-Debug",
+30:             "generator": "Ninja",
+31:             "configurationType": "Debug",
+32:             "buildRoot": "${projectDir}\\cmake-${name}",
+33:             "installRoot": "${projectDir}\\output\\install\\${name}",
+34:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI5",
+35:             "buildCommandArgs": "",
+36:             "ctestCommandArgs": "",
+37:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+38:             "inheritEnvironments": [ "gcc-arm" ]
+39:         },
+40:         {
+41:             "name": "Baremetal-RPI3-Release",
+42:             "generator": "Ninja",
+43:             "configurationType": "Release",
+44:             "buildRoot": "${projectDir}\\cmake-${name}",
+45:             "installRoot": "${projectDir}\\output\\install\\${name}",
+46:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI3",
+47:             "buildCommandArgs": "",
+48:             "ctestCommandArgs": "",
+49:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+50:             "inheritEnvironments": [ "gcc-arm" ]
+51:         },
+52:         {
+53:             "name": "Baremetal-RPI4-Release",
+54:             "generator": "Ninja",
+55:             "configurationType": "Release",
+56:             "buildRoot": "${projectDir}\\cmake-${name}",
+57:             "installRoot": "${projectDir}\\output\\install\\${name}",
+58:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI4",
+59:             "buildCommandArgs": "",
+60:             "ctestCommandArgs": "",
+61:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+62:             "inheritEnvironments": [ "gcc-arm" ]
+63:         },
+64:         {
+65:             "name": "Baremetal-RPI5-Release",
+66:             "generator": "Ninja",
+67:             "configurationType": "Release",
+68:             "buildRoot": "${projectDir}\\cmake-${name}",
+69:             "installRoot": "${projectDir}\\output\\install\\${name}",
+70:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI5",
+71:             "buildCommandArgs": "",
+72:             "ctestCommandArgs": "",
+73:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+74:             "inheritEnvironments": [ "gcc-arm" ]
+75:         },
+76:         {
+77:             "name": "Baremetal-RPI3-RelWithDebInfo",
+78:             "generator": "Ninja",
+79:             "configurationType": "RelWithDebInfo",
+80:             "buildRoot": "${projectDir}\\cmake-${name}",
+81:             "installRoot": "${projectDir}\\output\\install\\${name}",
+82:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI3",
+83:             "buildCommandArgs": "",
+84:             "ctestCommandArgs": "",
+85:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+86:             "inheritEnvironments": [ "gcc-arm" ]
+87:         },
+88:         {
+89:             "name": "Baremetal-RPI4-RelWithDebInfo",
+90:             "generator": "Ninja",
+91:             "configurationType": "RelWithDebInfo",
+92:             "buildRoot": "${projectDir}\\cmake-${name}",
+93:             "installRoot": "${projectDir}\\output\\install\\${name}",
+94:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI4",
+95:             "buildCommandArgs": "",
+96:             "ctestCommandArgs": "",
+97:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+98:             "inheritEnvironments": [ "gcc-arm" ]
+99:         },
+100:         {
+101:             "name": "Baremetal-RPI5-RelWithDebInfo",
+102:             "generator": "Ninja",
+103:             "configurationType": "RelWithDebInfo",
+104:             "buildRoot": "${projectDir}\\cmake-${name}",
+105:             "installRoot": "${projectDir}\\output\\install\\${name}",
+106:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI5",
+107:             "buildCommandArgs": "",
+108:             "ctestCommandArgs": "",
+109:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+110:             "inheritEnvironments": [ "gcc-arm" ]
+111:         },
+112:         {
+113:             "name": "Baremetal-RPI3-MinSizeRel",
+114:             "generator": "Ninja",
+115:             "configurationType": "MinSizeRel",
+116:             "buildRoot": "${projectDir}\\cmake-${name}",
+117:             "installRoot": "${projectDir}\\output\\install\\${name}",
+118:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI3",
+119:             "buildCommandArgs": "",
+120:             "ctestCommandArgs": "",
+121:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+122:             "inheritEnvironments": [ "gcc-arm" ]
+123:         },
+124:         {
+125:             "name": "Baremetal-RPI4-MinSizeRel",
+126:             "generator": "Ninja",
+127:             "configurationType": "MinSizeRel",
+128:             "buildRoot": "${projectDir}\\cmake-${name}",
+129:             "installRoot": "${projectDir}\\output\\install\\${name}",
+130:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI4",
+131:             "buildCommandArgs": "",
+132:             "ctestCommandArgs": "",
+133:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+134:             "inheritEnvironments": [ "gcc-arm" ]
+135:         },
+136:         {
+137:             "name": "Baremetal-RPI5-MinSizeRel",
+138:             "generator": "Ninja",
+139:             "configurationType": "MinSizeRel",
+140:             "buildRoot": "${projectDir}\\cmake-${name}",
+141:             "installRoot": "${projectDir}\\output\\install\\${name}",
+142:             "cmakeCommandArgs": "DBAREMETAL_TARGET=RPI5",
+143:             "buildCommandArgs": "",
+144:             "ctestCommandArgs": "",
+145:             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
+146:             "inheritEnvironments": [ "gcc-arm" ]
+147:         }
+148:     ]
+149:   }
 ```
 
 The environments section (line 2) could contain environment variables common for all build configurations, but is left empty here.
-The configurations section (line 4-51) will contain an array of build configurations, one for every supported build configurations using the baremetal toolchain.
+The configurations section (line 4-147) will contain an array of build configurations, one for every supported build configuration, and for each target board.
 
-- `name` is the name of the configuration, which is what you will be able to select in the Configurations dropdown box in Visual Studio. This has to be unique.
+- `name` is the name of the configuration, which is what you will be able to select in the Configurations dropdown box in Visual Studio. This has to be unique
 - `generator` settings will define how to build a CMake project. This can be one of many, check `cmake --help` for the list.
-Visual Studio will select `Ninja` as the default for CMake project, which is what we're going to use.
-- `configurationType` specifies what kind of build we're going to perform. This is one of the CMake build types (Debug, Release, RelWithDebInfo, MinSizeRel).
-- `buildRoot` specifies the cmake build directory to be used. 
-Until now, we've been using `cmake-build`, we'll use `cmake-${name}` here, where `${name}` is the `name` of the configuration, e.g. resulting in `cmake-Baremetal-Debug` for the Debug configuration.
-- `installRoot` is not so relevant now, but is the directory root used when executing an install target. We set it to `${projectDir}\\output\\install\\${name}`, in other words it will be in the `output\install` directory, under a subdirectory named after the CMake project we're building.
-- `cmakeCommandArgs` will specify the CMake definitions we wish to pass. These variable will be defined in our CMake scrips. We leave this empty for now, but will revisit this later.
-- `buildCommandArgs` specifies additional parameters to pass on to CMake for building. We are not using any.
-- `ctestCommandArgs` specifies additional parameters when running CMake in test mode. As we will not be using CMake for testing, this is empty.
-- `cmakeToolchain` specifies the toolchain file to be using. This is important for us, as we use the toolchain file to select our build toolchain for baremetal building.
+Visual Studio will select `Ninja` as the default for CMake project, which is what we're going to use
+- `configurationType` specifies what kind of build we're going to perform. This is one of the CMake build types (Debug, Release, RelWithDebInfo, MinSizeRel)
+- `buildRoot` specifies the CMake build directory to be used. 
+Until now, we've been using `cmake-Baremetal-RPI3-Debug`, we'll use `cmake-${name}` here, where `${name}` is the `name` of the configuration, e.g. resulting in `cmake-Baremetal-RPI3-Debug` for the Debug configuration on Raspberry Pi 3
+- `installRoot` is not so relevant now, but is the directory root used when executing an install target.
+We set it to `${projectDir}\\output\\install\\${name}`, in other words it will be in the `output\install` directory, under a subdirectory named after the CMake project we're building
+- `cmakeCommandArgs` will specify the CMake definitions we wish to pass. These variable will be defined in our CMake scrips. For now we'll only pass the definition of the variable `BAREMETAL_TARGET` to the board type we're building for, but will revisit this later
+- `buildCommandArgs` specifies additional parameters to pass on to CMake for building. We are not using any
+- `ctestCommandArgs` specifies additional parameters when running CMake in test mode. As we will not be using CMake for testing, this is empty
+- `cmakeToolchain` specifies the toolchain file to be using.
+This is important for us, as we use the toolchain file to select our build toolchain for baremetal building.
 We've placed the file in the root directory, so the location is `${projectDir}\\baremetal.toolchain`
 - `inheritEnvironments` is used to re-use standard settings from Visual Studio. As we're building for ARM targets and we have a GNU toolchain, it is set to `gcc-arm`
 
@@ -1167,7 +1390,7 @@ Then click "Select Folder"
 <img src="images/visualstudio-select-project-folder.png" alt="Visual Studio select root folder" width="800"/>
 
 Visual Studio will now open your project folder, and start loading `CMakeSettings.json`.
-After loading, it will select the first configuration in your `CMakeSettings.json` file, in this case "Baremetal-Debug".
+After loading, it will select the first configuration in your `CMakeSettings.json` file, in this case "Baremetal-RPI-Debug".
 
 Depending on whether you selected to always generate CMake configuration or not, it will also automatically configure your project.
 If not, you can always force configuration of CMake by selecting `Project->Configure baremetal-main`.
@@ -1183,9 +1406,9 @@ This will completely remove the CMake cache for this configuration (`CMakeCache.
 After automatically or manually configuring CMake, the Output panel at the bottom will show the CMake output:
 
 ```text
-1> CMake generation started for configuration: 'BareMetal-Debug'.
-1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\output\install\BareMetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DBAREMETAL_CONSOLE_UART0=ON -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal" 2>&1"
-1> Working directory: D:\Projects\baremetal\cmake-BareMetal-Debug
+1> CMake generation started for configuration: 'Baremetal-Debug'.
+1> Command line: "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\output\install\Baremetal-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DBAREMETAL_CONSOLE_UART0=ON -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal" 2>&1"
+1> Working directory: D:\Projects\baremetal\cmake-Baremetal-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- 
 1> [CMake] ** Setting up project **
@@ -1243,13 +1466,13 @@ After automatically or manually configuring CMake, the Output panel at the botto
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo/create-image
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/RPI3/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
@@ -1270,7 +1493,7 @@ If the toolchain was already checked, the output will be shorter.
 
 Notice that Visual Studio uses its own version of CMake: `CMake 3.20.21032501-MSVC_2`
 
-After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure-rpi[3|4}.bat` or `tools/configure.sh-rpi[3|4}` on the command line.
+After this, the CMake build directory is created, and CMake is configured, much like when you would run `tools\configure-rpi[3|4|5}.bat` or `tools/configure.sh-rpi[3|4|5}` on the command line.
 
 ### Building {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION_BUILDING}
 
@@ -1303,11 +1526,11 @@ When in CMake Targets View, you can build a project by right clicking the projec
 Running "Build All" or "Rebuild All" however does build all projects, including demo-image:
 
 ```text
->------ Build All started: Project: baremetal, Configuration: BareMetal-Debug ------
-  [1/4] Building ASM object code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
-  [2/4] Building CXX object code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
-  [3/4] Linking CXX executable ..\output\Debug\bin\demo.elf
-  [4/4] Generating ../../../../../deploy/Debug/demo-image/kernel8.img
+>------ Build All started: Project: baremetal, Configuration: BareMetal-RPI3-Debug ------
+  [1/4] Building CXX object code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
+  [2/4] Building ASM object code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
+  [3/4] Linking CXX executable ..\output\RPI3\Debug\bin\demo.elf
+  [4/4] Generating ../../../../deploy/Debug/demo-image/kernel8.img
 
 Build All succeeded.
 ```
@@ -1324,7 +1547,7 @@ First, we start QEMU. We could use a QEMU instance on Linux, however, as we are 
 Starting QEMU will automatically refresh the build for our image:
 
 ```bat
-tools\startQEMU-image-uart0.bat demo
+tools\startQEMU-image-uart0-rpi3.bat demo
 ```
 
 Now we need to configure Visual Studio to debug our project correctly. This is one of the less practical things in Visual Studio.
@@ -1345,8 +1568,8 @@ File: .vs/launch.vs.json
 5:     {
 6:       "type": "default",
 7:       "project": "CMakeLists.txt",
-8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
-9:       "name": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
+8:       "projectTarget": "demo.elf (D:\\Projects\\Private\\RaspberryPi\\baremetal.github\\output\\RPI3\\Debug\\bin\\demo.elf)",
+9:       "name": "demo.elf (D:\\Projects\\Private\\RaspberryPi\\baremetal.github\\output\\RPI3\\Debug\\bin\\demo.elf)"
 10:     }
 11:   ]
 12: }
@@ -1363,17 +1586,17 @@ File: .vs/launch.vs.json
 5:     {
 6:       "type": "cppgdb",
 7:       "project": "CMakeLists.txt",
-8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
-9:       "name": "demo.elf (D:\\Projects\\baremetal\\output\\Debug\\bin\\demo.elf)",
+8:       "projectTarget": "demo.elf (D:\\Projects\\RaspberryPi\\baremetal\\output\\RPI3\\Debug\\bin\\demo.elf)",
+9:       "name": "demo.elf (D:\\Projects\\RaspberryPi\\baremetal\\output\\RPI3\\Debug\\bin\\demo.elf)",
 10:       "program": "demo.elf",
 11:       "request": "launch",
 12:       "stopAtEntry": false,
-13:       "cwd": "${workspaceRoot}\\output\\Debug\\bin",
+13:       "cwd": "D:\\Projects\\baremetal\\output\\RPI3\\Debug\\bin",
 14:       "externalConsole": true,
 15:       "MIMode": "gdb",
 16:       "targetArchitecture": "arm64",
 17:       "miDebuggerServerAddress": "localhost:1234",
-18:       "miDebuggerPath": "D:\\Toolchains\\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe",
+18:       "miDebuggerPath": "D:\\Toolchains\\arm-gnu-toolchain-13.3.Rel1-mingw-w64-i686-aarch64-none-elf\\bin\\aarch64-none-elf-gdb.exe",
 19:       "args": []
 20:     }
 21:   ]
@@ -1394,7 +1617,7 @@ As we would like to start our application, we use `launch` (it is also possible 
 We set this to `false`, as we will simply put a breakpoint at the first line of code
 - Line 13: `cwd` will be the working directory used for debugging.
 Here we are able to use the variable `${workspaceRoot}` to denote the root directory, unlike in `projectTarget` and `name`
-It is best to select the directory from which the application is loaded, so `${workspaceRoot}\\output\\Debug\\bin`.
+It is best to select the directory from which the application is loaded, so `${workspaceRoot}\\output\\RPI3\\Debug\\bin` in this case.
 Notice the double backslashes to escape single ones
 - Line 14: `externalConsole` determines whether a console is created.
 We set this to `true` so a console is created in the lower panel
@@ -1412,7 +1635,7 @@ As our application is baremetal, we have no parameters, so we set it to an empty
 
 Now, when we save .vs\launch.vs.json, we can start debugging.
 
-First we open the source file and set a breakpoint on the first line.
+First we open the source file and set a breakpoint on the first line. We can also set a breakpoint in start.S to see how the code starts up.
 
 Then we start the debugger by either clicking on the _Selected Startup Item_ button (which actually shows the selected application),
 or by selecting Debug->Start Debugging
@@ -1421,7 +1644,9 @@ or by selecting Debug->Start Debugging
 
 The program breaks on the first sensible line after the breakpoint, which is inside the main function.
 
-<img src="images/visualstudio-debug.png" alt="Debug window" width="850"/>
+<img src="images/visualstudio-debug-main.png" alt="Debug window" width="850"/>
+
+<img src="images/visualstudio-debug-start-code.png" alt="Debug window" width="850"/>
 
 In the Output tab, we can also see the output of the debugger:
 
@@ -1461,8 +1686,6 @@ You can now step through the code using the normal buttons / keys:
 - Ctrl+F10: Run to cursor
 
 As there is not much to debug, you cannot really step through the code (you will soon end up in `start.S` in the halt loop.
-
-It is also possible to put breakpoints in start.S, so you can step through the assembly.
 
 When you stop debugging, the application will be killed, and QEMU will stop.
 

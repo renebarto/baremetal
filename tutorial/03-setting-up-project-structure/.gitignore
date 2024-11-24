@@ -1,0 +1,12 @@
+cmake-*/
+deploy/
+output/
+out/
+.vs/*
+.vscode/
+doc/board/images
+doc/board/pdf
+doc/cpu/images
+doc/cpu/pdf
+doc/tutorials/images
+doc/tutorials/pdf

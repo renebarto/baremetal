@@ -1105,7 +1105,7 @@ Update the file `tutorial/02-setting-up-a-project/CMakeLists.txt`
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-File: d:\Projects\Private\RaspberryPi\baremetal.github\tutorial\02-setting-up-a-project\CMakeLists.txt
+File: d:\Projects\Private\RaspberryPi\baremetal\tutorial\02-setting-up-a-project\CMakeLists.txt
 ...
 50: set(PROJECT_SOURCES
 51:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -1269,7 +1269,7 @@ popd
 Output of the configuration step will be similar to the following:
 
 ```text
-~/repo/baremetal.github/cmake-build ~/repo/baremetal.github
+~/repo/baremetal/cmake-build ~/repo/baremetal
 -- CMake 3.30.2
 -- TOOLCHAIN_ROOT           /opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf
 -- Processor                aarch64
@@ -1301,27 +1301,27 @@ Output of the configuration step will be similar to the following:
 **********************************************************************************
 
 --
-## In directory: /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project
+## In directory: /home/rene/repo/baremetal/tutorial/02-setting-up-a-project
 
 ** Setting up 02-setting-up-a-project **
 
--- PROJECT_LINK_OPTIONS= -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -Wl,--section-start=.init=0x80000 -T /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/link.ld -nostdlib -nostartfiles
+-- PROJECT_LINK_OPTIONS= -L/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1 -Wl,--section-start=.init=0x80000 -T /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/link.ld -nostdlib -nostartfiles
 -- The C compiler identification is GNU 13.3.1
 --
 **********************************************************************************
 
 --
-## In directory: /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project
+## In directory: /home/rene/repo/baremetal/tutorial/02-setting-up-a-project
 
 ** Setting up 02-setting-up-a-project-image **
 
 -- create_image 02-setting-up-a-project-image kernel8.img 02-setting-up-a-project
 -- TARGET_NAME 02-setting-up-a-project.elf
--- generate /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
+-- generate /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/../../deploy/Debug/02-setting-up-a-project-image/kernel8.img from /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/../../output/Debug/bin/02-setting-up-a-project
 -- Configuring done (0.2s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/rene/repo/baremetal.github/cmake-build
-~/repo/baremetal.github
+-- Build files have been written to: /home/rene/repo/baremetal/cmake-build
+~/repo/baremetal
 ```
 
 This will show information first on the executable target project `02-setting-up-a-project` and then the image creation project `02-setting-up-a-project-image`.
@@ -1446,11 +1446,11 @@ Loading section .text, size 0x8 lma 0x80050
 Start address 0x0000000000080000, load size 88
 Transfer rate: 85 KB/sec, 44 bytes/write.
 (gdb) b start.S:54
-Breakpoint 1 at 0x80000: file /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S, line 54.
+Breakpoint 1 at 0x80000: file /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/start.S, line 54.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 1, _start () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S:54
+Thread 1 hit Breakpoint 1, _start () at /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/start.S:54
 54          mrs     x1, mpidr_el1
 (gdb) n
 56          and     x1, x1, #3
@@ -1463,14 +1463,14 @@ x1             0x80000000          2147483648
 (gdb) n
 69          mov     sp, x1
 (gdb) b start.S:89
-Breakpoint 2 at 0x80034: file /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S, line 89.
+Breakpoint 2 at 0x80034: file /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/start.S, line 89.
 (gdb) c
 Continuing.
 
-Thread 1 hit Breakpoint 2, empty_bss () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/start.S:89
+Thread 1 hit Breakpoint 2, empty_bss () at /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/start.S:89
 89          bl      main
 (gdb) s
-main () at /home/rene/repo/baremetal.github/tutorial/02-setting-up-a-project/main.cpp:3
+main () at /home/rene/repo/baremetal/tutorial/02-setting-up-a-project/main.cpp:3
 3           return 0;
 ```
 

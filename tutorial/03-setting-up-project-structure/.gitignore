@@ -1,6 +1,0 @@
-cmake-*/
-deploy/
-output/
-out/
-.vs/*
-!.vs/launch.vs.json

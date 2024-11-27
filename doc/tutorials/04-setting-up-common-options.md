@@ -1674,4 +1674,77 @@ tools/startQEMU-image-uart0-rpi3.sh demo
 
 Start debugging as shown in [Visual Studio CMake integration](#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION). Make sure the demo applications is selected as startup project.
 
+## Tutorial code setup
+
+Starting from here, we'll be adding the code we create in a tutorial into the tutorial folder, and add it as a project to CMake.
+We already added a CMake file to the `tutorial` directory, and for every chapter, we'll add a new folder here.
+As we cannot have two executables with the same name in CMake, we'll be renaming the one in the tutorial folder.
+
+### Adding the code
+
+We'll add a CMake file under the subdirectory named after this tutorial file, and copy the code there, as well as a new CMake file:
+
+<img src="images/tutorial-code-for-chapter-04.png" alt="Tutorial folder structure" width="600"/>
+
+The code will simply be copied, but the demo CMake file will be changed slightly:
+
+```cmake
+File: tutorial/04-setting-up-common-options/code/applications/demo/CMakeLists.txt
+1: project(04-setting-up-common-options
+2:     DESCRIPTION "Tutorial 04 Setting up common options"
+3:     LANGUAGES CXX ASM)
+4: 
+5: message(STATUS "\n**********************************************************************************\n")
+6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+```
+
+The extra CMake file for this chapter will simply include the code folder:
+```cmake
+File: tutorial/04-setting-up-common-options/CMakeLists.txt
+1: add_subdirectory(code)
+```
+
+Also, we'll add the folder for the code to the CMake file under `tutorial`:
+
+```cmake
+File: tutorial/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: add_subdirectory(04-setting-up-common-options)
+```
+
+A similar structure will be created for each chapter from now on, which will configure and build the executables for each tutorial chapter next to the main code:
+
+```text
+1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo
+1> [CMake] 
+1> [CMake] ** Setting up 04-setting-up-common-options-image **
+1> [CMake] 
+1> [CMake] -- create_image 04-setting-up-common-options-image kernel8.img 04-setting-up-common-options
+1> [CMake] -- TARGET_NAME 04-setting-up-common-options.elf
+1> [CMake] -- generate D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image/kernel8.img from D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/04-setting-up-common-options
+1> [CMake] -- 
+1> [CMake] **********************************************************************************
+1> [CMake] 
+1> [CMake] -- 
+1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/tutorial/04-setting-up-common-options/code/libraries
+```
+
+```text
+>------ Build All started: Project: baremetal, Configuration: BareMetal-RPI3-Debug ------
+  [1/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [2/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\start.S.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/start.S
+  [3/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [4/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\main.cpp.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/main.cpp
+  [5/8] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [6/8] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\04-setting-up-common-options.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [7/8] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img"
+  [8/8] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-Baremetal-RPI3-Debug\tutorial\04-setting-up-common-options\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/04-setting-up-common-options.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image/kernel8.img"
+
+Build All succeeded.
+```
+
+As you can see, now two executables and two image files are created.
+
 Next: [05-setting-up-tools](05-setting-up-tools.md)

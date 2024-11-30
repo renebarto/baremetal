@@ -1674,13 +1674,13 @@ tools/startQEMU-image-uart0-rpi3.sh demo
 
 Start debugging as shown in [Visual Studio CMake integration](#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_VISUAL_STUDIO_CMAKE_INTEGRATION). Make sure the demo applications is selected as startup project.
 
-## Tutorial code setup
+## Tutorial code setup {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_TUTORIAL_CODE_SETUP}
 
 Starting from here, we'll be adding the code we create in a tutorial into the tutorial folder, and add it as a project to CMake.
 We already added a CMake file to the `tutorial` directory, and for every chapter, we'll add a new folder here.
 As we cannot have two executables with the same name in CMake, we'll be renaming the one in the tutorial folder.
 
-### Adding the code
+### Adding the code {#TUTORIAL_04_SETTING_UP_COMMON_OPTIONS_TUTORIAL_CODE_SETUP_ADDING_THE_CODE}
 
 We'll add a CMake file under the subdirectory named after this tutorial file, and copy the code there, as well as a new CMake file:
 

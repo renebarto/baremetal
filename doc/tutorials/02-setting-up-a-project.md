@@ -958,7 +958,7 @@ The linker definition file defines the different sections in the executable file
 - Line 79-85: .init_array is the static initializer section.
 It contains a table of functions used to initialize static data, such as constructors of static class objects.
 This is always stored.
-We will get to this in [Improving startup and static initialization](06-improving-startup-static-initialization.md)
+We will get to this in [Improving startup and static initialization](07-improving-startup-static-initialization.md)
 - Line 89-90: .data contains read/write data for the executable
 - Line 93-100: .bss contains unitialized data, such as simple global (extern) or local (static) variables. They are normally zeroed out before the program starts.
 We save the start and the end of this section in variables \__bss_start and \__bss_end respectively

@@ -1066,7 +1066,7 @@ File: tutorial/02-setting-up-a-project/start.S
 81:     str     xzr, [x1], #8
 82:     // Count down number of blocks
 83:     sub     w2, w2, #1
-84:     // Loop as loop as the end is not reached
+84:     // Loop as long as the end is not reached
 85:     cbnz    w2, clear_bss_loop
 86: 
 87:     // jump to C code, should not return
@@ -1095,7 +1095,7 @@ Call to the main() function in `tutorial/02-setting-up-a-project/main.cpp`
 - Line 91: when main() returns, also halt core 0
 
 For more information on ARM assembly code code also [getting-started-with-ARM-assembly-language](pdf/getting-started-with-arm-assembly-language.pdf).
-For more information on the `MPIDR_EL1` register see also [Arm Architecture Registers](pdf/ARM-architecture-registers.pdf) page 1390, or [ARM® Architecture Reference Manual](pdf/arm-aarch64-reference-manual.pdf), section D8.2.64.
+For more information on the `MPIDR_EL1` register see also [Arm Architecture Registers](pdf/ARM-architecture-registers.pdf) page 1390, or [ARM Architecture Reference Manual](pdf/arm-aarch64-reference-manual.pdf), section D8.2.64.
 
 ## Update project CMake file {#TUTORIAL_02_SETTING_UP_A_PROJECT_FOR_BUILDING_AND_DEBUGGING_UPDATE_PROJECT_CMAKE_FILE}
 
@@ -1105,7 +1105,6 @@ Update the file `tutorial/02-setting-up-a-project/CMakeLists.txt`
 
 ```cmake
 File: tutorial/02-setting-up-a-project/CMakeLists.txt
-File: d:\Projects\Private\RaspberryPi\baremetal\tutorial\02-setting-up-a-project\CMakeLists.txt
 ...
 50: set(PROJECT_SOURCES
 51:     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -1369,7 +1368,7 @@ To run QEMU:
 
 ```bat
 cd <project_root_dir>
-"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel deploy\Debug\02-setting-up-a-project-image\kernel8.img -serial stdio -s -S
+"c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel deploy\Debug\02-setting-up-a-project-image\kernel8.img -display none -serial stdio -s -S
 ```
 
 To run GDB:
@@ -1405,7 +1404,7 @@ To run QEMU:
 
 ```bash
 cd <project_root_dir>
-qemu-system-aarch64 -M raspi3b -kernel deploy/Debug/02-setting-up-a-project-image/kernel8.img -serial stdio -s -S
+qemu-system-aarch64 -M raspi3b -kernel deploy/Debug/02-setting-up-a-project-image/kernel8.img -display none -serial stdio -s -S
 ```
 
 To run GDB:

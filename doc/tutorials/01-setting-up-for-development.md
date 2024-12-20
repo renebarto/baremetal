@@ -23,8 +23,8 @@ The current version as of writing this document is 13.3 rel 1.
 For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-arm-none-linux-gnueabihf.zip).
 Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
-The best way to install on Windows is to create a directory with a short path, say `F:\Toolchains`, and place the unzipped files in a folder underneath this directory.
-Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `F:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`:
+The best way to install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
+Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`:
 
 <img src="images/env-before.png" alt="Environment edit" width="500"/>
 
@@ -32,7 +32,7 @@ In the lower pane, select Path and click Edit...
 
 <img src="images/env-add-toolchain.png" alt="Environment add" width="500"/>
 
-Click new and add the directory of the compilers, etc., in this case `F:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK.
+Click new and add the directory of the compilers, etc., in this case `D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`. Click OK.
 
 Click OK again to finalize changing the environment.
 
@@ -556,7 +556,7 @@ Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 Copy the demo image (`tutorial/01-demo/windows/kernel8.img`) (see [Deployment mechanism](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM)) to your working location, and in a terminal type:
 
 ```bat
-"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s
+"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -display none -serial stdio -s
 ```
 
 For now, we have left out the `-S` option, which makes QEMU wait for a debugger to attach.
@@ -590,7 +590,7 @@ You will see that the serial number of the "board" is always 0 in QEMU.
 Copy the demo image (`tutorial/01-demo/linux/kernel8.img`) (see [Deployment mechanism](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM)) to e.g. your home directory, and in a terminal type:
 
 ```bash
-qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -display none -serial stdio -s
 ```
 
 For now, we have left out the -S option, which makes QEMU wait for a debugger to attach.
@@ -645,7 +645,7 @@ Using the JTAG adapter is quite tricky, and currently only supported on Linux. I
 Copy the demo image (`tutorial/01-demo/kernel8.img`) (see [Deployment mechanism](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM)) to your working location, and in a terminal type:
 
 ```bat
-"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -serial stdio -s -S
+"C:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel kernel8.img -display none -serial stdio -s -S
 ```
 
 Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
@@ -661,7 +661,7 @@ QEMU will be waiting for the debugger to attach, with a screen similar to the on
 Copy the demo image (`tutorial/01-demo/kernel8.img`) (see [Deployment mechanism](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM)) to e.g. your working directory, and in a terminal type:
 
 ```bash
-qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio -s -S
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -display none -serial stdio -s -S
 ```
 
 Here, we add the `-S` option, which makes QEMU wait for a debugger to attach.
@@ -679,7 +679,7 @@ QEMU will be waiting for the debugger to attach, with a screen similar to the on
 Start gdb:
 
 ```bat
-F:\Toolchains\arm-gnu-toolchain-13.3.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args demo.elf
+D:\Toolchains\arm-gnu-toolchain-13.3.Rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gdb.exe --args demo.elf
 ```
 
 ```text

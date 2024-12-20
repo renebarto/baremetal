@@ -1,4 +1,4 @@
- # Tutorial 06: First application - using the console - UART1 {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1}
+# Tutorial 06: First application - using the console - UART1 {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1}
 
 @tableofcontents
 
@@ -933,7 +933,7 @@ Notice that we use a pointer to a byte. This is for easy calculation of addresse
 However, when reading from and writing to registers, we almost always need to write 32 bits.
 We will add some utility functions to safely read and write 32 bit values from and to memory.
 
-### MemoryAccess.h {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_BCMREGISTERSH}
+### MemoryAccess.h {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_MEMORYACCESSH}
 
 We will add a simple class with two static methods to read from and write to memory.
 
@@ -1004,7 +1004,7 @@ public:
 
 This declaration should speak for itself.
 
-### MemoryAccess.cpp {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_BCMREGISTERSH}
+### MemoryAccess.cpp {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_MEMORYACCESSCPP}
 
 Let's implement the two methods for MemoryAccess.
 

@@ -11,5 +11,5 @@ doc/cpu/pdf
 doc/tutorials/images
 doc/tutorials/pdf
 baremetal-cppcheck-build-dir/
-doxygen/
+doxygen/html/
 links.json

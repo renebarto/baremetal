@@ -81,7 +81,7 @@ clear_bss_loop:
     str     xzr, [x1], #8
     // Count down number of blocks
     sub     w2, w2, #1
-    // Loop as loop as the end is not reached
+    // Loop as long as the end is not reached
     cbnz    w2, clear_bss_loop
 
     // jump to C code, should not return

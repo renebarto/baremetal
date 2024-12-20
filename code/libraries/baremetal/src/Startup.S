@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : start.S
+// File        : Startup.S
 //
 // Namespace   : -
 //
@@ -9,6 +9,7 @@
 //
 // Description : Startup code. This is the entry point to any executable. It puts all cores except core 0 in sleep mode.
 //               For core 0, it sets the stack pointer to just below the code (as the stack grows down), and then calls main().
+//               Note: this file is based on the Circle startup assembly file by Rene Stange.
 //
 //------------------------------------------------------------------------------
 //
@@ -38,25 +39,56 @@
 //
 //------------------------------------------------------------------------------
 
-/// @brief Start of kernel code
-#define MEM_KERNEL_START        _start
-/// @brief Maximum size of code
-#define KERNEL_MAX_SIZE         0x200000 // Max 2 Mb
-/// @brief Kernel code end
-#define MEM_KERNEL_END          (MEM_KERNEL_START + KERNEL_MAX_SIZE)
+#include <baremetal/SysConfig.h>
 
-/// @brief Size of kernel stack for a single core
-#define KERNEL_STACK_SIZE       0x20000 // 128 Kb
-/// @brief Kernel stack top (stack grows down)
-#define MEM_KERNEL_STACK        (MEM_KERNEL_END + KERNEL_STACK_SIZE)
+.macro armv8_switch_to_el1_m, xreg1, xreg2
 
-/// @brief Our code starts in section .init
-.section ".init"
+    // Initialize Generic Timers
+    mrs     \xreg1, cnthctl_el2
+    orr     \xreg1, \xreg1, #0x3        // Enable EL1 access to timers
+    msr     cnthctl_el2, \xreg1
+    msr     cntvoff_el2, xzr
 
-.global _start
+    // Initilize MPID/MPIDR registers
+    mrs     \xreg1, midr_el1
+    mrs     \xreg2, mpidr_el1
+    msr     vpidr_el2, \xreg1
+    msr     vmpidr_el2, \xreg2
 
-/// @brief Startup starts here
-_start:
+    // Disable coprocessor traps
+    mov     \xreg1, #0x33ff
+    msr     cptr_el2, \xreg1            // Disable coprocessor traps to EL2
+    msr     hstr_el2, xzr               // Disable coprocessor traps to EL2
+    mov     \xreg1, #3 << 20
+    msr     cpacr_el1, \xreg1           // Enable FP/SIMD at EL1
+
+    // Initialize HCR_EL2
+    mov     \xreg1, #(1 << 31)          // 64bit EL1
+    msr     hcr_el2, \xreg1
+
+    // SCTLR_EL1 initialization
+    //
+    // setting RES1 bits (29,28,23,22,20,11) to 1
+    // and RES0 bits (31,30,27,21,17,13,10,6) +
+    // UCI,EE,EOE,WXN,nTWE,nTWI,UCT,DZE,I,UMA,SED,ITD,
+    // CP15BEN,SA0,SA,C,A,M to 0
+    mov     \xreg1, #0x0800
+    movk    \xreg1, #0x30d0, lsl #16
+    msr     sctlr_el1, \xreg1
+
+    // Return to the EL1_SP1 mode from EL2
+    mov     \xreg1, #0x3c4
+    msr     spsr_el2, \xreg1            // EL1_SP0 | D | A | I | F
+    adr     \xreg1, label1
+    msr     elr_el2, \xreg1
+    eret
+label1:
+.endm
+
+.section .init
+
+    .globl _start
+_start:                                 // normally entered from armstub8 in EL2 after boot
     // Read MPIDR_EL1 register, low 7 bits contain core id (as we have 4 cores, we mask only lowest two bits)
     mrs     x1, mpidr_el1
     // Mask away everything but the core id
@@ -70,10 +102,18 @@ waitevent:
 
 core0:
     // core 0
+    mrs     x0, CurrentEL               // check if already in EL1t mode?
+    cmp     x0, #4
+    beq     EL1
 
-    // set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    ldr     x1, =MEM_KERNEL_STACK
-    mov     sp, x1
+    ldr     x0, =MEM_EXCEPTION_STACK    // IRQ, FIQ and exception handler run in EL1h
+    msr     sp_el1, x0                  // init their stack
+
+    armv8_switch_to_el1_m x0, x1
+
+EL1:
+    ldr     x0, =MEM_KERNEL_STACK       // main thread runs in EL1t and uses sp_el0
+    mov     sp, x0                      // init its stack
 
     // clear bss
     // Load bss start
@@ -88,11 +128,13 @@ clear_bss_loop:
     str     xzr, [x1], #8
     // Count down number of blocks
     sub     w2, w2, #1
-    // Loop as loop as the end is not reached
+    // Loop as long as the end is not reached
     cbnz    w2, clear_bss_loop
 
     // jump to C code, should not return
 empty_bss:
-    bl      main
+    bl      main                        // Jump to main()
     // For fail safety, halt this core too
     b       waitevent
+
+// End

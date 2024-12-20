@@ -404,8 +404,8 @@ Searching for files in directory D:/Projects/baremetal.github.shadow/code
 ...
 Reading and parsing tag files
 Parsing files
-Preprocessing F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
-Parsing file F:/Projects/Private/baremetal/code/applications/demo/src/main.cpp...
+Preprocessing D:/Projects/baremetal/code/applications/demo/src/main.cpp...
+Parsing file D:/Projects/baremetal/code/applications/demo/src/main.cpp...
 ...
 finalizing index lists...
 writing tag file...
@@ -855,11 +855,11 @@ tools\run-cppcheck.bat
 ```
 
 ```text
-A subdirectory or file D:\Projects\Private\RaspberryPi\baremetal.github\tools\..\cppcheck-build-dir already exists.
-A subdirectory or file D:\Projects\Private\RaspberryPi\baremetal.github\tools\..\output\log already exists.
-Checking D:\Projects\Private\RaspberryPi\baremetal.github\code\applications\demo\src\main.cpp ...
+A subdirectory or file D:\Projects\baremetal\tools\..\cppcheck-build-dir already exists.
+A subdirectory or file D:\Projects\baremetal\tools\..\output\log already exists.
+Checking D:\Projects\baremetal\code\applications\demo\src\main.cpp ...
 1/2 files checked 50% done
-Checking D:\Projects\Private\RaspberryPi\baremetal.github\tutorial\04-setting-up-common-options\code\applications\demo\src\main.cpp ...
+Checking D:\Projects\baremetal\tutorial\04-setting-up-common-options\code\applications\demo\src\main.cpp ...
 2/2 files checked 100% done
 ```
 
@@ -873,7 +873,7 @@ nofile:0:0: information: Active checkers: 167/836 [checkersReport]
 Now if we add a function to `main.cpp` that is not used:
 
 ```cpp
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\applications\demo\src\main.cpp
+File: D:/Projects/baremetal/code/applications/demo/src/main.cpp
 1: /// @file
 2: /// Demo application main code
 3: 
@@ -896,7 +896,7 @@ File: d:\Projects\Private\RaspberryPi\baremetal.github\code\applications\demo\sr
 and then run cppcheck, we see:
 
 ```text
-D:\Projects\Private\RaspberryPi\baremetal.github\code\applications\demo\src\main.cpp:4:0: style: The function 'dummy' is never used. [unusedFunction]
+D:\Projects\baremetal\code\applications\demo\src\main.cpp:4:0: style: The function 'dummy' is never used. [unusedFunction]
 static void dummy()
 ^
 nofile:0:0: information: Active checkers: 167/836 [checkersReport]

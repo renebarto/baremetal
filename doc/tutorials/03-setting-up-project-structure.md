@@ -66,7 +66,6 @@ For now, we'll start with the following contents:
 
 ```cmake
 File: CMakeLists.txt
-File: d:\Projects\Private\RaspberryPi\baremetal.github\CMakeLists.txt
 1: cmake_minimum_required(VERSION 3.18)
 2: 
 3: message(STATUS "CMake ${CMAKE_VERSION}")
@@ -385,7 +384,7 @@ File: code/applications/demo/src/start.S
 74:     str     xzr, [x1], #8
 75:     // Count down number of blocks
 76:     sub     w2, w2, #1
-77:     // Loop as loop as the end is not reached
+77:     // Loop as long as the end is not reached
 78:     cbnz    w2, clear_bss_loop
 79: 
 80:     // jump to C code, should not return
@@ -476,7 +475,7 @@ tools\configure-rpi3.bat
 -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
 -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
 -- CMAKE_EXE_LINKER_FLAGS=
--- Adding to CMAKE_EXE_LINKER_FLAGS -LF:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- Adding to CMAKE_EXE_LINKER_FLAGS -LD:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
 -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
 -- Processor                aarch64
 -- Platform tuple           aarch64-none-elf
@@ -487,26 +486,26 @@ tools\configure-rpi3.bat
 -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
 -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
 -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
--- CMAKE_EXE_LINKER_FLAGS=   -LF:\toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+-- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
 -- The C compiler identification is GNU 13.2.1
 -- The CXX compiler identification is GNU 13.2.1
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/code
+## In directory: D:/Projects/baremetal/code
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications
+## In directory: D:/Projects/baremetal/code/applications
 -- The ASM compiler identification is GNU
 -- Found assembler: D:/Toolchains/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications/demo
+## In directory: D:/Projects/baremetal/code/applications/demo
 
 ** Setting up demo **
 
@@ -514,23 +513,23 @@ tools\configure-rpi3.bat
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/applications/demo
+## In directory: D:/Projects/baremetal/code/applications/demo
 
 ** Setting up demo-image **
 
 -- create_image demo-image .img demo
 -- TARGET_NAME demo.elf
--- generate D:/Projects/Private/RaspberryPi/baremetal/deploy/Debug/demo-image/.img from D:/Projects/Private/RaspberryPi/baremetal/output/Debug/bin/demo
+-- generate D:/Projects/baremetal/deploy/Debug/demo-image/.img from D:/Projects/baremetal/output/Debug/bin/demo
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/code/libraries
+## In directory: D:/Projects/baremetal/code/libraries
 --
 **********************************************************************************
 
 --
-## In directory: D:/Projects/Private/RaspberryPi/baremetal/tutorial
+## In directory: D:/Projects/baremetal/tutorial
 -- Configuring done (0.7s)
 -- Generating done (0.0s)
 CMake Warning:
@@ -539,7 +538,7 @@ CMake Warning:
     BAREMETAL_TARGET
 
 
--- Build files have been written to: D:/Projects/Private/RaspberryPi/baremetal/cmake-Baremetal-RPI3-Debug
+-- Build files have been written to: D:/Projects/baremetal/cmake-Baremetal-RPI3-Debug
 ```
 
 #### Linux {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_CONFIGURING_CMAKE_LINUX}
@@ -954,7 +953,7 @@ File: tools/startQEMU-image-uart0-rpi3.bat
 2: set thisdir=%~dp0
 3: 
 4: call %thisdir%\build-image-rpi3 %1
-5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -display none -serial stdio -s -S
 ```
 
 ##### Start QEMU listening to UART1 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_3}
@@ -965,7 +964,7 @@ File: tools/startQEMU-image-uart1-rpi3.bat
 2: set thisdir=%~dp0
 3: 
 4: call %thisdir%\build-image-rpi3 %1
-5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi3b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -display none -serial null -serial stdio -s -S
 ```
 
 ##### Start QEMU listening to UART0 on Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART0_ON_RASPBERRY_PI_4}
@@ -976,7 +975,7 @@ File: tools/startQEMU-image-uart0-rpi4.bat
 2: set thisdir=%~dp0
 3: 
 4: call %thisdir%\build-image-rpi4 %1
-5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial stdio -s -S
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -display none -serial stdio -s -S
 ```
 
 ##### Start QEMU listening to UART1 on Raspberry Pi 4 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_WINDOWS_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_4}
@@ -987,13 +986,14 @@ File: tools/startQEMU-image-uart1-rpi4.bat
 2: set thisdir=%~dp0
 3: 
 4: call %thisdir%\build-image-rpi4 %1
-5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -serial null -serial stdio -s -S
+5: "c:\Program Files\qemu\qemu-system-aarch64.exe" -M raspi4b -kernel %thisdir%\..\deploy\Debug\%1-image\kernel8.img -display none -serial null -serial stdio -s -S
 ```
 
 Explanation:
 - We switch echo-ing off
 - We start QEMU here to emulate Raspberry Pi 3B or Raspberry Pi 4B
-- We use the specified image for the kernel.
+- We use the specified image for the kernel
+- We switch the display off for now. This enables us run QEMU from the console, even remotely
 - We redirect output to stdout for UART0 (`-serial stdio -s`) or UART1 (`-serial null -serial stdio -s`)
 - We do not start the system immediately, but let it wait for gdb (`-S`)
 - QEMU will start a gdb server at port 1234
@@ -1025,8 +1025,8 @@ File: tools/startQEMU-image-uart0-rpi3.sh
 4: echo "$thisdir/build-image-rpi3.sh $1"
 5: $thisdir/build-image-rpi3.sh $1
 6: 
-7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
-8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial stdio -s -S
+7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -display none -serial stdio -s -S
+8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -display none -serial stdio -s -S
 ```
 
 ##### Start QEMU listening to UART1 on Raspberry Pi 3 {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_QEMU_LINUX_START_QEMU_LISTENING_TO_UART1_ON_RASPBERRY_PI_3}
@@ -1039,14 +1039,15 @@ File: tools/startQEMU-image-uart1.sh
 4: echo "$thisdir/build-image-rpi3.sh $1"
 5: $thisdir/build-image-rpi3.sh $1
 6: 
-7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
-8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -serial null -serial stdio -s -S
+7: echo qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -display none -serial null -serial stdio -s -S
+8: qemu-system-aarch64 -M raspi3b -kernel $thisdir/../deploy/Debug/$1-image/kernel8.img -display none -serial null -serial stdio -s -S
 9: 
 ```
 
 Explanation:
 - We start QEMU here to emulate Raspberry Pi 3B (Raspberry Pi 4B is not supported on Linux so far)
-- We use the specified image for the kernel. 
+- We use the specified image for the kernel
+- We switch the display off for now. This enables us run QEMU from the console, even remotely
 - We redirect output to stdout for UART0 (`-serial stdio -s`) or UART1 (`-serial null -serial stdio -s`)
 - We do not start the system immediately, but let it wait for gdb (`-S`).
 - QEMU will start a gdb server at port 1234
@@ -1060,7 +1061,7 @@ tools/startQEMU-image-uart0.sh demo
 thisdir=tools
 tools/build-target.sh demo
 ninja: no work to do.
-qemu-system-aarch64 -M raspi3b -kernel tools/../deploy/Debug/demo-image/kernel8.img -serial stdio -s -S
+qemu-system-aarch64 -M raspi3b -kernel tools/../deploy/Debug/demo-image/kernel8.img -display none -serial stdio -s -S
 ```
 
 ### Starting GDB {#TUTORIAL_03_SETTING_UP_PROJECT_STRUCTURE_BUILDING_STARTING_GDB}
@@ -1128,7 +1129,7 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from D:\Projects\Private\RaspberryPi\baremetal.github\output\RPI3\Debug\bin\demo.elf...
+Reading symbols from D:\Projects\baremetal\output\RPI3\Debug\bin\demo.elf...
 0x0000000000000000 in ?? ()
 Loading section .init, size 0x50 lma 0x80000
 Loading section .text, size 0x8 lma 0x80050

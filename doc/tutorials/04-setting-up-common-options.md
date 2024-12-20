@@ -788,8 +788,8 @@ The output for the configure step should be similar to:
 
 ```text
 1> CMake generation started for configuration: 'BareMetal-RPI3-Debug'.
-1> Command line: "C:\WINDOWS\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\Private\RaspberryPi\baremetal.github\output\install\BareMetal-RPI3-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\Private\RaspberryPi\baremetal.github\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\Private\RaspberryPi\baremetal.github" 2>&1"
-1> Working directory: D:\Projects\Private\RaspberryPi\baremetal.github\cmake-BareMetal-RPI3-Debug
+1> Command line: "C:\WINDOWS\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_BUILD_TYPE:STRING="Debug" -DCMAKE_INSTALL_PREFIX:PATH="D:\Projects\baremetal\output\install\BareMetal-RPI3-Debug" -DCMAKE_TOOLCHAIN_FILE:FILEPATH="D:\Projects\baremetal\baremetal.toolchain" -DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\Projects\baremetal" 2>&1"
+1> Working directory: D:\Projects\baremetal\cmake-BareMetal-RPI3-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
 1> [CMake] -- 
@@ -800,17 +800,17 @@ The output for the configure step should be similar to:
 1> [CMake] -- 
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
-1> [CMake] -- TOOLCHAIN_ROOT           F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
+1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
 1> [CMake] -- Processor                aarch64
 1> [CMake] -- Platform tuple           aarch64-none-elf
-1> [CMake] -- Assembler                F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C compiler               F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
-1> [CMake] -- C++ compiler             F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
-1> [CMake] -- Archiver                 F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
-1> [CMake] -- Linker                   F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
-1> [CMake] -- ObjCopy                  F:/toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
-1> [CMake] -- Std include path         F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
-1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
+1> [CMake] -- Assembler                D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C compiler               D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-gcc.exe
+1> [CMake] -- C++ compiler             D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-g++.exe
+1> [CMake] -- Archiver                 D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ar.exe
+1> [CMake] -- Linker                   D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-ld.exe
+1> [CMake] -- ObjCopy                  D:/Toolchains/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/bin/aarch64-none-elf-objcopy.exe
+1> [CMake] -- Std include path         D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1/include
+1> [CMake] -- CMAKE_EXE_LINKER_FLAGS=   -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1
 1> [CMake] -- C++ compiler version:    13.3.1
 1> [CMake] -- C compiler version:      13.3.1
 1> [CMake] -- C++ supported standard:  17
@@ -818,17 +818,17 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/code
+1> [CMake] ## In directory: D:/Projects/baremetal/code
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/code/applications
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo **
 1> [CMake] 
@@ -846,10 +846,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             : 
 1> [CMake] -- Include dirs - private            : 
-1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
+1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      : 
 1> [CMake] -- Link libs                         : 
-1> [CMake] -- Source files                      :  D:/Projects/Private/RaspberryPi/baremetal.github/code/applications/demo/src/main.cpp D:/Projects/Private/RaspberryPi/baremetal.github/code/applications/demo/src/start.S
+1> [CMake] -- Source files                      :  D:/Projects/baremetal/code/applications/demo/src/main.cpp D:/Projects/baremetal/code/applications/demo/src/start.S
 1> [CMake] -- Include files - public            : 
 1> [CMake] -- Include files - private           : 
 1> [CMake] -- 
@@ -860,7 +860,7 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
@@ -869,10 +869,10 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target imported link libraries    : 
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
-1> [CMake] -- Target static library location    :  D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/lib
+1> [CMake] -- Target static library location    :  D:/Projects/baremetal/output/RPI3/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
-1> [CMake] -- Target binary location            :  D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target binary location            :  D:/Projects/baremetal/output/RPI3/Debug/bin
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles 
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
@@ -881,26 +881,26 @@ The output for the configure step should be similar to:
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up demo-image **
 1> [CMake] 
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
-1> [CMake] -- generate D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo
+1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img from D:/Projects/baremetal/output/RPI3/Debug/bin/demo
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal/code/libraries
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/tutorial
+1> [CMake] ## In directory: D:/Projects/baremetal/tutorial
 1> [CMake] -- Configuring done
 1> [CMake] -- Generating done
-1> [CMake] -- Build files have been written to: D:/Projects/Private/RaspberryPi/baremetal.github/cmake-Baremetal-RPI3-Debug
+1> [CMake] -- Build files have been written to: D:/Projects/baremetal/cmake-Baremetal-RPI3-Debug
 1> Extracted CMake variables.
 1> Extracted source files and headers.
 1> Extracted code model.
@@ -915,10 +915,10 @@ We can then build for Raspberry Pi 3:
 
 ```text
 >------ Build All started: Project: baremetal, Configuration: BareMetal-RPI3-Debug ------
-  [1/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [2/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [3/4] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img"
+  [1/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [2/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [3/4] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
 
 Build All succeeded.
 ```
@@ -927,10 +927,10 @@ Or Raspberry Pi 4:
 
 ```text
 >------ Build All started: Project: baremetal, Configuration: BareMetal-RPI4-Debug ------
-  [1/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=4 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [2/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=4 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [3/4] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI4\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-BareMetal-RPI4-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI4/Debug/bin/demo.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8-rpi4.img"
+  [1/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=4 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [2/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=4 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a72 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [3/4] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI4\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-RPI4-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI4/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8-rpi4.img"
 
 Build All succeeded.
 ```
@@ -939,10 +939,10 @@ Or Raspberry Pi 5:
 
 ```text
 >------ Build All started: Project: baremetal, Configuration: BareMetal-RPI5-Debug ------
-  [1/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=5 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a76 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [2/4] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=5 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a76 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [3/4] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI5\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [4/4] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-BareMetal-RPI5-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI5/Debug/bin/demo.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel_2712.img"
+  [1/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=5 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a76 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [2/4] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=5 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a76 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [3/4] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI5\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [4/4] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-BareMetal-RPI5-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI5/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel_2712.img"
 
 Build All succeeded.
 ```
@@ -1454,7 +1454,7 @@ cmd.exe /C
    -nostdlib -nostartfiles
    code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
    code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
-   -o ..\output\Debug\bin\demo.elf
+   -o ..\output\RPI3\Debug\bin\demo.elf
    -Wl,--start-group  -Wl,--end-group &&
   cd ."
 ```
@@ -1482,7 +1482,7 @@ Options used when linking are:
    -nostdlib -nostartfiles
    code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj
    code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj
-   -o ..\output\Debug\bin\demo.elf
+   -o ..\output\RPI3\Debug\bin\demo.elf
    -Wl,--start-group  -Wl,--end-group
 ```
 
@@ -1585,7 +1585,7 @@ File: code/applications/demo/CMakeLists.txt
 71: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 ```
 
-- Next is the option `-o ..\output\Debug\bin\demo.elf`, which specifies the output of the linker, the application.
+- Next is the option `-o ..\output\RPI3\Debug\bin\demo.elf`, which specifies the output of the linker, the application.
 This is determined by the specification of the name and location of the target file in the project CMake file:
 
 ```cmake
@@ -1634,9 +1634,9 @@ cmd.exe /C
     "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
         -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image &&
     D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe
-        D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo.elf
+        D:/Projects/baremetal/output/RPI3/Debug/bin/demo.elf
         -O binary
-        D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img
+        D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img
 ```
 
 Here we see a 3 commands being performed inside a command shell:
@@ -1717,30 +1717,30 @@ File: tutorial/CMakeLists.txt
 A similar structure will be created for each chapter from now on, which will configure and build the executables for each tutorial chapter next to the main code:
 
 ```text
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/tutorial/04-setting-up-common-options/code/applications/demo
+1> [CMake] ## In directory: D:/Projects/baremetal/tutorial/04-setting-up-common-options/code/applications/demo
 1> [CMake] 
 1> [CMake] ** Setting up 04-setting-up-common-options-image **
 1> [CMake] 
 1> [CMake] -- create_image 04-setting-up-common-options-image kernel8.img 04-setting-up-common-options
 1> [CMake] -- TARGET_NAME 04-setting-up-common-options.elf
-1> [CMake] -- generate D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image/kernel8.img from D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/04-setting-up-common-options
+1> [CMake] -- generate D:/Projects/baremetal/deploy/Debug/04-setting-up-common-options-image/kernel8.img from D:/Projects/baremetal/output/RPI3/Debug/bin/04-setting-up-common-options
 1> [CMake] -- 
 1> [CMake] **********************************************************************************
 1> [CMake] 
 1> [CMake] -- 
-1> [CMake] ## In directory: D:/Projects/Private/RaspberryPi/baremetal.github/tutorial/04-setting-up-common-options/code/libraries
+1> [CMake] ## In directory: D:/Projects/baremetal/tutorial/04-setting-up-common-options/code/libraries
 ```
 
 ```text
 >------ Build All started: Project: baremetal, Configuration: BareMetal-RPI3-Debug ------
-  [1/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
-  [2/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\start.S.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/start.S
-  [3/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
-  [4/8] F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\main.cpp.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/main.cpp
-  [5/8] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [6/8] cmd.exe /C "cd . && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LF:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/Private/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\04-setting-up-common-options.elf  -Wl,--start-group  -Wl,--end-group && cd ."
-  [7/8] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img"
-  [8/8] cmd.exe /C "cd /D D:\Projects\Private\RaspberryPi\baremetal.github\cmake-Baremetal-RPI3-Debug\tutorial\04-setting-up-common-options\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image && F:\toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/Private/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/04-setting-up-common-options.elf -O binary D:/Projects/Private/RaspberryPi/baremetal.github/deploy/Debug/04-setting-up-common-options-image/kernel8.img"
+  [1/8] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\start.S.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -c ../code/applications/demo/src/start.S
+  [2/8] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\start.S.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/start.S
+  [3/8] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -MF code\applications\demo\CMakeFiles\demo.dir\src\main.cpp.obj.d -o code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj -c ../code/applications/demo/src/main.cpp
+  [4/8] D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -DBAREMETAL_RPI_TARGET=3 -DPLATFORM_BAREMETAL -D_DEBUG  -g -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter -std=gnu++17 -MD -MT tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -MF tutorial\04-setting-up-common-options\code\applications\demo\CMakeFiles\04-setting-up-common-options.dir\src\main.cpp.obj.d -o tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj -c ../tutorial/04-setting-up-common-options/code/applications/demo/src/main.cpp
+  [5/8] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [6/8] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/main.cpp.obj tutorial/04-setting-up-common-options/code/applications/demo/CMakeFiles/04-setting-up-common-options.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\04-setting-up-common-options.elf  -Wl,--start-group  -Wl,--end-group && cd ."
+  [7/8] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
+  [8/8] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-Baremetal-RPI3-Debug\tutorial\04-setting-up-common-options\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/04-setting-up-common-options-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI3/Debug/bin/04-setting-up-common-options.elf -O binary D:/Projects/baremetal/deploy/Debug/04-setting-up-common-options-image/kernel8.img"
 
 Build All succeeded.
 ```

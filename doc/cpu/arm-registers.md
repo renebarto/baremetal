@@ -4,8 +4,6 @@
 
 See [documentation](pdf/arm-architecture-registers.pdf) and [reference manual](pdf/arm-aarch64-reference-manual.pdf).
 
-\todo Selectively copy registers used in code.
-
 This page enumerates the definition of some of the registers inside the ARM processor.
 The list will never be complete, please refer to the documentation for that, here I just list very common registers, and registers needed to explain certain code.
 
@@ -16,30 +14,140 @@ The list will never be complete, please refer to the documentation for that, her
 <table>
 <caption id="arm_register_overview">Register overview</caption>
 <tr><th>Register name<th>Width<th>Access<th>Reset value<th>Name                                                    <th>Meaning</tr>
-<!-- <tr><td>MIDR_EL1     <td>32   <td>R  <td>0x410FD083 <td>Main ID Register                                        <td>Provides identification information for the processor, including an implementer code for the device and a device ID number.</tr>
-<tr><td>MPIDR_EL1    <td>64   <td>R  <td>0x80000003 <td>Multiprocessor Affinity Register                        <td>Provides an additional core identification mechanism for scheduling purposes in a cluster system. EDDEVAFF0 is a read-only copy of MPIDR_EL1[31:0] accessible from the external debug interface.</tr>
-<tr><td>L2CTLR_EL1   <td>32   <td>R/W<td>?          <td>L2 Control register                                     <td>?</tr>
+<tr><td>CNTFRQ_EL0   <td>64   <td>R/W<td>0x00000000 <td>Counter-timer Frequency register (EL0)                  <td>This register is provided so that software can discover the frequency of the system counter. It must be programmed with this value as part of system initialization. The value of the register is not interpreted by hardware.</tr>
+<tr><td>CNTHCTL_EL2  <td>64   <td>R/W<td>?          <td>Counter-timer Hypervisor Control register (EL2)         <td>Controls the generation of an event stream from the physical counter, and access from EL1 to the physical counter and the EL1 physical timer.</tr>
+<tr><td>CNTVOFF_EL2  <td>64   <td>R/W<td>?          <td>Counter-timer Virtual Offset register (EL2)             <td>Holds the 64-bit virtual offset. This is the offset between the physical count value visible in CNTPCT_EL0 and the virtual count value visible in CNTVCT_EL0.</tr>
+<tr><td>CNTP_CTL_EL0 <td>64   <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer Control register (EL0)     <td>Control register for the EL0 physical timer.<br>Bit 2: If 1, compare value condition is met, if 0, it is not met (yet)<br>Bit 1: If 1, interrupt on timer condition is masked, if 0, the interrupt is not masked<br>Bit 0: If 1, the timer is enabled, if 0, it is disabled</tr>
+<tr><td>CNTP_CVAL_EL0<td>64   <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer CompareValue register (EL0)<td>Holds the compare value for the EL0 physical timer.</tr>
+<tr><td>CNTPCT_EL0   <td>64   <td>R/W<td>0x00000000 <td>Counter-timer Physical Count register (EL0)             <td>Holds the 64-bit physical count value.</tr>
+<tr><td>CPACR_EL1    <td>32   <td>R/W<td>?          <td>Architectural Feature Access Control Register (EL1)     <td>Controls access to trace, SME, Streaming SVE, SVE, and Advanced SIMD and floating-point functionality.</tr>
+<tr><td>CPTR_EL2     <td>32   <td>R/W<td>?          <td>Architectural Feature Trap Register (EL2)               <td>Controls trapping to EL2 of accesses to CPACR, CPACR_EL1, trace, Activity Monitor, SME, Streaming SVE, SVE, and Advanced SIMD and floating-point functionality.</tr>
+<tr><td>CTR_EL0      <td>64   <td>R/W<td>0x00000000 <td>Cache Type Register (EL0)                               <td>Provides information about the architecture of the caches.</tr>
+<tr><td>CurrentEL    <td>64   <td>R/W<td>0x00000000 <td>Current Exception Level                                 <td>Holds the current Exception level.</tr>
+<tr><td>DAIF         <td>64   <td>R/W<td>0x000003C0 <td>Interrupt Mask Bits                                     <td>Allows access to the interrupt mask bits.</tr>
+<tr><td>DAIFClr      <td>64   <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Reset Register                      <td>Used to reset bit in DAIF register. Every '1' bit written resets the corresponding bit in DAIF.</tr>
+<tr><td>DAIFSet      <td>64   <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Set Register                        <td>Used to set bit in DAIF register. Every '1' bit written sets the corresponding bit in DAIF.</tr>
+<tr><td>ELR_EL1      <td>64   <td>R/W<td>?          <td>Exception Link Register (EL1)                           <td>When taking an exception to EL1, holds the address to return to.</tr>
+<tr><td>ELR_EL2      <td>64   <td>R/W<td>?          <td>Exception Link Register (EL2)                           <td>When taking an exception to EL2, holds the address to return to.</tr>
+<tr><td>ESR_EL1      <td>64   <td>R  <td>?          <td>Exception Syndrome Register (EL1)                       <td>Holds syndrome information for an exception taken to EL1.</tr>
+<tr><td>ESR_EL2      <td>64   <td>R  <td>?          <td>Exception Syndrome Register (EL2)                       <td>Holds syndrome information for an exception taken to EL2.</tr>
+<tr><td>FAR_EL1      <td>64   <td>R/W<td>?          <td>Fault Address Register (EL1)                            <td>Holds the faulting Virtual Address for all synchronous Instruction or Data Abort, PC alignment fault and Watchpoint exceptions that are taken to EL1.</tr>
+<tr><td>HCR_EL2      <td>64   <td>R/W<td>?          <td>Hypervisor Configuration Register (EL2)                 <td>Provides configuration controls for virtualization, including defining whether various operations are trapped to EL2.</tr>
+<tr><td>HSTR_EL2     <td>32   <td>R/W<td>?          <td>Hypervisor System Trap Register (EL2)                   <td>Controls trapping to EL2 of EL1 or lower AArch32 accesses to the System register in the coproc == 0b1111 encoding space, by the CRn value used to access the register using MCR or MRC instruction. When the register is accessible using an MCRR or MRRC instruction, this is the CRm value used to access the register.</tr>
+<tr><td>L2CTLR_EL1   <td>32   <td>R/W<td>?          <td>L2 Control register                                     <td>Level 2 cache control</tr>
+<tr><td>MIDR_EL1     <td>32   <td>R  <td>0x410FD083 <td>Main ID Register                                        <td>Provides identification information for the processor, including an implementer code for the device and a device ID number.</tr>
+<tr><td>MPIDR_EL1    <td>64   <td>R  <td>0x80000003 <td>Multiprocessor Affinity Register                        <td>Provides an additional core identification mechanism for scheduling purposes in a cluster system.</tr>
+<tr><td>SCTLR_EL1    <td>64   <td>R/W<td>?          <td>System Control Register (EL1)                           <td>Provides top level control of the system, including its memory system, at EL1 and EL0.</tr>
 <tr><td>SP_EL0       <td>64   <td>R/W<td>?          <td>Stack Pointer (EL0)                                     <td>Holds the stack pointer associated with EL0. At higher Exception levels, this is used as the current stack pointer when the value of SPSel.SP is 0.</tr>
 <tr><td>SP_EL1       <td>64   <td>R/W<td>?          <td>Stack Pointer (EL1)                                     <td>Holds the stack pointer associated with EL1. When executing at EL1, the value of SPSel.SP determines the current stack pointer:<br>
 SPSel.SP   Current stack pointer<br>
 0b0        SP_EL0<br>
 0b1        SP_EL1
-<tr><td>ELR_EL1      <td>64   <td>R/W<td>?          <td>Exception Link Register (EL1)                           <td>When taking an exception to EL1, holds the address to return to.</tr>
-<tr><td>ESR_EL1      <td>64   <td>R  <td>?          <td>Exception Syndrome Register (EL1)                       <td>Holds syndrome information for an exception taken to EL1</tr>
 <tr><td>SPSR_EL1     <td>64   <td>R/W<td>?          <td>Saved Program Status Register (EL1)                     <td>Holds the saved process state when an exception is taken to EL1.</tr>
-<tr><td>FAR_EL1      <td>64   <td>R/W<td>?          <td>Fault Address Register (EL1)                            <td>Holds the faulting Virtual Address for all synchronous Instruction or Data Abort, PC alignment fault and Watchpoint exceptions that are taken to EL1.</tr>
+<tr><td>SPSR_EL2     <td>64   <td>R/W<td>?          <td>Saved Program Status Register (EL2)                     <td>Holds the saved process state when an exception is taken to EL2.</tr>
+<tr><td>VMPIDR_EL2   <td>64   <td>R/W<td>?          <td>Virtualization Multiprocessor ID Register (EL2)         <td>Holds the value of the Virtualization Multiprocessor ID. This is the value returned by EL1 reads of MPIDR_EL1.</tr>
+<tr><td>VPIDR_EL2    <td>32   <td>R/W<td>?          <td>Virtualization Processor ID Register (EL2)              <td>Holds the value of the Virtualization Processor ID. This is the value returned by EL1 reads of MIDR_EL1.</tr>
 <tr><td>VBAR_EL1     <td>64   <td>R/W<td>?          <td>Vector Base Address Register (EL1)                      <td>Holds the vector base address for the exception vector table for EL1. As this table needs to be aligned to 2048 bytes, the low 11 bits must be 0.</tr>
-<tr><td>DAIF         <td>64   <td>R/W<td>0x000003C0 <td>Interrupt Mask Bits                                     <td>Allows access to the interrupt mask bits.</tr>
-<tr><td>DAIFClr      <td>4    <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Reset Register                      <td></tr>
-<tr><td>DAIFSet      <td>4    <td>R/W<td>0x00000000 <td>Interrupt Mask Bits Set Register                        <td></tr>
-<tr><td>CNTFRQ_EL0   <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Frequency register (EL0)                  <td>This register is provided so that software can discover the frequency of the system counter. It must be programmed with this value as part of system initialization. The value of the register is not interpreted by hardware.</tr>
-<tr><td>CNTPCT_EL0   <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Count register (EL0)             <td>Holds the 64-bit physical count value.</tr>
-<tr><td>CNTP_CTL_EL0 <td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer Control register (EL0)     <td>Control register for the EL0 physical timer.<br>Bit 2: If 1, compare value condition is met, if 0, it is not met (yet)<br>Bit 1: If 1, interrupt on timer condition is masked, if 0, the interrupt is not masked<br>Bit 0: If 1, the timer is enabled, if 0, it is disabled</tr>
-<tr><td>CNTP_CVAL_EL0<td>4    <td>R/W<td>0x00000000 <td>Counter-timer Physical Timer CompareValue register (EL0)<td>Holds the compare value for the EL0 physical timer.</tr>
-<tr><td>CTR_EL0      <td>4    <td>R/W<td>0x00000000 <td>Cache Type Register (EL0)                               <td>Provides information about the architecture of the caches.</tr> -->
 </table>
 
-<!--### ELR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER}
+### CNTFRQ_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTFRQ_EL0_REGISTER}
+
+This register is provided so that software can discover the frequency of the system counter.
+It must be programmed with this value as part of system initialization.
+The value of the register is not interpreted by hardware.
+
+<table>
+<caption id="CNTFRQ_EL0 bits">System Control Register(EL1)</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>63:32<td>Res0<td>Reserved, must be 0</tr>
+<tr><td>31:0<td>Clock frequency<td>Clock frequency. Indicates the system counter clock frequency, in Hz.</tr>
+</table>
+
+### CNTHCTL_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTHCTL_EL2_REGISTER}
+
+\todo To be described
+
+### CNTVOFF_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTVOFF_EL2_REGISTER}
+
+\todo To be described
+
+### CNTP_CTL_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER}
+
+Holds the 64-bit physical count value.
+
+<table>
+<caption id="CNTP_CTL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>63:3<td>Res 0<td>Reserved, must be 0.</tr>
+<tr><td>2<td>ISTATUS<td>The status of the timer. This bit indicates whether the timer condition is met:\n
+                        0 = Timer condition is not met.\n
+                        1 = Timer condition is met.</tr>
+<tr><td>1<td>IMASK  <td>Timer interrupt mask bit. Permitted values are:\n
+                        0 = Timer interrupt is not masked by the IMASK bit.\n
+                        1 = Timer interrupt is masked by the IMASK bit.</tr>
+<tr><td>0<td>ENABLE <td>Enables the timer. Permitted values are:\n
+                        0 = Timer disabled.\n
+                        1 = Timer enabled.</tr>
+</table>
+
+### CNTP_CVAL_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER}
+
+Holds the compare value for the EL0 physical timer.
+
+<table>
+<caption id="CNTP_CVAL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>63:0<td>CompareValue<td>Holds the EL1 physical timer CompareValue.\n
+When CNTP_CTL_EL0.ENABLE is 1, the timer condition is met when(CNTPCT_EL0 - CompareValue) is greater than or equal to zero.This means that CompareValue acts like a 64 - bit upcounter timer.When the timer condition is met:<br/>
+CNTP_CTL_EL0.ISTATUS is set to 1.<br/>
+If CNTP_CTL_EL0.IMASK is 0, an interrupt is generated.<br/>
+When CNTP_CTL_EL0.ENABLE is 0, the timer condition is not met, but CNTPCT_EL0 continues to count.</tr>
+</table>
+
+### CNTPCT_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTPCT_EL0_REGISTER}
+
+Holds the 64-bit physical count value.
+
+<table>
+<caption id="CNTPCT_EL0 bits">System Control Register(EL1)</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>63:0<td>Physical count value<td>Physical count value.</tr>
+</table>
+
+### CPACR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CPACR_EL1_REGISTER}
+
+\todo To be described
+
+### CPTR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CPTR_EL2_REGISTER}
+
+\todo To be described
+
+### CTR_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CTR_EL0_REGISTER}
+
+\todo To be described
+
+### CurrentEL register {#ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER}
+
+Read only register, return the current Exception Level.
+
+### DAIF register {#ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER}
+
+<table>
+<caption id="DAIF_bits">DAIF bits</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>9<td>D, Process state D mask     <td>0 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are not masked.\n
+                                             1 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are masked.</tr>
+<tr><td>8<td>A, SError exception mask bit<td>0 = Exception not masked.\n
+                                             1 = Exception masked.</tr>
+<tr><td>7<td>I, IRQ mask bit             <td>0 = IRQ not masked.\n
+                                             1 = IRQ masked.</tr>
+<tr><td>6<td>F, FIQ mask bit             <td>0 = FIQ not masked.\n
+                                             1 = FIQ masked.</tr>
+</table>
+
+Separate bit can be set using the DAIFSet register, and can be reset using the DAIFClr register. Each '1' will respecively set / reset the corresponding bit in the DAIF register.
+
+### ELR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER}
 
 When taking an exception to EL1, holds the address to return to.
 
@@ -47,7 +155,17 @@ When taking an exception to EL1, holds the address to return to.
 <caption id="ELR_EL1 bits">Exception Link Register (EL1)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:0<td>Return address<td>Return address.</tr>
-</table
+</table>
+
+### ELR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL2_REGISTER}
+
+When taking an exception to EL2, holds the address to return to.
+
+<table>
+<caption id="ELR_EL2 bits">Exception Link Register (EL2)</caption>
+<tr><th>Bits<th>ID<th>Values</tr>
+<tr><td>63:0<td>Return address<td>Return address.</tr>
+</table>
 
 ### ESR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_ESR_EL1_REGISTER}
 
@@ -299,6 +417,48 @@ Holds syndrome information for an exception taken to EL1.
 </table>
 </table>
 
+### ESR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_ESR_EL2_REGISTER}
+
+Holds syndrome information for an exception taken to EL2.
+
+\todo To be described
+
+### FAR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_FAR_EL1_REGISTER}
+
+\todo To be described
+
+### HCR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_HCR_EL2_REGISTER}
+
+\todo To be described
+
+### HSTR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_HSTR_EL2_REGISTER}
+
+\todo To be described
+
+### L2CTLR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_L2CTLR_EL1_REGISTER}
+
+\todo To be described
+
+### MIDR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_MIDR_EL1_REGISTER}
+
+\todo To be described
+
+### MPIDR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_MPIDR_EL1_REGISTER}
+
+\todo To be described
+
+### SCTLR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_SCTLR_EL1_REGISTER}
+
+\todo To be described
+
+### SP_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_SP_EL0_REGISTER}
+
+\todo To be described
+
+### SP_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_SP_EL1_REGISTER}
+
+\todo To be described
+
 ### SPSR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER}
 
 Holds the saved process state when an exception is taken to EL1.
@@ -383,76 +543,21 @@ When exception taken from AArch64 state:<br>
                             0101 = EL1 with SP_EL1 (EL1h).<br>
 </table>
 
-### DAIF register {#ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER}
+### SPSR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL2_REGISTER}
 
-<table>
-<caption id="DAIF_bits">DAIF bits</caption>
-<tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>9<td>D, Process state D mask     <td>0 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are not masked.\n
-                                             1 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are masked.</tr>
-<tr><td>8<td>A, SError exception mask bit<td>0 = Exception not masked.\n
-                                             1 = Exception masked.</tr>
-<tr><td>7<td>I, IRQ mask bit             <td>0 = IRQ not masked.\n
-                                             1 = IRQ masked.</tr>
-<tr><td>6<td>F, FIQ mask bit             <td>0 = FIQ not masked.\n
-                                             1 = FIQ masked.</tr>
-</table>
+Holds the saved process state when an exception is taken to EL2.
 
-### CNTFRQ_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTFRQ_EL0_REGISTER}
+\todo To be described
 
-This register is provided so that software can discover the frequency of the system counter.
-It must be programmed with this value as part of system initialization.
-The value of the register is not interpreted by hardware.
+### VMPIDR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_VMPIDR_EL2_REGISTER}
 
-<table>
-<caption id="CNTFRQ_EL0 bits">System Control Register(EL1)</caption>
-<tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>63:32<td>Res0<td>Reserved, must be 0</tr>
-<tr><td>31:0<td>Clock frequency<td>Clock frequency. Indicates the system counter clock frequency, in Hz.</tr>
-</table>
+\todo To be described
 
-### CNTPCT_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTPCT_EL0_REGISTER}
+### VPIDR_EL2 register {#ARM_REGISTERS_REGISTER_OVERVIEW_VPIDR_EL2_REGISTER}
 
-Holds the 64-bit physical count value.
+\todo To be described
 
-<table>
-<caption id="CNTPCT_EL0 bits">System Control Register(EL1)</caption>
-<tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>63:0<td>Physical count value<td>Physical count value.</tr>
-</table>
+### VBAR_EL1 register {#ARM_REGISTERS_REGISTER_OVERVIEW_VBAR_EL1_REGISTER}
 
-### CNTP_CTL_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER}
+\todo To be described
 
-Holds the 64-bit physical count value.
-
-<table>
-<caption id="CNTP_CTL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
-<tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>63:3<td>Res 0<td>Reserved, must be 0.</tr>
-<tr><td>2<td>ISTATUS<td>The status of the timer. This bit indicates whether the timer condition is met:\n
-                        0 = Timer condition is not met.\n
-                        1 = Timer condition is met.</tr>
-<tr><td>1<td>IMASK  <td>Timer interrupt mask bit. Permitted values are:\n
-                        0 = Timer interrupt is not masked by the IMASK bit.\n
-                        1 = Timer interrupt is masked by the IMASK bit.</tr>
-<tr><td>0<td>ENABLE <td>Enables the timer. Permitted values are:\n
-                        0 = Timer disabled.\n
-                        1 = Timer enabled.</tr>
-</table>
-
-### CNTP_CVAL_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER}
-
-Holds the compare value for the EL1 physical timer.
-
-<table>
-<caption id="CNTP_CVAL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
-<tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>63:0<td>CompareValue<td>Holds the EL1 physical timer CompareValue.\n
-When CNTP_CTL_EL0.ENABLE is 1, the timer condition is met when(CNTPCT_EL0 - CompareValue) is greater than or equal to zero.This means that CompareValue acts like a 64 - bit upcounter timer.When the timer condition is met:\n
-CNTP_CTL_EL0.ISTATUS is set to 1.\n
-If CNTP_CTL_EL0.IMASK is 0, an interrupt is generated.\n
-When CNTP_CTL_EL0.ENABLE is 0, the timer condition is not met, but CNTPCT_EL0 continues to count.</tr>
-</table>
-
-### CurrentEL register {#ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER}
- -->

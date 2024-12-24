@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : MemoryAccess.cpp
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryAccess
 //
-// Description : Common instructions for e.g. synchronization
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,29 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/MemoryAccess.h>
 
 /// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+/// Memory access class implementation
 
-/// @brief NOP instruction
-#define NOP()                           asm volatile("nop")
+using namespace baremetal;
 
-/// @brief Data sync barrier
-#define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
+/// <summary>
+/// Read a 32 bit value from register at address
+/// </summary>
+/// <param name="address">Address of register</param>
+/// <returns>32 bit register value</returns>
+uint32 MemoryAccess::Read32(regaddr address)
+{
+    return *reinterpret_cast<uint32 volatile *>(address);
+}
 
-/// @brief Wait for interrupt
-#define WaitForInterrupt()              asm volatile ("wfi")
-
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
+/// <summary>
+/// Write a 32 bit value to register at address
+/// </summary>
+/// <param name="address">Address of register</param>
+/// <param name="data">Data to write</param>
+void MemoryAccess::Write32(regaddr address, uint32 data)
+{
+    *reinterpret_cast<uint32 volatile *>(address) = data;
+}

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : Util.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common instructions for e.g. synchronization
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,25 +39,17 @@
 
 #pragma once
 
+#include <baremetal/Types.h>
+
 /// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+/// Standard C library utility functions
 
-/// @brief NOP instruction
-#define NOP()                           asm volatile("nop")
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/// @brief Data sync barrier
-#define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
+void *memset(void *buffer, int value, size_t length);
 
-/// @brief Wait for interrupt
-#define WaitForInterrupt()              asm volatile ("wfi")
-
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")
+#ifdef __cplusplus
+}
+#endif

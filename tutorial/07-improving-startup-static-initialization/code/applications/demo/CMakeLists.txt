@@ -1,24 +1,31 @@
+project(07-improving-startup-static-initialization
+    DESCRIPTION "Demo application"
+    LANGUAGES CXX ASM)
+
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal
-    DESCRIPTION "Bare metal library"
-    LANGUAGES CXX ASM)
+message("\n** Setting up ${PROJECT_NAME} **\n")
 
-set(PROJECT_TARGET_NAME ${PROJECT_NAME})
+include(functions)
+
+set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
-set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+set(PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC )
+set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX} -fanalyzer)
 set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
 set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
 set(PROJECT_INCLUDE_DIRS_PRIVATE )
-set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(PROJECT_INCLUDE_DIRS_PUBLIC )
 
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
+    baremetal-07
     )
 
 set(PROJECT_LIBS
@@ -27,26 +34,10 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     )
 
-set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Util.h
-    )
+set(PROJECT_INCLUDES_PUBLIC )
 set(PROJECT_INCLUDES_PRIVATE )
 
 if (CMAKE_VERBOSE_MAKEFILE)
@@ -72,8 +63,9 @@ if (CMAKE_VERBOSE_MAKEFILE)
     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 endif()
 
-add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+
+target_link_libraries(${PROJECT_NAME} ${LINKER_START_GROUP} ${PROJECT_LIBS} ${LINKER_END_GROUP})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
 target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -107,5 +99,9 @@ endif()
 link_directories(${LINK_DIRECTORIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 show_target_properties(${PROJECT_NAME})
+
+set(BAREMETAL_EXECUTABLE_TARGET ${PROJECT_NAME})
+setup_image(${PROJECT_NAME})

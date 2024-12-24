@@ -275,24 +275,23 @@ We will use the NOP instruction (which is part of the baremetal library) in a si
 
 ```cpp
 File: code/applications/demo/src/main.cpp
-1: /// @file
-2: /// Demo application main code
-3: 
-4: #include <baremetal/ARMInstructions.h>
+1: #include <baremetal/ARMInstructions.h>
+2: 
+3: /// @file
+4: /// Demo application main code
 5: 
 6: /// <summary>
 7: /// Demo application main code
 8: /// </summary>
 9: /// <returns>For now always 0</returns>
-10: 
-11: int main()
-12: {
-13:     for (int i = 0; i < 1000000; ++i)
-14:     {
-15:         NOP();
-16:     }
-17:     return 0;
-18: }
+10: int main()
+11: {
+12:     for (int i = 0; i < 1000000; ++i)
+13:     {
+14:         NOP();
+15:     }
+16:     return 0;
+17: }
 ```
 
 ### Update project setup for demo application {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_BAREMETAL_LIBRARY_STRUCTURE___STEP_1_UPDATE_PROJECT_SETUP_FOR_DEMO_APPLICATION}
@@ -1285,59 +1284,62 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 191: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
 192: #define RPI_AUX_MU_BAUD               reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
 193: #if BAREMETAL_RPI_TARGET == 3
-194: #define AUX_UART_CLOCK 250000000
-195: #else
-196: #define AUX_UART_CLOCK 500000000
-197: #endif
-198: #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
-199: 
-200: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
-201: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
-202: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
-203: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
-204: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
-205: 
-206: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
-207: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
-208: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
-209: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref RASPBERRY_PI_UART1
-210: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT1(6)
-211: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref RASPBERRY_PI_UART1
-212: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
-213: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
-214: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
-215: 
-216: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
-217: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
-218: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
-219: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters. See @ref RASPBERRY_PI_UART1
-220: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT1(0) | BIT1(1)
-221: 
-222: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
-223: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low. See @ref RASPBERRY_PI_UART1
-224: #define RPI_AUX_MU_MCR_RTS_LOW        BIT1(1)
-225: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high. See @ref RASPBERRY_PI_UART1
-226: #define RPI_AUX_MU_MCR_RTS_HIGH       BIT0(1)
-227: 
-228: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
-229: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle. See @ref RASPBERRY_PI_UART1
-230: #define RPI_AUX_MU_LSR_TX_IDLE        BIT1(6)
-231: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty. See @ref RASPBERRY_PI_UART1
-232: #define RPI_AUX_MU_LSR_TX_EMPTY       BIT1(5)
-233: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun. See @ref RASPBERRY_PI_UART1
-234: #define RPI_AUX_MU_LSR_RX_OVERRUN     BIT1(1)
-235: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready. See @ref RASPBERRY_PI_UART1
-236: #define RPI_AUX_MU_LSR_RX_READY       BIT1(0)
-237: 
-238: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
-239: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS. See @ref RASPBERRY_PI_UART1
-240: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT1(3)
-241: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS. See @ref RASPBERRY_PI_UART1
-242: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT1(2)
-243: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit. See @ref RASPBERRY_PI_UART1
-244: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT1(1)
-245: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive. See @ref RASPBERRY_PI_UART1
-246: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT1(0)
+194: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 3
+195: #define AUX_UART_CLOCK 250000000
+196: #else
+197: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 4
+198: #define AUX_UART_CLOCK 500000000
+199: #endif
+200: /// @brief Calculate Raspberry Pi Mini UART (UART1) baud rate value from frequency
+201: #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
+202: 
+203: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
+204: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
+205: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
+206: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
+207: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
+208: 
+209: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
+210: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
+211: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
+212: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref RASPBERRY_PI_UART1
+213: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT1(6)
+214: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref RASPBERRY_PI_UART1
+215: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
+216: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
+217: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
+218: 
+219: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
+220: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
+221: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
+222: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters. See @ref RASPBERRY_PI_UART1
+223: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT1(0) | BIT1(1)
+224: 
+225: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
+226: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low. See @ref RASPBERRY_PI_UART1
+227: #define RPI_AUX_MU_MCR_RTS_LOW        BIT1(1)
+228: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high. See @ref RASPBERRY_PI_UART1
+229: #define RPI_AUX_MU_MCR_RTS_HIGH       BIT0(1)
+230: 
+231: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
+232: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle. See @ref RASPBERRY_PI_UART1
+233: #define RPI_AUX_MU_LSR_TX_IDLE        BIT1(6)
+234: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty. See @ref RASPBERRY_PI_UART1
+235: #define RPI_AUX_MU_LSR_TX_EMPTY       BIT1(5)
+236: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun. See @ref RASPBERRY_PI_UART1
+237: #define RPI_AUX_MU_LSR_RX_OVERRUN     BIT1(1)
+238: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready. See @ref RASPBERRY_PI_UART1
+239: #define RPI_AUX_MU_LSR_RX_READY       BIT1(0)
+240: 
+241: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
+242: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS. See @ref RASPBERRY_PI_UART1
+243: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT1(3)
+244: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS. See @ref RASPBERRY_PI_UART1
+245: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT1(2)
+246: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit. See @ref RASPBERRY_PI_UART1
+247: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT1(1)
+248: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive. See @ref RASPBERRY_PI_UART1
+249: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT1(0)
 ```
 
 We will not go into details, as it will be quite clear from what was discussed before what the registers are.
@@ -1615,224 +1617,226 @@ File: code/libraries/baremetal/src/UART1.cpp
 46: /// @file
 47: /// Raspberry Pi UART1 serial device implementation
 48: 
-49: // Total count of GPIO pins, numbered from 0 through 53
+File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\UART1.cpp
+49: /// @brief Total count of GPIO pins, numbered from 0 through 53
 50: #define NUM_GPIO 54
 51: 
 52: namespace baremetal {
 53: 
 54: #if BAREMETAL_RPI_TARGET == 3
-55: static const int NumWaitCycles = 150;
-56: 
-57: /// <summary>
-58: /// ait the specified number of cycles, by executing a NOP instruction for each cycle
-59: /// </summary>
-60: /// <param name="numCycles">NUmber of cycles to wait</param>
-61: static void WaitCycles(uint32 numCycles)
-62: {
-63:     if (numCycles)
-64:     {
-65:         while (numCycles--)
-66:         {
-67:             NOP();
-68:         }
-69:     }
-70: }
-71: #endif // BAREMETAL_RPI_TARGET == 3
-72: 
-73: /// <summary>
-74: /// Constructs a UART1 instance.
-75: /// </summary>
-76: UART1::UART1()
-77:     : m_isInitialized{}
-78: {
-79: }
-80: 
-81: /// <summary>
-82: /// Initialize the UART1 device. Only performed once, guarded by m_isInitialized.
-83: ///
-84: ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
-85: /// </summary>
-86: void UART1::Initialize()
-87: {
-88:     if (m_isInitialized)
-89:         return;
-90: 
-91:     // initialize UART
-92:     auto value = MemoryAccess::Read32(RPI_AUX_ENABLES);
-93:     MemoryAccess::Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);  // Disable UART1, AUX mini uart
-94: 
-95:     SetMode(14, GPIOMode::AlternateFunction5);
-96: 
-97:     SetMode(15, GPIOMode::AlternateFunction5);
-98: 
-99:     MemoryAccess::Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);   // enable UART1, AUX mini uart
-100:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, 0);                               // Disable Tx, Rx
-101:     MemoryAccess::Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);       // 8 bit mode
-102:     MemoryAccess::Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);          // RTS high
-103:     MemoryAccess::Write32(RPI_AUX_MU_IER, 0);                                // Disable interrupts
-104:     MemoryAccess::Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR);
-105:                                                                             // Clear FIFO
-106:     MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(115200));   // Set baudrate
-107: 
-108:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
-109:                                                                             // Enable Tx, Rx
-110:     m_isInitialized = true;
-111: }
-112: 
-113: /// <summary>
-114: /// Receive a character
-115: /// </summary>
-116: /// <returns>Character received</returns>
-117: char UART1::Read()
-118: {
-119:     // wait until something is in the buffer
-120:     // Check Rx FIFO holds data
-121:     while (!(MemoryAccess::Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LSR_RX_READY))
-122:     {
-123:         NOP();
-124:     }
-125:     // Read it and return
-126:     return static_cast<char>(MemoryAccess::Read32(RPI_AUX_MU_IO));
-127: }
-128: 
-129: /// <summary>
-130: /// Send a character
-131: /// </summary>
-132: /// <param name="c">Character to be sent</param>
-133: void UART1::Write(char c)
-134: {
-135:     // wait until we can send
-136:     // Check Tx FIFO empty
-137:     while (!(MemoryAccess::Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LSR_TX_EMPTY))
-138:     {
-139:         NOP();
-140:     }
-141:     // Write the character to the buffer
-142:     MemoryAccess::Write32(RPI_AUX_MU_IO, static_cast<uint32>(c));
-143: }
-144: 
-145: /// <summary>
-146: /// Write a string
-147: /// </summary>
-148: /// <param name="str">String to be written</param>
-149: void UART1::WriteString(const char* str)
-150: {
-151:     while (*str)
-152:     {
-153:         // convert newline to carriage return + newline
-154:         if (*str == '\n')
-155:             Write('\r');
-156:         Write(*str++);
-157:     }
-158: }
-159: 
-160: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
-161: {
-162:     if (pinNumber >= NUM_GPIO)
-163:         return false;
-164:     if (mode >= GPIOMode::Unknown)
-165:         return false;
-166:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
-167:     {
-168:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-169:             return false;
-170: 
-171:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-172:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
-173:             return false;
-174:     }
-175:     else if (GPIOMode::Output == mode)
-176:     {
-177:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-178:             return false;
-179: 
-180:         if (!SetFunction(pinNumber, GPIOFunction::Output))
-181:             return false;
-182:     }
-183:     else
-184:     {
-185:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
-186:             return false;
-187:         if (!SetFunction(pinNumber, GPIOFunction::Input))
-188:             return false;
-189:     }
-190:     if (mode == GPIOMode::Output)
-191:         Off(pinNumber, mode);
-192:     return true;
-193: }
-194: 
-195: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
-196: {
-197:     if (pinNumber >= NUM_GPIO)
-198:         return false;
-199:     if (function >= GPIOFunction::Unknown)
-200:         return false;
-201: 
-202:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
-203:     uint32  shift = (pinNumber % 10) * 3;
-204: 
-205:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-206: 
-207:     uint32 value = MemoryAccess::Read32(selectRegister);
-208:     value &= ~(7 << shift);
-209:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-210:     MemoryAccess::Write32(selectRegister, value);
-211:     return true;
-212: }
-213: 
-214: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
-215: {
-216:     if (pullMode >= GPIOPullMode::Unknown)
-217:         return false;
-218: 
-219:     if (pinNumber >= NUM_GPIO)
-220:         return false;
-221: #if BAREMETAL_RPI_TARGET == 3
-222:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
-223:     uint32  shift = pinNumber % 32;
-224: 
-225:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
-226:     WaitCycles(NumWaitCycles);
-227:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
-228:     WaitCycles(NumWaitCycles);
-229:     MemoryAccess::Write32(clkRegister, 0);
-230: #else
-231:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
-232:     unsigned              shift = (pinNumber % 16) * 2;
-233: 
-234:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-235: 
-236:     uint32                value = MemoryAccess::Read32(modeReg);
-237:     value &= ~(3 << shift);
-238:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-239:     MemoryAccess::Write32(modeReg, value);
-240: #endif
-241: 
-242:     return true;
-243: }
-244: 
-245: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
-246: {
-247:     if (pinNumber >= NUM_GPIO)
-248:         return false;
-249: 
-250:     // Output level can be set in input mode for subsequent switch to output
-251:     if (mode >= GPIOMode::Unknown)
-252:         return false;
-253: 
-254:     unsigned regOffset = (pinNumber / 32) * 4;
-255:     uint32 regMask = 1 << (pinNumber % 32);
-256: 
-257:     bool value = false;
-258: 
-259:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-260: 
-261:     MemoryAccess::Write32(setClrReg, regMask);
-262: 
-263:     return true;
-264: }
-265: 
-266: } // namespace baremetal
+55: /// @brief Count of NOP instructions to pause when programming GPIO for Raspberry Pi 3
+56: static const int NumWaitCycles = 150;
+57: 
+58: /// <summary>
+59: /// ait the specified number of cycles, by executing a NOP instruction for each cycle
+60: /// </summary>
+61: /// <param name="numCycles">NUmber of cycles to wait</param>
+62: static void WaitCycles(uint32 numCycles)
+63: {
+64:     if (numCycles)
+65:     {
+66:         while (numCycles--)
+67:         {
+68:             NOP();
+69:         }
+70:     }
+71: }
+72: #endif // BAREMETAL_RPI_TARGET == 3
+73: 
+74: /// <summary>
+75: /// Constructs a UART1 instance.
+76: /// </summary>
+77: UART1::UART1()
+78:     : m_isInitialized{}
+79: {
+80: }
+81: 
+82: /// <summary>
+83: /// Initialize the UART1 device. Only performed once, guarded by m_isInitialized.
+84: ///
+85: ///  Set baud rate and characteristics (115200 8N1) and map to GPIO
+86: /// </summary>
+87: void UART1::Initialize()
+88: {
+89:     if (m_isInitialized)
+90:         return;
+91: 
+92:     // initialize UART
+93:     auto value = MemoryAccess::Read32(RPI_AUX_ENABLES);
+94:     MemoryAccess::Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1);  // Disable UART1, AUX mini uart
+95: 
+96:     SetMode(14, GPIOMode::AlternateFunction5);
+97: 
+98:     SetMode(15, GPIOMode::AlternateFunction5);
+99: 
+100:     MemoryAccess::Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);   // enable UART1, AUX mini uart
+101:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, 0);                               // Disable Tx, Rx
+102:     MemoryAccess::Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);       // 8 bit mode
+103:     MemoryAccess::Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);          // RTS high
+104:     MemoryAccess::Write32(RPI_AUX_MU_IER, 0);                                // Disable interrupts
+105:     MemoryAccess::Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR);
+106:                                                                             // Clear FIFO
+107:     MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(115200));   // Set baudrate
+108: 
+109:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
+110:                                                                             // Enable Tx, Rx
+111:     m_isInitialized = true;
+112: }
+113: 
+114: /// <summary>
+115: /// Receive a character
+116: /// </summary>
+117: /// <returns>Character received</returns>
+118: char UART1::Read()
+119: {
+120:     // wait until something is in the buffer
+121:     // Check Rx FIFO holds data
+122:     while (!(MemoryAccess::Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LSR_RX_READY))
+123:     {
+124:         NOP();
+125:     }
+126:     // Read it and return
+127:     return static_cast<char>(MemoryAccess::Read32(RPI_AUX_MU_IO));
+128: }
+129: 
+130: /// <summary>
+131: /// Send a character
+132: /// </summary>
+133: /// <param name="c">Character to be sent</param>
+134: void UART1::Write(char c)
+135: {
+136:     // wait until we can send
+137:     // Check Tx FIFO empty
+138:     while (!(MemoryAccess::Read32(RPI_AUX_MU_LSR) & RPI_AUX_MU_LSR_TX_EMPTY))
+139:     {
+140:         NOP();
+141:     }
+142:     // Write the character to the buffer
+143:     MemoryAccess::Write32(RPI_AUX_MU_IO, static_cast<uint32>(c));
+144: }
+145: 
+146: /// <summary>
+147: /// Write a string
+148: /// </summary>
+149: /// <param name="str">String to be written</param>
+150: void UART1::WriteString(const char* str)
+151: {
+152:     while (*str)
+153:     {
+154:         // convert newline to carriage return + newline
+155:         if (*str == '\n')
+156:             Write('\r');
+157:         Write(*str++);
+158:     }
+159: }
+160: 
+161: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+162: {
+163:     if (pinNumber >= NUM_GPIO)
+164:         return false;
+165:     if (mode >= GPIOMode::Unknown)
+166:         return false;
+167:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
+168:     {
+169:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+170:             return false;
+171: 
+172:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
+173:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
+174:             return false;
+175:     }
+176:     else if (GPIOMode::Output == mode)
+177:     {
+178:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+179:             return false;
+180: 
+181:         if (!SetFunction(pinNumber, GPIOFunction::Output))
+182:             return false;
+183:     }
+184:     else
+185:     {
+186:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
+187:             return false;
+188:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+189:             return false;
+190:     }
+191:     if (mode == GPIOMode::Output)
+192:         Off(pinNumber, mode);
+193:     return true;
+194: }
+195: 
+196: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+197: {
+198:     if (pinNumber >= NUM_GPIO)
+199:         return false;
+200:     if (function >= GPIOFunction::Unknown)
+201:         return false;
+202: 
+203:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+204:     uint32  shift = (pinNumber % 10) * 3;
+205: 
+206:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+207: 
+208:     uint32 value = MemoryAccess::Read32(selectRegister);
+209:     value &= ~(7 << shift);
+210:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+211:     MemoryAccess::Write32(selectRegister, value);
+212:     return true;
+213: }
+214: 
+215: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+216: {
+217:     if (pullMode >= GPIOPullMode::Unknown)
+218:         return false;
+219: 
+220:     if (pinNumber >= NUM_GPIO)
+221:         return false;
+222: #if BAREMETAL_RPI_TARGET == 3
+223:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+224:     uint32  shift = pinNumber % 32;
+225: 
+226:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
+227:     WaitCycles(NumWaitCycles);
+228:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
+229:     WaitCycles(NumWaitCycles);
+230:     MemoryAccess::Write32(clkRegister, 0);
+231: #else
+232:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+233:     unsigned              shift = (pinNumber % 16) * 2;
+234: 
+235:     static const unsigned ModeMap[3] = { 0, 2, 1 };
+236: 
+237:     uint32                value = MemoryAccess::Read32(modeReg);
+238:     value &= ~(3 << shift);
+239:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
+240:     MemoryAccess::Write32(modeReg, value);
+241: #endif
+242: 
+243:     return true;
+244: }
+245: 
+246: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+247: {
+248:     if (pinNumber >= NUM_GPIO)
+249:         return false;
+250: 
+251:     // Output level can be set in input mode for subsequent switch to output
+252:     if (mode >= GPIOMode::Unknown)
+253:         return false;
+254: 
+255:     unsigned regOffset = (pinNumber / 32) * 4;
+256:     uint32 regMask = 1 << (pinNumber % 32);
+257: 
+258:     bool value = false;
+259: 
+260:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+261: 
+262:     MemoryAccess::Write32(setClrReg, regMask);
+263: 
+264:     return true;
+265: }
+266: 
+267: } // namespace baremetal
 ```
 
 For AUX and UART1 register documentation, refer to [BCM2837 ARM Peripherals](pdf/bcm2837-peripherals.pdf) (page 8).
@@ -1840,34 +1844,34 @@ Be aware that some of the documentation for BCM2835 contains errors, which have 
 
 - Line 50: The source file starts by defining the total number of GPIO pins that can be used on Raspberry Pi (it has GPIO pins 0 through 53)
 - Line 52: We define the baremetal namespace again, everything else will be inside this namespace
-- Line 54-71: Note that these lines are only compiled for Raspberry Pi 3, we don't need them for Raspberry Pi 4 and higher
-  - Line 55: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles` (defined as 150)
-  - Line 61-70: We define a static function `WaitCycles`, that waits the specified number of NOP instructions.
+- Line 54-72: Note that these lines are only compiled for Raspberry Pi 3, we don't need them for Raspberry Pi 4 and higher
+  - Line 56: We define a constant to set the number of NOP cycles we wait between GPIO operations `NumWaitCycles` (defined as 150)
+  - Line 62-71: We define a static function `WaitCycles`, that waits the specified number of NOP instructions.
   As discussed in [BCMRegister.h](#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_BCMREGISTERSH) some operations on the GPIO we need to pause a bit with Raspberry Pi 3, that is what this function is for
-- Line 76-79: We implement the UART1 constructor, which only initializes the `m_isInitialized` member variable
-- Line 86-111: We implement the `Initialize` method. This invokes the most part of the code
-  - Line 88-89: We check whether the class was already initialized (`m_isInitialized` is true), if so we simply return
-  - Line 92: We read the Auxiliary Enables Register, which contains enable bits for SPI1, SPI2 and UART1
-  - Line 93: We clear the enable bit for UART1 by writing to the Auxiliary Enables Register. This will disable UART1, as advised in the documentation
-  - Line 95: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
-  - Line 97: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
-  - Line 99: We set the enable bit again for UART1 by writing to the Auxiliary Enables Register. This will enable UART1, and makes its registers available
-  - Line 100: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
-  - Line 101: We set UART1 to 8 bit mode by writing to the Line Control Register
-  - Line 102: We set the RTS signal high (see documentation, we don't use RTS in this case) by writing to the Modem Control Register
-  - Line 103: We disable UART1 interrupts by writing to the Interrupt Control Register
-  - Line 104: We enable and clear the receive and transmit FIFO buffers by writing to the Interrupt Identity Register
-  - Line 106: We set the baud rate (speed) to 115200, using the macro `RPI_AUX_MU_BAUD_VALUE`
+- Line 77-80: We implement the UART1 constructor, which only initializes the `m_isInitialized` member variable
+- Line 87-112: We implement the `Initialize` method. This invokes the most part of the code
+  - Line 89-90: We check whether the class was already initialized (`m_isInitialized` is true), if so we simply return
+  - Line 93: We read the Auxiliary Enables Register, which contains enable bits for SPI1, SPI2 and UART1
+  - Line 94: We clear the enable bit for UART1 by writing to the Auxiliary Enables Register. This will disable UART1, as advised in the documentation
+  - Line 96: We set GPIO pin 14 to GPIO Alternate function 5, which makes it the UART1 TxD signal (transmit). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
+  - Line 98: We set GPIO pin 15 to GPIO Alternate function 5, which makes it the UART1 RxD signal (receive). See also [GPIO functions](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO)
+  - Line 100: We set the enable bit again for UART1 by writing to the Auxiliary Enables Register. This will enable UART1, and makes its registers available
+  - Line 101: We write to the UART1 Control Register to disable Rx and Tx (receive and transmit) signals
+  - Line 102: We set UART1 to 8 bit mode by writing to the Line Control Register
+  - Line 103: We set the RTS signal high (see documentation, we don't use RTS in this case) by writing to the Modem Control Register
+  - Line 104: We disable UART1 interrupts by writing to the Interrupt Control Register
+  - Line 105: We enable and clear the receive and transmit FIFO buffers by writing to the Interrupt Identity Register
+  - Line 107: We set the baud rate (speed) to 115200, using the macro `RPI_AUX_MU_BAUD_VALUE`
 The actual baud rate is 115313, but this is close enough to work well
-  - Line 108: We enable Rx and Tx signals again by writing to the UART1 Control Register
-  - Line 110: We set `m_isInitialized` to true
-- Line 117-127: We implement the `Read` method, which reads a character from UART1
+  - Line 109: We enable Rx and Tx signals again by writing to the UART1 Control Register
+  - Line 111: We set `m_isInitialized` to true
+- Line 118-128: We implement the `Read` method, which reads a character from UART1
   - The function waits for the device to become available for reading by executing NOP instructions while the Line Status Register does not contain a 1 for the Rx ready bit (which signals there is at least one character ready to be read)
   - It then reads a character to the IO register and returns the character
-- Line 133-143: We implement the `Write` method, which writes a character to UART1
+- Line 134-144: We implement the `Write` method, which writes a character to UART1
   - The function waits for the device to become available for writing by executing NOP instructions while the Line Status Register does not contain a 1 for the Tx empty bit (which signals there is room for a character)
   - It then writes the character to the IO register
-- Line 149-158: We implement the `WriteString` method, which writes a string to UART1
+- Line 150-159: We implement the `WriteString` method, which writes a string to UART1
   - This simply iterates through the string and writes the character using the `Write()` method.
   - The only special case is that a line feed (`\n`) in the string is written as a line feed plus carriage return character (`\r` followed by `\n`)
 - The rest will be described below
@@ -1877,75 +1881,75 @@ The actual baud rate is 115313, but this is close enough to work well
 The `SetMode()` method used in line 91 and 93 is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-160: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
-161: {
-162:     if (pinNumber >= NUM_GPIO)
-163:         return false;
-164:     if (mode >= GPIOMode::Unknown)
-165:         return false;
-166:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
-167:     {
-168:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-169:             return false;
-170: 
-171:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-172:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
-173:             return false;
-174:     }
-175:     else if (GPIOMode::Output == mode)
-176:     {
-177:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
-178:             return false;
-179: 
-180:         if (!SetFunction(pinNumber, GPIOFunction::Output))
-181:             return false;
-182:     }
-183:     else
-184:     {
-185:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
-186:             return false;
-187:         if (!SetFunction(pinNumber, GPIOFunction::Input))
-188:             return false;
-189:     }
-190:     if (mode == GPIOMode::Output)
-191:         Off(pinNumber, mode);
-192:     return true;
-193: }
+161: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+162: {
+163:     if (pinNumber >= NUM_GPIO)
+164:         return false;
+165:     if (mode >= GPIOMode::Unknown)
+166:         return false;
+167:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
+168:     {
+169:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+170:             return false;
+171: 
+172:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) +
+173:                                     static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
+174:             return false;
+175:     }
+176:     else if (GPIOMode::Output == mode)
+177:     {
+178:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
+179:             return false;
+180: 
+181:         if (!SetFunction(pinNumber, GPIOFunction::Output))
+182:             return false;
+183:     }
+184:     else
+185:     {
+186:         if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
+187:             return false;
+188:         if (!SetFunction(pinNumber, GPIOFunction::Input))
+189:             return false;
+190:     }
+191:     if (mode == GPIOMode::Output)
+192:         Off(pinNumber, mode);
+193:     return true;
+194: }
 ```
 
-- Line 162-165: Some sanity checks are performed. If these fail, false is returned
-- Line 166-174: If the GPIOMode passed signifies an Alternate Function, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set using `SetFunction()`
-- Line 175-182: If the GPIOMode is Output, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set to Output using `SetFunction()`
-- Line 184-189: If the GPIOMode is Input, InputPullDown or InputPullUp, the pull mode on the pin is set accordingly using `SetPullMode()`, and the function is set to Input using `SetFunction()`
-- Line 190-191: If the mode is output, the output is set to off (false, low) using `Off()`
+- Line 163-166: Some sanity checks are performed. If these fail, false is returned
+- Line 167-175: If the GPIOMode passed signifies an Alternate Function, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set using `SetFunction()`
+- Line 176-183: If the GPIOMode is Output, the pull mode on the pin is switched off using `SetPullMode()`, and the function is set to Output using `SetFunction()`
+- Line 185-190: If the GPIOMode is Input, InputPullDown or InputPullUp, the pull mode on the pin is set accordingly using `SetPullMode()`, and the function is set to Input using `SetFunction()`
+- Line 191-192: If the mode is output, the output is set to off (false, low) using `Off()`
 
 #### SetFunction {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETFUNCTION}
 
 The `SetFunction()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-195: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
-196: {
-197:     if (pinNumber >= NUM_GPIO)
-198:         return false;
-199:     if (function >= GPIOFunction::Unknown)
-200:         return false;
-201: 
-202:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
-203:     uint32  shift = (pinNumber % 10) * 3;
-204: 
-205:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-206: 
-207:     uint32 value = MemoryAccess::Read32(selectRegister);
-208:     value &= ~(7 << shift);
-209:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-210:     MemoryAccess::Write32(selectRegister, value);
-211:     return true;
-212: }
+196: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+197: {
+198:     if (pinNumber >= NUM_GPIO)
+199:         return false;
+200:     if (function >= GPIOFunction::Unknown)
+201:         return false;
+202: 
+203:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
+204:     uint32  shift = (pinNumber % 10) * 3;
+205: 
+206:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+207: 
+208:     uint32 value = MemoryAccess::Read32(selectRegister);
+209:     value &= ~(7 << shift);
+210:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+211:     MemoryAccess::Write32(selectRegister, value);
+212:     return true;
+213: }
 ```
 
-- Line 197-200: Some sanity checks are performed. If these fail, false is returned
-- Line 202: We calculate the register for the GPIO function select register.
+- Line 198-201: Some sanity checks are performed. If these fail, false is returned
+- Line 203: We calculate the register for the GPIO function select register.
 This register uses 3 bits for every GPIO pin, so a 32 bit register can deal with 10 GPIO pins (the upper 2 bits are not used).
 This means there are 6 registers:
   - `RPI_GPIO_GPFSEL0` for GPIO pins 0 to 9
@@ -1954,14 +1958,14 @@ This means there are 6 registers:
   - `RPI_GPIO_GPFSEL3` for GPIO pins 30 to 39
   - `RPI_GPIO_GPFSEL4` for GPIO pins 40 to 49
   - `RPI_GPIO_GPFSEL5` for the rest of the GPIO pins
-- Line 203: We calculate the corresponding bit shift to select the correct bits in the GPIO function select register
-- Line 207: We read the current value of the GPIO function select register.
+- Line 204: We calculate the corresponding bit shift to select the correct bits in the GPIO function select register
+- Line 208: We read the current value of the GPIO function select register.
 Notice that we use the `MemoryAccess` class for this
-- Line 208: We mask the bits for the selected GPIO pin
-- Line 209: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
+- Line 209: We mask the bits for the selected GPIO pin
+- Line 210: We add the bits for the pull mode of the selected GPIO pin, using the conversion map defined in Line 182.
 For input of the map we use the integer conversion of the `GPIOFunction` enum.
 This map is not strictly necessary, however it is convenient for readability to define the `GPIOFunction` enum this way
-- Line 210: We write the value to the GPIO function select register.
+- Line 211: We write the value to the GPIO function select register.
 Notice again that we use the `MemoryAccess` class for this
 
 #### SetPullMode {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_SETPULLMODE}
@@ -1969,107 +1973,107 @@ Notice again that we use the `MemoryAccess` class for this
 The `SetPullMode()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-214: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
-215: {
-216:     if (pullMode >= GPIOPullMode::Unknown)
-217:         return false;
-218: 
-219:     if (pinNumber >= NUM_GPIO)
-220:         return false;
-221: #if BAREMETAL_RPI_TARGET == 3
-222:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
-223:     uint32  shift = pinNumber % 32;
-224: 
-225:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
-226:     WaitCycles(NumWaitCycles);
-227:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
-228:     WaitCycles(NumWaitCycles);
-229:     MemoryAccess::Write32(clkRegister, 0);
-230: #else
-231:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
-232:     unsigned              shift = (pinNumber % 16) * 2;
-233: 
-234:     static const unsigned ModeMap[3] = { 0, 2, 1 };
-235: 
-236:     uint32                value = MemoryAccess::Read32(modeReg);
-237:     value &= ~(3 << shift);
-238:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
-239:     MemoryAccess::Write32(modeReg, value);
-240: #endif
-241: 
-242:     return true;
-243: }
+215: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+216: {
+217:     if (pullMode >= GPIOPullMode::Unknown)
+218:         return false;
+219: 
+220:     if (pinNumber >= NUM_GPIO)
+221:         return false;
+222: #if BAREMETAL_RPI_TARGET == 3
+223:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
+224:     uint32  shift = pinNumber % 32;
+225: 
+226:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
+227:     WaitCycles(NumWaitCycles);
+228:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
+229:     WaitCycles(NumWaitCycles);
+230:     MemoryAccess::Write32(clkRegister, 0);
+231: #else
+232:     regaddr               modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
+233:     unsigned              shift = (pinNumber % 16) * 2;
+234: 
+235:     static const unsigned ModeMap[3] = { 0, 2, 1 };
+236: 
+237:     uint32                value = MemoryAccess::Read32(modeReg);
+238:     value &= ~(3 << shift);
+239:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
+240:     MemoryAccess::Write32(modeReg, value);
+241: #endif
+242: 
+243:     return true;
+244: }
 ```
 
-- Line 216-220: Some sanity checks are performed. If these fail, false is returned
-- Line 222-229: For Raspberry Pi 3 we set the pull mode
-  - Line 222: We calculate the register for the GPIO pull up/down clock.
+- Line 217-221: Some sanity checks are performed. If these fail, false is returned
+- Line 223-230: For Raspberry Pi 3 we set the pull mode
+  - Line 223: We calculate the register for the GPIO pull up/down clock.
 This register uses 1 bit for every GPIO pin, so a 32 bit register can deal with 32 GPIO pins.
 This means there are 2 registers:
     - `RPI_GPIO_GPPUDCLK0` for GPIO pins 0 to 31
     - `RPI_GPIO_GPPUDCLK1` for the rest of the GPIO pins
-  - Line 223: We calculate the corresponding bit shift to select the correct bit in the GPIO pull up/down clock register.
+  - Line 224: We calculate the corresponding bit shift to select the correct bit in the GPIO pull up/down clock register.
 The GPIO pull up/down clock register uses one bit for every GPIO pin
-  - Line 225: We write the pull mode to the GPIO pull up/down register.
+  - Line 226: We write the pull mode to the GPIO pull up/down register.
 For the value we use the integer conversion of the `GPIOPullMode` enum.
-  - Line 226: We wait a bit (`NumWaitCycles` NOP operations)
-  - Line 227: We set the GPIO pull up/down clock bit high. This acts as a strobe to set the pull mode for the GPIO pin
-  - Line 228: We wait a bit again
-  - Line 229: We set the GPIO pull up/down clock bit low again
-- Line 231-239: For Raspberry Pi 4/5 we set the pull mode
-  - Line 231: We calculate the register for the GPIO pull up/down register.
+  - Line 227: We wait a bit (`NumWaitCycles` NOP operations)
+  - Line 228: We set the GPIO pull up/down clock bit high. This acts as a strobe to set the pull mode for the GPIO pin
+  - Line 229: We wait a bit again
+  - Line 230: We set the GPIO pull up/down clock bit low again
+- Line 232-240: For Raspberry Pi 4/5 we set the pull mode
+  - Line 232: We calculate the register for the GPIO pull up/down register.
 Raspberry Pi 4/5 use two bits for every pin, so a 32 bit register can deal with 16 GPIO pins.
 This means there are 4 registers:
     - `RPI_GPIO_GPPUPPDN0` for GPIO pins 0 to 15
     - `RPI_GPIO_GPPUPPDN1` for GPIO pins 16 to 31
     - `RPI_GPIO_GPPUPPDN2` for GPIO pins 32 to 47
     - `RPI_GPIO_GPPUPPDN3` for the rest of the GPIO pins
-  - Line 232: We calculate the corresponding bit shift to select the correct bits in the GPIO pull up/down register
-  - Line 236: We read the current value of the GPIO pull up/down register
-  - Line 237: We mask the bits for the selected GPIO pin
-  - Line 238: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
+  - Line 233: We calculate the corresponding bit shift to select the correct bits in the GPIO pull up/down register
+  - Line 237: We read the current value of the GPIO pull up/down register
+  - Line 238: We mask the bits for the selected GPIO pin
+  - Line 239: We add the bits for the pull modeof the selected GPIO pin, using the conversion map defined in Line 211.
 For input of the map we use the integer conversion of the `GPIOPullMode` enum.
 Note that these values are different than for Raspberry Pi 3, hence the mapping
-  - Line 239: We write the value to the GPIO pull up/down register
+  - Line 240: We write the value to the GPIO pull up/down register
 
 #### Off {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UART1CPP_OFF}
 
 The `Off()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-245: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
-246: {
-247:     if (pinNumber >= NUM_GPIO)
-248:         return false;
-249: 
-250:     // Output level can be set in input mode for subsequent switch to output
-251:     if (mode >= GPIOMode::Unknown)
-252:         return false;
-253: 
-254:     unsigned regOffset = (pinNumber / 32) * 4;
-255:     uint32 regMask = 1 << (pinNumber % 32);
-256: 
-257:     bool value = false;
-258: 
-259:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-260: 
-261:     MemoryAccess::Write32(setClrReg, regMask);
-262: 
-263:     return true;
-264: }
+246: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+247: {
+248:     if (pinNumber >= NUM_GPIO)
+249:         return false;
+250: 
+251:     // Output level can be set in input mode for subsequent switch to output
+252:     if (mode >= GPIOMode::Unknown)
+253:         return false;
+254: 
+255:     unsigned regOffset = (pinNumber / 32) * 4;
+256:     uint32 regMask = 1 << (pinNumber % 32);
+257: 
+258:     bool value = false;
+259: 
+260:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
+261: 
+262:     MemoryAccess::Write32(setClrReg, regMask);
+263: 
+264:     return true;
+265: }
 ```
 
-- Line 247-252: Some sanity checks are performed. If these fail, false is returned
-- Line 254: We calculate the index for the GPIO set or clear register.
+- Line 248-253: Some sanity checks are performed. If these fail, false is returned
+- Line 255: We calculate the index for the GPIO set or clear register.
 A GPIO pin can be set by writing a 1 to the correct GPIO pin set register at the correct bit offset, and can be reset by writing a 1 to the correct GPIO pin clear register at the correct bit offset.
 This register uses 1 bit for every GPIO pin, so a 32 bit register can deal with 32 GPIO pins.
 This means there are 2 registers:
   - `RPI_GPIO_GPSET0` or `RPI_GPIO_GPCLR0` for GPIO pins 0 to 31
   - `RPI_GPIO_GPSET1` or `RPI_GPIO_GPCLR1` for the rest of the GPIO pins
-- Line 255: We calculate the corresponding bit shift to select the correct bit in the GPIO set of clear register
-- Line 257: We set the value. This is a bit superfluous, but we will be reusing this code later
-- Line 259: We decide depending on the value whether to use the GPIO set register or GPIO clear register
-- Line 261: We set the corresponding bit in the correct register
+- Line 256: We calculate the corresponding bit shift to select the correct bit in the GPIO set of clear register
+- Line 258: We set the value. This is a bit superfluous, but we will be reusing this code later
+- Line 260: We decide depending on the value whether to use the GPIO set register or GPIO clear register
+- Line 262: We set the corresponding bit in the correct register
 
 ### Update startup code {#TUTORIAL_06_FIRST_APPLICATION___USING_THE_CONSOLE___UART1_CREATING_THE_LIBRARY_CODE___STEP_2_UPDATE_STARTUP_CODE}
 

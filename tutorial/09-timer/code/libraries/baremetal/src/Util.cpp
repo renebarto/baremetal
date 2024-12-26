@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : Util.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Timer
+// Class       : -
 //
-// Description : Timer class
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,52 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/Util.h>
 
 /// @file
-/// Raspberry Pi Timer
-
-#include <baremetal/Types.h>
-
-namespace baremetal
-{
-
-class IMemoryAccess;
+/// Standard C library utility functions implementation
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
 /// </summary>
-class Timer
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns>Pointer to buffer</returns>
+void *memset(void *buffer, int value, size_t length)
 {
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer &GetTimer();
+    uint8 *ptr = reinterpret_cast<uint8 *>(buffer);
 
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess &m_memoryAccess;
-
-    Timer();
-
-public:
-    Timer(IMemoryAccess &memoryAccess);
-
-    static void WaitCycles(uint32 numCycles);
-
-#if defined(USE_PHYSICAL_COUNTER)
-    uint64 GetSystemTimer();
-#endif
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
-};
-
-Timer &GetTimer();
-
-} // namespace baremetal
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}

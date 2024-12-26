@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : Macros.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Timer
+// Class       : -
 //
-// Description : Timer class
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -40,49 +40,14 @@
 #pragma once
 
 /// @file
-/// Raspberry Pi Timer
+/// Generic macros
 
-#include <baremetal/Types.h>
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK                __attribute__ ((weak))
 
-namespace baremetal
-{
-
-class IMemoryAccess;
-
-/// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
-/// </summary>
-class Timer
-{
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer &GetTimer();
-
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess &m_memoryAccess;
-
-    Timer();
-
-public:
-    Timer(IMemoryAccess &memoryAccess);
-
-    static void WaitCycles(uint32 numCycles);
-
-#if defined(USE_PHYSICAL_COUNTER)
-    uint64 GetSystemTimer();
-#endif
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
-};
-
-Timer &GetTimer();
-
-} // namespace baremetal
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n)              (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n)              (1UL << (n))

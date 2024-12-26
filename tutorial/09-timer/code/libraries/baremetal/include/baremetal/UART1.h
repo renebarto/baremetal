@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : UART1.h
 //
 // Namespace   : baremetal
 //
-// Class       : Timer
+// Class       : UART1
 //
-// Description : Timer class
+// Description : RPI UART1 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,46 @@
 
 #pragma once
 
-/// @file
-/// Raspberry Pi Timer
-
 #include <baremetal/Types.h>
 
-namespace baremetal
-{
+/// @file
+/// Raspberry Pi UART1 serial device declaration
+
+namespace baremetal {
 
 class IMemoryAccess;
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
+/// Encapsulation for the UART1 device.
 ///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-class Timer
+class UART1
 {
     /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
     /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer &GetTimer();
+    /// <returns>Reference to the singleton UART1 instance</returns>
+    friend UART1 &GetUART1();
 
 private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess &m_memoryAccess;
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool            m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess  &m_memoryAccess;
 
-    Timer();
+    UART1();
 
 public:
-    Timer(IMemoryAccess &memoryAccess);
+    UART1(IMemoryAccess &memoryAccess);
 
-    static void WaitCycles(uint32 numCycles);
-
-#if defined(USE_PHYSICAL_COUNTER)
-    uint64 GetSystemTimer();
-#endif
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
+    void Initialize();
+    char Read();
+    void Write(char c);
+    void WriteString(const char *str);
 };
 
-Timer &GetTimer();
+UART1 &GetUART1();
 
 } // namespace baremetal

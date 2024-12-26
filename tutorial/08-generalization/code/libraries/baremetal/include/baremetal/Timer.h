@@ -46,8 +46,6 @@
 
 namespace baremetal {
 
-class IMemoryAccess;
-
 /// <summary>
 /// Timer class. For now only contains busy waiting methods
 ///

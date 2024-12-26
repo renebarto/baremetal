@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : MemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : Timer
+// Class       : MemoryAccess
 //
-// Description : Timer class
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,30 @@
 
 #pragma once
 
+#include <baremetal/IMemoryAccess.h>
+
 /// @file
-/// Raspberry Pi Timer
+/// Memory access class
 
-#include <baremetal/Types.h>
-
-namespace baremetal
-{
-
-class IMemoryAccess;
+namespace baremetal {
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// Memory access interface
 /// </summary>
-class Timer
+class MemoryAccess : public IMemoryAccess
 {
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer &GetTimer();
-
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess &m_memoryAccess;
-
-    Timer();
-
 public:
-    Timer(IMemoryAccess &memoryAccess);
-
-    static void WaitCycles(uint32 numCycles);
-
-#if defined(USE_PHYSICAL_COUNTER)
-    uint64 GetSystemTimer();
-#endif
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
+    uint8  Read8(regaddr address) override;
+    void   Write8(regaddr address, uint8 data) override;
+    void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void   Write16(regaddr address, uint16 data) override;
+    void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void   Write32(regaddr address, uint32 data) override;
+    void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 };
 
-Timer &GetTimer();
+MemoryAccess &GetMemoryAccess();
 
 } // namespace baremetal

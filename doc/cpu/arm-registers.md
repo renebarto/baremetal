@@ -56,6 +56,7 @@ This register is provided so that software can discover the frequency of the sys
 It must be programmed with this value as part of system initialization.
 The value of the register is not interpreted by hardware.
 
+See also [ARM architecture registers](pdf/ARM-architecture-registers.pdf), section `CNTFRQ_EL0, Counter-timer Frequency register`.
 <table>
 <caption id="CNTFRQ_EL0 bits">System Control Register(EL1)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
@@ -75,18 +76,20 @@ The value of the register is not interpreted by hardware.
 
 Holds the 64-bit physical count value.
 
+See also [ARM architecture registers](pdf/ARM-architecture-registers.pdf), section `CNTP_CTL_EL0, Counter-timer Physical Timer Control register`.
+
 <table>
 <caption id="CNTP_CTL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
 <tr><td>63:3<td>Res 0<td>Reserved, must be 0.</tr>
-<tr><td>2<td>ISTATUS<td>The status of the timer. This bit indicates whether the timer condition is met:\n
-                        0 = Timer condition is not met.\n
+<tr><td>2<td>ISTATUS<td>The status of the timer. This bit indicates whether the timer condition is met:<br/>
+                        0 = Timer condition is not met.<br/>
                         1 = Timer condition is met.</tr>
-<tr><td>1<td>IMASK  <td>Timer interrupt mask bit. Permitted values are:\n
-                        0 = Timer interrupt is not masked by the IMASK bit.\n
+<tr><td>1<td>IMASK  <td>Timer interrupt mask bit. Permitted values are:<br/>
+                        0 = Timer interrupt is not masked by the IMASK bit.<br/>
                         1 = Timer interrupt is masked by the IMASK bit.</tr>
-<tr><td>0<td>ENABLE <td>Enables the timer. Permitted values are:\n
-                        0 = Timer disabled.\n
+<tr><td>0<td>ENABLE <td>Enables the timer. Permitted values are:<br/>
+                        0 = Timer disabled.<br/>
                         1 = Timer enabled.</tr>
 </table>
 
@@ -94,10 +97,12 @@ Holds the 64-bit physical count value.
 
 Holds the compare value for the EL0 physical timer.
 
+See also [ARM architecture registers](pdf/ARM-architecture-registers.pdf), section `CNTP_CVAL_EL0, Counter-timer Physical Timer CompareValue register`.
+
 <table>
 <caption id="CNTP_CVAL_EL0 bits">Counter-timer Physical Timer Control Register (EL0)</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>63:0<td>CompareValue<td>Holds the EL1 physical timer CompareValue.\n
+<tr><td>63:0<td>CompareValue<td>Holds the EL1 physical timer CompareValue.<br/>
 When CNTP_CTL_EL0.ENABLE is 1, the timer condition is met when(CNTPCT_EL0 - CompareValue) is greater than or equal to zero.This means that CompareValue acts like a 64 - bit upcounter timer.When the timer condition is met:<br/>
 CNTP_CTL_EL0.ISTATUS is set to 1.<br/>
 If CNTP_CTL_EL0.IMASK is 0, an interrupt is generated.<br/>
@@ -107,6 +112,8 @@ When CNTP_CTL_EL0.ENABLE is 0, the timer condition is not met, but CNTPCT_EL0 co
 ### CNTPCT_EL0 register {#ARM_REGISTERS_REGISTER_OVERVIEW_CNTPCT_EL0_REGISTER}
 
 Holds the 64-bit physical count value.
+
+See also [ARM architecture registers](pdf/ARM-architecture-registers.pdf), section `CNTPCT_EL0, Counter-timer Physical Count register`.
 
 <table>
 <caption id="CNTPCT_EL0 bits">System Control Register(EL1)</caption>
@@ -135,13 +142,13 @@ Read only register, return the current Exception Level.
 <table>
 <caption id="DAIF_bits">DAIF bits</caption>
 <tr><th>Bits<th>ID<th>Values</tr>
-<tr><td>9<td>D, Process state D mask     <td>0 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are not masked.\n
+<tr><td>9<td>D, Process state D mask     <td>0 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are not masked.<br/>
                                              1 = Watchpoint, Breakpoint, and Software Step exceptions targeted at the current Exception level are masked.</tr>
-<tr><td>8<td>A, SError exception mask bit<td>0 = Exception not masked.\n
+<tr><td>8<td>A, SError exception mask bit<td>0 = Exception not masked.<br/>
                                              1 = Exception masked.</tr>
-<tr><td>7<td>I, IRQ mask bit             <td>0 = IRQ not masked.\n
+<tr><td>7<td>I, IRQ mask bit             <td>0 = IRQ not masked.<br/>
                                              1 = IRQ masked.</tr>
-<tr><td>6<td>F, FIQ mask bit             <td>0 = FIQ not masked.\n
+<tr><td>6<td>F, FIQ mask bit             <td>0 = FIQ not masked.<br/>
                                              1 = FIQ masked.</tr>
 </table>
 

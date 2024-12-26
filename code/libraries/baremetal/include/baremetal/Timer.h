@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : Timer.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : Timer
 //
-// Description : Generic character read / write device interface
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,62 +39,24 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
-
 /// @file
-/// System startup / shutdown functionality
+/// Raspberry Pi Timer
+
+#include <baremetal/Types.h>
 
 namespace baremetal {
 
+class IMemoryAccess;
+
 /// <summary>
-/// System startup / shutdown handling class
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
 /// </summary>
-class System
+class Timer
 {
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
-
-
 public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    static void WaitCycles(uint32 numCycles);
 };
-
-System &GetSystem();
 
 } // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif

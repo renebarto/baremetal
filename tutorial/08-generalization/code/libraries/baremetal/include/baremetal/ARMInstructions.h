@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : ARMInstructions.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Common instructions for e.g. synchronization
 //
 //------------------------------------------------------------------------------
 //
@@ -39,62 +39,25 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
-
 /// @file
-/// System startup / shutdown functionality
+/// ARM instructions represented as macros for ease of use.
+///
+/// For specific registers, we also define the fields and their possible values.
 
-namespace baremetal {
+/// @brief NOP instruction
+#define NOP()                           asm volatile("nop")
 
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
-{
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
+/// @brief Data sync barrier
+#define DataSyncBarrier()               asm volatile ("dsb sy" ::: "memory")
 
+/// @brief Wait for interrupt
+#define WaitForInterrupt()              asm volatile ("wfi")
 
-public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif
+/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define	EnableIRQs()                    asm volatile ("msr DAIFClr, #2")
+/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define	DisableIRQs()                   asm volatile ("msr DAIFSet, #2")
+/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define	EnableFIQs()                    asm volatile ("msr DAIFClr, #1")
+/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define	DisableFIQs()                   asm volatile ("msr DAIFSet, #1")

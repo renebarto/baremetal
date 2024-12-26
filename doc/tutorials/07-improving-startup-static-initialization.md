@@ -158,73 +158,72 @@ File: code/libraries/baremetal/include/baremetal/System.h
 44: /// @file
 45: /// System startup / shutdown functionality
 46: 
-47: namespace baremetal
-48: {
-49: 
-50: /// <summary>
-51: /// System startup / shutdown handling class
-52: /// </summary>
-53: class System
-54: {
-55:     /// <summary>
-56:     /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-57:     /// </summary>
-58:     /// <returns>Reference to the singleton system instance</returns>
-59:     friend System &GetSystem();
+47: baremetal {
+48: 
+49: /// <summary>
+50: /// System startup / shutdown handling class
+51: /// </summary>
+52: class System
+53: {
+54:     /// <summary>
+55:     /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+56:     /// </summary>
+57:     /// <returns>Reference to the singleton system instance</returns>
+58:     friend System &GetSystem();
+59: 
 60: 
-61: 
-62: public:
-63:     System();
-64: 
-65:     [[noreturn]] void Halt();
-66:     [[noreturn]] void Reboot();
-67: };
-68: 
-69: System &GetSystem();
-70: 
-71: } // namespace baremetal
-72: 
-73: /// <summary>
-74: /// Return code for main() function
-75: /// </summary>
-76: enum class ReturnCode
-77: {
-78:     /// @brief If main() returns this, the system will be halted
-79:     ExitHalt,
-80:     /// @brief If main() returns this, the system will be rebooted
-81:     ExitReboot,
-82: };
-83: 
-84: #ifdef __cplusplus
-85: extern "C"
-86: {
-87: #endif
-88: 
-89: /// <summary>
-90: /// Forward declared main() function
-91: /// </summary>
-92: /// <returns>Integer cast of ReturnCode</returns>
-93: int main();
-94: /// <summary>
-95: /// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-96: /// </summary>
-97: [[noreturn]] void sysinit();
-98: 
-99: #ifdef __cplusplus
-100: }
-101: #endif
+61: public:
+62:     System();
+63: 
+64:     [[noreturn]] void Halt();
+65:     [[noreturn]] void Reboot();
+66: };
+67: 
+68: System &GetSystem();
+69: 
+70: } // namespace baremetal
+71: 
+72: /// <summary>
+73: /// Return code for main() function
+74: /// </summary>
+75: enum class ReturnCode
+76: {
+77:     /// @brief If main() returns this, the system will be halted
+78:     ExitHalt,
+79:     /// @brief If main() returns this, the system will be rebooted
+80:     ExitReboot,
+81: };
+82: 
+83: #ifdef __cplusplus
+84: extern "C"
+85: {
+86: #endif
+87: 
+88: /// <summary>
+89: /// Forward declared main() function
+90: /// </summary>
+91: /// <returns>Integer cast of ReturnCode</returns>
+92: int main();
+93: /// <summary>
+94: /// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+95: /// </summary>
+96: [[noreturn]] void sysinit();
+97: 
+98: #ifdef __cplusplus
+99: }
+100: #endif
 ```
 
-- Line 53-67: We declare the class System, which has two methods, each of which will not return (hence the `[[noreturn]]` attribute):
+- Line 52-66: We declare the class System, which has two methods, each of which will not return (hence the `[[noreturn]]` attribute):
   - Halt(), which halts the system
   - Reboot(), which restarts the system
-- Line 59: We declare a friend function `GetSystem()` in the System class
-- Line 69: We declare the actual function `GetSystem()` to return a reference to the (singleton) System instance
-- Line 76-82: We add an enum for the application return code, to enable forcing system halt or system restart
-- Line 84-87: We enter the `C` linkage region, which mean the function declared next will have C names when linking, instead of the normal C++ mangled names
-- Line 93: We forward declare the main() function. Notice that it is wrapped inside `extern "C" { }`. This enforces the functions inside this construction to have C linkage
-- Line 97: We declare the sysinit() method, which will be called from startup assembly code, and will eventually call main()
-- Line 99-101: We leave the `C` linkage region again
+- Line 58: We declare a friend function `GetSystem()` in the System class
+- Line 68: We declare the actual function `GetSystem()` to return a reference to the (singleton) System instance
+- Line 75-81: We add an enum for the application return code, to enable forcing system halt or system restart
+- Line 83-86: We enter the `C` linkage region, which mean the function declared next will have C names when linking, instead of the normal C++ mangled names
+- Line 92: We forward declare the main() function. Notice that it is wrapped inside `extern "C" { }`. This enforces the functions inside this construction to have C linkage
+- Line 96: We declare the sysinit() method, which will be called from startup assembly code, and will eventually call main()
+- Line 98-100: We leave the `C` linkage region again
 
 ### System.cpp {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_SYSTEMCPP}
 
@@ -1118,7 +1117,6 @@ Update file `code/libraries/baremetal/CMakeLists.txt':
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\CMakeLists.txt
 29: set(PROJECT_SOURCES
 30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
@@ -1195,7 +1193,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 94: #define RPI_PWRMGT_RSTC_RESET           0x00000102
 95: /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
 96: #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
-97: // @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
+97: /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
 98: #define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01)  << 0 | (((x) >> 1) & 0x01) << 2 |  (((x) >> 2) & 0x01) << 4 |  (((x) >> 3) & 0x01) << 6 |  (((x) >> 4) & 0x01) << 8 |  (((x) >> 5) & 0x01) << 10
 99: 
 100: //---------------------------------------------
@@ -1254,7 +1252,7 @@ This is normally 0, but all 1's is a special case (sector 63 means halt)
 - Line 86: We write to the watchdog timer, presumably the value is the magic number with 10 added for 10 seconds.
 - Line 87: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
 
-#### Implement System::Reboot() {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT___STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMSYSTEM}
+#### Implement System::Reboot() {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT___STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMREBOOT}
 
 Update the file code/libraries/baremetal/src/System.cpp
 

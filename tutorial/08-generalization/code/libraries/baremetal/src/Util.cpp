@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : Util.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,64 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <baremetal/Types.h>
+#include <baremetal/Util.h>
 
 /// @file
-/// System startup / shutdown functionality
-
-namespace baremetal {
+/// Standard C library utility functions implementation
 
 /// <summary>
-/// System startup / shutdown handling class
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
 /// </summary>
-class System
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns>Pointer to buffer</returns>
+void *memset(void *buffer, int value, size_t length)
 {
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
+    uint8 *ptr = reinterpret_cast<uint8 *>(buffer);
 
-
-public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
 }
-#endif

@@ -1,5 +1,5 @@
-project(07-improving-startup-static-initialization
-    DESCRIPTION "07-improving-startup-static-initialization tutorial application"
+project(08-generalization
+    DESCRIPTION "08-generalization tutorial application"
     LANGUAGES CXX ASM)
 
 message(STATUS "\n**********************************************************************************\n")
@@ -25,7 +25,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal-07
+    baremetal-08
     )
 
 set(PROJECT_LIBS

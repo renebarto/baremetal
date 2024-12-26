@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : Util.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -42,58 +42,13 @@
 #include <baremetal/Types.h>
 
 /// @file
-/// System startup / shutdown functionality
-
-namespace baremetal {
-
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
-{
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
-
-
-public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
+/// Standard C library utility functions
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
+void *memset(void *buffer, int value, size_t length);
 
 #ifdef __cplusplus
 }

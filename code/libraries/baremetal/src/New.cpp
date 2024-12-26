@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : New.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,64 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <baremetal/Types.h>
+#include <baremetal/New.h>
 
 /// @file
-/// System startup / shutdown functionality
-
-namespace baremetal {
+/// Basic memory allocation functions implementation
 
 /// <summary>
-/// System startup / shutdown handling class
+/// Standard de-allocation for single value.
 /// </summary>
-class System
+/// <param name="address">Block to free</param>
+void operator delete (void *address) noexcept
 {
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
-
-
-public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
 }
-#endif
+
+/// <summary>
+/// Standard de-allocation with size for single value.
+/// </summary>
+/// <param name="address">Block to free</param>
+/// <param name="size">Size of block to free in bytes</param>
+void operator delete (void *address, size_t /*size*/) noexcept
+{
+}

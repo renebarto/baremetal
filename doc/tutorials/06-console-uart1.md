@@ -1617,7 +1617,6 @@ File: code/libraries/baremetal/src/UART1.cpp
 46: /// @file
 47: /// Raspberry Pi UART1 serial device implementation
 48: 
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\UART1.cpp
 49: /// @brief Total count of GPIO pins, numbered from 0 through 53
 50: #define NUM_GPIO 54
 51: 

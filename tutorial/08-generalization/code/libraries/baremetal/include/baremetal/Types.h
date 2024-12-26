@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : Types.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -39,62 +39,40 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
-
 /// @file
-/// System startup / shutdown functionality
+/// Standard types
 
-namespace baremetal {
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
-{
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-public:
-    System();
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
 
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8 *regaddr;

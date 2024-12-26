@@ -1187,7 +1187,7 @@ Find the GDB manual and other documentation resources online at:
 
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
-Reading symbols from /home/rene/repo/baremetal.github/output/RPI3/Debug/bin/demo.elf...
+Reading symbols from /home/rene/repo/baremetal/output/RPI3/Debug/bin/demo.elf...
 0x0000000000000000 in ?? ()
 Loading section .init, size 0x50 lma 0x80000
 Loading section .text, size 0x8 lma 0x80050
@@ -1569,8 +1569,8 @@ File: .vs/launch.vs.json
 5:     {
 6:       "type": "default",
 7:       "project": "CMakeLists.txt",
-8:       "projectTarget": "demo.elf (D:\\Projects\\Private\\RaspberryPi\\baremetal.github\\output\\RPI3\\Debug\\bin\\demo.elf)",
-9:       "name": "demo.elf (D:\\Projects\\Private\\RaspberryPi\\baremetal.github\\output\\RPI3\\Debug\\bin\\demo.elf)"
+8:       "projectTarget": "demo.elf (D:\\Projects\\baremetal\\output\\RPI3\\Debug\\bin\\demo.elf)",
+9:       "name": "demo.elf (D:\\Projects\\baremetal\\output\\RPI3\\Debug\\bin\\demo.elf)"
 10:     }
 11:   ]
 12: }

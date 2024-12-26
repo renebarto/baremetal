@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : SysConfig.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : -
 //
-// Description : Generic character read / write device interface
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
@@ -39,62 +39,28 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
-
 /// @file
-/// System startup / shutdown functionality
+/// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 
-namespace baremetal {
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
 
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
-{
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System &GetSystem();
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
 
-
-public:
-    System();
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
-};
-
-System &GetSystem();
-
-} // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C"
-{
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
+///
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
 
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
 #endif
+
+#include <baremetal/MemoryMap.h>

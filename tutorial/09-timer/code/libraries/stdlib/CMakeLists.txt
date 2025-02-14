@@ -1,7 +1,7 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal-09
+project(stdlib-09
     DESCRIPTION "Bare metal library"
     LANGUAGES CXX ASM)
 
@@ -19,7 +19,6 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    stdlib-09
     )
 
 set(PROJECT_LIBS
@@ -28,26 +27,16 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Macros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/New.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Types.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Util.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

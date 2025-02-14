@@ -29,8 +29,6 @@ We will be implementing both, but using the second.
 
 First, we will add some methods to the `Timer` class.
 
-\todo Continue here
-
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`.
 
 ```cpp

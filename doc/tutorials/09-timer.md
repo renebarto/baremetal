@@ -23,7 +23,7 @@ That is exactly what we will do in this tutorial. There are two kinds of timers:
 - A free running timer in the ARM processor
 - A more advanced timer in the SoC that can generate interrupts when timed out
 
-We will be implementing both, but using the second.
+We will be using the SoC timer later on for interrupt generating timers, but we'll start off creating more accurate delays using the ARM timer for now.
 
 ### Timer.h {#TUTORIAL_09_TIMER_USING_THE_SYSTEM_TIMER_TIMERH}
 

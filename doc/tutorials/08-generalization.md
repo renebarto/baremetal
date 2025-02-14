@@ -2444,5 +2444,192 @@ rReboot
 
 As you can see, now the full text is displayed, also the strange characters are no longer shown.
 
+## Separating standard functionality - Step 4 {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4}
+
+So far, we've been adding quite a few utility functions, that would normally be part of a standard C or C++ library.
+In order to prepare for such a library, let's move this code to a new library.
+We'll create a new library `stdlib` and move the following code there:
+- All functions in baremetal/include/baremetal/New.h and baremetal/src/New.cpp
+- All functions in baremetal/include/baremetal/Util.h and baremetal/src/Util.cpp
+- All definitions in baremetal/include/baremetal/Macros.h
+- All type definitions in baremetal/include/baremetal/Types.h
+- All functions in baremetal/src/CXAGuard.cpp
+
+The new library wil be next to `baremetal`, and have the following structure:
+
+<img src="images/treeview-stdlib-library.png" alt="Initial project structure" width="300"/>
+
+### CMake file for stdlib {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_CMAKE_FILE_FOR_STDLIB}
+
+We'll have to set up the CMake file fr the new library.
+
+Create the file `code/libraries/stdlib/CMakeLists.txt`
+
+```cmake
+File: code/libraries/stdlib/CMakeLists.txt
+1: message(STATUS "\n**********************************************************************************\n")
+2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+3: 
+4: project(stdlib
+5:     DESCRIPTION "Bare metal library"
+6:     LANGUAGES CXX ASM)
+7: 
+8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
+9: 
+10: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
+11: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
+12: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
+13: set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+14: set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
+15: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+16: set(PROJECT_INCLUDE_DIRS_PRIVATE )
+17: set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+18: 
+19: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
+20: 
+21: set(PROJECT_DEPENDENCIES
+22:     )
+23: 
+24: set(PROJECT_LIBS
+25:     ${LINKER_LIBRARIES}
+26:     ${PROJECT_DEPENDENCIES}
+27:     )
+28: 
+29: set(PROJECT_SOURCES
+30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
+33:     )
+34: 
+35: set(PROJECT_INCLUDES_PUBLIC
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Macros.h
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/New.h
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Types.h
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/include/stdlib/Util.h
+40:     )
+41: set(PROJECT_INCLUDES_PRIVATE )
+42: 
+43: if (CMAKE_VERBOSE_MAKEFILE)
+44:     display_list("Package                           : " ${PROJECT_NAME} )
+45:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+46:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+47:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+48:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+49:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+50:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+51:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+52:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+53:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+54:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+55:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+56:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+57:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+58:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+59:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+60:     display_list("Link libs                         : " ${PROJECT_LIBS} )
+61:     display_list("Source files                      : " ${PROJECT_SOURCES} )
+62:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+63:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+64: endif()
+65: 
+66: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+67: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+68: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+69: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+70: target_compile_definitions(${PROJECT_NAME} PRIVATE
+71:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+72:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+73:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+74:     )
+75: target_compile_definitions(${PROJECT_NAME} PUBLIC
+76:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+77:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+78:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+79:     )
+80: target_compile_options(${PROJECT_NAME} PRIVATE
+81:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+82:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+83:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+84:     )
+85: target_compile_options(${PROJECT_NAME} PUBLIC
+86:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+87:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+88:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+89:     )
+90: 
+91: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+92: 
+93: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+94: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+95:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+96: endif()
+97: 
+98: link_directories(${LINK_DIRECTORIES})
+99: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+100: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+101: 
+102: show_target_properties(${PROJECT_NAME})
+```
+
+### Update CMake file for baremetal library {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_UPDATE_CMAKE_FILE_FOR_BAREMETAL_LIBRARY}
+
+We can now remove the files we moved to the new library from the `baremetal` CMake file.
+Also, we need to add a dependency on the new `stdlib` library in `baremetal`.
+
+Update the file `code/libraries/baremetal/CMakeLists.txt`
+
+```cmake
+File: code/libraries/baremetal/CMakeLists.txt
+21: set(PROJECT_DEPENDENCIES
+22:     stdlib
+23:     )
+24: 
+25: set(PROJECT_LIBS
+26:     ${LINKER_LIBRARIES}
+27:     ${PROJECT_DEPENDENCIES}
+28:     )
+29: 
+30: set(PROJECT_SOURCES
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
+33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+37:     )
+38: 
+39: set(PROJECT_INCLUDES_PUBLIC
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+51:     )
+52: set(PROJECT_INCLUDES_PRIVATE )
+```
+
+### Add stdlib to libraries CMake file {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_ADD_STDLIB_TO_LIBRARIES_CMAKE_FILE}
+
+We still need to add the `stdlib` library.
+
+Update the file `code/libraries/CMakeLists.txt`
+
+```cmake
+File: code/libraries/CMakeLists.txt
+4: add_subdirectory(baremetal)
+5: add_subdirectory(stdlib)
+```
+
+### Update includes {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_UPDATE_INCLUDES}
+
+The last step is to change all inclusions from `baremetal/` to `stdlib/` for all files moved.
+I will not add the source changes for this here, as it should be trivial.
+
 Next: [09-timer](09-timer.md)
 

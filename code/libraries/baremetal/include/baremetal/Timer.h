@@ -42,7 +42,7 @@
 /// @file
 /// Raspberry Pi Timer
 
-#include <baremetal/Types.h>
+#include <stdlib/Types.h>
 
 namespace baremetal
 {

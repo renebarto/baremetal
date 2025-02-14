@@ -85,7 +85,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE
 // SOFTWARE.
 
-#include <baremetal/Types.h>
+#include <stdlib/Types.h>
 
 /// @file
 /// Static variable acquire / release functionality

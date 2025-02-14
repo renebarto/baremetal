@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : New.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,17 +39,10 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
-
 /// @file
-/// Standard C library utility functions
+/// Basic memory allocation functions
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdlib/Types.h>
 
-void *memset(void *buffer, int value, size_t length);
-
-#ifdef __cplusplus
-}
-#endif
+void operator delete(void *block) noexcept;
+void operator delete(void *block, size_t size) noexcept;

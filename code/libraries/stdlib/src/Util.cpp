@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : New.h
+// File        : Util.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Generic memory allocation functions
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,12 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <stdlib/Util.h>
 
 /// @file
-/// Basic memory allocation functions
+/// Standard C library utility functions implementation
 
-#include <baremetal/Types.h>
+/// <summary>
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
+/// </summary>
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns>Pointer to buffer</returns>
+void *memset(void *buffer, int value, size_t length)
+{
+    uint8 *ptr = reinterpret_cast<uint8 *>(buffer);
 
-void operator delete(void *block) noexcept;
-void operator delete(void *block, size_t size) noexcept;
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}

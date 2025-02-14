@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
+#include <stdlib/Types.h>
 
 /// @file
 /// System startup / shutdown functionality

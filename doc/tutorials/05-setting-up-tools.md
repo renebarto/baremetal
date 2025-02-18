@@ -282,7 +282,7 @@ Some items worth changing:
 | HTML_HEADER            | Sets a HTML header if desired                        | `doxygen/header.html`
 | HTML_FOOTER            | Sets a HTML footer if desired                        | `doxygen/footer.html`
 | HTML_STYLESHEET        | Sets a HTML style sheet if desired                   | `doxygen/stylesheet.css`
-| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)| 
+| HTML_EXTRA_FILES       | Any additional files you wish to add. These can be multiple file types, such as HTML, PDF, icons, etc. End every line except the last with a backslash (\\)|
 | HTML_COLORSTYLE_HUE    | Set a color hue for your pages                       | `120`
 | HTML_COLORSTYLE_SAT    | Set a color saturation for your pages                | `160`
 | GENERATE_TREEVIEW      | If set a tree-like structure in a side panel         | `YES`
@@ -499,7 +499,7 @@ As an (very simple) example, let's update `code/applications/demo/src/main.cpp` 
 File: code/applications/demo/src/main.cpp
 1: /// @file
 2: /// Demo application main code
-3: 
+3:
 4: /// <summary>
 5: /// Demo application main code
 6: /// </summary>
@@ -604,7 +604,7 @@ If the method or function returns a value, a `@return` or `<returns></returns>` 
 92:     /// <summary>
 93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
 94:     ///
-95:     /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+95:     /// The timer used is the ARM builtin timer.
 96:     /// </summary>
 97:     /// <param name="msec">Wait time in milliseconds</param>
 98:     static void WaitMilliSeconds(uint64 msec);
@@ -635,7 +635,7 @@ The link will show the information collected for the class:
 A ref tag creates a link to another item in the repository, or a URL to an external document.
 
 ```cpp
-    /// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
 ```
 
 In Markdown files, this is done using `[description](link)`
@@ -876,12 +876,12 @@ Now if we add a function to `main.cpp` that is not used:
 File: D:/Projects/baremetal/code/applications/demo/src/main.cpp
 1: /// @file
 2: /// Demo application main code
-3: 
+3:
 4: static void dummy()
 5: {
-6: 
+6:
 7: }
-8: 
+8:
 9: /// <summary>
 10: /// Demo application main code
 11: /// </summary>
@@ -890,7 +890,7 @@ File: D:/Projects/baremetal/code/applications/demo/src/main.cpp
 14: {
 15:     return 0;
 16: }
-17: 
+17:
 ```
 
 and then run cppcheck, we see:
@@ -971,7 +971,7 @@ Open the folder under `Text Editor` and navigate to `C/C++->Code Style->Formatti
 
 <img src="images/visualstudio-options-texteditor-formatting.png" alt="Configure Visual Studio for clang-format" width="500"/>
 
-Select `Enable ClangFormat support`, then `Use custome clang-format.exe file.` 
+Select `Enable ClangFormat support`, then `Use custome clang-format.exe file.`
 Click `Browse...`.
 
 <img src="images/visualstudio-options-texteditor-formatting-select-clang-format.png" alt="Configure Visual Studio for clang-format" width="500"/>

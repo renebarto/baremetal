@@ -102,7 +102,7 @@ void Timer::WaitMilliSeconds(uint64 msec)
 /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 /// counter). Busy wait
 ///
-/// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+/// The timer used is the ARM builtin timer.
 /// </summary>
 /// <param name="usec">Wait time in microseconds</param>
 void Timer::WaitMicroSeconds(uint64 usec)

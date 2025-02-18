@@ -90,7 +90,7 @@ void Timer::WaitCycles(uint32 numCycles)
 /// <summary>
 /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
 ///
-/// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+/// The timer used for the delays is the ARM builtin timer.
 /// </summary>
 /// <param name="msec">Wait time in milliseconds</param>
 void Timer::WaitMilliSeconds(uint64 msec)
@@ -98,12 +98,11 @@ void Timer::WaitMilliSeconds(uint64 msec)
     WaitMicroSeconds(msec * USEC_PER_MSEC);
 }
 
-#if !defined(USE_PHYSICAL_COUNTER)
 /// <summary>
 /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 /// counter). Busy wait
 ///
-/// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
+/// The timer used is the ARM builtin timer.
 /// </summary>
 /// <param name="usec">Wait time in microseconds</param>
 void Timer::WaitMicroSeconds(uint64 usec)
@@ -125,7 +124,7 @@ void Timer::WaitMicroSeconds(uint64 usec)
     }
     while (current - start < wait);
 }
-#else
+
 /// <summary>
 /// Reads the BCM2835 System Timer counter value. See @ref RASPBERRY_PI_SYSTEM_TIMER
 /// </summary>
@@ -146,26 +145,6 @@ uint64 Timer::GetSystemTimer()
     // compose long int value
     return (static_cast<uint64>(highWord) << 32 | lowWord);
 }
-
-/// <summary>
-/// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
-/// counter). Busy wait
-///
-/// Depending on whether @ref BAREMETAL_DEFINES_AND_OPTIONS_IMPORTANT_DEFINES_USE_PHYSICAL_COUNTER is defined, the timer will either use the ARM builtin timer (USE_PHYSICAL_COUNTER not defined) or the System Timer which is part of the BCM2835 chip (or newer) (USE_PHYSICAL_COUNTER defined).
-/// </summary>
-/// <param name="usec">Wait time in microseconds</param>
-void Timer::WaitMicroSeconds(uint64 usec)
-{
-    auto start = GetTimer().GetSystemTimer();
-    // We must check if it's non-zero, because QEMU does not emulate
-    // system timer, and returning constant zero would mean infinite loop
-    if (start)
-    {
-        while (GetTimer().GetSystemTimer() - start < usec)
-            NOP();
-    }
-}
-#endif
 
 /// <summary>
 /// Retrieves the singleton Timer instance. It is created in the first call to this function.

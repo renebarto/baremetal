@@ -11,6 +11,7 @@ In the same way, the project names are adapted to make sure there are no conflic
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-08.a`
+- a library `output/Debug/lib/stdlib-08.a`
 - an application `output/Debug/bin/08-generalization.elf`
 - an image in `deploy/Debug/08-generalization-image`
 

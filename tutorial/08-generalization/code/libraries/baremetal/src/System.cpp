@@ -39,13 +39,13 @@
 
 #include <baremetal/System.h>
 
+#include <stdlib/Util.h>
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/SysConfig.h>
 #include <baremetal/Timer.h>
 #include <baremetal/UART1.h>
-#include <baremetal/Util.h>
 
 /// @file
 /// System startup / shutdown functionality implementation

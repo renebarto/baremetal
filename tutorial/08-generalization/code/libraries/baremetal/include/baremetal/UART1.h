@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include <baremetal/Types.h>
+#include <stdlib/Types.h>
 
 /// @file
 /// Raspberry Pi UART1 serial device declaration

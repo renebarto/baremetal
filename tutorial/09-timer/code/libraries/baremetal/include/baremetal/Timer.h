@@ -75,9 +75,7 @@ public:
 
     static void WaitCycles(uint32 numCycles);
 
-#if defined(USE_PHYSICAL_COUNTER)
     uint64 GetSystemTimer();
-#endif
 
     static void WaitMilliSeconds(uint64 msec);
     static void WaitMicroSeconds(uint64 usec);

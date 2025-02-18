@@ -42,7 +42,7 @@
 /// @file
 /// Abstract GPIO pin. Could be either a virtual or physical pin
 
-#include <baremetal/Types.h>
+#include <stdlib/Types.h>
 
 namespace baremetal {
 

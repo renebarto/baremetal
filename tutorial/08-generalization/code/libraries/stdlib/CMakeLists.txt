@@ -1,7 +1,7 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(stdlib
+project(stdlib-08
     DESCRIPTION "Bare metal library"
     LANGUAGES CXX ASM)
 

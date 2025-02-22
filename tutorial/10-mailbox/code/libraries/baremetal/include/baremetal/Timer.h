@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : Timer.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Timer
 //
-// Description : Utility functions
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,18 +39,48 @@
 
 #pragma once
 
+/// @file
+/// Raspberry Pi Timer
+
 #include <stdlib/Types.h>
 
-/// @file
-/// Standard C library utility functions
+namespace baremetal
+{
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class IMemoryAccess;
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
+/// </summary>
+class Timer
+{
+    /// <summary>
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// </summary>
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer &GetTimer();
 
-#ifdef __cplusplus
-}
-#endif
+private:
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
+
+    Timer();
+
+public:
+    Timer(IMemoryAccess &memoryAccess);
+
+    static void WaitCycles(uint32 numCycles);
+
+    uint64 GetSystemTimer();
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
+};
+
+Timer &GetTimer();
+
+} // namespace baremetal

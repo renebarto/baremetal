@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : New.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,20 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <stdlib/Types.h>
+#include <stdlib/New.h>
 
 /// @file
-/// Standard C library utility functions
+/// Basic memory allocation functions implementation
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-
-#ifdef __cplusplus
+/// <summary>
+/// Standard de-allocation for single value.
+/// </summary>
+/// <param name="address">Block to free</param>
+void operator delete (void *address) noexcept
+{
 }
-#endif
+
+/// <summary>
+/// Standard de-allocation with size for single value.
+/// </summary>
+/// <param name="address">Block to free</param>
+/// <param name="size">Size of block to free in bytes</param>
+void operator delete (void *address, size_t /*size*/) noexcept
+{
+}

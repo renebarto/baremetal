@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : RPIProperties.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : RPIProperties
 //
-// Description : Utility functions
+// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
 //
 //------------------------------------------------------------------------------
 //
@@ -40,17 +40,26 @@
 #pragma once
 
 #include <stdlib/Types.h>
+#include <baremetal/IMailbox.h>
 
 /// @file
-/// Standard C library utility functions
+/// Top level functionality handling for Raspberry Pi Mailbox
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Top level functionality for requests on Mailbox interface
+/// </summary>
+class RPIProperties
+{
+private:
+    /// @brief Reference to mailbox for functions requested
+    IMailbox &m_mailbox;
 
-#ifdef __cplusplus
-}
-#endif
+public:
+    explicit RPIProperties(IMailbox &mailbox);
+
+    bool GetBoardSerial(uint64 &serial);
+};
+
+} // namespace baremetal

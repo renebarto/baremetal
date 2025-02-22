@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : MemoryManager.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryManager
 //
-// Description : Utility functions
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
@@ -42,15 +42,26 @@
 #include <stdlib/Types.h>
 
 /// @file
-/// Standard C library utility functions
+/// Memory management
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// <summary>
+/// Page slot for requesting coherent memory region
+/// </summary>
+enum class CoherentPageSlot
+{
+    /// @brief Coherent memory page slot for Raspberry Pi mailbox
+    PropertyMailbox = 0,
+};
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+namespace baremetal {
 
-#ifdef __cplusplus
-}
-#endif
+/// <summary>
+/// For now, handles assignment of coherent memory slots.
+/// </summary>
+class MemoryManager
+{
+public:
+    static uintptr GetCoherentPage(CoherentPageSlot slot);
+};
+
+} // namespace baremetal

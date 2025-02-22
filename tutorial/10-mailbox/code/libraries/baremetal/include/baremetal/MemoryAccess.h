@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : MemoryAccess.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryAccess
 //
-// Description : Utility functions
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,18 +39,30 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
+#include <baremetal/IMemoryAccess.h>
 
 /// @file
-/// Standard C library utility functions
+/// Memory access class
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Memory access interface
+/// </summary>
+class MemoryAccess : public IMemoryAccess
+{
+public:
+    uint8  Read8(regaddr address) override;
+    void   Write8(regaddr address, uint8 data) override;
+    void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void   Write16(regaddr address, uint16 data) override;
+    void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void   Write32(regaddr address, uint32 data) override;
+    void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
+};
 
-#ifdef __cplusplus
-}
-#endif
+MemoryAccess &GetMemoryAccess();
+
+} // namespace baremetal

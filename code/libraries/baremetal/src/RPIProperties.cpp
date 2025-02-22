@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.cpp
+// File        : RPIProperties.cpp
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : RPIProperties
 //
-// Description : Utility functions
+// Description : Access to BCM2835/6/7 properties using mailbox
 //
 //------------------------------------------------------------------------------
 //
@@ -37,44 +37,55 @@
 //
 //------------------------------------------------------------------------------
 
+#include <baremetal/RPIProperties.h>
+
 #include <stdlib/Util.h>
+#include <baremetal/BCMRegisters.h>
+#include <baremetal/RPIPropertiesInterface.h>
 
 /// @file
-/// Standard C library utility functions implementation
+/// Top level functionality handling for Raspberry Pi Mailbox implementation
+
+namespace baremetal {
 
 /// <summary>
-/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
+/// Mailbox property tag structure for requesting board serial number.
 /// </summary>
-/// <param name="buffer">Buffer pointer</param>
-/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
-/// <param name="length">Size of the buffer to fill in bytes</param>
-/// <returns>Pointer to buffer</returns>
-void *memset(void *buffer, int value, size_t length)
+struct PropertyTagSerial
 {
-    uint8 *ptr = reinterpret_cast<uint8 *>(buffer);
+    /// Tag ID, must be equal to PROPTAG_GET_BOARD_REVISION.
+    PropertyTag tag;
+    /// The requested serial number/ This is a 64 bit unsigned number, divided up into two times a 32 bit number
+    uint32   serial[2];
+} PACKED;
 
-    while (length-- > 0)
-    {
-        *ptr++ = static_cast<char>(value);
-    }
-    return buffer;
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="mailbox">Mailbox to be used for requests. Can be a fake for testing purposes</param>
+RPIProperties::RPIProperties(IMailbox &mailbox)
+    : m_mailbox{mailbox}
+{
 }
 
 /// <summary>
-/// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
+/// Request board serial number
 /// </summary>
-/// <param name="dest">Destination buffer pointer</param>
-/// <param name="src">Source buffer pointer</param>
-/// <param name="length">Size of buffer to copy in bytes</param>
-/// <returns>Pointer to destination buffer</returns>
-void* memcpy(void* dest, const void* src, size_t length)
+/// <param name="serial">On return, set to serial number, if successful</param>
+/// <returns>Return true on success, false on failure</returns>
+bool RPIProperties::GetBoardSerial(uint64 &serial)
 {
-    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
-    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+    PropertyTagSerial      tag{};
+    RPIPropertiesInterface interface(m_mailbox);
 
-    while (length-- > 0)
+    auto                   result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
+
+    if (result)
     {
-        *dstPtr++ = *srcPtr++;
+        serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
     }
-    return dest;
+
+    return result;
 }
+
+} // namespace baremetal

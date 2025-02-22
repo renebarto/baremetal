@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : SysConfig.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
@@ -39,18 +39,28 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-
 /// @file
-/// Standard C library utility functions
+/// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 
-#ifdef __cplusplus
-extern "C" {
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
+
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
+
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
+///
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
 #endif
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-
-#ifdef __cplusplus
-}
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
 #endif
+
+#include <baremetal/MemoryMap.h>

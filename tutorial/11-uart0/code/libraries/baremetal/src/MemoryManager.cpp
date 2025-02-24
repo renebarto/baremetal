@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : MemoryManager.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : MemoryManager
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,49 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/MemoryManager.h>
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
+#include <baremetal/SysConfig.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Memory management implementation
 
-namespace baremetal {
-
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+using namespace baremetal;
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// Return the coherent memory page (allocated with the GPU) for the requested page slot
 /// </summary>
-class RPIProperties
+/// <param name="slot">Page slot to return the address for</param>
+/// <returns>Page slot coherent memory address</returns>
+uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 {
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    uint64 pageAddress = MEM_COHERENT_REGION;
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
+    pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    return pageAddress;
+}

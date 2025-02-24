@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Util.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -40,46 +40,17 @@
 #pragma once
 
 #include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Standard C library utility functions
 
-namespace baremetal {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+void *memset(void *buffer, int value, size_t length);
+void* memcpy(void* dest, const void* src, size_t length);
 
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
-
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+#ifdef __cplusplus
+}
+#endif

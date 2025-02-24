@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : CharDevice.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : CharDevice
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -39,47 +39,31 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
-
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Abstract character device
 
 namespace baremetal {
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+    /// <summary>
+    /// Abstract character CharDevice
+    ///
+    /// Abstraction of a CharDevice that can read and write characters
+    /// </summary>
+    class CharDevice
+    {
+    public:
+        virtual ~CharDevice() = default;
 
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+        /// <summary>
+        /// Read a character
+        /// </summary>
+        /// <returns>Character read</returns>
+        virtual char Read() = 0;
+        /// <summary>
+        /// Write a character
+        /// </summary>
+        /// <param name="c">Character to be written</param>
+        virtual void Write(char c) = 0;
+    };
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    } // namespace baremetal

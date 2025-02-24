@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : IMailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : IMailbox
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -40,46 +40,56 @@
 #pragma once
 
 #include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Abstract Mailbox interface
 
 namespace baremetal {
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// Mailbox channel
 /// </summary>
-enum class ClockID : uint32
+enum class MailboxChannel
 {
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
 };
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// Mailbox abstract interface
 /// </summary>
-class RPIProperties
+class IMailbox
 {
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
-
 public:
-    explicit RPIProperties(IMailbox &mailbox);
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
 };
 
 } // namespace baremetal

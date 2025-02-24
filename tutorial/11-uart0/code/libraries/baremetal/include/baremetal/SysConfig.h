@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : SysConfig.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,28 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
-
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 
-namespace baremetal {
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
 
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
+///
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
+#endif
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
+#endif
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+#include <baremetal/MemoryMap.h>

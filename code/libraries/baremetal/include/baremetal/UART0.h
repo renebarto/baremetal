@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : UART0.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : UART0
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,46 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
+#include <baremetal/CharDevice.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Raspberry Pi UART0 serial device
 
 namespace baremetal {
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+class IMemoryAccess;
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// Encapsulation for the UART0 device.
+///
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-class RPIProperties
+class UART0 : public CharDevice
 {
+    /// <summary>
+    /// Construct the singleton UART0 instance if needed, and return a reference to the instance. This is a friend function of class UART0
+    /// </summary>
+    /// <returns>Reference to the singleton UART0 instance</returns>
+    friend UART0 &GetUART0();
+
 private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool            m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess  &m_memoryAccess;
+
+    UART0();
 
 public:
-    explicit RPIProperties(IMailbox &mailbox);
+    UART0(IMemoryAccess &memoryAccess);
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    void Initialize();
+    char Read() override;
+    void Write(char c) override;
+    void WriteString(const char* str);
 };
+
+UART0 &GetUART0();
 
 } // namespace baremetal

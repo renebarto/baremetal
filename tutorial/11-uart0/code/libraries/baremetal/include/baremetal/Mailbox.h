@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Mailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : Mailbox
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,38 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
 #include <baremetal/IMailbox.h>
+#include <baremetal/MemoryAccess.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Raspberry Pi Mailbox
 
 namespace baremetal {
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
-
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
 {
 private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
 
 public:
-    explicit RPIProperties(IMailbox &mailbox);
+    Mailbox(MailboxChannel channel, IMemoryAccess &memoryAccess = GetMemoryAccess());
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void    Flush();
+    uintptr Read();
+    void    Write(uintptr data);
 };
 
 } // namespace baremetal

@@ -1814,7 +1814,6 @@ Update the file `code/libraries/baremetal/include/baremetal/UART1.h`.
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\include\baremetal\UART1.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2024 Rene Barto
 3: //
@@ -1856,52 +1855,50 @@ File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\
 39: 
 40: #pragma once
 41: 
-42: #include <baremetal/Types.h>
-43: 
-44: /// @file
-45: /// Raspberry Pi UART1 serial device declaration
+42: /// @file
+43: /// Raspberry Pi UART1 serial device declaration
+44: 
+45: namespace baremetal {
 46: 
-47: namespace baremetal {
+47: class IMemoryAccess;
 48: 
-49: class IMemoryAccess;
-50: 
-51: /// <summary>
-52: /// Encapsulation for the UART1 device.
-53: ///
-54: /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-55: /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-56: /// </summary>
-57: class UART1
-58: {
-59:     /// <summary>
-60:     /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-61:     /// </summary>
-62:     /// <returns>Reference to the singleton UART1 instance</returns>
-63:     friend UART1 &GetUART1();
-64: 
-65: private:
-66:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
-67:     bool            m_isInitialized;
-68:     /// @brief Memory access interface reference for accessing registers.
-69:     IMemoryAccess  &m_memoryAccess;
+49: /// <summary>
+50: /// Encapsulation for the UART1 device.
+51: ///
+52: /// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+53: /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+54: /// </summary>
+55: class UART1
+56: {
+57:     /// <summary>
+58:     /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+59:     /// </summary>
+60:     /// <returns>Reference to the singleton UART1 instance</returns>
+61:     friend UART1 &GetUART1();
+62: 
+63: private:
+64:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
+65:     bool            m_isInitialized;
+66:     /// @brief Memory access interface reference for accessing registers.
+67:     IMemoryAccess  &m_memoryAccess;
+68: 
+69:     UART1();
 70: 
-71:     UART1();
-72: 
-73: public:
-74:     UART1(IMemoryAccess &memoryAccess);
-75: 
-76:     void Initialize();
-77:     char Read();
-78:     void Write(char c);
-79:     void WriteString(const char *str);
-80: };
+71: public:
+72:     UART1(IMemoryAccess &memoryAccess);
+73: 
+74:     void Initialize();
+75:     char Read();
+76:     void Write(char c);
+77:     void WriteString(const char *str);
+78: };
+79: 
+80: UART1 &GetUART1();
 81: 
-82: UART1 &GetUART1();
-83: 
-84: } // namespace baremetal
-85: 
+82: } // namespace baremetal
 ```
 
+- Line 42: We remove the include for `Types.h` which is no longer needed
 - Line 50-74: We remove the enum class GPIOMOde which is now in `IGPIOPin.h`
 - Line 77-110: We remove the enum class definitions for GPIOFunction and GPIOPullMode which are now in `PhysicalIGPIOPin.cpp`
 - Line 146-152: We remove the methods for GPIO which are noew in 'PhysicalGPIOPin.h`

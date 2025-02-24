@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Util.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,49 +37,44 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
-
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
+#include <stdlib/Util.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
-
-namespace baremetal {
+/// Standard C library utility functions implementation
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
 /// </summary>
-enum class ClockID : uint32
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns>Pointer to buffer</returns>
+void *memset(void *buffer, int value, size_t length)
 {
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+    uint8 *ptr = reinterpret_cast<uint8 *>(buffer);
+
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
 /// </summary>
-class RPIProperties
+/// <param name="dest">Destination buffer pointer</param>
+/// <param name="src">Source buffer pointer</param>
+/// <param name="length">Size of buffer to copy in bytes</param>
+/// <returns>Pointer to destination buffer</returns>
+void* memcpy(void* dest, const void* src, size_t length)
 {
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
+    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
 
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    while (length-- > 0)
+    {
+        *dstPtr++ = *srcPtr++;
+    }
+    return dest;
+}

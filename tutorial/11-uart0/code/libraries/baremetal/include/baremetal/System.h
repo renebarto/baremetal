@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : System.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : System
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -40,46 +40,68 @@
 #pragma once
 
 #include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// System startup / shutdown functionality
 
 namespace baremetal {
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+class IMemoryAccess;
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// System startup / shutdown handling class
 /// </summary>
-class RPIProperties
+class System
 {
+    /// <summary>
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System &GetSystem();
+
 private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess &m_memoryAccess;
+
+    System();
 
 public:
-    explicit RPIProperties(IMailbox &mailbox);
+    System(IMemoryAccess &memoryAccess);
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
 };
 
+System &GetSystem();
+
 } // namespace baremetal
+
+/// <summary>
+/// Return code for main() function
+/// </summary>
+enum class ReturnCode
+{
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+int               main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
+}
+#endif

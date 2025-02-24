@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Timer.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : Timer
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,48 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
-
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Raspberry Pi Timer
 
-namespace baremetal {
+#include <stdlib/Types.h>
+
+namespace baremetal
+{
+
+class IMemoryAccess;
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
 /// </summary>
-enum class ClockID : uint32
+class Timer
 {
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+    /// <summary>
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// </summary>
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer &GetTimer();
 
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
 private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
+
+    Timer();
 
 public:
-    explicit RPIProperties(IMailbox &mailbox);
+    Timer(IMemoryAccess &memoryAccess);
 
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    static void WaitCycles(uint32 numCycles);
+
+    uint64 GetSystemTimer();
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
 };
+
+Timer &GetTimer();
 
 } // namespace baremetal

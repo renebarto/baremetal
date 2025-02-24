@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : Macros.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : RPIProperties
+// Class       : -
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -39,47 +39,20 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
-
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Generic macros
 
-namespace baremetal {
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED              __attribute__ ((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+#define ALIGN(n)            __attribute__ ((aligned (n)))
 
-/// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
-/// </summary>
-enum class ClockID : uint32
-{
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK                __attribute__ ((weak))
 
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
-
-public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n)              (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n)              (1UL << (n))

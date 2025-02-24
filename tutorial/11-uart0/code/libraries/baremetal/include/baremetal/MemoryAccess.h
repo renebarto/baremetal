@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : MemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : MemoryAccess
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,30 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
+#include <baremetal/IMemoryAccess.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Memory access class
 
 namespace baremetal {
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// Memory access interface
 /// </summary>
-enum class ClockID : uint32
+class MemoryAccess : public IMemoryAccess
 {
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
-
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
-
 public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    uint8  Read8(regaddr address) override;
+    void   Write8(regaddr address, uint8 data) override;
+    void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void   Write16(regaddr address, uint16 data) override;
+    void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void   Write32(regaddr address, uint32 data) override;
+    void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 };
+
+MemoryAccess &GetMemoryAccess();
 
 } // namespace baremetal

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : MemoryManager.h
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : MemoryManager
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
@@ -40,46 +40,28 @@
 #pragma once
 
 #include <stdlib/Types.h>
-#include <baremetal/IMailbox.h>
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
+/// Memory management
+
+/// <summary>
+/// Page slot for requesting coherent memory region
+/// </summary>
+enum class CoherentPageSlot
+{
+    /// @brief Coherent memory page slot for Raspberry Pi mailbox
+    PropertyMailbox = 0,
+};
 
 namespace baremetal {
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// For now, handles assignment of coherent memory slots.
 /// </summary>
-enum class ClockID : uint32
+class MemoryManager
 {
-    /// @brief EMMC clock
-    EMMC      = 1,
-    /// @brief UART0 clock
-    UART      = 2,
-    /// @brief ARM processor clock
-    ARM       = 3,
-    /// @brief Core SoC clock
-    CORE      = 4,
-    /// @brief EMMC clock 2
-    EMMC2     = 12,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
-
-/// <summary>
-/// Top level functionality for requests on Mailbox interface
-/// </summary>
-class RPIProperties
-{
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox &m_mailbox;
-
 public:
-    explicit RPIProperties(IMailbox &mailbox);
-
-    bool GetBoardSerial(uint64 &serial);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
+    static uintptr GetCoherentPage(CoherentPageSlot slot);
 };
 
 } // namespace baremetal

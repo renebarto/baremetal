@@ -99,7 +99,6 @@ Update the file `code/libraries/baremetal/src/Timer.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 ...
-File: d:\Projects\RaspberryPi\baremetal.github.shadow\code\libraries\baremetal\src\Timer.cpp
 40: #include <baremetal/Timer.h>
 41: 
 42: #include <baremetal/ARMInstructions.h>
@@ -178,7 +177,7 @@ File: d:\Projects\RaspberryPi\baremetal.github.shadow\code\libraries\baremetal\s
 115:     // Read the current counter
 116:     GetTimerCounter(start);
 117:     // Calculate required count increase
-118:     unsigned long wait = ((freq / USEC_PER_SEC) * usec) / USEC_PER_SEC;
+118:     unsigned long wait = (freq / USEC_PER_SEC) * usec;
 119:     // Loop while counter increase is less than wait
 120:     // Careful: busy wait
 121:     do

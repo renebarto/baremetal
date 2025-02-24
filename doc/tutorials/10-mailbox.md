@@ -492,7 +492,6 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: d:\Projects\RaspberryPi\baremetal.github.shadow\code\libraries\baremetal\CMakeLists.txt
 30: set(PROJECT_SOURCES
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
@@ -759,7 +758,6 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: d:\Projects\RaspberryPi\baremetal.github.shadow\code\libraries\baremetal\CMakeLists.txt
 30: set(PROJECT_SOURCES
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
@@ -899,7 +897,7 @@ More information on the Mailbox registers can be found in:
 
 We'll dive a bit deeper into the information when discussing the actual code.
 
-The Mailbox register addresses are all prefixed with `RPI_MAILBOX`.
+The Mailbox register addresses are all prefixed with `RPI_MAILBOX_`.
 
 ### IMailbox.h {#TUTORIAL_10_MAILBOX_ADDING_THE_MAILBOX___STEP_3_IMAILBOXH}
 

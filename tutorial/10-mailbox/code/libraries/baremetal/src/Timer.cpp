@@ -115,7 +115,7 @@ void Timer::WaitMicroSeconds(uint64 usec)
     // Read the current counter
     GetTimerCounter(start);
     // Calculate required count increase
-    unsigned long wait = ((freq / USEC_PER_SEC) * usec) / USEC_PER_SEC;
+    unsigned long wait = (freq / USEC_PER_SEC) * usec;
     // Loop while counter increase is less than wait
     // Careful: busy wait
     do

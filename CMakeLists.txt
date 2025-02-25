@@ -67,6 +67,8 @@ option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
 option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
+option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
+option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
 
 message(STATUS "\n** Setting up project **\n--")
 
@@ -99,6 +101,17 @@ if (BAREMETAL_TRACE_DEBUG)
 else ()
     set(BAREMETAL_DEBUG_TRACING 0)
 endif()
+if (BAREMETAL_TRACE_MEMORY)
+    set(BAREMETAL_MEMORY_TRACING 1)
+else ()
+    set(BAREMETAL_MEMORY_TRACING 0)
+endif()
+if (BAREMETAL_TRACE_MEMORY_DETAIL)
+    set(BAREMETAL_MEMORY_TRACING 1)
+    set(BAREMETAL_MEMORY_TRACING_DETAIL 1)
+else ()
+    set(BAREMETAL_MEMORY_TRACING_DETAIL 0)
+endif()
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
 set(DEFINES_C
@@ -106,6 +119,8 @@ set(DEFINES_C
     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
     BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
+    BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
+    BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
     BAREMETAL_MAJOR=${VERSION_MAJOR}
     BAREMETAL_MINOR=${VERSION_MINOR}
     BAREMETAL_LEVEL=${VERSION_LEVEL}
@@ -282,6 +297,8 @@ message(STATUS "-- Debug output to UART0:           ${BAREMETAL_CONSOLE_UART0}")
 message(STATUS "-- Debug output to UART1:           ${BAREMETAL_CONSOLE_UART1}")
 message(STATUS "-- Color log output:                ${BAREMETAL_COLOR_LOGGING}")
 message(STATUS "-- Debug tracing output:            ${BAREMETAL_TRACE_DEBUG}")
+message(STATUS "-- Memory tracing output:           ${BAREMETAL_TRACE_MEMORY}")
+message(STATUS "-- Detailed memory tracing output:  ${BAREMETAL_TRACE_MEMORY_DETAIL}")
 message(STATUS "-- Version major:                   ${VERSION_MAJOR}")
 message(STATUS "-- Version minor:                   ${VERSION_MINOR}")
 message(STATUS "-- Version level:                   ${VERSION_LEVEL}")

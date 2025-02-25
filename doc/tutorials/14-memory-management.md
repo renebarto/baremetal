@@ -1615,7 +1615,7 @@ In order to use memory allocation in the way we are used to, using either `mallo
 So we'll add `New.h` and `New.cpp` to add functions for C++, and add `Malloc.h` and `Malloc.cpp` for the C variants.
 We need to add this code to the `baremetal` library, as it used the `MemoryManager` class.
 
-### Malloc.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_UTILH}
+### Malloc.h {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_MALLOCH}
 
 We will declares the memory allocation functions for C.
 
@@ -1685,7 +1685,7 @@ File: code/libraries/baremetal/include/baremetal/Malloc.h
 
 Line 51-54: We add the function declarations for `malloc()`, `calloc()`, `realloc()` and `free()`
 
-### Malloc.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_UTILCPP}
+### Malloc.cpp {#TUTORIAL_14_MEMORY_MANAGEMENT_SUPPORTING_CC___MEMORY_ALLOCATION___STEP_2_MALLOCCPP}
 
 We will implement the added functions.
 

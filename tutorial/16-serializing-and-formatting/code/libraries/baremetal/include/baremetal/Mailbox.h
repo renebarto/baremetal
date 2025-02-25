@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : Mailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Mailbox
 //
-// Description : Baremetal version information
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,40 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <baremetal/IMailbox.h>
+#include <baremetal/MemoryAccess.h>
 
 /// @file
-/// Build version implementation
+/// Raspberry Pi Mailbox
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
 
-/// <summary>
-/// Set up version string
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
 ///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+public:
+    Mailbox(MailboxChannel channel, IMemoryAccess &memoryAccess = GetMemoryAccess());
+
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void    Flush();
+    uintptr Read();
+    void    Write(uintptr data);
+};
+
+} // namespace baremetal

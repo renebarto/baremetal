@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : Malloc.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,53 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#include <baremetal/Malloc.h>
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <baremetal/MemoryManager.h>
+#include <baremetal/SysConfig.h>
 
 /// @file
-/// Build version implementation
-
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+/// Standard C memory allocation functions implementation
 
 /// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// Allocates a block of memory of the desired size.
 /// </summary>
-void baremetal::SetupVersion()
+/// <param name="size">The desired size of the memory block</param>
+/// <returns></returns>
+void* malloc(size_t size)
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
+    return baremetal::MemoryManager::HeapAllocate(size, HEAP_DEFAULT_MALLOC);
 }
 
 /// <summary>
-/// Return version string
+/// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
+///
+/// The memory allocated is num x size bytes
 /// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
+/// <param name="num">Number of cells to allocate memory for</param>
+/// <param name="size">Size of each cell</param>
+/// <returns></returns>
+void* calloc(size_t num, size_t size)
 {
-    return s_baremetalVersionString;
+    return malloc(num * size);
+}
+
+/// <summary>
+/// Re-allocates memory previously allocated with malloc() or calloc() to a new size
+/// </summary>
+/// <param name="ptr">Pointer to memory block to be re-allocated</param>
+/// <param name="new_size">The desired new size of the memory block</param>
+/// <returns></returns>
+void* realloc(void* ptr, size_t new_size)
+{
+    return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
+}
+
+/// <summary>
+/// Frees memory previously allocated with malloc() or calloc()
+/// </summary>
+/// <param name="ptr">Pointer to memory block to be freed</param>
+void free(void* ptr)
+{
+    baremetal::MemoryManager::HeapFree(ptr);
 }

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : Assert.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Assertion functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,34 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <stdlib/Macros.h>
+#include <stdlib/Types.h>
 
 /// @file
-/// Build version implementation
+/// Assertion functions
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
 
-/// <summary>
-/// Set up version string
+#ifdef NDEBUG
+/// If building for release, assert is replaced by nothing
+#define assert(expr) ((void)0)
+#else
+void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
+
+/// @brief Assertion callback function, which can be installed to handle a failed assertion
+using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
+
+void ResetAssertionCallback();
+void SetAssertionCallback(AssertionCallback* callback);
+
+/// @brief Assertion. If the assertion fails, AssertionFailed is called.
 ///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// <param name="expression">Expression to evaluate.
+/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
+#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+#endif
+
+} // namespace baremetal

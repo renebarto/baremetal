@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : CharDevice.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : CharDevice
 //
-// Description : Baremetal version information
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -37,41 +37,33 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Abstract character device
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
 
-/// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
+    /// <summary>
+    /// Abstract character CharDevice
+    ///
+    /// Abstraction of a CharDevice that can read and write characters
+    /// </summary>
+    class CharDevice
     {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    public:
+        virtual ~CharDevice() = default;
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+        /// <summary>
+        /// Read a character
+        /// </summary>
+        /// <returns>Character read</returns>
+        virtual char Read() = 0;
+        /// <summary>
+        /// Write a character
+        /// </summary>
+        /// <param name="c">Character to be written</param>
+        virtual void Write(char c) = 0;
+    };
+
+    } // namespace baremetal

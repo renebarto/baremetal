@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : System.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : System
 //
-// Description : Baremetal version information
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,71 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <stdlib/Types.h>
 
 /// @file
-/// Build version implementation
+/// System startup / shutdown functionality
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
+
+class IMemoryAccess;
 
 /// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// System startup / shutdown handling class
 /// </summary>
-void baremetal::SetupVersion()
+class System
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// <summary>
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System &GetSystem();
+
+private:
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess &m_memoryAccess;
+
+    System();
+
+public:
+    System(IMemoryAccess &memoryAccess);
+
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
+};
+
+System &GetSystem();
+
+} // namespace baremetal
 
 /// <summary>
-/// Return version string
+/// Return code for main() function
 /// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
+enum class ReturnCode
 {
-    return s_baremetalVersionString;
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+int               main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
 }
+#endif

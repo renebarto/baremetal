@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : New.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <stdlib/New.h>
 
 /// @file
-/// Build version implementation
-
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+/// Basic memory allocation functions implementation
 
 /// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// Standard de-allocation for single value.
 /// </summary>
-void baremetal::SetupVersion()
+/// <param name="address">Block to free</param>
+void operator delete (void *address) noexcept
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
 }
 
 /// <summary>
-/// Return version string
+/// Standard de-allocation with size for single value.
 /// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
+/// <param name="address">Block to free</param>
+/// <param name="size">Size of block to free in bytes</param>
+void operator delete (void *address, size_t /*size*/) noexcept
 {
-    return s_baremetalVersionString;
 }

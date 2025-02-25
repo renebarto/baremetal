@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : IMailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : IMailbox
 //
-// Description : Baremetal version information
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,59 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <stdlib/Types.h>
 
 /// @file
-/// Build version implementation
+/// Abstract Mailbox interface
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
 
 /// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// Mailbox channel
 /// </summary>
-void baremetal::SetupVersion()
+enum class MailboxChannel
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
+};
 
 /// <summary>
-/// Return version string
+/// Mailbox abstract interface
 /// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
+class IMailbox
 {
-    return s_baremetalVersionString;
-}
+public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
+
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
+
+} // namespace baremetal

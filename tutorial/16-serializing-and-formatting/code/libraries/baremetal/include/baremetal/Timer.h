@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Timer.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Timer
 //
-// Description : Baremetal version information
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,52 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Raspberry Pi Timer
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+#include <stdlib/Types.h>
+
+namespace baremetal
+{
+
+class IMemoryAccess;
 
 /// <summary>
-/// Set up version string
+/// Timer class. For now only contains busy waiting methods
 ///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// Note that this class is created as a singleton, using the GetTimer() function.
 /// </summary>
-void baremetal::SetupVersion()
+class Timer
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// <summary>
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// </summary>
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer &GetTimer();
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+private:
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
+    IMemoryAccess &m_memoryAccess;
+
+    Timer();
+
+public:
+    Timer(IMemoryAccess &memoryAccess);
+
+    void GetTimeString(char* buffer, size_t bufferSize);
+
+    static void WaitCycles(uint32 numCycles);
+
+    uint64 GetSystemTimer();
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
+};
+
+Timer &GetTimer();
+
+} // namespace baremetal

@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Macros.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -37,41 +37,29 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Generic macros
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED              __attribute__ ((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+#define ALIGN(n)            __attribute__ ((aligned (n)))
 
-/// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK                __attribute__ ((weak))
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Make branch prediction expect exp to be true (GCC compiler only)
+/// @param exp Expression to be evaluated
+#define likely(exp)         __builtin_expect (!!(exp), 1)
+/// @brief Make branch prediction expect exp to be false (GCC compiler only)
+/// @param exp Expression to be evaluated
+#define unlikely(exp)       __builtin_expect (!!(exp), 0)
+
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n)              (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n)              (1UL << (n))

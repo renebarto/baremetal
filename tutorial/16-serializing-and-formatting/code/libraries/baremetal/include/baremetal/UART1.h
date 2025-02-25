@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : UART1.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : UART1
 //
-// Description : Baremetal version information
+// Description : RPI UART1 class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,48 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
+#pragma once
 
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#include <baremetal/CharDevice.h>
 
 /// @file
-/// Build version implementation
+/// Raspberry Pi UART1 serial device
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+namespace baremetal {
+
+class IMemoryAccess;
 
 /// <summary>
-/// Set up version string
+/// Encapsulation for the UART1 device.
 ///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-void baremetal::SetupVersion()
+class UART1 : public CharDevice
 {
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+    /// <summary>
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// </summary>
+    /// <returns>Reference to the singleton UART1 instance</returns>
+    friend UART1& GetUART1();
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool            m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess  &m_memoryAccess;
+
+    UART1();
+
+public:
+    UART1(IMemoryAccess &memoryAccess);
+
+    void Initialize();
+    char Read() override;
+    void Write(char c) override;
+    void WriteString(const char* str);
+};
+
+UART1 &GetUART1();
+
+} // namespace baremetal

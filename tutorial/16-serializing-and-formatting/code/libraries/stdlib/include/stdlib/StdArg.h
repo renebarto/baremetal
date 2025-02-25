@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : StdArg.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Variable arguments handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,22 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Standard variable argument list handling using builtin functionality in GCC
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+// prevent warning, if <stdarg.h> from toolchain is included too
+#ifndef _STDARG_H
 
-/// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief declare standard va_list type
+typedef __builtin_va_list va_list;
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief define standard va_start macro
+#define va_start(arg, last)     __builtin_va_start (arg, last)
+/// @brief define standard va_end macro
+#define va_end(arg)             __builtin_va_end (arg)
+/// @brief define standard va_arg macro
+#define va_arg(arg, type)       __builtin_va_arg (arg, type)
+
+#endif

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Version.cpp
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,42 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Standard types
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-/// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
+
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
+
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8 *regaddr;

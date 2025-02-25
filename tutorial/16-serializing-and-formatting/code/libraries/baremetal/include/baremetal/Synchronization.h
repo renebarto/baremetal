@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Version.cpp
+// File        : Synchronization.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Baremetal version information
+// Description : Synchronization functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,41 +37,12 @@
 //
 //------------------------------------------------------------------------------
 
-#include <baremetal/Version.h>
-
-#include <stdlib/Util.h>
-#include <baremetal/Format.h>
+#pragma once
 
 /// @file
-/// Build version implementation
+/// Synchronization functionality
 
-/// @brief Buffer size of version string buffer
-static const size_t BufferSize = 20;
-/// @brief Version string buffer
-static char s_baremetalVersionString[BufferSize]{};
-/// @brief Flag to check if version set up was already done
-static bool s_baremetalVersionSetupDone = false;
-
-/// <summary>
-/// Set up version string
-///
-/// The version string is written into a buffer without allocating memory.
-/// This is important, as we may be logging before memory management is set up.
-/// </summary>
-void baremetal::SetupVersion()
-{
-    if (!s_baremetalVersionSetupDone)
-    {
-        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
-        s_baremetalVersionSetupDone = true;
-    }
-}
-
-/// <summary>
-/// Return version string
-/// </summary>
-/// <returns>Version string</returns>
-const char* baremetal::GetVersion()
-{
-    return s_baremetalVersionString;
-}
+/// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MIN  64
+/// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MAX  64

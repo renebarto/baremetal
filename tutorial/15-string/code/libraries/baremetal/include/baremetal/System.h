@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : System.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : System
 //
-// Description : Utility functions
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -42,53 +42,66 @@
 #include <stdlib/Types.h>
 
 /// @file
-/// Standard C library utility functions
+/// System startup / shutdown functionality
+
+namespace baremetal {
+
+class IMemoryAccess;
+
+/// <summary>
+/// System startup / shutdown handling class
+/// </summary>
+class System
+{
+    /// <summary>
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System &GetSystem();
+
+private:
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess &m_memoryAccess;
+
+    System();
+
+public:
+    System(IMemoryAccess &memoryAccess);
+
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
+};
+
+System &GetSystem();
+
+} // namespace baremetal
+
+/// <summary>
+/// Return code for main() function
+/// </summary>
+enum class ReturnCode
+{
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-int memcmp(const void* buffer1, const void* buffer2, size_t length);
-
-int toupper(int c);
-int tolower(int c);
-size_t strlen(const char* str);
-int strcmp(const char* str1, const char* str2);
-int strcasecmp(const char* str1, const char* str2);
-int strncmp(const char* str1, const char* str2, size_t maxLen);
-int strncasecmp(const char* str1, const char* str2, size_t maxLen);
-char* strncpy(char* dest, const char* src, size_t maxLen);
-char* strncat(char* dest, const char* src, size_t maxLen);
-
-#ifdef __cplusplus
-}
+extern "C"
+{
 #endif
 
 /// <summary>
-/// Determine the number of bits needed to represent the specified value
+/// Forward declared main() function
 /// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Number of bits used for value</returns>
-inline constexpr unsigned NextPowerOf2Bits(size_t value)
-{
-    unsigned bitCount{ 0 };
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
-}
-
+/// <returns>Integer cast of ReturnCode</returns>
+int               main();
 /// <summary>
-/// Determine the next power of 2 greater than or equal to the specified value
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
 /// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Power of two greater or equal to value</returns>
-inline constexpr size_t NextPowerOf2(size_t value)
-{
-    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
 }
+#endif

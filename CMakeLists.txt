@@ -171,6 +171,7 @@ set(FLAGS_CXX
     -Wextra
     -Werror
     -Wno-missing-field-initializers
+    -Wno-analyzer-use-of-uninitialized-value
     -Wno-unused-value
     -Wno-aligned-new
     -ffreestanding

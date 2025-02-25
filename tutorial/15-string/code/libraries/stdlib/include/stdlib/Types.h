@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -39,56 +39,40 @@
 
 #pragma once
 
-#include <stdlib/Types.h>
-
 /// @file
-/// Standard C library utility functions
+/// Standard types
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-int memcmp(const void* buffer1, const void* buffer2, size_t length);
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-int toupper(int c);
-int tolower(int c);
-size_t strlen(const char* str);
-int strcmp(const char* str1, const char* str2);
-int strcasecmp(const char* str1, const char* str2);
-int strncmp(const char* str1, const char* str2, size_t maxLen);
-int strncasecmp(const char* str1, const char* str2, size_t maxLen);
-char* strncpy(char* dest, const char* src, size_t maxLen);
-char* strncat(char* dest, const char* src, size_t maxLen);
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-#ifdef __cplusplus
-}
-#endif
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
 
-/// <summary>
-/// Determine the number of bits needed to represent the specified value
-/// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Number of bits used for value</returns>
-inline constexpr unsigned NextPowerOf2Bits(size_t value)
-{
-    unsigned bitCount{ 0 };
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
-}
-
-/// <summary>
-/// Determine the next power of 2 greater than or equal to the specified value
-/// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Power of two greater or equal to value</returns>
-inline constexpr size_t NextPowerOf2(size_t value)
-{
-    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
-}
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8 *regaddr;

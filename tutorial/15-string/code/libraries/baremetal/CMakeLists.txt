@@ -1,7 +1,7 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal
+project(baremetal-15
     DESCRIPTION "Bare metal library"
     LANGUAGES CXX ASM)
 
@@ -19,7 +19,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    stdlib
+    stdlib-15
     )
 
 set(PROJECT_LIBS

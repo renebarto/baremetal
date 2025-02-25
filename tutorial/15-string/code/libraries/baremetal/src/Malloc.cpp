@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : Malloc.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,58 +37,53 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <baremetal/Malloc.h>
 
-#include <stdlib/Types.h>
+#include <baremetal/MemoryManager.h>
+#include <baremetal/SysConfig.h>
 
 /// @file
-/// Standard C library utility functions
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void *memset(void *buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-int memcmp(const void* buffer1, const void* buffer2, size_t length);
-
-int toupper(int c);
-int tolower(int c);
-size_t strlen(const char* str);
-int strcmp(const char* str1, const char* str2);
-int strcasecmp(const char* str1, const char* str2);
-int strncmp(const char* str1, const char* str2, size_t maxLen);
-int strncasecmp(const char* str1, const char* str2, size_t maxLen);
-char* strncpy(char* dest, const char* src, size_t maxLen);
-char* strncat(char* dest, const char* src, size_t maxLen);
-
-#ifdef __cplusplus
-}
-#endif
+/// Standard C memory allocation functions implementation
 
 /// <summary>
-/// Determine the number of bits needed to represent the specified value
+/// Allocates a block of memory of the desired size.
 /// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Number of bits used for value</returns>
-inline constexpr unsigned NextPowerOf2Bits(size_t value)
+/// <param name="size">The desired size of the memory block</param>
+/// <returns></returns>
+void* malloc(size_t size)
 {
-    unsigned bitCount{ 0 };
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
+    return baremetal::MemoryManager::HeapAllocate(size, HEAP_DEFAULT_MALLOC);
 }
 
 /// <summary>
-/// Determine the next power of 2 greater than or equal to the specified value
+/// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
+///
+/// The memory allocated is num x size bytes
 /// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Power of two greater or equal to value</returns>
-inline constexpr size_t NextPowerOf2(size_t value)
+/// <param name="num">Number of cells to allocate memory for</param>
+/// <param name="size">Size of each cell</param>
+/// <returns></returns>
+void* calloc(size_t num, size_t size)
 {
-    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
+    return malloc(num * size);
+}
+
+/// <summary>
+/// Re-allocates memory previously allocated with malloc() or calloc() to a new size
+/// </summary>
+/// <param name="ptr">Pointer to memory block to be re-allocated</param>
+/// <param name="new_size">The desired new size of the memory block</param>
+/// <returns></returns>
+void* realloc(void* ptr, size_t new_size)
+{
+    return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
+}
+
+/// <summary>
+/// Frees memory previously allocated with malloc() or calloc()
+/// </summary>
+/// <param name="ptr">Pointer to memory block to be freed</param>
+void free(void* ptr)
+{
+    baremetal::MemoryManager::HeapFree(ptr);
 }

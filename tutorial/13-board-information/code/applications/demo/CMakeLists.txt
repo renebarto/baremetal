@@ -1,25 +1,31 @@
+project(13-board-information
+    DESCRIPTION "13-board-information tutorial application"
+    LANGUAGES CXX ASM)
+
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal
-    DESCRIPTION "Bare metal library"
-    LANGUAGES CXX ASM)
+message("\n** Setting up ${PROJECT_NAME} **\n")
 
-set(PROJECT_TARGET_NAME ${PROJECT_NAME})
+include(functions)
+
+set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
 
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
-set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX})
+set(PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC )
+set(PROJECT_COMPILE_OPTIONS_CXX_PRIVATE ${COMPILE_OPTIONS_CXX} -fanalyzer)
 set(PROJECT_COMPILE_OPTIONS_CXX_PUBLIC )
 set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
+set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
 set(PROJECT_INCLUDE_DIRS_PRIVATE )
-set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(PROJECT_INCLUDE_DIRS_PUBLIC )
 
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    stdlib
+    baremetal-13
     )
 
 set(PROJECT_LIBS
@@ -28,53 +34,10 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     )
 
-set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MachineInfo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
-    )
+set(PROJECT_INCLUDES_PUBLIC )
 set(PROJECT_INCLUDES_PRIVATE )
 
 if (CMAKE_VERBOSE_MAKEFILE)
@@ -100,8 +63,9 @@ if (CMAKE_VERBOSE_MAKEFILE)
     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 endif()
 
-add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+
+target_link_libraries(${PROJECT_NAME} ${LINKER_START_GROUP} ${PROJECT_LIBS} ${LINKER_END_GROUP})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
 target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -135,5 +99,9 @@ endif()
 link_directories(${LINK_DIRECTORIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 show_target_properties(${PROJECT_NAME})
+
+set(BAREMETAL_EXECUTABLE_TARGET ${PROJECT_NAME})
+setup_image(${PROJECT_NAME})

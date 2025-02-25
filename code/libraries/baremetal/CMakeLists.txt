@@ -28,6 +28,10 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
@@ -40,15 +44,20 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
@@ -62,6 +71,7 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

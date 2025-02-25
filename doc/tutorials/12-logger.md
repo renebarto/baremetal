@@ -2931,7 +2931,7 @@ We can now configure and build our code, and start debugging.
 
 The application will now print output in color, depending on the log severity level, and also print source name and line number:
 
-<img src="images/tutorial-12-logger.png" alt="Console output" width="800"/>
+<img src="images/tutorial-12-logger.png" alt="Console output" width="600"/>
 
 ## Assertion - Step 4 {#TUTORIAL_12_LOGGER_ASSERTION___STEP_4}
 
@@ -2946,7 +2946,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Assert.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Assert.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Assert.h
 5: //
@@ -2983,43 +2983,43 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
-42: #include <baremetal/Macros.h>
-43: #include <baremetal/Types.h>
-44:
+41: 
+42: #include <stdlib/Macros.h>
+43: #include <stdlib/Types.h>
+44: 
 45: /// @file
 46: /// Assertion functions
-47:
+47: 
 48: namespace baremetal {
-49:
+49: 
 50: #ifdef NDEBUG
 51: /// If building for release, assert is replaced by nothing
 52: #define assert(expr) ((void)0)
 53: #else
 54: void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
-55:
+55: 
 56: /// @brief Assertion callback function, which can be installed to handle a failed assertion
 57: using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
-58:
+58: 
 59: void ResetAssertionCallback();
 60: void SetAssertionCallback(AssertionCallback* callback);
-61:
+61: 
 62: /// @brief Assertion. If the assertion fails, AssertionFailed is called.
 63: ///
 64: /// <param name="expression">Expression to evaluate.
 65: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
 66: #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
-67:
+67: 
 68: #endif
-69:
+69: 
 70: } // namespace baremetal
 ```
 
 - Line 52: If we build for release, we simply ignore the assertion
 - Line 54: We declare the assertion failure function `AssertionFailed()`.
-This will call the assertion failure handler, which log a `Panic` message and halts the system by default, unless a custom asstion failure handler is installed
+This will call the assertion failure handler, which logs a `Panic` message and halts the system by default, unless a custom assertion failure handler is installed
 - Line 57: We declare the prototype of the assertion failure handler function `AssertionCallback`
 - Line 59: We declare the function `ResetAssertionCallback()` which resets the assertion failure handler to the default
 - Line 60: We declare the function `SetAssertionCallback()` which sets a custom assertion failure handler
@@ -3235,61 +3235,53 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-29: set(PROJECT_SOURCES
-30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
-32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+30: set(PROJECT_SOURCES
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
+32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
 33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
 34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
 35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
 36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
-42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
-46:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
-47:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-48:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
-50:     )
-51:
-52: set(PROJECT_INCLUDES_PUBLIC
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
-58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
-59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
-61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
-63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
-64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
-65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
-67:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-68:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
-69:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
-70:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
-71:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
-72:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
-73:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/StdArg.h
-74:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-75:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-76:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
-77:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
-78:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
-79:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-80:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Util.h
-81:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
-82:     )
-83: set(PROJECT_INCLUDES_PRIVATE )
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
+44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
+45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
+46:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
+48:     )
+49: 
+50: set(PROJECT_INCLUDES_PUBLIC
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
+53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
+57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
+59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
+61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
+62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
+64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
+67:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
+68:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
+69:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+70:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
+71:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
+72:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
+73:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+74:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
+75:     )
+76: set(PROJECT_INCLUDES_PRIVATE )
 ...
 ```
 
@@ -3299,7 +3291,7 @@ We can now configure and build our code, and start debugging.
 
 When pressing the `p` key, the application will assert and halt:
 
-<img src="images/tutorial-12-assert.png" alt="Console output" width="800"/>
+<img src="images/tutorial-12-assert.png" alt="Console output" width="600"/>
 
 We can now start adding sanity checks that fail assertion if not successful.
 

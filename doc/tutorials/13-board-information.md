@@ -1336,12 +1336,12 @@ Update the file `code/libraries/baremetal/src/Logger.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Logger.cpp
 ...
-42: #include <baremetal/Console.h>
-43: #include <baremetal/Format.h>
-44: #include <baremetal/MachineInfo.h>
-45: #include <baremetal/System.h>
-46: #include <baremetal/Timer.h>
-47: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
+43: #include <baremetal/Console.h>
+44: #include <baremetal/Format.h>
+45: #include <baremetal/MachineInfo.h>
+46: #include <baremetal/System.h>
+47: #include <baremetal/Timer.h>
 48: #include <baremetal/Version.h>
 ...
 72: /// <summary>

@@ -1,5 +1,5 @@
 project(15-string
-    DESCRIPTION "Demo application"
+    DESCRIPTION "15-string tutorial application"
     LANGUAGES CXX ASM)
 
 message(STATUS "\n**********************************************************************************\n")

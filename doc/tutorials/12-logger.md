@@ -681,52 +681,45 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-29: set(PROJECT_SOURCES
-30:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
-31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/CXAGuard.cpp
+30: set(PROJECT_SOURCES
+31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
 33:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
 34:     ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
-35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
-36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
-37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
-38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
-39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
-40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
-43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
-44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-45:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Util.cpp
-46:     )
-47:
-48: set(PROJECT_INCLUDES_PUBLIC
-49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
-53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
-55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Macros.h
-57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
-58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
-60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
-62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
-63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
-64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
-65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
-66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-67:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-68:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
-69:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Types.h
-70:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
-71:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-72:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Util.h
-73:     )
-74: set(PROJECT_INCLUDES_PRIVATE )
+35:     ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
+36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
+37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
+38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
+39:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
+40:     ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
+41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
+42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
+43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
+44:     )
+45: 
+46: set(PROJECT_INCLUDES_PUBLIC
+47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
+48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
+49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
+50:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
+51:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+52:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
+53:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
+54:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
+55:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
+56:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
+57:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
+58:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
+59:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
+60:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
+61:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
+62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
+63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
+64:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
+65:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
+66:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
+67:     )
+68: set(PROJECT_INCLUDES_PRIVATE )
 ...
 ```
 

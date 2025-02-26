@@ -1,5 +1,5 @@
 project(16-serializing-and-formatting
-    DESCRIPTION "16-serializing-and-formatting application"
+    DESCRIPTION "16-serializing-and-formatting tutorial application"
     LANGUAGES CXX ASM)
 
 message(STATUS "\n**********************************************************************************\n")

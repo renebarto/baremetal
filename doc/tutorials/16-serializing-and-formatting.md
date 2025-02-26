@@ -71,13 +71,13 @@ Update the file `code/libraries/baremetal/src/Logger.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Logger.cpp
 ...
-42: #include <baremetal/Console.h>
-43: #include <baremetal/Format.h>
-44: #include <baremetal/MachineInfo.h>
-45: #include <baremetal/String.h>
-46: #include <baremetal/System.h>
-47: #include <baremetal/Timer.h>
-48: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
+43: #include <baremetal/Console.h>
+44: #include <baremetal/Format.h>
+45: #include <baremetal/MachineInfo.h>
+46: #include <baremetal/String.h>
+47: #include <baremetal/System.h>
+48: #include <baremetal/Timer.h>
 49: #include <baremetal/Version.h>
 ...
 73: /// <summary>
@@ -333,9 +333,9 @@ Update the file `code/libraries/baremetal/src/Format.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Format.cpp
 ...
-42: #include <baremetal/Serialization.h>
-43: #include <baremetal/String.h>
-44: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
+43: #include <baremetal/Serialization.h>
+44: #include <baremetal/String.h>
 45: 
 46: /// @file
 47: /// Formatting functionality implementation
@@ -1488,7 +1488,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 ...
 40: #include <baremetal/Serialization.h>
 41: 
-42: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
 43: 
 44: /// @file
 45: /// Type serialization functions implementation
@@ -1873,7 +1873,6 @@ File: code/libraries/baremetal/src/Serialization.cpp
 424:     return result.align(width);
 425: }
 426: 
-File: d:\Projects\baremetal.test\code\libraries\baremetal\src\Serialization.cpp
 427: /// <summary>
 428: /// Serialize a string to string.
 429: /// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
@@ -2302,8 +2301,8 @@ Update the file `code/libraries/baremetal/src/Version.cpp`
 File: code/libraries/baremetal/src/Version.cpp
 40: #include <baremetal/Version.h>
 41: 
-42: #include <baremetal/Format.h>
-43: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
+43: #include <baremetal/Format.h>
 44: 
 45: /// @file
 46: /// Build version implementation
@@ -2343,8 +2342,6 @@ File: code/libraries/baremetal/src/Version.cpp
 ## Application code {#TUTORIAL_16_SERIALIZATION_AND_FORMATTING_APPLICATION_CODE}
 
 We'll add some tests for check whether the serialization functions work as expected.
-This is the second attempt at creating class / micro / unit tests for our code.
-Later on, we'll be adding a simple test framework, but for now we're going to focus more on HW support.
 
 Update the file `code\applications\demo\src\main.cpp`
 

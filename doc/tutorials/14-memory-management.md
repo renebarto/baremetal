@@ -554,9 +554,9 @@ File: code/libraries/baremetal/src/HeapAllocator.cpp
 39: 
 40: #include <baremetal/HeapAllocator.h>
 41: 
-42: #include <baremetal/Assert.h>
-43: #include <baremetal/Logger.h>
-44: #include <baremetal/Util.h>
+42: #include <stdlib/Util.h>
+43: #include <baremetal/Assert.h>
+44: #include <baremetal/Logger.h>
 45: #include <baremetal/SysConfig.h>
 46: 
 47: /// @file

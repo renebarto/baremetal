@@ -67,7 +67,7 @@ option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
 option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
-option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" ON)
+option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
 option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
 
 message(STATUS "\n** Setting up project **\n--")

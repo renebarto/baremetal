@@ -10,7 +10,7 @@ Raspberry Pi 3 supports only UART0 next to the mini-UART.
 Raspberry Pi 4 supports UART0, 2, 3, 4, 5, and mini-UART.
 Raspberry Pi 5 supports UART0, 1, 2, 3, 4, 5, and no mini-UART.
 
-## GPIO pins
+## GPIO pins {#RASPBERRY_PI_PL011_UART_GPIO_PINS}
 
 | GPIO#  |Pull  | Alt 0 | Alt 1 | Alt 2 | Alt 3 | Alt 4 | Alt 5 |
 |--------|------|-------|-------|-------|-------|-------|

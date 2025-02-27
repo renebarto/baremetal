@@ -1,10 +1,10 @@
 # Raspberry Pi Interrupt Control {#RASPBERRY_PI_INTERRUPT_CONTROL}
 
-## Raspberry Pi 3
+## Raspberry Pi 3 {#RASPBERRY_PI_INTERRUPT_CONTROL_RASPBERRY_PI_3}
 
 See [documentation](pdf/bcm2835-peripherals.pdf), section 7.
 
-### Interrupt ID
+### Interrupt ID {#RASPBERRY_PI_INTERRUPT_CONTROL_RASPBERRY_PI_3_INTERRUPT_ID}
 
 Raspberry Pi 3 has an interrupt controller as part of the specific Broadcom SoC, BCM2835/6/7. It supports a total of 84 interrupts:
 - 32 in the IRQ1 control group (also named GPU 0..31 IRQ, linked to GPU pending 0)
@@ -113,7 +113,7 @@ For the interrupts connected to ARM local, this is different, e.g. `IRQ_LOCAL_CN
 
 Interrupts are prefixed in code with `RPI_INTRCTRL_`.
 
-### Interrupt control registers
+### Interrupt control registers {#RASPBERRY_PI_INTERRUPT_CONTROL_RASPBERRY_PI_3_INTERRUPT_CONTROL_REGISTERS}
 
 <table>
 <caption id="Interrupt_control_registers">Interrupt control registers</caption>
@@ -263,7 +263,7 @@ Interrupts are prefixed in code with `RPI_INTRCTRL_`.
 0 = no change</tr>
 </table>
 
-## Raspberry Pi 4/5
+## Raspberry Pi 4/5 {#RASPBERRY_PI_INTERRUPT_CONTROL_RASPBERRY_PI_45}
 
 See [documentation](pdf/bcm2711-peripherals.pdf), section 6.
 

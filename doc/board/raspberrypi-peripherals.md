@@ -11,7 +11,7 @@
 - @subpage RASPBERRY_PI_SPI0
 - @subpage RASPBERRY_PI_SPI1 -->
 - @subpage RASPBERRY_PI_SYSTEM_TIMER
-- @subpage RASPBERRY_PI_UART0
+- @subpage RASPBERRY_PI_PL011_UART
 - @subpage RASPBERRY_PI_UART1
 
 @todo Add ARM local peripherals

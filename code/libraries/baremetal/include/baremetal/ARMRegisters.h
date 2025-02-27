@@ -119,14 +119,23 @@
 
 /// @brief Raspberry Pi ARM Local Interrupt Source Timer 0
 #define ARM_LOCAL_INTSRC_TIMER0            BIT1(0)
+/// @brief Raspberry Pi ARM Local Interrupt Source Timer 1
 #define ARM_LOCAL_INTSRC_TIMER1            BIT1(1)
+/// @brief Raspberry Pi ARM Local Interrupt Source Timer 2
 #define ARM_LOCAL_INTSRC_TIMER2            BIT1(2)
+/// @brief Raspberry Pi ARM Local Interrupt Source Timer 3
 #define ARM_LOCAL_INTSRC_TIMER3            BIT1(3)
+/// @brief Raspberry Pi ARM Local Interrupt Source Mailbox 0
 #define ARM_LOCAL_INTSRC_MAILBOX0          BIT1(4)
+/// @brief Raspberry Pi ARM Local Interrupt Source Mailbox 1
 #define ARM_LOCAL_INTSRC_MAILBOX1          BIT1(5)
+/// @brief Raspberry Pi ARM Local Interrupt Source Mailbox 2
 #define ARM_LOCAL_INTSRC_MAILBOX2          BIT1(6)
+/// @brief Raspberry Pi ARM Local Interrupt Source Mailbox 3
 #define ARM_LOCAL_INTSRC_MAILBOX3          BIT1(7)
+/// @brief Raspberry Pi ARM Local Interrupt Source GPU
 #define ARM_LOCAL_INTSRC_GPU               BIT1(8)
+/// @brief Raspberry Pi ARM Local Interrupt Source PMU
 #define ARM_LOCAL_INTSRC_PMU               BIT1(9)
 
 /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS

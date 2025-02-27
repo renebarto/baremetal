@@ -363,37 +363,37 @@
 // Raspberry Pi UART0
 //---------------------------------------------
 
-/// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
-/// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
-/// @brief Raspberry Pi UART0 flag register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 flag register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
-/// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
-/// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
-/// @brief Raspberry Pi UART0 line control register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 line control register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
-/// @brief Raspberry Pi UART0 control register register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 control register register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
-/// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
-/// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
-/// @brief Raspberry Pi UART0 raw interrupt status register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 raw interrupt status register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
-/// @brief Raspberry Pi UART0 masked interrupt status  register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 masked interrupt status  register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
-/// @brief Raspberry Pi UART0 interrupt clear register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 interrupt clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
-/// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
 
 /// @brief Raspberry Pi UART0 flag register values
-/// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_FR_RX_READY         BIT1(4)
-/// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_UART0
+/// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_PL011_UART
 #define RPI_UART0_FR_TX_EMPTY         BIT1(5)
 
 //---------------------------------------------

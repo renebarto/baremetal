@@ -71,14 +71,14 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Abstract character device
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47:     /// <summary>
 48:     /// Abstract character CharDevice
 49:     ///
@@ -88,7 +88,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 53:     {
 54:     public:
 55:         virtual ~CharDevice() = default;
-56: 
+56:
 57:         /// <summary>
 58:         /// Read a character
 59:         /// </summary>
@@ -100,9 +100,9 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 65:         /// <param name="c">Character to be written</param>
 66:         virtual void Write(char c) = 0;
 67:     };
-68: 
+68:
 69:     } // namespace baremetal
-70: 
+70:
 ```
 
 - Line 52: We declare the class `CharDevice`
@@ -120,14 +120,14 @@ Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
 File: code/libraries/baremetal/include/baremetal/UART1.h
 ...
 42: #include <baremetal/CharDevice.h>
-43: 
+43:
 44: /// @file
 45: /// Raspberry Pi UART1 serial device
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: class IMemoryAccess;
-50: 
+50:
 51: /// <summary>
 52: /// Encapsulation for the UART1 device.
 53: ///
@@ -141,26 +141,26 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 61:     /// </summary>
 62:     /// <returns>Reference to the singleton UART1 instance</returns>
 63:     friend UART1& GetUART1();
-64: 
+64:
 65: private:
 66:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
 67:     bool            m_isInitialized;
 68:     /// @brief Memory access interface reference for accessing registers.
 69:     IMemoryAccess  &m_memoryAccess;
-70: 
+70:
 71:     UART1();
-72: 
+72:
 73: public:
 74:     UART1(IMemoryAccess &memoryAccess);
-75: 
+75:
 76:     void Initialize();
 77:     char Read() override;
 78:     void Write(char c) override;
 79:     void WriteString(const char* str);
 80: };
-81: 
+81:
 82: UART1 &GetUART1();
-83: 
+83:
 84: } // namespace baremetal
 ```
 
@@ -201,7 +201,7 @@ File: d:\Projects\RaspberryPi\baremetal.github.shadow\tutorial\11-uart0\code\lib
 62:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
 63:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
 64:     )
-65: 
+65:
 ...
 ```
 
@@ -225,7 +225,7 @@ Update the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 ...
 48: namespace baremetal {
-49: 
+49:
 50: /// <summary>
 51: /// Clock ID number. Used to retrieve and set the clock frequency for several clocks
 52: /// </summary>
@@ -244,7 +244,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 65:     /// @brief Pixel clock
 66:     PIXEL_BVB = 14,
 67: };
-68: 
+68:
 69: /// <summary>
 70: /// Top level functionality for requests on Mailbox interface
 71: /// </summary>
@@ -253,14 +253,14 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 74: private:
 75:     /// @brief Reference to mailbox for functions requested
 76:     IMailbox &m_mailbox;
-77: 
+77:
 78: public:
 79:     explicit RPIProperties(IMailbox &mailbox);
-80: 
+80:
 81:     bool GetBoardSerial(uint64 &serial);
 82:     bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
 83: };
-84: 
+84:
 85: } // namespace baremetal
 ```
 
@@ -283,7 +283,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 58:     /// The requested serial number/ This is a 64 bit unsigned number, divided up into two times a 32 bit number
 59:     uint32   serial[2];
 60: } PACKED;
-61: 
+61:
 62: /// <summary>
 63: /// Mailbox property tag structure for requesting board serial number.
 64: /// </summary>
@@ -312,17 +312,17 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 116: {
 117:     PropertyTagClockRate      tag{};
 118:     RPIPropertiesInterface interface(m_mailbox);
-119: 
+119:
 120:     tag.clockID   = static_cast<uint32>(clockID);
 121:     tag.rate      = freqHz;
 122:     tag.skipTurbo = skipTurbo;
 123:     auto result   = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
-124: 
+124:
 125:     // Do not write to console here, as this call is needed to set up the console
-126: 
+126:
 127:     return result;
 128: }
-129: 
+129:
 130: } // namespace baremetal
 ```
 
@@ -347,45 +347,45 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 251: //---------------------------------------------
 252: // Raspberry Pi UART0
 253: //---------------------------------------------
-254: 
-255: /// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_UART0
+254:
+255: /// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_PL011_UART
 256: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
-257: /// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_UART0
+257: /// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_PL011_UART
 258: #define RPI_UART0_DR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
-259: /// @brief Raspberry Pi UART0 flag register (R/W). See @ref RASPBERRY_PI_UART0
+259: /// @brief Raspberry Pi UART0 flag register (R/W). See @ref RASPBERRY_PI_PL011_UART
 260: #define RPI_UART0_FR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
-261: /// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W). See @ref RASPBERRY_PI_UART0
+261: /// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
 262: #define RPI_UART0_IBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
-263: /// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W). See @ref RASPBERRY_PI_UART0
+263: /// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
 264: #define RPI_UART0_FBRD                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
-265: /// @brief Raspberry Pi UART0 line control register (R/W). See @ref RASPBERRY_PI_UART0
+265: /// @brief Raspberry Pi UART0 line control register (R/W). See @ref RASPBERRY_PI_PL011_UART
 266: #define RPI_UART0_LCRH                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
-267: /// @brief Raspberry Pi UART0 control register register (R/W). See @ref RASPBERRY_PI_UART0
+267: /// @brief Raspberry Pi UART0 control register register (R/W). See @ref RASPBERRY_PI_PL011_UART
 268: #define RPI_UART0_CR                  reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
-269: /// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W). See @ref RASPBERRY_PI_UART0
+269: /// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W). See @ref RASPBERRY_PI_PL011_UART
 270: #define RPI_UART0_IFLS                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
-271: /// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W). See @ref RASPBERRY_PI_UART0
+271: /// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
 272: #define RPI_UART0_IMSC                reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
-273: /// @brief Raspberry Pi UART0 raw interrupt status register (R/W). See @ref RASPBERRY_PI_UART0
+273: /// @brief Raspberry Pi UART0 raw interrupt status register (R/W). See @ref RASPBERRY_PI_PL011_UART
 274: #define RPI_UART0_RIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
-275: /// @brief Raspberry Pi UART0 masked interrupt status  register (R/W). See @ref RASPBERRY_PI_UART0
+275: /// @brief Raspberry Pi UART0 masked interrupt status  register (R/W). See @ref RASPBERRY_PI_PL011_UART
 276: #define RPI_UART0_MIS                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
-277: /// @brief Raspberry Pi UART0 interrupt clear register (R/W). See @ref RASPBERRY_PI_UART0
+277: /// @brief Raspberry Pi UART0 interrupt clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
 278: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
-279: /// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_UART0
+279: /// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_PL011_UART
 280: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
-281: 
+281:
 282: /// @brief Raspberry Pi UART0 flag register values
-283: /// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_UART0
+283: /// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_PL011_UART
 284: #define RPI_UART0_FR_RX_READY         BIT1(4)
-285: /// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_UART0
+285: /// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_PL011_UART
 286: #define RPI_UART0_FR_TX_EMPTY         BIT1(5)
-287: 
+287:
 ...
 ```
 
 We will not go into details here, we'll cover this when we use the registers.
-More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_UART0) as well as in the official 
+More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_PL011_UART) as well as in the official
 [Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2837-peripherals.pdf) (page 175),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 144) and
 [Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 34)
@@ -438,18 +438,18 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include <baremetal/CharDevice.h>
-43: 
+43:
 44: /// @file
 45: /// Raspberry Pi UART0 serial device
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: class IMemoryAccess;
-50: 
+50:
 51: /// <summary>
 52: /// Encapsulation for the UART0 device.
 53: ///
@@ -463,26 +463,26 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 61:     /// </summary>
 62:     /// <returns>Reference to the singleton UART0 instance</returns>
 63:     friend UART0 &GetUART0();
-64: 
+64:
 65: private:
 66:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
 67:     bool            m_isInitialized;
 68:     /// @brief Memory access interface reference for accessing registers.
 69:     IMemoryAccess  &m_memoryAccess;
-70: 
+70:
 71:     UART0();
-72: 
+72:
 73: public:
 74:     UART0(IMemoryAccess &memoryAccess);
-75: 
+75:
 76:     void Initialize();
 77:     char Read() override;
 78:     void Write(char c) override;
 79:     void WriteString(const char* str);
 80: };
-81: 
+81:
 82: UART0 &GetUART0();
-83: 
+83:
 84: } // namespace baremetal
 ```
 
@@ -534,21 +534,21 @@ File: code/libraries/baremetal/src/UART0.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <baremetal/UART0.h>
-41: 
+41:
 42: #include <baremetal/ARMInstructions.h>
 43: #include <baremetal/BCMRegisters.h>
 44: #include <baremetal/Mailbox.h>
 45: #include <baremetal/MemoryAccess.h>
 46: #include <baremetal/PhysicalGPIOPin.h>
 47: #include <baremetal/RPIProperties.h>
-48: 
+48:
 49: /// @file
 50: /// Raspberry Pi UART0 serial device implementation
-51: 
+51:
 52: namespace baremetal {
-53: 
+53:
 54: /// <summary>
 55: /// Constructs a default UART0 instance.
 56: ///
@@ -559,7 +559,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 61:     , m_memoryAccess{GetMemoryAccess()}
 62: {
 63: }
-64: 
+64:
 65: /// <summary>
 66: /// Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
 67: /// </summary>
@@ -569,7 +569,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 71:     , m_memoryAccess{memoryAccess}
 72: {
 73: }
-74: 
+74:
 75: /// <summary>
 76: /// Initialize the UART0 device. Only performed once, guarded by m_isInitialized.
 77: ///
@@ -581,12 +581,12 @@ File: code/libraries/baremetal/src/UART0.cpp
 83:         return;
 84:     // initialize UART
 85:     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
-86: 
+86:
 87:     Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
 88:     RPIProperties properties(mailbox);
 89:     if (!properties.SetClockRate(ClockID::UART, 4000000, false))
 90:         return;
-91: 
+91:
 92:     // map UART0 to GPIO pins
 93:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction0, m_memoryAccess);
 94:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction0, m_memoryAccess);
@@ -597,7 +597,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 99:     m_memoryAccess.Write32(RPI_UART0_CR, 0x301);      // enable Tx, Rx, UART
 100:     m_isInitialized = true;
 101: }
-102: 
+102:
 103: /// <summary>
 104: /// Send a character
 105: /// </summary>
@@ -613,7 +613,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 115:     // Write the character to the buffer
 116:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 117: }
-118: 
+118:
 119: /// <summary>
 120: /// Receive a character
 121: /// </summary>
@@ -629,7 +629,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 131:     // Read it and return
 132:     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
 133: }
-134: 
+134:
 135: /// <summary>
 136: /// Write a string
 137: /// </summary>
@@ -644,7 +644,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 146:         Write(*str++);
 147:     }
 148: }
-149: 
+149:
 150: /// <summary>
 151: /// Construct the singleton UART0 device if needed, and return a reference to the instance
 152: /// </summary>
@@ -655,7 +655,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 157:     value.Initialize();
 158:     return value;
 159: }
-160: 
+160:
 161: } // namespace baremetal
 ```
 
@@ -773,7 +773,7 @@ File: code/libraries/baremetal/src/System.cpp
 141:     Timer::WaitMilliSeconds(WaitTime);
 ...
 190:     GetUART0().WriteString("Starting up\n");
-191: 
+191:
 192:     extern int main();
 ...
 ```
@@ -801,7 +801,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
 43:     )
-44: 
+44:
 45: set(PROJECT_INCLUDES_PUBLIC
 46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h

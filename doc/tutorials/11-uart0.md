@@ -337,6 +337,7 @@ The implementation is comparable to that of `GetBoardSerial()`, we simple create
 ### BCMRegisters.h {#TUTORIAL_11_UART0_EXTENDING_MAILBOX_INTERFACE___STEP_2_BCMREGISTERSH}
 
 We need to add some registers of the Broadcom SoC in the Raspberry Pi for UART0 (or PL011 UART).
+For more information, see [Raspberry Pi PL011 UART](#RASPBERRY_PI_PL011_UART).
 
 Update the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 

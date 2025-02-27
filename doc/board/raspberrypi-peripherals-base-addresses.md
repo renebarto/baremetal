@@ -16,8 +16,13 @@
 | CPRMAN                                     | 7E101000                    |                           |                             |
 | Random                                     | 7E104000                    |                           |                             |
 | [GPIO](#RASPBERRY_PI_GPIO)                 | 7E200000                    | 3F200000                  | 7E200000                    | FE200000                  | 7C200000                   | 107C200000               |
-| UART 0                                     | 7E201000                    |                           |                             |
+| [UART 0](#RASPBERRY_PI_PL011_UART)         | 7E201000                    | 3F201000                  | 7E201000                    | FE201000                  | 7C201000                   | 107C201000               |
 | Bluetooth                                  | 7E201000                    |                           |                             |
+| [UART 1](#RASPBERRY_PI_PL011_UART)         |                             |                           |                             |                           | 7C201200                   | 107C201200               |
+| [UART 2](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201400                    | FE201400                  | 7C201400                   | 107C201400               |
+| [UART 3](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201600                    | FE201600                  | 7C201600                   | 107C201600               |
+| [UART 4](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201800                    | FE201800                  | 7C201800                   | 107C201800               |
+| [UART 5](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201A00                    | FE201A00                  | 7C201A00                   | 107C201A00               |
 | SD Host                                    | 7E202000                    |                           |                             |
 | MMC 0                                      | 7E202000                    |                           |                             |
 | I2S                                        | 7E203000                    |                           |                             |

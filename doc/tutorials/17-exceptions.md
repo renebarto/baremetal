@@ -1320,7 +1320,8 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 119: } // namespace baremetal
 ```
 
-- Line 75: We change the three exception handlers to a single one, `ExceptionHandler()`
+- Line 75: We change the three exception handlers to a single one, `ExceptionHandler()`.
+Notice that we mark it a `C` function, in order for the linker to be able to link to the assembly code
 - Line 84-95: We declare the class `ExceptionSystem`
   - Line 86: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
   - Line 89: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance

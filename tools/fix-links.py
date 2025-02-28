@@ -177,7 +177,7 @@ class PageFinder:
             if linkName in existingLinks.keys():
                 raise ValueError(f"{self.path}:{self.lineNumber} PANIC: link {linkName} already defined")
             existingLinks[linkName] = f"{self.path}:{self.lineNumber}"
-            self.log(f"{self.path}:{self.lineNumber} Add link {linkName}")
+            #self.log(f"{self.path}:{self.lineNumber} Add link {linkName}")
 
     def UpdateLinksForFile(self, path):
         with open(path, 'r') as self.inFile:
@@ -212,6 +212,7 @@ class MarkDownLinkChecker:
         self.lineNumber = 0
         self.logFile = logOutput
         self.inCodeSection = False
+        self.inComment = False
 
     def log(self, str):
         print(str, file=self.logFile)
@@ -219,6 +220,8 @@ class MarkDownLinkChecker:
     def CheckLink(self, line):
         matcherCodeBegin = re.compile(r'^```\w*$')
         matcherCodeEnd = re.compile(r'^```$')
+        matcherCommentBegin = re.compile(r'<!--')
+        matcherCommentEnd = re.compile(r'-->')
         matcherRef = re.compile(r'[\\@]ref\s+([\w_]+)')
         matcherSubPage = re.compile(r'[\\@]subpage\s+([\w_]+)')
         matcherMarkDownRef = re.compile(r'\[[^\]]+\]\(#([\w_]+)\)')
@@ -230,7 +233,16 @@ class MarkDownLinkChecker:
             self.inCodeSection = True
             return
 
+        if not matcherCommentEnd.match(line) is None:
+            self.inComment = False
+            return
+        if not matcherCommentBegin.match(line) is None:
+            self.inComment = True
+            return
+
         if self.inCodeSection:
+            return
+        if self.inComment:
             return
         for m in matchRef:
             linkName = m
@@ -267,6 +279,72 @@ class MarkDownLinkChecker:
                 self.CheckLinksForFile(os.path.join(root, file))
         return True
 
+class ContentLinkChecker:
+    path = ""
+    inFile = None
+    lineNumber = 0
+    logfile = None
+
+    def __init__(self, logOutput):
+        self.path = ""
+        self.inFile = None
+        self.lineNumber = 0
+        self.logFile = logOutput
+
+    def log(self, str):
+        print(str, file=self.logFile)
+
+    def CheckLink(self, line):
+        matcherMarkDownRef = re.compile(r'\[[^\]]+\]\(([^\)]+)\)')
+        matcherImageRef = re.compile(r'\<img\ssrc=\"')
+        matcherURL = re.compile(r'^http[s]?\:\/\/[\w\d\-\+\.\~\#\_\&\/=\?/]*$')
+        matcherInternalRef = re.compile(r'^#[\w\d\_]*$')
+        matcherPDF = re.compile(r'^pdf\/')
+        matcherImages = re.compile(r'^images\/')
+        matchRef = matcherMarkDownRef.findall(line)
+        for m in matchRef:
+            linkName = m
+            if not matcherURL.match(linkName) is None:
+                pass
+                #self.log(f"{self.path}:{self.lineNumber} URL {linkName}")
+            else:
+                if not matcherInternalRef.match(linkName) is None:
+                    pass
+                    #self.log(f"{self.path}:{self.lineNumber} Ref {linkName}")
+                else:
+                    if not matcherPDF.match(linkName) is None:
+                        if not os.path.exists(os.path.join(GetRootDir(), 'doc', linkName)):
+                            self.log(f"{self.path}:{self.lineNumber} PDF {linkName} does NOT exist")
+                    else:
+                        if not matcherImages.match(linkName) is None:
+                            if not os.path.exists(os.path.join(GetRootDir(), 'doc', linkName)):
+                                self.log(f"{self.path}:{self.lineNumber} Image {linkName} does NOT exist")
+                        else:
+                            filename = linkName.split('#', 1)[0]
+                            if not os.path.exists(os.path.join(os.path.dirname(self.path), filename)):
+                                self.log(f"{self.path}:{self.lineNumber} Link {filename} does NOT exist")
+
+                    #self.log(f"{self.path}:{self.lineNumber} Link {linkName}")
+
+    def CheckLinksForFile(self, path):
+        with open(path, 'r') as self.inFile:
+            self.path = path
+            self.lineNumber = 0
+            line = self.inFile.readline()
+            while not EmptyString(line):
+                self.lineNumber = self.lineNumber + 1
+                if not EmptyLine(line):
+                    line = self.CheckLink(line)
+                line = self.inFile.readline()
+        return
+    def CheckLinks(self):
+        for (root,dirs,files) in os.walk(GetRootDir(),topdown=True):
+            # self.log(f"Directory path: {root}")
+            mdFiles = [x for x in files if HasExtension(x, '.md')]
+            for file in mdFiles:
+                self.CheckLinksForFile(os.path.join(root, file))
+        return True
+
 @click.command()
 @click.option('--xmloutput', default='links.json', help='Output links to XML')
 @click.option('--logfile', default='fix-links.log', help='Log output file')
@@ -278,16 +356,25 @@ def FixLinks(xmloutput, logfile, verbose):
     if not markDownLinkFixer.CreateLinksForMarkdownSections():
         print("Fail")
         exit(1)
+
     print('Create links for page entries')
     pageFinder = PageFinder(logOutput)
     if not pageFinder.UpdateLinks():
         print("Fail")
         exit(1)
+
     with open(f"{os.path.join(GetRootDir(), xmloutput)}", "w") as f:
         json.dump(existingLinks, f, indent=4)
+
     print('Check markdown links')
     markDownLinkChecker = MarkDownLinkChecker(logOutput)
     if not markDownLinkChecker.CheckLinks():
+        print("Fail")
+        exit(1)
+
+    print('Check pdf and image links')
+    contentLinkChecker = ContentLinkChecker(logOutput)
+    if not contentLinkChecker.CheckLinks():
         print("Fail")
         exit(1)
     

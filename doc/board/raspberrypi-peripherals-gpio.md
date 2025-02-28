@@ -4,8 +4,6 @@ See [documentation](pdf/bcm2837-peripherals.pdf), page 90
 
 Pinout:
 
-[Test](images/raspberrypi-gpio-pinout.png)
-
  <img src="images/rpi-gpio-pinout.png" alt="Raspberry Pi GPIO pins" width="1000"/>
  
 

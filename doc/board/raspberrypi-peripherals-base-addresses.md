@@ -16,8 +16,13 @@
 | CPRMAN                                     | 7E101000                    |                           |                             |
 | Random                                     | 7E104000                    |                           |                             |
 | [GPIO](#RASPBERRY_PI_GPIO)                 | 7E200000                    | 3F200000                  | 7E200000                    | FE200000                  | 7C200000                   | 107C200000               |
-| UART 0                                     | 7E201000                    |                           |                             |
+| [UART 0](#RASPBERRY_PI_PL011_UART)         | 7E201000                    | 3F201000                  | 7E201000                    | FE201000                  | 7C201000                   | 107C201000               |
 | Bluetooth                                  | 7E201000                    |                           |                             |
+| [UART 1](#RASPBERRY_PI_PL011_UART)         |                             |                           |                             |                           | 7C201200                   | 107C201200               |
+| [UART 2](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201400                    | FE201400                  | 7C201400                   | 107C201400               |
+| [UART 3](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201600                    | FE201600                  | 7C201600                   | 107C201600               |
+| [UART 4](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201800                    | FE201800                  | 7C201800                   | 107C201800               |
+| [UART 5](#RASPBERRY_PI_PL011_UART)         |                             |                           | 7E201A00                    | FE201A00                  | 7C201A00                   | 107C201A00               |
 | SD Host                                    | 7E202000                    |                           |                             |
 | MMC 0                                      | 7E202000                    |                           |                             |
 | I2S                                        | 7E203000                    |                           |                             |
@@ -31,8 +36,8 @@
 | Thermal                                    | 7E212000                    |                           |                             |
 | [Aux](#RASPBERRY_PI_AUXILIARY_PERIPHERAL)  | 7E215000                    | 3F215000                  | 7E215000                    | FE215000                  | 7C215000                    | 107C215000              |
 | [UART 1](#RASPBERRY_PI_UART1)              | 7E215040                    | 3F215040                  | 7E215040                    | FE215040                  | 7C215040                    | 107C215040              |
-| [SPI 1](#RASPBERRY_PI_SPI0)                | 7E215080                    | 3F215080                  | 7E215080                    | FE215080                  | 7C215080                    | 107C215080              |
-| [SPI 2](#RASPBERRY_PI_SPI1)                | 7E2150C0                    | 3F2150C0                  | 7E2150C0                    | FE2150C0                  | 7C2150C0                    | 107C2150C0              |
+| SPI 1                                      | 7E215080                    | 3F215080                  | 7E215080                    | FE215080                  | 7C215080                    | 107C215080              |
+| SPI 2                                      | 7E2150C0                    | 3F2150C0                  | 7E2150C0                    | FE2150C0                  | 7C2150C0                    | 107C2150C0              |
 | MMC 1                                      | 7E300000                    |                           |                             |
 | HVS                                        | 7E400000                    |                           |                             |
 | KMS                                        | 7E600000                    |                           |                             |

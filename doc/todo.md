@@ -63,3 +63,5 @@
     ]
 }
 ```
+
+@todo Explain which timers and mailboxes exist, and distinguish between them. So difference between ARM core time, ARM AP804 timer and BCM timer, same for ARM core mailboxes between cores and the BCM mailbox to the GPU.

@@ -11,8 +11,6 @@ LOG_MODULE("main");
 
 using namespace baremetal;
 
-#define TICKS_PER_SECOND 2 // Timer ticks per second
-
 void KernelTimerHandler3(KernelTimerHandle /*timerHandle*/, void */*param*/, void */*context*/)
 {
     LOG_INFO("Timer 3 will never expire in time");

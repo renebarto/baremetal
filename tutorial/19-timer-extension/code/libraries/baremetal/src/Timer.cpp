@@ -51,15 +51,6 @@
 /// @file
 /// Raspberry Pi Timer implementation
 
-/// @brief Number of milliseconds in a second
-#define MSEC_PER_SEC  1000
-/// @brief Number of microseconds in a second
-#define USEC_PER_SEC  1000000
-/// @brief Number of microseconds in a millisecond
-#define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
-/// @brief Number of timer ticks per second
-#define TICKS_PER_SECOND 100                               
-
 namespace baremetal {
 
 const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};

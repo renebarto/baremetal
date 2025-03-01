@@ -51,20 +51,7 @@
 /// @file
 /// Raspberry Pi Timer implementation
 
-/// @brief Number of milliseconds in a second
-#define MSEC_PER_SEC  1000
-/// @brief Number of microseconds in a second
-#define USEC_PER_SEC  1000000
-/// @brief Number of microseconds in a millisecond
-#define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
-/// @brief Number of timer ticks per second
-#define TICKS_PER_SECOND 100                               
-
 namespace baremetal {
-
-const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-const char    *Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 /// @brief Define log name
 LOG_MODULE("Timer");
@@ -123,6 +110,10 @@ struct KernelTimer
 /// @brief Kernel timer element, element which is stored in the kernel time list
 using KernelTimerElement = DoubleLinkedList<KernelTimer *>::Element;
 
+const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+const char    *Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
 /// <summary>
 /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
 /// </summary>
@@ -135,7 +126,6 @@ Timer::Timer()
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
-    , m_kernelTimerList{}
 {
 }
 
@@ -152,7 +142,6 @@ Timer::Timer(IMemoryAccess &memoryAccess)
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
-    , m_kernelTimerList{}
 {
 }
 
@@ -166,18 +155,6 @@ Timer::~Timer()
     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
 
     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
-
-    KernelTimerElement *element;
-    while ((element = m_kernelTimerList.GetFirst()) != 0)
-    {
-        KernelTimer *timer = m_kernelTimerList.GetPointer(element);
-        assert(timer != nullptr);
-        assert(timer->CheckMagic());
-
-        m_kernelTimerList.Remove(element);
-
-        delete timer;
-    }
 }
 
 /// <summary>
@@ -620,3 +597,4 @@ Timer &GetTimer()
 }
 
 } // namespace baremetal
+

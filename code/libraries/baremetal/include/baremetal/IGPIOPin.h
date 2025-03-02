@@ -118,6 +118,15 @@ public:
     /// Invert GPIO value on->off off->on
     /// </summary>
     virtual void Invert() = 0;
+    /// <summary>
+    /// Get GPIO event status
+    /// </summary>
+    /// <returns>GPIO event status, true if an event is flagged, false if not</returns>
+    virtual bool GetEvent() = 0;
+    /// <summary>
+    /// Clear GPIO event status
+    /// </summary>
+    virtual void ClearEvent() = 0;
 };
 
 } // namespace baremetal

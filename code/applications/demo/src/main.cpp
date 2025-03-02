@@ -4,6 +4,7 @@
 #include <baremetal/InterruptHandler.h>
 #include <baremetal/Interrupts.h>
 #include <baremetal/Logger.h>
+#include <baremetal/PhysicalGPIOPin.h>
 #include <baremetal/System.h>
 #include <baremetal/Timer.h>
 
@@ -11,21 +12,35 @@ LOG_MODULE("main");
 
 using namespace baremetal;
 
-void KernelTimerHandler3(KernelTimerHandle /*timerHandle*/, void */*param*/, void */*context*/)
+struct GPIOPins
 {
-    LOG_INFO("Timer 3 will never expire in time");
-}
+    IGPIOPin& pinCLK;
+    IGPIOPin& pinDT;
+    IGPIOPin& pinSW;
+};
 
-void KernelTimerHandler2(KernelTimerHandle /*timerHandle*/, void */*param*/, void */*context*/)
+void InterruptHandler(void *param)
 {
-    LOG_INFO("Timer 2 expired");
-}
-
-void KernelTimerHandler1(KernelTimerHandle /*timerHandle*/, void */*param*/, void */*context*/)
-{
-    LOG_INFO("Timer 1 expired");
-    LOG_INFO("Starting kernel timer 2 to fire in 2 seconds");
-    GetTimer().StartKernelTimer(200, KernelTimerHandler2, nullptr, nullptr);
+    LOG_DEBUG("GPIO3");
+    GPIOPins* pins = reinterpret_cast<GPIOPins*>(param);
+    if (pins->pinCLK.GetEvent())
+    {
+        auto value = pins->pinCLK.Get();
+        LOG_DEBUG("CLK=%d", value);
+        pins->pinCLK.ClearEvent();
+    }
+    if (pins->pinDT.GetEvent())
+    {
+        auto value = pins->pinDT.Get();
+        LOG_DEBUG("DT=%d", value);
+        pins->pinDT.ClearEvent();
+    }
+    if (pins->pinSW.GetEvent())
+    {
+        auto value = pins->pinSW.Get();
+        LOG_DEBUG("SW=%d", value);
+        pins->pinSW.ClearEvent();
+    }
 }
 
 int main()
@@ -35,18 +50,28 @@ int main()
     auto exceptionLevel = CurrentEL();
     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 
-    Timer &timer = GetTimer();
-    LOG_INFO("Starting kernel timer 1 to fire in 1 second");
-    auto timer1Handle = timer.StartKernelTimer(100, KernelTimerHandler1, nullptr, nullptr);
+    PhysicalGPIOPin pinCLK(11, GPIOMode::InputPullUp);
+    PhysicalGPIOPin pinDT(9, GPIOMode::InputPullUp);
+    PhysicalGPIOPin pinSW(10, GPIOMode::InputPullUp);
+    GPIOPins pins { pinCLK, pinDT, pinSW };
 
-    LOG_INFO("Starting kernel timer 3 to fire in 10 seconds");
-    auto timer3Handle = timer.StartKernelTimer(1000, KernelTimerHandler3, nullptr, nullptr);
+    GetInterruptSystem().RegisterIRQHandler(IRQ_ID::IRQ_GPIO3, InterruptHandler, &pins);
+
+    pinCLK.EnableInterrupt(GPIOInterruptType::RisingEdge);
+    pinCLK.EnableInterrupt(GPIOInterruptType::FallingEdge);
+    pinDT.EnableInterrupt(GPIOInterruptType::RisingEdge);
+    pinDT.EnableInterrupt(GPIOInterruptType::FallingEdge);
+    pinSW.EnableInterrupt(GPIOInterruptType::RisingEdge);
+    pinSW.EnableInterrupt(GPIOInterruptType::FallingEdge);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);
 
-    LOG_INFO("Cancelling kernel timer 3");
-    timer.CancelKernelTimer(timer3Handle);
+    GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_GPIO3);
+
+    pinCLK.DisableAllInterrupts();
+    pinDT.DisableAllInterrupts();
+    pinSW.DisableAllInterrupts();
 
     console.Write("Press r to reboot, h to halt\n");
     char ch{};

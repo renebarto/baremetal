@@ -53,8 +53,32 @@ enum class GPIOFunction;
 /// @brief GPIO pull mode
 enum class GPIOPullMode;
 
+#if BAREMETAL_RPI_TARGET == 3
 /// @brief Total count of GPIO pins, numbered from 0 through 53
 #define NUM_GPIO 54
+#else
+/// @brief Total count of GPIO pins, numbered from 0 through 56
+#define NUM_GPIO 57
+#endif
+
+/// @brief Interrupt type to enable
+enum class GPIOInterruptType
+{
+    /// @brief Interrupt on rising edge
+    RisingEdge,
+    /// @brief Interrupt on falling edge
+    FallingEdge,
+    /// @brief Interrupt on low level
+    HighLevel,
+    /// @brief Interrupt on high level
+    LowLevel,
+    /// @brief Interrupt on asynchronous rising edge
+    AsyncRisingEdge,
+    /// @brief Interrupt on asynchronous falling edge
+    AsyncFallingEdge,
+    /// @brief Invalid / unknown
+    Unknown,
+};
 
 /// <summary>
 /// Physical GPIO pin (i.e. available on GPIO header) 
@@ -63,17 +87,23 @@ class PhysicalGPIOPin : public IGPIOPin
 {
 private:
     /// @brief Configured GPIO pin number (0..53)
-    uint8           m_pinNumber;
+    uint8                 m_pinNumber;
     /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
-    GPIOMode        m_mode;
+    GPIOMode              m_mode;
     /// @brief Configured GPIO function.
-    GPIOFunction    m_function;
+    GPIOFunction          m_function;
     /// @brief Configured GPIO pull mode (only for input function).
-    GPIOPullMode    m_pullMode;
+    GPIOPullMode          m_pullMode;
     /// @brief Current value of the GPIO pin (true for on, false for off).
-    bool            m_value;
+    bool                  m_value;
     /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess  &m_memoryAccess;
+    IMemoryAccess&        m_memoryAccess;
+    /// @brief Register offset for enabling interrupts, setting / clearing GPIO levels and checking GPIO level and interrupt events
+    unsigned              m_regOffset;
+    /// @brief Register mask for enabling interrupts, setting / clearing GPIO levels and checking GPIO level and interrupt events
+    uint32                m_regMask;
+    /// @brief GPIO interrupt types enabled
+    bool                  m_interruptEnabled[static_cast<size_t>(GPIOInterruptType::Unknown)];
 
 public:
     PhysicalGPIOPin(IMemoryAccess &memoryAccess = GetMemoryAccess());
@@ -88,12 +118,17 @@ public:
     bool Get() override;
     void Set(bool on) override;
     void Invert() override;
+    bool GetEvent() override;
+    void ClearEvent() override;
 
     GPIOMode GetMode();
     bool SetMode(GPIOMode mode);
     GPIOFunction GetFunction();
     GPIOPullMode GetPullMode();
     void SetPullMode(GPIOPullMode pullMode);
+    void EnableInterrupt(GPIOInterruptType interruptType);
+    void DisableInterrupt(GPIOInterruptType interruptType);
+    void DisableAllInterrupts();
 
 private:
     void SetFunction(GPIOFunction function);

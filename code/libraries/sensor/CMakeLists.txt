@@ -1,8 +1,8 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(baremetal
-    DESCRIPTION "Bare metal library"
+project(sensor
+    DESCRIPTION "Sensor library"
     LANGUAGES CXX ASM)
 
 set(PROJECT_TARGET_NAME ${PROJECT_NAME})
@@ -19,7 +19,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    stdlib
+    baremetal
     )
 
 set(PROJECT_LIBS
@@ -28,74 +28,11 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionStub.S
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/GPIOManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/InterruptHandler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Interrupts.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Mailbox.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineInfo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Malloc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryAccess.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MemoryManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/New.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalGPIOPin.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIProperties.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RPIPropertiesInterface.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Serialization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Startup.S
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/String.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/System.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART0.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UART1.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/KY-040.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/CharDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Console.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Exception.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ExceptionHandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/GPIOManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/InterruptHandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Interrupts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Iterator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Logger.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MachineInfo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Mailbox.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Malloc.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryAccess.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/MemoryMap.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/New.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/PhysicalGPIOPin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIProperties.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/RPIPropertiesInterface.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Serialization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/String.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Synchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/SysConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/System.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Timer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART0.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/UART1.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Version.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/sensor/KY-040.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

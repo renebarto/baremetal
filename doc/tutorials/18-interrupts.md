@@ -3084,7 +3084,7 @@ We'll not get into each and every IRQ or FIQ id, but give some descriptions on m
   - Line 484-707: We define all currently supported IRQ for Raspberry 4 / 5
   - Line 712-935: We define all currently supported FIQ for Raspberry 4 / 5
 
-### System.cpp {#TUTORIAL_18_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_INTERRUPTH}
+### System.cpp {#TUTORIAL_18_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_SYSTEMCPP}
 
 As we've added the `Shutdown()` method to `InterruptSystem`, it is wise to make sure we nicely shutdown the interrupt system before halting or rebooting.
 Let's add a call for this.

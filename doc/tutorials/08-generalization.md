@@ -2457,9 +2457,9 @@ The new library wil be next to `baremetal`, and have the following structure:
 
 <img src="images/treeview-stdlib-library.png" alt="Initial project structure" width="300"/>
 
-### CMake file for stdlib {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_CMAKE_FILE_FOR_STDLIB}
+### CMake file for stdlib library {#TUTORIAL_08_GENERALIZATION_SEPARATING_STANDARD_FUNCTIONALITY___STEP_4_CMAKE_FILE_FOR_STDLIB_LIBRARY}
 
-We'll have to set up the CMake file fr the new library.
+We'll have to set up the CMake file for the new library.
 
 Create the file `code/libraries/stdlib/CMakeLists.txt`
 

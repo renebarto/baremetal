@@ -127,6 +127,19 @@ public:
     /// Clear GPIO event status
     /// </summary>
     virtual void ClearEvent() = 0;
+    /// <summary>
+    /// Determine whether interrupts for the GPIO pin are automatically acknowledged (by reseting the event bit)
+    /// </summary>
+    /// <returns>Returns true if a GPIO interrupt is automatically acknowledged, false if not</returns>
+    virtual bool GetAutoAcknowledgeInterrupt() const = 0;
+    /// <summary>
+    /// Acknowledge interrupts for the GPIO pin, by reseting the event bit
+    /// </summary>
+    virtual void AcknowledgeInterrupt() = 0;
+    /// <summary>
+    /// Handler for an interrupt on the GPIO pin
+    /// </summary>
+    virtual void InterruptHandler() = 0;
 };
 
 } // namespace baremetal

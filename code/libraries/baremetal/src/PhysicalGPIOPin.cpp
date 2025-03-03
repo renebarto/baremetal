@@ -41,14 +41,35 @@
 
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/BCMRegisters.h>
+#include <baremetal/GPIOManager.h>
+#include <baremetal/Logger.h>
 #include <baremetal/MemoryAccess.h>
 #include <baremetal/Timer.h>
 
 /// @file
 /// Physical GPIO pin implementation
 
-namespace baremetal
+/// @brief Define log name
+LOG_MODULE("PhysicalGPIOPin");
+
+namespace baremetal {
+
+/// @brief Interrupt type register offset
+enum GPIOInterruptTypeOffset
 {
+    /// @brief Interrupt on rising edge
+    OffsetRisingEdge = 0,
+    /// @brief Interrupt on falling edge
+    OffsetFallingEdge = 12,
+    /// @brief Interrupt on low level
+    OffsetHighLevel = 24,
+    /// @brief Interrupt on high level
+    OffsetLowLevel = 36,
+    /// @brief Interrupt on asynchronous rising edge
+    OffsetAsyncRisingEdge = 48,
+    /// @brief Interrupt on asynchronous falling edge
+    OffsetAsyncFallingEdge = 60,
+};
 
 /// @brief GPIO function
 enum class GPIOFunction
@@ -104,7 +125,10 @@ PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess &memoryAccess /*= GetMemoryAccess
     , m_memoryAccess{ memoryAccess }
     , m_regOffset{}
     , m_regMask{}
-    , m_interruptEnabled{}
+    , m_handler{}
+    , m_handlerParam{}
+    , m_autoAcknowledge{}
+    , m_interruptMask{}
 {
 }
 
@@ -121,7 +145,10 @@ PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess &
     , m_memoryAccess{ memoryAccess }
     , m_regOffset{}
     , m_regMask{}
-    , m_interruptEnabled{}
+    , m_handler{}
+    , m_handlerParam{}
+    , m_autoAcknowledge{}
+    , m_interruptMask{}
 {
     AssignPin(pinNumber);
     SetMode(mode);
@@ -360,38 +387,140 @@ void PhysicalGPIOPin::SetPullMode(GPIOPullMode pullMode)
 }
 
 /// <summary>
-/// Enable interrupts for the specified type
+/// Set up an interrupt handler for the GPIO pin
 /// </summary>
-/// <param name="interruptType">Interrupt type to enable</param>
-void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptType interruptType)
+/// <param name="handler">Interrupt handler function</param>
+/// <param name="param">Interrupt handler parameter</param>
+/// <param name="autoAcknowledge">Perform auto acknowledge on the GPIO pin event status</param>
+void PhysicalGPIOPin::ConnectInterrupt(GPIOPinInterruptHandler *handler, void *param, bool autoAcknowledge /*= true*/)
 {
     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
 
-    assert(interruptType < GPIOInterruptType::Unknown);
-    if (!m_interruptEnabled[static_cast<size_t>(interruptType)])
+    assert(m_interruptMask == static_cast<uint8>(GPIOInterruptTypes::None));
+
+    assert(handler != nullptr);
+    assert(m_handler == nullptr);
+    m_handler = handler;
+    m_handlerParam   = param;
+    m_autoAcknowledge = autoAcknowledge;
+
+    GetGPIOManager().ConnectInterrupt(this);
+}
+
+/// <summary>
+/// Remove the interrupt handler for the GPIO pin.
+/// </summary>
+void PhysicalGPIOPin::DisconnectInterrupt()
+{
+    assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
+
+    DisableAllInterrupts();
+
+    assert(m_handler != nullptr);
+    m_handler = nullptr;
+
+    GetGPIOManager().DisconnectInterrupt(this);
+}
+
+/// <summary>
+/// Return the interrupt auto acknowledge setting
+/// </summary>
+/// <returns>Returns the interrupt auto acknowledge setting</returns>
+bool PhysicalGPIOPin::GetAutoAcknowledgeInterrupt() const
+{
+    return m_autoAcknowledge;
+}
+
+/// <summary>
+/// Acknowledge the GPIO pin interrupt by resetting the event status for this GPIO
+/// </summary>
+void PhysicalGPIOPin::AcknowledgeInterrupt()
+{
+    assert(m_handler != nullptr);
+
+    m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
+}
+
+/// <summary>
+/// GPIO pin interrupt handler
+/// </summary>
+void PhysicalGPIOPin::InterruptHandler()
+{
+    LOG_DEBUG("Interrupt for GPIO pin %d handled", m_pinNumber);
+    assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
+
+    assert(m_handler != nullptr);
+    if (m_interruptMask != static_cast<uint8>(GPIOInterruptTypes::None))
+        (*m_handler)(this, m_handlerParam);
+}
+
+/// <summary>
+/// Convert an interrupt type to a register offset
+/// </summary>
+/// <param name="interruptTypes">Interrupt type (only a single bit set)</param>
+/// <returns>Register offset from the rising edge interrupt register</returns>
+static GPIOInterruptTypeOffset ConvertToOffset(GPIOInterruptTypes interruptTypes)
+{
+    switch (interruptTypes)
     {
-        m_interruptEnabled[static_cast<size_t>(interruptType)] = true;
+        case GPIOInterruptTypes::RisingEdge:
+            return GPIOInterruptTypeOffset::OffsetRisingEdge;
+        case GPIOInterruptTypes::FallingEdge:
+            return GPIOInterruptTypeOffset::OffsetFallingEdge;
+        case GPIOInterruptTypes::HighLevel:
+            return GPIOInterruptTypeOffset::OffsetHighLevel;
+        case GPIOInterruptTypes::LowLevel:
+            return GPIOInterruptTypeOffset::OffsetLowLevel;
+        case GPIOInterruptTypes::AsyncRisingEdge:
+            return GPIOInterruptTypeOffset::OffsetAsyncRisingEdge;
+        case GPIOInterruptTypes::AsyncFallingEdge:
+            return GPIOInterruptTypeOffset::OffsetAsyncFallingEdge;
+        default:
+            return GPIOInterruptTypeOffset::OffsetRisingEdge;
+    }
+}
 
-        regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + (static_cast<unsigned>(interruptType) - static_cast<unsigned>(GPIOInterruptType::RisingEdge)) * 12;
+/// <summary>
+/// Enable interrupts for the specified type
+/// </summary>
+/// <param name="interruptTypes">Set of interrupt types to enable</param>
+void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptTypes interruptTypes)
+{
+    assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
 
-        m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) | m_regMask);
+    uint8 interruptMask = static_cast<uint8>(interruptTypes);
+    assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
+    uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
+    while (pattern != 0)
+    {
+        if ((interruptMask & pattern) != 0)
+        {
+            m_interruptMask |= pattern;
+            regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
+            m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) | m_regMask);
+        }
+        pattern >>= 1;
     }
 }
 
 /// <summary>
 /// Disable interrupts for the specified type
 /// </summary>
-/// <param name="interruptType">Interrupt type to disable</param>
-void PhysicalGPIOPin::DisableInterrupt(GPIOInterruptType interruptType)
+/// <param name="interruptTypes">Set of interrupt types to disable</param>
+void PhysicalGPIOPin::DisableInterrupt(GPIOInterruptTypes interruptTypes)
 {
-    assert(interruptType < GPIOInterruptType::Unknown);
-    if (m_interruptEnabled[static_cast<size_t>(interruptType)])
+    uint8 interruptMask = static_cast<uint8>(interruptTypes);
+    assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
+    uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
+    while (pattern != 0)
     {
-        m_interruptEnabled[static_cast<size_t>(interruptType)] = false;
-
-        regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + (static_cast<unsigned>(interruptType) - static_cast<unsigned>(GPIOInterruptType::RisingEdge)) * 12;
-
-        m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) & ~m_regMask);
+        if ((interruptMask & pattern) != 0)
+        {
+            m_interruptMask &= ~pattern;
+            regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
+            m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) & ~m_regMask);
+        }
+        pattern >>= 1;
     }
 }
 
@@ -400,12 +529,7 @@ void PhysicalGPIOPin::DisableInterrupt(GPIOInterruptType interruptType)
 /// </summary>
 void PhysicalGPIOPin::DisableAllInterrupts()
 {
-    DisableInterrupt(GPIOInterruptType::RisingEdge);
-    DisableInterrupt(GPIOInterruptType::FallingEdge);
-    DisableInterrupt(GPIOInterruptType::HighLevel);
-    DisableInterrupt(GPIOInterruptType::LowLevel);
-    DisableInterrupt(GPIOInterruptType::AsyncRisingEdge);
-    DisableInterrupt(GPIOInterruptType::AsyncFallingEdge);
+    DisableInterrupt(GPIOInterruptTypes::All);
 }
 
 /// <summary>

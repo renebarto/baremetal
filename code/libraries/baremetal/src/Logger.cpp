@@ -56,6 +56,8 @@ using namespace baremetal;
 /// @brief Define log name
 LOG_MODULE("Logger");
 
+Logger* Logger::s_logger{};
+
 /// <summary>
 /// Construct a logger
 /// </summary>
@@ -68,6 +70,17 @@ Logger::Logger(LogSeverity logLevel, Timer *timer /*= nullptr*/, Console &consol
     , m_console{console}
     , m_level{logLevel}
 {
+}
+
+/// <summary>
+/// Check whether the singleton logger was instantiated and initialized
+/// </summary>
+/// <returns>Returns true if the singleton logger instance is created and initialized, false otherwise</returns>
+bool Logger::HaveLogger()
+{
+    if (s_logger == nullptr)
+        return false;
+    return s_logger->m_isInitialized;
 }
 
 /// <summary>
@@ -305,8 +318,11 @@ void Logger::WriteNoAllocV(const char* source, int line, LogSeverity severity, c
 /// <returns>Reference to the singleton logger instance</returns>
 Logger &baremetal::GetLogger()
 {
-    static LogSeverity defaultSeverity{LogSeverity::Debug};
-    static Logger      logger(defaultSeverity, &GetTimer());
-    logger.Initialize();
-    return logger;
+    if (Logger::s_logger == nullptr)
+    {
+        Logger::s_logger = new Logger(LogSeverity::Debug, &GetTimer());
+        Logger::s_logger->Initialize();
+
+    }
+    return *Logger::s_logger;
 }

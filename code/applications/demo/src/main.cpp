@@ -12,34 +12,36 @@ LOG_MODULE("main");
 
 using namespace baremetal;
 
-struct GPIOPins
+void InterruptHandlerCLK(IGPIOPin* pin, void *param)
 {
-    IGPIOPin& pinCLK;
-    IGPIOPin& pinDT;
-    IGPIOPin& pinSW;
-};
-
-void InterruptHandler(void *param)
-{
-    LOG_DEBUG("GPIO3");
-    GPIOPins* pins = reinterpret_cast<GPIOPins*>(param);
-    if (pins->pinCLK.GetEvent())
+    LOG_DEBUG("GPIO CLK");
+    if (pin->GetEvent())
     {
-        auto value = pins->pinCLK.Get();
+        auto value = pin->Get();
         LOG_DEBUG("CLK=%d", value);
-        pins->pinCLK.ClearEvent();
+        pin->ClearEvent();
     }
-    if (pins->pinDT.GetEvent())
+}
+
+void InterruptHandlerDT(IGPIOPin* pin, void *param)
+{
+    LOG_DEBUG("GPIO DT");
+    if (pin->GetEvent())
     {
-        auto value = pins->pinDT.Get();
+        auto value = pin->Get();
         LOG_DEBUG("DT=%d", value);
-        pins->pinDT.ClearEvent();
+        pin->ClearEvent();
     }
-    if (pins->pinSW.GetEvent())
+}
+
+void InterruptHandlerSW(IGPIOPin* pin, void *param)
+{
+    LOG_DEBUG("GPIO SW");
+    if (pin->GetEvent())
     {
-        auto value = pins->pinSW.Get();
+        auto value = pin->Get();
         LOG_DEBUG("SW=%d", value);
-        pins->pinSW.ClearEvent();
+        pin->ClearEvent();
     }
 }
 
@@ -53,25 +55,22 @@ int main()
     PhysicalGPIOPin pinCLK(11, GPIOMode::InputPullUp);
     PhysicalGPIOPin pinDT(9, GPIOMode::InputPullUp);
     PhysicalGPIOPin pinSW(10, GPIOMode::InputPullUp);
-    GPIOPins pins { pinCLK, pinDT, pinSW };
 
-    GetInterruptSystem().RegisterIRQHandler(IRQ_ID::IRQ_GPIO3, InterruptHandler, &pins);
-
-    pinCLK.EnableInterrupt(GPIOInterruptType::RisingEdge);
-    pinCLK.EnableInterrupt(GPIOInterruptType::FallingEdge);
-    pinDT.EnableInterrupt(GPIOInterruptType::RisingEdge);
-    pinDT.EnableInterrupt(GPIOInterruptType::FallingEdge);
-    pinSW.EnableInterrupt(GPIOInterruptType::RisingEdge);
-    pinSW.EnableInterrupt(GPIOInterruptType::FallingEdge);
+    pinCLK.ConnectInterrupt(InterruptHandlerCLK, nullptr);
+    pinCLK.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
+    pinDT.ConnectInterrupt(InterruptHandlerDT, nullptr);
+    pinDT.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
+    pinSW.ConnectInterrupt(InterruptHandlerSW, nullptr);
+    pinSW.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
 
     LOG_INFO("Wait 5 seconds");
     Timer::WaitMilliSeconds(5000);
 
     GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_GPIO3);
 
-    pinCLK.DisableAllInterrupts();
-    pinDT.DisableAllInterrupts();
-    pinSW.DisableAllInterrupts();
+    pinCLK.DisconnectInterrupt();
+    pinDT.DisconnectInterrupt();
+    pinSW.DisconnectInterrupt();
 
     console.Write("Press r to reboot, h to halt\n");
     char ch{};

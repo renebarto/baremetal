@@ -87,10 +87,14 @@ private:
     Console    &m_console;
     /// @brief Currently set logging severity level
     LogSeverity m_level;
+    /// @brief Pointer to singleton logger. To be use to check whether Logger was already instantiated
+    static Logger* s_logger;
 
     explicit Logger(LogSeverity logLevel, Timer *timer = nullptr, Console &console = GetConsole());
 
 public:
+    static bool HaveLogger();
+
     bool Initialize();
     void SetLogLevel(LogSeverity logLevel);
 

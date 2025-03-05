@@ -1,8 +1,8 @@
 message(STATUS "\n**********************************************************************************\n")
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(sensor
-    DESCRIPTION "Sensor library"
+project(device
+    DESCRIPTION "Bare metal device library"
     LANGUAGES CXX ASM)
 
 set(PROJECT_TARGET_NAME ${PROJECT_NAME})
@@ -28,11 +28,11 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/KY-040.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpio/KY-040.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/sensor/KY-040.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/device/gpio/KY-040.h
     )
 set(PROJECT_INCLUDES_PRIVATE )
 

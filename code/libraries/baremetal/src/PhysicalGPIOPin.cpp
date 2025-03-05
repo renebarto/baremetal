@@ -416,7 +416,6 @@ void PhysicalGPIOPin::DisconnectInterrupt()
 
     DisableAllInterrupts();
 
-    assert(m_handler != nullptr);
     m_handler = nullptr;
 
     GetGPIOManager().DisconnectInterrupt(this);

@@ -147,7 +147,7 @@ Notice that we use `InputPullUp` as this is a GPIO input, and it is internally p
 ### Configuring, building and debugging {#TUTORIAL_20_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
-Not that we need to have the hardware installed, so we need to run the code on an actual board.
+Note that we need to have the hardware installed, so we need to run the code on an actual board.
 
 When we press the switch:
 
@@ -2007,150 +2007,148 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 416: 
 417:     DisableAllInterrupts();
 418: 
-419:     assert(m_handler != nullptr);
-420:     m_handler = nullptr;
-421: 
-422:     GetGPIOManager().DisconnectInterrupt(this);
-423: }
-424: 
-425: /// <summary>
-426: /// Return the interrupt auto acknowledge setting
-427: /// </summary>
-428: /// <returns>Returns the interrupt auto acknowledge setting</returns>
-429: bool PhysicalGPIOPin::GetAutoAcknowledgeInterrupt() const
-430: {
-431:     return m_autoAcknowledge;
-432: }
-433: 
-434: /// <summary>
-435: /// Acknowledge the GPIO pin interrupt by resetting the event status for this GPIO
-436: /// </summary>
-437: void PhysicalGPIOPin::AcknowledgeInterrupt()
-438: {
-439:     assert(m_handler != nullptr);
-440: 
-441:     m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
-442: }
-443: 
-444: /// <summary>
-445: /// GPIO pin interrupt handler
-446: /// </summary>
-447: void PhysicalGPIOPin::InterruptHandler()
-448: {
-449:     LOG_DEBUG("Interrupt for GPIO pin %d handled", m_pinNumber);
-450:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-451: 
-452:     assert(m_handler != nullptr);
-453:     if (m_interruptMask != static_cast<uint8>(GPIOInterruptTypes::None))
-454:         (*m_handler)(this, m_handlerParam);
-455: }
-456: 
-457: /// <summary>
-458: /// Convert an interrupt type to a register offset
-459: /// </summary>
-460: /// <param name="interruptTypes">Interrupt type (only a single bit set)</param>
-461: /// <returns>Register offset from the rising edge interrupt register</returns>
-462: static GPIOInterruptTypeOffset ConvertToOffset(GPIOInterruptTypes interruptTypes)
-463: {
-464:     switch (interruptTypes)
-465:     {
-466:         case GPIOInterruptTypes::RisingEdge:
-467:             return GPIOInterruptTypeOffset::OffsetRisingEdge;
-468:         case GPIOInterruptTypes::FallingEdge:
-469:             return GPIOInterruptTypeOffset::OffsetFallingEdge;
-470:         case GPIOInterruptTypes::HighLevel:
-471:             return GPIOInterruptTypeOffset::OffsetHighLevel;
-472:         case GPIOInterruptTypes::LowLevel:
-473:             return GPIOInterruptTypeOffset::OffsetLowLevel;
-474:         case GPIOInterruptTypes::AsyncRisingEdge:
-475:             return GPIOInterruptTypeOffset::OffsetAsyncRisingEdge;
-476:         case GPIOInterruptTypes::AsyncFallingEdge:
-477:             return GPIOInterruptTypeOffset::OffsetAsyncFallingEdge;
-478:         default:
-479:             return GPIOInterruptTypeOffset::OffsetRisingEdge;
-480:     }
-481: }
-482: 
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\PhysicalGPIOPin.cpp
-483: /// <summary>
-484: /// Enable interrupts for the specified type
-485: /// </summary>
-486: /// <param name="interruptTypes">Set of interrupt types to enable</param>
-487: void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptTypes interruptTypes)
-488: {
-489:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-490: 
-491:     uint8 interruptMask = static_cast<uint8>(interruptTypes);
-492:     assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
-493:     uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
-494:     while (pattern != 0)
-495:     {
-496:         if ((interruptMask & pattern) != 0)
-497:         {
-498:             m_interruptMask |= pattern;
-499:             regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
-500:             m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) | m_regMask);
-501:         }
-502:         pattern >>= 1;
-503:     }
-504: }
-505: 
-506: /// <summary>
-507: /// Disable interrupts for the specified type
-508: /// </summary>
-509: /// <param name="interruptTypes">Set of interrupt types to disable</param>
-510: void PhysicalGPIOPin::DisableInterrupt(GPIOInterruptTypes interruptTypes)
-511: {
-512:     uint8 interruptMask = static_cast<uint8>(interruptTypes);
-513:     assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
-514:     uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
-515:     while (pattern != 0)
-516:     {
-517:         if ((interruptMask & pattern) != 0)
-518:         {
-519:             m_interruptMask &= ~pattern;
-520:             regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
-521:             m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) & ~m_regMask);
-522:         }
-523:         pattern >>= 1;
-524:     }
-525: }
-526: 
-527: /// <summary>
-528: /// Disable all interrupts
-529: /// </summary>
-530: void PhysicalGPIOPin::DisableAllInterrupts()
-531: {
-532:     DisableInterrupt(GPIOInterruptTypes::All);
-533: }
-534: 
-535: /// <summary>
-536: /// Set GPIO pin function
-537: /// </summary>
-538: /// <param name="function">Function to be set for the configured GPIO pin</param>
-539: void PhysicalGPIOPin::SetFunction(GPIOFunction function)
-540: {
-541:     // Check if pin is assigned
-542:     if (m_pinNumber >= NUM_GPIO)
-543:         return;
-544: 
-545:     // Check if mode is valid
-546:     if (function >= GPIOFunction::Unknown)
-547:         return;
-548: 
-549:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10) * 4;
-550:     uint32  shift = (m_pinNumber % 10) * 3;
-551: 
-552:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
-553: 
-554:     uint32 value = m_memoryAccess.Read32(selectRegister);
-555:     value &= ~(7 << shift);
-556:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
-557:     m_memoryAccess.Write32(selectRegister, value);
-558:     m_function = function;
-559: }
-560: 
-561: } // namespace baremetal
+419:     m_handler = nullptr;
+420: 
+421:     GetGPIOManager().DisconnectInterrupt(this);
+422: }
+423: 
+424: /// <summary>
+425: /// Return the interrupt auto acknowledge setting
+426: /// </summary>
+427: /// <returns>Returns the interrupt auto acknowledge setting</returns>
+428: bool PhysicalGPIOPin::GetAutoAcknowledgeInterrupt() const
+429: {
+430:     return m_autoAcknowledge;
+431: }
+432: 
+433: /// <summary>
+434: /// Acknowledge the GPIO pin interrupt by resetting the event status for this GPIO
+435: /// </summary>
+436: void PhysicalGPIOPin::AcknowledgeInterrupt()
+437: {
+438:     assert(m_handler != nullptr);
+439: 
+440:     m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
+441: }
+442: 
+443: /// <summary>
+444: /// GPIO pin interrupt handler
+445: /// </summary>
+446: void PhysicalGPIOPin::InterruptHandler()
+447: {
+448:     LOG_DEBUG("Interrupt for GPIO pin %d handled", m_pinNumber);
+449:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
+450: 
+451:     assert(m_handler != nullptr);
+452:     if (m_interruptMask != static_cast<uint8>(GPIOInterruptTypes::None))
+453:         (*m_handler)(this, m_handlerParam);
+454: }
+455: 
+456: /// <summary>
+457: /// Convert an interrupt type to a register offset
+458: /// </summary>
+459: /// <param name="interruptTypes">Interrupt type (only a single bit set)</param>
+460: /// <returns>Register offset from the rising edge interrupt register</returns>
+461: static GPIOInterruptTypeOffset ConvertToOffset(GPIOInterruptTypes interruptTypes)
+462: {
+463:     switch (interruptTypes)
+464:     {
+465:         case GPIOInterruptTypes::RisingEdge:
+466:             return GPIOInterruptTypeOffset::OffsetRisingEdge;
+467:         case GPIOInterruptTypes::FallingEdge:
+468:             return GPIOInterruptTypeOffset::OffsetFallingEdge;
+469:         case GPIOInterruptTypes::HighLevel:
+470:             return GPIOInterruptTypeOffset::OffsetHighLevel;
+471:         case GPIOInterruptTypes::LowLevel:
+472:             return GPIOInterruptTypeOffset::OffsetLowLevel;
+473:         case GPIOInterruptTypes::AsyncRisingEdge:
+474:             return GPIOInterruptTypeOffset::OffsetAsyncRisingEdge;
+475:         case GPIOInterruptTypes::AsyncFallingEdge:
+476:             return GPIOInterruptTypeOffset::OffsetAsyncFallingEdge;
+477:         default:
+478:             return GPIOInterruptTypeOffset::OffsetRisingEdge;
+479:     }
+480: }
+481: 
+482: /// <summary>
+483: /// Enable interrupts for the specified type
+484: /// </summary>
+485: /// <param name="interruptTypes">Set of interrupt types to enable</param>
+486: void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptTypes interruptTypes)
+487: {
+488:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
+489: 
+490:     uint8 interruptMask = static_cast<uint8>(interruptTypes);
+491:     assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
+492:     uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
+493:     while (pattern != 0)
+494:     {
+495:         if ((interruptMask & pattern) != 0)
+496:         {
+497:             m_interruptMask |= pattern;
+498:             regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
+499:             m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) | m_regMask);
+500:         }
+501:         pattern >>= 1;
+502:     }
+503: }
+504: 
+505: /// <summary>
+506: /// Disable interrupts for the specified type
+507: /// </summary>
+508: /// <param name="interruptTypes">Set of interrupt types to disable</param>
+509: void PhysicalGPIOPin::DisableInterrupt(GPIOInterruptTypes interruptTypes)
+510: {
+511:     uint8 interruptMask = static_cast<uint8>(interruptTypes);
+512:     assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
+513:     uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
+514:     while (pattern != 0)
+515:     {
+516:         if ((interruptMask & pattern) != 0)
+517:         {
+518:             m_interruptMask &= ~pattern;
+519:             regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + ConvertToOffset(static_cast<GPIOInterruptTypes>(pattern));
+520:             m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) & ~m_regMask);
+521:         }
+522:         pattern >>= 1;
+523:     }
+524: }
+525: 
+526: /// <summary>
+527: /// Disable all interrupts
+528: /// </summary>
+529: void PhysicalGPIOPin::DisableAllInterrupts()
+530: {
+531:     DisableInterrupt(GPIOInterruptTypes::All);
+532: }
+533: 
+534: /// <summary>
+535: /// Set GPIO pin function
+536: /// </summary>
+537: /// <param name="function">Function to be set for the configured GPIO pin</param>
+538: void PhysicalGPIOPin::SetFunction(GPIOFunction function)
+539: {
+540:     // Check if pin is assigned
+541:     if (m_pinNumber >= NUM_GPIO)
+542:         return;
+543: 
+544:     // Check if mode is valid
+545:     if (function >= GPIOFunction::Unknown)
+546:         return;
+547: 
+548:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10) * 4;
+549:     uint32  shift = (m_pinNumber % 10) * 3;
+550: 
+551:     static const unsigned FunctionMap[] = { 0, 1, 4, 5, 6, 7, 3, 2 };
+552: 
+553:     uint32 value = m_memoryAccess.Read32(selectRegister);
+554:     value &= ~(7 << shift);
+555:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
+556:     m_memoryAccess.Write32(selectRegister, value);
+557:     m_function = function;
+558: }
+559: 
+560: } // namespace baremetal
 ```
 
 - Line 44: We need to include the header for the `GPIOManager`.
@@ -2165,24 +2163,24 @@ File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\
   - Line 401-402: We verify that the handler passed is valid, and that no handler is set yet
   - Line 403-405: We save the handler function, its parameter and the auto acknowledge setting
   - Line 407: We connect the interrupt for the GPIO pin
-- Line 413-423: We implement the method `DisconnectInterrupt()`
+- Line 413-422: We implement the method `DisconnectInterrupt()`
   - Line 415: We verify that the GPIO pin is set to input mode
   - Line 417: We remove all interrupt types for the GPIO
-  - Line 419-420: We verify that a handler is set, and reset it
-  - Line 422: We disconnect the interrupt for the GPIO pin
-- Line 429-432: We implement the method `GetAutoAcknowledgeInterrupt()`
-- Line 437-442: We implement the method `AcknowledgeInterrupt()`, resetting the event status bit for the GPIO
-- Line 447-455: We implement the method `InterruptHandler()`
-- Line 462-480: We convert a GPIO interrupt type to a register offset (relative to the rising edge interrupt register)
-- Line 487-504: We update the method `EnableInterrupt()` to take a combination of GPIO interrupt types
-  - Line 491-492: We convert the mask to byte and verify that only allowed bits are set
-  - Line 493-503: We with a pattern for `AsyncFallingEdge` (the highest), and for each pattern check whether the bit is set.
+  - Line 419: We verify reset the handler
+  - Line 421: We disconnect the interrupt for the GPIO pin
+- Line 428-431: We implement the method `GetAutoAcknowledgeInterrupt()`
+- Line 436-441: We implement the method `AcknowledgeInterrupt()`, resetting the event status bit for the GPIO
+- Line 446-454: We implement the method `InterruptHandler()`
+- Line 461-480: We convert a GPIO interrupt type to a register offset (relative to the rising edge interrupt register)
+- Line 486-503: We update the method `EnableInterrupt()` to take a combination of GPIO interrupt types
+  - Line 490-491: We convert the mask to byte and verify that only allowed bits are set
+  - Line 492-502: We with a pattern for `AsyncFallingEdge` (the highest), and for each pattern check whether the bit is set.
 If so, we add it to the interrupt mask, calculate the register address, and set the corresponding bit in the interrupt enable register
-- Line 510-525: We update the method `DisableInterrupt()` to take a combination of GPIO interrupt types
-  - Line 512-513: We convert the mask to byte and verify that only allowed bits are set
-  - Line 514-524: We with a pattern for `AsyncFallingEdge` (the highest), and for each pattern check whether the bit is set.
+- Line 509-524: We update the method `DisableInterrupt()` to take a combination of GPIO interrupt types
+  - Line 511-512: We convert the mask to byte and verify that only allowed bits are set
+  - Line 513-523: We with a pattern for `AsyncFallingEdge` (the highest), and for each pattern check whether the bit is set.
 If so, we remove it from the interrupt mask, calculate the register address, and reset the corresponding bit in the interrupt enable register
-- Line 530-533: We update the method `DisableAllInterrupts()` to simply call `DisableInterrupt()` with all interrupt types combined
+- Line 529-532: We update the method `DisableAllInterrupts()` to simply call `DisableInterrupt()` with all interrupt types combined
 
 ### InterruptHandler.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_INTERRUPTHANDLERCPP}
 
@@ -2861,7 +2859,183 @@ Create the file `code/libraries/device/include/device/gpio/KY-040.h`
 
 ```cpp
 File: code/libraries/device/include/device/gpio/KY-040.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2025 Rene Barto
+3: //
+4: // File        : KY-040.h
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : KY040
+9: //
+10: // Description : KY-040 rotary encoder support
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: #include <stdlib/Types.h>
+43: #include <baremetal/PhysicalGPIOPin.h>
+44: #include <baremetal/Timer.h>
+45: 
+46: /// @file
+47: /// Abstract GPIO pin. Could be either a virtual or physical pin
+48: 
+49: namespace device {
+50: 
+51: enum class SwitchButtonEvent;
+52: enum class SwitchButtonState;
+53: 
+54: /// <summary>
+55: /// KY-040 rotary switch device
+56: /// </summary>
+57: class KY040
+58: {
+59: public:
+60:     /// <summary>
+61:     /// Events generated by the rotary switch
+62:     /// </summary>
+63:     enum class Event
+64:     {
+65:         /// @brief Switch is pressed
+66:         SwitchDown,
+67:         /// @brief Switch is released
+68:         SwitchUp,
+69:         /// @brief Switch is clicked (short press / release cycle)
+70:         SwitchClick,
+71:         /// @brief Switch is clicked twice in a short time
+72:         SwitchDoubleClick,
+73:         /// @brief Switch is clicked three time in a short time
+74:         SwitchTripleClick,
+75:         /// @brief Switch is held down for a longer time
+76:         SwitchHold, ///< generated each second
+77:         /// @brief Unknown event
+78:         Unknown
+79:     };
+80: 
+81:     /// <summary>
+82:     /// Pointer to event handler function to be registered by an application
+83:     /// </summary>
+84:     using EventHandler = void(Event event, void *param);
+85: 
+86: private:
+87:     /// @brief True if the rotary switch was initialized
+88:     bool                            m_isInitialized;
+89:     /// @brief GPIO pin for CLK input
+90:     baremetal::PhysicalGPIOPin      m_clkPin;
+91:     /// @brief GPIO pin for DT input
+92:     baremetal::PhysicalGPIOPin      m_dtPin;
+93:     /// @brief GPIO pin for SW input (switch button)
+94:     baremetal::PhysicalGPIOPin      m_swPin;
+95:     /// @brief Internal state of the switch button (to tracking single, double, triple clicking and hold
+96:     SwitchButtonState               m_switchButtonState;
+97:     /// @brief Handle to timer for debouncing the switch button
+98:     baremetal::KernelTimerHandle    m_debounceTimerHandle;
+99:     /// @brief Handle to timer for handling button press ticks (for hold)
+100:     baremetal::KernelTimerHandle    m_tickTimerHandle;
+101:     /// @brief Time at which the current button press occurred
+102:     unsigned                        m_currentPressTicks;
+103:     /// @brief Time at which the current button release occurred
+104:     unsigned                        m_currentReleaseTicks;
+105:     /// @brief Time at which the last button press occurred
+106:     unsigned                        m_lastPressTicks;
+107:     /// @brief Time at which the last button release occurred
+108:     unsigned                        m_lastReleaseTicks;
+109: 
+110:     /// @brief Registered event handler
+111:     EventHandler*                   m_eventHandler;
+112:     /// @brief Parameter for registered event handler
+113:     void*                           m_eventHandlerParam;
+114: 
+115: public:
+116:     KY040(uint8 clkPin, uint8 dtPin, uint8 swPin);
+117:     virtual ~KY040();
+118: 
+119:     void               Initialize();
+120:     void               Uninitialize();
+121: 
+122:     void               RegisterEventHandler(EventHandler *handler, void *param);
+123:     void               UnregisterEventHandler(EventHandler *handler);
+124:     static const char *EventToString(Event event);
+125: 
+126: private:
+127:     static void SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin, void *param);
+128:     void        SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin);
+129:     static void SwitchButtonDebounceHandler(baremetal::KernelTimerHandle handle, void *param, void *context);
+130:     void        SwitchButtonDebounceHandler(baremetal::KernelTimerHandle handle, void *param);
+131:     static void SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void *param, void *context);
+132:     void        SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void *param);
+133:     void        HandleSwitchButtonEvent(SwitchButtonEvent switchEvent);
+134: };
+135: 
+136: } // namespace device
 ```
+
+Notice that the class is declared in the `device` namespace, which we will use for all classes in the device library.
+
+- Line 51: We forward declare an enum `SwitchButtonEvent`, which will hold the internal switch button event (up, down, click, doubleclick, tick in case of holding the button down)
+- Line 52: We forward declare an enum `SwitchButtonState`, which will hold the internal switch button state (which keeps track of the state machine for the button switch)
+- Line 57-135: We declare the class `KY040`
+  - Line 63-79: We declare the enum `Event` which will hold the event actually sent to a registered event handler (down, up, click, double click, triple click, hold)
+  - Line 84: We declare the type for the event handler that can registered to
+  - Line 88: We declare the member variable `m_isInitialized` to guard against multiple initialization
+  - Line 90: We declare the member variable `m_clkPin` which is the GPIO pin for the CLK GPIO
+  - Line 92: We declare the member variable `m_dtPin` which is the GPIO pin for the DT GPIO
+  - Line 94: We declare the member variable `m_swPin` which is the GPIO pin for the SW GPIO
+  - Line 96: We declare the member variable `m_switchButtonState` which is the internal switch button state
+  - Line 98: We declare the member variable `m_debounceTimerHandle` which is a handle to the time to perform debouncing of the switch button
+  - Line 100: We declare the member variable `m_tickTimerHandle` which is a handle to the hold tick timer
+  - Line 102: We declare the member variable `m_currentPressTicks` which is the time the current switch button press happened (in timer ticks)
+  - Line 104: We declare the member variable `m_currentReleaseTicks` which is the time the current switch button release happened (in timer ticks).
+This is used to detect clicks
+  - Line 106: We declare the member variable `m_lastPressTicks` which is the time the last switch button press happened (in timer ticks).
+This is used to detect double and triple clicks
+  - Line 108: We declare the member variable `m_lastReleaseTicks` which is the time the last switch button release happened (in timer ticks)
+  - Line 111: We declare the member variable `m_eventHandler` which is the time the registered event handler
+  - Line 113: We declare the member variable `m_eventHandlerParam` which is the parameter to be passed to the event handler
+  - Line 116: We declare the constructor, which takes GPIO pin numbers for the CLK, DT and SW pin respectively
+  - Line 117: We declare the desctructor
+  - Line 119: We declare the method `Initialize()` to initialize the rotary switch
+  - Line 120: We declare the method `Uninitialize()` to uninitialize the rotary switch
+  - Line 122: We declare the method `RegisterEventHandler()` to register an event handler
+  - Line 123: We declare the method `UnregisterEventHandler()` to unregister an event handler
+  - Line 124: We declare the method `EventToString()` to convert an event to a string
+  - Line 127: We declare the static private method `SwitchButtonInterruptHandler()` which is the GPIO pin interrupt handler
+As the parameter will point to the class instance, it will call the class method `SwitchButtonInterruptHandler()`
+  - Line 128: We declare the private method `SwitchButtonInterruptHandler()` to handle debouncing of the switch button
+  - Line 129: We declare the static private method `SwitchButtonDebounceHandler()` which is the timer timeout handler for switch button debouncing.
+As the context parameter will point to the class instance, it will call the class method `SwitchButtonDebounceHandler()`
+  - Line 130: We declare the private method `SwitchButtonDebounceHandler()` to handle debouncing of the switch button
+  - Line 131: We declare the static private method `SwitchButtonTickHandler()` which is the timer timeout handler for switch button holding.
+As the context parameter will point to the class instance, it will call the class method `SwitchButtonTickHandler()`
+  - Line 132: We declare the private method `SwitchButtonTickHandler()` to handle holding down the switch button
+  - Line 133: We declare the private method `HandleSwitchButtonEvent()` which deals with internal state keeping
 
 ### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040CPP}
 
@@ -2871,14 +3045,630 @@ Create the file `code/libraries/device/src/gpio/KY-040.cpp`
 
 ```cpp
 File: code/libraries/device/src/gpio/KY-040.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2025 Rene Barto
+3: //
+4: // File        : KY-040.h
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : KY040
+9: //
+10: // Description : KY-040 rotary encoder support
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include <device/gpio/KY-040.h>
+41: 
+42: #include <baremetal/Assert.h>
+43: #include <baremetal/Logger.h>
+44: 
+45: /// @brief Define log name
+46: LOG_MODULE("KY-040");
+47: 
+48: using namespace baremetal;
+49: 
+50: namespace device {
+51: 
+52: /// @brief Time delay for debounding switch button
+53: static const unsigned SwitchDebounceDelayMilliseconds       = 50;
+54: /// @brief Tick delay for determining if switch button was held down
+55: static const unsigned SwitchTickDelayMilliseconds           = 1000;
+56: /// @brief Maximum delay between press and release for a click
+57: static const unsigned SwitchClickMaxDelayMilliseconds       = 400;
+58: /// @brief Maximum delay between two presses for a double click (or triple click)
+59: static const unsigned SwitchDoubleClickMaxDelayMilliseconds = 800;
+60: 
+61: /// <summary>
+62: /// Switch button internal event
+63: /// </summary>
+64: enum class SwitchButtonEvent
+65: {
+66:     /// @brief Switch button is down
+67:     Down,
+68:     /// @brief Switch button is up
+69:     Up,
+70:     /// @brief Switch button is clicked
+71:     Click,
+72:     /// @brief Switch button is double clicked
+73:     DblClick,
+74:     /// @brief Switch button is held down for at least SwitchTickDelayMilliseconds milliseconds
+75:     Tick,
+76:     /// @brief Unknown event
+77:     Unknown
+78: };
+79: 
+80: /// <summary>
+81: /// Switch button internal state
+82: /// </summary>
+83: enum class SwitchButtonState
+84: {
+85:     /// @brief Initial state
+86:     Start,
+87:     /// @brief Switch button is down
+88:     Down,
+89:     /// @brief Switch button is clicked
+90:     Click,
+91:     /// @brief Switch button is down for the second time within SwitchDoubleClickMaxDelayMilliseconds milliseconds
+92:     Click2,
+93:     /// @brief Switch button is down for the third time, since second time within SwitchDoubleClickMaxDelayMilliseconds milliseconds
+94:     Click3,
+95:     /// @brief Switch button is held down
+96:     Hold,
+97:     /// @brief Invalid state
+98:     Invalid,
+99:     /// @brief Unknown state
+100:     Unknown
+101: };
+102: 
+103: /// <summary>
+104: /// Convert rotary switch event to a string
+105: /// </summary>
+106: /// <param name="event">Event type</param>
+107: /// <returns>String representing event</returns>
+108: const char *KY040::EventToString(KY040::Event event)
+109: {
+110:     switch (event)
+111:     {
+112:     case KY040::Event::SwitchDown:
+113:         return "SwitchDown";
+114:     case KY040::Event::SwitchUp:
+115:         return "SwitchUp";
+116:     case KY040::Event::SwitchClick:
+117:         return "SwitchClick";
+118:     case KY040::Event::SwitchDoubleClick:
+119:         return "SwitchDoubleClick";
+120:     case KY040::Event::SwitchTripleClick:
+121:         return "SwitchTripleClick";
+122:     case KY040::Event::SwitchHold:
+123:         return "SwitchHold";
+124:     case KY040::Event::Unknown:
+125:     default:
+126:         break;
+127:     }
+128:     return "Unknown";
+129: }
+130: 
+131: /// <summary>
+132: /// Convert internal switch button event to a string
+133: /// </summary>
+134: /// <param name="event">Event button event</param>
+135: /// <returns>String representing event</returns>
+136: static const char *SwitchButtonEventToString(SwitchButtonEvent event)
+137: {
+138:     switch (event)
+139:     {
+140:     case SwitchButtonEvent::Down:
+141:         return "Down";
+142:     case SwitchButtonEvent::Up:
+143:         return "Up";
+144:     case SwitchButtonEvent::Click:
+145:         return "Click";
+146:     case SwitchButtonEvent::DblClick:
+147:         return "DblClick";
+148:     case SwitchButtonEvent::Tick:
+149:         return "Tick";
+150:     case SwitchButtonEvent::Unknown:
+151:     default:
+152:         break;
+153:     }
+154:     return "Unknown";
+155: }
+156: 
+157: /// <summary>
+158: /// Convert internal switch button state to a string
+159: /// </summary>
+160: /// <param name="event">Event button state</param>
+161: /// <returns>String representing state</returns>
+162: static const char *SwitchButtonStateToString(SwitchButtonState state)
+163: {
+164:     switch (state)
+165:     {
+166:     case SwitchButtonState::Start:
+167:         return "Start";
+168:     case SwitchButtonState::Down:
+169:         return "Down";
+170:     case SwitchButtonState::Click:
+171:         return "Click";
+172:     case SwitchButtonState::Click2:
+173:         return "Click2";
+174:     case SwitchButtonState::Click3:
+175:         return "Click3";
+176:     case SwitchButtonState::Hold:
+177:         return "Hold";
+178:     case SwitchButtonState::Invalid:
+179:         return "Invalid";
+180:     case SwitchButtonState::Unknown:
+181:     default:
+182:         break;
+183:     }
+184:     return "Unknown";
+185: }
+186: 
+187: /// <summary>
+188: /// Event lookup for handling switch button state versus switch button event
+189: /// 
+190: /// Every row signifies a beginning internalstate, every column signifies an internal event, values in the table determine the resulting event
+191: /// </summary>
+192: static const KY040::Event s_switchOutput[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
+193:     // {Down,               Up,                    Click,                           DoubleClick,                     Tick}
+194: 
+195:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::Unknown},            // SwitchButtonState::Start
+196:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::SwitchHold},         // SwitchButtonState::Down
+197:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::SwitchClick},        // SwitchButtonState::Click
+198:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchDoubleClick, KY040::Event::SwitchDoubleClick, KY040::Event::SwitchDoubleClick},  // SwitchButtonState::Click2
+199:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchTripleClick, KY040::Event::SwitchTripleClick, KY040::Event::SwitchTripleClick},  // SwitchButtonState::Click3
+200:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::Unknown,           KY040::Event::Unknown,           KY040::Event::SwitchHold},         // SwitchButtonState::Hold
+201:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::Unknown,           KY040::Event::Unknown,           KY040::Event::Unknown}             // SwitchButtonState::Invalid
+202: };
+203: /// <summary>
+204: /// Determine the event for the current internal state and internal event
+205: /// </summary>
+206: /// <param name="state">Current internal state</param>
+207: /// <param name="event">Current internal event</param>
+208: /// <returns>Resulting event</returns>
+209: static KY040::Event GetSwitchOutput(SwitchButtonState state, SwitchButtonEvent event)
+210: {
+211:     return s_switchOutput[static_cast<size_t>(state)][static_cast<size_t>(event)];
+212: }
+213: 
+214: /// <summary>
+215: /// State machine for handling switch button state
+216: /// 
+217: /// Every row signifies a beginning internalstate, every column signifies an internal event, values in the table determine the resulting internal state
+218: /// </summary>
+219: static const SwitchButtonState s_nextSwitchState[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
+220:     // {Down,              Up,                  Click,               DoubleClick,          Tick}
+221: 
+222:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click, SwitchButtonState::Click2, SwitchButtonState::Start},   // SwitchButtonState::Start
+223:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click, SwitchButtonState::Click2, SwitchButtonState::Hold},    // SwitchButtonState::Down
+224:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click, SwitchButtonState::Click2, SwitchButtonState::Invalid}, // SwitchButtonState::Click
+225:     {SwitchButtonState::Down, SwitchButtonState::Click2, SwitchButtonState::Click2, SwitchButtonState::Click3, SwitchButtonState::Hold},  // SwitchButtonState::Click2
+226:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click3, SwitchButtonState::Click3, SwitchButtonState::Hold},   // SwitchButtonState::Click3
+227:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click, SwitchButtonState::Click2, SwitchButtonState::Hold},    // SwitchButtonState::Hold
+228:     {SwitchButtonState::Down, SwitchButtonState::Start, SwitchButtonState::Click, SwitchButtonState::Click2, SwitchButtonState::Invalid}  // SwitchButtonState::Invalid
+229: };
+230: /// <summary>
+231: /// Determine the next internal state for the current internal state and internal event
+232: /// </summary>
+233: /// <param name="state">Current internal state</param>
+234: /// <param name="event">Current internal event</param>
+235: /// <returns>Resulting state</returns>
+236: static SwitchButtonState GetSwitchNextState(SwitchButtonState state, SwitchButtonEvent event)
+237: {
+238:     return s_nextSwitchState[static_cast<size_t>(state)][static_cast<size_t>(event)];
+239: }
+240: 
+241: /// <summary>
+242: /// Constructor for KY040 class
+243: /// </summary>
+244: /// <param name="clkPin">GPIO pin number for CLK input</param>
+245: /// <param name="dtPin">GPIO pin number for DT input</param>
+246: /// <param name="swPin">GPIO pin number for SW input</param>
+247: KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin)
+248:     : m_isInitialized{}
+249:     , m_clkPin(clkPin, GPIOMode::InputPullUp)
+250:     , m_dtPin(dtPin, GPIOMode::InputPullUp)
+251:     , m_swPin(swPin, GPIOMode::InputPullUp)
+252:     , m_switchButtonState{SwitchButtonState::Start}
+253:     , m_debounceTimerHandle{}
+254:     , m_tickTimerHandle{}
+255:     , m_currentPressTicks{}
+256:     , m_currentReleaseTicks{}
+257:     , m_lastPressTicks{}
+258:     , m_lastReleaseTicks{}
+259: 
+260:     , m_eventHandler{}
+261:     , m_eventHandlerParam{}
+262: {
+263:     LOG_DEBUG("KY040 constructor");
+264: }
+265: 
+266: /// <summary>
+267: /// KY040 class destructor
+268: /// </summary>
+269: KY040::~KY040()
+270: {
+271:     LOG_DEBUG("KY040 destructor");
+272:     Uninitialize();
+273: }
+274: 
+275: /// <summary>
+276: /// Initialized the KY040 rotary switch
+277: /// </summary>
+278: void KY040::Initialize()
+279: {
+280:     if (m_isInitialized)
+281:         return;
+282: 
+283:     LOG_DEBUG("KY040 Initialize");
+284:     m_swPin.ConnectInterrupt(SwitchButtonInterruptHandler, this);
+285: 
+286:     m_swPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
+287: 
+288:     m_isInitialized = true;
+289: }
+290: 
+291: /// <summary>
+292: /// Uninitialize the KY040 rotary switch
+293: /// </summary>
+294: void KY040::Uninitialize()
+295: {
+296:     if (m_isInitialized)
+297:     {
+298:         LOG_DEBUG("Disconnect SW pin");
+299:         m_swPin.DisableAllInterrupts();
+300:         m_swPin.DisconnectInterrupt();
+301:         m_isInitialized = false;
+302:     }
+303:     if (m_debounceTimerHandle)
+304:     {
+305:         GetTimer().CancelKernelTimer(m_debounceTimerHandle);
+306:     }
+307:     if (m_tickTimerHandle)
+308:     {
+309:         GetTimer().CancelKernelTimer(m_tickTimerHandle);
+310:     }
+311: }
+312: 
+313: /// <summary>
+314: /// Register an event handler for the rotary switch
+315: /// </summary>
+316: /// <param name="handler">Handler function</param>
+317: /// <param name="param">Parameter to pass to handler function</param>
+318: void KY040::RegisterEventHandler(EventHandler *handler, void *param)
+319: {
+320:     assert(!m_eventHandler);
+321:     m_eventHandler = handler;
+322:     assert(m_eventHandler);
+323:     m_eventHandlerParam = param;
+324: }
+325: 
+326: /// <summary>
+327: /// Unregister event handler for the rotary switch
+328: /// </summary>
+329: /// <param name="handler">Handler function</param>
+330: void KY040::UnregisterEventHandler(EventHandler *handler)
+331: {
+332:     assert(m_eventHandler = handler);
+333:     m_eventHandler = nullptr;
+334:     m_eventHandlerParam = nullptr;
+335: }
+336: 
+337: /// <summary>
+338: /// Global GPIO pin interrupt handler
+339: /// </summary>
+340: /// <param name="pin">GPIO pin for the button switch</param>
+341: /// <param name="param">Parameter for the interrupt handler, which is a pointer to the class instance</param>
+342: void KY040::SwitchButtonInterruptHandler(IGPIOPin* pin, void *param)
+343: {
+344:     KY040 *pThis = reinterpret_cast<KY040 *>(param);
+345:     assert(pThis != nullptr);
+346:     pThis->SwitchButtonInterruptHandler(pin);
+347: }
+348: 
+349: /// <summary>
+350: /// GPIO pin interrupt handler
+351: /// </summary>
+352: /// <param name="pin">GPIO pin for the button switch</param>
+353: void KY040::SwitchButtonInterruptHandler(IGPIOPin* pin)
+354: {
+355:     LOG_DEBUG("KY040 SwitchButtonInterruptHandler");
+356:     assert(pin != nullptr);
+357: 
+358:     /// Get Switch state (false = pressed, true = released)
+359:     bool swValue = pin->Get();
+360:     if (swValue)
+361:     {        
+362:         m_currentReleaseTicks = GetTimer().GetTicks();
+363:     }
+364:     else
+365:     {
+366:         m_currentPressTicks = GetTimer().GetTicks();
+367:     }
+368: 
+369:     if (m_debounceTimerHandle)
+370:     {
+371:         LOG_DEBUG("KY040 Cancel debounce timer");
+372:         GetTimer().CancelKernelTimer(m_debounceTimerHandle);
+373:     }
+374: 
+375:     LOG_DEBUG("KY040 Start debounce timer");
+376:     m_debounceTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchDebounceDelayMilliseconds), SwitchButtonDebounceHandler, nullptr, this);
+377: }
+378: 
+379: /// <summary>
+380: /// Global switch button debounce handler, called by the switch button debounce timer on timeout
+381: /// 
+382: /// Will call the class internal switch button debounce handler
+383: /// </summary>
+384: /// <param name="handle">Kernel timer handle</param>
+385: /// <param name="param">Timer handler parameter</param>
+386: /// <param name="context">Timer handler context</param>
+387: void KY040::SwitchButtonDebounceHandler(KernelTimerHandle handle, void *param, void *context)
+388: {
+389:     KY040 *pThis = reinterpret_cast<KY040 *>(context);
+390:     assert(pThis != nullptr);
+391:     pThis->SwitchButtonDebounceHandler(handle, param);
+392: }
+393: 
+394: /// <summary>
+395: /// Switch button debounce handler, called by the global switch button debounce handler on timeout
+396: /// </summary>
+397: /// <param name="handle">Kernel timer handle</param>
+398: /// <param name="param">Timer handler parameter</param>
+399: void KY040::SwitchButtonDebounceHandler(KernelTimerHandle handle, void *param)
+400: {
+401:     LOG_DEBUG("KY040 Timeout debounce timer");
+402:     m_debounceTimerHandle = 0;
+403: 
+404:     bool swValue     = m_swPin.Get();
+405:     auto event       = swValue ? Event::SwitchUp : Event::SwitchDown;
+406:     auto switchButtonEvent = swValue ? SwitchButtonEvent::Up : SwitchButtonEvent::Down;
+407:     if (swValue)
+408:     {
+409:         if (m_currentReleaseTicks - m_lastPressTicks < MSEC2TICKS(SwitchClickMaxDelayMilliseconds))
+410:         {
+411:             switchButtonEvent = SwitchButtonEvent::Click;
+412:         }
+413:     }
+414:     else
+415:     {
+416:         if (m_currentPressTicks - m_lastPressTicks < MSEC2TICKS(SwitchDoubleClickMaxDelayMilliseconds))
+417:         {
+418:             switchButtonEvent = SwitchButtonEvent::DblClick;
+419:         }
+420:     }
+421:     LOG_DEBUG("KY040 SW                : %d", swValue);
+422:     LOG_DEBUG("KY040 SW LastDown       : %d", m_lastPressTicks);
+423:     LOG_DEBUG("KY040 SW LastUp         : %d", m_lastReleaseTicks);
+424:     LOG_DEBUG("KY040 SW CurrentDown    : %d", m_currentPressTicks);
+425:     LOG_DEBUG("KY040 SW CurrentUp      : %d", m_currentReleaseTicks);
+426:     if (swValue)
+427:     {
+428:         m_lastReleaseTicks = m_currentReleaseTicks;
+429:     }
+430:     else
+431:     {
+432:         m_lastPressTicks = m_currentPressTicks;
+433:     }
+434: 
+435:     LOG_DEBUG("KY040 Event             : %s", EventToString(event));
+436:     LOG_DEBUG("KY040 Switch Event      : %s", SwitchButtonEventToString(switchButtonEvent));
+437:     if (m_eventHandler)
+438:     {
+439:         (*m_eventHandler)(event, m_eventHandlerParam);
+440:     }
+441: 
+442:     if (m_tickTimerHandle)
+443:     {
+444:         GetTimer().CancelKernelTimer(m_tickTimerHandle);
+445:     }
+446: 
+447:     if (!swValue) // If pressed, check for hold
+448:         m_tickTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchTickDelayMilliseconds), SwitchButtonTickHandler, nullptr, this);
+449: 
+450:     HandleSwitchButtonEvent(switchButtonEvent);
+451: }
+452: 
+453: /// <summary>
+454: /// Global switch button tick handler, called by the switch button tick timer on timeout
+455: /// 
+456: /// Will call the class internal switch button tick handler
+457: /// </summary>
+458: /// <param name="handle">Kernel timer handle</param>
+459: /// <param name="param">Timer handler parameter</param>
+460: /// <param name="context">Timer handler context</param>
+461: void KY040::SwitchButtonTickHandler(KernelTimerHandle handle, void *param, void *context)
+462: {
+463:     KY040 *pThis = reinterpret_cast<KY040 *>(context);
+464:     assert(pThis != nullptr);
+465:     
+466:     pThis->SwitchButtonTickHandler(handle, param);
+467: }
+468: 
+469: /// <summary>
+470: /// Switch button tick handler, called by the global switch button tick handler on timeout
+471: /// </summary>
+472: /// <param name="handle">Kernel timer handle</param>
+473: /// <param name="param">Timer handler parameter</param>
+474: void KY040::SwitchButtonTickHandler(KernelTimerHandle handle, void *param)
+475: {
+476:     LOG_DEBUG("KY040 Timeout tick timer");
+477:     // Timer timed out, so we need to generate a tick
+478:     m_tickTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchTickDelayMilliseconds), SwitchButtonTickHandler, nullptr, this);
+479: 
+480:     HandleSwitchButtonEvent(SwitchButtonEvent::Tick);
+481: }
+482: 
+483: /// <summary>
+484: /// Handle a switch button event
+485: /// 
+486: /// Updates the internal state of switch button, and generates the proper event
+487: /// </summary>
+488: /// <param name="switchButtonEvent">Internal switch button event</param>
+489: void KY040::HandleSwitchButtonEvent(SwitchButtonEvent switchButtonEvent)
+490: {
+491:     assert(switchButtonEvent < SwitchButtonEvent::Unknown);
+492: 
+493:     LOG_DEBUG("KY040 Current state     : %s", SwitchButtonStateToString(m_switchButtonState));
+494:     LOG_DEBUG("KY040 Switch Event      : %s", SwitchButtonEventToString(switchButtonEvent));
+495:     Event event = GetSwitchOutput(m_switchButtonState, switchButtonEvent);
+496:     SwitchButtonState nextState = GetSwitchNextState(m_switchButtonState, switchButtonEvent);
+497: 
+498:     LOG_DEBUG("KY040 Event             : %s", EventToString(event));
+499:     LOG_DEBUG("KY040 Next state        : %s", SwitchButtonStateToString(nextState));
+500: 
+501:     m_switchButtonState = nextState;
+502: 
+503:     if ((event != Event::Unknown) && (m_eventHandler != nullptr))
+504:     {
+505:         (*m_eventHandler)(event, m_eventHandlerParam);
+506:     }
+507: }
+508: 
+509: } // namespace device
 ```
 
+- Line 53: We define the timeout value to be used for debouncing in milliseconds
+- Line 55: We define the timeout value to be used for detecting holding down the switch button in milliseconds
+- Line 57: We define the timeout value to be used for detecting clicks (short push/release cycle) in milliseconds
+- Line 59: We define the timeout value to be used for detecting double and triple clicks in milliseconds
+- Line 64-78: We declare the `SwitchButtonEvent` enum which is used to keep track of events internally
+- Line 83-101: We declare the `SwitchButtonState` enum which is used to keep track of the switch state internally
+- Line 108-129: We implement the method `EventToString()`
+- Line 136-155: We implement a local function `SwitchButtonEventToString()` to convert the internal event to a string, for debugging
+- Line 162-185: We implement a local function `SwitchButtonStateToString()` to convert the internal switch button state to a string, for debugging
+- Line 192-202: We define a matrix `s_switchOutput` to determine the event to be generated when an event happens in a certain state. This is part of the state machine.
+I'll not go into details here, I'll leave it to you to figure this out
+- Line 209-212: We implement a local function `GetSwitchOutput()` which uses the `s_switchOutput` variable to determine the event to generate
+- Line 219-229: We define a matrix `s_nextSwitchState` to determine the next state when an event happens in a certain state. This is part of the state machine.
+Again, I'll not go into details here, I'll leave it to you to figure this out
+- Line 236-239: We implement a local function `GetSwitchNextState()` which uses the `s_nextSwitchState` variable to determine the next state
+- Line 247-264: We implement the constructor. This is quite straightforward
+- Line 269-273: We implement the desctructor. This is quite straightforward
+- Line 278-289: We implement the `Initialize()` method.
+For now it only connects the interrupt for the SW GPIO, for both rising and falling edges
+- Line 294-311: We implement the `Uninitialize()` method.
+This disconnects the interrupt, and cancels any running timers
+- Line 318-324: We implement the `RegisterEventHandler` method. This is quite straightforward
+- Line 330-335: We implement the `UnregisterEventHandler` method. This is quite straightforward
+- Line 342-347: We implement the global `SwitchButtonInterruptHandler()` method, which is the global interrupt handler for the GPIO pins.
+It converts the parameter to a class pointer, and then calls the class method
+- Line 353-377: We implement the `SwitchButtonInterruptHandler()` method, which is the class interrupt handler for the GPIO pins
+  - Line 359: It reads the GPIO pin value (down is false, up is true)
+  - Line 361-363: If the switch button is up, we set the release time
+  - Line 365-367: If the switch button is down, we set the press time
+  - Line 369-373: If there was already a debounce timer running, we cancel it
+  - Line 375-376: We start a new debounce timer
+- Line 387-392: We implement the global `SwitchButtonDebounceHandler()` method, which is the global debounce timer timeout handler.
+It converts the parameter to a class pointer, and then calls the class method
+- Line 399-451: We implement the `SwitchButtonDebounceHandler()` method, which is the class debounce timer timeout handler
+  - Line 404-406: We determin the GPIO pin value, set the event to either `SwitchUp` or `SwitchDown`, and similarly set the internal event to `Up` or `Down`
+  - Line 408-413: If the button is up, we check the time elapsed between the press and the release, if this is within the click time, we change the internal event to `Click`
+  - Line 415-420: If the button is down, we check the time elapsed between the press and the previous press, if this is within the double click time, we change the internal event to `DblClick`
+  - Line 421-425: We print debug output on switch button state and timing
+  - Line 428: If the button is up, we save the last release time
+  - Line 432: Else we save the last press time
+  - Line 435-436: We print debug output on switch button state and timing
+  - Line 437-440: If an event handler is registered, we call it
+  - Line 442-445: If a tick timer was running, we cancel it
+  - Line 447-448: if the button is down, we start a time to check for holding down the button
+  - Line 450: We call the method `HandleSwitchButtonEvent()` to handle the internal state and generate a possible event
+- Line 461-467: We implement the global `SwitchButtonTickHandler()` method, which is the global tick timer timeout handler.
+It converts the parameter to a class pointer, and then calls the class method
+- Line 474-481: We implement the `SwitchButtonTickHandler()` method, which is the class tick timer timeout handler
+  - Line 478: We start another tick timer as we will repeat the event as long as the button is held down
+  - Line 480: We call the method `HandleSwitchButtonEvent()` to handle the internal state and generate a possible event
+- Line 489-507: We implement the `HandleSwitchButtonEvent()` method, which handles the state machine
+  - Line 491: We verify we have a valid event
+  - Line 493-494: We print debug info
+  - Line 495: We determine the output event from the current internal event and the internal state
+  - Line 496: We determine the new internal state from the current internal event and the internal state
+  - Line 498-499: We print debug info
+  - Line 501: We save the next state
+  - Line 503-5506: If the output event is valid, and a event handler is registered, we call the event handler
+  
 ### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CODE}
 
+We'll create a rotary switch in the application and display its event callback.
+Due to the amount of debug output, we'll change the log level to `Info`. We'll also keep waiting a bit longer to allow for interaction with the rotary switch.
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
 File: code/applications/demo/src/main.cpp
+1: #include <baremetal/ARMInstructions.h>
+2: #include <baremetal/Assert.h>
+3: #include <baremetal/Console.h>
+4: #include <baremetal/Logger.h>
+5: #include <baremetal/System.h>
+6: #include <baremetal/Timer.h>
+7: #include <device/gpio/KY-040.h>
+8: 
+9: LOG_MODULE("main");
+10: 
+11: using namespace baremetal;
+12: using namespace device;
+13: 
+14: void OnEvent(KY040::Event event, void *param)
+15: {
+16:     LOG_INFO("Event %s", KY040::EventToString(event));
+17: }
+18: 
+19: int main()
+20: {
+21:     auto& console = GetConsole();
+22:     GetLogger().SetLogLevel(LogSeverity::Info);
+23: 
+24:     auto exceptionLevel = CurrentEL();
+25:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+26: 
+27:     KY040 rotarySwitch(11, 9, 10);
+28:     rotarySwitch.Initialize();
+29:     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
+30:     
+31:     LOG_INFO("Wait 20 seconds");
+32:     Timer::WaitMilliSeconds(20000);
+33: 
+34:     rotarySwitch.UnregisterEventHandler(OnEvent);
+35: 
+36:     console.Write("Press r to reboot, h to halt\n");
+37:     char ch{};
+38:     while ((ch != 'r') && (ch != 'h'))
+39:     {
+40:         ch = console.ReadChar();
+41:         console.WriteChar(ch);
+42:     }
+43: 
+44:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+45: }
+46: 
 ```
 
 ### Update application CMake file {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CMAKE_FILE}
@@ -2896,11 +3686,93 @@ File: code/applications/demo/CMakeLists.txt
 31: 
 ```
 
-## Adding intelligence to the switch button - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5}
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and test.
+Notice the click, double click, triple click and hold events
+
+```text
+Info   0.00:00:21.820 InterruptSystem::Shutdown (InterruptHandler:153)
+Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:96)
+Info   0.00:00:00.050 Starting up (System:209)
+Info   0.00:00:00.070 Current EL: 1 (main:25)
+Info   0.00:00:00.090 Wait 20 seconds (main:31)
+Info   0.00:00:00.840 Event SwitchDown (main:16)
+Info   0.00:00:00.840 Event SwitchDoubleClick (main:16)
+Info   0.00:00:01.220 Event SwitchUp (main:16)
+Info   0.00:00:02.780 Event SwitchDown (main:16)
+Info   0.00:00:03.010 Event SwitchUp (main:16)
+Info   0.00:00:03.010 Event SwitchClick (main:16)
+Info   0.00:00:04.850 Event SwitchDown (main:16)
+Info   0.00:00:05.000 Event SwitchUp (main:16)
+Info   0.00:00:05.000 Event SwitchClick (main:16)
+Info   0.00:00:05.110 Event SwitchDown (main:16)
+Info   0.00:00:05.110 Event SwitchDoubleClick (main:16)
+Info   0.00:00:05.290 Event SwitchUp (main:16)
+Info   0.00:00:05.290 Event SwitchDoubleClick (main:16)
+Info   0.00:00:06.500 Event SwitchDown (main:16)
+Info   0.00:00:06.650 Event SwitchUp (main:16)
+Info   0.00:00:06.650 Event SwitchClick (main:16)
+Info   0.00:00:06.790 Event SwitchDown (main:16)
+Info   0.00:00:06.790 Event SwitchDoubleClick (main:16)
+Info   0.00:00:06.930 Event SwitchUp (main:16)
+Info   0.00:00:06.930 Event SwitchDoubleClick (main:16)
+Info   0.00:00:07.930 Event SwitchDown (main:16)
+Info   0.00:00:08.080 Event SwitchUp (main:16)
+Info   0.00:00:08.080 Event SwitchClick (main:16)
+Info   0.00:00:08.220 Event SwitchDown (main:16)
+Info   0.00:00:08.220 Event SwitchDoubleClick (main:16)
+Info   0.00:00:08.330 Event SwitchUp (main:16)
+Info   0.00:00:08.330 Event SwitchDoubleClick (main:16)
+Info   0.00:00:08.440 Event SwitchDown (main:16)
+Info   0.00:00:08.440 Event SwitchDoubleClick (main:16)
+Info   0.00:00:08.590 Event SwitchUp (main:16)
+Info   0.00:00:08.590 Event SwitchTripleClick (main:16)
+Info   0.00:00:09.880 Event SwitchDown (main:16)
+Info   0.00:00:10.880 Event SwitchHold (main:16)
+Info   0.00:00:11.880 Event SwitchHold (main:16)
+Info   0.00:00:12.880 Event SwitchHold (main:16)
+Info   0.00:00:13.340 Event SwitchUp (main:16)
+Press r to reboot, h to halt
+rInfo   0.00:00:21.620 Reboot (System:154)
+Info   0.00:00:21.640 InterruptSystem::Shutdown (InterruptHandler:153)
+```
+
+## Adding intelligence to the rotary switch - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5}
           
-Now let's also make the rotare part a bit smarter.
+Now let's also make the rotate part a bit smarter.
 
-We'll want to distinguish between a clockwise and a anti-clockwise tick.
+We'll want to distinguish between a clockwise and a anti-clockwise tick, and we will need to handle fast turning which may skip an event here and there.
 
+### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040H}
+
+
+Update the file `code/libraries/device/include/device/gpio/KY-040.h`
+
+```cpp
+File: code/libraries/device/include/device/gpio/KY-040.h
+```
+
+### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040CPP}
+
+We'll implement the changes.
+
+Update the file `code/libraries/device/src/gpio/KY-040.cpp`
+
+```cpp
+File: code/libraries/device/src/gpio/KY-040.cpp
+```
+
+### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CODE}
+
+The application code remains unchanged.
+
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and test.
+Notice the click, double click, triple click and hold events
+
+```text
+```
 
 Next: [21-i2c](21-i2c.md)

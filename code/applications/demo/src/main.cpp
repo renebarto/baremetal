@@ -1,76 +1,37 @@
 #include <baremetal/ARMInstructions.h>
 #include <baremetal/Assert.h>
 #include <baremetal/Console.h>
-#include <baremetal/InterruptHandler.h>
-#include <baremetal/Interrupts.h>
 #include <baremetal/Logger.h>
-#include <baremetal/PhysicalGPIOPin.h>
 #include <baremetal/System.h>
 #include <baremetal/Timer.h>
+#include <device/gpio/KY-040.h>
 
 LOG_MODULE("main");
 
 using namespace baremetal;
+using namespace device;
 
-void InterruptHandlerCLK(IGPIOPin* pin, void *param)
+void OnEvent(KY040::Event event, void *param)
 {
-    LOG_DEBUG("GPIO CLK");
-    if (pin->GetEvent())
-    {
-        auto value = pin->Get();
-        LOG_DEBUG("CLK=%d", value);
-        pin->ClearEvent();
-    }
-}
-
-void InterruptHandlerDT(IGPIOPin* pin, void *param)
-{
-    LOG_DEBUG("GPIO DT");
-    if (pin->GetEvent())
-    {
-        auto value = pin->Get();
-        LOG_DEBUG("DT=%d", value);
-        pin->ClearEvent();
-    }
-}
-
-void InterruptHandlerSW(IGPIOPin* pin, void *param)
-{
-    LOG_DEBUG("GPIO SW");
-    if (pin->GetEvent())
-    {
-        auto value = pin->Get();
-        LOG_DEBUG("SW=%d", value);
-        pin->ClearEvent();
-    }
+    LOG_INFO("Event %s", KY040::EventToString(event));
 }
 
 int main()
 {
     auto& console = GetConsole();
+    GetLogger().SetLogLevel(LogSeverity::Info);
 
     auto exceptionLevel = CurrentEL();
     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 
-    PhysicalGPIOPin pinCLK(11, GPIOMode::InputPullUp);
-    PhysicalGPIOPin pinDT(9, GPIOMode::InputPullUp);
-    PhysicalGPIOPin pinSW(10, GPIOMode::InputPullUp);
+    KY040 rotarySwitch(11, 9, 10);
+    rotarySwitch.Initialize();
+    rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
+    
+    LOG_INFO("Wait 20 seconds");
+    Timer::WaitMilliSeconds(20000);
 
-    pinCLK.ConnectInterrupt(InterruptHandlerCLK, nullptr);
-    pinCLK.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
-    pinDT.ConnectInterrupt(InterruptHandlerDT, nullptr);
-    pinDT.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
-    pinSW.ConnectInterrupt(InterruptHandlerSW, nullptr);
-    pinSW.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
-
-    LOG_INFO("Wait 5 seconds");
-    Timer::WaitMilliSeconds(5000);
-
-    GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_GPIO3);
-
-    pinCLK.DisconnectInterrupt();
-    pinDT.DisconnectInterrupt();
-    pinSW.DisconnectInterrupt();
+    rotarySwitch.UnregisterEventHandler(OnEvent);
 
     console.Write("Press r to reboot, h to halt\n");
     char ch{};

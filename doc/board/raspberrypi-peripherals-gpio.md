@@ -5,7 +5,8 @@ See [documentation](pdf/bcm2837-peripherals.pdf), page 90
 Pinout:
 
  <img src="images/rpi-gpio-pinout.png" alt="Raspberry Pi GPIO pins" width="1000"/>
- 
+
+Raspberry Pi 3 has 54 GPIO, Raspberry Pi 4 and later have 57. Most however are not attached to the GPIO header.
 
 | Register           | Address         | Bits  | Name                                  | Acc | Meaning |
 |--------------------|-----------------|-------|---------------------------------------|-----|---------|
@@ -64,8 +65,11 @@ Pinout:
 |                    |                 | 8:56  | FSEL42                                | R/W | Function select GPIO42. Reset level: 0
 |                    |                 | 5:3   | FSEL41                                | R/W | Function select GPIO41. Reset level: 0
 |                    |                 | 2:0   | FSEL40                                | R/W | Function select GPIO40. Reset level: 0
-| RPI_GPIO_GPFSEL5   | Base+0x00200014 | 31:12 | -                                     | R   | Reserved. Reset level: 0
-|                    |                 | 11:9  | FSEL53                                | R/W | Function select GPIO53<br/>000 = input<br/>001 = output<br/>010 = alt function 5<br/>011 = alt function 4<br/>100 = alt function 0<br/>101 = alt function 1<br/>110 = alt function 2<br/>111 = alt function 3<br/>Reset level: 0
+| RPI_GPIO_GPFSEL5   | Base+0x00200014 | 31:21 | -                                     | R   | Reserved. Reset level: 0
+|                    |                 | 20:18 | FSEL56 (RPI 4 and later only)         | R/W | Function select GPIO56<br/>000 = input<br/>001 = output<br/>010 = alt function 5<br/>011 = alt function 4<br/>100 = alt function 0<br/>101 = alt function 1<br/>110 = alt function 2<br/>111 = alt function 3<br/>Reset level: 0
+|                    |                 | 17:15 | FSEL55 (RPI 4 and later only)         | R/W | Function select GPIO55. Reset level: 0
+|                    |                 | 14:12 | FSEL54 (RPI 4 and later only)         | R/W | Function select GPIO54. Reset level: 0
+|                    |                 | 11:9  | FSEL53                                | R/W | Function select GPIO53. Reset level: 0
 |                    |                 | 8:56  | FSEL52                                | R/W | Function select GPIO52. Reset level: 0
 |                    |                 | 5:3   | FSEL51                                | R/W | Function select GPIO51. Reset level: 0
 |                    |                 | 2:0   | FSEL50                                | R/W | Function select GPIO50. Reset level: 0
@@ -102,7 +106,10 @@ Pinout:
 |                    |                 | 2     | SET2                                  | R/W | Set GPIO2 (0 = no effect, 1 = set GPIO)
 |                    |                 | 1     | SET1                                  | R/W | Set GPIO1 (0 = no effect, 1 = set GPIO)
 |                    |                 | 0     | SET0                                  | R/W | Set GPIO0 (0 = no effect, 1 = set GPIO)
-| RPI_GPIO_GPSET1    | Base+0x00200020 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPSET1    | Base+0x00200020 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | SET56 (RPI 4 and later only)          | R/W | Set GPIO56 (0 = no effect, 1 = set GPIO)
+|                    |                 | 23    | SET55 (RPI 4 and later only)          | R/W | Set GPIO55 (0 = no effect, 1 = set GPIO)
+|                    |                 | 22    | SET54 (RPI 4 and later only)          | R/W | Set GPIO54 (0 = no effect, 1 = set GPIO)
 |                    |                 | 21    | SET53                                 | R/W | Set GPIO53 (0 = no effect, 1 = set GPIO)
 |                    |                 | 20    | SET52                                 | R/W | Set GPIO52 (0 = no effect, 1 = set GPIO)
 |                    |                 | 19    | SET51                                 | R/W | Set GPIO51 (0 = no effect, 1 = set GPIO)
@@ -158,7 +165,10 @@ Pinout:
 |                    |                 | 2     | CLR2                                  | R/W | Clear GPIO2 (0 = no effect, 1 = clear GPIO)
 |                    |                 | 1     | CLR1                                  | R/W | Clear GPIO1 (0 = no effect, 1 = clear GPIO)
 |                    |                 | 0     | CLR0                                  | R/W | Clear GPIO0 (0 = no effect, 1 = clear GPIO)
-| RPI_GPIO_GPCLR1    | Base+0x0020002C | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPCLR1    | Base+0x0020002C | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | CLR56 (RPI 4 and later only)          | R/W | Clear GPIO56 (0 = no effect, 1 = clear GPIO)
+|                    |                 | 23    | CLR55 (RPI 4 and later only)          | R/W | Clear GPIO55 (0 = no effect, 1 = clear GPIO)
+|                    |                 | 22    | CLR54 (RPI 4 and later only)          | R/W | Clear GPIO54 (0 = no effect, 1 = clear GPIO)
 |                    |                 | 21    | CLR53                                 | R/W | Clear GPIO53 (0 = no effect, 1 = clear GPIO)
 |                    |                 | 20    | CLR52                                 | R/W | Clear GPIO52 (0 = no effect, 1 = clear GPIO)
 |                    |                 | 19    | CLR51                                 | R/W | Clear GPIO51 (0 = no effect, 1 = clear GPIO)
@@ -214,7 +224,10 @@ Pinout:
 |                    |                 | 2     | LEV2                                  | R/W | Level GPIO2 (0 = low, 1 = high)
 |                    |                 | 1     | LEV1                                  | R/W | Level GPIO1 (0 = low, 1 = high)
 |                    |                 | 0     | LEV0                                  | R/W | Level GPIO0 (0 = low, 1 = high)
-| RPI_GPIO_GPLEV1    | Base+0x00200038 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPLEV1    | Base+0x00200038 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | LEV56 (RPI 4 and later only)          | R/W | Level GPIO56 (0 = low, 1 = high)
+|                    |                 | 23    | LEV55 (RPI 4 and later only)          | R/W | Level GPIO55 (0 = low, 1 = high)
+|                    |                 | 22    | LEV54 (RPI 4 and later only)          | R/W | Level GPIO54 (0 = low, 1 = high)
 |                    |                 | 21    | LEV53                                 | R/W | Level GPIO53 (0 = low, 1 = high)
 |                    |                 | 20    | LEV52                                 | R/W | Level GPIO52 (0 = low, 1 = high)
 |                    |                 | 19    | LEV51                                 | R/W | Level GPIO51 (0 = low, 1 = high)
@@ -270,7 +283,10 @@ Pinout:
 |                    |                 | 2     | EDS2                                  | R/W | Event detected GPIO2 (0 = event not detected, 1 = event detected)
 |                    |                 | 1     | EDS1                                  | R/W | Event detected GPIO1 (0 = event not detected, 1 = event detected)
 |                    |                 | 0     | EDS0                                  | R/W | Event detected GPIO0 (0 = event not detected, 1 = event detected)
-| RPI_GPIO_GPEDS1    | Base+0x00200044 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPEDS1    | Base+0x00200044 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | EDS56 (RPI 4 and later only)          | R/W | Event detected GPIO56 (0 = event not detected, 1 = event detected)
+|                    |                 | 23    | EDS55 (RPI 4 and later only)          | R/W | Event detected GPIO55 (0 = event not detected, 1 = event detected)
+|                    |                 | 22    | EDS54 (RPI 4 and later only)          | R/W | Event detected GPIO54 (0 = event not detected, 1 = event detected)
 |                    |                 | 21    | EDS53                                 | R/W | Event detected GPIO53 (0 = event not detected, 1 = event detected)
 |                    |                 | 20    | EDS52                                 | R/W | Event detected GPIO52 (0 = event not detected, 1 = event detected)
 |                    |                 | 19    | EDS51                                 | R/W | Event detected GPIO51 (0 = event not detected, 1 = event detected)
@@ -326,7 +342,10 @@ Pinout:
 |                    |                 | 2     | GPREN2                                | R/W | Rising edge detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPREN1                                | R/W | Rising edge detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPREN0                                | R/W | Rising edge detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPREN1    | Base+0x00200050 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPREN1    | Base+0x00200050 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPREN56 (RPI 4 and later only)        | R/W | Rising edge detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPREN55 (RPI 4 and later only)        | R/W | Rising edge detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPREN54 (RPI 4 and later only)        | R/W | Rising edge detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPREN53                               | R/W | Rising edge detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPREN52                               | R/W | Rising edge detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPREN51                               | R/W | Rising edge detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -382,7 +401,10 @@ Pinout:
 |                    |                 | 2     | GPFEN2                                | R/W | Falling edge detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPFEN1                                | R/W | Falling edge detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPFEN0                                | R/W | Falling edge detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPFEN1    | Base+0x0020005C | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPFEN1    | Base+0x0020005C | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPFEN56 (RPI 4 and later only)        | R/W | Falling edge detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPFEN55 (RPI 4 and later only)        | R/W | Falling edge detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPFEN54 (RPI 4 and later only)        | R/W | Falling edge detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPFEN53                               | R/W | Falling edge detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPFEN52                               | R/W | Falling edge detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPFEN51                               | R/W | Falling edge detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -438,7 +460,10 @@ Pinout:
 |                    |                 | 2     | GPHEN2                                | R/W | High level detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPHEN1                                | R/W | High level detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPHEN0                                | R/W | High level detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPHEN1    | Base+0x00200068 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPHEN1    | Base+0x00200068 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPHEN56 (RPI 4 and later only)        | R/W | High level detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPHEN55 (RPI 4 and later only)        | R/W | High level detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPHEN54 (RPI 4 and later only)        | R/W | High level detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPHEN53                               | R/W | High level detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPHEN52                               | R/W | High level detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPHEN51                               | R/W | High level detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -494,7 +519,10 @@ Pinout:
 |                    |                 | 2     | GPLEN2                                | R/W | Low level detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPLEN1                                | R/W | Low level detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPLEN0                                | R/W | Low level detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPLEN1    | Base+0x00200074 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPLEN1    | Base+0x00200074 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPLEN56 (RPI 4 and later only)        | R/W | Low level detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPLEN55 (RPI 4 and later only)        | R/W | Low level detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPLEN54 (RPI 4 and later only)        | R/W | Low level detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPLEN53                               | R/W | Low level detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPLEN52                               | R/W | Low level detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPLEN51                               | R/W | Low level detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -550,7 +578,10 @@ Pinout:
 |                    |                 | 2     | GPAREN2                               | R/W | Asynchronous rising edge detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPAREN1                               | R/W | Asynchronous rising edge detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPAREN0                               | R/W | Asynchronous rising edge detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPAREN1   | Base+0x00200080 | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPAREN1   | Base+0x00200080 | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPAREN56 (RPI 4 and later only)       | R/W | Asynchronous rising edge detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPAREN55 (RPI 4 and later only)       | R/W | Asynchronous rising edge detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPAREN54 (RPI 4 and later only)       | R/W | Asynchronous rising edge detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPAREN53                              | R/W | Asynchronous rising edge detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPAREN52                              | R/W | Asynchronous rising edge detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPAREN51                              | R/W | Asynchronous rising edge detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -606,7 +637,10 @@ Pinout:
 |                    |                 | 2     | GPAFEN2                               | R/W | Asynchronous falling edge detect enable GPIO2 (0 = enabled, 1 = disabled)
 |                    |                 | 1     | GPAFEN1                               | R/W | Asynchronous falling edge detect enable GPIO1 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPAFEN0                               | R/W | Asynchronous falling edge detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPAFEN1   | Base+0x0020008C | 31:22 | -                                     | R/W | Unused
+| RPI_GPIO_GPAFEN1   | Base+0x0020008C | 31:25 | -                                     | R/W | Unused
+|                    |                 | 24    | GPAFEN56 (RPI 4 and later only)       | R/W | Asynchronous falling edge detect enable GPIO56 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | GPAFEN55 (RPI 4 and later only)       | R/W | Asynchronous falling edge detect enable GPIO55 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | GPAFEN54 (RPI 4 and later only)       | R/W | Asynchronous falling edge detect enable GPIO54 (0 = enabled, 1 = disabled)
 |                    |                 | 21    | GPAFEN53                              | R/W | Asynchronous falling edge detect enable GPIO53 (0 = enabled, 1 = disabled)
 |                    |                 | 20    | GPAFEN52                              | R/W | Asynchronous falling edge detect enable GPIO52 (0 = enabled, 1 = disabled)
 |                    |                 | 19    | GPAFEN51                              | R/W | Asynchronous falling edge detect enable GPIO51 (0 = enabled, 1 = disabled)
@@ -630,68 +664,127 @@ Pinout:
 |                    |                 | 1     | GPAFEN33                              | R/W | Asynchronous falling edge detect enable GPIO33 (0 = enabled, 1 = disabled)
 |                    |                 | 0     | GPAFEN32                              | R/W | Asynchronous falling edge detect enable GPIO32 (0 = enabled, 1 = disabled)
 | -                  | Base+0x00200090 | 31:0  | -                                     | -   | Reserved
-| RPI_GPIO_GPPUD     | Base+0x00200094 | 31:2  | R                                     | -   | Unused
-|                    |                 | 1:0   | PUD                                   | R/W | Pull up/down mode<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
-| RPI_GPIO_GPPUDCLK0 | Base+0x00200098 | 31    | PUDCLK31                              | R/W | Pull up/down set GPIO31 (0 = no effect, 1 = asser change on GPIO)<br/>Process:<br/>1. Write to GPPUD register to set pull up/ down<br/>2. Wait 150 cycles<br/>3. Write to GPPUDCLK0/1 to assert the clock for selected GPIO(s)<br/>4. Wait 150 cycles<br/>5. Write 00 to GPPUD to remove control signal<br/>6. Write to GPPUDCLK0/1 to remove the clock for selected GPIO(s)
-|                    |                 | 30    | PUDCLK30                              | R/W | Asynchronous falling edge detect enable GPIO30 (0 = enabled, 1 = disabled)
-|                    |                 | 29    | PUDCLK29                              | R/W | Asynchronous falling edge detect enable GPIO29 (0 = enabled, 1 = disabled)
-|                    |                 | 28    | PUDCLK28                              | R/W | Asynchronous falling edge detect enable GPIO28 (0 = enabled, 1 = disabled)
-|                    |                 | 27    | PUDCLK27                              | R/W | Asynchronous falling edge detect enable GPIO27 (0 = enabled, 1 = disabled)
-|                    |                 | 26    | PUDCLK26                              | R/W | Asynchronous falling edge detect enable GPIO26 (0 = enabled, 1 = disabled)
-|                    |                 | 25    | PUDCLK25                              | R/W | Asynchronous falling edge detect enable GPIO25 (0 = enabled, 1 = disabled)
-|                    |                 | 24    | PUDCLK24                              | R/W | Asynchronous falling edge detect enable GPIO24 (0 = enabled, 1 = disabled)
-|                    |                 | 23    | PUDCLK23                              | R/W | Asynchronous falling edge detect enable GPIO23 (0 = enabled, 1 = disabled)
-|                    |                 | 22    | PUDCLK22                              | R/W | Asynchronous falling edge detect enable GPIO22 (0 = enabled, 1 = disabled)
-|                    |                 | 21    | PUDCLK21                              | R/W | Asynchronous falling edge detect enable GPIO21 (0 = enabled, 1 = disabled)
-|                    |                 | 20    | PUDCLK20                              | R/W | Asynchronous falling edge detect enable GPIO20 (0 = enabled, 1 = disabled)
-|                    |                 | 19    | PUDCLK19                              | R/W | Asynchronous falling edge detect enable GPIO19 (0 = enabled, 1 = disabled)
-|                    |                 | 18    | PUDCLK18                              | R/W | Asynchronous falling edge detect enable GPIO18 (0 = enabled, 1 = disabled)
-|                    |                 | 17    | PUDCLK17                              | R/W | Asynchronous falling edge detect enable GPIO17 (0 = enabled, 1 = disabled)
-|                    |                 | 16    | PUDCLK16                              | R/W | Asynchronous falling edge detect enable GPIO16 (0 = enabled, 1 = disabled)
-|                    |                 | 15    | PUDCLK15                              | R/W | Asynchronous falling edge detect enable GPIO15 (0 = enabled, 1 = disabled)
-|                    |                 | 14    | PUDCLK14                              | R/W | Asynchronous falling edge detect enable GPIO14 (0 = enabled, 1 = disabled)
-|                    |                 | 13    | PUDCLK13                              | R/W | Asynchronous falling edge detect enable GPIO13 (0 = enabled, 1 = disabled)
-|                    |                 | 12    | PUDCLK12                              | R/W | Asynchronous falling edge detect enable GPIO12 (0 = enabled, 1 = disabled)
-|                    |                 | 11    | PUDCLK11                              | R/W | Asynchronous falling edge detect enable GPIO11 (0 = enabled, 1 = disabled)
-|                    |                 | 10    | PUDCLK10                              | R/W | Asynchronous falling edge detect enable GPIO10 (0 = enabled, 1 = disabled)
-|                    |                 | 9     | PUDCLK9                               | R/W | Asynchronous falling edge detect enable GPIO9 (0 = enabled, 1 = disabled)
-|                    |                 | 8     | PUDCLK8                               | R/W | Asynchronous falling edge detect enable GPIO8 (0 = enabled, 1 = disabled)
-|                    |                 | 7     | PUDCLK7                               | R/W | Asynchronous falling edge detect enable GPIO7 (0 = enabled, 1 = disabled)
-|                    |                 | 6     | PUDCLK6                               | R/W | Asynchronous falling edge detect enable GPIO6 (0 = enabled, 1 = disabled)
-|                    |                 | 5     | PUDCLK5                               | R/W | Asynchronous falling edge detect enable GPIO5 (0 = enabled, 1 = disabled)
-|                    |                 | 4     | PUDCLK4                               | R/W | Asynchronous falling edge detect enable GPIO4 (0 = enabled, 1 = disabled)
-|                    |                 | 3     | PUDCLK3                               | R/W | Asynchronous falling edge detect enable GPIO3 (0 = enabled, 1 = disabled)
-|                    |                 | 2     | PUDCLK2                               | R/W | Asynchronous falling edge detect enable GPIO2 (0 = enabled, 1 = disabled)
-|                    |                 | 1     | PUDCLK1                               | R/W | Asynchronous falling edge detect enable GPIO1 (0 = enabled, 1 = disabled)
-|                    |                 | 0     | PUDCLK0                               | R/W | Asynchronous falling edge detect enable GPIO0 (0 = enabled, 1 = disabled)
-| RPI_GPIO_GPPUDCLK1 | Base+0x0020009C | 31:22 | -                                     | R/W | Unused
-|                    |                 | 21    | PUDCLK53                              | R/W | Asynchronous falling edge detect enable GPIO53 (0 = enabled, 1 = disabled)
-|                    |                 | 20    | PUDCLK52                              | R/W | Asynchronous falling edge detect enable GPIO52 (0 = enabled, 1 = disabled)
-|                    |                 | 19    | PUDCLK51                              | R/W | Asynchronous falling edge detect enable GPIO51 (0 = enabled, 1 = disabled)
-|                    |                 | 18    | PUDCLK50                              | R/W | Asynchronous falling edge detect enable GPIO50 (0 = enabled, 1 = disabled)
-|                    |                 | 17    | PUDCLK49                              | R/W | Asynchronous falling edge detect enable GPIO49 (0 = enabled, 1 = disabled)
-|                    |                 | 16    | PUDCLK48                              | R/W | Asynchronous falling edge detect enable GPIO48 (0 = enabled, 1 = disabled)
-|                    |                 | 15    | PUDCLK47                              | R/W | Asynchronous falling edge detect enable GPIO47 (0 = enabled, 1 = disabled)
-|                    |                 | 14    | PUDCLK46                              | R/W | Asynchronous falling edge detect enable GPIO46 (0 = enabled, 1 = disabled)
-|                    |                 | 13    | PUDCLK45                              | R/W | Asynchronous falling edge detect enable GPIO45 (0 = enabled, 1 = disabled)
-|                    |                 | 12    | PUDCLK44                              | R/W | Asynchronous falling edge detect enable GPIO44 (0 = enabled, 1 = disabled)
-|                    |                 | 11    | PUDCLK43                              | R/W | Asynchronous falling edge detect enable GPIO43 (0 = enabled, 1 = disabled)
-|                    |                 | 10    | PUDCLK42                              | R/W | Asynchronous falling edge detect enable GPIO42 (0 = enabled, 1 = disabled)
-|                    |                 | 9     | PUDCLK41                              | R/W | Asynchronous falling edge detect enable GPIO41 (0 = enabled, 1 = disabled)
-|                    |                 | 8     | PUDCLK40                              | R/W | Asynchronous falling edge detect enable GPIO40 (0 = enabled, 1 = disabled)
-|                    |                 | 7     | PUDCLK39                              | R/W | Asynchronous falling edge detect enable GPIO39 (0 = enabled, 1 = disabled)
-|                    |                 | 6     | PUDCLK38                              | R/W | Asynchronous falling edge detect enable GPIO38 (0 = enabled, 1 = disabled)
-|                    |                 | 5     | PUDCLK37                              | R/W | Asynchronous falling edge detect enable GPIO37 (0 = enabled, 1 = disabled)
-|                    |                 | 4     | PUDCLK36                              | R/W | Asynchronous falling edge detect enable GPIO36 (0 = enabled, 1 = disabled)
-|                    |                 | 3     | PUDCLK35                              | R/W | Asynchronous falling edge detect enable GPIO35 (0 = enabled, 1 = disabled)
-|                    |                 | 2     | PUDCLK34                              | R/W | Asynchronous falling edge detect enable GPIO34 (0 = enabled, 1 = disabled)
-|                    |                 | 1     | PUDCLK33                              | R/W | Asynchronous falling edge detect enable GPIO33 (0 = enabled, 1 = disabled)
-|                    |                 | 0     | PUDCLK32                              | R/W | Asynchronous falling edge detect enable GPIO32 (0 = enabled, 1 = disabled)
+| RPI_GPIO_GPPUD     | Base+0x00200094 | 31:2  | -                                     | -   | Unused
+|                    |                 | 1:0   | PUD       (RPI 3)                     | R/W | Pull up/down mode<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+| RPI_GPIO_GPPUDCLK0 | Base+0x00200098 | 31    | PUDCLK31  (RPI 3)                     | R/W | Pull up/down set GPIO31 (0 = no effect, 1 = assert change on GPIO)<br/>Process:<br/>1. Write to GPPUD register to set pull up/ down<br/>2. Wait 150 cycles<br/>3. Write to GPPUDCLK0/1 to assert the clock for selected GPIO(s)<br/>4. Wait 150 cycles<br/>5. Write 00 to GPPUD to remove control signal<br/>6. Write to GPPUDCLK0/1 to remove the clock for selected GPIO(s)
+|                    |                 | 30    | PUDCLK30  (RPI 3)                     | R/W | Pull up/down set GPIO30 (0 = enabled, 1 = disabled)
+|                    |                 | 29    | PUDCLK29  (RPI 3)                     | R/W | Pull up/down set GPIO29 (0 = enabled, 1 = disabled)
+|                    |                 | 28    | PUDCLK28  (RPI 3)                     | R/W | Pull up/down set GPIO28 (0 = enabled, 1 = disabled)
+|                    |                 | 27    | PUDCLK27  (RPI 3)                     | R/W | Pull up/down set GPIO27 (0 = enabled, 1 = disabled)
+|                    |                 | 26    | PUDCLK26  (RPI 3)                     | R/W | Pull up/down set GPIO26 (0 = enabled, 1 = disabled)
+|                    |                 | 25    | PUDCLK25  (RPI 3)                     | R/W | Pull up/down set GPIO25 (0 = enabled, 1 = disabled)
+|                    |                 | 24    | PUDCLK24  (RPI 3)                     | R/W | Pull up/down set GPIO24 (0 = enabled, 1 = disabled)
+|                    |                 | 23    | PUDCLK23  (RPI 3)                     | R/W | Pull up/down set GPIO23 (0 = enabled, 1 = disabled)
+|                    |                 | 22    | PUDCLK22  (RPI 3)                     | R/W | Pull up/down set GPIO22 (0 = enabled, 1 = disabled)
+|                    |                 | 21    | PUDCLK21  (RPI 3)                     | R/W | Pull up/down set GPIO21 (0 = enabled, 1 = disabled)
+|                    |                 | 20    | PUDCLK20  (RPI 3)                     | R/W | Pull up/down set GPIO20 (0 = enabled, 1 = disabled)
+|                    |                 | 19    | PUDCLK19  (RPI 3)                     | R/W | Pull up/down set GPIO19 (0 = enabled, 1 = disabled)
+|                    |                 | 18    | PUDCLK18  (RPI 3)                     | R/W | Pull up/down set GPIO18 (0 = enabled, 1 = disabled)
+|                    |                 | 17    | PUDCLK17  (RPI 3)                     | R/W | Pull up/down set GPIO17 (0 = enabled, 1 = disabled)
+|                    |                 | 16    | PUDCLK16  (RPI 3)                     | R/W | Pull up/down set GPIO16 (0 = enabled, 1 = disabled)
+|                    |                 | 15    | PUDCLK15  (RPI 3)                     | R/W | Pull up/down set GPIO15 (0 = enabled, 1 = disabled)
+|                    |                 | 14    | PUDCLK14  (RPI 3)                     | R/W | Pull up/down set GPIO14 (0 = enabled, 1 = disabled)
+|                    |                 | 13    | PUDCLK13  (RPI 3)                     | R/W | Pull up/down set GPIO13 (0 = enabled, 1 = disabled)
+|                    |                 | 12    | PUDCLK12  (RPI 3)                     | R/W | Pull up/down set GPIO12 (0 = enabled, 1 = disabled)
+|                    |                 | 11    | PUDCLK11  (RPI 3)                     | R/W | Pull up/down set GPIO11 (0 = enabled, 1 = disabled)
+|                    |                 | 10    | PUDCLK10  (RPI 3)                     | R/W | Pull up/down set GPIO10 (0 = enabled, 1 = disabled)
+|                    |                 | 9     | PUDCLK9   (RPI 3)                     | R/W | Pull up/down set GPIO9 (0 = enabled, 1 = disabled)
+|                    |                 | 8     | PUDCLK8   (RPI 3)                     | R/W | Pull up/down set GPIO8 (0 = enabled, 1 = disabled)
+|                    |                 | 7     | PUDCLK7   (RPI 3)                     | R/W | Pull up/down set GPIO7 (0 = enabled, 1 = disabled)
+|                    |                 | 6     | PUDCLK6   (RPI 3)                     | R/W | Pull up/down set GPIO6 (0 = enabled, 1 = disabled)
+|                    |                 | 5     | PUDCLK5   (RPI 3)                     | R/W | Pull up/down set GPIO5 (0 = enabled, 1 = disabled)
+|                    |                 | 4     | PUDCLK4   (RPI 3)                     | R/W | Pull up/down set GPIO4 (0 = enabled, 1 = disabled)
+|                    |                 | 3     | PUDCLK3   (RPI 3)                     | R/W | Pull up/down set GPIO3 (0 = enabled, 1 = disabled)
+|                    |                 | 2     | PUDCLK2   (RPI 3)                     | R/W | Pull up/down set GPIO2 (0 = enabled, 1 = disabled)
+|                    |                 | 1     | PUDCLK1   (RPI 3)                     | R/W | Pull up/down set GPIO1 (0 = enabled, 1 = disabled)
+|                    |                 | 0     | PUDCLK0   (RPI 3)                     | R/W | Pull up/down set GPIO0 (0 = enabled, 1 = disabled)
+| RPI_GPIO_GPPUDCLK1 | Base+0x0020009C | 31:22 | -         (RPI 3)                     | R/W | Unused
+|                    |                 | 21    | PUDCLK53  (RPI 3)                     | R/W | Pull up/down set GPIO53 (0 = enabled, 1 = disabled)
+|                    |                 | 20    | PUDCLK52  (RPI 3)                     | R/W | Pull up/down set GPIO52 (0 = enabled, 1 = disabled)
+|                    |                 | 19    | PUDCLK51  (RPI 3)                     | R/W | Pull up/down set GPIO51 (0 = enabled, 1 = disabled)
+|                    |                 | 18    | PUDCLK50  (RPI 3)                     | R/W | Pull up/down set GPIO50 (0 = enabled, 1 = disabled)
+|                    |                 | 17    | PUDCLK49  (RPI 3)                     | R/W | Pull up/down set GPIO49 (0 = enabled, 1 = disabled)
+|                    |                 | 16    | PUDCLK48  (RPI 3)                     | R/W | Pull up/down set GPIO48 (0 = enabled, 1 = disabled)
+|                    |                 | 15    | PUDCLK47  (RPI 3)                     | R/W | Pull up/down set GPIO47 (0 = enabled, 1 = disabled)
+|                    |                 | 14    | PUDCLK46  (RPI 3)                     | R/W | Pull up/down set GPIO46 (0 = enabled, 1 = disabled)
+|                    |                 | 13    | PUDCLK45  (RPI 3)                     | R/W | Pull up/down set GPIO45 (0 = enabled, 1 = disabled)
+|                    |                 | 12    | PUDCLK44  (RPI 3)                     | R/W | Pull up/down set GPIO44 (0 = enabled, 1 = disabled)
+|                    |                 | 11    | PUDCLK43  (RPI 3)                     | R/W | Pull up/down set GPIO43 (0 = enabled, 1 = disabled)
+|                    |                 | 10    | PUDCLK42  (RPI 3)                     | R/W | Pull up/down set GPIO42 (0 = enabled, 1 = disabled)
+|                    |                 | 9     | PUDCLK41  (RPI 3)                     | R/W | Pull up/down set GPIO41 (0 = enabled, 1 = disabled)
+|                    |                 | 8     | PUDCLK40  (RPI 3)                     | R/W | Pull up/down set GPIO40 (0 = enabled, 1 = disabled)
+|                    |                 | 7     | PUDCLK39  (RPI 3)                     | R/W | Pull up/down set GPIO39 (0 = enabled, 1 = disabled)
+|                    |                 | 6     | PUDCLK38  (RPI 3)                     | R/W | Pull up/down set GPIO38 (0 = enabled, 1 = disabled)
+|                    |                 | 5     | PUDCLK37  (RPI 3)                     | R/W | Pull up/down set GPIO37 (0 = enabled, 1 = disabled)
+|                    |                 | 4     | PUDCLK36  (RPI 3)                     | R/W | Pull up/down set GPIO36 (0 = enabled, 1 = disabled)
+|                    |                 | 3     | PUDCLK35  (RPI 3)                     | R/W | Pull up/down set GPIO35 (0 = enabled, 1 = disabled)
+|                    |                 | 2     | PUDCLK34  (RPI 3)                     | R/W | Pull up/down set GPIO34 (0 = enabled, 1 = disabled)
+|                    |                 | 1     | PUDCLK33  (RPI 3)                     | R/W | Pull up/down set GPIO33 (0 = enabled, 1 = disabled)
+|                    |                 | 0     | PUDCLK32  (RPI 3)                     | R/W | Pull up/down set GPIO32 (0 = enabled, 1 = disabled)
 | -                  | Base+0x002000A0 | 31:0  | -                                     | -   | Reserved
 | -                  | Base+0x002000A4 | 31:0  | -                                     | -   | Reserved
 | -                  | Base+0x002000A8 | 31:0  | -                                     | -   | Reserved
 | -                  | Base+0x002000AC | 31:0  | -                                     | -   | Reserved
-| -                  | Base+0x002000B0 | 31:0  | -                                     | -   | Test
+| -                  | Base+0x002000B0 | 31:0  | Undocumented                          | -   | Test
+| RPI_GPIO_GPPINMUXSD| Base+0x002000D0 | -     | Undocumented                          | -   | GPIO pull up/down pin multiplexer register
+| RPI_GPIO_GPPUPPDN0 | Base+0x002000E4 | 31:30 | PUD15 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO15<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 29:28 | PUD14 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO14<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 27:26 | PUD13 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO13<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 25:24 | PUD12 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO12<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 23:22 | PUD11 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO11<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 21:20 | PUD10 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO10<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 19:18 | PUD9  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO9<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 17:16 | PUD8  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO8<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 15:14 | PUD7  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO7<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 13:12 | PUD6  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO6<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 11:10 | PUD5  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO5<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 9:8   | PUD4  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO4<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 7:6   | PUD3  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO3<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 5:4   | PUD2  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO2<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 3:2   | PUD1  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO1<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 1:0   | PUD0  (RPI 4 and later only)          | R/W | Pull up/down mode GPIO0<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+| RPI_GPIO_GPPUPPDN1 | Base+0x002000E8 | 31:30 | PUD31 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO31<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 29:28 | PUD30 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO30<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 27:26 | PUD29 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO29<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 25:24 | PUD28 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO28<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 23:22 | PUD27 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO27<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 21:20 | PUD26 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO26<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 19:18 | PUD25 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO25<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 17:16 | PUD24 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO24<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 15:14 | PUD23 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO23<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 13:12 | PUD22 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO22<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 11:10 | PUD21 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO21<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 9:8   | PUD20 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO20<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 7:6   | PUD19 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO19<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 5:4   | PUD18 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO18<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 3:2   | PUD17 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO17<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 1:0   | PUD16 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO16<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+| RPI_GPIO_GPPUPPDN2 | Base+0x002000EC | 31:30 | PUD47 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO47<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 29:28 | PUD46 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO46<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 27:26 | PUD45 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO45<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 25:24 | PUD44 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO44<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 23:22 | PUD43 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO43<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 21:20 | PUD42 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO42<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 19:18 | PUD41 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO41<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 17:16 | PUD40 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO40<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 15:14 | PUD39 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO39<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 13:12 | PUD38 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO38<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 11:10 | PUD37 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO37<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 9:8   | PUD36 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO36<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 7:6   | PUD35 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO35<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 5:4   | PUD34 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO34<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 3:2   | PUD33 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO33<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 1:0   | PUD32 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO32<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+| RPI_GPIO_GPPUPPDN3 | Base+0x002000F0 | 31:18 | -                                     | R   | Unused
+|                    |                 | 17:16 | PUD56 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO56<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 15:14 | PUD55 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO55<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 13:12 | PUD54 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO54<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 11:10 | PUD53 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO53<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 9:8   | PUD52 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO52<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 7:6   | PUD51 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO51<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 5:4   | PUD50 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO50<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 3:2   | PUD49 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO49<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
+|                    |                 | 1:0   | PUD48 (RPI 4 and later only)          | R/W | Pull up/down mode GPIO48<br/>00 = Off (disable pull up/down)<br/>01 - enable pull down control<br/>10 - enable pull up control<br/>11 = reserved
 
 ## Pull up-down mode {#RASPBERRY_PI_GPIO_PULL_UP_DOWN_MODE}
 

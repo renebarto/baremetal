@@ -128,8 +128,8 @@ System::System(IMemoryAccess &memoryAccess)
 void System::Halt()
 {
     LOG_INFO("Halt");
-    Timer::WaitMilliSeconds(WaitTime);
     GetInterruptSystem().Shutdown();
+    Timer::WaitMilliSeconds(WaitTime);
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
@@ -152,8 +152,8 @@ void System::Halt()
 void System::Reboot()
 {
     LOG_INFO("Reboot");
-    Timer::WaitMilliSeconds(WaitTime);
     GetInterruptSystem().Shutdown();
+    Timer::WaitMilliSeconds(WaitTime);
 
     DisableIRQs();
     DisableFIQs();

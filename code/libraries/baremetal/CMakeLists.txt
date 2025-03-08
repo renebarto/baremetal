@@ -33,6 +33,7 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionStub.S
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/GPIOManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/InterruptHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Interrupts.cpp
@@ -66,7 +67,9 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ExceptionHandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/GPIOManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h

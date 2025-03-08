@@ -34,108 +34,122 @@ Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
-47: namespace baremetal
-48: {
+48: namespace baremetal {
 49: 
-50: class InterruptSystem;
-51: class IMemoryAccess;
-52: 
-53: /// @brief Periodic timer tick handler
-54: using PeriodicTimerHandler = void(void);
-55: 
-56: /// @brief Maximum number of periodic tick handlers which can be installed
-57: #define TIMER_MAX_PERIODIC_HANDLERS 4
-58: 
-59: /// <summary>
-60: /// Timer class. For now only contains busy waiting methods
-61: ///
-62: /// Note that this class is created as a singleton, using the GetTimer() function.
-63: /// </summary>
-64: class Timer
-65: {
-66:     /// <summary>
-67:     /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-68:     /// </summary>
-69:     /// <returns>A reference to the singleton Timer</returns>
-70:     friend Timer &GetTimer();
-71: 
-72: private:
-73:     /// @brief True if class is already initialized
-74:     bool m_isInitialized;
-75:     /// @brief Reference to the singleton InterruptSystem instantiation.
-76:     InterruptSystem &m_interruptSystem;
-77:     /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-78:     IMemoryAccess &m_memoryAccess;
-79:     /// @brief Clock ticks per timer tick
-80:     uint64 m_clockTicksPerSystemTick;
-81:     /// @brief Timer tick counter
-82:     volatile uint64 m_ticks;
-83:     /// @brief Uptime in seconds
-84:     volatile uint32 m_upTime;
-85:     /// @brief Time in seconds (epoch time)
-86:     volatile uint64 m_time;
-87:     /// @brief Periodic tick handler functions
-88:     PeriodicTimerHandler *m_periodicHandlers[TIMER_MAX_PERIODIC_HANDLERS];
-89:     /// @brief Number of periodic tick handler functions installed
-90:     volatile unsigned     m_numPeriodicHandlers;
-91: 
-92:     Timer();
-93: 
-94: public:
-95:     Timer(IMemoryAccess &memoryAccess);
-96:     ~Timer();
-97: 
-98:     void Initialize();
-99: 
-100:     uint64 GetTicks() const;
-101: 
-102:     uint32 GetUptime() const;
-103: 
-104:     uint64 GetTime() const;
-105: 
-106:     void GetTimeString(char* buffer, size_t bufferSize);
-107: 
-108:     void RegisterPeriodicHandler(PeriodicTimerHandler *handler);
-109:     void UnregisterPeriodicHandler(PeriodicTimerHandler *handler);
+50: /// @brief Number of milliseconds in a second
+51: #define MSEC_PER_SEC  1000
+52: /// @brief Number of microseconds in a second
+53: #define USEC_PER_SEC  1000000
+54: /// @brief Number of microseconds in a millisecond
+55: #define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
+56: /// @brief Number of timer ticks per second
+57: #define TICKS_PER_SECOND 100                               
+58: /// @brief Convert milliseconds to timer ticks
+59: #define MSEC2TICKS(msec) (((msec) * TICKS_PER_SECOND) / MSEC_PER_SEC)
+60: 
+61: class InterruptSystem;
+62: class IMemoryAccess;
+63: 
+64: /// @brief Periodic timer tick handler
+65: using PeriodicTimerHandler = void(void);
+66: 
+67: /// @brief Maximum number of periodic tick handlers which can be installed
+68: #define TIMER_MAX_PERIODIC_HANDLERS 4
+69: 
+70: /// <summary>
+71: /// Timer class. For now only contains busy waiting methods
+72: ///
+73: /// Note that this class is created as a singleton, using the GetTimer() function.
+74: /// </summary>
+75: class Timer
+76: {
+77:     /// <summary>
+78:     /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+79:     /// </summary>
+80:     /// <returns>A reference to the singleton Timer</returns>
+81:     friend Timer &GetTimer();
+82: 
+83: private:
+84:     /// @brief True if class is already initialized
+85:     bool m_isInitialized;
+86:     /// @brief Reference to the singleton InterruptSystem instantiation.
+87:     InterruptSystem &m_interruptSystem;
+88:     /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+89:     IMemoryAccess &m_memoryAccess;
+90:     /// @brief Clock ticks per timer tick
+91:     uint64 m_clockTicksPerSystemTick;
+92:     /// @brief Timer tick counter
+93:     volatile uint64 m_ticks;
+94:     /// @brief Uptime in seconds
+95:     volatile uint32 m_upTime;
+96:     /// @brief Time in seconds (epoch time)
+97:     volatile uint64 m_time;
+98:     /// @brief Periodic tick handler functions
+99:     PeriodicTimerHandler *m_periodicHandlers[TIMER_MAX_PERIODIC_HANDLERS];
+100:     /// @brief Number of periodic tick handler functions installed
+101:     volatile unsigned     m_numPeriodicHandlers;
+102: 
+103:     Timer();
+104: 
+105: public:
+106:     Timer(IMemoryAccess &memoryAccess);
+107:     ~Timer();
+108: 
+109:     void Initialize();
 110: 
-111:     static void WaitCycles(uint32 numCycles);
+111:     uint64 GetTicks() const;
 112: 
-113:     uint64 GetSystemTimer();
+113:     uint32 GetUptime() const;
 114: 
-115:     static void WaitMilliSeconds(uint64 msec);
-116:     static void WaitMicroSeconds(uint64 usec);
-117: 
-118: private:
-119:     void InterruptHandler();
-120:     static void InterruptHandler(void *param);
-121: };
-122: 
-123: Timer &GetTimer();
-124: 
-125: } // namespace baremetal
+115:     uint64 GetTime() const;
+116: 
+117:     void GetTimeString(char* buffer, size_t bufferSize);
+118: 
+119:     void RegisterPeriodicHandler(PeriodicTimerHandler *handler);
+120:     void UnregisterPeriodicHandler(PeriodicTimerHandler *handler);
+121: 
+122:     static void WaitCycles(uint32 numCycles);
+123: 
+124:     uint64 GetSystemTimer();
+125: 
+126:     static void WaitMilliSeconds(uint64 msec);
+127:     static void WaitMicroSeconds(uint64 usec);
+128: 
+129: private:
+130:     void InterruptHandler();
+131:     static void InterruptHandler(void *param);
+132: };
+133: 
+134: Timer &GetTimer();
+135: 
+136: } // namespace baremetal
 ```
 
-- Line 54: We define a new type `PeriodicTimerHandler` which is a callback for every timer tick
-- Line 57: We define the maximum number of periodic handlers which can be installed
-- Line 64-123: We update the class `Timer`
-  - Line 74: We add a boolean to check if the class is initialized
-  - Line 76: We add a reference to the singleton `InterruptSystem` instance, as we need to handle interrupts
-  - Line 80: We add the member variable `m_clockTicksPerSystemTick` to hold the number of clock ticks per timer tick
-  - Line 82: We add the member variable `m_ticks` to count the timer ticks
-  - Line 84: We add the member variable `m_upTime` to count the uptime in seconds
-  - Line 86: We add the member variable `m_time` to hold the time in seconds (epoch time).
+- Line 50-55: We move the definitions `MSEC_PER_SEC`, `USEC_PER_SEC` and `USEC_PER_MSEC` from `Timer.cpp` to `Timer.h`
+- Line 57: We set the timer tick to be 100 times per second
+- Line 59: We add a macro `MSEC2TICKS` to convert from milliseconds to timer ticks
+- Line 65: We define a new type `PeriodicTimerHandler` which is a callback for every timer tick
+- Line 65: We define a new type `PeriodicTimerHandler` which is a callback for every timer tick
+- Line 68: We define the maximum number of periodic handlers which can be installed
+- Line 75-132: We update the class `Timer`
+  - Line 85: We add a boolean to check if the class is initialized
+  - Line 87: We add a reference to the singleton `InterruptSystem` instance, as we need to handle interrupts
+  - Line 91: We add the member variable `m_clockTicksPerSystemTick` to hold the number of clock ticks per timer tick
+  - Line 93: We add the member variable `m_ticks` to count the timer ticks
+  - Line 95: We add the member variable `m_upTime` to count the uptime in seconds
+  - Line 97: We add the member variable `m_time` to hold the time in seconds (epoch time).
 For now this will be the same as the uptime, but later we will be retrieving the actual time
-  - Line 88: We add an array of `PeriodicTimerHandler` functions to hold the periodic tick handlers
-  - Line 90: We add a variable to hold the number of periodic tick handlers installed
-  - Line 96: We add a destructor
-  - Line 98: We add a method `Initialize`
-  - Line 100: We add a method `GetTicks` to retrieve the number of timer ticks
-  - Line 102: We add a method `GetUptime` to retrieve the uptime in seconds
-  - Line 104: We add a method `GetTime` to retrieve the epoch time in seconds
-  - Line 108: We add a method `RegisterPeriodicHandler` to register a periodic tick handler
-  - Line 109: We add a method `UnregisterPeriodicHandler` to unregister a periodic tick handler
-  - Line 119: We add a private method `InterruptHandler` to handle the timer interrupt
-  - Line 120: We add a static method `InterruptHandler` to handle the timer interrupt, which calls the private method `InterruptHandler` by using the `param` parameter
+  - Line 99: We add an array of `PeriodicTimerHandler` functions to hold the periodic tick handlers
+  - Line 101: We add a variable to hold the number of periodic tick handlers installed
+  - Line 107: We add a destructor
+  - Line 109: We add a method `Initialize`
+  - Line 111: We add a method `GetTicks` to retrieve the number of timer ticks
+  - Line 113: We add a method `GetUptime` to retrieve the uptime in seconds
+  - Line 115: We add a method `GetTime` to retrieve the epoch time in seconds
+  - Line 119: We add a method `RegisterPeriodicHandler` to register a periodic tick handler
+  - Line 120: We add a method `UnregisterPeriodicHandler` to unregister a periodic tick handler
+  - Line 130: We add a private method `InterruptHandler` to handle the timer interrupt
+  - Line 131: We add a static method `InterruptHandler` to handle the timer interrupt, which calls the private method `InterruptHandler` by using the `param` parameter
 
 ### Timer.cpp {#TUTORIAL_19_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TIMERCPP}
 
@@ -152,234 +166,234 @@ File: code/libraries/baremetal/src/Timer.cpp
 46: #include <baremetal/InterruptHandler.h>
 47: #include <baremetal/MemoryAccess.h>
 ...
-58: /// @brief Number of timer ticks per second
-59: #define TICKS_PER_SECOND 100                               
-...
-63: /// <summary>
-64: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
-65: /// </summary>
-66: Timer::Timer()
-67:     : m_interruptSystem{GetInterruptSystem()}
-68:     , m_memoryAccess{ GetMemoryAccess() }
-69:     , m_clockTicksPerSystemTick{}
-70:     , m_ticks{}
-71:     , m_upTime{}
-72:     , m_time{}
-73:     , m_periodicHandlers{}
-74:     , m_numPeriodicHandlers{}
-75: {
-76: }
-77: 
-78: /// <summary>
-79: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
-80: /// </summary>
-81: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
-82: Timer::Timer(IMemoryAccess &memoryAccess)
-83:     : m_interruptSystem{GetInterruptSystem()}
-84:     , m_memoryAccess{ memoryAccess }
-85:     , m_clockTicksPerSystemTick{}
-86:     , m_ticks{}
-87:     , m_upTime{}
-88:     , m_time{}
-89:     , m_periodicHandlers{}
-90:     , m_numPeriodicHandlers{}
+52: using namespace baremetal;
+53: 
+54: /// <summary>
+55: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+56: /// </summary>
+57: Timer::Timer()
+58:     : m_interruptSystem{GetInterruptSystem()}
+59:     , m_memoryAccess{ GetMemoryAccess() }
+60:     , m_clockTicksPerSystemTick{}
+61:     , m_ticks{}
+62:     , m_upTime{}
+63:     , m_time{}
+64:     , m_periodicHandlers{}
+65:     , m_numPeriodicHandlers{}
+66: {
+67: }
+68: 
+69: /// <summary>
+70: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
+71: /// </summary>
+72: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+73: Timer::Timer(IMemoryAccess &memoryAccess)
+74:     : m_interruptSystem{GetInterruptSystem()}
+75:     , m_memoryAccess{ memoryAccess }
+76:     , m_clockTicksPerSystemTick{}
+77:     , m_ticks{}
+78:     , m_upTime{}
+79:     , m_time{}
+80:     , m_periodicHandlers{}
+81:     , m_numPeriodicHandlers{}
+82: {
+83: }
+84: 
+85: /// <summary>
+86: /// Destructor
+87: ///
+88: /// Disables the timer, as well as the timer interrupt
+89: /// </summary> 
+90: Timer::~Timer()
 91: {
-92: }
+92:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
 93: 
-94: /// <summary>
-95: /// Destructor
-96: ///
-97: /// Disables the timer, as well as the timer interrupt
-98: /// </summary> 
-99: Timer::~Timer()
-100: {
-101:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
-102: 
-103:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
-104: }
-105: 
-106: /// <summary>
-107: /// Timer initialization
-108: ///
-109: /// Add a timer interrupt handler, calculate the number of clock ticks per timer tick, set the next timer deadline.
-110: /// Then enables the timer
-111: /// </summary> 
-112: void Timer::Initialize()
-113: {
-114:     if (m_isInitialized)
-115:         return;
-116: 
-117:     memset(m_periodicHandlers, 0, TIMER_MAX_PERIODIC_HANDLERS * sizeof(PeriodicTimerHandler*));
-118:     m_interruptSystem.RegisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS, InterruptHandler, this);
-119: 
-120:     uint64 counterFreq{};
-121:     GetTimerFrequency(counterFreq);
-122:     assert(counterFreq % TICKS_PER_SECOND == 0);
-123:     m_clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
-124: 
-125:     uint64 counter;
-126:     GetTimerCounter(counter);
-127:     SetTimerCompareValue(counter + m_clockTicksPerSystemTick);
-128:     SetTimerControl(CNTP_CTL_EL0_ENABLE);
-129: 
-130:     m_isInitialized = true;
+94:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+95: }
+96: 
+97: /// <summary>
+98: /// Timer initialization
+99: ///
+100: /// Add a timer interrupt handler, calculate the number of clock ticks per timer tick, set the next timer deadline.
+101: /// Then enables the timer
+102: /// </summary> 
+103: void Timer::Initialize()
+104: {
+105:     if (m_isInitialized)
+106:         return;
+107: 
+108:     memset(m_periodicHandlers, 0, TIMER_MAX_PERIODIC_HANDLERS * sizeof(PeriodicTimerHandler*));
+109:     m_interruptSystem.RegisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS, InterruptHandler, this);
+110: 
+111:     uint64 counterFreq{};
+112:     GetTimerFrequency(counterFreq);
+113:     assert(counterFreq % TICKS_PER_SECOND == 0);
+114:     m_clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
+115: 
+116:     uint64 counter;
+117:     GetTimerCounter(counter);
+118:     SetTimerCompareValue(counter + m_clockTicksPerSystemTick);
+119:     SetTimerControl(CNTP_CTL_EL0_ENABLE);
+120: 
+121:     m_isInitialized = true;
+122: }
+123: 
+124: /// <summary>
+125: /// Return the current timer tick cound
+126: /// </summary>
+127: /// <returns>The current timer tick count</returns>
+128: uint64 Timer::GetTicks() const
+129: {
+130:     return m_ticks;
 131: }
 132: 
 133: /// <summary>
-134: /// Return the current timer tick cound
+134: /// Return the uptime in seconds
 135: /// </summary>
-136: /// <returns>The current timer tick count</returns>
-137: uint64 Timer::GetTicks() const
+136: /// <returns>Uptime in seconds</returns>
+137: uint32 Timer::GetUptime() const
 138: {
-139:     return m_ticks;
+139:     return m_upTime;
 140: }
 141: 
 142: /// <summary>
-143: /// Return the uptime in seconds
+143: /// Return the current time in seconds (epoch time)
 144: /// </summary>
-145: /// <returns>Uptime in seconds</returns>
-146: uint32 Timer::GetUptime() const
+145: /// <returns>Current time in seconds (epoch time)</returns>
+146: uint64 Timer::GetTime() const
 147: {
-148:     return m_upTime;
+148:     return m_time;
 149: }
 150: 
-151: /// <summary>
-152: /// Return the current time in seconds (epoch time)
-153: /// </summary>
-154: /// <returns>Current time in seconds (epoch time)</returns>
-155: uint64 Timer::GetTime() const
-156: {
-157:     return m_time;
-158: }
-159: 
 ...
-173: /// <summary>
-174: /// Register a periodic timer handler
-175: /// 
-176: /// Registers a periodic timer handler function. The handler function will be called every timer tick.
-177: /// </summary>
-178: /// <param name="handler">Pointer to periodic timer handler to register</param>
-179: void Timer::RegisterPeriodicHandler(PeriodicTimerHandler *handler)
-180: {
-181:     assert(handler != 0);
+164: /// <summary>
+165: /// Register a periodic timer handler
+166: /// 
+167: /// Registers a periodic timer handler function. The handler function will be called every timer tick.
+168: /// </summary>
+169: /// <param name="handler">Pointer to periodic timer handler to register</param>
+170: void Timer::RegisterPeriodicHandler(PeriodicTimerHandler *handler)
+171: {
+172:     assert(handler != 0);
+173: 
+174:     size_t index{};
+175:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+176:     {
+177:         if (m_periodicHandlers[index] == nullptr)
+178:             break;
+179:     }
+180:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+181:     m_periodicHandlers[index] = handler;
 182: 
-183:     size_t index{};
-184:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
-185:     {
-186:         if (m_periodicHandlers[index] == nullptr)
-187:             break;
-188:     }
-189:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
-190:     m_periodicHandlers[index] = handler;
-191: 
-192:     DataSyncBarrier();
-193: 
-194:     m_numPeriodicHandlers++;
-195: }
-196: 
-197: /// <summary>
-198: /// Unregister a periodic timer handler
-199: /// 
-200: /// Removes aperiodic timer handler function from the registration. The handler function will no longer be called.
-201: /// </summary>
-202: /// <param name="handler">Pointer to periodic timer handler to unregister</param>
-203: void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler *handler)
-204: {
-205:     assert(handler != 0);
-206:     assert(m_numPeriodicHandlers > 0);
+183:     DataSyncBarrier();
+184: 
+185:     m_numPeriodicHandlers++;
+186: }
+187: 
+188: /// <summary>
+189: /// Unregister a periodic timer handler
+190: /// 
+191: /// Removes aperiodic timer handler function from the registration. The handler function will no longer be called.
+192: /// </summary>
+193: /// <param name="handler">Pointer to periodic timer handler to unregister</param>
+194: void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler *handler)
+195: {
+196:     assert(handler != 0);
+197:     assert(m_numPeriodicHandlers > 0);
+198: 
+199:     size_t index{};
+200:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+201:     {
+202:         if (m_periodicHandlers[index] == handler)
+203:             break;
+204:     }
+205:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+206:     m_periodicHandlers[index] = nullptr;
 207: 
-208:     size_t index{};
-209:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
-210:     {
-211:         if (m_periodicHandlers[index] == handler)
-212:             break;
-213:     }
-214:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
-215:     m_periodicHandlers[index] = nullptr;
-216: 
-217:     DataSyncBarrier();
-218: 
-219:     m_numPeriodicHandlers--;
-220: }
-221: 
+208:     DataSyncBarrier();
+209: 
+210:     m_numPeriodicHandlers--;
+211: }
+212: 
 ...
-296: /// <summary>
-297: /// Interrupt handler for the timer
-298: /// 
-299: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
-300: /// </summary>
-301: void Timer::InterruptHandler()
-302: {
-303:     uint64 compareValue;
-304:     GetTimerCompareValue(compareValue);
-305:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
-306: 
-307:     if (++m_ticks % TICKS_PER_SECOND == 0)
-308:     {
-309:         m_upTime++;
-310:         m_time++;
-311:     }
-312: 
-313:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
-314:     {
-315:         if (m_periodicHandlers[i] != nullptr)
-316:             (*m_periodicHandlers[i])();
-317:     }
-318: }
-319: 
-320: /// <summary>
-321: /// Static interrupt handler
-322: /// 
-323: /// Calls the instance interrupt handler
-324: /// </summary>
-325: /// <param name="param"></param>
-326: void Timer::InterruptHandler(void *param)
-327: {
-328:     Timer *instance = reinterpret_cast<Timer *>(param);
-329:     assert(instance != nullptr);
-330: 
-331:     instance->InterruptHandler();
-332: }
-333: 
+287: /// <summary>
+288: /// Interrupt handler for the timer
+289: /// 
+290: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
+291: /// </summary>
+292: void Timer::InterruptHandler()
+293: {
+294:     uint64 compareValue;
+295:     GetTimerCompareValue(compareValue);
+296:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+297: 
+298:     if (++m_ticks % TICKS_PER_SECOND == 0)
+299:     {
+300:         m_upTime++;
+301:         m_time++;
+302:     }
+303: 
+304:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+305:     {
+306:         if (m_periodicHandlers[i] != nullptr)
+307:             (*m_periodicHandlers[i])();
+308:     }
+309: }
+310: 
+311: /// <summary>
+312: /// Static interrupt handler
+313: /// 
+314: /// Calls the instance interrupt handler
+315: /// </summary>
+316: /// <param name="param"></param>
+317: void Timer::InterruptHandler(void *param)
+318: {
+319:     Timer *instance = reinterpret_cast<Timer *>(param);
+320:     assert(instance != nullptr);
+321: 
+322:     instance->InterruptHandler();
+323: }
+324: 
+...
 ```
 
 - Line 42-47: We need to include the header for `memset()`, `assert()` as well as for the `InterruptSystem` class.
-- Line 59: We define the number of timer ticks per second
-- Line 66-76: We update the constructor of the `Timer` class to initialize the newly added member variables
-- Line 82-92: We update the special constructor of the `Timer` class to initialize the newly added member variables
-- Line 99-104: We add a destructor to disable the timer and the timer interrupt
-- Line 112-131: We add the method `Initialize` to initialize the timer
-  - Line 114: We check if the timer is already initialized
-  - Line 117: We clear the array of periodic handlers
-  - Line 118: We register the timer interrupt handler
-  - Line 120-123: We calculate the number of clock ticks per timer tick
-  - Line 126-127: We set the timer compare value to the current timer counter plus the number of clock ticks per timer tick
-  - Line 128: We enable the timer
-  - Line 130: We set the timer as initialized
-- Line 137-140: We implement the method `GetTicks`
-- Line 146-149: We implement the method `GetUptime`
-- Line 155-158: We implement the method `GetTime`
-- Line 179-195: We implement the method `RegisterPeriodicHandler`
-  - Line 181: We perform a sanity check if the handler is not null
-  - Line 183-188: We find an empty slot in the array of periodic handlers
-  - Line 189: We perform a sanity check whether we found an empty slot
-  - Line 190: We store the handler in the array
-  - Line 194: We increment the number of periodic handlers
-- Line 203-220: We implement the method `UnregisterPeriodicHandler`
-  - Line 205: We perform a sanity check if the handler is not null
-  - Line 206: We perform a sanity check if there are periodic handlers registered
-  - Line 208-213: We find the handler in the array of periodic handlers
-  - Line 214: We perform a sanity check whether we found the handler
-  - Line 215: We remove the handler from the array
-  - Line 219: We decrement the number of periodic handlers
-- Line 301-318: We implement the instance method `InterruptHandler`
-  - Line 304: We retrieve the current timer compare value
-  - Line 305: We set the next timer deadline
-  - Line 307-311: We increment the timer tick count, we check if a second has passed, if so we increment the uptime and the time
-  - Line 313-317: We call the periodic handlers
-- Line 326-332: We implement the static method `InterruptHandler`
-  - Line 328-329: We cast the `param` to a `Timer` instance and perform a sanity check
-  - Line 331: We call the instance method `InterruptHandler`
+- Line 49-54: We remove the definitions `MSEC_PER_SEC`, `USEC_PER_SEC` and `USEC_PER_MSEC` as they have been moved to `Timer.h`
+- Line 57-67: We update the constructor of the `Timer` class to initialize the newly added member variables
+- Line 73-83: We update the special constructor of the `Timer` class to initialize the newly added member variables
+- Line 90-95: We add a destructor to disable the timer and the timer interrupt
+- Line 103-122: We add the method `Initialize` to initialize the timer
+  - Line 105-106: We check if the timer is already initialized
+  - Line 108: We clear the array of periodic handlers
+  - Line 109: We register the timer interrupt handler
+  - Line 111-114: We calculate the number of clock ticks per timer tick
+  - Line 117-118: We set the timer compare value to the current timer counter plus the number of clock ticks per timer tick
+  - Line 119: We enable the timer
+  - Line 121: We set the timer as initialized
+- Line 128-131: We implement the method `GetTicks`
+- Line 137-140: We implement the method `GetUptime`
+- Line 146-149: We implement the method `GetTime`
+- Line 170-186: We implement the method `RegisterPeriodicHandler`
+  - Line 172: We perform a sanity check if the handler is not null
+  - Line 174-179: We find an empty slot in the array of periodic handlers
+  - Line 180: We perform a sanity check whether we found an empty slot
+  - Line 181: We store the handler in the array
+  - Line 185: We increment the number of periodic handlers
+- Line 194-211: We implement the method `UnregisterPeriodicHandler`
+  - Line 196: We perform a sanity check if the handler is not null
+  - Line 197: We perform a sanity check if there are periodic handlers registered
+  - Line 199-202: We find the handler in the array of periodic handlers
+  - Line 205: We perform a sanity check whether we found the handler
+  - Line 206: We remove the handler from the array
+  - Line 210: We decrement the number of periodic handlers
+- Line 292-309: We implement the instance method `InterruptHandler`
+  - Line 295: We retrieve the current timer compare value
+  - Line 296: We set the next timer deadline
+  - Line 298-302: We increment the timer tick count, we check if a second has passed, if so we increment the uptime and the time
+  - Line 304-308: We call the periodic handlers
+- Line 317-323: We implement the static method `InterruptHandler`
+  - Line 319-320: We cast the `param` to a `Timer` instance and perform a sanity check
+  - Line 322: We call the instance method `InterruptHandler`
 
 ### Update CMake file {#TUTORIAL_19_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_UPDATE_CMAKE_FILE}
 
@@ -481,152 +495,153 @@ Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
-93:     /// @brief Number of days is each month (0 = January, etc.)
-94:     static const unsigned s_daysInMonth[12];
-95:     /// @brief Name of each month (0 = January, etc.)
-96:     static const char    *s_monthName[12];
+102:     /// @brief Number of days is each month (0 = January, etc.)
+103:     static const unsigned s_daysInMonth[12];
+104:     /// @brief Name of each month (0 = January, etc.)
+105:     static const char    *s_monthName[12];
 ...
-123: 
-124:     static bool IsLeapYear(unsigned year);
-125:     static unsigned GetDaysInMonth(unsigned month, unsigned year);
+132: 
+133:     static bool IsLeapYear(unsigned year);
+134:     static unsigned GetDaysInMonth(unsigned month, unsigned year);
 ```
 
-- Line 94: We define an array `s_daysInMonth` to hold the number of days in each month
-- Line 95: We define an array `s_monthName` to hold the name of each month
-- Line 124: We add a static method `IsLeapYear` to check if a year is a leap year
-- Line 125: We add a static method `GetDaysInMonth` to retrieve the number of days in a month
+- Line 103: We define an array `s_daysInMonth` to hold the number of days in each month
+- Line 105: We define an array `s_monthName` to hold the name of each month
+- Line 133: We add a static method `IsLeapYear` to check if a year is a leap year
+- Line 134: We add a static method `GetDaysInMonth` to retrieve the number of days in a month
 
 ### Timer.cpp {#TUTORIAL_19_TIMER_EXTENSION_UPDATING_THE_TIME_STRING___STEP_2_TIMERCPP}
 
-Let's implement the newly added methods in the `Timer` class.
+Let's implement the newly added methods in the `Timer` class, and update the `GetTimeString()` method to use them.
 
 Update the file `code/libraries/baremetal/src/Timer.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 ...
-166: /// <summary>
-167: /// Writes a representation of the current time to a buffer, or of the uptime if the current time is not valid.
-168: ///
-169: /// The current time will be in the format "MMM dd HH:MM:SS.mmm", according to our time zone, if the time is valid.
-170: /// If the time is not known yet, it we be the uptime in the format "ddd.HH:MM:SS.mmm".
-171: /// If not yet initialized, an empty string is returned
-172: /// </summary>
-173: /// <param name="buffer">Buffer to write the time string to</param>
-174: /// <param name="bufferSize">Size of the buffer</param>
-175: void Timer::GetTimeString(char* buffer, size_t bufferSize)
-176: {
-177:     uint64 time  = m_time;
-178:     uint64 ticks = m_ticks;
-179: 
-180:     if (bufferSize == 0)
-181:     {
-182:         return;
-183:     }
-184:     if (!m_isInitialized)
+151: /// <summary>
+152: /// Writes a representation of the current time to a buffer, or of the uptime if the current time is not valid.
+153: ///
+154: /// The current time will be in the format "MMM dd HH:MM:SS.mmm", according to our time zone, if the time is valid.
+155: /// If the time is not known yet, it we be the uptime in the format "ddd.HH:MM:SS.mmm".
+156: /// If not yet initialized, an empty string is returned
+157: /// </summary>
+158: /// <param name="buffer">Buffer to write the time string to</param>
+159: /// <param name="bufferSize">Size of the buffer</param>
+160: void Timer::GetTimeString(char* buffer, size_t bufferSize)
+161: {
+162:     uint64 time  = m_time;
+163:     uint64 ticks = m_ticks;
+164: 
+165:     if (bufferSize == 0)
+166:     {
+167:         return;
+168:     }
+169:     if (!m_isInitialized)
+170:     {
+171:         *buffer = '\0';
+172:         return;
+173:     }
+174: 
+175:     unsigned second = time % 60;
+176:     time /= 60; // Time is now in minute
+177:     unsigned minute = time % 60;
+178:     time /= 60; // Time is now in hour
+179:     unsigned hour       = time % 24;
+180:     time /= 24; // Time is now in days
+181:     unsigned daysTotal = time;
+182: 
+183:     unsigned year = 1970; // Epoch start
+184:     while (true)
 185:     {
-186:         *buffer = '\0';
-187:         return;
-188:     }
-189: 
-190:     unsigned second = time % 60;
-191:     time /= 60; // Time is now in minute
-192:     unsigned minute = time % 60;
-193:     time /= 60; // Time is now in hour
-194:     unsigned hour       = time % 24;
-195:     time /= 24; // Time is now in days
-196:     unsigned daysTotal = time;
-197: 
-198:     unsigned year = 1970; // Epoch start
-199:     while (true)
-200:     {
-201:         unsigned daysInYear = IsLeapYear(year) ? 366 : 365;
-202:         if (time < daysInYear)
-203:         {
-204:             break;
-205:         }
-206: 
-207:         time -= daysInYear;
-208:         year++;
-209:     }
+186:         unsigned daysInYear = IsLeapYear(year) ? 366 : 365;
+187:         if (time < daysInYear)
+188:         {
+189:             break;
+190:         }
+191: 
+192:         time -= daysInYear;
+193:         year++;
+194:     }
+195: 
+196:     unsigned month = 0;
+197:     while (1)
+198:     {
+199:         unsigned daysInMonth = GetDaysInMonth(month, year);
+200:         if (time < daysInMonth)
+201:         {
+202:             break;
+203:         }
+204: 
+205:         time -= daysInMonth;
+206:         month++;
+207:     }
+208: 
+209:     unsigned monthDay = time + 1;
 210: 
-211:     unsigned month = 0;
-212:     while (1)
-213:     {
-214:         unsigned daysInMonth = GetDaysInMonth(month, year);
-215:         if (time < daysInMonth)
-216:         {
-217:             break;
-218:         }
-219: 
-220:         time -= daysInMonth;
-221:         month++;
-222:     }
-223: 
-224:     unsigned monthDay = time + 1;
+211: #if (TICKS_PER_SECOND != MSEC_PER_SEC)
+212:     ticks = ticks * MSEC_PER_SEC / TICKS_PER_SECOND;
+213: #endif
+214:     auto   milliSeconds = ticks % MSEC_PER_SEC;
+215: 
+216:     if (year > 1975) // Just a sanity check to see if we have an actual time
+217:     {
+218:         FormatNoAlloc(buffer, bufferSize, "%s %2u, %04u %02u:%02u:%02u.%03u", s_monthName[month], monthDay, year, hour, minute, second, milliSeconds);
+219:     }
+220:     else
+221:     {
+222:         FormatNoAlloc(buffer, bufferSize, "%u.%02u:%02u:%02u.%03u", daysTotal, hour, minute, second, milliSeconds);
+223:     }
+224: }
 225: 
-226: #if (TICKS_PER_SECOND != MSEC_PER_SEC)
-227:     ticks = ticks * MSEC_PER_SEC / TICKS_PER_SECOND;
-228: #endif
-229:     auto   milliSeconds = ticks % MSEC_PER_SEC;
-230: 
-231:     if (year > 1975) // Just a sanity check to see if we have an actual time
-232:     {
-233:         FormatNoAlloc(buffer, bufferSize, "%s %2u, %04u %02u:%02u:%02u.%03u", s_monthName[month], monthDay, year, hour, minute, second, milliSeconds);
-234:     }
-235:     else
-236:     {
-237:         FormatNoAlloc(buffer, bufferSize, "%u.%02u:%02u:%02u.%03u", daysTotal, hour, minute, second, milliSeconds);
-238:     }
-239: }
-240: 
 ...
+349: /// <summary>
+350: /// Determine if the specified year is a leap year
+351: /// </summary>
+352: /// <param name="year">Year</param>
+353: /// <returns>Returns true if year is a leap year, false otherwise</returns>
+354: bool Timer::IsLeapYear(unsigned year)
+355: {
+356:     if (year % 100 == 0)
+357:     {
+358:         return year % 400 == 0;
+359:     }
+360: 
+361:     return year % 4 == 0;
+362: }
+363: 
 364: /// <summary>
-365: /// Determine if the specified year is a leap year
+365: /// Calculates the number days in the specified month of the specified year
 366: /// </summary>
-367: /// <param name="year">Year</param>
-368: /// <returns>Returns true if year is a leap year, false otherwise</returns>
-369: bool Timer::IsLeapYear(unsigned year)
-370: {
-371:     if (year % 100 == 0)
-372:     {
-373:         return year % 400 == 0;
-374:     }
-375: 
-376:     return year % 4 == 0;
-377: }
-378: 
-379: /// <summary>
-380: /// Calculates the number days in the specified month of the specified year
-381: /// </summary>
-382: /// <param name="month">Month, 0=January, 1=February, etc.</param>
-383: /// <param name="year">Year</param>
-384: /// <returns></returns>
-385: unsigned Timer::GetDaysInMonth(unsigned month, unsigned year)
-386: {
-387:     if (month == 1 && IsLeapYear(year))
-388:     {
-389:         return 29;
-390:     }
-391: 
-392:     return s_daysInMonth[month];
-393: }
-394: 
+367: /// <param name="month">Month, 0=January, 1=February, etc.</param>
+368: /// <param name="year">Year</param>
+369: /// <returns></returns>
+370: unsigned Timer::GetDaysInMonth(unsigned month, unsigned year)
+371: {
+372:     if (month == 1 && IsLeapYear(year))
+373:     {
+374:         return 29;
+375:     }
+376: 
+377:     return s_daysInMonth[month];
+378: }
+379: 
+...
 ```
 
-- Line 175-238: We implement the method `GetTimeString`
-  - Line 177-178: We retrieve the time and the ticks
-  - Line 184-187: We check if the buffer can hold any data, if not we simply return
-  - Line 184-187: We check if the timer is initialized, if not we return an empty string
-  - Line 190-196: We calculate the seconds, minutes, hours and days
-  - Line 198-209: We calculate the year
-  - Line 211-222: We calculate the month
-  - Line 224: We calculate the day of the month
-  - Line 226-229: We convert the ticks to milliseconds
-  - Line 233: We format the time string as "[MMM dd ]HH:MM:SS.mmm" if we have the actual time
-  - Line 237: We format the time string as "ddd.HH:MM:SS.mmm" if we don't have the actual time
-- Line 369-377: We implement the static method `IsLeapYear` to check if a year is a leap year
-- Line 385-393: We implement the static method `GetDaysInMonth` to retrieve the number of days in a month
+- Line 160-224: We update the method `GetTimeString`
+  - Line 162-163: We retrieve the time and the ticks
+  - Line 165-168: We check if the buffer can hold any data, if not we simply return
+  - Line 169-173: We check if the timer is initialized, if not we return an empty string
+  - Line 175-181: We calculate the seconds, minutes, hours and days
+  - Line 183-294: We calculate the year
+  - Line 196-207: We calculate the month
+  - Line 209: We calculate the day of the month
+  - Line 211-214: We convert the ticks to milliseconds
+  - Line 218: We format the time string as "[MMM dd ]HH:MM:SS.mmm" if we have the actual time
+  - Line 222: We format the time string as "ddd.HH:MM:SS.mmm" if we don't have the actual time
+- Line 354-362: We implement the static method `IsLeapYear` to check if a year is a leap year
+- Line 370-378: We implement the static method `GetDaysInMonth` to retrieve the number of days in a month
 
 ### Update CMake file {#TUTORIAL_19_TIMER_EXTENSION_UPDATING_THE_TIME_STRING___STEP_2_UPDATE_CMAKE_FILE}
 
@@ -668,7 +683,7 @@ We'll start with a bit of plumbing however.
 
 We'll first introduce a double linked list for our timers.
 
-### List.h {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_SINGLETONH}
+### List.h {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_LISTH}
 
 Create a new file `code/libraries/baremetal/include/baremetal/List.h`
 
@@ -1034,7 +1049,7 @@ File: code/libraries/baremetal/include/baremetal/List.h
   - Line 275-308: We implement the `DoubleLinkedList` method `Remove()`
   - Line 316-330: We implement the `DoubleLinkedList` method `Find()`
 
-### Timer.h {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_SINGLETONH}
+### Timer.h {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_TIMERH}
 
 Update the new file `code/libraries/baremetal/include/baremetal/Timer.h`
 
@@ -1043,290 +1058,354 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 45: #include <stdlib/Types.h>
 46: #include <baremetal/List.h>
 ...
-53: struct KernelTimer;
-54: 
-55: /// @brief Handle to a kernel timer
-56: using KernelTimerHandle = uintptr;
-57: 
-58: /// @brief Kernel timer handler
-59: using KernelTimerHandler = void(KernelTimerHandle timerHandle, void *param, void *context);
-60: 
+71: struct KernelTimer;
+72: 
+73: /// @brief Handle to a kernel timer
+74: using KernelTimerHandle = uintptr;
+75: 
+76: /// @brief Kernel timer handler
+77: using KernelTimerHandler = void(KernelTimerHandle timerHandle, void *param, void *context);
+78: 
 ...
-97:     /// @brief Periodic tick handler functions
-98:     PeriodicTimerHandler *m_periodicHandlers[TIMER_MAX_PERIODIC_HANDLERS];
-99:     /// @brief Number of periodic tick handler functions installed
-100:     volatile unsigned     m_numPeriodicHandlers;
-101:     /// @brief Kernel timer list
-102:     DoubleLinkedList<KernelTimer *> m_kernelTimerList;
-103:     /// @brief Number of days is each month (0 = January, etc.)
-104:     static const unsigned s_daysInMonth[12];
-105:     /// @brief Name of each month (0 = January, etc.)
-106:     static const char    *s_monthName[12];
+107:     /// @brief Periodic tick handler functions
+108:     PeriodicTimerHandler *m_periodicHandlers[TIMER_MAX_PERIODIC_HANDLERS];
+109:     /// @brief Number of periodic tick handler functions installed
+110:     volatile unsigned     m_numPeriodicHandlers;
+111:     /// @brief Kernel timer list
+112:     DoubleLinkedList<KernelTimer *> m_kernelTimerList;
+113:     /// @brief Number of days is each month (0 = January, etc.)
+114:     static const unsigned s_daysInMonth[12];
+115:     /// @brief Name of each month (0 = January, etc.)
+116:     static const char    *s_monthName[12];
 ...
-111:     Timer(IMemoryAccess &memoryAccess);
-112:     ~Timer();
-113: 
-114:     void Initialize();
-115: 
-116:     uint64 GetTicks() const;
-117: 
-118:     uint32 GetUptime() const;
-119: 
-120:     uint64 GetTime() const;
-121: 
-122:     void GetTimeString(char* buffer, size_t bufferSize);
+121:     Timer(IMemoryAccess &memoryAccess);
+122:     ~Timer();
 123: 
-124:     void RegisterPeriodicHandler(PeriodicTimerHandler *handler);
-125:     void UnregisterPeriodicHandler(PeriodicTimerHandler *handler);
-126: 
-127:     KernelTimerHandle StartKernelTimer(uint32 delayTicks, KernelTimerHandler *handler, void *param = nullptr, void *context = nullptr);
-128:     void CancelKernelTimer(KernelTimerHandle handle);
+124:     void Initialize();
+125: 
+126:     uint64 GetTicks() const;
+127: 
+128:     uint32 GetUptime() const;
 129: 
-130:     static void WaitCycles(uint32 numCycles);
+130:     uint64 GetTime() const;
 131: 
-132:     uint64 GetSystemTimer();
+132:     void GetTimeString(char* buffer, size_t bufferSize);
 133: 
-134:     static void WaitMilliSeconds(uint64 msec);
-135:     static void WaitMicroSeconds(uint64 usec);
+134:     void RegisterPeriodicHandler(PeriodicTimerHandler *handler);
+135:     void UnregisterPeriodicHandler(PeriodicTimerHandler *handler);
 136: 
-137:     static bool IsLeapYear(unsigned year);
-138:     static unsigned GetDaysInMonth(unsigned month, unsigned year);
+137:     KernelTimerHandle StartKernelTimer(uint32 delayTicks, KernelTimerHandler *handler, void *param = nullptr, void *context = nullptr);
+138:     void CancelKernelTimer(KernelTimerHandle handle);
 139: 
-140: private:
-141:     void PollKernelTimers();
-142:     void InterruptHandler();
-143:     static void InterruptHandler(void *param);
+140:     static void WaitCycles(uint32 numCycles);
+141: 
+142:     uint64 GetSystemTimer();
+143: 
+144:     static void WaitMilliSeconds(uint64 msec);
+145:     static void WaitMicroSeconds(uint64 usec);
+146: 
+147:     static bool IsLeapYear(unsigned year);
+148:     static unsigned GetDaysInMonth(unsigned month, unsigned year);
+149: 
+150: private:
+151:     void PollKernelTimers();
+152:     void InterruptHandler();
+153:     static void InterruptHandler(void *param);
+...
 ```
 
 - Line 46: We include the header for the `DoubleLinkedList` class
-- Line 56: We define the type for the kernel timer handle `KernelTimerHandle`
-- Line 58: We define the type for the kernel timer handler function `KernelTimerHandler`
-- Line 102: We declare a member variable for the list of kernel timers `m_kernelTimerList`
-- Line 127: We declare a method `StartKernelTimer()` to start a kernel timer
-- Line 128: We declare a method `CancelKernelTimer()` to cancel a kernel timer
-- Line 141: We declare a method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
+- Line 74: We define the type for the kernel timer handle `KernelTimerHandle`
+- Line 77: We define the type for the kernel timer handler function `KernelTimerHandler`
+- Line 112: We declare a member variable for the list of kernel timers `m_kernelTimerList`
+- Line 137: We declare a method `StartKernelTimer()` to start a kernel timer
+- Line 138: We declare a method `CancelKernelTimer()` to cancel a kernel timer
+- Line 151: We declare a method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
  
-### Timer.h {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_SINGLETONH}
+### Timer.cpp {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_TIMERCPP}
 
 Update the new file `code/libraries/baremetal/src/Timer.cpp`
 
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 ..
-69: /// @brief Define log name
-70: LOG_MODULE("Timer");
-71: 
-72: /// @brief Magic number for kernel timer (KTMC)
-73: #define KERNEL_TIMER_MAGIC 0x4B544D43
-74: 
-75: /// <summary>
-76: /// Kernel timer administration
-77: /// </summary>
-78: /// <typeparam name="Pointer"></typeparam>
-79: struct KernelTimer
-80: {
-81: #ifndef NDEBUG
-82:     /// @brief Magic number to check if element is valid
-83:     unsigned m_magic;
-84: #endif
-85:     /// @brief Kernel timer deadline in timer ticks
-86:     unsigned            m_elapsesAtTicks;
-87:     /// @brief Pointer to kernel timer handler
-88:     KernelTimerHandler *m_handler;
-89:     /// @brief Kernel timer handler parameter
-90:     void               *m_param;
-91:     /// @brief Kernel timer handler context
-92:     void               *m_context;
-93: 
-94:     /// <summary>
-95:     /// Construct a kernel timer administration element
-96:     /// </summary>
-97:     /// <param name="elapseTimeTicks">Timer deadline in timer ticks</param>
-98:     /// <param name="handler">Kernel timer handler pointer</param>
-99:     /// <param name="param">Kernel timer handler parameter</param>
-100:     /// <param name="context">Kernerl timer handler context</param>
-101:     KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler *handler, void *param, void *context)
-102:         :
-103: #ifndef NDEBUG
-104:           m_magic{KERNEL_TIMER_MAGIC}
-105:         ,
-106: #endif
-107:           m_elapsesAtTicks{elapseTimeTicks}
-108:         , m_handler{handler}
-109:         , m_param{param}
-110:         , m_context{context}
-111: 
-112:     {
-113:     }
-114:     /// <summary>
-115:     /// Verify magic number
-116:     /// </summary>
-117:     /// <returns>True if the magic number is correct, false otherwise</returns>
-118:     bool CheckMagic() const
-119:     {
-120:         return m_magic == KERNEL_TIMER_MAGIC;
-121:     }
-122: };
-123: /// @brief Kernel timer element, element which is stored in the kernel time list
-124: using KernelTimerElement = DoubleLinkedList<KernelTimer *>::Element;
-125: 
+54: namespace baremetal {
+55: 
+56: /// @brief Define log name
+57: LOG_MODULE("Timer");
+58: 
+59: /// @brief Magic number for kernel timer (KTMC)
+60: #define KERNEL_TIMER_MAGIC 0x4B544D43
+61: 
+62: /// <summary>
+63: /// Kernel timer administration
+64: /// </summary>
+65: /// <typeparam name="Pointer"></typeparam>
+66: struct KernelTimer
+67: {
+68: #ifndef NDEBUG
+69:     /// @brief Magic number to check if element is valid
+70:     unsigned m_magic;
+71: #endif
+72:     /// @brief Kernel timer deadline in timer ticks
+73:     unsigned            m_elapsesAtTicks;
+74:     /// @brief Pointer to kernel timer handler
+75:     KernelTimerHandler *m_handler;
+76:     /// @brief Kernel timer handler parameter
+77:     void               *m_param;
+78:     /// @brief Kernel timer handler context
+79:     void               *m_context;
+80: 
+81:     /// <summary>
+82:     /// Construct a kernel timer administration element
+83:     /// </summary>
+84:     /// <param name="elapseTimeTicks">Timer deadline in timer ticks</param>
+85:     /// <param name="handler">Kernel timer handler pointer</param>
+86:     /// <param name="param">Kernel timer handler parameter</param>
+87:     /// <param name="context">Kernerl timer handler context</param>
+88:     KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler *handler, void *param, void *context)
+89:         :
+90: #ifndef NDEBUG
+91:           m_magic{KERNEL_TIMER_MAGIC}
+92:         ,
+93: #endif
+94:           m_elapsesAtTicks{elapseTimeTicks}
+95:         , m_handler{handler}
+96:         , m_param{param}
+97:         , m_context{context}
+98: 
+99:     {
+100:     }
+101:     /// <summary>
+102:     /// Verify magic number
+103:     /// </summary>
+104:     /// <returns>True if the magic number is correct, false otherwise</returns>
+105:     bool CheckMagic() const
+106:     {
+107:         return m_magic == KERNEL_TIMER_MAGIC;
+108:     }
+109: };
+110: /// @brief Kernel timer element, element which is stored in the kernel time list
+111: using KernelTimerElement = DoubleLinkedList<KernelTimer *>::Element;
+112: 
+113: const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+114: 
+115: const char    *Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+116: 
+117: /// <summary>
+118: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+119: /// </summary>
+120: Timer::Timer()
+121:     : m_interruptSystem{GetInterruptSystem()}
+122:     , m_memoryAccess{ GetMemoryAccess() }
+123:     , m_clockTicksPerSystemTick{}
+124:     , m_ticks{}
+125:     , m_upTime{}
+126:     , m_time{}
+127:     , m_periodicHandlers{}
+128:     , m_numPeriodicHandlers{}
+129:     , m_kernelTimerList{}
+130: {
+131: }
+132: 
+File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Timer.cpp
+133: /// <summary>
+134: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
+135: /// </summary>
+136: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+137: Timer::Timer(IMemoryAccess &memoryAccess)
+138:     : m_interruptSystem{GetInterruptSystem()}
+139:     , m_memoryAccess{ memoryAccess }
+140:     , m_clockTicksPerSystemTick{}
+141:     , m_ticks{}
+142:     , m_upTime{}
+143:     , m_time{}
+144:     , m_periodicHandlers{}
+145:     , m_numPeriodicHandlers{}
+146:     , m_kernelTimerList{}
+147: {
+148: }
+149: 
+150: /// <summary>
+151: /// Destructor
+152: ///
+153: /// Disables the timer, as well as the timer interrupt
+154: /// </summary> 
+155: Timer::~Timer()
+156: {
+157:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
+158: 
+159:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+160: 
+161:     KernelTimerElement *element;
+162:     while ((element = m_kernelTimerList.GetFirst()) != 0)
+163:     {
+164:         CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
+165:     }
+166: }
+167: 
 ...
-361: /// <summary>
-362: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
-363: /// </summary>
-364: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
-365: /// <param name="handler">Kernel timer handler to call when time elapses</param>
-366: /// <param name="param">Parameter to pass to kernel timer handler</param>
-367: /// <param name="context">Kernel timer handler context</param>
-368: /// <returns>Handle to kernel timer</returns>
-369: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler *handler, void *param, void *context)
-370: {
-371:     unsigned elapseTimeTicks = m_ticks + delayTicks;
-372:     assert(handler != nullptr);
-373: 
-374:     KernelTimer *timer = new KernelTimer(elapseTimeTicks, handler, param, context);
-375:     assert(timer != nullptr);
-376:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
-377: 
-378:     KernelTimerElement *prevElement{};
-379:     KernelTimerElement *element = m_kernelTimerList.GetFirst();
-380:     while (element != nullptr)
+346: /// <summary>
+347: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
+348: /// </summary>
+349: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
+350: /// <param name="handler">Kernel timer handler to call when time elapses</param>
+351: /// <param name="param">Parameter to pass to kernel timer handler</param>
+352: /// <param name="context">Kernel timer handler context</param>
+353: /// <returns>Handle to kernel timer</returns>
+354: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler *handler, void *param, void *context)
+355: {
+356:     unsigned elapseTimeTicks = m_ticks + delayTicks;
+357:     assert(handler != nullptr);
+358: 
+359:     KernelTimer *timer = new KernelTimer(elapseTimeTicks, handler, param, context);
+360:     assert(timer != nullptr);
+361:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
+362: 
+363:     KernelTimerElement *prevElement{};
+364:     KernelTimerElement *element = m_kernelTimerList.GetFirst();
+365:     while (element != nullptr)
+366:     {
+367:         const KernelTimer *timer2 = m_kernelTimerList.GetPointer(element);
+368:         assert(timer2 != nullptr);
+369:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
+370: 
+371:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
+372:         {
+373:             break;
+374:         }
+375: 
+376:         prevElement = element;
+377:         element     = m_kernelTimerList.GetNext(element);
+378:     }
+379: 
+380:     if (element != nullptr)
 381:     {
-382:         const KernelTimer *timer2 = m_kernelTimerList.GetPointer(element);
-383:         assert(timer2 != nullptr);
-384:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
-385: 
-386:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
-387:         {
-388:             break;
-389:         }
-390: 
-391:         prevElement = element;
-392:         element     = m_kernelTimerList.GetNext(element);
-393:     }
-394: 
-395:     if (element != nullptr)
-396:     {
-397:         m_kernelTimerList.InsertBefore(element, timer);
-398:     }
-399:     else
-400:     {
-401:         m_kernelTimerList.InsertAfter(prevElement, timer);
-402:     }
-403: 
-404:     return reinterpret_cast<KernelTimerHandle>(timer);
-405: }
+382:         m_kernelTimerList.InsertBefore(element, timer);
+383:     }
+384:     else
+385:     {
+386:         m_kernelTimerList.InsertAfter(prevElement, timer);
+387:     }
+388: 
+389:     return reinterpret_cast<KernelTimerHandle>(timer);
+390: }
+391: 
+392: /// <summary>
+393: /// Cancels and removes a kernel timer.
+394: /// </summary>
+395: /// <param name="handle">Handle to kernel timer to cancel</param>
+396: void Timer::CancelKernelTimer(KernelTimerHandle handle)
+397: {
+398:     KernelTimer *timer = reinterpret_cast<KernelTimer *>(handle);
+399:     assert(timer != 0);
+400:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+401: 
+402:     KernelTimerElement *element = m_kernelTimerList.Find(timer);
+403:     if (element != nullptr)
+404:     {
+405:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
 406: 
-407: /// <summary>
-408: /// Cancels and removes a kernel timer.
-409: /// </summary>
-410: /// <param name="handle">Handle to kernel timer to cancel</param>
-411: void Timer::CancelKernelTimer(KernelTimerHandle handle)
-412: {
-413:     KernelTimer *timer = reinterpret_cast<KernelTimer *>(handle);
-414:     assert(timer != 0);
-415:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
-416: 
-417:     KernelTimerElement *element = m_kernelTimerList.Find(timer);
-418:     if (element != nullptr)
-419:     {
-420:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-421: 
-422:         m_kernelTimerList.Remove(element);
-423: 
-424: #ifndef NDEBUG
-425:         timer->m_magic = 0;
-426: #endif
-427:         delete timer;
-428:     }
-429: }
-430: 
-431: /// <summary>
-432: /// Update all registered kernel timers, and handle expiration of timers
-433: /// </summary>
-434: void Timer::PollKernelTimers()
-435: {
-436:     auto element = m_kernelTimerList.GetFirst();
-437:     while (element != nullptr)
-438:     {
-439:         KernelTimer *timer = m_kernelTimerList.GetPointer(element);
-440:         assert(timer != nullptr);
-441:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-442: 
-443:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
-444:         {
-445:             break;
-446:         }
-447: 
-448:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
-449: 
-450:         m_kernelTimerList.Remove(element);
-451: 
-452:         KernelTimerHandler *handler = timer->m_handler;
-453:         assert(handler != nullptr);
-454:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
-455: 
-456: #ifndef NDEBUG
-457:         timer->m_magic = 0;
-458: #endif
-459:         delete timer;
-460: 
-461:         // The list may have changed due to the handler callback, so re-initialize
-462:         element = m_kernelTimerList.GetFirst();
-463:     }
-464: }
-465: 
+407:         m_kernelTimerList.Remove(element);
+408: 
+409: #ifndef NDEBUG
+410:         timer->m_magic = 0;
+411: #endif
+412:         delete timer;
+413:     }
+414: }
+415: 
+416: /// <summary>
+417: /// Update all registered kernel timers, and handle expiration of timers
+418: /// </summary>
+419: void Timer::PollKernelTimers()
+420: {
+421:     auto element = m_kernelTimerList.GetFirst();
+422:     while (element != nullptr)
+423:     {
+424:         KernelTimer *timer = m_kernelTimerList.GetPointer(element);
+425:         assert(timer != nullptr);
+426:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+427: 
+428:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
+429:         {
+430:             break;
+431:         }
+432: 
+433:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+434: 
+435:         m_kernelTimerList.Remove(element);
+436: 
+437:         KernelTimerHandler *handler = timer->m_handler;
+438:         assert(handler != nullptr);
+439:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
+440: 
+441: #ifndef NDEBUG
+442:         timer->m_magic = 0;
+443: #endif
+444:         delete timer;
+445: 
+446:         // The list may have changed due to the handler callback, so re-initialize
+447:         element = m_kernelTimerList.GetFirst();
+448:     }
+449: }
+450: 
 ...
-576: void Timer::InterruptHandler()
-577: {
-578:     uint64 compareValue;
-579:     GetTimerCompareValue(compareValue);
-580:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
-581: 
-582:     if (++m_ticks % TICKS_PER_SECOND == 0)
-583:     {
-584:         m_upTime++;
-585:         m_time++;
-586:     }
-587: 
-588:     PollKernelTimers();
-589: 
-590:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
-591:     {
-592:         if (m_periodicHandlers[i] != nullptr)
-593:             (*m_periodicHandlers[i])();
-594:     }
-595: }
-596: 
+561: void Timer::InterruptHandler()
+562: {
+563:     uint64 compareValue;
+564:     GetTimerCompareValue(compareValue);
+565:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+566: 
+567:     if (++m_ticks % TICKS_PER_SECOND == 0)
+568:     {
+569:         m_upTime++;
+570:         m_time++;
+571:     }
+572: 
+573:     PollKernelTimers();
+574: 
+575:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+576:     {
+577:         if (m_periodicHandlers[i] != nullptr)
+578:             (*m_periodicHandlers[i])();
+579:     }
+580: }
 ```
 
-- Line 70: We define the log module name
-- Line 73: We define a magic number for the kernel timer administration
-- Line 79-122: We declare a struct `KernelTimer` to hold the kernel timer administration
-  - Line 81-92: We declare the magic number, the timer deadline in ticks, the handler function pointer, the handler parameter, and the handler context
-  - Line 101-113: We declare and implement the constructor for `KernelTimer`
-  - Line 118-121: We declare and implement a method `CheckMagic()` to check the magic number
-- Line 369-405: We implement the method `StartKernelTimer()` to start a kernel timer
-  - Line 371: We calculate the time the timer should expire
-  - Line 372: We perform a sanity check that the handler is valid
-  - Line 374-375: We create a new kernel timer, and verify it was created
-  - Line 378-393: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
-  - Line 395-402: We then insert the timer in the list at the correct position
-- Line 411-429: We implement the method `CancelKernelTimer()` to cancel a kernel timer
-  - Line 413-414: We convert the handle back to a pointer, and verify it is valid
-  - Line 417-428: We find the element in the list, and remove it
-- Line 434-464: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
-  - Line 436: We get the first element in the list
-  - Line 437-463: We loop through all elements in the list
-     - Line 439: We get the timer from the element, and verify it is valid, and has the correct magic number
-     - Line 443: We check if the timer has expired
-     - Line 450: If it did expire we remove the timer from the list
-     - Line 452-454: We extract the handler, verify it is valid, and call it
-     - Line 459: We delete the timer
-     - Line 462: We re-initialize the element, as the list may have changed
-- Line 588: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
+- Line 54: We place the implementation inside the `baremetal` namespace
+- Line 57: We define the log module name
+- Line 60: We define a magic number for the kernel timer administration
+- Line 66-109: We declare a struct `KernelTimer` to hold the kernel timer administration
+  - Line 68-79: We declare the magic number, the timer deadline in ticks, the handler function pointer, the handler parameter, and the handler context
+  - Line 88-100: We declare and implement the constructor for `KernelTimer`
+  - Line 105-108: We declare and implement a method `CheckMagic()` to check the magic number
+- Line 113: We define the values for the days per month
+- Line 115: We define the values for the month names
+- Line 129: We update the constructor to initialize the kernel timer list
+- Line 146: We update the special constructor to initialize the kernel timer list
+- Line 161-164: We update the destructor to clean up the timers
+- Line 354-390: We implement the method `StartKernelTimer()` to start a kernel timer
+  - Line 356: We calculate the time the timer should expire
+  - Line 357: We perform a sanity check that the handler is valid
+  - Line 359-360: We create a new kernel timer, and verify it was created
+  - Line 363-378: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
+  - Line 380-387: We then insert the timer in the list at the correct position
+- Line 396-414: We implement the method `CancelKernelTimer()` to cancel a kernel timer
+  - Line 398-399: We convert the handle back to a pointer, and verify it is valid
+  - Line 402-413: We find the element in the list, and remove it
+- Line 419-449: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
+  - Line 421: We get the first element in the list
+  - Line 422-448: We loop through all elements in the list
+     - Line 424: We get the timer from the element, and verify it is valid, and has the correct magic number
+     - Line 428-431: We check if the timer has expired, if not we skip the timer
+     - Line 435: If it did expire we remove the timer from the list
+     - Line 437-439: We extract the handler, verify it is valid, and call it
+     - Line 444: We delete the timer
+     - Line 447: We re-initialize the element, as the list may have changed
+- Line 573: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
 
-### Update CMake file {#TUTORIAL_19_TIMER_EXTENSION_UPDATING_THE_TIME_STRING___STEP_2_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_UPDATE_CMAKE_FILE}
 
 As we have added some source files to the `baremetal` library, we need to update its CMake file.
 
@@ -1406,7 +1485,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Update application code {#TUTORIAL_19_TIMER_EXTENSION_UPDATING_THE_TIME_STRING___STEP_2_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_UPDATE_APPLICATION_CODE}
 
 We'll updat the application code to user kernel timers.
 
@@ -1484,7 +1563,7 @@ We create three kernel timers, one which will never expire in time, one which wi
 We expect the first one (timer 1) to expire, and start the second one (timer 2) after 1 second. We expect the second one to expire after 2 seconds.
 We expect the third one (timer 3) to never expire in time, and be cancelled after 5 seconds.
 
-### Configuring, building and debugging {#TUTORIAL_19_TIMER_EXTENSION_UPDATING_THE_TIME_STRING___STEP_2_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 
@@ -1515,6 +1594,4 @@ At 0.04 seconds (tick 4), the timer 3 is started, to expire at 10.04 seconds (ti
 At 1.03 seconds (tick 103), the timer 1 expires, and timer 2 is started, to expire at 3.03 seconds (tick 303). Timer 2 expires at 3.03 seconds (tick 303).
 At 5.01 seconds (tick 501), timer 3 is cancelled.
 
-Next: [19-timer-extension](19-timer-extension.md)
-
-
+Next: [20-gpio](20-gpio.md)

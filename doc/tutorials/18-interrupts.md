@@ -3084,6 +3084,30 @@ We'll not get into each and every IRQ or FIQ id, but give some descriptions on m
   - Line 484-707: We define all currently supported IRQ for Raspberry 4 / 5
   - Line 712-935: We define all currently supported FIQ for Raspberry 4 / 5
 
+### System.cpp {#TUTORIAL_18_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_SYSTEMCPP}
+
+As we've added the `Shutdown()` method to `InterruptSystem`, it is wise to make sure we nicely shutdown the interrupt system before halting or rebooting.
+Let's add a call for this.
+
+Update the file `code/libraries/baremetal/src/System.cpp`
+
+```cpp
+File: code/libraries/baremetal/src/System.cpp
+...
+128: void System::Halt()
+129: {
+130:     LOG_INFO("Halt");
+131:     GetInterruptSystem().Shutdown();
+132:     Timer::WaitMilliSeconds(WaitTime);
+...
+152: void System::Reboot()
+153: {
+154:     LOG_INFO("Reboot");
+155:     GetInterruptSystem().Shutdown();
+156:     Timer::WaitMilliSeconds(WaitTime);
+...
+```
+
 ### Update CMake file {#TUTORIAL_18_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_UPDATE_CMAKE_FILE}
 
 As we have not added any source files to the `baremetal` library, we do not need to update its CMake file.

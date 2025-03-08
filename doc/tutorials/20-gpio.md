@@ -3382,7 +3382,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 335: }
 336: 
 337: /// <summary>
-338: /// Global GPIO pin interrupt handler
+338: /// Global GPIO pin interrupt handler for the switch button
 339: /// </summary>
 340: /// <param name="pin">GPIO pin for the button switch</param>
 341: /// <param name="param">Parameter for the interrupt handler, which is a pointer to the class instance</param>
@@ -3394,7 +3394,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 347: }
 348: 
 349: /// <summary>
-350: /// GPIO pin interrupt handler
+350: /// GPIO pin interrupt handlerthe switch button
 351: /// </summary>
 352: /// <param name="pin">GPIO pin for the button switch</param>
 353: void KY040::SwitchButtonInterruptHandler(IGPIOPin* pin)
@@ -3579,7 +3579,7 @@ For now it only connects the interrupt for the SW GPIO, for both rising and fall
 This disconnects the interrupt, and cancels any running timers
 - Line 318-324: We implement the `RegisterEventHandler` method. This is quite straightforward
 - Line 330-335: We implement the `UnregisterEventHandler` method. This is quite straightforward
-- Line 342-347: We implement the global `SwitchButtonInterruptHandler()` method, which is the global interrupt handler for the GPIO pins.
+- Line 342-347: We implement the global `SwitchButtonInterruptHandler()` method, which is the global interrupt handler for the SW GPIO pin.
 It converts the parameter to a class pointer, and then calls the class method
 - Line 353-377: We implement the `SwitchButtonInterruptHandler()` method, which is the class interrupt handler for the GPIO pins
   - Line 359: It reads the GPIO pin value (down is false, up is true)
@@ -3686,7 +3686,7 @@ File: code/applications/demo/CMakeLists.txt
 31: 
 ```
 
-### Configuring, building and debugging {#TUTORIAL_20_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 Notice the click, double click, triple click and hold events
@@ -3738,22 +3738,189 @@ rInfo   0.00:00:21.620 Reboot (System:154)
 Info   0.00:00:21.640 InterruptSystem::Shutdown (InterruptHandler:153)
 ```
 
-## Adding intelligence to the rotary switch - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5}
+## Adding intelligence to the rotary switch - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5}
           
 Now let's also make the rotate part a bit smarter.
 
-We'll want to distinguish between a clockwise and a anti-clockwise tick, and we will need to handle fast turning which may skip an event here and there.
+We'll want to distinguish between a clockwise and a counter-clockwise tick, and we will need to handle fast turning which may skip an event here and there.
 
-### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040H}
+We'll start each pattern with the default situation, where both signals are high.
 
+When turning clockwise, the expected pattern is:
+
+| CLK | DT |
+|-----|----|
+| 1   | 1  |
+| 0   | 1  |
+| 0   | 0  |
+| 1   | 0  |
+| 1   | 1  |
+
+When turning counter-clockwise, the expected pattern is:
+
+| CLK | DT |
+|-----|----|
+| 1   | 1  |
+| 1   | 0  |
+| 0   | 0  |
+| 0   | 1  |
+| 1   | 1  |
+
+We'll use another state machine to keep track of the rotary status:
+
+| State          | CLK | DT | New state         | Event            |
+|----------------|-----|----|-------------------|------------------|
+| Start          | 0   | 0  | Invalid           | -                |
+| Start          | 0   | 1  | CW Start          | -                |
+| Start          | 1   | 0  | CCW Start         | -                |
+| Start          | 1   | 1  | Start             | -                |
+| CW Start       | 0   | 0  | CW Data Fall      | -                |
+| CW Start       | 0   | 1  | CW Start          | -                |
+| CW Start       | 1   | 0  | CW Clock Rise (*) | -                |
+| CW Start       | 1   | 1  | Start (*)         | -                |
+| CW Data Fall   | 0   | 0  | CW Data Fall      | -                |
+| CW Data Fall   | 0   | 1  | CW Start (*)      | -                |
+| CW Data Fall   | 1   | 0  | CW Clock Rise     | -                |
+| CW Data Fall   | 1   | 1  | Invalid           | -                |
+| CW Clock Rise  | 0   | 0  | CW Data Fall (*)  | -                |
+| CW Clock Rise  | 0   | 1  | Invalid           | -                |
+| CW Clock Rise  | 1   | 0  | CW Clock Rise     | -                |
+| CW Clock Rise  | 1   | 1  | Start (**)        | Clockwise        |
+| CCW Start      | 0   | 0  | CCW Clock Fall    | -                |
+| CCW Start      | 0   | 1  | CCW Data Rise (*) | -                |
+| CCW Start      | 1   | 0  | CCW Start         | -                |
+| CCW Start      | 1   | 1  | Start (*)         | -                |
+| CCW Clock Fall | 0   | 0  | CCW Clock Fall    | -                |
+| CCW Clock Fall | 0   | 1  | CCW Data Rise     | -                |
+| CCW Clock Fall | 1   | 0  | CCW Start (*)     | -                |
+| CCW Clock Fall | 1   | 1  | Invalid           | -                |
+| CCW Data Rise  | 0   | 0  | CCW Clock Fall    | -                |
+| CCW Data Rise  | 0   | 1  | CCW Data Rise     | -                |
+| CCW Data Rise  | 1   | 0  | Invalud           | -                |
+| CCW Data Rise  | 1   | 1  | Start (**)        | CounterClockwise |
+| Invalid        | 0   | 0  | Invalud           | -                |
+| Invalid        | 0   | 1  | Invalud           | -                |
+| Invalid        | 1   | 0  | Invalud           | -                |
+| Invalid        | 1   | 1  | Start             | -                |
+
+Here, sa single asterisk '*' indicates a fallback situation that is not expected, but we try to handle it correctly.
+A double asterisk '**' means it is the end of a cycle, and we generate an event an restart the cycle
+
+### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_KY_040H}
+
+So, lets update the KY040 class to add rotary behaviour.
 
 Update the file `code/libraries/device/include/device/gpio/KY-040.h`
 
 ```cpp
 File: code/libraries/device/include/device/gpio/KY-040.h
+...
+49: namespace device {
+50: 
+51: enum class SwitchEncoderState;
+52: enum class SwitchButtonEvent;
+53: enum class SwitchButtonState;
+54: 
+55: /// <summary>
+56: /// KY-040 rotary switch device
+57: /// </summary>
+58: class KY040
+59: {
+60: public:
+61:     /// <summary>
+62:     /// Events generated by the rotary switch
+63:     /// </summary>
+64:     enum class Event
+65:     {
+66:     	/// @brief Switch is rotated clockwise
+67:         RotateClockwise,
+68:     	/// @brief Switch is rotated counter clockwise
+69:         RotateCounterclockwise,
+70:         /// @brief Switch is pressed
+71:         SwitchDown,
+72:         /// @brief Switch is released
+73:         SwitchUp,
+74:         /// @brief Switch is clicked (short press / release cycle)
+75:         SwitchClick,
+76:         /// @brief Switch is clicked twice in a short time
+77:         SwitchDoubleClick,
+78:         /// @brief Switch is clicked three time in a short time
+79:         SwitchTripleClick,
+80:         /// @brief Switch is held down for a longer time
+81:         SwitchHold, ///< generated each second
+82:         /// @brief Unknown event
+83:         Unknown
+84:     };
+85: 
+86:     /// <summary>
+87:     /// Pointer to event handler function to be registered by an application
+88:     /// </summary>
+89:     using EventHandler = void(Event event, void *param);
+90: 
+91: private:
+92:     /// @brief True if the rotary switch was initialized
+93:     bool                            m_isInitialized;
+94:     /// @brief GPIO pin for CLK input
+95:     baremetal::PhysicalGPIOPin      m_clkPin;
+96:     /// @brief GPIO pin for DT input
+97:     baremetal::PhysicalGPIOPin      m_dtPin;
+98:     /// @brief GPIO pin for SW input (switch button)
+99:     baremetal::PhysicalGPIOPin      m_swPin;
+100:     /// @brief Internal state of the rotary encoder
+101:     SwitchEncoderState              m_switchEncoderState;
+102:     /// @brief Internal state of the switch button (to tracking single, double, triple clicking and hold
+103:     SwitchButtonState               m_switchButtonState;
+104:     /// @brief Handle to timer for debouncing the switch button
+105:     baremetal::KernelTimerHandle    m_debounceTimerHandle;
+106:     /// @brief Handle to timer for handling button press ticks (for hold)
+107:     baremetal::KernelTimerHandle    m_tickTimerHandle;
+108:     /// @brief Time at which the current button press occurred
+109:     unsigned                        m_currentPressTicks;
+110:     /// @brief Time at which the current button release occurred
+111:     unsigned                        m_currentReleaseTicks;
+112:     /// @brief Time at which the last button press occurred
+113:     unsigned                        m_lastPressTicks;
+114:     /// @brief Time at which the last button release occurred
+115:     unsigned                        m_lastReleaseTicks;
+116: 
+117:     /// @brief Registered event handler
+118:     EventHandler*                   m_eventHandler;
+119:     /// @brief Parameter for registered event handler
+120:     void*                           m_eventHandlerParam;
+121: 
+122: public:
+123:     KY040(uint8 clkPin, uint8 dtPin, uint8 swPin);
+124:     virtual ~KY040();
+125: 
+126:     void               Initialize();
+127:     void               Uninitialize();
+128: 
+129:     void               RegisterEventHandler(EventHandler *handler, void *param);
+130:     void               UnregisterEventHandler(EventHandler *handler);
+131:     static const char *EventToString(Event event);
+132: 
+133: private:
+134:     static void SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin, void *param);
+135:     void        SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin);
+136:     static void SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin, void *param);
+137:     void        SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin);
+138:     static void SwitchButtonDebounceHandler(baremetal::KernelTimerHandle handle, void *param, void *context);
+139:     void        SwitchButtonDebounceHandler(baremetal::KernelTimerHandle handle, void *param);
+140:     static void SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void *param, void *context);
+141:     void        SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void *param);
+142:     void        HandleSwitchButtonEvent(SwitchButtonEvent switchEvent);
+143: };
+144: 
+145: } // namespace device
 ```
 
-### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040CPP}
+- Line 51: We forward declare the enum `SwitchEncoderState` which will hold the internal rotary encoder state
+- Line 67-69: We add the clockwise and counter clockwise rotation as events
+- Line 101: We add the member variable `m_switchEncoderState` to hold the rotary encoder internal state
+- Line 134-135: We add the GPIO pin interrupt handler for the CLK and DT GPIO pins.
+One is global and receives a pointer to the KY040 instance, the other is called by the global one
+
+### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_KY_040CPP}
 
 We'll implement the changes.
 
@@ -3761,18 +3928,346 @@ Update the file `code/libraries/device/src/gpio/KY-040.cpp`
 
 ```cpp
 File: code/libraries/device/src/gpio/KY-040.cpp
+...
+61: /// <summary>
+62: /// Switch encoder internal state
+63: /// </summary>
+64: enum class SwitchEncoderState
+65: {
+66: 	/// @brief CLK high, DT high
+67:     Start,
+68:     /// @brief CLK high, DT down
+69:     CWStart,
+70:     /// @brief CLK down, DT low
+71:     CWDataFall,
+72:     /// @brief CLK low, DT up
+73:     CWClockRise,
+74:     /// @brief CLK down, DT high
+75:     CCWStart,
+76:     /// @brief CLK up DT down
+77:     CCWClockFall,
+78:     /// @brief CLK up, DT low
+79:     CCWDataRise,
+80:     /// @brief Invalid state
+81:     Invalid,
+82:     /// @brief Unknown
+83:     Unknown
+84: };
+85: 
+...
+128: /// <summary>
+129: /// Convert rotary switch encoder state to a string
+130: /// </summary>
+131: /// <param name="state">Switch encode state</param>
+132: /// <returns>String representing state</returns>
+133: static const char *EncoderStateToString(SwitchEncoderState state)
+134: {
+135:     switch (state)
+136:     {
+137:     case SwitchEncoderState::Start:
+138:         return "Start";
+139:     case SwitchEncoderState::CWStart:
+140:         return "CWStart";
+141:     case SwitchEncoderState::CWDataFall:
+142:         return "CWDataFall";
+143:     case SwitchEncoderState::CWClockRise:
+144:         return "CWClockRise";
+145:     case SwitchEncoderState::CCWStart:
+146:         return "CCWStart";
+147:     case SwitchEncoderState::CCWClockFall:
+148:         return "CCWClockFall";
+149:     case SwitchEncoderState::CCWDataRise:
+150:         return "CCWDataRise";
+151:     case SwitchEncoderState::Invalid:
+152:         return "Invalid";
+153:     case SwitchEncoderState::Unknown:
+154:     default:
+155:         break;
+156:     }
+157:     return "Unknown";
+158: }
+159: 
+...
+165: const char *KY040::EventToString(KY040::Event event)
+166: {
+167:     switch (event)
+168:     {
+169:     case KY040::Event::RotateClockwise:
+170:         return "RotateClockwise";
+171:     case KY040::Event::RotateCounterclockwise:
+172:         return "RotateCounterclockwise";
+173:     case KY040::Event::SwitchDown:
+174:         return "SwitchDown";
+175:     case KY040::Event::SwitchUp:
+176:         return "SwitchUp";
+177:     case KY040::Event::SwitchClick:
+178:         return "SwitchClick";
+179:     case KY040::Event::SwitchDoubleClick:
+180:         return "SwitchDoubleClick";
+181:     case KY040::Event::SwitchTripleClick:
+182:         return "SwitchTripleClick";
+183:     case KY040::Event::SwitchHold:
+184:         return "SwitchHold";
+185:     case KY040::Event::Unknown:
+186:     default:
+187:         break;
+188:     }
+189:     return "Unknown";
+190: }
+...
+248: static const KY040::Event s_encoderOutput[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
+249: //  {{CLK=0/DT=0,            CLK=0/DT=1},            {CLK=1/DT=0,            CLK=1/DT=1}}
+250: 
+251:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}},                   // Start
+252: 
+253:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}},                   // CWStart
+254:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}},                   // CWDataFall
+255:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::RotateClockwise}},           // CWClockRise
+256: 
+257:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}},                   // CCWStart
+258:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}},                   // CCWClockFall
+259:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::RotateCounterclockwise}},    // CCWDataRise
+260: 
+261:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}}                    // Invalid
+262: };
+263: static KY040::Event GetEncoderOutput(SwitchEncoderState state, bool clkValue, bool dtValue)
+264: {
+265:     return s_encoderOutput[static_cast<size_t>(state)][clkValue][dtValue];
+266: }
+267: 
+268: static const SwitchEncoderState s_encoderNextState[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
+269: //  {{CLK=0/DT=0,                       CLK=0/DT=1},                      {CLK=1/DT=0,                      CLK=1/DT=1}}
+270: 
+271:     {{SwitchEncoderState::Invalid,      SwitchEncoderState::CWStart},     {SwitchEncoderState::CCWStart,    SwitchEncoderState::Start}},     // Start (1, 1), this is the default state between two clicks
+272: 
+273:     {{SwitchEncoderState::CWDataFall,   SwitchEncoderState::CWStart},     {SwitchEncoderState::CWClockRise, SwitchEncoderState::Start}},     // CWStart (1, 0)
+274:     {{SwitchEncoderState::CWDataFall,   SwitchEncoderState::CWStart},     {SwitchEncoderState::CWClockRise, SwitchEncoderState::Invalid}},   // CWDataFall (0, 0)
+275:     {{SwitchEncoderState::CWDataFall,   SwitchEncoderState::Invalid},     {SwitchEncoderState::CWClockRise, SwitchEncoderState::Start}},     // CWClockRise (0, 1)
+276: 
+277:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::CCWStart,    SwitchEncoderState::Start}},     // CCWStart (0, 1)
+278:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::CCWStart,    SwitchEncoderState::Invalid}},   // CCWClockFall (0, 0)
+279:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::Invalid,     SwitchEncoderState::Start}},     // CCWDataRise (1, 0)
+280: 
+281:     {{SwitchEncoderState::Invalid,      SwitchEncoderState::Invalid},     {SwitchEncoderState::Invalid,     SwitchEncoderState::Start}}      // Invalid
+282: };
+283: static SwitchEncoderState GetEncoderNextState(SwitchEncoderState state, bool clkValue, bool dtValue)
+284: {
+285:     return s_encoderNextState[static_cast<size_t>(state)][clkValue][dtValue];
+286: }
+287: 
+...
+348: KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin)
+349:     : m_isInitialized{}
+350:     , m_clkPin(clkPin, GPIOMode::InputPullUp)
+351:     , m_dtPin(dtPin, GPIOMode::InputPullUp)
+352:     , m_swPin(swPin, GPIOMode::InputPullUp)
+353:     , m_switchEncoderState{SwitchEncoderState::Start}
+354:     , m_switchButtonState{SwitchButtonState::Start}
+355:     , m_debounceTimerHandle{}
+356:     , m_tickTimerHandle{}
+357:     , m_currentPressTicks{}
+358:     , m_currentReleaseTicks{}
+359:     , m_lastPressTicks{}
+360:     , m_lastReleaseTicks{}
+361: 
+362:     , m_eventHandler{}
+363:     , m_eventHandlerParam{}
+364: {
+365:     LOG_DEBUG("KY040 constructor");
+366: }
+...
+380: void KY040::Initialize()
+381: {
+382:     if (m_isInitialized)
+383:         return;
+384: 
+385:     LOG_DEBUG("KY040 Initialize");
+386:     m_clkPin.ConnectInterrupt(SwitchEncoderInterruptHandler, this);
+387:     m_dtPin.ConnectInterrupt(SwitchEncoderInterruptHandler, this);
+388:     m_swPin.ConnectInterrupt(SwitchButtonInterruptHandler, this);
+389: 
+390:     m_clkPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
+391:     m_dtPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
+392:     m_swPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
+393: 
+394:     m_isInitialized = true;
+395: }
+...
+447: /// <summary>
+448: /// Global GPIO pin interrupt handler for switch encoder
+449: /// </summary>
+450: /// <param name="pin">GPIO pin for the button encoder inputs</param>
+451: /// <param name="param">Parameter for the interrupt handler, which is a pointer to the class instance</param>
+452: void KY040::SwitchEncoderInterruptHandler(baremetal::IGPIOPin *pin, void *param)
+453: {
+454:     KY040 *pThis = reinterpret_cast<KY040 *>(param);
+455:     assert(pThis != nullptr);
+456:     pThis->SwitchEncoderInterruptHandler(pin);
+457: }
+458: 
+459: /// <summary>
+460: /// GPIO pin interrupt handler for switch encoder
+461: /// </summary>
+462: /// <param name="pin">GPIO pin for the button encoder inputs</param>
+463: void KY040::SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin)
+464: {
+465:     auto clkValue = m_clkPin.Get();
+466:     auto dtValue  = m_dtPin.Get();
+467:     LOG_DEBUG("KY040 CLK: %d", clkValue);
+468:     LOG_DEBUG("KY040 DT:  %d", dtValue);
+469:     assert(m_switchEncoderState < SwitchEncoderState::Unknown);
+470: 
+471:     LOG_DEBUG("KY040 Current state: %s", EncoderStateToString(m_switchEncoderState));
+472:     Event event = GetEncoderOutput(m_switchEncoderState, clkValue, dtValue);
+473:     m_switchEncoderState = GetEncoderNextState(m_switchEncoderState, clkValue, dtValue);
+474:     LOG_DEBUG("KY040 Event: %s", EventToString(event));
+475:     LOG_DEBUG("KY040 Next state: %s", EncoderStateToString(m_switchEncoderState));
+476: 
+477:     if ((event != Event::Unknown) && (m_eventHandler != nullptr))
+478:     {
+479:         (*m_eventHandler)(event, m_eventHandlerParam);
+480:     }
+481: }
+482: 
 ```
 
-### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CODE}
+- Line 64-84: We declare the `SwitchEncoderState` enum values.
+You can recognize the values from the table we showed in [Adding intelligence to the rotary switch - Step 5](#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5)
+- Line 133-158: We define a function `EncoderStateToString` to convert a rotary encoder state to a string for debugging
+- Line 169-172: We add the `Clockwise` and `CounterClockwise` enum values to the conversion to string
+- Line 248-262: We define a matrix `s_encoderOutput` to determine the event to be generated when an event happens in a certain state.
+This is part of the state machine
+- Line 263-266: We implement a local function `GetEncoderOutput()` which uses the `s_encoderOutput` variable to determine the event to generate
+- Line 268-282: We define a matrix `s_encoderNextState` to determine the next state when an event happens in a certain state.
+This is part of the state machine
+- Line 283-286: We implement a local function `GetEncoderNextState()` which uses the `s_encoderNextState` variable to determine the next state
+- Line 353: We update the constructor to initialize `m_switchEncoderState`
+- Line 386-387: We update the `Initialize()` method to also connect and interrupt handler for the CLK and DT GPIO pins
+- Line 390-391: We update the `Initialize()` method to also set up interrupt for both rising and falling edges for the CLK and DT GPIO pins
+- Line 452-457: We implement the global `SwitchEncoderInterruptHandler()` method, which is the global interrupt handler for the CLK and DT GPIO pins.
+It converts the parameter to a class pointer, and then calls the class method
+- Line 463-481: We implement the `SwitchEncoderInterruptHandler()` method, which is the class interrupt handler for the CLK and DT GPIO pins
+  - Line 465-466: It reads the GPIO pin values
+  - Line 472: We determine the event to be generated from the current state and the GPIO pin values
+  - Line 473: We determine the next state from the current state and the GPIO pin values
+  - Line 477-480: If the event is not `Unknown` and there is an event handler function installed, we call it
 
-The application code remains unchanged.
+### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_UPDATE_APPLICATION_CODE}
 
-### Configuring, building and debugging {#TUTORIAL_20_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_1_CONFIGURING_BUILDING_AND_DEBUGGING}
+Let's try to do something useful with the rotary switch.
+We use a value which starts at 0, if we rotate clockwise we increment the value, if we rotate counter clockwise we decrement, and if the switch is push down, we print the value.
+
+Update the file `code/applications/demo/src/main.cpp`
+
+```cpp
+File: code/applications/demo/src/main.cpp
+1: #include <baremetal/ARMInstructions.h>
+2: #include <baremetal/Assert.h>
+3: #include <baremetal/Console.h>
+4: #include <baremetal/Logger.h>
+5: #include <baremetal/System.h>
+6: #include <baremetal/Timer.h>
+7: #include <device/gpio/KY-040.h>
+8: 
+9: LOG_MODULE("main");
+10: 
+11: using namespace baremetal;
+12: using namespace device;
+13: 
+14: int value = 0;
+15: 
+16: void OnEvent(KY040::Event event, void *param)
+17: {
+18:     LOG_INFO("Event %s", KY040::EventToString(event));
+19:     switch (event)
+20:     {
+21:         case KY040::Event::SwitchDown:
+22:             LOG_INFO("Value %d", value);
+23:             break;
+24:         case KY040::Event::RotateClockwise:
+25:             value++;
+26:             break;
+27:         case KY040::Event::RotateCounterclockwise:
+28:             value--;
+29:             break;
+30:         default:
+31:             break;
+32:     }
+33: }
+34: 
+35: int main()
+36: {
+37:     auto& console = GetConsole();
+38:     GetLogger().SetLogLevel(LogSeverity::Info);
+39: 
+40:     auto exceptionLevel = CurrentEL();
+41:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+42: 
+43:     KY040 rotarySwitch(11, 9, 10);
+44:     rotarySwitch.Initialize();
+45:     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
+46:     
+47:     LOG_INFO("Wait 20 seconds");
+48:     Timer::WaitMilliSeconds(20000);
+49: 
+50:     rotarySwitch.UnregisterEventHandler(OnEvent);
+51:     rotarySwitch.Uninitialize();
+52: 
+53:     console.Write("Press r to reboot, h to halt\n");
+54:     char ch{};
+55:     while ((ch != 'r') && (ch != 'h'))
+56:     {
+57:         ch = console.ReadChar();
+58:         console.WriteChar(ch);
+59:     }
+60: 
+61:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+62: }
+```
+
+The code should speak for itself.
+
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
-Notice the click, double click, triple click and hold events
+Notice the rotate events, as well as the value being printed when with push the switch down.
 
 ```text
+Info   0.00:51:26.470 InterruptSystem::Shutdown (InterruptHandler:153)
+Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:96)
+Info   0.00:00:00.050 Starting up (System:209)
+Info   0.00:00:00.070 Current EL: 1 (main:41)
+Info   0.00:00:00.090 Wait 20 seconds (main:47)
+Info   0.00:00:01.150 Event RotateClockwise (main:18)
+Info   0.00:00:02.170 Event RotateClockwise (main:18)
+Info   0.00:00:02.290 Event RotateClockwise (main:18)
+Info   0.00:00:02.440 Event RotateClockwise (main:18)
+Info   0.00:00:04.210 Event SwitchDown (main:18)
+Info   0.00:00:04.210 Value 4 (main:22)
+Info   0.00:00:04.420 Event SwitchUp (main:18)
+Info   0.00:00:04.420 Event SwitchClick (main:18)
+Info   0.00:00:05.800 Event RotateCounterclockwise (main:18)
+Info   0.00:00:05.900 Event RotateCounterclockwise (main:18)
+Info   0.00:00:06.020 Event RotateCounterclockwise (main:18)
+Info   0.00:00:06.140 Event RotateCounterclockwise (main:18)
+Info   0.00:00:06.270 Event RotateCounterclockwise (main:18)
+Info   0.00:00:07.240 Event SwitchDown (main:18)
+Info   0.00:00:07.240 Value -1 (main:22)
+Info   0.00:00:07.430 Event SwitchUp (main:18)
+Info   0.00:00:07.430 Event SwitchClick (main:18)
+Info   0.00:00:08.860 Event RotateClockwise (main:18)
+Info   0.00:00:09.000 Event RotateClockwise (main:18)
+Info   0.00:00:09.860 Event SwitchDown (main:18)
+Info   0.00:00:09.860 Value 1 (main:22)
+Info   0.00:00:10.020 Event SwitchUp (main:18)
+Info   0.00:00:10.020 Event SwitchClick (main:18)
+Info   0.00:00:12.750 Event RotateClockwise (main:18)
+Info   0.00:00:12.960 Event RotateClockwise (main:18)
+Info   0.00:00:14.030 Event SwitchDown (main:18)
+Info   0.00:00:14.030 Value 3 (main:22)
+Info   0.00:00:14.160 Event SwitchUp (main:18)
+Info   0.00:00:14.160 Event SwitchClick (main:18)
+Press r to reboot, h to halt
 ```
 
 Next: [21-i2c](21-i2c.md)

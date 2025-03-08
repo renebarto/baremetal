@@ -126,6 +126,7 @@ Timer::Timer()
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
+    , m_kernelTimerList{}
 {
 }
 
@@ -142,6 +143,7 @@ Timer::Timer(IMemoryAccess &memoryAccess)
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
+    , m_kernelTimerList{}
 {
 }
 
@@ -155,6 +157,12 @@ Timer::~Timer()
     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
 
     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+
+    KernelTimerElement *element;
+    while ((element = m_kernelTimerList.GetFirst()) != 0)
+    {
+        CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
+    }
 }
 
 /// <summary>
@@ -597,4 +605,3 @@ Timer &GetTimer()
 }
 
 } // namespace baremetal
-

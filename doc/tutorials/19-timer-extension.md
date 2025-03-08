@@ -1192,133 +1192,185 @@ File: code/libraries/baremetal/src/Timer.cpp
 114: 
 115: const char    *Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 116: 
+117: /// <summary>
+118: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+119: /// </summary>
+120: Timer::Timer()
+121:     : m_interruptSystem{GetInterruptSystem()}
+122:     , m_memoryAccess{ GetMemoryAccess() }
+123:     , m_clockTicksPerSystemTick{}
+124:     , m_ticks{}
+125:     , m_upTime{}
+126:     , m_time{}
+127:     , m_periodicHandlers{}
+128:     , m_numPeriodicHandlers{}
+129:     , m_kernelTimerList{}
+130: {
+131: }
+132: 
+File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Timer.cpp
+133: /// <summary>
+134: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
+135: /// </summary>
+136: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+137: Timer::Timer(IMemoryAccess &memoryAccess)
+138:     : m_interruptSystem{GetInterruptSystem()}
+139:     , m_memoryAccess{ memoryAccess }
+140:     , m_clockTicksPerSystemTick{}
+141:     , m_ticks{}
+142:     , m_upTime{}
+143:     , m_time{}
+144:     , m_periodicHandlers{}
+145:     , m_numPeriodicHandlers{}
+146:     , m_kernelTimerList{}
+147: {
+148: }
+149: 
+150: /// <summary>
+151: /// Destructor
+152: ///
+153: /// Disables the timer, as well as the timer interrupt
+154: /// </summary> 
+155: Timer::~Timer()
+156: {
+157:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
+158: 
+159:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+160: 
+161:     KernelTimerElement *element;
+162:     while ((element = m_kernelTimerList.GetFirst()) != 0)
+163:     {
+164:         CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
+165:     }
+166: }
+167: 
 ...
-352: /// <summary>
-353: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
-354: /// </summary>
-355: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
-356: /// <param name="handler">Kernel timer handler to call when time elapses</param>
-357: /// <param name="param">Parameter to pass to kernel timer handler</param>
-358: /// <param name="context">Kernel timer handler context</param>
-359: /// <returns>Handle to kernel timer</returns>
-360: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler *handler, void *param, void *context)
-361: {
-362:     unsigned elapseTimeTicks = m_ticks + delayTicks;
-363:     assert(handler != nullptr);
-364: 
-365:     KernelTimer *timer = new KernelTimer(elapseTimeTicks, handler, param, context);
-366:     assert(timer != nullptr);
-367:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
-368: 
-369:     KernelTimerElement *prevElement{};
-370:     KernelTimerElement *element = m_kernelTimerList.GetFirst();
-371:     while (element != nullptr)
-372:     {
-373:         const KernelTimer *timer2 = m_kernelTimerList.GetPointer(element);
-374:         assert(timer2 != nullptr);
-375:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
-376: 
-377:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
-378:         {
-379:             break;
-380:         }
-381: 
-382:         prevElement = element;
-383:         element     = m_kernelTimerList.GetNext(element);
-384:     }
-385: 
-386:     if (element != nullptr)
-387:     {
-388:         m_kernelTimerList.InsertBefore(element, timer);
-389:     }
-390:     else
-391:     {
-392:         m_kernelTimerList.InsertAfter(prevElement, timer);
-393:     }
-394: 
-395:     return reinterpret_cast<KernelTimerHandle>(timer);
-396: }
-397: 
-398: /// <summary>
-399: /// Cancels and removes a kernel timer.
-400: /// </summary>
-401: /// <param name="handle">Handle to kernel timer to cancel</param>
-402: void Timer::CancelKernelTimer(KernelTimerHandle handle)
-403: {
-404:     KernelTimer *timer = reinterpret_cast<KernelTimer *>(handle);
-405:     assert(timer != 0);
-406:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
-407: 
-408:     KernelTimerElement *element = m_kernelTimerList.Find(timer);
-409:     if (element != nullptr)
-410:     {
-411:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-412: 
-413:         m_kernelTimerList.Remove(element);
-414: 
-415: #ifndef NDEBUG
-416:         timer->m_magic = 0;
-417: #endif
-418:         delete timer;
-419:     }
-420: }
-421: 
-422: /// <summary>
-423: /// Update all registered kernel timers, and handle expiration of timers
-424: /// </summary>
-425: void Timer::PollKernelTimers()
-426: {
-427:     auto element = m_kernelTimerList.GetFirst();
-428:     while (element != nullptr)
-429:     {
-430:         KernelTimer *timer = m_kernelTimerList.GetPointer(element);
-431:         assert(timer != nullptr);
-432:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-433: 
-434:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
-435:         {
-436:             break;
-437:         }
-438: 
-439:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+346: /// <summary>
+347: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
+348: /// </summary>
+349: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
+350: /// <param name="handler">Kernel timer handler to call when time elapses</param>
+351: /// <param name="param">Parameter to pass to kernel timer handler</param>
+352: /// <param name="context">Kernel timer handler context</param>
+353: /// <returns>Handle to kernel timer</returns>
+354: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler *handler, void *param, void *context)
+355: {
+356:     unsigned elapseTimeTicks = m_ticks + delayTicks;
+357:     assert(handler != nullptr);
+358: 
+359:     KernelTimer *timer = new KernelTimer(elapseTimeTicks, handler, param, context);
+360:     assert(timer != nullptr);
+361:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
+362: 
+363:     KernelTimerElement *prevElement{};
+364:     KernelTimerElement *element = m_kernelTimerList.GetFirst();
+365:     while (element != nullptr)
+366:     {
+367:         const KernelTimer *timer2 = m_kernelTimerList.GetPointer(element);
+368:         assert(timer2 != nullptr);
+369:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
+370: 
+371:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
+372:         {
+373:             break;
+374:         }
+375: 
+376:         prevElement = element;
+377:         element     = m_kernelTimerList.GetNext(element);
+378:     }
+379: 
+380:     if (element != nullptr)
+381:     {
+382:         m_kernelTimerList.InsertBefore(element, timer);
+383:     }
+384:     else
+385:     {
+386:         m_kernelTimerList.InsertAfter(prevElement, timer);
+387:     }
+388: 
+389:     return reinterpret_cast<KernelTimerHandle>(timer);
+390: }
+391: 
+392: /// <summary>
+393: /// Cancels and removes a kernel timer.
+394: /// </summary>
+395: /// <param name="handle">Handle to kernel timer to cancel</param>
+396: void Timer::CancelKernelTimer(KernelTimerHandle handle)
+397: {
+398:     KernelTimer *timer = reinterpret_cast<KernelTimer *>(handle);
+399:     assert(timer != 0);
+400:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+401: 
+402:     KernelTimerElement *element = m_kernelTimerList.Find(timer);
+403:     if (element != nullptr)
+404:     {
+405:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+406: 
+407:         m_kernelTimerList.Remove(element);
+408: 
+409: #ifndef NDEBUG
+410:         timer->m_magic = 0;
+411: #endif
+412:         delete timer;
+413:     }
+414: }
+415: 
+416: /// <summary>
+417: /// Update all registered kernel timers, and handle expiration of timers
+418: /// </summary>
+419: void Timer::PollKernelTimers()
+420: {
+421:     auto element = m_kernelTimerList.GetFirst();
+422:     while (element != nullptr)
+423:     {
+424:         KernelTimer *timer = m_kernelTimerList.GetPointer(element);
+425:         assert(timer != nullptr);
+426:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+427: 
+428:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
+429:         {
+430:             break;
+431:         }
+432: 
+433:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+434: 
+435:         m_kernelTimerList.Remove(element);
+436: 
+437:         KernelTimerHandler *handler = timer->m_handler;
+438:         assert(handler != nullptr);
+439:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
 440: 
-441:         m_kernelTimerList.Remove(element);
-442: 
-443:         KernelTimerHandler *handler = timer->m_handler;
-444:         assert(handler != nullptr);
-445:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
-446: 
-447: #ifndef NDEBUG
-448:         timer->m_magic = 0;
-449: #endif
-450:         delete timer;
-451: 
-452:         // The list may have changed due to the handler callback, so re-initialize
-453:         element = m_kernelTimerList.GetFirst();
-454:     }
-455: }
-456: 
+441: #ifndef NDEBUG
+442:         timer->m_magic = 0;
+443: #endif
+444:         delete timer;
+445: 
+446:         // The list may have changed due to the handler callback, so re-initialize
+447:         element = m_kernelTimerList.GetFirst();
+448:     }
+449: }
+450: 
 ...
-567: void Timer::InterruptHandler()
-568: {
-569:     uint64 compareValue;
-570:     GetTimerCompareValue(compareValue);
-571:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+561: void Timer::InterruptHandler()
+562: {
+563:     uint64 compareValue;
+564:     GetTimerCompareValue(compareValue);
+565:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+566: 
+567:     if (++m_ticks % TICKS_PER_SECOND == 0)
+568:     {
+569:         m_upTime++;
+570:         m_time++;
+571:     }
 572: 
-573:     if (++m_ticks % TICKS_PER_SECOND == 0)
-574:     {
-575:         m_upTime++;
-576:         m_time++;
-577:     }
-578: 
-579:     PollKernelTimers();
-580: 
-581:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
-582:     {
-583:         if (m_periodicHandlers[i] != nullptr)
-584:             (*m_periodicHandlers[i])();
-585:     }
-586: }
+573:     PollKernelTimers();
+574: 
+575:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+576:     {
+577:         if (m_periodicHandlers[i] != nullptr)
+578:             (*m_periodicHandlers[i])();
+579:     }
+580: }
 ```
 
 - Line 54: We place the implementation inside the `baremetal` namespace
@@ -1330,25 +1382,28 @@ File: code/libraries/baremetal/src/Timer.cpp
   - Line 105-108: We declare and implement a method `CheckMagic()` to check the magic number
 - Line 113: We define the values for the days per month
 - Line 115: We define the values for the month names
-- Line 346-482: We implement the method `StartKernelTimer()` to start a kernel timer
-  - Line 348: We calculate the time the timer should expire
-  - Line 349: We perform a sanity check that the handler is valid
-  - Line 351-352: We create a new kernel timer, and verify it was created
-  - Line 355-370: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
-  - Line 372-379: We then insert the timer in the list at the correct position
-- Line 388-406: We implement the method `CancelKernelTimer()` to cancel a kernel timer
-  - Line 390-391: We convert the handle back to a pointer, and verify it is valid
-  - Line 394-405: We find the element in the list, and remove it
-- Line 411-441: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
-  - Line 413: We get the first element in the list
-  - Line 414-440: We loop through all elements in the list
-     - Line 416: We get the timer from the element, and verify it is valid, and has the correct magic number
-     - Line 420-423: We check if the timer has expired, if so we skip the timer
-     - Line 427: If it did expire we remove the timer from the list
-     - Line 429-431: We extract the handler, verify it is valid, and call it
-     - Line 436: We delete the timer
-     - Line 439: We re-initialize the element, as the list may have changed
-- Line 565: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
+- Line 129: We update the constructor to initialize the kernel timer list
+- Line 146: We update the special constructor to initialize the kernel timer list
+- Line 161-164: We update the destructor to clean up the timers
+- Line 354-390: We implement the method `StartKernelTimer()` to start a kernel timer
+  - Line 356: We calculate the time the timer should expire
+  - Line 357: We perform a sanity check that the handler is valid
+  - Line 359-360: We create a new kernel timer, and verify it was created
+  - Line 363-378: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
+  - Line 380-387: We then insert the timer in the list at the correct position
+- Line 396-414: We implement the method `CancelKernelTimer()` to cancel a kernel timer
+  - Line 398-399: We convert the handle back to a pointer, and verify it is valid
+  - Line 402-413: We find the element in the list, and remove it
+- Line 419-449: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
+  - Line 421: We get the first element in the list
+  - Line 422-448: We loop through all elements in the list
+     - Line 424: We get the timer from the element, and verify it is valid, and has the correct magic number
+     - Line 428-431: We check if the timer has expired, if not we skip the timer
+     - Line 435: If it did expire we remove the timer from the list
+     - Line 437-439: We extract the handler, verify it is valid, and call it
+     - Line 444: We delete the timer
+     - Line 447: We re-initialize the element, as the list may have changed
+- Line 573: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
 
 ### Update CMake file {#TUTORIAL_19_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_UPDATE_CMAKE_FILE}
 

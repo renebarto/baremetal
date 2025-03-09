@@ -4157,6 +4157,9 @@ It converts the parameter to a class pointer, and then calls the class method
 Let's try to do something useful with the rotary switch.
 We use a value which starts at 0, if we rotate clockwise we increment the value, if we rotate counter clockwise we decrement, and if the switch is push down, we print the value.
 
+In fact, let's make it even more fancy. If we press and hold the switch button for 2 seconds, let's automatically perform a reboot.
+This means the main loop will simply be waiting for an interrupt to happen, and check whether we need to reboot.
+
 Update the file `code/applications/demo/src/main.cpp`
 
 ```cpp
@@ -4174,58 +4177,75 @@ File: code/applications/demo/src/main.cpp
 11: using namespace baremetal;
 12: using namespace device;
 13: 
-14: int value = 0;
-15: 
-16: void OnEvent(KY040::Event event, void *param)
-17: {
-18:     LOG_INFO("Event %s", KY040::EventToString(event));
-19:     switch (event)
-20:     {
-21:         case KY040::Event::SwitchDown:
-22:             LOG_INFO("Value %d", value);
-23:             break;
-24:         case KY040::Event::RotateClockwise:
-25:             value++;
+14: static int value = 0;
+15: static int holdCounter = 0;
+16: static const int HoldThreshold = 2;
+17: static bool reboot = false;
+18: 
+19: void OnEvent(KY040::Event event, void *param)
+20: {
+21:     LOG_INFO("Event %s", KY040::EventToString(event));
+22:     switch (event)
+23:     {
+24:         case KY040::Event::SwitchDown:
+25:             LOG_INFO("Value %d", value);
 26:             break;
-27:         case KY040::Event::RotateCounterclockwise:
-28:             value--;
+27:         case KY040::Event::RotateClockwise:
+28:             value++;
 29:             break;
-30:         default:
-31:             break;
-32:     }
-33: }
-34: 
-35: int main()
-36: {
-37:     auto& console = GetConsole();
-38:     GetLogger().SetLogLevel(LogSeverity::Info);
-39: 
-40:     auto exceptionLevel = CurrentEL();
-41:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-42: 
-43:     KY040 rotarySwitch(11, 9, 10);
-44:     rotarySwitch.Initialize();
-45:     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
-46:     
-47:     LOG_INFO("Wait 20 seconds");
-48:     Timer::WaitMilliSeconds(20000);
-49: 
-50:     rotarySwitch.UnregisterEventHandler(OnEvent);
-51:     rotarySwitch.Uninitialize();
-52: 
-53:     console.Write("Press r to reboot, h to halt\n");
-54:     char ch{};
-55:     while ((ch != 'r') && (ch != 'h'))
-56:     {
-57:         ch = console.ReadChar();
-58:         console.WriteChar(ch);
-59:     }
-60: 
-61:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-62: }
+30:         case KY040::Event::RotateCounterclockwise:
+31:             value--;
+32:             break;
+33:         case KY040::Event::SwitchHold:
+34:             holdCounter++;
+35:             if (holdCounter >= HoldThreshold)
+36:             {
+37:                 reboot = true;
+38:                 LOG_INFO("Reboot triggered");
+39:             }
+40:             break;
+41:         default:
+42:             break;
+43:     }
+44: }
+45: 
+46: int main()
+47: {
+48:     auto& console = GetConsole();
+49:     GetLogger().SetLogLevel(LogSeverity::Info);
+50: 
+51:     auto exceptionLevel = CurrentEL();
+52:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
+53: 
+54:     KY040 rotarySwitch(11, 9, 10);
+55:     rotarySwitch.Initialize();
+56:     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
+57:     
+58:     LOG_INFO("Hold down switch button for %d seconds to reboot", HoldThreshold);
+59:     while (!reboot)
+60:     {
+61:         WaitForInterrupt();
+62:     }
+63: 
+64:     rotarySwitch.UnregisterEventHandler(OnEvent);
+65:     rotarySwitch.Uninitialize();
+66: 
+67:     LOG_INFO("Rebooting");
+68: 
+69:     return static_cast<int>(ReturnCode::ExitReboot);
+70: }
 ```
 
-The code should speak for itself.
+- Line 19-44: We handle the event callback from the rotarty switch
+  - Line 24-26: If the switch button is down, we print the current value
+  - Line 27-29: If the switch is rotated clockwise, we increment the value
+  - Line 30-32: If the switch is rotated counter clockwise, we decrement the value
+  - Line 33-40: If the switch button is held down, we count the number of times we get a `SwitchHold` event.
+If this reached `HolsThreshold`, we flag a reboot
+- Line 58: We print a message to hold down the button for `HoldThreshold` seconds to reboot
+- Line 59-62: As long as the reboot flag is not set, we wait for an interrupt.
+This effectively shuts down the core until an interrupt happens
+- Line: 69: We return `ReturnCode::ExitReboot` to enforce a reboot
 
 ### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
@@ -4233,41 +4253,59 @@ We can now configure and build our code, and test.
 Notice the rotate events, as well as the value being printed when with push the switch down.
 
 ```text
-Info   0.00:51:26.470 InterruptSystem::Shutdown (InterruptHandler:153)
 Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:96)
 Info   0.00:00:00.050 Starting up (System:209)
-Info   0.00:00:00.070 Current EL: 1 (main:41)
-Info   0.00:00:00.090 Wait 20 seconds (main:47)
-Info   0.00:00:01.150 Event RotateClockwise (main:18)
-Info   0.00:00:02.170 Event RotateClockwise (main:18)
-Info   0.00:00:02.290 Event RotateClockwise (main:18)
-Info   0.00:00:02.440 Event RotateClockwise (main:18)
-Info   0.00:00:04.210 Event SwitchDown (main:18)
-Info   0.00:00:04.210 Value 4 (main:22)
-Info   0.00:00:04.420 Event SwitchUp (main:18)
-Info   0.00:00:04.420 Event SwitchClick (main:18)
-Info   0.00:00:05.800 Event RotateCounterclockwise (main:18)
-Info   0.00:00:05.900 Event RotateCounterclockwise (main:18)
-Info   0.00:00:06.020 Event RotateCounterclockwise (main:18)
-Info   0.00:00:06.140 Event RotateCounterclockwise (main:18)
-Info   0.00:00:06.270 Event RotateCounterclockwise (main:18)
-Info   0.00:00:07.240 Event SwitchDown (main:18)
-Info   0.00:00:07.240 Value -1 (main:22)
-Info   0.00:00:07.430 Event SwitchUp (main:18)
-Info   0.00:00:07.430 Event SwitchClick (main:18)
-Info   0.00:00:08.860 Event RotateClockwise (main:18)
-Info   0.00:00:09.000 Event RotateClockwise (main:18)
-Info   0.00:00:09.860 Event SwitchDown (main:18)
-Info   0.00:00:09.860 Value 1 (main:22)
-Info   0.00:00:10.020 Event SwitchUp (main:18)
-Info   0.00:00:10.020 Event SwitchClick (main:18)
-Info   0.00:00:12.750 Event RotateClockwise (main:18)
-Info   0.00:00:12.960 Event RotateClockwise (main:18)
-Info   0.00:00:14.030 Event SwitchDown (main:18)
-Info   0.00:00:14.030 Value 3 (main:22)
-Info   0.00:00:14.160 Event SwitchUp (main:18)
-Info   0.00:00:14.160 Event SwitchClick (main:18)
-Press r to reboot, h to halt
+Info   0.00:00:00.070 Current EL: 1 (main:52)
+Info   0.00:00:00.090 Hold down switch button for 2 seconds to reboot (main:58)
+Info   0.00:00:03.540 Event RotateClockwise (main:21)
+Info   0.00:00:03.900 Event RotateClockwise (main:21)
+Info   0.00:00:04.020 Event RotateClockwise (main:21)
+Info   0.00:00:04.180 Event RotateClockwise (main:21)
+Info   0.00:00:04.320 Event RotateClockwise (main:21)
+Info   0.00:00:04.680 Event RotateCounterclockwise (main:21)
+Info   0.00:00:05.000 Event RotateCounterclockwise (main:21)
+Info   0.00:00:05.100 Event RotateCounterclockwise (main:21)
+Info   0.00:00:05.390 Event RotateCounterclockwise (main:21)
+Info   0.00:00:05.480 Event RotateCounterclockwise (main:21)
+Info   0.00:00:06.900 Event SwitchDown (main:21)
+Info   0.00:00:06.900 Value 0 (main:25)
+Info   0.00:00:07.360 Event SwitchUp (main:21)
+Info   0.00:00:09.460 Event SwitchDown (main:21)
+Info   0.00:00:09.460 Value 0 (main:25)
+Info   0.00:00:10.460 Event SwitchHold (main:21)
+Info   0.00:00:10.990 Event SwitchUp (main:21)
+Info   0.00:00:12.450 Event SwitchDown (main:21)
+Info   0.00:00:12.450 Value 0 (main:25)
+Info   0.00:00:13.450 Event SwitchHold (main:21)
+Info   0.00:00:13.450 Reboot triggered (main:38)
+Info   0.00:00:13.480 Rebooting (main:67)
+Info   0.00:00:13.500 Reboot (System:154)
+Info   0.00:00:13.520 InterruptSystem::Shutdown (InterruptHandler:153)
+Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:96)
+Info   0.00:00:00.050 Starting up (System:209)
+Info   0.00:00:00.070 Current EL: 1 (main:52)
+Info   0.00:00:00.090 Hold down switch button for 2 seconds to reboot (main:58)
+Info   0.00:00:01.320 Event RotateClockwise (main:21)
+Info   0.00:00:02.230 Event RotateClockwise (main:21)
+Info   0.00:00:02.550 Event RotateClockwise (main:21)
+Info   0.00:00:02.780 Event RotateClockwise (main:21)
+Info   0.00:00:03.050 Event RotateClockwise (main:21)
+Info   0.00:00:04.170 Event RotateCounterclockwise (main:21)
+Info   0.00:00:04.770 Event RotateCounterclockwise (main:21)
+Info   0.00:00:05.190 Event RotateCounterclockwise (main:21)
+Info   0.00:00:06.210 Event RotateCounterclockwise (main:21)
+Info   0.00:00:08.470 Event SwitchDown (main:21)
+Info   0.00:00:08.470 Value 1 (main:25)
+Info   0.00:00:08.620 Event SwitchUp (main:21)
+Info   0.00:00:08.620 Event SwitchClick (main:21)
+Info   0.00:00:10.320 Event SwitchDown (main:21)
+Info   0.00:00:10.320 Value 1 (main:25)
+Info   0.00:00:11.320 Event SwitchHold (main:21)
+Info   0.00:00:12.320 Event SwitchHold (main:21)
+Info   0.00:00:12.320 Reboot triggered (main:38)
+Info   0.00:00:12.350 Rebooting (main:67)
+Info   0.00:00:12.370 Reboot (System:154)
+Info   0.00:00:12.390 InterruptSystem::Shutdown (InterruptHandler:153)
 ```
 
 Next: [21-i2c](21-i2c.md)

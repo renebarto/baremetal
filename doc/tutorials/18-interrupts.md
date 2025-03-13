@@ -722,132 +722,170 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include <baremetal/Interrupts.h>
-41:
+41: 
 42: #include <baremetal/ARMRegisters.h>
 43: #include <baremetal/Assert.h>
 44: #include <baremetal/Logger.h>
 45: #include <baremetal/MemoryAccess.h>
-46:
+46: 
 47: /// @file
 48: /// Interrupt numbers and enable / disable functionality
-49:
+49: 
 50: /// @brief Define log name
 51: LOG_MODULE("Interrupts");
-52:
-53: void baremetal::EnableIRQ(IRQ_ID irqID)
-54: {
-55:     int irq = static_cast<int>(irqID);
-56:     assert(irq < IRQ_LINES);
-57:     MemoryAccess mem;
-58: #if BAREMETAL_RPI_TARGET == 3
-59:
-60:     if (irq < ARM_IRQ_LOCAL_BASE)
-61:     {
-62:         mem.Write32(ARM_IC_IRQS_ENABLE(irq), ARM_IRQ_MASK(irq));
-63:     }
-64:     else
+52: 
+53: /// <summary>
+54: /// Enable the requested IRQ
+55: /// </summary>
+56: /// <param name="irqID">IRQ to enable</param>
+57: void baremetal::EnableIRQ(IRQ_ID irqID)
+58: {
+59:     int irq = static_cast<int>(irqID);
+60:     assert(irq < IRQ_LINES);
+61:     MemoryAccess mem;
+62: #if BAREMETAL_RPI_TARGET == 3
+63: 
+64:     if (irq < ARM_IRQ_LOCAL_BASE)
 65:     {
-66:         // The only implemented local IRQs so far
-67:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPS || irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
-68:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
-69:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(irq - ARM_IRQ_LOCAL_BASE));
-70:     }
-71:
-72: #else
-73:
-74:     mem.Write32(RPI_GICD_ISENABLER0 + 4 * (irq / 32), BIT1(irq % 32));
-75:
-76: #endif
-77: }
-78:
-79: void baremetal::DisableIRQ(IRQ_ID irqID)
-80: {
-81:     int irq = static_cast<int>(irqID);
-82:     assert(irq < IRQ_LINES);
-83:     MemoryAccess mem;
-84: #if BAREMETAL_RPI_TARGET == 3
-85:
-86:     if (irq < ARM_IRQ_LOCAL_BASE)
-87:     {
-88:         mem.Write32(ARM_IC_IRQS_DISABLE(irq), ARM_IRQ_MASK(irq));
-89:     }
-90:     else
-91:     {
-92:         // The only implemented local IRQs so far
-93:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPS || irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
-94:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
-95:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(irq - ARM_IRQ_LOCAL_BASE));
-96:     }
-97:
-98: #else
-99:
-100:     mem.Write32(RPI_GICD_ICENABLER0 + 4 * (irq / 32), BIT1(irq % 32));
-101:
-102: #endif
-103: }
-104:
-105: void baremetal::EnableFIQ(FIQ_ID fiqID)
-106: {
-107:     int fiq = static_cast<int>(fiqID);
-108:     assert(fiq <= ARM_MAX_FIQ);
-109:     MemoryAccess mem;
-110: #if BAREMETAL_RPI_TARGET == 3
-111:
-112:     mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, fiq | BIT1(7));
-113:
-114: #else
-115:
-116:     LOG_PANIC("FIQ not supported yet");
-117:
-118: #endif
-119: }
-120:
-121: void baremetal::DisableFIQ(FIQ_ID fiqID)
-122: {
-123:     int fiq = static_cast<int>(fiqID);
-124:     assert(fiq <= ARM_MAX_FIQ);
-125:     MemoryAccess mem;
-126: #if BAREMETAL_RPI_TARGET == 3
-127:
-128:     mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
-129:
-130: #else
-131:
-132:     LOG_PANIC("FIQ not supported yet");
-133:
-134: #endif
-135: }
+66:         mem.Write32(ARM_IC_IRQS_ENABLE(irq), ARM_IRQ_MASK(irq));
+67:     }
+68:     else
+69:     {
+70:         // The only implemented local IRQs so far
+71:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
+72:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+73:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(irq - ARM_IRQ_LOCAL_BASE));
+74:     }
+75: 
+76: #else
+77: 
+78:     mem.Write32(RPI_GICD_ISENABLER0 + 4 * (irq / 32), BIT1(irq % 32));
+79: 
+80: #endif
+81: }
+82: 
+83: /// <summary>
+84: /// Disable the requested IRQ
+85: /// </summary>
+86: /// <param name="irqID">IRQ to disable</param>
+87: void baremetal::DisableIRQ(IRQ_ID irqID)
+88: {
+89:     int irq = static_cast<int>(irqID);
+90:     assert(irq < IRQ_LINES);
+91:     MemoryAccess mem;
+92: #if BAREMETAL_RPI_TARGET == 3
+93: 
+94:     if (irq < ARM_IRQ_LOCAL_BASE)
+95:     {
+96:         mem.Write32(ARM_IC_IRQS_DISABLE(irq), ARM_IRQ_MASK(irq));
+97:     }
+98:     else
+99:     {
+100:         // The only implemented local IRQs so far
+101:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
+102:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+103:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(irq - ARM_IRQ_LOCAL_BASE));
+104:     }
+105: 
+106: #else
+107: 
+108:     mem.Write32(RPI_GICD_ICENABLER0 + 4 * (irq / 32), BIT1(irq % 32));
+109: 
+110: #endif
+111: }
+112: 
+113: /// <summary>
+114: /// Enable the requested FIQ
+115: /// </summary>
+116: /// <param name="fiqID">FIQ to enable</param>
+117: void baremetal::EnableFIQ(FIQ_ID fiqID)
+118: {
+119:     int fiq = static_cast<int>(fiqID);
+120:     assert(fiq <= IRQ_LINES);
+121:     MemoryAccess mem;
+122: #if BAREMETAL_RPI_TARGET == 3
+123: 
+124:     if (fiq < ARM_IRQ_LOCAL_BASE)
+125:     {
+126:         mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, fiq | BIT1(7));
+127:     }
+128:     else
+129:     {
+130:         // The only implemented local IRQs so far
+131:         assert(fiqID == FIQ_ID::FIQ_LOCAL_CNTPNS);
+132:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+133:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(fiq - ARM_IRQ_LOCAL_BASE + 4)); // FIQ enable bits are bit 4..7
+134:     }
+135: 
+136: #else
+137: 
+138:     LOG_PANIC("FIQ not supported yet");
+139: 
+140: #endif
+141: }
+142: 
+143: /// <summary>
+144: /// Disable the requested FIQ
+145: /// </summary>
+146: /// <param name="fiqID">FIQ to disable</param>
+147: void baremetal::DisableFIQ(FIQ_ID fiqID)
+148: {
+149:     int fiq = static_cast<int>(fiqID);
+150:     assert(fiq <= IRQ_LINES);
+151:     MemoryAccess mem;
+152: #if BAREMETAL_RPI_TARGET == 3
+153: 
+154:     if (fiq < ARM_IRQ_LOCAL_BASE)
+155:     {
+156:         mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
+157:     }
+158:     else
+159:     {
+160:         // The only implemented local IRQs so far
+161:         assert(fiqID == FIQ_ID::FIQ_LOCAL_CNTPNS);
+162:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
+163:             mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(fiq - ARM_IRQ_LOCAL_BASE + 4)); // FIQ enable bits are bit 4..7
+164:     }
+165: 
+166: #else
+167: 
+168:     LOG_PANIC("FIQ not supported yet");
+169: 
+170: #endif
+171: }
 ```
 
-- Line 53-88: We implement the function `EnableIRQ()`
-  - Line 55-56: We convert the IRQ to an integer, and perform as sanity check
-  - Line 57: We create a `MemoryAccess` instance for register access
-  - Line 60-63: For Raspberry Pi 3, if the IRQ is in the IRQ1, IRQ2 or Basic IRQ group, we use the macro `ARM_IC_IRQS_ENABLE` to determine the register to write to, and the macro `ARM_IRQ_MASK` to determine the bitmask to write.
+- Line 57-81: We implement the function `EnableIRQ()`
+  - Line 55-60: We convert the IRQ to an integer, and perform as sanity check
+  - Line 61: We create a `MemoryAccess` instance for register access
+  - Line 64-67: For Raspberry Pi 3, if the IRQ is in the IRQ1, IRQ2 or Basic IRQ group, we use the macro `ARM_IC_IRQS_ENABLE` to determine the register to write to, and the macro `ARM_IRQ_MASK` to determine the bitmask to write.
 We then write the bit pattern to the selected address
-  - Line 64-70: Otherwise if it is `IRQ_LOCAL_CNTPS` or `IRQ_LOCAL_CNTPNS`, we write to the ARM local interrupt control register with the correct bit patern
-  - Line 74: For Raspberry Pi 4 / 5, we calculate the register address `RPI_GICD_ISENABLERn` (there are 8 register of 32 bits each) and the value to write.
+  - Line 60-74: Otherwise we check it is `IRQ_LOCAL_CNTPNS`, and write to the ARM local interrupt control register to set the correct bit
+  - Line 78: For Raspberry Pi 4 / 5, we calculate the register address `RPI_GICD_ISENABLERn` (there are 8 register of 32 bits each) and the value to write.
 We then write the bit pattern to the selected address
-- Line 79-103: We implement the function `DisableIRQ()`
-  - Line 81-82: We convert the IRQ to an integer, and perform as sanity check
-  - Line 83: We create a `MemoryAccess` instance for register access
-  - Line 86-89: For Raspberry Pi 3, if the IRQ is in the IRQ1, IRQ2 or Basic IRQ group, we use the macro `ARM_IC_IRQS_ENABLE` to determine the register to write to, and the macro `ARM_IRQ_MASK` to determine the bitmask to write.
+- Line 87-111: We implement the function `DisableIRQ()`
+  - Line 89-90: We convert the IRQ to an integer, and perform as sanity check
+  - Line 91: We create a `MemoryAccess` instance for register access
+  - Line 94-97: For Raspberry Pi 3, if the IRQ is in the IRQ1, IRQ2 or Basic IRQ group, we use the macro `ARM_IC_IRQS_ENABLE` to determine the register to write to, and the macro `ARM_IRQ_MASK` to determine the bitmask to write.
 We then write the bit pattern to the selected address
-  - Line 91-96: Otherwise if it is `IRQ_LOCAL_CNTPS` or `IRQ_LOCAL_CNTPNS`, we write to the ARM local interrupt control register with the correct bit patern
-  - Line 100: For Raspberry Pi 4 / 5, we calculate the register address `RPI_GICD_ISENABLERn` (there are 8 register of 32 bits each) and the value to write.
+  - Line 99-104: Otherwise we check it is `IRQ_LOCAL_CNTPNS`, and write to the ARM local interrupt control register to reset the correct bit
+  - Line 108: For Raspberry Pi 4 / 5, we calculate the register address `RPI_GICD_ISENABLERn` (there are 8 register of 32 bits each) and the value to write.
 We then write the bit pattern to the selected address
-- Line 105-119: We implement the function `EnableFIQ()`
-  - Line 107-108: We convert the FIQ to an integer, and perform as sanity check
-  - Line 109: We create a `MemoryAccess` instance for register access
-  - Line 112: For Raspberry Pi 3, we write the FIQ id to the `RPI_INTRCTRL_FIQ_CONTROL` register and set bit 7 to flag enabling the FIQ.
-  - Line 116: For Raspberry Pi 4 / 5, we perform a panic, as we will need to perform a Secure Monitor call in order to set the FIQ, which we did not implement yet.
+- Line 117-141: We implement the function `EnableFIQ()`
+  - Line 119-120: We convert the FIQ to an integer, and perform as sanity check
+  - Line 121: We create a `MemoryAccess` instance for register access
+  - Line 124-127: For Raspberry Pi 3, if the FIQ is in the IRQ1, IRQ2 or Basic IRQ group, we write the FIQ id to the `RPI_INTRCTRL_FIQ_CONTROL` register and set bit 7 to flag enabling the FIQ
+  - Line 129-134: Otherwise we check it is `FIQ_LOCAL_CNTPNS`, and write to the ARM local interrupt control register to set the correct bit
+  - Line 138: For Raspberry Pi 4 / 5, we perform a panic, as we will need to perform a Secure Monitor call in order to set the FIQ, which we did not implement yet.
   As we don't intend to use FIQ yet, we will simply fail for now
-- Line 121-135: We implement the function `DisableFIQ()`
-  - Line 123-124: We convert the FIQ to an integer, and perform as sanity check
-  - Line 125: We create a `MemoryAccess` instance for register access
-  - Line 128: For Raspberry Pi 3, we write 0 to the `RPI_INTRCTRL_FIQ_CONTROL` register, resetting set bit 7 to flag no FIQ is enabled.
-  - Line 132: For Raspberry Pi 4 / 5, we perform a panic, as we will need to perform a Secure Monitor call in order to set the FIQ, which we did not implement yet.
+- Line 147-171: We implement the function `DisableFIQ()`
+  - Line 149-150: We convert the FIQ to an integer, and perform as sanity check
+  - Line 151: We create a `MemoryAccess` instance for register access
+  - Line 154-157: For Raspberry Pi 3, if the IRQ is in the IRQ1, IRQ2 or Basic IRQ group, we write 0 to the `RPI_INTRCTRL_FIQ_CONTROL` register, resetting set bit 7 to flag no FIQ is enabled
+  - Line 159-164: Otherwise we check it is `FIQ_LOCAL_CNTPNS`, and write to the ARM local interrupt control register to reset the correct bit
+  - Line 168: For Raspberry Pi 4 / 5, we perform a panic, as we will need to perform a Secure Monitor call in order to set the FIQ, which we did not implement yet.
   As we don't intend to use FIQ yet, we will simply fail for now
 
 ### InterruptHandler.h {#TUTORIAL_18_INTERRUPTS_INTERRUPT_HANDLING___STEP_1_INTERRUPTHANDLERH}

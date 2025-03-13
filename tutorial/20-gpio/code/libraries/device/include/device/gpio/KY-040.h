@@ -46,6 +46,7 @@
 /// @file
 /// Abstract GPIO pin. Could be either a virtual or physical pin
 
+/// @brief Device library namespace
 namespace device {
 
 enum class SwitchEncoderState;

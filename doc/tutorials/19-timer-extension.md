@@ -4,7 +4,7 @@
 
 ## New tutorial setup {#TUTORIAL_19_TIMER_EXTENSION_NEW_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/18-timer-extension`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/19-timer-extension`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_19_TIMER_EXTENSION_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}

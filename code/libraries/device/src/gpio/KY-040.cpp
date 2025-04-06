@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : KY-040.h
+// File        : KY-040.cpp
 //
 // Namespace   : device
 //
@@ -218,7 +218,7 @@ static const char *SwitchButtonEventToString(SwitchButtonEvent event)
 /// <summary>
 /// Convert internal switch button state to a string
 /// </summary>
-/// <param name="event">Event button state</param>
+/// <param name="state">Event button state</param>
 /// <returns>String representing state</returns>
 static const char *SwitchButtonStateToString(SwitchButtonState state)
 {
@@ -245,6 +245,9 @@ static const char *SwitchButtonStateToString(SwitchButtonState state)
     return "Unknown";
 }
 
+/// <summary>
+/// Lookup table for rotary switch to create an event from an the status of the CLK and DT GPIO inputs when in a certain internal state
+/// </summary>
 static const KY040::Event s_encoderOutput[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
 //  {{CLK=0/DT=0,            CLK=0/DT=1},            {CLK=1/DT=0,            CLK=1/DT=1}}
 
@@ -260,11 +263,21 @@ static const KY040::Event s_encoderOutput[static_cast<size_t>(SwitchEncoderState
 
     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}}                    // Invalid
 };
+/// <summary>
+/// Get an event for the rotary switch
+/// </summary>
+/// <param name="state">Rotary switch internal state</param>
+/// <param name="clkValue">Value of CLK GPIO input</param>
+/// <param name="dtValue">Value of DT GPIO input</param>
+/// <returns>Resulting event</returns>
 static KY040::Event GetEncoderOutput(SwitchEncoderState state, bool clkValue, bool dtValue)
 {
     return s_encoderOutput[static_cast<size_t>(state)][clkValue][dtValue];
 }
 
+/// <summary>
+/// Lookup table for rotary switch to create an new internal state from an the status of the CLK and DT GPIO inputs when in a certain internal state
+/// </summary>
 static const SwitchEncoderState s_encoderNextState[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
 //  {{CLK=0/DT=0,                       CLK=0/DT=1},                      {CLK=1/DT=0,                      CLK=1/DT=1}}
 
@@ -280,6 +293,13 @@ static const SwitchEncoderState s_encoderNextState[static_cast<size_t>(SwitchEnc
 
     {{SwitchEncoderState::Invalid,      SwitchEncoderState::Invalid},     {SwitchEncoderState::Invalid,     SwitchEncoderState::Start}}      // Invalid
 };
+/// <summary>
+/// Get new internal state for the rotary switch
+/// </summary>
+/// <param name="state">Rotary switch internal state</param>
+/// <param name="clkValue">Value of CLK GPIO input</param>
+/// <param name="dtValue">Value of DT GPIO input</param>
+/// <returns>New internal state</returns>
 static SwitchEncoderState GetEncoderNextState(SwitchEncoderState state, bool clkValue, bool dtValue)
 {
     return s_encoderNextState[static_cast<size_t>(state)][clkValue][dtValue];
@@ -345,11 +365,12 @@ static SwitchButtonState GetSwitchNextState(SwitchButtonState state, SwitchButto
 /// <param name="clkPin">GPIO pin number for CLK input</param>
 /// <param name="dtPin">GPIO pin number for DT input</param>
 /// <param name="swPin">GPIO pin number for SW input</param>
-KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin)
+/// <param name="memoryAccess">MemoryAccess instance to be used for register access</param>
+KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin, IMemoryAccess& memoryAccess /*= GetMemoryAccess()*/)
     : m_isInitialized{}
-    , m_clkPin(clkPin, GPIOMode::InputPullUp)
-    , m_dtPin(dtPin, GPIOMode::InputPullUp)
-    , m_swPin(swPin, GPIOMode::InputPullUp)
+    , m_clkPin(clkPin, GPIOMode::InputPullUp, memoryAccess)
+    , m_dtPin(dtPin, GPIOMode::InputPullUp, memoryAccess)
+    , m_swPin(swPin, GPIOMode::InputPullUp, memoryAccess)
     , m_switchEncoderState{SwitchEncoderState::Start}
     , m_switchButtonState{SwitchButtonState::Start}
     , m_debounceTimerHandle{}

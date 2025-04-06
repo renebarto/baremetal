@@ -50,6 +50,10 @@
 /// @brief Define log name
 LOG_MODULE("Interrupts");
 
+/// <summary>
+/// Enable the requested IRQ
+/// </summary>
+/// <param name="irqID">IRQ to enable</param>
 void baremetal::EnableIRQ(IRQ_ID irqID)
 {
     int irq = static_cast<int>(irqID);
@@ -76,6 +80,10 @@ void baremetal::EnableIRQ(IRQ_ID irqID)
 #endif
 }
 
+/// <summary>
+/// Disable the requested IRQ
+/// </summary>
+/// <param name="irqID">IRQ to disable</param>
 void baremetal::DisableIRQ(IRQ_ID irqID)
 {
     int irq = static_cast<int>(irqID);
@@ -102,6 +110,10 @@ void baremetal::DisableIRQ(IRQ_ID irqID)
 #endif
 }
 
+/// <summary>
+/// Enable the requested FIQ
+/// </summary>
+/// <param name="fiqID">FIQ to enable</param>
 void baremetal::EnableFIQ(FIQ_ID fiqID)
 {
     int fiq = static_cast<int>(fiqID);
@@ -128,6 +140,10 @@ void baremetal::EnableFIQ(FIQ_ID fiqID)
 #endif
 }
 
+/// <summary>
+/// Disable the requested FIQ
+/// </summary>
+/// <param name="fiqID">FIQ to disable</param>
 void baremetal::DisableFIQ(FIQ_ID fiqID)
 {
     int fiq = static_cast<int>(fiqID);

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Assert.h
+// File        : I2CMasterEmulator.h
 //
 // Namespace   : baremetal
 //
-// Class       : -
+// Class       : I2CMasterEmulator
 //
-// Description : Assertion functions
+// Description : I2C Master emulator
 //
 //------------------------------------------------------------------------------
 //
@@ -39,33 +39,41 @@
 
 #pragma once
 
-#include <stdlib/Macros.h>
-#include <stdlib/Types.h>
+#include <baremetal/I2CMaster.h>
+#include <baremetal/stubs/MemoryAccessStubI2C.h>
 
 /// @file
-/// Assertion functions
+/// I2C Master emulator
 
-/// @brief Baremetal library namespace
-namespace baremetal {
+namespace baremetal
+{
 
-#ifdef NDEBUG
-/// If building for release, assert is replaced by nothing
-#define assert(expr) ((void)0)
-#else
-void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
+/// @brief Function prototype for Address send callback
+using SendAddressByteCallback = bool(uint8 address);
+/// @brief Function prototype for Data receive callback
+using RecvDataByteCallback = bool(uint8 &data);
+/// @brief Function prototype for Data send callback
+using SendDataByteCallback = bool(uint8 data);
 
-/// @brief Assertion callback function, which can be installed to handle a failed assertion
-using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
+/// <summary>
+/// I2C Master emulator
+/// 
+/// Emulates behaviour of I2C Master and provides callbacks for events
+/// </summary>
+class I2CMasterEmulator
+    : public I2CMaster
+{
+private:
+    /// @brief Memory access interface reference for accessing registers.
+    static MemoryAccessStubI2C m_memoryAccess;
 
-void ResetAssertionCallback();
-void SetAssertionCallback(AssertionCallback* callback);
+public:
+    I2CMasterEmulator();
+    bool Initialize(uint8 bus, I2CMode mode = I2CMode::Normal, uint32 config = 0);
 
-/// @brief Assertion. If the assertion fails, AssertionFailed is called.
-///
-/// <param name="expression">Expression to evaluate.
-/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
-#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
-
-#endif
+    void SetSendAddressByteCallback(SendAddressByteCallback callback);
+    void SetRecvDataByteCallback(RecvDataByteCallback callback);
+    void SetSendDataByteCallback(SendDataByteCallback callback);
+};
 
 } // namespace baremetal

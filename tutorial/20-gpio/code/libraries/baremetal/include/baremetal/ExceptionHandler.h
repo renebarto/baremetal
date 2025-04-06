@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <stdlib/Macros.h>
 #include <stdlib/Types.h>
 #include <baremetal/System.h>
 

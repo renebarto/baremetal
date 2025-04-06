@@ -28,6 +28,8 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/stubs/MemoryAccessStubGPIO.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/stubs/MemoryAccessStubI2C.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Assert.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Console.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ExceptionHandler.cpp
@@ -35,6 +37,8 @@ set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Format.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GPIOManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HeapAllocator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/I2CMaster.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/I2CMasterEmulator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/InterruptHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Interrupts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
@@ -58,6 +62,8 @@ set(PROJECT_SOURCES
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/stubs/MemoryAccessStubGPIO.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/stubs/MemoryAccessStubI2C.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMRegisters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Assert.h
@@ -69,6 +75,8 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/Format.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/GPIOManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/HeapAllocator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/I2CMaster.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/I2CMasterEmulator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h

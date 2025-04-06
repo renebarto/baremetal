@@ -4,7 +4,7 @@
 
 ## New tutorial setup {#TUTORIAL_20_GPIO_NEW_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/18-timer-extension`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/20-gpio`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_20_GPIO_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
@@ -12,8 +12,8 @@ In the same way, the project names are adapted to make sure there are no conflic
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-20.a`
 - a library `output/Debug/lib/stdlib-20.a`
-- an application `output/Debug/bin/20-timer-extension.elf`
-- an image in `deploy/Debug/20-timer-extension-image`
+- an application `output/Debug/bin/20-gpio.elf`
+- an image in `deploy/Debug/20-gpio-image`
 
 ## Using hardware {#TUTORIAL_20_GPIO_USING_HARDWARE}
 
@@ -1818,7 +1818,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 227:         return;
 228: 
 229:     // Check if mode is output
-230:     if (m_mode == GPIOMode::Output)
+230:     if (m_mode != GPIOMode::Output)
 231:         return;
 232: 
 233:     m_value = on;

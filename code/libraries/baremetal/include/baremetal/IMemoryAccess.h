@@ -80,8 +80,15 @@ public:
     /// <param name="mask">Mask to apply. Value read will be masked with the inverse of mask, then the data (after shift) will be masked with mask before OR'ing with the value read</param>
     /// <param name="data">Data to write (after shifting left by shift bits)</param>
     /// <param name="shift">Shift to apply to the data to write (shift left)</param>
-    virtual void   ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) = 0;
-    /// <summary>
+    void ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift)
+    {
+        auto value = Read8(address);
+        value &= ~mask;
+        value |= ((data << shift) & mask);
+        Write8(address, value);
+    }
+
+    ///     /// <summary>
     /// Read a 16 bit value from register at address
     /// </summary>
     /// <param name="address">Address of register</param>
@@ -104,7 +111,14 @@ public:
     /// <param name="mask">Mask to apply. Value read will be masked with the inverse of mask, then the data (after shift) will be masked with mask before OR'ing with the value read</param>
     /// <param name="data">Data to write (after shifting left by shift bits)</param>
     /// <param name="shift">Shift to apply to the data to write (shift left)</param>
-    virtual void   ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) = 0;
+    void ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift)
+    {
+        auto value = Read16(address);
+        value &= ~mask;
+        value |= ((data << shift) & mask);
+        Write16(address, value);
+    }
+
     /// <summary>
     /// Read a 32 bit value from register at address
     /// </summary>
@@ -128,7 +142,14 @@ public:
     /// <param name="mask">Mask to apply. Value read will be masked with the inverse of mask, then the data (after shift) will be masked with mask before OR'ing with the value read</param>
     /// <param name="data">Data to write (after shifting left by shift bits)</param>
     /// <param name="shift">Shift to apply to the data to write (shift left)</param>
-    virtual void   ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) = 0;
+    void ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift)
+    {
+        auto value = Read32(address);
+        value &= ~mask;
+        value |= ((data << shift) & mask);
+        Write32(address, value);
+    }
+
 };
 
 } // namespace baremetal

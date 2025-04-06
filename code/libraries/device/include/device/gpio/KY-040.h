@@ -46,6 +46,7 @@
 /// @file
 /// Abstract GPIO pin. Could be either a virtual or physical pin
 
+/// @brief Device library namespace
 namespace device {
 
 enum class SwitchEncoderState;
@@ -120,7 +121,7 @@ private:
     void*                           m_eventHandlerParam;
 
 public:
-    KY040(uint8 clkPin, uint8 dtPin, uint8 swPin);
+    KY040(uint8 clkPin, uint8 dtPin, uint8 swPin, baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
     virtual ~KY040();
 
     void               Initialize();

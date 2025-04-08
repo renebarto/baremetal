@@ -1,4 +1,4 @@
-project(20-gpio-extension
+project(20-gpio
     DESCRIPTION "20-gpio tutorial application"
     LANGUAGES CXX ASM)
 

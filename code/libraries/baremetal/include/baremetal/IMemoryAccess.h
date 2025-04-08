@@ -71,7 +71,7 @@ public:
     virtual void   Write8(regaddr address, uint8 data) = 0;
     /// <summary>
     /// Read, modify and write a 8 bit value to register at address
-    /// 
+    ///
     /// The operation will read the value from the specified register, then AND it with the inverse of the mask (8 bits) provided
     /// The data provided (8 bits) will be masked with the mask provided, shifted left bit shift bits, and then OR'ed with the mask read data
     /// The result will then be written back to the register
@@ -102,7 +102,7 @@ public:
     virtual void   Write16(regaddr address, uint16 data) = 0;
     /// <summary>
     /// Read, modify and write a 16 bit value to register at address
-    /// 
+    ///
     /// The operation will read the value from the specified register, then AND it with the inverse of the mask (16 bits) provided
     /// The data provided (16 bits) will be masked with the mask provided, shifted left bit shift bits, and then OR'ed with the mask read data
     /// The result will then be written back to the register
@@ -133,7 +133,7 @@ public:
     virtual void   Write32(regaddr address, uint32 data) = 0;
     /// <summary>
     /// Read, modify and write a 32 bit value to register at address
-    /// 
+    ///
     /// The operation will read the value from the specified register, then AND it with the inverse of the mask (32 bits) provided
     /// The data provided (32 bits) will be masked with the mask provided, shifted left bit shift bits, and then OR'ed with the mask read data
     /// The result will then be written back to the register

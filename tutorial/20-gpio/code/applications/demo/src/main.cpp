@@ -11,7 +11,10 @@ LOG_MODULE("main");
 using namespace baremetal;
 using namespace device;
 
-int value = 0;
+static int value = 0;
+static int holdCounter = 0;
+static const int HoldThreshold = 2;
+static bool reboot = false;
 
 void OnEvent(KY040::Event event, void *param)
 {
@@ -26,6 +29,14 @@ void OnEvent(KY040::Event event, void *param)
             break;
         case KY040::Event::RotateCounterclockwise:
             value--;
+            break;
+        case KY040::Event::SwitchHold:
+            holdCounter++;
+            if (holdCounter >= HoldThreshold)
+            {
+                reboot = true;
+                LOG_INFO("Reboot triggered");
+            }
             break;
         default:
             break;
@@ -43,20 +54,17 @@ int main()
     KY040 rotarySwitch(11, 9, 10);
     rotarySwitch.Initialize();
     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
-    
-    LOG_INFO("Wait 20 seconds");
-    Timer::WaitMilliSeconds(20000);
+
+    LOG_INFO("Hold down switch button for %d seconds to reboot", HoldThreshold);
+    while (!reboot)
+    {
+        WaitForInterrupt();
+    }
 
     rotarySwitch.UnregisterEventHandler(OnEvent);
     rotarySwitch.Uninitialize();
 
-    console.Write("Press r to reboot, h to halt\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h'))
-    {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
-    }
+    LOG_INFO("Rebooting");
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>(ReturnCode::ExitReboot);
 }

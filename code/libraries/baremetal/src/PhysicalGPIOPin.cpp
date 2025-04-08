@@ -113,7 +113,7 @@ static const int NumWaitCycles = 150;
 #endif // BAREMETAL_RPI_TARGET == 3
 
 /// <summary>
-/// Creates a virtual GPIO pin 
+/// Creates a virtual GPIO pin
 /// </summary>
 /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
 PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess &memoryAccess /*= GetMemoryAccess()*/)
@@ -133,7 +133,7 @@ PhysicalGPIOPin::PhysicalGPIOPin(IMemoryAccess &memoryAccess /*= GetMemoryAccess
 }
 
 /// <summary>
-/// Creates a virtual GPIO pin 
+/// Creates a virtual GPIO pin
 /// </summary>
 /// <param name="pinNumber">GPIO pin number (0..53)</param>
 /// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>

@@ -98,7 +98,7 @@ inline GPIOInterruptTypes operator | (GPIOInterruptTypes lhs, GPIOInterruptTypes
 using GPIOPinInterruptHandler = void(IGPIOPin* pin, void *param);
 
 /// <summary>
-/// Physical GPIO pin (i.e. available on GPIO header) 
+/// Physical GPIO pin (i.e. available on GPIO header)
 /// </summary>
 class PhysicalGPIOPin
     : public IGPIOPin

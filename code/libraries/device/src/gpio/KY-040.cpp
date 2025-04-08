@@ -42,6 +42,9 @@
 #include <baremetal/Assert.h>
 #include <baremetal/Logger.h>
 
+/// @file
+/// KY-040 rotary switch support imlementation.
+
 /// @brief Define log name
 LOG_MODULE("KY-040");
 
@@ -307,7 +310,7 @@ static SwitchEncoderState GetEncoderNextState(SwitchEncoderState state, bool clk
 
 /// <summary>
 /// Event lookup for handling switch button state versus switch button event
-/// 
+///
 /// Every row signifies a beginning internalstate, every column signifies an internal event, values in the table determine the resulting event
 /// </summary>
 static const KY040::Event s_switchOutput[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
@@ -334,7 +337,7 @@ static KY040::Event GetSwitchOutput(SwitchButtonState state, SwitchButtonEvent e
 
 /// <summary>
 /// State machine for handling switch button state
-/// 
+///
 /// Every row signifies a beginning internalstate, every column signifies an internal event, values in the table determine the resulting internal state
 /// </summary>
 static const SwitchButtonState s_nextSwitchState[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
@@ -379,7 +382,6 @@ KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin, IMemoryAccess& memoryAccess
     , m_currentReleaseTicks{}
     , m_lastPressTicks{}
     , m_lastReleaseTicks{}
-
     , m_eventHandler{}
     , m_eventHandlerParam{}
 {
@@ -502,7 +504,7 @@ void KY040::SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin)
 }
 
 /// <summary>
-/// Global GPIO pin interrupt handler for switch button
+/// Global GPIO pin interrupt handler for the switch button
 /// </summary>
 /// <param name="pin">GPIO pin for the button switch</param>
 /// <param name="param">Parameter for the interrupt handler, which is a pointer to the class instance</param>
@@ -525,7 +527,7 @@ void KY040::SwitchButtonInterruptHandler(IGPIOPin* pin)
     /// Get Switch state (false = pressed, true = released)
     bool swValue = pin->Get();
     if (swValue)
-    {        
+    {
         m_currentReleaseTicks = GetTimer().GetTicks();
     }
     else
@@ -545,7 +547,7 @@ void KY040::SwitchButtonInterruptHandler(IGPIOPin* pin)
 
 /// <summary>
 /// Global switch button debounce handler, called by the switch button debounce timer on timeout
-/// 
+///
 /// Will call the class internal switch button debounce handler
 /// </summary>
 /// <param name="handle">Kernel timer handle</param>
@@ -619,7 +621,7 @@ void KY040::SwitchButtonDebounceHandler(KernelTimerHandle handle, void *param)
 
 /// <summary>
 /// Global switch button tick handler, called by the switch button tick timer on timeout
-/// 
+///
 /// Will call the class internal switch button tick handler
 /// </summary>
 /// <param name="handle">Kernel timer handle</param>
@@ -629,7 +631,7 @@ void KY040::SwitchButtonTickHandler(KernelTimerHandle handle, void *param, void 
 {
     KY040 *pThis = reinterpret_cast<KY040 *>(context);
     assert(pThis != nullptr);
-    
+
     pThis->SwitchButtonTickHandler(handle, param);
 }
 
@@ -649,7 +651,7 @@ void KY040::SwitchButtonTickHandler(KernelTimerHandle handle, void *param)
 
 /// <summary>
 /// Handle a switch button event
-/// 
+///
 /// Updates the internal state of switch button, and generates the proper event
 /// </summary>
 /// <param name="switchButtonEvent">Internal switch button event</param>

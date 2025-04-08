@@ -44,7 +44,7 @@
 #include <baremetal/Timer.h>
 
 /// @file
-/// Abstract GPIO pin. Could be either a virtual or physical pin
+/// KY-040 rotary switch support declaration.
 
 /// @brief Device library namespace
 namespace device {

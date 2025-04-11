@@ -1208,7 +1208,6 @@ File: code/libraries/baremetal/src/Timer.cpp
 130: {
 131: }
 132: 
-File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Timer.cpp
 133: /// <summary>
 134: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
 135: /// </summary>

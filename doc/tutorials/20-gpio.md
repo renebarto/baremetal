@@ -920,149 +920,149 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 109: }
 110: 
 111: /// <summary>
-112: /// Read a 32 bit value from register at address
+112: /// Convert pin mode to string
 113: /// </summary>
-114: /// <param name="address">Address of register</param>
-115: /// <returns>32 bit register value</returns>
-116: uint32 MemoryAccessStubGPIO::Read32(regaddr address)
+114: /// <param name="mode">Pin mode</param>
+115: /// <returns>String representing pin mode</returns>
+116: static string PinModeToString(uint32 mode)
 117: {
-118:     uintptr offset = GetRegisterOffset(address);
-119:     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-120: //    LOG_DEBUG("GPIO read register %016x = %08x", offset, *registerField);
-121:     switch (offset)
-122:     {
-123:         case RPI_GPIO_GPFSEL0_OFFSET:
-124:         case RPI_GPIO_GPFSEL1_OFFSET:
-125:         case RPI_GPIO_GPFSEL2_OFFSET:
-126:         case RPI_GPIO_GPFSEL3_OFFSET:
-127:         case RPI_GPIO_GPFSEL4_OFFSET:
-128:         case RPI_GPIO_GPFSEL5_OFFSET:
-129:         {
-130:             uint8 pinBase = (offset - RPI_GPIO_GPFSEL0_OFFSET) / 4 * 10;
-131:             string line{ "GPIO Read Pin Mode "};
-132:             for (uint8 pinIndex = 0; pinIndex < 10; ++pinIndex)
-133:             {
-134:                 int shift = pinIndex * 3;
-135:                 uint8 pin = pinBase + pinIndex;
-136:                 uint8 pinMode = (*registerField >> shift) & 0x00000007;
-137:                 line += Format(" - Pin %d mode %x", pin, pinMode);
-138:             }
-139:             LOG_DEBUG(line.c_str());
-140:             break;
-141:         }
-142:         case RPI_GPIO_GPLEV0_OFFSET:
-143:         case RPI_GPIO_GPLEV1_OFFSET:
-144:         {
-145:             uint8 pinBase = (offset - RPI_GPIO_GPLEV0_OFFSET)  / 4 * 32;
-146:             string line{ "GPIO Read Pin Level "};
-147:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-148:             {
-149:                 int shift = pinIndex;
-150:                 uint8 pin = pinBase + pinIndex;
-151:                 uint8 value = (*registerField >> shift) & 0x00000001;
-152:                 if (value)
-153:                     line += " - Pin %d ON ";
-154:                 else
-155:                     line += " - Pin %d OFF";
-156:             }
-157:             LOG_DEBUG(line.c_str());
-158:             break;
-159:         }
-160:         case RPI_GPIO_GPEDS0_OFFSET:
-161:         case RPI_GPIO_GPEDS1_OFFSET:
-162:         {
-163:             uint8 pinBase = (offset - RPI_GPIO_GPEDS0_OFFSET)  / 4 * 32;
-164:             string line{ "GPIO Read Pin Event Detect Status "};
-165:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-166:             {
-167:                 int shift = pinIndex;
-168:                 uint8 pin = pinBase + pinIndex;
-169:                 uint8 value = (*registerField >> shift) & 0x00000001;
-170:                 if (value)
-171:                     line += " - Pin %d ON ";
-172:                 else
-173:                     line += " - Pin %d OFF";
-174:             }
-175:             LOG_DEBUG(line.c_str());
-176:             break;
-177:         }
-178:         case RPI_GPIO_GPREN0_OFFSET:
-179:         case RPI_GPIO_GPREN1_OFFSET:
-180:         {
-181:             uint8 pinBase = (offset - RPI_GPIO_GPREN0_OFFSET)  / 4 * 32;
-182:             string line{ "GPIO Read Pin Rising Edge Detect Enable "};
-183:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-184:             {
-185:                 int shift = pinIndex;
-186:                 uint8 pin = pinBase + pinIndex;
-187:                 uint8 value = (*registerField >> shift) & 0x00000001;
-188:                 if (value)
-189:                     line += Format(" - Pin %d ON ", pin);
-190:                 else
-191:                     line += Format(" - Pin %d OFF", pin);
-192:             }
-193:             LOG_DEBUG(line.c_str());
-194:             break;
-195:         }
-196:         case RPI_GPIO_GPFEN0_OFFSET:
-197:         case RPI_GPIO_GPFEN1_OFFSET:
-198:         {
-199:             uint8 pinBase = (offset - RPI_GPIO_GPFEN0_OFFSET)  / 4 * 32;
-200:             string line{ "GPIO Read Pin Falling Edge Detect Enable "};
-201:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-202:             {
-203:                 int shift = pinIndex;
-204:                 uint8 pin = pinBase + pinIndex;
-205:                 uint8 value = (*registerField >> shift) & 0x00000001;
-206:                 if (value)
-207:                     line += Format(" - Pin %d ON ", pin);
-208:                 else
-209:                     line += Format(" - Pin %d OFF", pin);
+118:     string result{};
+119:     switch (mode & 0x07)
+120:     {
+121:     case 0:
+122:         result = "Input";
+123:         break;
+124:     case 1:
+125:         result = "Output";
+126:         break;
+127:     case 2:
+128:         result = "Alt5";
+129:         break;
+130:     case 3:
+131:         result = "Alt4";
+132:         break;
+133:     case 4:
+134:         result = "Alt0";
+135:         break;
+136:     case 5:
+137:         result = "Alt1";
+138:         break;
+139:     case 6:
+140:         result = "Alt2";
+141:         break;
+142:     case 7:
+143:         result = "Alt3";
+144:         break;
+145:     }
+146:     return result;
+147: }
+148: 
+149: /// <summary>
+150: /// Convert pull up/down mode to string
+151: /// </summary>
+152: /// <param name="mode">Pull up/down mode</param>
+153: /// <returns>String representing pull up/down mode</returns>
+154: static string PullUpDownModeToString(uint32 mode)
+155: {
+156:     string result{};
+157:     switch (mode & 0x03)
+158:     {
+159:     case 0:
+160:         result = "None";
+161:         break;
+162:     case 1:
+163: #if BAREMETAL_RPI_TARGET == 3
+164:         result = "PullDown";
+165: #else
+166:         result = "PullUp";
+167: #endif
+168:         break;
+169:     case 2:
+170: #if BAREMETAL_RPI_TARGET == 3
+171:         result = "PullUp";
+172: #else
+173:         result = "PullDown";
+174: #endif
+175:         break;
+176:     case 3:
+177:         result = "Reserved";
+178:         break;
+179:     }
+180:     return result;
+181: }
+182: 
+183: /// <summary>
+184: /// Read a 32 bit value from register at address
+185: /// </summary>
+186: /// <param name="address">Address of register</param>
+187: /// <returns>32 bit register value</returns>
+188: uint32 MemoryAccessStubGPIO::Read32(regaddr address)
+189: {
+190:     uintptr offset = GetRegisterOffset(address);
+191:     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
+192: //    LOG_DEBUG("GPIO read register %016x = %08x", offset, *registerField);
+193:     switch (offset)
+194:     {
+195:         case RPI_GPIO_GPFSEL0_OFFSET:
+196:         case RPI_GPIO_GPFSEL1_OFFSET:
+197:         case RPI_GPIO_GPFSEL2_OFFSET:
+198:         case RPI_GPIO_GPFSEL3_OFFSET:
+199:         case RPI_GPIO_GPFSEL4_OFFSET:
+200:         case RPI_GPIO_GPFSEL5_OFFSET:
+201:         {
+202:             uint8 pinBase = (offset - RPI_GPIO_GPFSEL0_OFFSET) / 4 * 10;
+203:             string line{ "GPIO Read Pin Mode "};
+204:             for (uint8 pinIndex = 0; pinIndex < 10; ++pinIndex)
+205:             {
+206:                 int shift = pinIndex * 3;
+207:                 uint8 pin = pinBase + pinIndex;
+208:                 uint8 pinMode = (*registerField >> shift) & 0x00000007;
+209:                 line += Format(" - Pin %d mode %s", pin, PinModeToString(pinMode).c_str());
 210:             }
 211:             LOG_DEBUG(line.c_str());
 212:             break;
 213:         }
-214:         case RPI_GPIO_GPHEN0_OFFSET:
-215:         case RPI_GPIO_GPHEN1_OFFSET:
+214:         case RPI_GPIO_GPLEV0_OFFSET:
+215:         case RPI_GPIO_GPLEV1_OFFSET:
 216:         {
-217:             uint8 pinBase = (offset - RPI_GPIO_GPHEN0_OFFSET)  / 4 * 32;
-218:             string line{ "GPIO Read Pin High Level Detect Enable "};
+217:             uint8 pinBase = (offset - RPI_GPIO_GPLEV0_OFFSET)  / 4 * 32;
+218:             string line{ "GPIO Read Pin Level "};
 219:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
 220:             {
 221:                 int shift = pinIndex;
 222:                 uint8 pin = pinBase + pinIndex;
 223:                 uint8 value = (*registerField >> shift) & 0x00000001;
 224:                 if (value)
-225:                     line += Format(" - Pin %d ON ", pin);
+225:                     line += " - Pin %d ON ";
 226:                 else
-227:                     line += Format(" - Pin %d OFF", pin);
+227:                     line += " - Pin %d OFF";
 228:             }
 229:             LOG_DEBUG(line.c_str());
 230:             break;
 231:         }
-232:         case RPI_GPIO_GPLEN0_OFFSET:
-233:         case RPI_GPIO_GPLEN1_OFFSET:
+232:         case RPI_GPIO_GPEDS0_OFFSET:
+233:         case RPI_GPIO_GPEDS1_OFFSET:
 234:         {
-235:             uint8 pinBase = (offset - RPI_GPIO_GPLEN0_OFFSET)  / 4 * 32;
-236:             string line{ "GPIO Read Pin Low Level Detect Enable "};
+235:             uint8 pinBase = (offset - RPI_GPIO_GPEDS0_OFFSET)  / 4 * 32;
+236:             string line{ "GPIO Read Pin Event Detect Status "};
 237:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
 238:             {
 239:                 int shift = pinIndex;
 240:                 uint8 pin = pinBase + pinIndex;
 241:                 uint8 value = (*registerField >> shift) & 0x00000001;
 242:                 if (value)
-243:                     line += Format(" - Pin %d ON ", pin);
+243:                     line += " - Pin %d ON ";
 244:                 else
-245:                     line += Format(" - Pin %d OFF", pin);
+245:                     line += " - Pin %d OFF";
 246:             }
 247:             LOG_DEBUG(line.c_str());
 248:             break;
 249:         }
-250:         case RPI_GPIO_GPAREN0_OFFSET:
-251:         case RPI_GPIO_GPAREN1_OFFSET:
+250:         case RPI_GPIO_GPREN0_OFFSET:
+251:         case RPI_GPIO_GPREN1_OFFSET:
 252:         {
-253:             uint8 pinBase = (offset - RPI_GPIO_GPAREN0_OFFSET)  / 4 * 32;
-254:             string line{ "GPIO Read Pin Async Rising Edge Detect Enable "};
+253:             uint8 pinBase = (offset - RPI_GPIO_GPREN0_OFFSET)  / 4 * 32;
+254:             string line{ "GPIO Read Pin Rising Edge Detect Enable "};
 255:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
 256:             {
 257:                 int shift = pinIndex;
@@ -1076,11 +1076,11 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 265:             LOG_DEBUG(line.c_str());
 266:             break;
 267:         }
-268:         case RPI_GPIO_GPAFEN0_OFFSET:
-269:         case RPI_GPIO_GPAFEN1_OFFSET:
+268:         case RPI_GPIO_GPFEN0_OFFSET:
+269:         case RPI_GPIO_GPFEN1_OFFSET:
 270:         {
-271:             uint8 pinBase = (offset - RPI_GPIO_GPAFEN0_OFFSET)  / 4 * 32;
-272:             string line{ "GPIO Read Pin Async Falling Edge Detect Enable "};
+271:             uint8 pinBase = (offset - RPI_GPIO_GPFEN0_OFFSET)  / 4 * 32;
+272:             string line{ "GPIO Read Pin Falling Edge Detect Enable "};
 273:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
 274:             {
 275:                 int shift = pinIndex;
@@ -1094,345 +1094,422 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 283:             LOG_DEBUG(line.c_str());
 284:             break;
 285:         }
-286: #if BAREMETAL_RPI_TARGET == 3
-287:         case RPI_GPIO_GPPUD_OFFSET:
+286:         case RPI_GPIO_GPHEN0_OFFSET:
+287:         case RPI_GPIO_GPHEN1_OFFSET:
 288:         {
-289:             uint8 value = *registerField & 0x00000003;
-290:             LOG_DEBUG("GPIO Read Pull Up/Down Mode %x", value);
-291:             break;
-292:         }
-293:         case RPI_GPIO_GPPUDCLK0_OFFSET:
-294:         case RPI_GPIO_GPPUDCLK1_OFFSET:
-295:         {
-296:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
-297:             string line{ "GPIO Read Pin Pull Up/Down Enable Clock "};
-298:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-299:             {
-300:                 int shift = pinIndex;
-301:                 uint8 pin = pinBase + pinIndex;
-302:                 uint8 value = (*registerField >> shift) & 0x00000001;
-303:                 if (value)
-304:                     line += Format(" - Pin %d ON ", pin);
-305:                 else
-306:                     line += Format(" - Pin %d OFF", pin);
-307:             }
-308:             LOG_DEBUG(line.c_str());
-309:             break;
-310:         }
-311: #elif BAREMETAL_RPI_TARGET == 4
-312:         case RPI_GPIO_GPPINMUXSD_OFFSET:
-313:         {
-314:             uint32 value = *registerField;
-315:             LOG_DEBUG("GPIO Read Pin Mux Mode %x", value);
-316:             break;
-317:         }
-318:         case RPI_GPIO_GPPUPPDN0_OFFSET:
-319:         case RPI_GPIO_GPPUPPDN1_OFFSET:
-320:         case RPI_GPIO_GPPUPPDN2_OFFSET:
-321:         case RPI_GPIO_GPPUPPDN3_OFFSET:
-322:         {
-323:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
-324:             string line{ "GPIO Read Pin Pull Up/Down Mode "};
-325:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
-326:             {
-327:                 int shift = pinIndex * 2;
-328:                 uint8 pin = pinBase + pinIndex;
-329:                 uint8 value = (*registerField >> shift) & 0x00000003;
-330:                 line += Format(" - Pin %d Pull up/down mode %x", pin, value);
-331:             }
-332:             LOG_DEBUG(line.c_str());
-333:             break;
-334:         }
-335: #endif
-336:         default:
-337:             LOG_ERROR("Invalid register access for reading: offset %d", offset);
+289:             uint8 pinBase = (offset - RPI_GPIO_GPHEN0_OFFSET)  / 4 * 32;
+290:             string line{ "GPIO Read Pin High Level Detect Enable "};
+291:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+292:             {
+293:                 int shift = pinIndex;
+294:                 uint8 pin = pinBase + pinIndex;
+295:                 uint8 value = (*registerField >> shift) & 0x00000001;
+296:                 if (value)
+297:                     line += Format(" - Pin %d ON ", pin);
+298:                 else
+299:                     line += Format(" - Pin %d OFF", pin);
+300:             }
+301:             LOG_DEBUG(line.c_str());
+302:             break;
+303:         }
+304:         case RPI_GPIO_GPLEN0_OFFSET:
+305:         case RPI_GPIO_GPLEN1_OFFSET:
+306:         {
+307:             uint8 pinBase = (offset - RPI_GPIO_GPLEN0_OFFSET)  / 4 * 32;
+308:             string line{ "GPIO Read Pin Low Level Detect Enable "};
+309:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+310:             {
+311:                 int shift = pinIndex;
+312:                 uint8 pin = pinBase + pinIndex;
+313:                 uint8 value = (*registerField >> shift) & 0x00000001;
+314:                 if (value)
+315:                     line += Format(" - Pin %d ON ", pin);
+316:                 else
+317:                     line += Format(" - Pin %d OFF", pin);
+318:             }
+319:             LOG_DEBUG(line.c_str());
+320:             break;
+321:         }
+322:         case RPI_GPIO_GPAREN0_OFFSET:
+323:         case RPI_GPIO_GPAREN1_OFFSET:
+324:         {
+325:             uint8 pinBase = (offset - RPI_GPIO_GPAREN0_OFFSET)  / 4 * 32;
+326:             string line{ "GPIO Read Pin Async Rising Edge Detect Enable "};
+327:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+328:             {
+329:                 int shift = pinIndex;
+330:                 uint8 pin = pinBase + pinIndex;
+331:                 uint8 value = (*registerField >> shift) & 0x00000001;
+332:                 if (value)
+333:                     line += Format(" - Pin %d ON ", pin);
+334:                 else
+335:                     line += Format(" - Pin %d OFF", pin);
+336:             }
+337:             LOG_DEBUG(line.c_str());
 338:             break;
-339:     }
-340:     return *registerField;
-341: }
-342: 
-343: /// <summary>
-344: /// Write a 32 bit value to register at address
-345: /// </summary>
-346: /// <param name="address">Address of register</param>
-347: /// <param name="data">Data to write</param>
-348: void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
-349: {
-350:     uintptr offset = GetRegisterOffset(address);
-351:     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-352: //    LOG_DEBUG("GPIO write register %016x = %08x", offset, data);
-353:     switch (offset)
-354:     {
-355:         case RPI_GPIO_GPFSEL0_OFFSET:
-356:         case RPI_GPIO_GPFSEL1_OFFSET:
-357:         case RPI_GPIO_GPFSEL2_OFFSET:
-358:         case RPI_GPIO_GPFSEL3_OFFSET:
-359:         case RPI_GPIO_GPFSEL4_OFFSET:
-360:         case RPI_GPIO_GPFSEL5_OFFSET:
-361:         {
-362:             uint8 pinBase = (offset - RPI_GPIO_GPFSEL0_OFFSET) / 4 * 10;
-363:             uint32 diff = data ^ *registerField;
-364:             for (uint8 pinIndex = 0; pinIndex < 10; ++pinIndex)
-365:             {
-366:                 int shift = pinIndex * 3;
-367:                 if (((diff >> shift) & 0x00000007) != 0)
-368:                 {
-369:                     uint8 pin = pinBase + pinIndex;
-370:                     uint8 pinMode = (data >> shift) & 0x00000007;
-371:                     LOG_DEBUG("GPIO Set Pin %d mode to %x", pin, pinMode);
-372:                 }
-373:             }
-374:             break;
-375:         }
-376:         case RPI_GPIO_GPSET0_OFFSET:
-377:         case RPI_GPIO_GPSET1_OFFSET:
-378:         {
-379:             uint8 pinBase = (offset - RPI_GPIO_GPSET0_OFFSET) / 4 * 32;
-380:             uint32 diff = data ^ *registerField;
-381:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-382:             {
-383:                 int shift = pinIndex;
-384:                 if (((diff >> shift) & 0x00000001) != 0)
-385:                 {
-386:                     uint8 pin = pinBase + pinIndex;
-387:                     uint8 value = (data >> shift) & 0x00000001;
-388:                     if (value != 0)
-389:                         LOG_DEBUG("GPIO Set Pin %d ON", pin);
-390:                 }
-391:             }
-392:             break;
-393:         }
-394:         case RPI_GPIO_GPCLR0_OFFSET:
-395:         case RPI_GPIO_GPCLR1_OFFSET:
-396:         {
-397:             uint8 pinBase = (offset - RPI_GPIO_GPCLR0_OFFSET)  / 4 * 32;
-398:             uint32 diff = data ^ *registerField;
-399:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-400:             {
-401:                 int shift = pinIndex;
-402:                 if (((diff >> shift) & 0x00000001) != 0)
-403:                 {
-404:                     uint8 pin = pinBase + pinIndex;
-405:                     uint8 value = (data >> shift) & 0x00000001;
-406:                     if (value != 0)
-407:                         LOG_DEBUG("GPIO Set Pin %d OFF", pin);
-408:                 }
-409:             }
+339:         }
+340:         case RPI_GPIO_GPAFEN0_OFFSET:
+341:         case RPI_GPIO_GPAFEN1_OFFSET:
+342:         {
+343:             uint8 pinBase = (offset - RPI_GPIO_GPAFEN0_OFFSET)  / 4 * 32;
+344:             string line{ "GPIO Read Pin Async Falling Edge Detect Enable "};
+345:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+346:             {
+347:                 int shift = pinIndex;
+348:                 uint8 pin = pinBase + pinIndex;
+349:                 uint8 value = (*registerField >> shift) & 0x00000001;
+350:                 if (value)
+351:                     line += Format(" - Pin %d ON ", pin);
+352:                 else
+353:                     line += Format(" - Pin %d OFF", pin);
+354:             }
+355:             LOG_DEBUG(line.c_str());
+356:             break;
+357:         }
+358: #if BAREMETAL_RPI_TARGET == 3
+359:         case RPI_GPIO_GPPUD_OFFSET:
+360:         {
+361:             uint8 value = *registerField & 0x00000003;
+362:             LOG_DEBUG("GPIO Read Pull Up/Down Mode %s", PullUpDownModeToString(value).c_str());
+363:             break;
+364:         }
+365:         case RPI_GPIO_GPPUDCLK0_OFFSET:
+366:         case RPI_GPIO_GPPUDCLK1_OFFSET:
+367:         {
+368:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
+369:             string line{ "GPIO Read Pin Pull Up/Down Enable Clock "};
+370:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+371:             {
+372:                 int shift = pinIndex;
+373:                 uint8 pin = pinBase + pinIndex;
+374:                 uint8 value = (*registerField >> shift) & 0x00000001;
+375:                 if (value)
+376:                     line += Format(" - Pin %d ON ", pin);
+377:                 else
+378:                     line += Format(" - Pin %d OFF", pin);
+379:             }
+380:             LOG_DEBUG(line.c_str());
+381:             break;
+382:         }
+383: #elif BAREMETAL_RPI_TARGET == 4
+384:         case RPI_GPIO_GPPINMUXSD_OFFSET:
+385:         {
+386:             uint32 value = *registerField;
+387:             LOG_DEBUG("GPIO Read Pin Mux Mode %x", value);
+388:             break;
+389:         }
+390:         case RPI_GPIO_GPPUPPDN0_OFFSET:
+391:         case RPI_GPIO_GPPUPPDN1_OFFSET:
+392:         case RPI_GPIO_GPPUPPDN2_OFFSET:
+393:         case RPI_GPIO_GPPUPPDN3_OFFSET:
+394:         {
+395:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
+396:             string line{ "GPIO Read Pin Pull Up/Down Mode "};
+397:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
+398:             {
+399:                 int shift = pinIndex * 2;
+400:                 uint8 pin = pinBase + pinIndex;
+401:                 uint8 value = (*registerField >> shift) & 0x00000003;
+402:                 line += Format(" - Pin %d Pull up/down mode %s", pin, PullUpDownModeToString(value).c_str());
+403:             }
+404:             LOG_DEBUG(line.c_str());
+405:             break;
+406:         }
+407: #endif
+408:         default:
+409:             LOG_ERROR("Invalid register access for reading: offset %d", offset);
 410:             break;
-411:         }
-412:         case RPI_GPIO_GPEDS0_OFFSET:
-413:         case RPI_GPIO_GPEDS1_OFFSET:
-414:         {
-415:             uint8 pinBase = (offset - RPI_GPIO_GPEDS0_OFFSET)  / 4 * 32;
-416:             uint32 diff = data ^ *registerField;
-417:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-418:             {
-419:                 int shift = pinIndex;
-420:                 if (((diff >> shift) & 0x00000001) != 0)
-421:                 {
-422:                     uint8 pin = pinBase + pinIndex;
-423:                     uint8 value = (data >> shift) & 0x00000001;
-424:                     if (value != 0)
-425:                         LOG_DEBUG("GPIO Clear Pin %d Event Status", pin);
-426:                 }
-427:             }
-428:             break;
-429:         }
-430:         case RPI_GPIO_GPREN0_OFFSET:
-431:         case RPI_GPIO_GPREN1_OFFSET:
-432:         {
-433:             uint8 pinBase = (offset - RPI_GPIO_GPREN0_OFFSET)  / 4 * 32;
-434:             uint32 diff = data ^ *registerField;
-435:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-436:             {
-437:                 int shift = pinIndex;
-438:                 if (((diff >> shift) & 0x00000001) != 0)
-439:                 {
-440:                     uint8 pin = pinBase + pinIndex;
-441:                     uint8 value = (data >> shift) & 0x00000001;
-442:                     if (value != 0)
-443:                         LOG_DEBUG("GPIO Set Pin %d Rising Edge Detect ON", pin);
-444:                     else
-445:                         LOG_DEBUG("GPIO Set Pin %d Rising Edge Detect OFF", pin);
-446:                 }
-447:             }
-448:             break;
-449:         }
-450:         case RPI_GPIO_GPFEN0_OFFSET:
-451:         case RPI_GPIO_GPFEN1_OFFSET:
-452:         {
-453:             uint8 pinBase = (offset - RPI_GPIO_GPFEN0_OFFSET)  / 4 * 32;
-454:             uint32 diff = data ^ *registerField;
-455:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-456:             {
-457:                 int shift = pinIndex;
-458:                 if (((diff >> shift) & 0x00000001) != 0)
-459:                 {
-460:                     uint8 pin = pinBase + pinIndex;
-461:                     uint8 value = (data >> shift) & 0x00000001;
-462:                     if (value != 0)
-463:                         LOG_DEBUG("GPIO Set Pin %d Falling Edge Detect ON", pin);
-464:                     else
-465:                         LOG_DEBUG("GPIO Set Pin %d Falling Edge Detect OFF", pin);
-466:                 }
-467:             }
-468:             break;
-469:         }
-470:         case RPI_GPIO_GPHEN0_OFFSET:
-471:         case RPI_GPIO_GPHEN1_OFFSET:
-472:         {
-473:             uint8 pinBase = (offset - RPI_GPIO_GPHEN0_OFFSET)  / 4 * 32;
-474:             uint32 diff = data ^ *registerField;
-475:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-476:             {
-477:                 int shift = pinIndex;
-478:                 if (((diff >> shift) & 0x00000001) != 0)
-479:                 {
-480:                     uint8 pin = pinBase + pinIndex;
-481:                     uint8 value = (data >> shift) & 0x00000001;
-482:                     if (value != 0)
-483:                         LOG_DEBUG("GPIO Set Pin %d High Level Detect ON", pin);
-484:                     else
-485:                         LOG_DEBUG("GPIO Set Pin %d High Level Detect OFF", pin);
-486:                 }
-487:             }
-488:             break;
-489:         }
-490:         case RPI_GPIO_GPLEN0_OFFSET:
-491:         case RPI_GPIO_GPLEN1_OFFSET:
-492:         {
-493:             uint8 pinBase = (offset - RPI_GPIO_GPLEN0_OFFSET)  / 4 * 32;
-494:             uint32 diff = data ^ *registerField;
-495:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-496:             {
-497:                 int shift = pinIndex;
-498:                 if (((diff >> shift) & 0x00000001) != 0)
-499:                 {
-500:                     uint8 pin = pinBase + pinIndex;
-501:                     uint8 value = (data >> shift) & 0x00000001;
-502:                     if (value != 0)
-503:                         LOG_DEBUG("GPIO Set Pin %d Low Level Detect ON", pin);
-504:                     else
-505:                         LOG_DEBUG("GPIO Set Pin %d Low Level Detect OFF", pin);
-506:                 }
-507:             }
-508:             break;
-509:         }
-510:         case RPI_GPIO_GPAREN0_OFFSET:
-511:         case RPI_GPIO_GPAREN1_OFFSET:
-512:         {
-513:             uint8 pinBase = (offset - RPI_GPIO_GPAREN0_OFFSET)  / 4 * 32;
-514:             uint32 diff = data ^ *registerField;
-515:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-516:             {
-517:                 int shift = pinIndex;
-518:                 if (((diff >> shift) & 0x00000001) != 0)
-519:                 {
-520:                     uint8 pin = pinBase + pinIndex;
-521:                     uint8 value = (data >> shift) & 0x00000001;
-522:                     if (value != 0)
-523:                         LOG_DEBUG("GPIO Set Pin %d Async Rising Edge Detect ON", pin);
-524:                     else
-525:                         LOG_DEBUG("GPIO Set Pin %d Async Rising Edge Detect OFF", pin);
-526:                 }
-527:             }
-528:             break;
-529:         }
-530:         case RPI_GPIO_GPAFEN0_OFFSET:
-531:         case RPI_GPIO_GPAFEN1_OFFSET:
-532:         {
-533:             uint8 pinBase = (offset - RPI_GPIO_GPAFEN0_OFFSET)  / 4 * 32;
-534:             uint32 diff = data ^ *registerField;
-535:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-536:             {
-537:                 int shift = pinIndex;
-538:                 if (((diff >> shift) & 0x00000001) != 0)
-539:                 {
-540:                     uint8 pin = pinBase + pinIndex;
-541:                     uint8 value = (data >> shift) & 0x00000001;
-542:                     if (value != 0)
-543:                         LOG_DEBUG("GPIO Set Pin %d Async Falling Edge Detect ON", pin);
-544:                     else
-545:                         LOG_DEBUG("GPIO Set Pin %d Async Falling Edge Detect OFF", pin);
-546:                 }
-547:             }
-548:             break;
-549:         }
-550: #if BAREMETAL_RPI_TARGET == 3
-551:         case RPI_GPIO_GPPUD_OFFSET:
-552:         {
-553:             uint32 diff = data ^ *registerField;
-554:             if ((diff & 0x00000003) != 0)
-555:             {
-556:                 uint8 value = data & 0x00000003;
-557:                 LOG_DEBUG("GPIO Set Pin Pull Up/Down Mode %x", value);
-558:             }
-559:             break;
-560:         }
-561:         case RPI_GPIO_GPPUDCLK0_OFFSET:
-562:         case RPI_GPIO_GPPUDCLK1_OFFSET:
-563:         {
-564:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
-565:             uint32 diff = data ^ *registerField;
-566:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-567:             {
-568:                 int shift = pinIndex;
-569:                 if (((diff >> shift) & 0x00000001) != 0)
-570:                 {
-571:                     uint8 pin = pinBase + pinIndex;
-572:                     uint8 value = (data >> shift) & 0x00000001;
-573:                     if (value != 0)
-574:                         LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock ON", pin);
-575:                     else
-576:                         LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock OFF", pin);
-577:                 }
-578:             }
-579:             break;
-580:         }
-581: #elif BAREMETAL_RPI_TARGET == 4
-582:         case RPI_GPIO_GPPINMUXSD_OFFSET:
-583:         {
-584:             uint32 value = *registerField;
-585:             LOG_DEBUG("GPIO Set Pin Mux Mode %x", value);
-586:             break;
-587:         }
-588:         case RPI_GPIO_GPPUPPDN0_OFFSET:
-589:         case RPI_GPIO_GPPUPPDN1_OFFSET:
-590:         case RPI_GPIO_GPPUPPDN2_OFFSET:
-591:         case RPI_GPIO_GPPUPPDN3_OFFSET:
-592:         {
-593:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
-594:             string line{ "GPIO Set Pin Pull Up/Down Mode "};
-595:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
-596:             {
-597:                 int shift = pinIndex * 2;
-598:                 uint8 pin = pinBase + pinIndex;
-599:                 uint8 value = (*registerField >> shift) & 0x00000003;
-600:                 line += Format(" - Pin %d Pull up/down mode %x", pin, value);
-601:             }
-602:             LOG_DEBUG(line.c_str());
-603:             break;
-604:         }
-605: #endif
-606:         default:
-607:             LOG_ERROR("Invalid GPIO register access for writing: offset %d", offset);
-608:             break;
-609:     }
-610:     *registerField = data;
-611: }
-612: 
-613: /// <summary>
-614: /// Determine register address offset relative to GPIO base address
-615: /// 
-616: /// If the address is not in the correct range, an assert is fired
-617: /// </summary>
-618: /// <param name="address">Address to check</param>
-619: /// <returns>Offset relative to GPIO base address</returns>
-620: uint32 MemoryAccessStubGPIO::GetRegisterOffset(regaddr address)
-621: {
-622:     assert((reinterpret_cast<uintptr>(address) & GPIOBaseAddressMask) == GPIOBaseAddress);
-623:     return reinterpret_cast<uintptr>(address) - GPIOBaseAddress;
-624: }
+411:     }
+412:     return *registerField;
+413: }
+414: 
+415: /// <summary>
+416: /// Write a 32 bit value to register at address
+417: /// </summary>
+418: /// <param name="address">Address of register</param>
+419: /// <param name="data">Data to write</param>
+420: void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
+421: {
+422:     uintptr offset = GetRegisterOffset(address);
+423:     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
+424: //    LOG_DEBUG("GPIO write register %016x = %08x", offset, data);
+425:     switch (offset)
+426:     {
+427:         case RPI_GPIO_GPFSEL0_OFFSET:
+428:         case RPI_GPIO_GPFSEL1_OFFSET:
+429:         case RPI_GPIO_GPFSEL2_OFFSET:
+430:         case RPI_GPIO_GPFSEL3_OFFSET:
+431:         case RPI_GPIO_GPFSEL4_OFFSET:
+432:         case RPI_GPIO_GPFSEL5_OFFSET:
+433:         {
+434:             uint8 pinBase = (offset - RPI_GPIO_GPFSEL0_OFFSET) / 4 * 10;
+435:             uint32 diff = data ^ *registerField;
+436:             for (uint8 pinIndex = 0; pinIndex < 10; ++pinIndex)
+437:             {
+438:                 int shift = pinIndex * 3;
+439:                 if (((diff >> shift) & 0x00000007) != 0)
+440:                 {
+441:                     uint8 pin = pinBase + pinIndex;
+442:                     uint8 pinMode = (data >> shift) & 0x00000007;
+443:                     string modeName = PinModeToString(pinMode);
+444:                     LOG_DEBUG("GPIO Set Pin %d Mode %s", pin, modeName.c_str());
+445:                 }
+446:             }
+447:             break;
+448:         }
+449:         case RPI_GPIO_GPSET0_OFFSET:
+450:         case RPI_GPIO_GPSET1_OFFSET:
+451:         {
+452:             uint8 pinBase = (offset - RPI_GPIO_GPSET0_OFFSET) / 4 * 32;
+453:             uint32 diff = data ^ *registerField;
+454:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+455:             {
+456:                 int shift = pinIndex;
+457:                 if (((diff >> shift) & 0x00000001) != 0)
+458:                 {
+459:                     uint8 pin = pinBase + pinIndex;
+460:                     uint8 value = (data >> shift) & 0x00000001;
+461:                     if (value != 0)
+462:                         LOG_DEBUG("GPIO Set Pin %d ON", pin);
+463:                 }
+464:             }
+465:             break;
+466:         }
+467:         case RPI_GPIO_GPCLR0_OFFSET:
+468:         case RPI_GPIO_GPCLR1_OFFSET:
+469:         {
+470:             uint8 pinBase = (offset - RPI_GPIO_GPCLR0_OFFSET)  / 4 * 32;
+471:             uint32 diff = data ^ *registerField;
+472:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+473:             {
+474:                 int shift = pinIndex;
+475:                 if (((diff >> shift) & 0x00000001) != 0)
+476:                 {
+477:                     uint8 pin = pinBase + pinIndex;
+478:                     uint8 value = (data >> shift) & 0x00000001;
+479:                     if (value != 0)
+480:                         LOG_DEBUG("GPIO Set Pin %d OFF", pin);
+481:                 }
+482:             }
+483:             break;
+484:         }
+485:         case RPI_GPIO_GPEDS0_OFFSET:
+486:         case RPI_GPIO_GPEDS1_OFFSET:
+487:         {
+488:             uint8 pinBase = (offset - RPI_GPIO_GPEDS0_OFFSET)  / 4 * 32;
+489:             uint32 diff = data ^ *registerField;
+490:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+491:             {
+492:                 int shift = pinIndex;
+493:                 if (((diff >> shift) & 0x00000001) != 0)
+494:                 {
+495:                     uint8 pin = pinBase + pinIndex;
+496:                     uint8 value = (data >> shift) & 0x00000001;
+497:                     if (value != 0)
+498:                         LOG_DEBUG("GPIO Clear Pin %d Event Status", pin);
+499:                 }
+500:             }
+501:             break;
+502:         }
+503:         case RPI_GPIO_GPREN0_OFFSET:
+504:         case RPI_GPIO_GPREN1_OFFSET:
+505:         {
+506:             uint8 pinBase = (offset - RPI_GPIO_GPREN0_OFFSET)  / 4 * 32;
+507:             uint32 diff = data ^ *registerField;
+508:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+509:             {
+510:                 int shift = pinIndex;
+511:                 if (((diff >> shift) & 0x00000001) != 0)
+512:                 {
+513:                     uint8 pin = pinBase + pinIndex;
+514:                     uint8 value = (data >> shift) & 0x00000001;
+515:                     if (value != 0)
+516:                         LOG_DEBUG("GPIO Set Pin %d Rising Edge Detect ON", pin);
+517:                     else
+518:                         LOG_DEBUG("GPIO Set Pin %d Rising Edge Detect OFF", pin);
+519:                 }
+520:             }
+521:             break;
+522:         }
+523:         case RPI_GPIO_GPFEN0_OFFSET:
+524:         case RPI_GPIO_GPFEN1_OFFSET:
+525:         {
+526:             uint8 pinBase = (offset - RPI_GPIO_GPFEN0_OFFSET)  / 4 * 32;
+527:             uint32 diff = data ^ *registerField;
+528:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+529:             {
+530:                 int shift = pinIndex;
+531:                 if (((diff >> shift) & 0x00000001) != 0)
+532:                 {
+533:                     uint8 pin = pinBase + pinIndex;
+534:                     uint8 value = (data >> shift) & 0x00000001;
+535:                     if (value != 0)
+536:                         LOG_DEBUG("GPIO Set Pin %d Falling Edge Detect ON", pin);
+537:                     else
+538:                         LOG_DEBUG("GPIO Set Pin %d Falling Edge Detect OFF", pin);
+539:                 }
+540:             }
+541:             break;
+542:         }
+543:         case RPI_GPIO_GPHEN0_OFFSET:
+544:         case RPI_GPIO_GPHEN1_OFFSET:
+545:         {
+546:             uint8 pinBase = (offset - RPI_GPIO_GPHEN0_OFFSET)  / 4 * 32;
+547:             uint32 diff = data ^ *registerField;
+548:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+549:             {
+550:                 int shift = pinIndex;
+551:                 if (((diff >> shift) & 0x00000001) != 0)
+552:                 {
+553:                     uint8 pin = pinBase + pinIndex;
+554:                     uint8 value = (data >> shift) & 0x00000001;
+555:                     if (value != 0)
+556:                         LOG_DEBUG("GPIO Set Pin %d High Level Detect ON", pin);
+557:                     else
+558:                         LOG_DEBUG("GPIO Set Pin %d High Level Detect OFF", pin);
+559:                 }
+560:             }
+561:             break;
+562:         }
+563:         case RPI_GPIO_GPLEN0_OFFSET:
+564:         case RPI_GPIO_GPLEN1_OFFSET:
+565:         {
+566:             uint8 pinBase = (offset - RPI_GPIO_GPLEN0_OFFSET)  / 4 * 32;
+567:             uint32 diff = data ^ *registerField;
+568:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+569:             {
+570:                 int shift = pinIndex;
+571:                 if (((diff >> shift) & 0x00000001) != 0)
+572:                 {
+573:                     uint8 pin = pinBase + pinIndex;
+574:                     uint8 value = (data >> shift) & 0x00000001;
+575:                     if (value != 0)
+576:                         LOG_DEBUG("GPIO Set Pin %d Low Level Detect ON", pin);
+577:                     else
+578:                         LOG_DEBUG("GPIO Set Pin %d Low Level Detect OFF", pin);
+579:                 }
+580:             }
+581:             break;
+582:         }
+583:         case RPI_GPIO_GPAREN0_OFFSET:
+584:         case RPI_GPIO_GPAREN1_OFFSET:
+585:         {
+586:             uint8 pinBase = (offset - RPI_GPIO_GPAREN0_OFFSET)  / 4 * 32;
+587:             uint32 diff = data ^ *registerField;
+588:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+589:             {
+590:                 int shift = pinIndex;
+591:                 if (((diff >> shift) & 0x00000001) != 0)
+592:                 {
+593:                     uint8 pin = pinBase + pinIndex;
+594:                     uint8 value = (data >> shift) & 0x00000001;
+595:                     if (value != 0)
+596:                         LOG_DEBUG("GPIO Set Pin %d Async Rising Edge Detect ON", pin);
+597:                     else
+598:                         LOG_DEBUG("GPIO Set Pin %d Async Rising Edge Detect OFF", pin);
+599:                 }
+600:             }
+601:             break;
+602:         }
+603:         case RPI_GPIO_GPAFEN0_OFFSET:
+604:         case RPI_GPIO_GPAFEN1_OFFSET:
+605:         {
+606:             uint8 pinBase = (offset - RPI_GPIO_GPAFEN0_OFFSET)  / 4 * 32;
+607:             uint32 diff = data ^ *registerField;
+608:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+609:             {
+610:                 int shift = pinIndex;
+611:                 if (((diff >> shift) & 0x00000001) != 0)
+612:                 {
+613:                     uint8 pin = pinBase + pinIndex;
+614:                     uint8 value = (data >> shift) & 0x00000001;
+615:                     if (value != 0)
+616:                         LOG_DEBUG("GPIO Set Pin %d Async Falling Edge Detect ON", pin);
+617:                     else
+618:                         LOG_DEBUG("GPIO Set Pin %d Async Falling Edge Detect OFF", pin);
+619:                 }
+620:             }
+621:             break;
+622:         }
+623: #if BAREMETAL_RPI_TARGET == 3
+624:         case RPI_GPIO_GPPUD_OFFSET:
+625:         {
+626:             uint32 diff = data ^ *registerField;
+627:             if ((diff & 0x00000003) != 0)
+628:             {
+629:                 uint8 value = data & 0x00000003;
+630:                 string modeName = PullUpDownModeToString(value);
+631:                 LOG_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
+632:             }
+633:             break;
+634:         }
+635:         case RPI_GPIO_GPPUDCLK0_OFFSET:
+636:         case RPI_GPIO_GPPUDCLK1_OFFSET:
+637:         {
+638:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
+639:             uint32 diff = data ^ *registerField;
+640:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+641:             {
+642:                 int shift = pinIndex;
+643:                 if (((diff >> shift) & 0x00000001) != 0)
+644:                 {
+645:                     uint8 pin = pinBase + pinIndex;
+646:                     uint8 value = (data >> shift) & 0x00000001;
+647:                     if (value != 0)
+648:                         LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock ON", pin);
+649:                     else
+650:                         LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock OFF", pin);
+651:                 }
+652:             }
+653:             break;
+654:         }
+655: #elif BAREMETAL_RPI_TARGET == 4
+656:         case RPI_GPIO_GPPINMUXSD_OFFSET:
+657:         {
+658:             uint32 value = *registerField;
+659:             LOG_DEBUG("GPIO Set Pin Mux Mode %x", value);
+660:             break;
+661:         }
+662:         case RPI_GPIO_GPPUPPDN0_OFFSET:
+663:         case RPI_GPIO_GPPUPPDN1_OFFSET:
+664:         case RPI_GPIO_GPPUPPDN2_OFFSET:
+665:         case RPI_GPIO_GPPUPPDN3_OFFSET:
+666:         {
+667:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
+668:             uint32 diff = data ^ *registerField;
+669:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
+670:             {
+671:                 int shift = pinIndex * 2;
+672:                 if (((diff >> shift) & 0x00000003) != 0)
+673:                 {
+674:                     uint8 pin = pinBase + pinIndex;
+675:                     uint8 value = (data >> shift) & 0x00000003;
+676:                     string modeName = PullUpDownModeToString(value);
+677:                     LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Mode %s", pin, modeName.c_str());
+678:                 }
+679:             }
+680:             break;
+681:         }
+682: #endif
+683:         default:
+684:             LOG_ERROR("Invalid GPIO register access for writing: offset %d", offset);
+685:             break;
+686:     }
+687:     *registerField = data;
+688: }
+689: 
+690: /// <summary>
+691: /// Determine register address offset relative to GPIO base address
+692: ///
+693: /// If the address is not in the correct range, an assert is fired
+694: /// </summary>
+695: /// <param name="address">Address to check</param>
+696: /// <returns>Offset relative to GPIO base address</returns>
+697: uint32 MemoryAccessStubGPIO::GetRegisterOffset(regaddr address)
+698: {
+699:     assert((reinterpret_cast<uintptr>(address) & GPIOBaseAddressMask) == GPIOBaseAddress);
+700:     return reinterpret_cast<uintptr>(address) - GPIOBaseAddress;
+701: }
 ```
 
 - Line 57: We define a variable `GPIOBaseAddress` to hold the base address of the GPIO registers
@@ -1442,41 +1519,43 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 - Line 80-88: We implement the method `Write8()` as a panic, as we will always do 32 bit read / write access
 - Line 90-99: We implement the method `Read16()` as a panic, as we will always do 32 bit read / write access
 - Line 101-109: We implement the method `Write16()` as a panic, as we will always do 32 bit read / write access
-- Line 111-341: We implement the method `Read32()`
-  - Line 118: We calculate the relative register offset from the address
-  - Line 119: We read the register from the saved register values
-  - Line 123-141: We handle the GPIO Function Select Registers, to trace the access
-  - Line 142-159: We handle the GPIO Level Registers, to trace the access
-  - Line 160-177: We handle the GPIO Event Detected Registers, to trace the access
-  - Line 178-195: We handle the GPIO Rising Edge Detect Status Registers, to trace the access
-  - Line 196-213: We handle the GPIO Falling Edge Detect Registers, to trace the access
-  - Line 214-231: We handle the GPIO High Level Detect Registers, to trace the access
-  - Line 232-249: We handle the GPIO Low Level Detect Registers, to trace the access
-  - Line 250-267: We handle the GPIO Asynchronous Rising Edge Detect Registers, to trace the access
-  - Line 268-285: We handle the GPIO Asynchronous Falling Edge Detect Registers, to trace the access
-  - Line 287-292: We handle the GPIO Pull up/down Mode Register for Raspberry Pi 3, to trace the access
-  - Line 293-310: We handle the GPIO Pull up/down Clock Registers for Raspberry Pi 3, to trace the access
-  - Line 312-317: We handle the GPIO Pull up/down Pin Mux Register for Raspberry Pi 4, to trace the access
-  - Line 318-334: We handle the GPIO Pull up/down Mode Registers for Raspberry Pi 4, to trace the access
-- Line 343-611: We implement the method `Write32()`
-  - Line 350: We calculate the relative register offset from the address
-  - Line 351: We determine the address of the field to write in the save register values
-  - Line 355-375: We handle the GPIO Function Select Registers, to trace the access
-  - Line 376-393: We handle the GPIO Set Registers, to trace the access
-  - Line 394-411: We handle the GPIO Clear Registers, to trace the access
-  - Line 412-429: We handle the GPIO Event Detect Status Registers, to trace the access
-  - Line 430-449: We handle the GPIO Rising Edge Detect Registers, to trace the access
-  - Line 450-469: We handle the GPIO Falling Edge Detect Registers, to trace the access
-  - Line 470-489: We handle the GPIO High Level Detect Registers, to trace the access
-  - Line 490-509: We handle the GPIO Low Level Detect Registers, to trace the access
-  - Line 510-529: We handle the GPIO Asynchronous Rising Edge Detect Registers, to trace the access
-  - Line 530-549: We handle the GPIO Asynchronous Falling Edge Detect Registers, to trace the access
-  - Line 551-560: We handle the GPIO Pull up/down Mode Register for Raspberry Pi 3, to trace the access
-  - Line 561-580: We handle the GPIO Pull up/down Clock Registers for Raspberry Pi 3, to trace the access
-  - Line 582-587: We handle the GPIO Pull up/down Pin Mux Register for Raspberry Pi 4, to trace the access
-  - Line 588-604: We handle the GPIO Pull up/down Mode Registers for Raspberry Pi 4, to trace the access
-  - Line 610: We write the value to the saved GPIO registers
-- Line 620-624: We implement the method `GetRegisterOffset()`
+- Line 111-147: We define a function `PinModeToString()` to convert a GPIO pin mode to a string
+- Line 149-181: We define a function `PullUpDownModeToString()` to convert a GPIO pin pull up/down mode to a string
+- Line 183-413: We implement the method `Read32()`
+  - Line 190: We calculate the relative register offset from the address
+  - Line 191: We determine the address of the field to read in the save register values
+  - Line 195-213: We handle the GPIO Function Select Registers, to trace the access
+  - Line 214-231: We handle the GPIO Level Registers, to trace the access
+  - Line 232-249: We handle the GPIO Event Detected Registers, to trace the access
+  - Line 250-267: We handle the GPIO Rising Edge Detect Status Registers, to trace the access
+  - Line 268-285: We handle the GPIO Falling Edge Detect Registers, to trace the access
+  - Line 286-303: We handle the GPIO High Level Detect Registers, to trace the access
+  - Line 304-321: We handle the GPIO Low Level Detect Registers, to trace the access
+  - Line 322-339: We handle the GPIO Asynchronous Rising Edge Detect Registers, to trace the access
+  - Line 340-357: We handle the GPIO Asynchronous Falling Edge Detect Registers, to trace the access
+  - Line 359-364: We handle the GPIO Pull up/down Mode Register for Raspberry Pi 3, to trace the access
+  - Line 365-282: We handle the GPIO Pull up/down Clock Registers for Raspberry Pi 3, to trace the access
+  - Line 384-389: We handle the GPIO Pull up/down Pin Mux Register for Raspberry Pi 4, to trace the access
+  - Line 390-406: We handle the GPIO Pull up/down Mode Registers for Raspberry Pi 4, to trace the access
+- Line 415-: We implement the method `Write32()`
+  - Line 422: We calculate the relative register offset from the address
+  - Line 423: We determine the address of the field to write in the save register values
+  - Line 427-448: We handle the GPIO Function Select Registers, to trace the access
+  - Line 449-466: We handle the GPIO Set Registers, to trace the access
+  - Line 467-484: We handle the GPIO Clear Registers, to trace the access
+  - Line 485-502: We handle the GPIO Event Detect Status Registers, to trace the access
+  - Line 503-522: We handle the GPIO Rising Edge Detect Registers, to trace the access
+  - Line 523-542: We handle the GPIO Falling Edge Detect Registers, to trace the access
+  - Line 543-562: We handle the GPIO High Level Detect Registers, to trace the access
+  - Line 563-582: We handle the GPIO Low Level Detect Registers, to trace the access
+  - Line 583-602: We handle the GPIO Asynchronous Rising Edge Detect Registers, to trace the access
+  - Line 603-622: We handle the GPIO Asynchronous Falling Edge Detect Registers, to trace the access
+  - Line 624-634: We handle the GPIO Pull up/down Mode Register for Raspberry Pi 3, to trace the access
+  - Line 635-654: We handle the GPIO Pull up/down Clock Registers for Raspberry Pi 3, to trace the access
+  - Line 656-661: We handle the GPIO Pull up/down Pin Mux Register for Raspberry Pi 4, to trace the access
+  - Line 662-681: We handle the GPIO Pull up/down Mode Registers for Raspberry Pi 4, to trace the access
+  - Line 687: We write the value to the saved GPIO registers
+- Line 690-701: We implement the method `GetRegisterOffset()`
 
 ### Update application code : Use GPIO stub {#TUTORIAL_20_GPIO_FAKING_GPIO____STEP_1_UPDATE_APPLICATION_CODE__USE_GPIO_STUB}
 
@@ -2005,7 +2084,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 ```
 
 - Line 65-81: We add a enum type `GPIOInterruptType` to distiguish between the different types of events that can cause an interrupt.
-There relate directly to the registered mentioned above in [Revisiting GPIO registers](#TUTORIAL_20_GPIO_ADDING_GPIO_INTERRUPTS___STEP_3_REVISITING_GPIO_REGISTERS)
+There relate directly to the registered mentioned above in [BCMRegisters.h](#TUTORIAL_20_GPIO_FAKING_GPIO____STEP_1_BCMREGISTERSH)
 - Line 102: We add a member variable `m_regOffset` to indicate the byte offset of the register to address for the GPIO.
 This is relative to the group, and as there are 32 GPIO event bits in each register, this will thus be (m_pinNumber / 32) * 4
 - Line 104: We add a member variable `m_regMask` to indicate the register mask to be used for the GPIO.
@@ -2353,7 +2432,7 @@ Debug  0.00:00:05.110 DT=1 (main:35)
 Press r to reboot, h to halt
 ```
 
-## General approach for GPIO interrupts - Step 3 {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3}
+## General approach for GPIO interrupts - Step 4 {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4}
 
 As we can see in the previous step, we need to set up administration to pass to the interrupt handler.
 That is impractical, it would be easier if we could register a handler for a specific GPIO pin interrupt.
@@ -2361,7 +2440,7 @@ That is impractical, it would be easier if we could register a handler for a spe
 We'll introduce a GPIO manager that will register to the GPIO interrupts, and have each pin register itself with the manager.
 The GPIO manager will then check for each registered pin whether an event occurred, and call the interrupt handler on that pin.
 
-### IGPIOManager.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_IGPIOMANAGERH}
+### IGPIOManager.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_IGPIOMANAGERH}
 
 First we'll create an abstract interface for the GPIO manager.
 
@@ -2466,7 +2545,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOManager.h
   - Line 80: We declare an abstract method `InterruptHandler()` as the interrupt handler function
   - Line 85: We declare an abstract method `AllOff()` to unregister all GPIO pins and switch them to default mode
 
-### GPIOManager.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_GPIOMANAGERH}
+### GPIOManager.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_GPIOMANAGERH}
 
 We'll now declare the GPIO manager class `GPIOManager`.
 
@@ -2586,7 +2665,7 @@ File: code/libraries/baremetal/include/baremetal/GPIOManager.h
   - Line 87: We declare a method `DisableAllInterrupts()` to disable all GPIO interrupts by clearing the respective registers
 - Line 92: As before, we declare a friend function to retrieve the singleton instance of the GPIO manager
 
-### GPIOManager.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_GPIOMANAGERCPP}
+### GPIOManager.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_GPIOMANAGERCPP}
 
 Update the file `code/libraries/baremetal/src/GPIOManager.cpp`
 
@@ -2886,7 +2965,7 @@ This removes all interrupts for the specified pins, by resetting the interrupt b
 This is the static entry point to the `GPIOManager` for interrupts, and relays to the `InterruptHandler()` method of the singleton instance
 - Line 244-253: We implement the `GetGPIOManager()` function to return the singleton instance of the `GPIOManager`
 
-### IGPIOPin.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_IGPIOPINH}
+### IGPIOPin.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_IGPIOPINH}
 
 We need to add the methods `InterruptHandler()`, `GetAutoAcknowledgeInterrupt()` and `AcknowledgeInterrupt()` to the GPIO pin.
 
@@ -2970,7 +3049,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 - Line 138: We declare a method `AcknowledgeInterrupt()` to perform GPIO acknowledgement, by resetting the event bit for the GPIO
 - Line 142: We declare a method `InterruptHandler()` as the GPIO pin interrupt handler
 
-### PhysicalGPIOPin.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_PHYSICALGPIOPINH}
+### PhysicalGPIOPin.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_PHYSICALGPIOPINH}
 
 We need to add the new methods in `IGPIOPin`, as well as allow for registering and unregistering and interrupt handler with the `GPIOManager`.
 We'll also change the way we deal with the different interrupts sources, by using bit patterns to allow for enabling and disabling multiple interrupt types at once.
@@ -3101,7 +3180,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 - Line 158: We declare a method `ConnectInterrupt()` to connect the GPIO pint interrupt with its parameter, and set the auto acknowledge status
 - Line 159: We declare a method `DisconnectInterrupt()` to disconnect the GPIO pint interrupt
 
-### PhysicalGPIOPin.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_PHYSICALGPIOPINCPP}
+### PhysicalGPIOPin.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_PHYSICALGPIOPINCPP}
 
 We need to implement the new methods, and change the way we deal with the interrupt type registration.
 
@@ -3664,7 +3743,7 @@ If so, we add it to the interrupt mask, calculate the register address, and set 
 If so, we remove it from the interrupt mask, calculate the register address, and reset the corresponding bit in the interrupt enable register
 - Line 526-532: We update the method `DisableAllInterrupts()` to simply call `DisableInterrupt()` with all interrupt types combined
 
-### InterruptHandler.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_INTERRUPTHANDLERCPP}
+### InterruptHandler.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_INTERRUPTHANDLERCPP}
 
 We'd like to see what is happening concerning registration and unregistration of IRQ and FIQ handlers.
 Let's add this. We need to take into account however, that the `Logger` class needs the `Timer` class, which already registers for an IRQ while staring up.
@@ -3824,7 +3903,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 - Line 256-257: We update the method `RegisterFIQHandler()` to log, but only when a logger is instantiated and initialized
 - Line 277-278: We update the method `UnregisterFIQHandler()` to log, but only when a logger is instantiated and initialized
 
-### Logger.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_LOGGERH}
+### Logger.h {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_LOGGERH}
 
 The changed usage of the `Logger` class means we need to be able to access the singleton instance. We therefore change it into a static pointer.
 
@@ -3873,7 +3952,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 - Line 91: We add a static `Logger` pointer to hold the singleton instance
 - Line 96: We declare a static method `HaveLogger()` to determine if we have an initialized `Logger` instance
 
-### Logger.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_LOGGERCPP}
+### Logger.cpp {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_LOGGERCPP}
 
 We need a way to check whether the `Logger` instance is already created.
 
@@ -3933,7 +4012,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 - Line 79-84: We implement the static method `HaveLogger()`
 - Line 319-328: We change the implement of `GetLogger()` to create a `Logger` instance through the new operator
 
-### Update application code {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_UPDATE_APPLICATION_CODE}
 
 Update the file `code/applications/demo/src/main.cpp`
 
@@ -4033,7 +4112,7 @@ File: code/applications/demo/src/main.cpp
 - Line 63-64: We set up the interrupt handler for the SW pin in a new way through the `GPIOManager`, using the combined `RisingEdge` and `FallingEdge` types
 - Line 71-73: We disconnect the interrupts using the new method, which goes through the `GPIOManager`
 
-### Update CMake file {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_UPDATE_CMAKE_FILE}
+### Update CMake file {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_UPDATE_CMAKE_FILE}
 
 As we have added some source files to the `baremetal` library, we need to update its CMake file.
 
@@ -4117,7 +4196,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 ...
 ```
 
-### Configuring, building and debugging {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_GENERAL_APPROACH_FOR_GPIO_INTERRUPTS___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 
@@ -4184,7 +4263,7 @@ Debug  0.00:00:05.100 InterruptSystem::UnregisterIRQHandler IRQ=52 (InterruptHan
 Press r to reboot, h to halt
 ```
 
-## Adding intelligence to the switch button - Step 4 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4}
+## Adding intelligence to the switch button - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5}
 
 So, now we can read the rotary switch signals, we attached interrupts so we can handle changes.
 Let's make the rotare switch a bit smarter.
@@ -4196,7 +4275,7 @@ We'll add a new class in a new library device `KY040` for this, and as a first s
 - Double press
 - Tripple press
 
-### Adding a new library {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_ADDING_A_NEW_LIBRARY}
+### Adding a new library {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_ADDING_A_NEW_LIBRARY}
 
 Let's add a new library for specific hardware devices.
 We'll create a new library `device`, and add an extra layer of directories to distignuish between e.g. GPIO and I2C devices.
@@ -4209,7 +4288,7 @@ The new library wil be next to `baremetal` and `stdlib`, and have the following 
 
 <img src="images/treeview-device-library.png" alt="Initial project structure" width="300"/>
 
-### CMake file for device library {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_CMAKE_FILE_FOR_DEVICE_LIBRARY}
+### CMake file for device library {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_CMAKE_FILE_FOR_DEVICE_LIBRARY}
 
 We'll have to set up the CMake file for the new library.
 
@@ -4319,7 +4398,7 @@ File: code/libraries/device/CMakeLists.txt
 
 As you can see we added a header and a source file, which we'll have to implement.
 
-### Update CMake file for libraries {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_CMAKE_FILE_FOR_LIBRARIES}
+### Update CMake file for libraries {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_UPDATE_CMAKE_FILE_FOR_LIBRARIES}
 
 We'll add the new library in the libraries CMake file.
 
@@ -4335,7 +4414,7 @@ File: code/libraries/CMakeLists.txt
 6: add_subdirectory(stdlib)
 ```
 
-### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040H}
+### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_KY_040H}
 
 We'll add a class KY040 for the rotary switch.
 
@@ -4522,7 +4601,7 @@ As the context parameter will point to the class instance, it will call the clas
   - Line 133: We declare the private method `SwitchButtonTickHandler()` to handle holding down the switch button
   - Line 13: We declare the private method `HandleSwitchButtonEvent()` which deals with internal state keeping
 
-### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_KY_040CPP}
+### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_KY_040CPP}
 
 We'll implement the class KY040.
 
@@ -4796,7 +4875,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 264: }
 265:
 266: /// <summary>
-267: /// KY040 class destructor
+267: /// Destructor for KY040 class 
 268: /// </summary>
 269: KY040::~KY040()
 270: {
@@ -4805,7 +4884,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 273: }
 274:
 275: /// <summary>
-276: /// Initialized the KY040 rotary switch
+276: /// Initialize the KY040 rotary switch
 277: /// </summary>
 278: void KY040::Initialize()
 279: {
@@ -5100,7 +5179,7 @@ It converts the parameter to a class pointer, and then calls the class method
   - Line 501: We save the next state
   - Line 503-506: If the output event is valid, and a event handler is registered, we call the event handler
 
-### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_UPDATE_APPLICATION_CODE}
 
 We'll create a rotary switch in the application and display its event callback.
 Due to the amount of debug output, we'll change the log level to `Info`. We'll also keep waiting a bit longer to allow for interaction with the rotary switch.
@@ -5156,7 +5235,7 @@ File: code/applications/demo/src/main.cpp
 46:
 ```
 
-### Update application CMake file {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_UPDATE_APPLICATION_CMAKE_FILE}
+### Update application CMake file {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_UPDATE_APPLICATION_CMAKE_FILE}
 
 As we are now using the `device` library, we need to add it to the application dependencies.
 
@@ -5171,7 +5250,7 @@ File: code/applications/demo/CMakeLists.txt
 31:
 ```
 
-### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_SWITCH_BUTTON___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 Notice the click, double click, triple click and hold events
@@ -5223,7 +5302,7 @@ rInfo   0.00:00:21.620 Reboot (System:154)
 Info   0.00:00:21.640 InterruptSystem::Shutdown (InterruptHandler:153)
 ```
 
-## Adding intelligence to the rotary switch - Step 5 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5}
+## Adding intelligence to the rotary switch - Step 6 {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6}
 
 Now let's also make the rotate part a bit smarter.
 
@@ -5291,7 +5370,7 @@ We'll use another state machine to keep track of the rotary status:
 Here, a single asterisk '*' indicates a fallback situation that is not expected, but we try to handle it correctly.
 A double asterisk '**' means it is the end of a cycle, and we generate an event an restart the cycle
 
-### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_KY_040H}
+### KY-040.h {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6_KY_040H}
 
 So, lets update the KY040 class to add rotary behaviour.
 
@@ -5409,7 +5488,7 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 - Line 135-136: We add the GPIO pin interrupt handler for the CLK and DT GPIO pins.
 One is global and receives a pointer to the KY040 instance, the other is called by the global one
 
-### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_KY_040CPP}
+### KY-040.cpp {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6_KY_040CPP}
 
 We'll implement the changes.
 
@@ -5700,7 +5779,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 ```
 
 - Line 64-87: We declare the `SwitchEncoderState` enum values.
-You can recognize the values from the table we showed in [Adding intelligence to the rotary switch - Step 5](#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5)
+You can recognize the values from the table we showed in [Adding intelligence to the rotary switch - Step 6](#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6)
 - Line 131-161: We define a function `EncoderStateToString` to convert a rotary encoder state to a string for debugging
 - Line 172-175: We add the `Clockwise` and `CounterClockwise` enum values to the conversion to string
 - Line 251-268: We define a matrix `s_encoderOutput` to determine the event to be generated when an event happens in a certain state.
@@ -5721,7 +5800,7 @@ It converts the parameter to a class pointer, and then calls the class method
   - Line 496: We determine the next state from the current state and the GPIO pin values
   - Line 500-503: If the event is not `Unknown` and there is an event handler function installed, we call it
 
-### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6_UPDATE_APPLICATION_CODE}
 
 Let's try to do something useful with the rotary switch.
 We use a value which starts at 0, if we rotate clockwise we increment the value, if we rotate counter clockwise we decrement, and if the switch is push down, we print the value.
@@ -5816,7 +5895,7 @@ If this reached `HoldThreshold`, we flag a reboot
 This effectively shuts down the core until an interrupt happens
 - Line 69: We return `ReturnCode::ExitReboot` to enforce a reboot
 
-### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_5_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_20_GPIO_ADDING_INTELLIGENCE_TO_THE_ROTARY_SWITCH___STEP_6_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 Notice the rotate events, as well as the value being printed when with push the switch down.

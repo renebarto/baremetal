@@ -109,6 +109,78 @@ void MemoryAccessStubGPIO::Write16(regaddr address, uint16 data)
 }
 
 /// <summary>
+/// Convert pin mode to string
+/// </summary>
+/// <param name="mode">Pin mode</param>
+/// <returns>String representing pin mode</returns>
+static string PinModeToString(uint32 mode)
+{
+    string result{};
+    switch (mode & 0x07)
+    {
+    case 0:
+        result = "Input";
+        break;
+    case 1:
+        result = "Output";
+        break;
+    case 2:
+        result = "Alt5";
+        break;
+    case 3:
+        result = "Alt4";
+        break;
+    case 4:
+        result = "Alt0";
+        break;
+    case 5:
+        result = "Alt1";
+        break;
+    case 6:
+        result = "Alt2";
+        break;
+    case 7:
+        result = "Alt3";
+        break;
+    }
+    return result;
+}
+
+/// <summary>
+/// Convert pull up/down mode to string
+/// </summary>
+/// <param name="mode">Pull up/down mode</param>
+/// <returns>String representing pull up/down mode</returns>
+static string PullUpDownModeToString(uint32 mode)
+{
+    string result{};
+    switch (mode & 0x03)
+    {
+    case 0:
+        result = "None";
+        break;
+    case 1:
+#if BAREMETAL_RPI_TARGET == 3
+        result = "PullDown";
+#else
+        result = "PullUp";
+#endif
+        break;
+    case 2:
+#if BAREMETAL_RPI_TARGET == 3
+        result = "PullUp";
+#else
+        result = "PullDown";
+#endif
+        break;
+    case 3:
+        result = "Reserved";
+        break;
+    }
+    return result;
+}
+
+/// <summary>
 /// Read a 32 bit value from register at address
 /// </summary>
 /// <param name="address">Address of register</param>
@@ -134,7 +206,7 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 int shift = pinIndex * 3;
                 uint8 pin = pinBase + pinIndex;
                 uint8 pinMode = (*registerField >> shift) & 0x00000007;
-                line += Format(" - Pin %d mode %x", pin, pinMode);
+                line += Format(" - Pin %d mode %s", pin, PinModeToString(pinMode).c_str());
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -287,7 +359,7 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
         case RPI_GPIO_GPPUD_OFFSET:
         {
             uint8 value = *registerField & 0x00000003;
-            LOG_DEBUG("GPIO Read Pull Up/Down Mode %x", value);
+            LOG_DEBUG("GPIO Read Pull Up/Down Mode %s", PullUpDownModeToString(value).c_str());
             break;
         }
         case RPI_GPIO_GPPUDCLK0_OFFSET:
@@ -327,7 +399,7 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 int shift = pinIndex * 2;
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000003;
-                line += Format(" - Pin %d Pull up/down mode %x", pin, value);
+                line += Format(" - Pin %d Pull up/down mode %s", pin, PullUpDownModeToString(value).c_str());
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -368,7 +440,8 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
                 {
                     uint8 pin = pinBase + pinIndex;
                     uint8 pinMode = (data >> shift) & 0x00000007;
-                    LOG_DEBUG("GPIO Set Pin %d mode to %x", pin, pinMode);
+                    string modeName = PinModeToString(pinMode);
+                    LOG_DEBUG("GPIO Set Pin %d Mode %s", pin, modeName.c_str());
                 }
             }
             break;
@@ -554,7 +627,8 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
             if ((diff & 0x00000003) != 0)
             {
                 uint8 value = data & 0x00000003;
-                LOG_DEBUG("GPIO Set Pin Pull Up/Down Mode %x", value);
+                string modeName = PullUpDownModeToString(value);
+                LOG_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
             }
             break;
         }
@@ -591,15 +665,18 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
         case RPI_GPIO_GPPUPPDN3_OFFSET:
         {
             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
-            string line{ "GPIO Set Pin Pull Up/Down Mode "};
+            uint32 diff = data ^ *registerField;
             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
             {
                 int shift = pinIndex * 2;
-                uint8 pin = pinBase + pinIndex;
-                uint8 value = (*registerField >> shift) & 0x00000003;
-                line += Format(" - Pin %d Pull up/down mode %x", pin, value);
+                if (((diff >> shift) & 0x00000003) != 0)
+                {
+                    uint8 pin = pinBase + pinIndex;
+                    uint8 value = (data >> shift) & 0x00000003;
+                    string modeName = PullUpDownModeToString(value);
+                    LOG_DEBUG("GPIO Set Pin %d Pull Up/Down Mode %s", pin, modeName.c_str());
+                }
             }
-            LOG_DEBUG(line.c_str());
             break;
         }
 #endif
@@ -612,7 +689,7 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
 
 /// <summary>
 /// Determine register address offset relative to GPIO base address
-/// 
+///
 /// If the address is not in the correct range, an assert is fired
 /// </summary>
 /// <param name="address">Address to check</param>

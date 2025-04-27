@@ -81,9 +81,11 @@ LOG_MODULE("I2CMaster");
 #define RESERVED_ADDRESS_LOW 0x07
 /// @brief I2C addresses staring from RESERVED_ADDRESS_HIGH are reserved
 #define RESERVED_ADDRESS_HIGH 0x78
+/// @brief Highest 10 bit address
+#define ADDRESS_10BIT_HIGH 0x3FF
 
 /// @brief GPIO pin configurations for I2C pins. For every bus there are multiple configurations for the two I2C pins
-static unsigned s_GPIOConfig[I2C_BUSES][I2C_CONFIGURATIONS][I2C_GPIOS] =
+static unsigned s_gpioConfig[I2C_BUSES][I2C_CONFIGURATIONS][I2C_GPIOS] =
 {
     // SDA, SCL
     {{ 0,  1}, {28, 29}, {44, 45}}, // Alt0, Alt0, Alt1
@@ -98,7 +100,7 @@ static unsigned s_GPIOConfig[I2C_BUSES][I2C_CONFIGURATIONS][I2C_GPIOS] =
 };
 
 /// @brief I2C register bases addresses for each bus, depening on the RPI model
-static regaddr s_BaseAddress[I2C_BUSES] =
+static regaddr s_baseAddress[I2C_BUSES] =
 {
     RPI_I2C0_BASE,
     RPI_I2C1_BASE,
@@ -126,7 +128,7 @@ static regaddr s_BaseAddress[I2C_BUSES] =
 
 /// <summary>
 /// Constructor for I2CMaster
-/// 
+///
 /// The default value for memoryAccess will use the singleton MemoryAccess instance. A different reference to a IMemoryAccess instance can be passed for testing
 /// </summary>
 /// <param name="memoryAccess">MemoryAccess instance to be used for register access</param>
@@ -134,7 +136,7 @@ I2CMaster::I2CMaster(IMemoryAccess &memoryAccess/* = GetMemoryAccess()*/)
     : m_memoryAccess{ memoryAccess }
     , m_bus{}
     , m_baseAddress{}
-    , m_mode{}
+    , m_clockMode{}
     , m_config{}
     , m_isInitialized{}
     , m_sdaPin{memoryAccess}
@@ -151,8 +153,8 @@ I2CMaster::~I2CMaster()
 {
     if (m_isInitialized)
     {
-        m_sdaPin.SetMode(GPIOMode::Input);
-        m_sclPin.SetMode(GPIOMode::Input);
+        m_sdaPin.SetMode(GPIOMode::InputPullUp);
+        m_sclPin.SetMode(GPIOMode::InputPullUp);
     }
     m_isInitialized = false;
     m_baseAddress = 0;
@@ -165,7 +167,7 @@ I2CMaster::~I2CMaster()
 /// <param name="mode">I2C clock rate to be used</param>
 /// <param name="config">Configuration index to be used. Determines which GPIO pins are to be used for the I2C bus</param>
 /// <returns></returns>
-bool I2CMaster::Initialize(uint8 bus, I2CMode mode, uint32 config)
+bool I2CMaster::Initialize(uint8 bus, I2CClockMode mode, uint32 config)
 {
     if (m_isInitialized)
         return true;
@@ -173,28 +175,28 @@ bool I2CMaster::Initialize(uint8 bus, I2CMode mode, uint32 config)
     LOG_INFO("Initialize bus %d, mode %d, config %d", bus, static_cast<int>(mode), config);
     if ((bus >= I2C_BUSES) ||
         (config >= I2C_CONFIGURATIONS) ||
-        (s_GPIOConfig[bus][config][I2C_GPIO_SDA] >= NUM_GPIO))
+        (s_gpioConfig[bus][config][I2C_GPIO_SDA] >= NUM_GPIO))
         return false;
 
     m_bus = bus;
-    m_mode = mode;
+    m_clockMode = mode;
     m_config = config;
-    m_baseAddress = s_BaseAddress[m_bus];
+    m_baseAddress = s_baseAddress[m_bus];
     m_coreClockRate = GetMachineInfo().GetClockRate(ClockID::CORE);
 
     assert(m_baseAddress != 0);
 
-    m_sdaPin.AssignPin(s_GPIOConfig[m_bus][m_config][I2C_GPIO_SDA]);
+    m_sdaPin.AssignPin(s_gpioConfig[m_bus][m_config][I2C_GPIO_SDA]);
     m_sdaPin.SetMode(ALT_FUNC(m_bus, m_config));
 
-    m_sclPin.AssignPin(s_GPIOConfig[m_bus][m_config][I2C_GPIO_SCL]);
+    m_sclPin.AssignPin(s_gpioConfig[m_bus][m_config][I2C_GPIO_SCL]);
     m_sclPin.SetMode(ALT_FUNC(m_bus, m_config));
 
     assert(m_coreClockRate > 0);
 
     m_isInitialized = true;
 
-    SetClock(m_mode == I2CMode::FastPlus ? 1000000 : (m_mode == I2CMode::Fast ? 400000 : 100000));
+    SetClock(m_clockMode == I2CClockMode::FastPlus ? 1000000 : (m_clockMode == I2CClockMode::Fast ? 400000 : 100000));
 
     LOG_INFO("Set up bus %d, config %d, base address %08X", bus, config, m_baseAddress);
     return true;
@@ -203,17 +205,17 @@ bool I2CMaster::Initialize(uint8 bus, I2CMode mode, uint32 config)
 /// <summary>
 /// Set I2C clock rate
 /// </summary>
-/// <param name="clockSpeed">Clock rate in Hz</param>
-void I2CMaster::SetClock(unsigned clockSpeed)
+/// <param name="clockRate">Clock rate in Hz</param>
+void I2CMaster::SetClock(unsigned clockRate)
 {
     assert(m_isInitialized);
 
-    assert(clockSpeed > 0);
-    m_clockSpeed = clockSpeed;
+    assert(clockRate > 0);
+    m_clockSpeed = clockRate;
 
-    uint16 divider = static_cast<uint16>(m_coreClockRate / clockSpeed);
+    uint16 divider = static_cast<uint16>(m_coreClockRate / clockRate);
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_DIV_OFFSET), divider);
-    LOG_INFO("Set clock %d", clockSpeed);
+    LOG_INFO("Set clock %d", clockRate);
 }
 
 /// <summary>
@@ -221,7 +223,7 @@ void I2CMaster::SetClock(unsigned clockSpeed)
 /// </summary>
 /// <param name="address">I2C address to be scanned</param>
 /// <returns>Returns true if a device was found, false otherwise</returns>
-bool I2CMaster::Scan(uint8 address)
+bool I2CMaster::Scan(uint16 address)
 {
     uint8 data{};
     return Read(address, data) == 1;
@@ -233,7 +235,7 @@ bool I2CMaster::Scan(uint8 address)
 /// <param name="address">Device address</param>
 /// <param name="data">Data to be received</param>
 /// <returns>Returns number of bytes read, or errorcode < 0 on failure</returns>
-size_t I2CMaster::Read(uint8 address, uint8 &data)
+size_t I2CMaster::Read(uint16 address, uint8 &data)
 {
     return Read(address, &data, 1);
 }
@@ -245,37 +247,41 @@ size_t I2CMaster::Read(uint8 address, uint8 &data)
 /// <param name="buffer">Pointer to buffer to store data read</param>
 /// <param name="count">Requested number of bytes to read</param>
 /// <returns>Returns number of bytes read, or errorcode < 0 on failure</returns>
-size_t I2CMaster::Read(uint8 address, void *buffer, size_t count)
+size_t I2CMaster::Read(uint16 address, void *buffer, size_t count)
 {
     assert(m_isInitialized);
 
-    if ((address >= 0x80) || (count == 0))
+    if ((address >= ADDRESS_10BIT_HIGH) || (count == 0))
     {
         return -I2C_MASTER_INVALID_PARM;
     }
+    if (address >= RESERVED_ADDRESS_HIGH)
+    {
+        // We need to start a write / read cycle
+        // The address part contains bits 8 and 9 of the address, the first write data byte the bits 0 through 7 of the address.
+        // After this we read the device
+        uint8 secondAddressByte = address & 0xFF;
+        uint8 firstAddressByte = static_cast<uint8>(0x78 | ((address >> 8) & 0x03));
+        return WriteReadRepeatedStart(firstAddressByte, &secondAddressByte, 1, buffer, count);
+    }
+    uint8 addressByte{ static_cast<uint8>(address & 0x7F) };
 
     uint8 *data = reinterpret_cast<uint8 *>(buffer);
     assert(data != 0);
 
     size_t result = 0;
 
-    // Setup transfer
-    WriteAddressRegister(address);
+    WriteAddressRegister(addressByte);
 
-    // Clear FIFO
     ClearFIFO();
-    // Clear error and done conditions
-    WriteStatusRegister(RPI_I2C_S_CLKT | RPI_I2C_S_ERR | RPI_I2C_S_DONE);
-
+    ClearAllStatus();
     WriteDataLengthRegister(count);
-
-    // Enable, start read transfer
-    WriteControlRegister(RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_READ);
+    StartReadTransfer();
 
     // Transfer active
-    while (!(ReadStatusRegister() & RPI_I2C_S_DONE))
+    while (!TransferDone())
     {
-        while (ReadStatusRegister() & RPI_I2C_S_RXD)
+        while (ReceiveFIFOHasData())
         {
             *data++ = ReadFIFORegister();
             //LOG_INFO("Read byte from %02x, data %02x", address, *(data - 1));
@@ -286,7 +292,7 @@ size_t I2CMaster::Read(uint8 address, void *buffer, size_t count)
     }
 
     // Transfer has finished, grab any remaining stuff from FIFO
-    while ((count > 0) && (ReadStatusRegister() & RPI_I2C_S_RXD))
+    while ((count > 0) && ReceiveFIFOHasData())
     {
         *data++ = ReadFIFORegister();
         //LOG_INFO("Read extra byte from %02x, data %02x", address, *(data - 1));
@@ -329,7 +335,7 @@ size_t I2CMaster::Read(uint8 address, void *buffer, size_t count)
 /// <param name="address">Device address</param>
 /// <param name="data">Data to write</param>
 /// <returns>Returns number of bytes written, or errorcode < 0 on failure</returns>
-size_t I2CMaster::Write(uint8 address, uint8 data)
+size_t I2CMaster::Write(uint16 address, uint8 data)
 {
     return Write(address, &data, 1);
 }
@@ -341,11 +347,11 @@ size_t I2CMaster::Write(uint8 address, uint8 data)
 /// <param name="buffer">Pointer to buffer containing data to sebd</param>
 /// <param name="count">Requested number of bytes to write</param>
 /// <returns>Returns number of bytes written, or errorcode < 0 on failure</returns>
-size_t I2CMaster::Write(uint8 address, const void *buffer, size_t count)
+size_t I2CMaster::Write(uint16 address, const void *buffer, size_t count)
 {
     assert(m_isInitialized);
 
-    if ((address <= RESERVED_ADDRESS_LOW) || (address >= RESERVED_ADDRESS_HIGH))
+    if (address >= ADDRESS_10BIT_HIGH)
     {
         return -I2C_MASTER_INVALID_PARM;
     }
@@ -356,37 +362,42 @@ size_t I2CMaster::Write(uint8 address, const void *buffer, size_t count)
     }
 
     const uint8 *data = reinterpret_cast<const uint8 *>(buffer);
+    assert(data != 0);
 
     int result = 0;
 
-    // Setup transfer
-    WriteAddressRegister(address);
-
-    // Clear FIFO
     ClearFIFO();
-    // Clear error and done conditions
-    WriteStatusRegister(RPI_I2C_S_CLKT | RPI_I2C_S_ERR | RPI_I2C_S_DONE);
 
-    WriteDataLengthRegister(count);
+    unsigned bytesWritten{};
+    uint8 addressByte{ static_cast<uint8>(address & 0x7F) };
+    if (address >= RESERVED_ADDRESS_HIGH)
+    {
+        // We need to write the low 8 bits of the address first
+        // The address part contains bits 8 and 9 of the address, the first write data byte the bits 0 through 7 of the address.
+        uint8 secondAddressByte = address & 0xFF;
+        addressByte = static_cast<uint8>(0x78 | ((address >> 8) & 0x03));
+        WriteFIFORegister(secondAddressByte);
+        bytesWritten++;
+    }
 
-    ReadControlRegister();
-    ReadStatusRegister();
+    WriteAddressRegister(addressByte);
+    ClearAllStatus();
+    WriteDataLengthRegister(static_cast<uint8>(bytesWritten + count));
 
     // Fill FIFO
-    for (unsigned i = 0; count > 0 && i < RPI_I2C_FIFO_SIZE; i++)
+    for (; count > 0 && bytesWritten < RPI_I2C_FIFO_SIZE; bytesWritten++)
     {
         WriteFIFORegister(*data++);
         count--;
         result++;
     }
 
-    // Enable, start write transfer
-    WriteControlRegister(RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_WRITE);
+    StartWriteTransfer();
 
     // Transfer active
-    while (!(ReadStatusRegister() & RPI_I2C_S_DONE))
+    while (!TransferDone())
     {
-        while ((count > 0) && (ReadStatusRegister() & RPI_I2C_S_TXD))
+        while ((count > 0) && TransmitFIFOHasSpace())
         {
             //LOG_INFO("Write extra byte to %02x, data %02x", address, *data);
             WriteFIFORegister(*data++);
@@ -421,8 +432,8 @@ size_t I2CMaster::Write(uint8 address, const void *buffer, size_t count)
 
     // Clear done bit
     ClearDone();
- 
-    while (ReadStatusRegister() & RPI_I2C_S_RXD)
+
+    while (ReceiveFIFOHasData())
     {
         uint8 data = ReadFIFORegister();
 #if TRACE
@@ -442,16 +453,16 @@ size_t I2CMaster::Write(uint8 address, const void *buffer, size_t count)
 /// <param name="readBuffer">Read data will be stored here</param>
 /// <param name="readCount">Number of bytes to be read</param>
 /// <returns>Returns number of bytes read, or errorcode < 0 on failure</returns>
-size_t I2CMaster::WriteReadRepeatedStart(uint8 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount)
+size_t I2CMaster::WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount)
 {
     assert(m_isInitialized);
 
-    if ((address <= RESERVED_ADDRESS_LOW) || (address >= RESERVED_ADDRESS_HIGH))
+    if (address >= ADDRESS_10BIT_HIGH)
     {
         return -I2C_MASTER_INVALID_PARM;
     }
 
-    if ((writeCount == 0) || (writeCount > RPI_I2C_FIFO_SIZE) || 
+    if ((writeCount == 0) || (writeCount > ((address >= 0x78) ? RPI_I2C_FIFO_SIZE - 1 : RPI_I2C_FIFO_SIZE)) ||
         (writeBuffer == nullptr) ||
         (readCount == 0) || (readBuffer == nullptr))
     {
@@ -462,18 +473,26 @@ size_t I2CMaster::WriteReadRepeatedStart(uint8 address, const void *writeBuffer,
 
     int result = 0;
 
-    // Setup transfer
-    WriteAddressRegister(address);
-
-    // Clear FIFO
     ClearFIFO();
-    // Clear error and done conditions
-    WriteStatusRegister(RPI_I2C_S_CLKT | RPI_I2C_S_ERR | RPI_I2C_S_DONE);
 
-    WriteDataLengthRegister(writeCount);
+    unsigned bytesWritten{};
+    uint8 addressByte{ static_cast<uint8>(address & 0x7F) };
+    if (address >= RESERVED_ADDRESS_HIGH)
+    {
+        // We need to write the low 8 bits of the address first
+        // The address part contains bits 8 and 9 of the address, the first write data byte the bits 0 through 7 of the address.
+        uint8 secondAddressByte = address & 0xFF;
+        uint8 addressByte = static_cast<uint8>(0x78 | ((address >> 8) & 0x03));
+        WriteFIFORegister(secondAddressByte);
+        bytesWritten++;
+    }
+
+    WriteAddressRegister(addressByte);
+    ClearAllStatus();
+    WriteDataLengthRegister(static_cast<uint8>(bytesWritten + writeCount));
 
     // Fill FIFO
-    for (unsigned i = 0; writeCount > 0 && i < RPI_I2C_FIFO_SIZE; i++)
+    for (; writeCount > 0 && bytesWritten < RPI_I2C_FIFO_SIZE; bytesWritten++)
     {
         WriteFIFORegister(*writeData++);
 
@@ -481,13 +500,12 @@ size_t I2CMaster::WriteReadRepeatedStart(uint8 address, const void *writeBuffer,
         result++;
     }
 
-    // Enable, start write transfer
-    WriteControlRegister(RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_WRITE);
+    StartWriteTransfer();
 
-    // Poll for transfer has started
-    while (!(ReadStatusRegister() & RPI_I2C_S_TA))
+    // Poll to check transfer has started
+    while (!TransferActive())
     {
-        if (ReadStatusRegister() & RPI_I2C_S_DONE)
+        if (TransferDone())
         {
             break;
         }
@@ -496,19 +514,17 @@ size_t I2CMaster::WriteReadRepeatedStart(uint8 address, const void *writeBuffer,
     uint8 *readData = reinterpret_cast<uint8 *>(readBuffer);
 
     WriteDataLengthRegister(readCount);
-
-    // Enable, start read transfer
-    WriteControlRegister(RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_READ);
+    StartReadTransfer();
 
     assert(m_clockSpeed > 0);
     Timer::WaitMicroSeconds((writeCount + 1) * 9 * 1000000 / m_clockSpeed);
 
     // Transfer active
-    while (!(ReadStatusRegister() & RPI_I2C_S_DONE))
+    while (!TransferDone())
     {
-        while ((readCount > 0) && ReadStatusRegister() & RPI_I2C_S_RXD)
+        while ((readCount > 0) && ReceiveFIFOHasData())
         {
-            *readData++ = ReadFIFORegister() & RPI_I2C_FIFO_MASK;
+            *readData++ = ReadFIFORegister();
 
             readCount--;
             result++;
@@ -516,9 +532,9 @@ size_t I2CMaster::WriteReadRepeatedStart(uint8 address, const void *writeBuffer,
     }
 
     // Transfer has finished, grab any remaining stuff from FIFO
-    while ((readCount > 0) && (ReadStatusRegister() & RPI_I2C_S_RXD))
+    while ((readCount > 0) && ReceiveFIFOHasData())
     {
-        *readData++ = ReadFIFORegister() & RPI_I2C_FIFO_MASK;
+        *readData++ = ReadFIFORegister();
 
         readCount--;
         result++;
@@ -591,11 +607,19 @@ void I2CMaster::WriteControlRegister(uint32 data)
 }
 
 /// <summary>
-/// Start a transfer
+/// Start a read transfer
 /// </summary>
-void I2CMaster::StartTransfer()
+void I2CMaster::StartReadTransfer()
 {
-    WriteControlRegister(ReadControlRegister() | RPI_I2C_C_ST);
+    WriteControlRegister(ReadControlRegister() | RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_READ);
+}
+
+/// <summary>
+/// Start a write transfer
+/// </summary>
+void I2CMaster::StartWriteTransfer()
+{
+    WriteControlRegister((ReadControlRegister() & ~RPI_I2C_C_READ)| RPI_I2C_C_ENABLE | RPI_I2C_C_ST | RPI_I2C_C_WRITE);
 }
 
 /// <summary>
@@ -607,22 +631,6 @@ void I2CMaster::ClearFIFO()
 }
 
 /// <summary>
-/// Set transfer typue to read for the next transfer
-/// </summary>
-void I2CMaster::SetReadTransfer()
-{
-    WriteControlRegister((ReadControlRegister() | RPI_I2C_C_READ));
-}
-
-/// <summary>
-/// Set transfer typue to write for the next transfer
-/// </summary>
-void I2CMaster::SetWriteTransfer()
-{
-    WriteControlRegister((ReadControlRegister() & ~RPI_I2C_C_READ));
-}
-
-/// <summary>
 /// Write to the I2C Address Register
 /// </summary>
 /// <param name="data">Value to write</param>
@@ -630,7 +638,7 @@ void I2CMaster::WriteAddressRegister(uint8 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_A_OFFSET), data);
 #if TRACE
-    LOG_INFO("Write I2C Address, %08x", data);
+    LOG_INFO("Write I2C Address, %02x", data);
 #endif
 }
 
@@ -647,6 +655,30 @@ void I2CMaster::WriteDataLengthRegister(uint8 data)
 }
 
 /// <summary>
+/// Read the I2C Status Register
+/// </summary>
+/// <returns>Value read from I2C Status Register</returns>
+uint32 I2CMaster::ReadStatusRegister()
+{
+    auto data = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_S_OFFSET));
+    #if TRACE
+    string text;
+    text += (data & RPI_I2C_S_CLKT) ? "CLKT " : "     ";
+    text += (data & RPI_I2C_S_ERR) ? "ERR " : "    ";
+    text += (data & RPI_I2C_S_RXF) ? "RXF " : "    ";
+    text += (data & RPI_I2C_S_TXE) ? "TXE " : "    ";
+    text += (data & RPI_I2C_S_RXD) ? "RXD " : "    ";
+    text += (data & RPI_I2C_S_TXD) ? "TXD " : "    ";
+    text += (data & RPI_I2C_S_RXR) ? "RXR " : "    ";
+    text += (data & RPI_I2C_S_TXW) ? "TXW " : "    ";
+    text += (data & RPI_I2C_S_DONE) ? "DONE " : "     ";
+    text += (data & RPI_I2C_S_TA) ? "TA " : "     ";
+    LOG_INFO("Read I2C Status, %s", text.c_str());
+    #endif
+    return data;
+}
+
+/// <summary>
 /// Write to the I2C Status Register
 /// </summary>
 /// <param name="data">Value to write</param>
@@ -660,30 +692,6 @@ void I2CMaster::WriteStatusRegister(uint32 data)
     text += (data & RPI_I2C_S_DONE) ? "DONE " : "     ";
     LOG_INFO("Write I2C Status, %s", text.c_str());
 #endif
-}
-
-/// <summary>
-/// Read the I2C Status Register
-/// </summary>
-/// <returns>Value read from I2C Status Register</returns>
-uint32 I2CMaster::ReadStatusRegister()
-{
-    uint8 data = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_S_OFFSET));
-#if TRACE
-    string text;
-    text += (data & RPI_I2C_S_CLKT) ? "CLKT " : "     ";
-    text += (data & RPI_I2C_S_ERR) ? "ERR " : "    ";
-    text += (data & RPI_I2C_S_RXF) ? "RXF " : "    ";
-    text += (data & RPI_I2C_S_TXE) ? "TXE " : "    ";
-    text += (data & RPI_I2C_S_RXD) ? "RXD " : "    ";
-    text += (data & RPI_I2C_S_TXD) ? "TXD " : "    ";
-    text += (data & RPI_I2C_S_RXR) ? "RXR " : "    ";
-    text += (data & RPI_I2C_S_TXW) ? "TXW " : "    ";
-    text += (data & RPI_I2C_S_DONE) ? "DONE " : "     ";
-    text += (data & RPI_I2C_S_TA) ? "TA " : "     ";
-    LOG_INFO("Read I2C Status, %s", text.c_str());
-#endif
-    return data;
 }
 
 /// <summary>
@@ -794,7 +802,7 @@ void I2CMaster::ClearClockStretchTimeout()
 }
 
 /// <summary>
-/// Clear the ACK bit in the I2C Status Register
+/// Clear the ERR bit in the I2C Status Register
 /// </summary>
 void I2CMaster::ClearNAck()
 {
@@ -810,15 +818,11 @@ void I2CMaster::ClearDone()
 }
 
 /// <summary>
-/// Write to the I2C FIFO Register
+/// Clear the CLKT, ERR and DONE bits in the I2C Status Register
 /// </summary>
-/// <param name="data">Value to write</param>
-void I2CMaster::WriteFIFORegister(uint8 data)
+void I2CMaster::ClearAllStatus()
 {
-    m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_FIFO_OFFSET), data);
-#if TRACE
-    LOG_INFO("Write FIFO, data %08x", data);
-#endif
+    WriteStatusRegister(RPI_I2C_S_CLKT | RPI_I2C_S_ERR | RPI_I2C_S_DONE);
 }
 
 /// <summary>
@@ -828,8 +832,20 @@ void I2CMaster::WriteFIFORegister(uint8 data)
 uint8 I2CMaster::ReadFIFORegister()
 {
     uint8 data = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_FIFO_OFFSET)) & RPI_I2C_FIFO_MASK;
-#if TRACE
+    #if TRACE
     LOG_INFO("Read FIFO, data %08x", data);
-#endif
+    #endif
     return data;
+}
+
+/// <summary>
+/// Write to the I2C FIFO Register
+/// </summary>
+/// <param name="data">Value to write</param>
+void I2CMaster::WriteFIFORegister(uint8 data)
+{
+    m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_FIFO_OFFSET), data);
+#if TRACE
+    LOG_INFO("Write FIFO, data %08x", data);
+#endif
 }

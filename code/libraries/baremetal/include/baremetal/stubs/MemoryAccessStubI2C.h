@@ -69,7 +69,7 @@ struct I2CRegisters
 
     /// <summary>
     /// Constructor for I2CRegisters
-    /// 
+    ///
     /// Sets default register values
     /// </summary>
     I2CRegisters()
@@ -84,6 +84,9 @@ struct I2CRegisters
     {
     }
 } PACKED;
+
+/// @brief FIFO size (both read and write)
+#define I2C_FIFO_SIZE 16
 
 /// @brief FIFO template class
 template<int N>
@@ -119,7 +122,7 @@ public:
     uint8 Read()
     {
         uint8 result{};
-        if (m_isFull | ((m_writeIndex - m_readIndex + N) % N > 0))
+        if (!IsEmpty())
         {
             result = m_data[m_readIndex];
             m_readIndex = (m_readIndex + 1) % N;
@@ -133,7 +136,7 @@ public:
     /// <param name="data">Data to write</param>
     void Write(uint8 data)
     {
-        if (!m_isFull)
+        if (!IsFull())
         {
             m_data[m_writeIndex] = data;
             m_writeIndex = (m_writeIndex + 1) % N;
@@ -141,11 +144,54 @@ public:
                 m_isFull = true;
         }
     }
+    /// <summary>
+    /// Check if FIFO is empty
+    /// </summary>
+    /// <returns>true if FIFO is empty, false otherwise</returns>
+    bool IsEmpty()
+    {
+        return (m_readIndex == m_writeIndex) && !m_isFull;
+    }
+    /// <summary>
+    /// Check if FIFO is full
+    /// </summary>
+    /// <returns>true if FIFO is full, false otherwise</returns>
+    bool IsFull()
+    {
+        return (m_readIndex == m_writeIndex) && m_isFull;
+    }
+    /// <summary>
+    /// Check if FIFO is at most 25% full
+    /// </summary>
+    /// <returns>true if FIFO is at most 25% full, false otherwise</returns>
+    bool IsOneQuarterOrLessFull()
+    {
+        return ((m_writeIndex - m_readIndex + I2C_FIFO_SIZE) % I2C_FIFO_SIZE) <= (I2C_FIFO_SIZE / 4);
+    }
+    /// <summary>
+    /// Check if FIFO is at least 75% full (at most 25% empty)
+    /// </summary>
+    /// <returns>true if FIFO is at least 75% full, false otherwise</returns>
+    bool IsThreeQuartersOrMoreFull()
+    {
+        return ((m_readIndex - m_writeIndex + I2C_FIFO_SIZE) % I2C_FIFO_SIZE) <= (I2C_FIFO_SIZE / 4);
+    }
+    /// <summary>
+    /// Flush the FIFO
+    /// </summary>
+    void Flush()
+    {
+        m_readIndex = m_writeIndex = 0;
+        m_isFull = false;
+    }
 };
 
-using SendAddressByteCallback = bool(uint8 address);
-using RecvDataByteCallback = bool(uint8 &data);
-using SendDataByteCallback = bool(uint8 data);
+/// @brief Callback for sending address
+using SendAddressByteCallback = bool(I2CRegisters& registers, uint8 address);
+/// @brief Callback for receiving data
+using RecvDataByteCallback = bool(I2CRegisters& registers, uint8 &data);
+/// @brief Callback for sending data
+using SendDataByteCallback = bool(I2CRegisters& registers, uint8 data);
 
 /// @brief MemoryAccess implementation for I2C stub
 class MemoryAccessStubI2C:
@@ -157,19 +203,24 @@ private:
     /// @brief I2C master base address
     uintptr m_i2cMasterBaseAddress;
     /// @brief Receive FIFO
-    FIFO<16> m_rxFifo;
+    FIFO<I2C_FIFO_SIZE> m_rxFifo;
     /// @brief Send FIFO
-    FIFO<16> m_txFifo;
+    FIFO<I2C_FIFO_SIZE> m_txFifo;
     /// @brief Pointer to send address callback
     SendAddressByteCallback* m_sendAddressByteCallback;
     /// @brief Pointer to receive data callback
     RecvDataByteCallback* m_recvDataByteCallback;
     /// @brief Pointer to send data callback
     SendDataByteCallback* m_sendDataByteCallback;
+    /// @brief Number of data bytes received
+    uint8 m_numBytesReceived;
+    /// @brief Number of data bytes sent
+    uint8 m_numBytesSent;
 
 public:
     MemoryAccessStubI2C();
     void SetBus(uint8 bus);
+
     uint8  Read8(regaddr address) override;
     void   Write8(regaddr address, uint8 data) override;
 
@@ -185,6 +236,15 @@ public:
 
 private:
     uint32 GetRegisterOffset(regaddr address);
+    void HandleWriteControlRegister(uint32 data);
+    void HandleWriteStatusRegister(uint32 data);
+    void HandleWriteFIFORegister(uint8 data);
+    uint8 HandleReadFIFORegister();
+    void HandleSendData();
+    void HandleRecvData();
+    void UpdateFIFOStatus();
+    void CancelTransfer();
+    void EndTransfer();
 };
 
 } // namespace baremetal

@@ -53,6 +53,9 @@ LOG_MODULE("MemoryAccessStubGPIO");
 
 using namespace baremetal;
 
+/// @brief If defined will trace detailed information on messages send and rece
+#define TRACE 0
+
 /// @brief GPIO base address
 static uintptr GPIOBaseAddress{ RPI_GPIO_BASE };
 /// @brief Mask used to check whether an address is in the GPIO register range
@@ -108,6 +111,7 @@ void MemoryAccessStubGPIO::Write16(regaddr address, uint16 data)
     LOG_PANIC("Call to Write16 should not happen");
 }
 
+#if TRACE
 /// <summary>
 /// Convert pin mode to string
 /// </summary>
@@ -179,6 +183,7 @@ static string PullUpDownModeToString(uint32 mode)
     }
     return result;
 }
+#endif
 
 /// <summary>
 /// Read a 32 bit value from register at address
@@ -189,7 +194,8 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
 {
     uintptr offset = GetRegisterOffset(address);
     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-//    LOG_DEBUG("GPIO read register %016x = %08x", offset, *registerField);
+#if TRACE
+    LOG_DEBUG("GPIO read register %016x = %08x", offset, *registerField);
     switch (offset)
     {
         case RPI_GPIO_GPFSEL0_OFFSET:
@@ -222,9 +228,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += " - Pin %d ON ";
+                line += " - Pin %d ON ";
                 else
-                    line += " - Pin %d OFF";
+                line += " - Pin %d OFF";
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -240,9 +246,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += " - Pin %d ON ";
+                line += " - Pin %d ON ";
                 else
-                    line += " - Pin %d OFF";
+                line += " - Pin %d OFF";
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -258,9 +264,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -276,9 +282,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -294,9 +300,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -312,9 +318,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -330,9 +336,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -348,9 +354,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -373,9 +379,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += Format(" - Pin %d ON ", pin);
+                line += Format(" - Pin %d ON ", pin);
                 else
-                    line += Format(" - Pin %d OFF", pin);
+                line += Format(" - Pin %d OFF", pin);
             }
             LOG_DEBUG(line.c_str());
             break;
@@ -409,6 +415,7 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
             LOG_ERROR("Invalid register access for reading: offset %d", offset);
             break;
     }
+#endif
     return *registerField;
 }
 
@@ -421,7 +428,8 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
 {
     uintptr offset = GetRegisterOffset(address);
     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-//    LOG_DEBUG("GPIO write register %016x = %08x", offset, data);
+#if TRACE
+    LOG_DEBUG("GPIO write register %016x = %08x", offset, data);
     switch (offset)
     {
         case RPI_GPIO_GPFSEL0_OFFSET:
@@ -684,6 +692,7 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
             LOG_ERROR("Invalid GPIO register access for writing: offset %d", offset);
             break;
     }
+#endif
     *registerField = data;
 }
 

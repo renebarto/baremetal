@@ -68,7 +68,7 @@ namespace baremetal
 /// <summary>
 /// I2C speed selection
 /// </summary>
-enum class I2CMode
+enum class I2CClockMode
 {
     /// @brief I2C @ 100 KHz
     Normal,
@@ -108,11 +108,11 @@ private:
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess&  m_memoryAccess;
     /// @brief I2C bus index
-    uint8          m_bus;
+    uint8           m_bus;
     /// @brief I2C bus base register address
     regaddr         m_baseAddress;
     /// @brief I2C bus clock rate
-    I2CMode         m_mode;
+    I2CClockMode    m_clockMode;
     /// @brief I2C bus GPIO configuration index used
     uint32          m_config;
     /// @brief True if class is already initialized
@@ -133,27 +133,26 @@ public:
 
     virtual ~I2CMaster();
 
-    bool Initialize(uint8 bus, I2CMode mode = I2CMode::Normal, uint32 config = 0);
+    bool Initialize(uint8 bus, I2CClockMode mode = I2CClockMode::Normal, uint32 config = 0);
 
-    void SetClock(unsigned clockSpeed);
-    bool Scan(uint8 address);
-    size_t Read(uint8 address, uint8 &data);
-    size_t Read(uint8 address, void *buffer, size_t count);
-    size_t Write(uint8 address, uint8 data);
-    size_t Write(uint8 address, const void *buffer, size_t count);
-    size_t WriteReadRepeatedStart(uint8 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount);
+    void SetClock(unsigned clockRate);
+    bool Scan(uint16 address);
+    size_t Read(uint16 address, uint8 &data);
+    size_t Read(uint16 address, void *buffer, size_t count);
+    size_t Write(uint16 address, uint8 data);
+    size_t Write(uint16 address, const void *buffer, size_t count);
+    size_t WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount);
 
 private:
     uint32 ReadControlRegister();
     void WriteControlRegister(uint32 data);
-    void StartTransfer();
+    void StartReadTransfer();
+    void StartWriteTransfer();
     void ClearFIFO();
-    void SetReadTransfer();
-    void SetWriteTransfer();
     void WriteAddressRegister(uint8 data);
     void WriteDataLengthRegister(uint8 data);
-    void WriteStatusRegister(uint32 data);
     uint32 ReadStatusRegister();
+    void WriteStatusRegister(uint32 data);
     bool HasClockStretchTimeout();
     bool HasAck();
     bool HasNAck();
@@ -168,8 +167,9 @@ private:
     void ClearClockStretchTimeout();
     void ClearNAck();
     void ClearDone();
-    void WriteFIFORegister(uint8 data);
+    void ClearAllStatus();
     uint8 ReadFIFORegister();
+    void WriteFIFORegister(uint8 data);
 };
 
 #else

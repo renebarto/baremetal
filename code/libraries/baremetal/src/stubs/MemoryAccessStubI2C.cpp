@@ -49,9 +49,12 @@
 /// MemoryAccessStubI2C
 
 /// @brief Define log name
-LOG_MODULE("MemoryAccessStubI2c");
+LOG_MODULE("MemoryAccessStubI2C");
 
 using namespace baremetal;
+
+/// @brief If defined will trace detailed information on messages send and rece
+#define TRACE 0
 
 /// @brief I2C bus 0 register base address
 static regaddr I2CBaseAddress0{ RPI_I2C0_BASE };
@@ -77,6 +80,13 @@ static uintptr I2CBaseAddressMask{ 0xFFFFFFFFFFFFFFE0 };
 /// MemoryAccessStubI2C constructor
 /// </summary>
 MemoryAccessStubI2C::MemoryAccessStubI2C()
+    : m_registers{}
+    , m_i2cMasterBaseAddress{}
+    , m_sendAddressByteCallback{}
+    , m_recvDataByteCallback{}
+    , m_sendDataByteCallback{}
+    , m_numBytesReceived{}
+    , m_numBytesSent{}
 {
 }
 
@@ -174,11 +184,14 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
 
     uintptr offset = GetRegisterOffset(address);
     uint32 *registerField = reinterpret_cast<uint32 *>(reinterpret_cast<uint8 *>(&m_registers) + offset);
-    LOG_INFO("I2C Read register %016x = %08x", offset, *registerField);
+#if TRACE
+    LOG_DEBUG("I2C Read register %016x = %08x", offset, *registerField);
+#endif
     switch (offset)
     {
         case RPI_I2C_C_OFFSET:
         {
+#if TRACE
             string line{ "I2C Read Control Register "};
             if (*registerField & RPI_I2C_C_ENABLE)
                 line += "Enable ON  ";
@@ -200,12 +213,14 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
                 line += "Read ";
             else
                 line += "Write ";
-            LOG_INFO(line.c_str());
+            LOG_DEBUG(line.c_str());
+#endif
             break;
         }
         case RPI_I2C_S_OFFSET:
         {
-            string line{ "I2C Read Control Register "};
+#if TRACE
+            string line{ "I2C Read Status Register "};
             if (*registerField & RPI_I2C_S_CLKT)
                 line += "CLKT ";
             else
@@ -246,44 +261,58 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
                 line += "TA ";
             else
                 line += "   ";
-            LOG_INFO(line.c_str());
+            LOG_DEBUG(line.c_str());
+#endif
             break;
         }
         case RPI_I2C_DLEN_OFFSET:
         {
-            LOG_INFO("I2C Get Data Length %d", *registerField);
+#if TRACE
+            LOG_DEBUG("I2C Get Data Length %d", *registerField);
+#endif
             break;
         }
         case RPI_I2C_A_OFFSET:
         {
-            LOG_INFO("I2C Get Address %d", *registerField);
+#if TRACE
+            LOG_DEBUG("I2C Get Address %02x", *registerField);
+#endif
             break;
         }
         case RPI_I2C_FIFO_OFFSET:
         {
-            LOG_INFO("I2C Read FIFO %02x", *registerField);
+#if TRACE
+            LOG_DEBUG("I2C Read FIFO %02x", *registerField);
+#endif
+            *registerField = HandleReadFIFORegister();
             break;
         }
         case RPI_I2C_DIV_OFFSET:
         {
-            LOG_INFO("I2C Set Clock Divider %d", *registerField);
+#if TRACE
+            LOG_DEBUG("I2C Set Clock Divider %d", *registerField);
+#endif
             break;
         }
         case RPI_I2C_DEL_OFFSET:
         {
+#if TRACE
             if (*registerField & 0xFFFF0000)
             {
-                LOG_INFO("I2C Get Falling Edge Delay %d", (*registerField >> 16));
+                LOG_DEBUG("I2C Get Falling Edge Delay %d", (*registerField >> 16));
             }
             if (*registerField & 0x0000FFFF)
             {
-                LOG_INFO("I2C Get Rising Edge Delay %d", (*registerField & 0x0000FFFF));
+                LOG_DEBUG("I2C Get Rising Edge Delay %d", (*registerField & 0x0000FFFF));
             }
+#endif
             break;
         }
         case RPI_I2C_CLKT_OFFSET:
         {
-            LOG_INFO("I2C Get Clock Stretch Timeout %d", (*registerField & 0x0000FFFF));
+#if TRACE
+            LOG_DEBUG("I2C Get Clock Stretch Timeout %d", (*registerField & 0x0000FFFF));
+#endif
             break;
         }
         default:
@@ -310,126 +339,138 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
 
     uintptr offset = GetRegisterOffset(address);
     uint32 *registerField = reinterpret_cast<uint32 *>(reinterpret_cast<uint8 *>(&m_registers) + offset);
-    LOG_INFO("I2C Write register %016x = %08x", offset, data);
+#if TRACE
+    LOG_DEBUG("I2C Write register %016x = %08x", offset, data);
+#endif
     switch (offset)
     {
         case RPI_I2C_C_OFFSET:
         {
+#if TRACE
             uint32 diff = (data ^ *registerField) | 0x00B0;
             if (diff & RPI_I2C_C_ENABLE)
             {
                 if (data & RPI_I2C_C_ENABLE)
-                    LOG_INFO("I2C Enable Controller");
+                    LOG_DEBUG("I2C Enable Controller");
                 else
-                    LOG_INFO("I2C Disable Controller");
+                    LOG_DEBUG("I2C Disable Controller");
             }
             if (diff & RPI_I2C_C_INTR_ENABLE)
             {
                 if (data & RPI_I2C_C_INTR_ENABLE)
-                    LOG_INFO("I2C Enable RX Interrupt");
+                    LOG_DEBUG("I2C Enable RX Interrupt");
                 else
-                    LOG_INFO("I2C Disable RX Interrupt");
+                    LOG_DEBUG("I2C Disable RX Interrupt");
             }
             if (diff & RPI_I2C_C_INTT_ENABLE)
             {
                 if (data & RPI_I2C_C_INTT_ENABLE)
-                    LOG_INFO("I2C Enable TX Interrupt");
+                    LOG_DEBUG("I2C Enable TX Interrupt");
                 else
-                    LOG_INFO("I2C Disable TX Interrupt");
+                    LOG_DEBUG("I2C Disable TX Interrupt");
             }
             if (diff & RPI_I2C_C_INTD_ENABLE)
             {
                 if (data & RPI_I2C_C_INTD_ENABLE)
-                    LOG_INFO("I2C Enable Done Interrupt");
+                    LOG_DEBUG("I2C Enable Done Interrupt");
                 else
-                    LOG_INFO("I2C Disable Done Interrupt");
+                    LOG_DEBUG("I2C Disable Done Interrupt");
             }
             if (diff & RPI_I2C_C_READ)
             {
                 if (data & RPI_I2C_C_READ)
-                    LOG_INFO("I2C Read Mode");
+                    LOG_DEBUG("I2C Read Mode");
                 else
-                    LOG_INFO("I2C Write Mode");
+                    LOG_DEBUG("I2C Write Mode");
             }
             if (data & RPI_I2C_C_CLEAR)
-                LOG_INFO("I2C Clear FIFO");
+                LOG_DEBUG("I2C Clear FIFO");
             if (data & RPI_I2C_C_ST)
-                LOG_INFO("I2C Start Transfer");
+                LOG_DEBUG("I2C Start Transfer");
+#endif
+            HandleWriteControlRegister(data);
             break;
         }
         case RPI_I2C_S_OFFSET:
         {
+#if TRACE
             if (data & RPI_I2C_S_CLKT)
-                LOG_INFO("I2C Reset Clock Stretch Timeout");
+                LOG_DEBUG("I2C Reset Clock Stretch Timeout");
             if (data & RPI_I2C_S_ERR)
-                LOG_INFO("I2C Reset Ack Error");
+                LOG_DEBUG("I2C Reset Ack Error");
             if (data & RPI_I2C_S_DONE)
-                LOG_INFO("I2C Reset Done");
+                LOG_DEBUG("I2C Reset Done");
+#endif
+            HandleWriteStatusRegister(data);
             break;
         }
         case RPI_I2C_DLEN_OFFSET:
         {
-            LOG_INFO("I2C Set Data Length %d", data);
+#if TRACE
+            LOG_DEBUG("I2C Set Data Length %d", data);
+#endif
+            *registerField = data;
             break;
         }
         case RPI_I2C_A_OFFSET:
         {
-            LOG_INFO("I2C Set Address %d", data);
+#if TRACE
+            LOG_DEBUG("I2C Set Address %02x", data);
+#endif
+            *registerField = data;
             break;
         }
         case RPI_I2C_FIFO_OFFSET:
         {
-            LOG_INFO("I2C Write FIFO %02x", data);
+#if TRACE
+            LOG_DEBUG("I2C Write FIFO %02x", data);
+#endif
+            HandleWriteFIFORegister(data);
             break;
         }
         case RPI_I2C_DIV_OFFSET:
         {
+#if TRACE
             if (data != *registerField)
             {
-                LOG_INFO("I2C Set Clock Divider %d", data);
+                LOG_DEBUG("I2C Set Clock Divider %d", data);
             }
+#endif
+            *registerField = data;
             break;
         }
         case RPI_I2C_DEL_OFFSET:
         {
+#if TRACE
             uint32 diff = data & *registerField;
             if (diff & 0xFFFF0000)
             {
-                LOG_INFO("I2C Set Falling Edge Delay %d", (data >> 16));
+                LOG_DEBUG("I2C Set Falling Edge Delay %d", (data >> 16));
             }
             if (diff & 0x0000FFFF)
             {
-                LOG_INFO("I2C Set Rising Edge Delay %d", (data & 0x0000FFFF));
+                LOG_DEBUG("I2C Set Rising Edge Delay %d", (data & 0x0000FFFF));
             }
+#endif
+            *registerField = data;
             break;
         }
         case RPI_I2C_CLKT_OFFSET:
         {
+#if TRACE
             uint32 diff = data & *registerField;
             if (diff & 0x0000FFFF)
             {
-                LOG_INFO("I2C Set Clock Stretch Timeout %d", (data & 0x0000FFFF));
+                LOG_DEBUG("I2C Set Clock Stretch Timeout %d", (data & 0x0000FFFF));
             }
+#endif
+            *registerField = data;
             break;
         }
         default:
             LOG_ERROR("Invalid I2C register access for writing: offset %d", offset);
             break;
     }
-    *registerField = data;
-}
-
-/// <summary>
-/// Determine register address offset, by checking against the different bus numbers
-/// 
-/// If no bus matches the address, an assert if fired
-/// </summary>
-/// <param name="address">Address to check</param>
-/// <returns>Offset relative to the base address for the respective bus, if one exists. Will return 0 (but assert) otherwise</returns>
-uint32 MemoryAccessStubI2C::GetRegisterOffset(regaddr address)
-{
-    assert((reinterpret_cast<uintptr>(address) & I2CBaseAddressMask) == m_i2cMasterBaseAddress);
-    return reinterpret_cast<uintptr>(address) - m_i2cMasterBaseAddress;
 }
 
 /// <summary>
@@ -459,3 +500,211 @@ void MemoryAccessStubI2C::SetSendDataByteCallback(SendDataByteCallback callback)
     m_sendDataByteCallback = callback;
 }
 
+/// <summary>
+/// Determine register address offset, by checking against the different bus numbers
+///
+/// If no bus matches the address, an assert if fired
+/// </summary>
+/// <param name="address">Address to check</param>
+/// <returns>Offset relative to the base address for the respective bus, if one exists. Will return 0 (but assert) otherwise</returns>
+uint32 MemoryAccessStubI2C::GetRegisterOffset(regaddr address)
+{
+    assert((reinterpret_cast<uintptr>(address) & I2CBaseAddressMask) == m_i2cMasterBaseAddress);
+    return reinterpret_cast<uintptr>(address) - m_i2cMasterBaseAddress;
+}
+
+/// <summary>
+/// Handle writing to I2C Control Register
+/// </summary>
+/// <param name="data">Value to write to the register</param>
+void MemoryAccessStubI2C::HandleWriteControlRegister(uint32 data)
+{
+    if ((data & RPI_I2C_C_CLEAR) != 0)
+    {
+        m_rxFifo.Flush();
+        m_txFifo.Flush();
+        m_numBytesReceived = 0;
+        m_numBytesSent = 0;
+    }
+    m_registers.ControlRegister = data & ~(RPI_I2C_C_CLEAR | RPI_I2C_C_ST);
+    if (((data & RPI_I2C_C_ENABLE) != 0) &&
+        ((data & RPI_I2C_C_ST) != 0))
+    {
+        // We started a (new) transaction
+        m_registers.StatusRegister = m_registers.StatusRegister | RPI_I2C_S_TA;
+        if (m_sendAddressByteCallback)
+        {
+            if (!(*m_sendAddressByteCallback)(m_registers, m_registers.AddressRegister))
+                m_registers.StatusRegister |= RPI_I2C_S_ERR;
+        }
+        if ((m_registers.ControlRegister & RPI_I2C_C_READ) != 0)
+        {
+            HandleRecvData();
+        }
+        else
+        {
+            HandleSendData();
+        }
+    }
+}
+
+/// <summary>
+/// Handle writing to I2C Status Register
+/// </summary>
+/// <param name="data">Value to write to the register</param>
+void MemoryAccessStubI2C::HandleWriteStatusRegister(uint32 data)
+{
+    if (data & RPI_I2C_S_ERR)
+    {
+        m_registers.StatusRegister = m_registers.StatusRegister & ~RPI_I2C_S_ERR;
+    }
+    if (data & RPI_I2C_S_DONE)
+    {
+        m_registers.StatusRegister = m_registers.StatusRegister & ~(RPI_I2C_S_DONE | RPI_I2C_S_TA);
+    }
+    if (data & RPI_I2C_S_CLKT)
+    {
+        m_registers.StatusRegister = m_registers.StatusRegister & ~RPI_I2C_S_CLKT;
+    }
+}
+
+/// <summary>
+/// Handle writing to I2C Transmit FIFO Register
+/// </summary>
+/// <param name="data">Value to write to the register</param>
+void MemoryAccessStubI2C::HandleWriteFIFORegister(uint8 data)
+{
+    if (!m_txFifo.IsFull())
+    {
+        m_txFifo.Write(data);
+    }
+    UpdateFIFOStatus();
+    HandleSendData();
+}
+
+/// <summary>
+/// Handle reading to I2C Receive FIFO Register
+/// </summary>
+/// <returns>Value read from the FIFO</returns>
+uint8 MemoryAccessStubI2C::HandleReadFIFORegister()
+{
+    uint8 result{};
+    HandleRecvData();
+    if (!m_rxFifo.IsEmpty())
+    {
+        result = m_rxFifo.Read();
+    }
+    UpdateFIFOStatus();
+    return result;
+}
+
+/// <summary>
+/// Handle transmitting data
+/// </summary>
+void MemoryAccessStubI2C::HandleSendData()
+{
+    if (((m_registers.StatusRegister & RPI_I2C_S_TA) != 0) &&
+        ((m_registers.ControlRegister & RPI_I2C_C_READ) == 0))
+    {
+        while (!m_txFifo.IsEmpty() && (m_numBytesSent < m_registers.DataLengthRegister))
+        {
+            auto data = m_txFifo.Read();
+            UpdateFIFOStatus();
+            bool sentData{};
+            if (m_sendDataByteCallback)
+                sentData = (*m_sendDataByteCallback)(m_registers, data);
+            if (sentData)
+                ++m_numBytesSent;
+            else
+            {
+                CancelTransfer();
+                break;
+            }
+        }
+    }
+    if (m_numBytesSent >= m_registers.DataLengthRegister)
+        EndTransfer();
+}
+
+/// <summary>
+/// Handle receiving data
+/// </summary>
+void MemoryAccessStubI2C::HandleRecvData()
+{
+    if (((m_registers.ControlRegister & RPI_I2C_C_ENABLE) != 0) &&
+        ((m_registers.ControlRegister & RPI_I2C_C_READ) != 0))
+    {
+        bool rxFull = m_rxFifo.IsFull();
+        while (!m_rxFifo.IsFull() && (m_numBytesReceived < m_registers.DataLengthRegister))
+        {
+            uint8 data{};
+            bool receivedData{};
+            if (m_recvDataByteCallback)
+            {
+                receivedData = (*m_recvDataByteCallback)(m_registers, data);
+            }
+            if (receivedData)
+            {
+                m_rxFifo.Write(data);
+                UpdateFIFOStatus();
+                ++m_numBytesReceived;
+            }
+            else
+            {
+                CancelTransfer();
+                break;
+            }
+        }
+    }
+    if (m_numBytesReceived >= m_registers.DataLengthRegister)
+        EndTransfer();
+}
+
+/// <summary>
+/// Update the FIFO status bits in the I2C Status Register
+/// </summary>
+void MemoryAccessStubI2C::UpdateFIFOStatus()
+{
+    if (m_txFifo.IsEmpty())
+        m_registers.StatusRegister |= RPI_I2C_S_TXE;
+    else
+        m_registers.StatusRegister &= (~RPI_I2C_S_TXE);
+    if (m_txFifo.IsFull())
+        m_registers.StatusRegister |= RPI_I2C_S_TXD;
+    else
+        m_registers.StatusRegister &= (~RPI_I2C_S_TXD);
+    if (m_txFifo.IsOneQuarterOrLessFull())
+        m_registers.StatusRegister |= RPI_I2C_S_TXW;
+    else
+        m_registers.StatusRegister &= (~RPI_I2C_S_TXW);
+    if (m_rxFifo.IsEmpty())
+        m_registers.StatusRegister &= (~RPI_I2C_S_RXD);
+    else
+        m_registers.StatusRegister |= RPI_I2C_S_RXD;
+    if (m_rxFifo.IsFull())
+        m_registers.StatusRegister |= RPI_I2C_S_RXF;
+    else
+        m_registers.StatusRegister &= (~RPI_I2C_S_RXF);
+    if (m_rxFifo.IsThreeQuartersOrMoreFull())
+        m_registers.StatusRegister |= RPI_I2C_S_RXR;
+    else
+        m_registers.StatusRegister &= (~RPI_I2C_S_RXR);
+}
+
+/// <summary>
+/// Cancel a transfer, i.e. set error flag to denote NACK, and set done flag
+/// </summary>
+void MemoryAccessStubI2C::CancelTransfer()
+{
+    m_registers.StatusRegister |= (RPI_I2C_S_ERR | RPI_I2C_S_DONE);
+    m_registers.StatusRegister &= (~RPI_I2C_S_TA);
+}
+
+/// <summary>
+/// Finalize a transfer, i.e. set done flag
+/// </summary>
+void MemoryAccessStubI2C::EndTransfer()
+{
+    m_registers.StatusRegister |= (RPI_I2C_S_DONE);
+    m_registers.StatusRegister &= (~RPI_I2C_S_TA);
+}

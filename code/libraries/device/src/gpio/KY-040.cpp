@@ -389,7 +389,7 @@ KY040::KY040(uint8 clkPin, uint8 dtPin, uint8 swPin, IMemoryAccess& memoryAccess
 }
 
 /// <summary>
-/// KY040 class destructor
+/// Destructor for KY040 class 
 /// </summary>
 KY040::~KY040()
 {
@@ -398,7 +398,7 @@ KY040::~KY040()
 }
 
 /// <summary>
-/// Initialized the KY040 rotary switch
+/// Initialize the KY040 rotary switch
 /// </summary>
 void KY040::Initialize()
 {

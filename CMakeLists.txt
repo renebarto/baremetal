@@ -308,7 +308,9 @@ message(STATUS "-- Version composed:                ${VERSION_MAJOR}.${VERSION_M
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 
+if (NOT BAREMETAL_TARGET STREQUAL "RPI5")
 add_subdirectory(code)
+endif()
 
 if(BUILD_TUTORIALS)
     add_subdirectory(tutorial)

@@ -44,26 +44,26 @@
 
 namespace baremetal {
 
+/// <summary>
+/// Abstract character CharDevice
+///
+/// Abstraction of a CharDevice that can read and write characters
+/// </summary>
+class CharDevice
+{
+public:
+    virtual ~CharDevice() = default;
+
     /// <summary>
-    /// Abstract character CharDevice
-    ///
-    /// Abstraction of a CharDevice that can read and write characters
+    /// Read a character
     /// </summary>
-    class CharDevice
-    {
-    public:
-        virtual ~CharDevice() = default;
+    /// <returns>Character read</returns>
+    virtual char Read() = 0;
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="c">Character to be written</param>
+    virtual void Write(char c) = 0;
+};
 
-        /// <summary>
-        /// Read a character
-        /// </summary>
-        /// <returns>Character read</returns>
-        virtual char Read() = 0;
-        /// <summary>
-        /// Write a character
-        /// </summary>
-        /// <param name="c">Character to be written</param>
-        virtual void Write(char c) = 0;
-    };
-
-    } // namespace baremetal
+} // namespace baremetal

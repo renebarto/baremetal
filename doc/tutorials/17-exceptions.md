@@ -412,65 +412,66 @@ File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 39: 
 40: #pragma once
 41: 
-42: #include <baremetal/Types.h>
-43: #include <baremetal/System.h>
-44: 
-45: /// @file
-46: /// Exception handler function
-47: 
-48: /// @brief Exception abort frame
-49: ///
-50: /// Storage for register value in case of exception, in order to recover
-51: struct AbortFrame
-52: {
-53:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-54:     uint64	esr_el1;
-55:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
-56:     uint64	spsr_el1;
-57:     /// @brief General-purpose register, Link Register
-58:     uint64	x30;
-59:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-60:     uint64	elr_el1;
-61:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-62:     uint64	sp_el0;
-63:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-64:     uint64	sp_el1;
-65:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-66:     uint64	far_el1;
-67:     /// @brief Unused valuem used to align to 64 bytes
-68:     uint64	unused;
-69: }
-70: /// @brief Just specifies the struct is packed
-71: PACKED;
-72: 
-73: /// @brief Handles an unexpected exception, with the abort frame passed in.
-74: ///
-75: /// The exception handler is called from assembly code (ExceptionStub.S)
-76: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_UNEXPECTED)
-77: /// @param abortFrame  Filled in AbortFrame instance.
-78: void UnexpectedHandler(uint64 exceptionID, AbortFrame* abortFrame);
-79: 
-80: /// @brief Handles a synchronous exception, with the abort frame passed in.
-81: ///
-82: /// The exception handler is called from assembly code (ExceptionStub.S)
-83: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYNCHRONOUS)
-84: /// @param abortFrame  Filled in AbortFrame instance.
-85: void SynchronousExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-86: 
-87: /// @brief Handles a system error exception, with the abort frame passed in.
-88: ///
-89: /// The exception handler is called from assembly code (ExceptionStub.S)
-90: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYSTEM_ERROR)
-91: /// @param abortFrame  Filled in AbortFrame instance.
-92: void SystemErrorHandler(uint64 exceptionID, AbortFrame* abortFrame);
+42: #include <stdlib/Macros.h>
+43: #include <baremetal/Types.h>
+44: #include <baremetal/System.h>
+45: 
+46: /// @file
+47: /// Exception handler function
+48: 
+49: /// @brief Exception abort frame
+50: ///
+51: /// Storage for register value in case of exception, in order to recover
+52: struct AbortFrame
+53: {
+54:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+55:     uint64	esr_el1;
+56:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
+57:     uint64	spsr_el1;
+58:     /// @brief General-purpose register, Link Register
+59:     uint64	x30;
+60:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+61:     uint64	elr_el1;
+62:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+63:     uint64	sp_el0;
+64:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+65:     uint64	sp_el1;
+66:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+67:     uint64	far_el1;
+68:     /// @brief Unused valuem used to align to 64 bytes
+69:     uint64	unused;
+70: }
+71: /// @brief Just specifies the struct is packed
+72: PACKED;
+73: 
+74: /// @brief Handles an unexpected exception, with the abort frame passed in.
+75: ///
+76: /// The exception handler is called from assembly code (ExceptionStub.S)
+77: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_UNEXPECTED)
+78: /// @param abortFrame  Filled in AbortFrame instance.
+79: void UnexpectedHandler(uint64 exceptionID, AbortFrame* abortFrame);
+80: 
+81: /// @brief Handles a synchronous exception, with the abort frame passed in.
+82: ///
+83: /// The exception handler is called from assembly code (ExceptionStub.S)
+84: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYNCHRONOUS)
+85: /// @param abortFrame  Filled in AbortFrame instance.
+86: void SynchronousExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+87: 
+88: /// @brief Handles a system error exception, with the abort frame passed in.
+89: ///
+90: /// The exception handler is called from assembly code (ExceptionStub.S)
+91: /// @param exceptionID Exception type being thrown (in this case EXCEPTION_SYSTEM_ERROR)
+92: /// @param abortFrame  Filled in AbortFrame instance.
+93: void SystemErrorHandler(uint64 exceptionID, AbortFrame* abortFrame);
 ```
 
-- Line 51-71: We create a packed struct `AbortFrame` which will hold all important information on entry. This information actually contains registers saved on the stack, as we'll see later
-- Line 78: We declare the exception handler for an unexpected exception `UnexpectedHandler()` which will receive two parameters.
+- Line 52-72: We create a packed struct `AbortFrame` which will hold all important information on entry. This information actually contains registers saved on the stack, as we'll see later
+- Line 79: We declare the exception handler for an unexpected exception `UnexpectedHandler()` which will receive two parameters.
 The first parameter is an exception ID which we will set (in this case EXCEPTION_UNEXPECTED), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
-- Line 85: We declare the exception handler for a synchronous exception (e.g. data exception, illegal instruction exception,break exception) `SynchronousExceptionHandler()` which will receive two parameters.
+- Line 86: We declare the exception handler for a synchronous exception (e.g. data exception, illegal instruction exception,break exception) `SynchronousExceptionHandler()` which will receive two parameters.
 The first parameter is an exception ID which we will set (in this case EXCEPTION_SYNCHRONOUS), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
-- Line 92: We declare the exception handler for a system error exception `SystemErrorHandler()` (implementation defined) which will receive two parameters.
+- Line 93: We declare the exception handler for a system error exception `SystemErrorHandler()` (implementation defined) which will receive two parameters.
 The first parameter is an exception ID which we will set (in this case EXCEPTION_SYSTEM_ERROR), the second is a pointer to the `AbortFrame` which is actually the stack pointer value
 
 ### ExceptionHandler.cpp {#TUTORIAL_17_EXCEPTIONS_EXCEPTION_HANDLING___STEP_1_EXCEPTIONHANDLERCPP}
@@ -1243,95 +1244,93 @@ Update the file `code/libraries/baremetal/include/baremetal/ExceptionHandler.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ExceptionHandler.h
 ...
-42: #include <stdlib/Types.h>
-43: #include <baremetal/System.h>
-...
-48: #ifdef __cplusplus
-49: extern "C" {
-50: #endif
-51: 
-52: /// <summary>
-53: /// Exception abort frame
-54: ///
-55: /// Storage for register value in case of exception, in order to recover
-56: /// </summary>
-57: struct AbortFrame
-58: {
-59:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-60:     uint64	esr_el1;
-61:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
-62:     uint64	spsr_el1;
-63:     /// @brief General-purpose register, Link Register
-64:     uint64	x30;
-65:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
-66:     uint64	elr_el1;
-67:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-68:     uint64	sp_el0;
-69:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-70:     uint64	sp_el1;
-71:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
-72:     uint64	far_el1;
-73:     /// @brief Unused valuem used to align to 64 bytes
-74:     uint64	unused;
-75: }
-76: /// @brief Just specifies the struct is packed
-77: PACKED;
-78: 
-79: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
-80: 
-81: #ifdef __cplusplus
-82: }
-83: #endif
-84: 
-85: namespace baremetal {
-86: 
-87: /// <summary>
-88: /// Exception handling system. Handles ARM processor exceptions
-89: ///
-90: /// This is a singleton class, created as soon as GetExceptionSystem() is called
-91: /// </summary>
-92: class ExceptionSystem
-93: {
-94:     friend ExceptionSystem& GetExceptionSystem();
-95: 
-96: private:
-97:     ExceptionSystem();
-98: 
-99: public:
-100:     ~ExceptionSystem();
-101: 
-102:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
-103: };
-104: 
-105: /// <summary>
-106: /// Injectable exception handler
-107: /// </summary>
-108: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
-109: /// <param name="abortFrame">Stored state information at the time of exception</param>
-110: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
-111: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
-112: 
-113: const char* GetExceptionType(unsigned exceptionID);
-114: 
-115: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
-116: 
-117: ExceptionSystem& GetExceptionSystem();
-118: 
-119: } // namespace baremetal
+49: #ifdef __cplusplus
+50: extern "C" {
+51: #endif
+52: 
+53: /// <summary>
+54: /// Exception abort frame
+55: ///
+56: /// Storage for register value in case of exception, in order to recover
+57: /// </summary>
+58: struct AbortFrame
+59: {
+60:     /// @brief Exception Syndrome Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+61:     uint64	esr_el1;
+62:     /// @brief Saved Program Status Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_SPSR_EL1_REGISTER
+63:     uint64	spsr_el1;
+64:     /// @brief General-purpose register, Link Register
+65:     uint64	x30;
+66:     /// @brief Exception Link Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW_ELR_EL1_REGISTER
+67:     uint64	elr_el1;
+68:     /// @brief Stack Pointer (EL0). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+69:     uint64	sp_el0;
+70:     /// @brief Stack Pointer (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+71:     uint64	sp_el1;
+72:     /// @brief Fault Address Register (EL1). See \ref ARM_REGISTERS_REGISTER_OVERVIEW
+73:     uint64	far_el1;
+74:     /// @brief Unused valuem used to align to 64 bytes
+75:     uint64	unused;
+76: }
+77: /// @brief Just specifies the struct is packed
+78: PACKED;
+79: 
+80: void ExceptionHandler(uint64 exceptionID, AbortFrame* abortFrame);
+81: 
+82: #ifdef __cplusplus
+83: }
+84: #endif
+85: 
+86: namespace baremetal {
+87: 
+88: /// <summary>
+89: /// Exception handling system. Handles ARM processor exceptions
+90: ///
+91: /// This is a singleton class, created as soon as GetExceptionSystem() is called
+92: /// </summary>
+93: class ExceptionSystem
+94: {
+95:     friend ExceptionSystem& GetExceptionSystem();
+96: 
+97: private:
+98:     ExceptionSystem();
+99: 
+100: public:
+101:     ~ExceptionSystem();
+102: 
+103:     void Throw(unsigned exceptionID, AbortFrame* abortFrame);
+104: };
+105: 
+106: /// <summary>
+107: /// Injectable exception handler
+108: /// </summary>
+109: /// <param name="exceptionID">ID of exception (EXCEPTION_UNEXPECTED, EXCEPTION_SYNCHRONOUS or EXCEPTION_SYSTEM_ERROR)</param>
+110: /// <param name="abortFrame">Stored state information at the time of exception</param>
+111: /// <returns>ReturnCode::ExitHalt if the system should be halted, ReturnCode::ExitReboot if the system should reboot</returns>
+112: using ExceptionPanicHandler = ReturnCode(unsigned exceptionID, AbortFrame* abortFrame);
+113: 
+114: const char* GetExceptionType(unsigned exceptionID);
+115: 
+116: ExceptionPanicHandler* RegisterExceptionPanicHandler(ExceptionPanicHandler* handler);
+117: 
+118: ExceptionSystem& GetExceptionSystem();
+119: 
+120: } // namespace baremetal
+121: 
 ```
 
-- Line 75: We change the three exception handlers to a single one, `ExceptionHandler()`.
+- Line 80: We change the three exception handlers to a single one, `ExceptionHandler()`.
 Notice that we mark it a `C` function, in order for the linker to be able to link to the assembly code
-- Line 84-95: We declare the class `ExceptionSystem`
-  - Line 86: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
-  - Line 89: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
-  - Line 92: We declare the destructor
-  - Line 94: We declare the method `Throw()` which will be called by `ExceptionHandler()`
-- Line 103: We declare the type for an injectable exception panic handler.
+- Line 93-104: We declare the class `ExceptionSystem`
+  - Line 95: We make the function `GetExceptionSystem()` a friend to the class, so we can use it to create the singleton instance
+  - Line 98: We declare the private (default) constructor, so only the `GetExceptionSystem()` function can be used to create and instance
+  - Line 101: We declare the destructor
+  - Line 103: We declare the method `Throw()` which will be called by `ExceptionHandler()`
+- Line 112: We declare the type for an injectable exception panic handler.
 This will be call by the `Throw()` method of `ExceptionSystem` if set, and will return true if the system should be halted, false if not
-- Line 105: We declare a helper function `GetExceptionType()` to convert an exception type into a string
-- Line 107: We declare a method to set the exception panic handler, returning the old installed handler, if any
-- Line 109: We declare the function `GetExceptionSystem()` to create the singleton instance of the `ExceptionSystem` class, if needed, and rreturn it
+- Line 114: We declare a helper function `GetExceptionType()` to convert an exception type into a string
+- Line 116: We declare a method to set the exception panic handler, returning the old installed handler, if any
+- Line 118: We declare the function `GetExceptionSystem()` to create the singleton instance of the `ExceptionSystem` class, if needed, and rreturn it
 
 ### ExceptionHandler.cpp {#TUTORIAL_17_EXCEPTIONS_EXCEPTION_SYSTEM___STEP_2_EXCEPTIONHANDLERCPP}
 

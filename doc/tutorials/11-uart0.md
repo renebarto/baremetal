@@ -180,7 +180,6 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/CMakeLists.txt
 ...
-File: d:\Projects\RaspberryPi\baremetal.github.shadow\tutorial\11-uart0\code\libraries\baremetal\CMakeLists.txt
 45: set(PROJECT_INCLUDES_PUBLIC
 46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/ARMInstructions.h
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/BCMRegisters.h

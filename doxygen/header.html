@@ -25,6 +25,9 @@ $darkmode
 $extrastylesheet
 </head>
 <body>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    </script>
 <!--BEGIN DISABLE_INDEX-->
   <!--BEGIN FULL_SIDEBAR-->
 <div id="side-nav" class="ui-resizable side-nav-resizable"><!-- do not remove this div, it is closed by doxygen! -->
@@ -68,6 +71,17 @@ $extrastylesheet
    <tr><td colspan="2">$searchbox</td></tr>
    <!--END FULL_SIDEBAR-->
   <!--END SEARCHENGINE-->
+    <script>
+     mermaid.initialize({
+       startOnLoad: true,
+       theme: 'base', 
+       themeVariables: {
+         primaryColor: '#f4f4ff',
+         secondaryColor: 'rgba(244,244,255,0.9)',
+         tertiaryColor: '#F9FAFC',
+       },
+     });
+   </script>
  </tbody>
 </table>
 </div>

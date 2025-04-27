@@ -191,7 +191,7 @@ void PhysicalGPIOPin::Set(bool on)
         return;
 
     // Check if mode is output
-    if (m_mode == GPIOMode::Output)
+    if (m_mode != GPIOMode::Output)
         return;
 
     m_value = on;

@@ -54,7 +54,7 @@ int main()
     KY040 rotarySwitch(11, 9, 10);
     rotarySwitch.Initialize();
     rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
-    
+
     LOG_INFO("Hold down switch button for %d seconds to reboot", HoldThreshold);
     while (!reboot)
     {

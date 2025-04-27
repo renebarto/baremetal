@@ -1606,7 +1606,7 @@ File: code/libraries/baremetal/src.PhysicalGPIOPin.cpp
 201:         return;
 202: 
 203:     // Check if mode is output
-204:     if (m_mode == GPIOMode::Output)
+204:     if (m_mode != GPIOMode::Output)
 205:         return;
 206: 
 207:     m_value = on;

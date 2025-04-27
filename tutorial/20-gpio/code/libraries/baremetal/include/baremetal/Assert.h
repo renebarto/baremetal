@@ -45,6 +45,7 @@
 /// @file
 /// Assertion functions
 
+/// @brief Baremetal library namespace
 namespace baremetal {
 
 #ifdef NDEBUG

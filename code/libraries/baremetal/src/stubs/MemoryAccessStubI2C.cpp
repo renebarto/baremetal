@@ -53,9 +53,6 @@ LOG_MODULE("MemoryAccessStubI2C");
 
 using namespace baremetal;
 
-/// @brief If defined will trace detailed information on messages send and rece
-#define TRACE 0
-
 /// @brief I2C bus 0 register base address
 static regaddr I2CBaseAddress0{ RPI_I2C0_BASE };
 /// @brief I2C bus 1 register base address
@@ -184,14 +181,14 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
 
     uintptr offset = GetRegisterOffset(address);
     uint32 *registerField = reinterpret_cast<uint32 *>(reinterpret_cast<uint8 *>(&m_registers) + offset);
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL
     LOG_DEBUG("I2C Read register %016x = %08x", offset, *registerField);
 #endif
     switch (offset)
     {
         case RPI_I2C_C_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             string line{ "I2C Read Control Register "};
             if (*registerField & RPI_I2C_C_ENABLE)
                 line += "Enable ON  ";
@@ -219,7 +216,7 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
         }
         case RPI_I2C_S_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             string line{ "I2C Read Status Register "};
             if (*registerField & RPI_I2C_S_CLKT)
                 line += "CLKT ";
@@ -267,21 +264,21 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
         }
         case RPI_I2C_DLEN_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Get Data Length %d", *registerField);
 #endif
             break;
         }
         case RPI_I2C_A_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Get Address %02x", *registerField);
 #endif
             break;
         }
         case RPI_I2C_FIFO_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Read FIFO %02x", *registerField);
 #endif
             *registerField = HandleReadFIFORegister();
@@ -289,14 +286,14 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
         }
         case RPI_I2C_DIV_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Set Clock Divider %d", *registerField);
 #endif
             break;
         }
         case RPI_I2C_DEL_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             if (*registerField & 0xFFFF0000)
             {
                 LOG_DEBUG("I2C Get Falling Edge Delay %d", (*registerField >> 16));
@@ -310,7 +307,7 @@ uint32 MemoryAccessStubI2C::Read32(regaddr address)
         }
         case RPI_I2C_CLKT_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Get Clock Stretch Timeout %d", (*registerField & 0x0000FFFF));
 #endif
             break;
@@ -339,14 +336,14 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
 
     uintptr offset = GetRegisterOffset(address);
     uint32 *registerField = reinterpret_cast<uint32 *>(reinterpret_cast<uint8 *>(&m_registers) + offset);
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL
     LOG_DEBUG("I2C Write register %016x = %08x", offset, data);
 #endif
     switch (offset)
     {
         case RPI_I2C_C_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             uint32 diff = (data ^ *registerField) | 0x00B0;
             if (diff & RPI_I2C_C_ENABLE)
             {
@@ -393,7 +390,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_S_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             if (data & RPI_I2C_S_CLKT)
                 LOG_DEBUG("I2C Reset Clock Stretch Timeout");
             if (data & RPI_I2C_S_ERR)
@@ -406,7 +403,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_DLEN_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Set Data Length %d", data);
 #endif
             *registerField = data;
@@ -414,7 +411,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_A_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Set Address %02x", data);
 #endif
             *registerField = data;
@@ -422,7 +419,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_FIFO_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             LOG_DEBUG("I2C Write FIFO %02x", data);
 #endif
             HandleWriteFIFORegister(data);
@@ -430,7 +427,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_DIV_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             if (data != *registerField)
             {
                 LOG_DEBUG("I2C Set Clock Divider %d", data);
@@ -441,7 +438,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_DEL_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             uint32 diff = data & *registerField;
             if (diff & 0xFFFF0000)
             {
@@ -457,7 +454,7 @@ void MemoryAccessStubI2C::Write32(regaddr address, uint32 data)
         }
         case RPI_I2C_CLKT_OFFSET:
         {
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
             uint32 diff = data & *registerField;
             if (diff & 0x0000FFFF)
             {

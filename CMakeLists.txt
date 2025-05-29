@@ -69,6 +69,10 @@ option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 option(BAREMETAL_TRACE_DEBUG "Enable debug tracing output" OFF)
 option(BAREMETAL_TRACE_MEMORY "Enable memory tracing output" OFF)
 option(BAREMETAL_TRACE_MEMORY_DETAIL "Enable detailed memory tracing output" OFF)
+option(BAREMETAL_TRACE_MEMORY_ACCESS_STUBS "Enable memory access tracing output on stubs" OFF)
+option(BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL "Enable detailed memory access tracing output on stubs" OFF)
+option(BAREMETAL_TRACE_I2C "Enable I2C tracing output" OFF)
+option(BAREMETAL_TRACE_I2C_DETAIL "Enable detailed I2C tracing output" OFF)
 
 message(STATUS "\n** Setting up project **\n--")
 
@@ -112,6 +116,27 @@ if (BAREMETAL_TRACE_MEMORY_DETAIL)
 else ()
     set(BAREMETAL_MEMORY_TRACING_DETAIL 0)
 endif()
+if (BAREMETAL_TRACE_MEMORY_ACCESS_STUBS)
+    set(BAREMETAL_MEMORY_ACCESS_TRACING 1)
+else ()
+    set(BAREMETAL_MEMORY_ACCESS_TRACING 0)
+endif()
+if (BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL)
+    set(BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL 1)
+else ()
+    set(BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL 0)
+endif()
+if (BAREMETAL_TRACE_I2C)
+    set(BAREMETAL_I2C_TRACING 1)
+else ()
+    set(BAREMETAL_I2C_TRACING 0)
+endif()
+if (BAREMETAL_TRACE_I2C_DETAIL)
+    set(BAREMETAL_I2C_TRACING_DETAIL 1)
+else ()
+    set(BAREMETAL_I2C_TRACING_DETAIL 0)
+endif()
+
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
 set(DEFINES_C
@@ -121,6 +146,10 @@ set(DEFINES_C
     BAREMETAL_DEBUG_TRACING=${BAREMETAL_DEBUG_TRACING}
     BAREMETAL_MEMORY_TRACING=${BAREMETAL_MEMORY_TRACING}
     BAREMETAL_MEMORY_TRACING_DETAIL=${BAREMETAL_MEMORY_TRACING_DETAIL}
+    BAREMETAL_MEMORY_ACCESS_TRACING=${BAREMETAL_MEMORY_ACCESS_TRACING}
+    BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL=${BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL}
+    BAREMETAL_I2C_TRACING=${BAREMETAL_I2C_TRACING}
+    BAREMETAL_I2C_TRACING_DETAIL=${BAREMETAL_I2C_TRACING_DETAIL}
     BAREMETAL_MAJOR=${VERSION_MAJOR}
     BAREMETAL_MINOR=${VERSION_MINOR}
     BAREMETAL_LEVEL=${VERSION_LEVEL}
@@ -300,6 +329,10 @@ message(STATUS "-- Color log output:                ${BAREMETAL_COLOR_LOGGING}")
 message(STATUS "-- Debug tracing output:            ${BAREMETAL_TRACE_DEBUG}")
 message(STATUS "-- Memory tracing output:           ${BAREMETAL_TRACE_MEMORY}")
 message(STATUS "-- Detailed memory tracing output:  ${BAREMETAL_TRACE_MEMORY_DETAIL}")
+message(STATUS "-- Memory access tracing output:    ${BAREMETAL_TRACE_MEMORY_ACCESS_STUBS}")
+message(STATUS "-- Detailed Memory access tracing:  ${BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL}")
+message(STATUS "-- I2C tracing output:              ${BAREMETAL_TRACE_I2C}")
+message(STATUS "-- Detailed I2C tracing output:     ${BAREMETAL_TRACE_I2C_DETAIL}")
 message(STATUS "-- Version major:                   ${VERSION_MAJOR}")
 message(STATUS "-- Version minor:                   ${VERSION_MINOR}")
 message(STATUS "-- Version level:                   ${VERSION_LEVEL}")

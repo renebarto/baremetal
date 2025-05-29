@@ -7,7 +7,7 @@
             "configurationType": "Debug",
             "buildRoot": "${projectDir}\\cmake-${name}",
             "installRoot": "${projectDir}\\output\\install\\${name}",
-            "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DBUILD_TUTORIALS=ON -DBAREMETAL_CONSOLE_UART0=ON",
+            "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI3 -DBUILD_TUTORIALS=ON -DBAREMETAL_CONSOLE_UART0=ON -DBAREMETAL_TRACE_MEMORY_ACCESS_STUBS=OFF -DBAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL=OFF -DBAREMETAL_TRACE_I2C=ON",
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",

@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <baremetal/II2CMaster.h>
 #include <baremetal/BCMRegisters.h>
 #include <baremetal/IMemoryAccess.h>
 #include <baremetal/PhysicalGPIOPin.h>
@@ -46,37 +47,7 @@
 /// @file
 /// I2C Master
 
-namespace baremetal
-{
-
-#if BAREMETAL_RPI_TARGET <= 4
-
-// Return codes returned by Read/Write as negative value
-/// @brief Invalid parameter
-#define I2C_MASTER_INVALID_PARM  1
-/// @brief Received a NACK
-#define I2C_MASTER_ERROR_NACK   2
-/// @brief Received clock stretch timeout
-#define I2C_MASTER_ERROR_CLKT   3
-/// @brief Not all data has been sent/received
-#define I2C_MASTER_DATA_LEFT    4
-/// @brief Transfer timed out
-#define I2C_MASTER_TIMEOUT      5
-/// @brief Bus did not become ready
-#define I2C_MASTER_BUS_NOT_BUSY 6
-
-/// <summary>
-/// I2C speed selection
-/// </summary>
-enum class I2CClockMode
-{
-    /// @brief I2C @ 100 KHz
-    Normal,
-    /// @brief I2C @ 400 KHz
-    Fast,
-    /// @brief I2C @ 1 MHz
-    FastPlus,
-};
+namespace baremetal {
 
 /// <summary>
 /// Driver for I2C master devices
@@ -103,6 +74,7 @@ enum class I2CClockMode
 /// 3         | GPIO6  GPIO7  | GPIO14 GPIO15 | GPIO22 GPIO23 | Raspberry Pi 5 only
 /// </summary>
 class I2CMaster
+    : public II2CMaster
 {
 private:
     /// @brief Memory access interface reference for accessing registers.
@@ -137,11 +109,11 @@ public:
 
     void SetClock(unsigned clockRate);
     bool Scan(uint16 address);
-    size_t Read(uint16 address, uint8 &data);
-    size_t Read(uint16 address, void *buffer, size_t count);
-    size_t Write(uint16 address, uint8 data);
-    size_t Write(uint16 address, const void *buffer, size_t count);
-    size_t WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount);
+    size_t Read(uint16 address, uint8 &data) override;
+    size_t Read(uint16 address, void *buffer, size_t count) override;
+    size_t Write(uint16 address, uint8 data) override;
+    size_t Write(uint16 address, const void *buffer, size_t count) override;
+    size_t WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount) override;
 
 private:
     uint32 ReadControlRegister();
@@ -171,11 +143,5 @@ private:
     uint8 ReadFIFORegister();
     void WriteFIFORegister(uint8 data);
 };
-
-#else
-
-#error RPI 5 not supported yet
-
-#endif
 
 } // namespace baremetal

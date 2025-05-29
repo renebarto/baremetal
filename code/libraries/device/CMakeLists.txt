@@ -28,13 +28,20 @@ set(PROJECT_LIBS
     )
 
 set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/display/HD44780Device.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gpio/KY-040.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpio/HD44780DeviceRaw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/i2c/HD44780DeviceI2C.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/i2c/MCP23017.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/i2c/MemoryAccessStubMCP23017LEDs.cpp
     )
 
 set(PROJECT_INCLUDES_PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/device/display/HD44780Device.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/device/display/ILCDDevice.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/device/gpio/HD44780DeviceRaw.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/device/gpio/KY-040.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/device/i2c/HD44780DeviceI2C.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/device/i2c/MCP23017.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/device/i2c/MemoryAccessStubMCP23017LEDs.h
     )

@@ -53,9 +53,6 @@ using namespace baremetal;
 /// @brief Define log name
 LOG_MODULE("I2CMaster");
 
-/// @brief If defined will trace detailed information on messages send and rece
-#define TRACE 1
-
 #if BAREMETAL_RPI_TARGET == 3
 /// @brief Number of I2C buses for RPI 3
 #define I2C_BUSES           2
@@ -301,7 +298,7 @@ size_t I2CMaster::Read(uint16 address, void *buffer, size_t count)
         result++;
     }
 
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     LOG_INFO("Read result = %d", result);
 #endif
 
@@ -407,7 +404,7 @@ size_t I2CMaster::Write(uint16 address, const void *buffer, size_t count)
         Timer::WaitMilliSeconds(1);
     }
 
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     LOG_INFO("Write result = %d", result);
 #endif
 
@@ -436,7 +433,7 @@ size_t I2CMaster::Write(uint16 address, const void *buffer, size_t count)
     while (ReceiveFIFOHasData())
     {
         uint8 data = ReadFIFORegister();
-#if TRACE
+#if BAREMETAL_I2C_TRACING
         LOG_INFO("Read byte = %02x", data);
 #endif
     }
@@ -572,7 +569,7 @@ size_t I2CMaster::WriteReadRepeatedStart(uint16 address, const void *writeBuffer
 uint32 I2CMaster::ReadControlRegister()
 {
     auto result = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_C_OFFSET));
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     string text;
     text += (result & RPI_I2C_C_ENABLE) ? "EN " : "   ";
     text += (result & RPI_I2C_C_INTR_ENABLE) ? "IR " : "  ";
@@ -593,7 +590,7 @@ uint32 I2CMaster::ReadControlRegister()
 void I2CMaster::WriteControlRegister(uint32 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_C_OFFSET), data);
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     string text;
     text += (data & RPI_I2C_C_ENABLE) ? "EN " : "   ";
     text += (data & RPI_I2C_C_INTR_ENABLE) ? "IR " : "  ";
@@ -637,7 +634,7 @@ void I2CMaster::ClearFIFO()
 void I2CMaster::WriteAddressRegister(uint8 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_A_OFFSET), data);
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     LOG_INFO("Write I2C Address, %02x", data);
 #endif
 }
@@ -649,7 +646,7 @@ void I2CMaster::WriteAddressRegister(uint8 data)
 void I2CMaster::WriteDataLengthRegister(uint8 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_DLEN_OFFSET), data);
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     LOG_INFO("Write I2C Length, %08x", data);
 #endif
 }
@@ -661,7 +658,7 @@ void I2CMaster::WriteDataLengthRegister(uint8 data)
 uint32 I2CMaster::ReadStatusRegister()
 {
     auto data = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_S_OFFSET));
-    #if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     string text;
     text += (data & RPI_I2C_S_CLKT) ? "CLKT " : "     ";
     text += (data & RPI_I2C_S_ERR) ? "ERR " : "    ";
@@ -674,7 +671,7 @@ uint32 I2CMaster::ReadStatusRegister()
     text += (data & RPI_I2C_S_DONE) ? "DONE " : "     ";
     text += (data & RPI_I2C_S_TA) ? "TA " : "     ";
     LOG_INFO("Read I2C Status, %s", text.c_str());
-    #endif
+#endif
     return data;
 }
 
@@ -685,7 +682,7 @@ uint32 I2CMaster::ReadStatusRegister()
 void I2CMaster::WriteStatusRegister(uint32 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_S_OFFSET), data);
-#if TRACE
+#if BAREMETAL_I2C_TRACING_DETAIL
     string text;
     text += (data & RPI_I2C_S_CLKT) ? "CLKT " : "     ";
     text += (data & RPI_I2C_S_ERR) ? "ERR " : "    ";
@@ -832,9 +829,9 @@ void I2CMaster::ClearAllStatus()
 uint8 I2CMaster::ReadFIFORegister()
 {
     uint8 data = m_memoryAccess.Read32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_FIFO_OFFSET)) & RPI_I2C_FIFO_MASK;
-    #if TRACE
+#if BAREMETAL_I2C_TRACING
     LOG_INFO("Read FIFO, data %08x", data);
-    #endif
+#endif
     return data;
 }
 
@@ -845,7 +842,7 @@ uint8 I2CMaster::ReadFIFORegister()
 void I2CMaster::WriteFIFORegister(uint8 data)
 {
     m_memoryAccess.Write32(RPI_I2C_REG_ADDRESS(m_baseAddress, RPI_I2C_FIFO_OFFSET), data);
-#if TRACE
+#if BAREMETAL_I2C_TRACING
     LOG_INFO("Write FIFO, data %08x", data);
 #endif
 }

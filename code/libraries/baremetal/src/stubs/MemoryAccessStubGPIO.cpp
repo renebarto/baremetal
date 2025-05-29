@@ -53,9 +53,6 @@ LOG_MODULE("MemoryAccessStubGPIO");
 
 using namespace baremetal;
 
-/// @brief If defined will trace detailed information on messages send and rece
-#define TRACE 0
-
 /// @brief GPIO base address
 static uintptr GPIOBaseAddress{ RPI_GPIO_BASE };
 /// @brief Mask used to check whether an address is in the GPIO register range
@@ -111,7 +108,7 @@ void MemoryAccessStubGPIO::Write16(regaddr address, uint16 data)
     LOG_PANIC("Call to Write16 should not happen");
 }
 
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
 /// <summary>
 /// Convert pin mode to string
 /// </summary>
@@ -194,8 +191,10 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
 {
     uintptr offset = GetRegisterOffset(address);
     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
+#if BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL
     LOG_DEBUG("GPIO read register %016x = %08x", offset, *registerField);
+#endif
     switch (offset)
     {
         case RPI_GPIO_GPFSEL0_OFFSET:
@@ -428,8 +427,10 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
 {
     uintptr offset = GetRegisterOffset(address);
     uint32* registerField = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(&m_registers) + offset);
-#if TRACE
+#if BAREMETAL_MEMORY_ACCESS_TRACING
+#if BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL
     LOG_DEBUG("GPIO write register %016x = %08x", offset, data);
+#endif
     switch (offset)
     {
         case RPI_GPIO_GPFSEL0_OFFSET:
@@ -458,16 +459,13 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
         case RPI_GPIO_GPSET1_OFFSET:
         {
             uint8 pinBase = (offset - RPI_GPIO_GPSET0_OFFSET) / 4 * 32;
-            uint32 diff = data ^ *registerField;
             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
             {
                 int shift = pinIndex;
-                if (((diff >> shift) & 0x00000001) != 0)
+                uint8 pin = pinBase + pinIndex;
+                if (((data >> shift) & 0x00000001) != 0)
                 {
-                    uint8 pin = pinBase + pinIndex;
-                    uint8 value = (data >> shift) & 0x00000001;
-                    if (value != 0)
-                        LOG_DEBUG("GPIO Set Pin %d ON", pin);
+                    LOG_DEBUG("GPIO Set Pin %d ON", pin);
                 }
             }
             break;
@@ -480,12 +478,10 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
             {
                 int shift = pinIndex;
-                if (((diff >> shift) & 0x00000001) != 0)
+                uint8 pin = pinBase + pinIndex;
+                if (((data >> shift) & 0x00000001) != 0)
                 {
-                    uint8 pin = pinBase + pinIndex;
-                    uint8 value = (data >> shift) & 0x00000001;
-                    if (value != 0)
-                        LOG_DEBUG("GPIO Set Pin %d OFF", pin);
+                    LOG_DEBUG("GPIO Set Pin %d OFF", pin);
                 }
             }
             break;

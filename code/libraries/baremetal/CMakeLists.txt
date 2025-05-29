@@ -77,6 +77,7 @@ set(PROJECT_INCLUDES_PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/I2CMaster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IGPIOPin.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/II2CMaster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMailbox.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/IMemoryAccess.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/InterruptHandler.h

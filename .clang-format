@@ -1,6 +1,6 @@
 ---
 BasedOnStyle: Microsoft
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
 AlignConsecutiveAssignments:
@@ -25,9 +25,9 @@ AlignConsecutiveDeclarations:
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveMacros:
-  Enabled: false
-  AcrossEmptyLines: false
-  AcrossComments: false
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
   AlignCompound: false
   AlignFunctionPointers: false
   PadOperators: false
@@ -67,7 +67,7 @@ BraceWrapping:
   AfterControlStatement: Always
   AfterEnum: true
   AfterFunction: true
-  AfterNamespace: true
+  AfterNamespace: false
   AfterObjCDeclaration: true
   AfterStruct: true
   AfterUnion: false
@@ -174,7 +174,7 @@ PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 1000
-PointerAlignment: Right
+PointerAlignment: Left
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments: true

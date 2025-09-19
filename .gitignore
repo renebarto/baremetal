@@ -13,3 +13,4 @@ doc/tutorials/pdf
 baremetal-cppcheck-build-dir/
 doxygen/html/
 links.json
+fix-links.log

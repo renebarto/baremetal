@@ -31,16 +31,16 @@ function(create_image target image project)
         )
 endfunction()
 
-function(setup_image dependency)
-    project(${dependency}-image
-        DESCRIPTION "Kernel image for ${dependency}")
+function(setup_image target)
+    project(${target}-image
+        DESCRIPTION "Kernel image for ${target}")
 
     message(STATUS "\n**********************************************************************************\n")
     message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
     message("\n** Setting up ${PROJECT_NAME} **\n")
 
-    set(DEPENDENCY ${dependency})
+    set(DEPENDENCY ${target})
     set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
 
     create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})

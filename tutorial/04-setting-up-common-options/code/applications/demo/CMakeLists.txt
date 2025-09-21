@@ -1,5 +1,5 @@
-project(demo
-    DESCRIPTION "Demo application"
+project(04-setting-up-common-options
+    DESCRIPTION "Tutorial 04 Setting up common options"
     LANGUAGES CXX ASM)
 
 message(STATUS "\n**********************************************************************************\n")

@@ -273,7 +273,9 @@ For Linux, we will use this approach. For Windows, we will be using Visual Studi
 
 ### Windows {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEVELOPMENT_ENVIRONMENT_WINDOWS}
 
-The current choice for Visual Studio 2019 has to do with the fact that debugging on QEMU (Linux or baremetal) with Visual Studio 2022 does not work from within VS, due to a bug. As the debugging part is partly shared between Visual Studio 2019 and Visual Studio 2022, my advice is to only have Visual Studio 2019 installed.
+The current choice for Visual Studio 2019 has to do with the fact that previously, debugging on QEMU (Linux or baremetal) with Visual Studio 2022 did not work from within VS, due to a bug.
+This was resolved at least in version 17.14.12.
+This tutorial is still based on Visual Studio 2019, but with a few small changes, can also be used for Visual Studio 2022.
 
 When installing Visual Studio 2019, at least make sure `Desktop development with C++` is checked as a feature. The feature `Linux development with C++` is not necessary.
 

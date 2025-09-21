@@ -38,13 +38,6 @@
 //
 //------------------------------------------------------------------------------
 
-#define MEM_KERNEL_START        _start
-#define KERNEL_MAX_SIZE         0x200000 // Max 2 Mb
-#define MEM_KERNEL_END          (MEM_KERNEL_START + KERNEL_MAX_SIZE)
-
-#define KERNEL_STACK_SIZE       0x20000 // 128 Kb
-#define MEM_KERNEL_STACK        (MEM_KERNEL_END + KERNEL_STACK_SIZE)
-
 .section ".init"
 
 .global _start
@@ -65,7 +58,7 @@ core0:
     // core 0
 
     // set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    ldr     x1, =MEM_KERNEL_STACK
+    ldr     x1, =_start
     mov     sp, x1
 
     // clear bss

@@ -108,7 +108,7 @@ GPIO is one of the main reason for the popularity of Raspberry Pi. Since Raspber
 Each of the interfaces will be described below.
 It is important to be aware that not all interfaces are available, or at the same pins, at all times.
 This depends on how GPIO is configured. For each pin there is a normal GPIO (simple digital signal) function as input or output, but also up to 6 special functions, depending on this configuration.
-Although the pinning is mostly the same for different versions of Raspberry Pi, there are differences. Please refer to [Alternative functions for GPIO, Raspberry Pi 3](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_3) and [Alternative functions for GPIO, Raspberry Pi 4 / 5](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_4__5)
+Although the pinning is mostly the same for different versions of Raspberry Pi, there are differences. Please refer to [Alternative functions for GPIO, Raspberry Pi 3](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_3),  and [Alternative functions for GPIO, Raspberry Pi 4](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_4) and [Alternative functions for GPIO, Raspberry Pi 5](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_5)
 
 This makes it quite complicated to figure out how to connected to a certain interface, and it also limits the number of parallel devices that can be connected.
 Also, be aware that only part of the GPIO are actually available on the header (GPIO 0 through GPIO 27), even though a larger number of GPIO pins is mentioned in documentation (up to GPIO54).

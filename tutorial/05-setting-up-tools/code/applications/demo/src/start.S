@@ -38,24 +38,10 @@
 //
 //------------------------------------------------------------------------------
 
-/// @brief Start of kernel code
-#define MEM_KERNEL_START        _start
-/// @brief Maximum size of code
-#define KERNEL_MAX_SIZE         0x200000 // Max 2 Mb
-/// @brief Kernel code end
-#define MEM_KERNEL_END          (MEM_KERNEL_START + KERNEL_MAX_SIZE)
-
-/// @brief Size of kernel stack for a single core
-#define KERNEL_STACK_SIZE       0x20000 // 128 Kb
-/// @brief Kernel stack top (stack grows down)
-#define MEM_KERNEL_STACK        (MEM_KERNEL_END + KERNEL_STACK_SIZE)
-
-/// @brief Our code starts in section .init
 .section ".init"
 
 .global _start
 
-/// @brief Startup starts here
 _start:
     // Read MPIDR_EL1 register, low 7 bits contain core id (as we have 4 cores, we mask only lowest two bits)
     mrs     x1, mpidr_el1
@@ -72,7 +58,7 @@ core0:
     // core 0
 
     // set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    ldr     x1, =MEM_KERNEL_STACK
+    ldr     x1, =_start
     mov     sp, x1
 
     // clear bss
@@ -94,5 +80,5 @@ clear_bss_loop:
     // jump to C code, should not return
 empty_bss:
     bl      main
-    // For fail safety, halt this core too
+    // for fail safety, halt this core too
     b       waitevent

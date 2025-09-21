@@ -10,7 +10,7 @@ doc/cpu/images
 doc/cpu/pdf
 doc/tutorials/images
 doc/tutorials/pdf
-baremetal-cppcheck-build-dir/
+cppcheck-build-dir/
 doxygen/html/
 links.json
 fix-links.log

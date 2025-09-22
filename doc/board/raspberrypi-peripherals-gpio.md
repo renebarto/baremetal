@@ -1,6 +1,10 @@
 # Raspberry Pi GPIO {#RASPBERRY_PI_GPIO}
 
-See [documentation](pdf/bcm2837-peripherals.pdf), page 90
+For Raspberry Pi 3 see [documentation](pdf/bcm2837-peripherals.pdf), section 6, page 89
+
+For Raspberry Pi 4 see [documentation](pdf/bcm2711-peripherals.pdf), section 5, page 65
+
+For Raspberry Pi 5 see [documentation](pdf/rp1-peripherals.pdf), section 3.1, page 14
 
 Pinout:
 
@@ -880,10 +884,10 @@ These functions are coded as follows:
 <tr><td>53<td>High<td>Internal                                                                            </tr>
 </table>
 
-### Raspberry Pi 4 / 5 {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_4__5}
+### Raspberry Pi 4 {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_4}
 
 <table>
-<caption id="GPIO_alternative_functions_rpi4_5"></caption>
+<caption id="GPIO_alternative_functions_rpi4"></caption>
 <tr><th>GPIO<th>Pull up / down<th>Alt 0     <th>Alt 1        <th>Alt 2     <th>Alt 3           <th>Alt 4     <th>Alt 5</tr>
 <tr><td>0<td>High<td>SDA0<td>SA5<td>PCLK<td>SPI3_CE0_N<td>TXD2<td>SDA6</tr>
 <tr><td>1<td>High<td>SCL0<td>SA4<td>DE<td>SPI3_MISO<td>RXD2<td>SCL6</tr>
@@ -901,8 +905,8 @@ These functions are coded as follows:
 <tr><td>13<td>Low<td>PWM0_1<td>SD5<td>DPI_D9<td>SPI5_MISO<td>RXD5<td>SCL5</tr>
 <tr><td>14<td>Low<td>TXD0<td>SD6<td>DPI_D10<td>SPI5_MOSI<td>CTS5<td>TXD1</tr>
 <tr><td>15<td>Low<td>RXD0<td>SD7<td>DPI_D11<td>SPI5_SCLK<td>RTS5<td>RXD1</tr>
-<tr><td>16<td>Low<td>\<reserved\><td>SD8<td>DPI_D12<td>CTS0<td>SPI1_CE2_N<td>CTS1</tr>
-<tr><td>17<td>Low<td>\<reserved\><td>SD9<td>DPI_D13<td>RTS0<td>SPI1_CE1_N<td>RTS1</tr>
+<tr><td>16<td>Low<td>reserved<td>SD8<td>DPI_D12<td>CTS0<td>SPI1_CE2_N<td>CTS1</tr>
+<tr><td>17<td>Low<td>reserved<td>SD9<td>DPI_D13<td>RTS0<td>SPI1_CE1_N<td>RTS1</tr>
 <tr><td>18<td>Low<td>PCM_CLK<td>SD10<td>DPI_D14<td>SPI6_CE0_N<td>SPI1_CE0_N<td>PWM0_0</tr>
 <tr><td>19<td>Low<td>PCM_FS<td>SD11<td>DPI_D15<td>SPI6_MISO<td>SPI1_MISO<td>PWM0_1</tr>
 <tr><td>20<td>Low<td>PCM_DIN<td>SD12<td>DPI_D16<td>SPI6_MOSI<td>SPI1_MOSI<td>GPCLK0</tr>
@@ -911,36 +915,71 @@ These functions are coded as follows:
 <tr><td>23<td>Low<td>SD0_CMD<td>SD15<td>DPI_D19<td>SD1_CMD<td>ARM_RTCK<td>SCL6</tr>
 <tr><td>24<td>Low<td>SD0_DAT0<td>SD16<td>DPI_D20<td>SD1_DAT0<td>ARM_TDO<td>SPI3_CE1_N</tr>
 <tr><td>25<td>Low<td>SD0_DAT1<td>SD17<td>DPI_D21<td>SD1_DAT1<td>ARM_TCK<td>SPI4_CE1_N</tr>
-<tr><td>26<td>Low<td>SD0_DAT2<td>\<reserved\><td>DPI_D22<td>SD1_DAT2<td>ARM_TDI<td>SPI5_CE1_N</tr>
-<tr><td>27<td>Low<td>SD0_DAT3<td>\<reserved\><td>DPI_D23<td>SD1_DAT3<td>ARM_TMS<td>SPI6_CE1_N</tr>
-<tr><td>28<td>-<td>SDA0<td>SA5<td>PCM_CLK<td>\<reserved\><td>MII_A_RX_ERR<td>RGMII_MDIO</tr>
-<tr><td>29<td>-<td>SCL0<td>SA4<td>PCM_FS<td>\<reserved\><td>MII_A_TX_ERR<td>RGMII_MDC</tr>
-<tr><td>30<td>Low<td>\<reserved\><td>SA3<td>PCM_DIN<td>CTS0<td>MII_A_CRS<td>CTS1</tr>
-<tr><td>31<td>Low<td>\<reserved\><td>SA2<td>PCM_DOUT<td>RTS0<td>MII_A_COL<td>RTS1</tr>
-<tr><td>32<td>Low<td>GPCLK0<td>SA1<td>\<reserved\><td>TXD0<td>SD_CARD_PRES<td>TXD1</tr>
-<tr><td>33<td>Low<td>\<reserved\><td>SA0<td>\<reserved\><td>RXD0<td>SD_CARD_WRPROT<td>RXD1</tr>
-<tr><td>34<td>High<td>GPCLK0<td>SOE_N / SE<td>\<reserved\><td>SD1_CLK<td>SD_CARD_LED<td>RGMII_IRQ</tr>
+<tr><td>26<td>Low<td>SD0_DAT2<td>reserved<td>DPI_D22<td>SD1_DAT2<td>ARM_TDI<td>SPI5_CE1_N</tr>
+<tr><td>27<td>Low<td>SD0_DAT3<td>reserved<td>DPI_D23<td>SD1_DAT3<td>ARM_TMS<td>SPI6_CE1_N</tr>
+<tr><td>28<td>-<td>SDA0<td>SA5<td>PCM_CLK<td>reserved<td>MII_A_RX_ERR<td>RGMII_MDIO</tr>
+<tr><td>29<td>-<td>SCL0<td>SA4<td>PCM_FS<td>reserved<td>MII_A_TX_ERR<td>RGMII_MDC</tr>
+<tr><td>30<td>Low<td>reserved<td>SA3<td>PCM_DIN<td>CTS0<td>MII_A_CRS<td>CTS1</tr>
+<tr><td>31<td>Low<td>reserved<td>SA2<td>PCM_DOUT<td>RTS0<td>MII_A_COL<td>RTS1</tr>
+<tr><td>32<td>Low<td>GPCLK0<td>SA1<td>reserved<td>TXD0<td>SD_CARD_PRES<td>TXD1</tr>
+<tr><td>33<td>Low<td>reserved<td>SA0<td>reserved<td>RXD0<td>SD_CARD_WRPROT<td>RXD1</tr>
+<tr><td>34<td>High<td>GPCLK0<td>SOE_N / SE<td>reserved<td>SD1_CLK<td>SD_CARD_LED<td>RGMII_IRQ</tr>
 <tr><td>35<td>High<td>SPI0_CE1_N<td>SWE_N / SRW_N<td><td>SD1_CMD<td>RGMII_START_STOP</tr>
 <tr><td>36<td>High<td>SPI0_CE0_N<td>SD0<td>TXD0<td>SD1_DAT0<td>RGMII_RX_OK<td>MII_A_RX_ERR</tr>
 <tr><td>37<td>Low<td>SPI0_MISO<td>SD1<td>RXD0<td>SD1_DAT1<td>RGMII_MDIO<td>MII_A_TX_ERR</tr>
 <tr><td>38<td>Low<td>SPI0_MOSI<td>SD2<td>RTS0<td>SD1_DAT2<td>RGMII_MDC<td>MII_A_CRS</tr>
 <tr><td>39<td>Low<td>SPI0_SCLK<td>SD3<td>CTS0<td>SD1_DAT3<td>RGMII_IRQ<td>MII_A_COL</tr>
 <tr><td>40<td>Low<td>PWM1_0<td>SD4<td><td>SD1_DAT4<td>SPI0_MISO<td>TXD1</tr>
-<tr><td>41<td>Low<td>PWM1_1<td>SD5<td>\<reserved\><td>SD1_DAT5<td>SPI0_MOSI<td>RXD1</tr>
-<tr><td>42<td>Low<td>GPCLK1<td>SD6<td>\<reserved\><td>SD1_DAT6<td>SPI0_SCLK<td>RTS1</tr>
-<tr><td>43<td>Low<td>GPCLK2<td>SD7<td>\<reserved\><td>SD1_DAT7<td>SPI0_CE0_N<td>CTS1</tr>
-<tr><td>44<td>-<td>GPCLK1<td>SDA0<td>SDA1<td>\<reserved\><td>SPI0_CE1_N<td>SD_CARD_VOLT</tr>
-<tr><td>45<td>-<td>PWM0_1<td>SCL0<td>SCL1<td>\<reserved\><td>SPI0_CE2_N<td>SD_CARD_PWR0</tr>
-<tr><td>46<td>High<td>\<Internal\></tr>
-<tr><td>47<td>High<td>\<Internal\></tr>
-<tr><td>48<td>High<td>\<Internal\></tr>
-<tr><td>49<td>High<td>\<Internal\></tr>
-<tr><td>50<td>High<td>\<Internal\></tr>
-<tr><td>51<td>High<td>\<Internal\></tr>
-<tr><td>52<td>High<td>\<Internal\></tr>
-<tr><td>53<td>High<td>\<Internal\></tr>
-<tr><td>54<td>High<td>\<Internal\></tr>
-<tr><td>55<td>High<td>\<Internal\></tr>
-<tr><td>56<td>High<td>\<Internal\></tr>
-<tr><td>57<td>High<td>\<Internal\></tr>
+<tr><td>41<td>Low<td>PWM1_1<td>SD5<td>reserved<td>SD1_DAT5<td>SPI0_MOSI<td>RXD1</tr>
+<tr><td>42<td>Low<td>GPCLK1<td>SD6<td>reserved<td>SD1_DAT6<td>SPI0_SCLK<td>RTS1</tr>
+<tr><td>43<td>Low<td>GPCLK2<td>SD7<td>reserved<td>SD1_DAT7<td>SPI0_CE0_N<td>CTS1</tr>
+<tr><td>44<td>-<td>GPCLK1<td>SDA0<td>SDA1<td>reserved<td>SPI0_CE1_N<td>SD_CARD_VOLT</tr>
+<tr><td>45<td>-<td>PWM0_1<td>SCL0<td>SCL1<td>reserved<td>SPI0_CE2_N<td>SD_CARD_PWR0</tr>
+<tr><td>46<td>High<td>Internal</tr>
+<tr><td>47<td>High<td>Internal</tr>
+<tr><td>48<td>High<td>Internal</tr>
+<tr><td>49<td>High<td>Internal</tr>
+<tr><td>50<td>High<td>Internal</tr>
+<tr><td>51<td>High<td>Internal</tr>
+<tr><td>52<td>High<td>Internal</tr>
+<tr><td>53<td>High<td>Internal</tr>
+<tr><td>54<td>High<td>Internal</tr>
+<tr><td>55<td>High<td>Internal</tr>
+<tr><td>56<td>High<td>Internal</tr>
+<tr><td>57<td>High<td>Internal</tr>
+</table>
+
+### Raspberry Pi 5 {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_5}
+
+<table>
+<caption id="GPIO_alternative_functions_rpi5"></caption>
+<tr><th>GPIO<th>Alt 0       <th>Alt 1    <th>Alt 2      <th>Alt 3        <th>Alt 4      <th>Alt 5      <th>Alt 6     <th>Alt 7    <th>Alt 8</tr>
+<tr><td>0   <td>SPI0_SIO[3] <td>DPI_PCLK <td>UART1_TX   <td>I2C0_SDA     <td>-          <td>SYS_RIO[0] <td>PROC_RIO[0] <td>PIO[0] <td>SPI2_CSn[0]</tr>
+<tr><td>1   <td>SPI0_SIO[2] <td>DPI_DE   <td>UART1_RX   <td>I2C0_SCL     <td>-          <td>SYS_RIO[1] <td>PROC_RIO[1] <td>PIO[1] <td>SPI2_SIO[1]</tr>
+<tr><td>2   <td>SPI0_CSn[3] <td>DPI_VSYNC<td>UART1_CTS  <td>I2C1_SDA     <td>USRT0_IR_RX<td>SYS_RIO[2] <td>PROC_RIO[2] <td>PIO[2] <td>SPI2_SIO[0]</tr>
+<tr><td>3   <td>SPI0_CSn[2] <td>DPI_HSYNC<td>UART1_RTS  <td>I2C1_SCL     <td>USRT0_IR_TX<td>SYS_RIO[3] <td>PROC_RIO[3] <td>PIO[3] <td>SPI2_SCLK  </tr>
+<tr><td>4   <td>GPCLK[0]    <td>DPI_D[0] <td>UART2_TX   <td>I2C2_SDA     <td>USRT0_RI   <td>SYS_RIO[4] <td>PROC_RIO[4] <td>PIO[4] <td>SPI3_CSn[0]</tr>
+<tr><td>5   <td>GPCLK[1]    <td>DPI_D[1] <td>UART2_RX   <td>I2C2_SCL     <td>USRT0_DTR  <td>SYS_RIO[5] <td>PROC_RIO[5] <td>PIO[5] <td>SPI3_CSn[1]</tr>
+<tr><td>6   <td>GPCLK[2]    <td>DPI_D[2] <td>UART2_CTS  <td>I2C3_SDA     <td>USRT0_DCD  <td>SYS_RIO[6] <td>PROC_RIO[6] <td>PIO[6] <td>SPI2_SIO[1]</tr>
+<tr><td>7   <td>SPI0_CSn[1] <td>DPI_D[3] <td>UART2_RTS  <td>I2C3_SCL     <td>USRT0_DSR  <td>SYS_RIO[7] <td>PROC_RIO[7] <td>PIO[7] <td>SPI2_SIO[0]</tr>
+<tr><td>8   <td>SPI0_CSn[0] <td>DPI_D[4] <td>UART3_TX   <td>I2C0_SDA     <td>-          <td>SYS_RIO[8] <td>PROC_RIO[8] <td>PIO[8] <td>SPI3_SCLK  </tr>
+<tr><td>9   <td>SPI0_SIO[1] <td>DPI_D[5] <td>UART3_RX   <td>I2C0_SCL     <td>-          <td>SYS_RIO[9] <td>PROC_RIO[9] <td>PIO[9] <td>SPI4_CSn[0]</tr>
+<tr><td>10  <td>SPI0_SIO[0] <td>DPI_D[6] <td>UART3_CTS  <td>I2C1_SDA     <td>-          <td>SYS_RIO[10]<td>PROC_RIO[10]<td>PIO[10]<td>SPI4_CIO[0]</tr>
+<tr><td>11  <td>SPI0_SCLK   <td>DPI_D[7] <td>UART3_RTS  <td>I2C1_SCL     <td>-          <td>SYS_RIO[11]<td>PROC_RIO[11]<td>PIO[11]<td>SPI4_SCLK  </tr>
+<tr><td>12  <td>PWM0[0]     <td>DPI_D[8] <td>UART4_TX   <td>I2C2_SDA     <td>AUDIO_OUT_L<td>SYS_RIO[12]<td>PROC_RIO[12]<td>PIO[12]<td>SPI5_CSn[0]</tr>
+<tr><td>13  <td>PWM0[1]     <td>DPI_D[9] <td>UART4_RX   <td>I2C2_SCL     <td>AUDIO_OUT_R<td>SYS_RIO[13]<td>PROC_RIO[13]<td>PIO[13]<td>SPI5_SIO[1]</tr>
+<tr><td>14  <td>PWM0[2]     <td>DPI_D[10]<td>UART4_CTS  <td>I2C3_SDA     <td>UART0_TX   <td>SYS_RIO[14]<td>PROC_RIO[14]<td>PIO[14]<td>SPI5_SIO[0]</tr>
+<tr><td>15  <td>PWM0[3]     <td>DPI_D[11]<td>UART4_RTS  <td>I2C3_SCL     <td>UART0_RX   <td>SYS_RIO[15]<td>PROC_RIO[15]<td>PIO[15]<td>SPI5_SCLK  </tr>
+<tr><td>16  <td>SPI1_CSn[2] <td>DPI_D[12]<td>MIP0_DSI_TE<td>-            <td>UART0_CTS  <td>SYS_RIO[16]<td>PROC_RIO[16]<td>PIO[16]<td>-          </tr>
+<tr><td>17  <td>SPI1_CSn[1] <td>DPI_D[13]<td>MIP1_DSI_TE<td>-            <td>UART0_RTS  <td>SYS_RIO[17]<td>PROC_RIO[17]<td>PIO[17]<td>-          </tr>
+<tr><td>18  <td>SPI1_CSn[0] <td>DPI_D[14]<td>I2S0_SCLK  <td>PWM0[2]      <td>I2S1_SCLK  <td>SYS_RIO[18]<td>PROC_RIO[18]<td>PIO[18]<td>GPCLK[1]   </tr>
+<tr><td>19  <td>SPI1_SIO[1] <td>DPI_D[15]<td>I2S0_WS    <td>PWM0[3]      <td>I2S1_WS    <td>SYS_RIO[19]<td>PROC_RIO[19]<td>PIO[19]<td>-          </tr>
+<tr><td>20  <td>SPI1_SIO[0] <td>DPI_D[16]<td>I2S0_SDI[0]<td>GPCLK[0]     <td>I2S1_SDI[0]<td>SYS_RIO[20]<td>PROC_RIO[20]<td>PIO[20]<td>-          </tr>
+<tr><td>21  <td>SPI1_SCLK   <td>DPI_D[17]<td>I2S0_SDO[0]<td>GPCLK[1]     <td>I2S1_SDO[0]<td>SYS_RIO[21]<td>PROC_RIO[21]<td>PIO[21]<td>-          </tr>
+<tr><td>22  <td>SDIO0_CLK   <td>DPI_D[18]<td>I2S0_SDI[1]<td>I2C3_SDA     <td>I2S1_SDI[1]<td>SYS_RIO[22]<td>PROC_RIO[22]<td>PIO[22]<td>-          </tr>
+<tr><td>23  <td>SDIO0_CMD   <td>DPI_D[19]<td>I2S0_SDO[1]<td>I2C3_SCL     <td>I2S1_SDO[1]<td>SYS_RIO[23]<td>PROC_RIO[23]<td>PIO[23]<td>-          </tr>
+<tr><td>24  <td>SDIO0_DAT[0]<td>DPI_D[20]<td>I2S0_SDI[2]<td>-            <td>I2S1_SDI[2]<td>SYS_RIO[24]<td>PROC_RIO[24]<td>PIO[24]<td>SPI2_CSn[1]</tr>
+<tr><td>25  <td>SDIO0_DAT[1]<td>DPI_D[21]<td>I2S0_SDO[2]<td>AUDIO_IN_CLK <td>I2S1_SDO[2]<td>SYS_RIO[25]<td>PROC_RIO[25]<td>PIO[25]<td>SPI3_CSn[1]</tr>
+<tr><td>26  <td>SDIO0_DAT[2]<td>DPI_D[22]<td>I2S0_SDI[3]<td>AUDIO_IN_DAT0<td>I2S1_SDI[3]<td>SYS_RIO[26]<td>PROC_RIO[26]<td>PIO[26]<td>SPI5_CSn[1]</tr>
+<tr><td>27  <td>SDIO0_DAT[3]<td>DPI_D[23]<td>I2S0_SDO[3]<td>AUDIO_IN_DAT1<td>I2S1_SDO[3]<td>SYS_RIO[27]<td>PROC_RIO[27]<td>PIO[27]<td>SPI1_CSn[1]</tr>
 </table>

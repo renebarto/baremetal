@@ -1,14 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : start.S
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Startup code. This is the entry point to any executable. It puts all cores except core 0 in sleep mode.
-//               For core 0, it sets the stack pointer to just below the code (as the stack grows down), and then calls main().
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -38,47 +37,42 @@
 //
 //------------------------------------------------------------------------------
 
-.section ".init"
+#pragma once
 
-.global _start
+/// @file
+/// Standard types
 
-_start:
-    // Read MPIDR_EL1 register, low 7 bits contain core id (as we have 4 cores, we mask only lowest two bits)
-    mrs     x1, mpidr_el1
-    // Mask away everything but the core id
-    and     x1, x1, #3
-    // If core id is 0, continue
-    cbz     x1, core0
-    // If core id > 0, start wait loop
-waitevent:
-    wfe
-    b       waitevent
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-core0:
-    // core 0
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-    // set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    ldr     x1, =_start
-    mov     sp, x1
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-    // clear bss
-    // Load bss start
-    ldr     x1, =__bss_start
-    // Load bss size (size is number of 8 byte blocks in bss section)
-    ldr     w2, =__bss_size // In 8 byte chunks, so actual size is __bss_size * 8
-    // If bss is empty
-    cbz     w2, empty_bss
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
 
-clear_bss_loop:
-    // Store 0 in x1 location for 8 bytes, increment x1 by 8
-    str     xzr, [x1], #8
-    // Count down number of blocks
-    sub     w2, w2, #1
-    // Loop as long as the end is not reached
-    cbnz    w2, clear_bss_loop
-
-    // jump to C code, should not return
-empty_bss:
-    bl      main
-    // for fail safety, halt this core too
-    b       waitevent
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8* regaddr;

@@ -49,11 +49,6 @@ message(STATUS "\n** Setting up project **\n--")
 message(STATUS "\n##################################################################################")
 message(STATUS "\n** Setting up toolchain **\n--")
 
-message(STATUS "\n** Setting up project **\n--")
-
-message(STATUS "\n##################################################################################")
-message(STATUS "\n** Setting up toolchain **\n--")
-
 project(baremetal-main
     DESCRIPTION "Baremetal overall project")
 
@@ -231,5 +226,10 @@ else()
     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
 endif()
 
+option(BUILD_TUTORIALS "Build all tutorials" ON)
+
 add_subdirectory(code)
-add_subdirectory(tutorial)
+
+if(BUILD_TUTORIALS)
+    add_subdirectory(tutorial)
+endif()

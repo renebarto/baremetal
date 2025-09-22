@@ -1,5 +1,5 @@
-project(demo
-    DESCRIPTION "Demo application"
+project(06-console-uart1
+    DESCRIPTION "Tutorial 06 console UART1"
     LANGUAGES CXX ASM)
 
 message(STATUS "\n**********************************************************************************\n")
@@ -25,7 +25,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
-    baremetal
+    baremetal-06
     )
 
 set(PROJECT_LIBS

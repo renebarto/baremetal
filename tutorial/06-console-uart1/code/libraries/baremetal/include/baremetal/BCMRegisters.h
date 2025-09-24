@@ -44,8 +44,8 @@
 
 #pragma once
 
-#include <baremetal/Macros.h>
-#include <baremetal/Types.h>
+#include "baremetal/Macros.h"
+#include "baremetal/Types.h"
 
 #if BAREMETAL_RPI_TARGET == 3
 /// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 3

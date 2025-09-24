@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : Util.cpp
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common instructions for e.g. synchronization
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,27 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/Util.h"
 
 /// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+/// Standard C library utility functions implementation
 
-/// @brief NOP instruction
-#define NOP()              asm volatile("nop")
+/// <summary>
+/// Standard C memset function. Fills memory pointed to by buffer with value bytes over length bytes
+/// </summary>
+/// <param name="buffer">Buffer pointer</param>
+/// <param name="value">Value used for filling the buffer (only lower byte is used)</param>
+/// <param name="length">Size of the buffer to fill in bytes</param>
+/// <returns>Pointer to buffer</returns>
+void* memset(void* buffer, int value, size_t length)
+{
+    uint8* ptr = reinterpret_cast<uint8*>(buffer);
 
-/// @brief Data sync barrier
-#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
-
-/// @brief Wait for interrupt
-#define WaitForInterrupt() asm volatile("wfi")
-
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableFIQs()      asm volatile("msr DAIFSet, #1")
+    while (length-- > 0)
+    {
+        *ptr++ = static_cast<char>(value);
+    }
+    return buffer;
+}

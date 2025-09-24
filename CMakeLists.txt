@@ -228,8 +228,9 @@ endif()
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 
-add_subdirectory(code)
-
+if (NOT ${BAREMETAL_RPI_TARGET} EQUAL 5)
+    add_subdirectory(code)
+endif()
 if(BUILD_TUTORIALS)
     add_subdirectory(tutorial)
 endif()

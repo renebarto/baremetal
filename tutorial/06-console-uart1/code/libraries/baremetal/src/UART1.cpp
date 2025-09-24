@@ -85,7 +85,7 @@ UART1::UART1()
 ///
 ///  Set baud rate and characteristics (8N1) and map to GPIO. Baud rate maximum is 115200
 /// </summary>
-/// <param name="baudrate"></param>
+/// <param name="baudrate">Baud rate to set</param>
 void UART1::Initialize(unsigned baudrate)
 {
     if (m_isInitialized)
@@ -105,12 +105,11 @@ void UART1::Initialize(unsigned baudrate)
     MemoryAccess::Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);        // RTS high
     MemoryAccess::Write32(RPI_AUX_MU_IER, 0);                              // Disable interrupts
     MemoryAccess::Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE |
-                                              RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR);
-    // Clear FIFO
-    MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(baudrate)); // Set baudrate
+                                              RPI_AUX_MU_IIR_TX_FIFO_CLEAR |
+                                              RPI_AUX_MU_IIR_RX_FIFO_CLEAR);                       // Clear FIFO
+    MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(baudrate));                       // Set baudrate
+    MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX); // Enable Tx, Rx
 
-    MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);
-    // Enable Tx, Rx
     m_baudrate = baudrate;
     m_isInitialized = true;
 }

@@ -729,11 +729,11 @@ Note however, that the code I show below will not be found as we don't have the 
 (gdb) b main.cpp:55
 Breakpoint 1 at 0x8080c: file ../code/applications/demo/src/main.cpp, line 55.
 (gdb) l
-41      #include <baremetal/MachineInfo.h>
-42      #include <baremetal/Random.h>
-43      #include <baremetal/Serialization.h>
-44      #include <baremetal/Timer.h>
-45      #include <baremetal/UART0.h>
+41      #include "baremetal/MachineInfo.h"
+42      #include "baremetal/Random.h"
+43      #include "baremetal/Serialization.h"
+44      #include "baremetal/Timer.h"
+45      #include "baremetal/UART0.h"
 46
 47      using namespace baremetal;
 48
@@ -851,11 +851,11 @@ Note however, that the code I show below will not be found as we don't have the 
 (gdb) b main
 Breakpoint 1 at 0x8080c: file /home/rene/repo/baremetal/code/applications/demo/src/main.cpp, line 55.
 (gdb) l
-41	#include <baremetal/MachineInfo.h>
-42	#include <baremetal/Random.h>
-43	#include <baremetal/Serialization.h>
-44	#include <baremetal/Timer.h>
-45	#include <baremetal/UART0.h>
+41	#include "baremetal/MachineInfo.h"
+42	#include "baremetal/Random.h"
+43	#include "baremetal/Serialization.h"
+44	#include "baremetal/Timer.h"
+45	#include "baremetal/UART0.h"
 46	
 47	using namespace baremetal;
 48	

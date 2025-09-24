@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common instructions for e.g. synchronization
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -40,24 +40,39 @@
 #pragma once
 
 /// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+/// Standard types
 
-/// @brief NOP instruction
-#define NOP()              asm volatile("nop")
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-/// @brief Data sync barrier
-#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-/// @brief Wait for interrupt
-#define WaitForInterrupt() asm volatile("wfi")
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableFIQs()      asm volatile("msr DAIFSet, #1")
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
+
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8* regaddr;

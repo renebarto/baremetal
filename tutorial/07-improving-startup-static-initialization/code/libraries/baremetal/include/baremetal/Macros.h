@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : Macros.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common instructions for e.g. synchronization
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -40,24 +40,11 @@
 #pragma once
 
 /// @file
-/// ARM instructions represented as macros for ease of use.
-///
-/// For specific registers, we also define the fields and their possible values.
+/// Generic macros
 
-/// @brief NOP instruction
-#define NOP()              asm volatile("nop")
-
-/// @brief Data sync barrier
-#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
-
-/// @brief Wait for interrupt
-#define WaitForInterrupt() asm volatile("wfi")
-
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableFIQs()      asm volatile("msr DAIFSet, #1")
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n) (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n) (1UL << (n))

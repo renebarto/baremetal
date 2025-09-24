@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : ARMInstructions.h
+// File        : SysConfig.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Common instructions for e.g. synchronization
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
@@ -40,24 +40,27 @@
 #pragma once
 
 /// @file
-/// ARM instructions represented as macros for ease of use.
+/// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
+
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
+
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
+
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
 ///
-/// For specific registers, we also define the fields and their possible values.
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
+#endif
 
-/// @brief NOP instruction
-#define NOP()              asm volatile("nop")
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
+#endif
 
-/// @brief Data sync barrier
-#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
-
-/// @brief Wait for interrupt
-#define WaitForInterrupt() asm volatile("wfi")
-
-/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
-/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
-/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
-/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
-#define DisableFIQs()      asm volatile("msr DAIFSet, #1")
+#include "baremetal/MemoryMap.h"

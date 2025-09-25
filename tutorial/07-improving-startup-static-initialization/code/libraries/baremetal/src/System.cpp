@@ -52,8 +52,7 @@
 using namespace baremetal;
 
 /// <summary>
-/// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate
-/// the System.
+/// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
 /// </summary>
 System::System()
 {
@@ -93,6 +92,9 @@ void System::Reboot()
 
     DisableIRQs();
     DisableFIQs();
+
+    for (int i = 0; i < 1000000; ++i)
+        NOP();
 
     // power off the SoC (GPU + CPU)
     auto r = MemoryAccess::Read32(RPI_PWRMGT_RSTS);
@@ -139,8 +141,6 @@ void sysinit()
 
     GetUART1().Initialize(115200);
     GetUART1().WriteString("Starting up\n");
-
-    extern int main();
 
     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
     {

@@ -101,15 +101,19 @@ Update the file `code/libraries/baremetal/src/UART1.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 ...
-282: 
-283: UART1 s_uart;
-284: 
-285: UART1& GetUART1()
-286: {
-287:     return s_uart;
-288: }
-289: 
-290: } // namespace baremetal
+281: 
+282: UART1 s_instance;
+283: 
+284: /// <summary>
+285: /// Construct the singleton UART1 device if needed, and return a reference to the instance
+286: /// </summary>
+287: /// <returns>Reference to the singleton UART1 device</returns>
+288: UART1& GetUART1()
+289: {
+290:     return s_instance;
+291: }
+292: 
+293: } // namespace baremetal
 ```
 
 We define a variable named `s_uart` here, and in the `GetUART1()` function, we first call `Initialize()` on it (which guards against multiple initialization), and then return the instance.
@@ -178,11 +182,11 @@ File: code/libraries/baremetal/include/baremetal/System.h
 52: class System
 53: {
 54:     /// <summary>
-55:     /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-56:     /// </summary>
-57:     /// <returns>Reference to the singleton system instance</returns>
-58:     friend System &GetSystem();
-59: 
+55:     /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend
+56:     /// function of class System
+57:     /// </summary>
+58:     /// <returns>Reference to the singleton system instance</returns>
+59:     friend System& GetSystem();
 60: 
 61: public:
 62:     System();
@@ -191,7 +195,7 @@ File: code/libraries/baremetal/include/baremetal/System.h
 65:     [[noreturn]] void Reboot();
 66: };
 67: 
-68: System &GetSystem();
+68: System& GetSystem();
 69: 
 70: } // namespace baremetal
 71: 
@@ -207,35 +211,34 @@ File: code/libraries/baremetal/include/baremetal/System.h
 81: };
 82: 
 83: #ifdef __cplusplus
-84: extern "C"
-85: {
-86: #endif
-87: 
-88: /// <summary>
-89: /// Forward declared main() function
-90: /// </summary>
-91: /// <returns>Integer cast of ReturnCode</returns>
-92: extern int main();
-93: /// <summary>
-94: /// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-95: /// </summary>
-96: [[noreturn]] void sysinit();
-97: 
-98: #ifdef __cplusplus
-99: }
-100: #endif
+84: extern "C" {
+85: #endif
+86: 
+87: /// <summary>
+88: /// Forward declared main() function
+89: /// </summary>
+90: /// <returns>Integer cast of ReturnCode</returns>
+91: extern int main();
+92: /// <summary>
+93: /// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+94: /// </summary>
+95: [[noreturn]] void sysinit();
+96: 
+97: #ifdef __cplusplus
+98: }
+99: #endif
 ```
 
 - Line 52-66: We declare the class System
-- Line 58: We declare a friend function `GetSystem()` in the System class
+- Line 54-59: We declare a friend function `GetSystem()` in the System class
 - Line 64: We declare the method Halt(), which halts the system, and will not return (hence the `[[noreturn]]` attribute)
-- Line 64: We declare the method Reboot(), which restarts the system, and will not return (hence the `[[noreturn]]` attribute)
+- Line 65: We declare the method Reboot(), which restarts the system, and will not return (hence the `[[noreturn]]` attribute)
 - Line 68: We declare the actual function `GetSystem()` to return a reference to the (singleton) System instance
 - Line 72-81: We add an enum for the application return code, to enable forcing system halt or system restart
-- Line 83-86: We enter the `C` linkage region, which mean the function declared next will have C names when linking, instead of the normal C++ mangled names
-- Line 88-92: We forward declare the main() function. Notice that it is wrapped inside `extern "C" { }`. This enforces the functions inside this construction to have C linkage
-- Line 93-96: We declare the sysinit() method, which will be called from startup assembly code, and will eventually call main()
-- Line 98-100: We leave the `C` linkage region again
+- Line 83-85: We enter the `C` linkage region, which mean the function declared next will have C names when linking, instead of the normal C++ mangled names
+- Line 87-91: We forward declare the main() function. Notice that it is wrapped inside `extern "C" { }`. This enforces the functions inside this construction to have C linkage
+- Line 92-95: We declare the sysinit() method, which will be called from startup assembly code, and will eventually call main()
+- Line 97-99: We leave the `C` linkage region again
 
 ### System.cpp {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPROVING_STARTUP___STEP_1_SYSTEMCPP}
 
@@ -335,52 +338,51 @@ File: code/libraries/baremetal/src/System.cpp
 90: }
 91: 
 92: #ifdef __cplusplus
-93: extern "C"
-94: {
-95: #endif
-96: 
-97: void sysinit()
-98: {
-99:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
-100:     EnableIRQs(); // go to TASK_LEVEL
-101: 
-102:     // clear BSS
-103:     extern unsigned char __bss_start;
-104:     extern unsigned char __bss_end;
-105:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
-106: 
-107:     // halt, if KERNEL_MAX_SIZE is not properly set
-108:     // cannot inform the user here
-109:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
-110:     {
-111:         GetSystem().Halt();
-112:     }
-113: 
-114:     GetUART1().Initialize(115200);
-115:     GetUART1().WriteString("Starting up\n");
-116: 
-117:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
-118:     {
-119:         GetSystem().Reboot();
-120:     }
-121: 
-122:     GetSystem().Halt();
-123: }
-124: 
-125: #ifdef __cplusplus
-126: }
-127: #endif
-128: 
-129: System s_system;
-130: 
-131: /// <summary>
-132: /// Construct the singleton system handler if needed, and return a reference to the instance
-133: /// </summary>
-134: /// <returns>Reference to the singleton system handler</returns>
-135: System &baremetal::GetSystem()
-136: {
-137:     return s_system;
-138: }
+93: extern "C" {
+94: #endif
+95: 
+96: void sysinit()
+97: {
+98:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
+99:     EnableIRQs(); // go to TASK_LEVEL
+100: 
+101:     // clear BSS
+102:     extern unsigned char __bss_start;
+103:     extern unsigned char __bss_end;
+104:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
+105: 
+106:     // halt, if KERNEL_MAX_SIZE is not properly set
+107:     // cannot inform the user here
+108:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
+109:     {
+110:         GetSystem().Halt();
+111:     }
+112: 
+113:     GetUART1().Initialize(115200);
+114:     GetUART1().WriteString("Starting up\n");
+115: 
+116:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
+117:     {
+118:         GetSystem().Reboot();
+119:     }
+120: 
+121:     GetSystem().Halt();
+122: }
+123: 
+124: #ifdef __cplusplus
+125: }
+126: #endif
+127: 
+128: System s_system;
+129: 
+130: /// <summary>
+131: /// Construct the singleton system handler if needed, and return a reference to the instance
+132: /// </summary>
+133: /// <returns>Reference to the singleton system handler</returns>
+134: System& baremetal::GetSystem()
+135: {
+136:     return s_system;
+137: }
 ```
 
 - Line 54-59: We implement the `System` constructor.
@@ -390,22 +392,22 @@ This also calls some functions (actually assembly instructions) that we will imp
 As part of the execution we disable fast interrupts (FIQ) and normal interrupts (IRQ).
 Note that the functions `DisableFIQs` and `DisableIRQs` still need to be implemented.
 This also calls some other assembly functions that we will implement shortly.
-- Line 92-95: We enter the `C` linkage region.
-- Line 97-123: We implement `sysinit()`.
-  - Line 99: We enable fast interrupts (FIQ). Note that the function `EnableFIQs` still needs to be implemented.
-  - Line 100: We enable normal interrupts (IRQ). Note that the function `EnableIRQs` still needs to be implemented.
-  - Line 103-104: We declare the variables for the bss section, they are defined in `baremetal.ld`
-  - Line 105: We clear the bss section with a call to the standard C function memset.
+- Line 92-94: We enter the `C` linkage region.
+- Line 96-122: We implement `sysinit()`.
+  - Line 98: We enable fast interrupts (FIQ). Note that the function `EnableFIQs` still needs to be implemented.
+  - Line 99: We enable normal interrupts (IRQ). Note that the function `EnableIRQs` still needs to be implemented.
+  - Line 102-103: We declare the variables for the bss section, they are defined in `baremetal.ld`
+  - Line 104: We clear the bss section with a call to the standard C function memset.
 Note that the function `memset` (normally a standard function) still needs to be implemented.
 Note also that we no longer use the __bss_size variable. We can remove this, as well as the clearing code in the startup assembly.
-  - Line 109-112: We perform a sanity check that our memory region contains the full bss section. If not, we halt the system.
-  - Line 114: We initialize the UART to 115200 baud.
-  - Line 115: We write the first line to the UART.
-  - Line 117-120: We call `main()`. If it returned `ReturnCode::ExitReboot`, we call `System::Reboot` on the singleton System object
-  - Line 122: Otherwise we call `System::Halt` on the singleton System object
-- Line 125-127: We exit the `C` linkage region again.
-- Line 129: We define an instance of the System class named `s_system` here
-- Line 131-138: We define the `GetSystem()` function to return the instance `s_system`.
+  - Line 108-111: We perform a sanity check that our memory region contains the full bss section. If not, we halt the system.
+  - Line 113: We initialize the UART to 115200 baud.
+  - Line 114: We write the first line to the UART.
+  - Line 116-119: We call `main()`. If it returned `ReturnCode::ExitReboot`, we call `System::Reboot` on the singleton System object
+  - Line 121: Otherwise we call `System::Halt` on the singleton System object
+- Line 124-126: We exit the `C` linkage region again.
+- Line 128: We define an instance of the System class named `s_system` here
+- Line 130-137: We define the `GetSystem()` function to return the instance `s_system`.
 We should have defined `s_system` as static, but that does not work so far, as we cannot inititialize static variables yet. We'll get to that.
 
 Notice that we include a new header in the top of the source:
@@ -786,46 +788,45 @@ Update the file `code/libraries/baremetal/src/System.cpp`:
 ```cpp
 File: \code/libraries/baremetal/src/System.cpp
 ...
-97: void sysinit()
-98: {
-99:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
-100:     EnableIRQs(); // go to TASK_LEVEL
-101: 
-102:     // clear BSS
-103:     extern unsigned char __bss_start;
-104:     extern unsigned char __bss_end;
-105:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
-106: 
-107:     // halt, if KERNEL_MAX_SIZE is not properly set
-108:     // cannot inform the user here
-109:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
-110:     {
-111:         GetSystem().Halt();
-112:     }
-113: 
-114:     // Call constructors of static objects
-115:     extern void (*__init_start)(void);
-116:     extern void (*__init_end)(void);
-117:     for (void (**func)(void) = &__init_start; func < &__init_end; func++)
-118:     {
-119:         (**func)();
-120:     }
-121: 
+96: void sysinit()
+97: {
+98:     EnableFIQs(); // go to IRQ_LEVEL, EnterCritical() will not work otherwise
+99:     EnableIRQs(); // go to TASK_LEVEL
+100: 
+101:     // clear BSS
+102:     extern unsigned char __bss_start;
+103:     extern unsigned char __bss_end;
+104:     memset(&__bss_start, 0, &__bss_end - &__bss_start);
+105: 
+106:     // halt, if KERNEL_MAX_SIZE is not properly set
+107:     // cannot inform the user here
+108:     if (MEM_KERNEL_END < reinterpret_cast<uintptr>(&__bss_end))
+109:     {
+110:         GetSystem().Halt();
+111:     }
+112: 
+113:     // Call constructors of static objects
+114:     extern void (*__init_start)(void);
+115:     extern void (*__init_end)(void);
+116:     for (void (**func)(void) = &__init_start; func < &__init_end; func++)
+117:     {
+118:         (**func)();
+119:     }
+120: 
+121:     GetUART1().Initialize(115200);
 122:     GetUART1().WriteString("Starting up\n");
 123: 
-124:     extern int main();
-125: 
-126:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
-127:     {
-128:         GetSystem().Reboot();
-129:     }
-130: 
-131:     GetSystem().Halt();
-132: }
+124:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
+125:     {
+126:         GetSystem().Reboot();
+127:     }
+128: 
+129:     GetSystem().Halt();
+130: }
 ...
 ```
 
-We've added line 114-120 here, which loop through the initialization array generated by the compiler.
+We've added line 113-119 here, which loop through the initialization array generated by the compiler.
 This is part of the `.init_array` section in `baremetal.ld', which also defines the start and end of the array:
 
 ```text
@@ -853,23 +854,23 @@ Update 'code/libraries\baremetal/include/baremetal/System.cpp':
 ```cpp
 File: code/libraries\baremetal/include/baremetal/System.cpp
 ...
-134: #ifdef __cplusplus
-135: }
-136: #endif
-137: 
-138: /// <summary>
-139: /// Construct the singleton system handler if needed, and return a reference to the instance
-140: /// </summary>
-141: /// <returns>Reference to the singleton system handler</returns>
-142: System& baremetal::GetSystem()
-143: {
-144:     static System value;
-145:     return value;
-146: }
+132: #ifdef __cplusplus
+133: }
+134: #endif
+135: 
+136: /// <summary>
+137: /// Construct the singleton system handler if needed, and return a reference to the instance
+138: /// </summary>
+139: /// <returns>Reference to the singleton system handler</returns>
+140: System& baremetal::GetSystem()
+141: {
+142:     static System value;
+143:     return value;
+144: }
 ```
 
-- Line 138: We removed the variables `s_system`.
-- Line 138-146: We update `GetSystem()`. Note how we add a local static variable to the function.
+- Line 136: We removed the variables `s_system`.
+- Line 136-144: We update `GetSystem()`. Note how we add a local static variable to the function.
 This will make sure there is only one instantiation of this variable.
 Also this will make sure the variable is instantiated only when the function is first called.
 
@@ -882,22 +883,24 @@ Update 'code/libraries\baremetal/include/baremetal/UART1.cpp':
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 ...
-283: /// <summary>
-284: /// Construct the singleton UART1 device if needed, and return a reference to the instance
-285: /// </summary>
-286: /// <returns>Reference to the singleton UART1 device</returns>
-287: UART1& GetUART1()
-288: {
-289:     static UART1 value;
-290: 
-291:     return value;
-292: }
-293: 
-294: } // namespace baremetal
+File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\UART1.cpp
+282: /// <summary>
+283: /// Construct the singleton UART1 device if needed, and return a reference to the instance
+284: /// </summary>
+285: /// <returns>Reference to the singleton UART1 device</returns>
+286: UART1& GetUART1()
+287: {
+288:     static UART1 value;
+289: 
+290:     return value;
+291: }
+292: 
+293: } // namespace baremetal
+294: 
 ```
 
-- Line 283: We removed the variables `s_uart`.
-- Line 283-292: We update `GetUART1()`. Note how we add a local static variable to the function.
+- Line 282: We removed the variables `s_instance`.
+- Line 282-291: We update `GetUART1()`. Note how we add a local static variable to the function.
 This will make sure there is only one instantiation of this variable.
 Also this will make sure the variable is instantiated only when the function is first called.
 Before we can use UART0, we do need to initialize, which we will do in `main()`.
@@ -1020,34 +1023,34 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 92: 
 93: // Byte index into the guard object
 94: /// @brief Index to byte signalling that the static object was acquired and released
-95: #define INDEX_HAS_RUN		0
+95: #define INDEX_HAS_RUN 0
 96: /// @brief Index to byte signalling that the static object was acquired but not released yes
-97: #define INDEX_IN_USE		1
+97: #define INDEX_IN_USE  1
 98: 
 99: /// <summary>
 100: /// Acquire guard for static initialization
 101: /// </summary>
 102: /// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
 103: /// <returns>Returns 1 if acquire is successful, 0 if already done</returns>
-104: extern "C" int __cxa_guard_acquire(volatile uint8 * guardObject)
+104: extern "C" int __cxa_guard_acquire(volatile uint8* guardObject)
 105: {
 106:     // Did we already initialize this object?
 107:     if (guardObject[INDEX_HAS_RUN] != 0)
 108:     {
-109:         return 0;                           // Do not run constructor
+109:         return 0; // Do not run constructor
 110:     }
 111: 
 112:     // Lock this guard while acquired
 113:     guardObject[INDEX_IN_USE] = 1;
 114: 
-115:     return 1;                               // Run constructor
+115:     return 1; // Run constructor
 116: }
 117: 
 118: /// <summary>
 119: /// Release the acquired guard
 120: /// </summary>
 121: /// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
-122: extern "C" void __cxa_guard_release(volatile uint8 * guardObject)
+122: extern "C" void __cxa_guard_release(volatile uint8* guardObject)
 123: {
 124:     // Set acquire / release cycle complete
 125:     guardObject[INDEX_HAS_RUN] = 1;
@@ -1058,7 +1061,7 @@ File: code/libraries/baremetal/src/CXAGuard.cpp
 130: /// Abort the static object initialization, release the acquired object
 131: /// </summary>
 132: /// <param name="guardObject">Guard object pointer to two bytes for a static object</param>
-133: extern "C" void __cxa_guard_abort(volatile uint8 * guardObject)
+133: extern "C" void __cxa_guard_abort(volatile uint8* guardObject)
 134: {
 135:     guardObject[INDEX_IN_USE] = 0;
 136: }
@@ -1097,39 +1100,39 @@ Update the file code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ...
-74: //---------------------------------------------
-75: // Raspberry Pi Power Management
-76: //---------------------------------------------
-77: 
-78: // The power management features of Raspberry Pi are not well documented.
-79: // Most information is extracted from the source code of an old BCM2835 watchdog timer
-80: // A good reference is https://elixir.bootlin.com/linux/latest/source/drivers/watchdog/bcm2835_wdt.c or
-81: // https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
-82: 
-83: /// @brief Raspberry Pi Power management Registers base address. See @ref RASPBERRY_PI_POWER_MANAGEMENT
-84: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
-85: /// @brief Raspberry Pi Power management reset control register
-86: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
-87: /// @brief Raspberry Pi Power management reset sector register
-88: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
-89: /// @brief Raspberry Pi Power management watchdog register
-90: #define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
-91: /// @brief Raspberry Pi Power management magic number, to be ORed with value when setting register values
-92: #define RPI_PWRMGT_WDOG_MAGIC           0x5A000000
-93: /// @brief Raspberry Pi Power management clear mask.
-94: #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
-95: /// @brief Raspberry Pi Power management full reset bit. Can be used to check if watchdog timer is still running
-96: #define RPI_PWRMGT_RSTC_REBOOT          BIT1(5)
-97: /// @brief Raspberry Pi Power management watchdog timer reset code
-98: #define RPI_PWRMGT_RSTC_RESET           0x00000102
-99: /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
-100: #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
-101: /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
-102: #define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01)  << 0 | (((x) >> 1) & 0x01) << 2 |  (((x) >> 2) & 0x01) << 4 |  (((x) >> 3) & 0x01) << 6 |  (((x) >> 4) & 0x01) << 8 |  (((x) >> 5) & 0x01) << 10
-103: 
-104: //---------------------------------------------
-105: // Raspberry Pi GPIO
-106: //---------------------------------------------
+70: //---------------------------------------------
+71: // Raspberry Pi Power Management
+72: //---------------------------------------------
+73: 
+74: // The power management features of Raspberry Pi are not well documented.
+75: // Most information is extracted from the source code of an old BCM2835 watchdog timer
+76: // A good reference is https://elixir.bootlin.com/linux/latest/source/drivers/watchdog/bcm2835_wdt.c or
+77: // https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
+78: 
+79: /// @brief Raspberry Pi Power management Registers base address. See @ref RASPBERRY_PI_POWER_MANAGEMENT
+80: #define RPI_PWRMGT_BASE                 RPI_BCM_IO_BASE + 0x00100000
+81: /// @brief Raspberry Pi Power management reset control register
+82: #define RPI_PWRMGT_RSTC                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x0000001C)
+83: /// @brief Raspberry Pi Power management reset sector register
+84: #define RPI_PWRMGT_RSTS                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000020)
+85: /// @brief Raspberry Pi Power management watchdog register
+86: #define RPI_PWRMGT_WDOG                 reinterpret_cast<regaddr>(RPI_PWRMGT_BASE + 0x00000024)
+87: /// @brief Raspberry Pi Power management magic number, to be ORed with value when setting register values
+88: #define RPI_PWRMGT_WDOG_MAGIC           0x5A000000
+89: /// @brief Raspberry Pi Power management clear mask.
+90: #define RPI_PWRMGT_RSTC_CLEAR           0xFFFFFFCF
+91: /// @brief Raspberry Pi Power management full reset bit. Can be used to check if watchdog timer is still running
+92: #define RPI_PWRMGT_RSTC_REBOOT          BIT1(5)
+93: /// @brief Raspberry Pi Power management watchdog timer reset code
+94: #define RPI_PWRMGT_RSTC_RESET           0x00000102
+95: /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
+96: #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
+97: /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
+98: #define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
+99: 
+100: //---------------------------------------------
+101: // Raspberry Pi GPIO
+102: //---------------------------------------------
 ...
 ```
 
@@ -1200,19 +1203,22 @@ File: code/libraries/baremetal/src/System.cpp
 93:     DisableIRQs();
 94:     DisableFIQs();
 95: 
-96:     // power off the SoC (GPU + CPU)
-97:     auto r = MemoryAccess::Read32(RPI_PWRMGT_RSTS);
-98:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
-99:     MemoryAccess::Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-100:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
-101:     MemoryAccess::Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
-102: 
-103:     for (;;) // Satisfy [[noreturn]]
-104:     {
-105:         DataSyncBarrier();
-106:         WaitForInterrupt();
-107:     }
-108: }
+96:     for (int i = 0; i < 1000000; ++i)
+97:         NOP();
+98: 
+99:     // power off the SoC (GPU + CPU)
+100:     auto r = MemoryAccess::Read32(RPI_PWRMGT_RSTS);
+101:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
+102:     MemoryAccess::Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
+103:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+104:     MemoryAccess::Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
+105: 
+106:     for (;;) // Satisfy [[noreturn]]
+107:     {
+108:         DataSyncBarrier();
+109:         WaitForInterrupt();
+110:     }
+111: }
 ...
 ```
 
@@ -1252,7 +1258,7 @@ File: code/applications/demo/src/main.cpp
 ```
 
 - Line 16: Here we use a variable to retrieve the UART instance, note that we use `auto&` here, forgetting the reference forces a copy, which is not desired.
-- Line 19: We simply tell the user to type a character
+- Line 19: We tell the user to type a character
 - Line 21-25: We read a character and loop until it is either `h` or `r`
 - Line 27: We return the correct return code depending on the choice
 

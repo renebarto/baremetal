@@ -215,7 +215,7 @@
 #define AUX_UART_CLOCK 250000000
 #elif BAREMETAL_RPI_TARGET == 4
 /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 4
-#define AUX_UART_CLOCK 500000000
+#define AUX_UART_CLOCK 267300000
 #else
 // Not supported yet
 #endif

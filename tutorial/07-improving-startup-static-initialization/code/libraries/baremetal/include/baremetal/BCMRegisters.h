@@ -92,107 +92,86 @@
 #define RPI_PWRMGT_RSTC_REBOOT          BIT1(5)
 /// @brief Raspberry Pi Power management watchdog timer reset code
 #define RPI_PWRMGT_RSTC_RESET           0x00000102
-/// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a
-/// combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
+/// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
 #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
 /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
-#define RPI_PARTITIONVALUE(x)                                                                                          \
-    (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 |        \
-        (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
+#define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
 
 //---------------------------------------------
 // Raspberry Pi GPIO
 //---------------------------------------------
 
 /// @brief Raspberry Pi GPIO registers base address. See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_BASE    RPI_BCM_IO_BASE + 0x00200000
+#define RPI_GPIO_BASE                   RPI_BCM_IO_BASE + 0x00200000
 /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL0 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000000)
+#define RPI_GPIO_GPFSEL0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000000)
 /// @brief Raspberry Pi GPIO function select register 1 (GPIO 10..19) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL1 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000004)
+#define RPI_GPIO_GPFSEL1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000004)
 /// @brief Raspberry Pi GPIO function select register 2 (GPIO 20..29) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL2 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000008)
+#define RPI_GPIO_GPFSEL2                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000008)
 /// @brief Raspberry Pi GPIO function select register 3 (GPIO 30..39) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL3 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000000C)
+#define RPI_GPIO_GPFSEL3                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000000C)
 /// @brief Raspberry Pi GPIO function select register 4 (GPIO 40..49) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL4 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000010)
+#define RPI_GPIO_GPFSEL4                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000010)
 /// @brief Raspberry Pi GPIO function select register 5 (GPIO 50..53) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFSEL5 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000014)
+#define RPI_GPIO_GPFSEL5                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000014)
 /// @brief Raspberry Pi GPIO set register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPSET0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000001C)
+#define RPI_GPIO_GPSET0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000001C)
 /// @brief Raspberry Pi GPIO set register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPSET1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000020)
+#define RPI_GPIO_GPSET1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000020)
 /// @brief Raspberry Pi GPIO clear register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPCLR0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000028)
+#define RPI_GPIO_GPCLR0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000028)
 /// @brief Raspberry Pi GPIO clear register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPCLR1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000002C)
+#define RPI_GPIO_GPCLR1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000002C)
 /// @brief Raspberry Pi GPIO level register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPLEV0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000034)
+#define RPI_GPIO_GPLEV0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000034)
 /// @brief Raspberry Pi GPIO level register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPLEV1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000038)
+#define RPI_GPIO_GPLEV1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000038)
 /// @brief Raspberry Pi GPIO event detected register 0 (GPIO 0..31) (1 bit / GPIO) (R). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPEDS0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000040)
+#define RPI_GPIO_GPEDS0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000040)
 /// @brief Raspberry Pi GPIO event detected register 1 (GPIO 32..53) (1 bit / GPIO) (R). See @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPEDS1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000044)
-/// @brief Raspberry Pi GPIO rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPREN0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000004C)
-/// @brief Raspberry Pi GPIO rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPREN1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000050)
-/// @brief Raspberry Pi GPIO falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFEN0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000058)
-/// @brief Raspberry Pi GPIO falling edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPFEN1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000005C)
-/// @brief Raspberry Pi GPIO high level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPHEN0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000064)
-/// @brief Raspberry Pi GPIO high level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPHEN1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000068)
-/// @brief Raspberry Pi GPIO low level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPLEN0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000070)
-/// @brief Raspberry Pi GPIO low level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref
-/// RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPLEN1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000074)
-/// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See
-/// @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPAREN0 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000007C)
-/// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See
-/// @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPAREN1 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000080)
-/// @brief Raspberry Pi GPIO asynchronous falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See
-/// @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPAFEN0 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000088)
-/// @brief Raspberry Pi GPIO asynchronous fallign edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See
-/// @ref RASPBERRY_PI_GPIO
-#define RPI_GPIO_GPAFEN1 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000008C)
+#define RPI_GPIO_GPEDS1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000044)
+/// @brief Raspberry Pi GPIO rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPREN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000004C)
+/// @brief Raspberry Pi GPIO rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPREN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000050)
+/// @brief Raspberry Pi GPIO falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPFEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000058)
+/// @brief Raspberry Pi GPIO falling edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPFEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000005C)
+/// @brief Raspberry Pi GPIO high level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPHEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000064)
+/// @brief Raspberry Pi GPIO high level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPHEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000068)
+/// @brief Raspberry Pi GPIO low level detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPLEN0                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000070)
+/// @brief Raspberry Pi GPIO low level detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPLEN1                 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000074)
+/// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPAREN0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000007C)
+/// @brief Raspberry Pi GPIO asynchronous rising edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPAREN1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000080)
+/// @brief Raspberry Pi GPIO asynchronous falling edge detect enable register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPAFEN0                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000088)
+/// @brief Raspberry Pi GPIO asynchronous fallign edge detect enable register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
+#define RPI_GPIO_GPAFEN1                reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000008C)
 #if BAREMETAL_RPI_TARGET == 3
 /// @brief Raspberry Pi GPIO pull up/down mode register (2 bits) (R/W). Raspberry Pi 3 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUD     reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000094)
-/// @brief Raspberry Pi GPIO pull up/down clock register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). Raspberry Pi 3 only. See
-/// @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down clock register 0 (GPIO 0..31) (1 bit / GPIO) (R/W). Raspberry Pi 3 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUDCLK0 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x00000098)
-/// @brief Raspberry Pi GPIO pull up/down clock register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). Raspberry Pi 3 only. See
-/// @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down clock register 1 (GPIO 32..53) (1 bit / GPIO) (R/W). Raspberry Pi 3 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUDCLK1 reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x0000009C)
 #elif BAREMETAL_RPI_TARGET == 4
 /// @brief Raspberry Pi GPIO pull up/down pin multiplexer register. Undocumented
 #define RPI_GPIO_GPPINMUXSD reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000D0)
-/// @brief Raspberry Pi GPIO pull up/down mode register 0 (GPIO 0..15) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only. See
-/// @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down mode register 0 (GPIO 0..15) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUPPDN0  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000E4)
-/// @brief Raspberry Pi GPIO pull up/down mode register 1 (GPIO 16..31) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only.
-/// See @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down mode register 1 (GPIO 16..31) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUPPDN1  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000E8)
-/// @brief Raspberry Pi GPIO pull up/down mode register 2 (GPIO 32..47) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only.
-/// See @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down mode register 2 (GPIO 32..47) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUPPDN2  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000EC)
-/// @brief Raspberry Pi GPIO pull up/down mode register 3 (GPIO 48..53) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only.
-/// See @ref RASPBERRY_PI_GPIO
+/// @brief Raspberry Pi GPIO pull up/down mode register 3 (GPIO 48..53) (2 bits / GPIO) (R/W). Raspberry Pi 4/5 only. See @ref RASPBERRY_PI_GPIO
 #define RPI_GPIO_GPPUPPDN3  reinterpret_cast<regaddr>(RPI_GPIO_BASE + 0x000000F0)
 #else // RPI target 5
 // Not supported yet
@@ -256,25 +235,19 @@
 #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
 
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
 
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT1(6)
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
-/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref
-/// RASPBERRY_PI_UART1
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
 
 /// @brief Raspberry Pi Mini UART (UART1) Line Control register values

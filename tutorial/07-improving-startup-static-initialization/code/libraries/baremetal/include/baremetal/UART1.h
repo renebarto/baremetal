@@ -116,8 +116,7 @@ enum class GPIOPullMode
 class UART1
 {
     /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend
-    /// function of class UART1
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend  function of class UART1
     /// </summary>
     /// <param name="baudrate">Baud rate to set</param>
     /// <returns>Reference to the singleton UART1 instance</returns>

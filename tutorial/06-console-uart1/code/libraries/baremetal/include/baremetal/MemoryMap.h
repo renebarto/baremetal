@@ -42,8 +42,7 @@
 /// @file
 /// Memory map definitions
 ///
-/// Some of the definitions could be pre-defined in either SysConfig.h or by the build, so include SysConfig.h instead
-/// of MemoryMap.h directly
+/// Some of the definitions could be pre-defined in either SysConfig.h or by the build, so include SysConfig.h instead of MemoryMap.h directly
 
 /// @brief Default RAM memory size (minimum size as of RPI 3)
 #define MEM_SIZE (1024 * MEGABYTE)
@@ -77,6 +76,5 @@
 #define MEM_KERNEL_STACK        (MEM_KERNEL_END + KERNEL_STACK_SIZE)
 /// @brief Top of exception stack for core 0 (stack grows down). Also includes the stacks for cores 1..CORES-1
 #define MEM_EXCEPTION_STACK     (MEM_KERNEL_STACK + KERNEL_STACK_SIZE * (CORES - 1) + EXCEPTION_STACK_SIZE)
-/// @brief Top of exception stack for all cores (stack grows down). Also includes the exception stacks for
-/// cores 1..CORES-1
+/// @brief Top of exception stack for all cores (stack grows down). Also includes the exception stacks for cores 1..CORES-1
 #define MEM_EXCEPTION_STACK_END (MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES - 1))

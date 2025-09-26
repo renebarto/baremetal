@@ -42,12 +42,17 @@
 /// @file
 /// Generic macros
 
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED   __attribute__((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+#define ALIGN(n) __attribute__((aligned(n)))
+
 /// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK    __attribute__((weak))
+#define WEAK     __attribute__((weak))
 
 /// @brief Convert bit index into integer with zero bit
 /// @param n Bit index
-#define BIT0(n) (0)
+#define BIT0(n)  (0)
 /// @brief Convert bit index into integer with one bit
 /// @param n Bit index
-#define BIT1(n) (1UL << (n))
+#define BIT1(n)  (1UL << (n))

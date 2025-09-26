@@ -228,8 +228,11 @@ endif()
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 
-add_subdirectory(code)
+# For now disable build for Raspberry Pi 5, as nothing is added yet.
+if (NOT ${BAREMETAL_RPI_TARGET} EQUAL 5)
+    add_subdirectory(code)
 
-if(BUILD_TUTORIALS)
-    add_subdirectory(tutorial)
+    if(BUILD_TUTORIALS)
+        add_subdirectory(tutorial)
+    endif()
 endif()

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : New.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Timer
+// Class       : -
 //
-// Description : Timer class
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,49 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "stdlib/New.h"
 
 /// @file
-/// Raspberry Pi Timer
-
-#include "stdlib/Types.h"
-
-namespace baremetal {
-
-class IMemoryAccess;
+/// Basic memory allocation functions implementation
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// Standard de-allocation for single value.
 /// </summary>
-class Timer
+/// <param name="address">Address to memory block to free</param>
+void operator delete(void* address) noexcept
 {
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer& GetTimer();
+}
 
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess& m_memoryAccess;
-
-    Timer();
-
-public:
-    Timer(IMemoryAccess& memoryAccess);
-
-    static void WaitCycles(uint32 numCycles);
-
-    uint64 GetSystemTimer();
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
-};
-
-Timer& GetTimer();
-
-} // namespace baremetal
+/// <summary>
+/// Standard de-allocation with size for single value.
+/// </summary>
+/// <param name="address">Address to memory block to free</param>
+/// <param name="size">Size of memory block to free</param>
+void operator delete(void* address, size_t size) noexcept
+{
+}

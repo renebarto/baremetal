@@ -68,27 +68,6 @@
 #endif
 
 //---------------------------------------------
-// Raspberry Pi System Timer
-//---------------------------------------------
-
-/// @brief Raspberry Pi System Timer Registers base address. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_BASE                 RPI_BCM_IO_BASE + 0x00003000
-/// @brief System Timer Control / Status register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_CS                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000000)
-/// @brief System Timer Counter Lower 32 bits register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_LO                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000004)
-/// @brief System Timer Counter Higher 32 bits register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_HI                   reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000008)
-/// @brief System Timer Compare 0 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_CMP0                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x0000000C)
-/// @brief System Timer Compare 1 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_CMP1                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000010)
-/// @brief System Timer Compare 2 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_CMP2                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000014)
-/// @brief System Timer Compare 3 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
-#define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
-
-//---------------------------------------------
 // Raspberry Pi Power Management
 //---------------------------------------------
 

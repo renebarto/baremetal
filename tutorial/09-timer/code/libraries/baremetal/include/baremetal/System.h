@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : System.h
 //
 // Namespace   : baremetal
 //
-// Class       : Timer
+// Class       : System
 //
-// Description : Timer class
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,68 @@
 
 #pragma once
 
-/// @file
-/// Raspberry Pi Timer
-
 #include "stdlib/Types.h"
+
+/// @file
+/// System startup / shutdown functionality
 
 namespace baremetal {
 
 class IMemoryAccess;
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// System startup / shutdown handling class
 /// </summary>
-class Timer
+class System
 {
     /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
     /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer& GetTimer();
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System& GetSystem();
 
 private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
 
-    Timer();
+    System();
 
 public:
-    Timer(IMemoryAccess& memoryAccess);
+    System(IMemoryAccess& memoryAccess);
 
-    static void WaitCycles(uint32 numCycles);
-
-    uint64 GetSystemTimer();
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
 };
 
-Timer& GetTimer();
+System& GetSystem();
 
 } // namespace baremetal
+
+/// <summary>
+/// Return code for main() function
+/// </summary>
+enum class ReturnCode
+{
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+extern int main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
+}
+#endif

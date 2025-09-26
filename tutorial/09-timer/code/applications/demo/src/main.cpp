@@ -1,6 +1,5 @@
 #include "baremetal/ARMInstructions.h"
 #include "baremetal/System.h"
-#include "baremetal/Timer.h"
 #include "baremetal/UART1.h"
 
 /// @file
@@ -16,9 +15,6 @@ int main()
 {
     auto& uart = GetUART1();
     uart.WriteString("Hello World!\n");
-
-    uart.WriteString("Wait 5 seconds\n");
-    Timer::WaitMilliSeconds(5000);
 
     uart.WriteString("Press r to reboot, h to halt\n");
     char ch{};

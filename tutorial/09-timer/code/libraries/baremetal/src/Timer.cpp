@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : Timer.cpp
 //
 // Namespace   : baremetal
 //
@@ -37,49 +37,26 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/Timer.h"
+
+#include "baremetal/ARMInstructions.h"
 
 /// @file
-/// Raspberry Pi Timer
+/// Raspberry Pi Timer implementation
 
-#include "stdlib/Types.h"
-
-namespace baremetal {
-
-class IMemoryAccess;
+using namespace baremetal;
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// Wait for specified number of NOP statements. Busy wait
 /// </summary>
-class Timer
+/// <param name="numCycles">Number of cycles to wait</param>
+void Timer::WaitCycles(uint32 numCycles)
 {
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer& GetTimer();
-
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess& m_memoryAccess;
-
-    Timer();
-
-public:
-    Timer(IMemoryAccess& memoryAccess);
-
-    static void WaitCycles(uint32 numCycles);
-
-    uint64 GetSystemTimer();
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
-};
-
-Timer& GetTimer();
-
-} // namespace baremetal
+    if (numCycles)
+    {
+        while (numCycles--)
+        {
+            NOP();
+        }
+    }
+}

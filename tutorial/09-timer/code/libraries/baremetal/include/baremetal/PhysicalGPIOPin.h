@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : PhysicalGPIOPin.h
 //
 // Namespace   : baremetal
 //
-// Class       : Timer
+// Class       : PhysicalGPIOPin
 //
-// Description : Timer class
+// Description : Physical GPIO pin
 //
 //------------------------------------------------------------------------------
 //
@@ -39,47 +39,64 @@
 
 #pragma once
 
-/// @file
-/// Raspberry Pi Timer
+#include "baremetal/IGPIOPin.h"
+#include "baremetal/MemoryAccess.h"
 
-#include "stdlib/Types.h"
+/// @file
+/// Physical GPIO pin
 
 namespace baremetal {
 
-class IMemoryAccess;
+/// @brief GPIO function
+enum class GPIOFunction;
+
+/// @brief GPIO pull mode
+enum class GPIOPullMode;
+
+/// @brief Total count of GPIO pins, numbered from 0 through 53
+#define NUM_GPIO 54
 
 /// <summary>
-/// Timer class. For now only contains busy waiting methods
-///
-/// Note that this class is created as a singleton, using the GetTimer() function.
+/// Physical GPIO pin (i.e. available on GPIO header)
 /// </summary>
-class Timer
+class PhysicalGPIOPin : public IGPIOPin
 {
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer& GetTimer();
-
 private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
+    /// @brief Configured GPIO pin number (0..53)
+    uint8 m_pinNumber;
+    /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
+    GPIOMode m_mode;
+    /// @brief Configured GPIO function.
+    GPIOFunction m_function;
+    /// @brief Configured GPIO pull mode (only for input function).
+    GPIOPullMode m_pullMode;
+    /// @brief Current value of the GPIO pin (true for on, false for off).
+    bool m_value;
+    /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
 
-    Timer();
-
 public:
-    Timer(IMemoryAccess& memoryAccess);
+    PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    static void WaitCycles(uint32 numCycles);
+    PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    uint64 GetSystemTimer();
+    uint8 GetPinNumber() const override;
+    bool AssignPin(uint8 pinNumber) override;
 
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
+    void On() override;
+    void Off() override;
+    bool Get() override;
+    void Set(bool on) override;
+    void Invert() override;
+
+    GPIOMode GetMode();
+    bool SetMode(GPIOMode mode);
+    GPIOFunction GetFunction();
+    GPIOPullMode GetPullMode();
+    void SetPullMode(GPIOPullMode pullMode);
+
+private:
+    void SetFunction(GPIOFunction function);
 };
-
-Timer& GetTimer();
 
 } // namespace baremetal

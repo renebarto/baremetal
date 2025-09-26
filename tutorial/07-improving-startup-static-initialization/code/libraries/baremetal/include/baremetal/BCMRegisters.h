@@ -95,7 +95,9 @@
 /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
 #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
 /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
-#define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
+#define RPI_PWRMGT_PARTITIONVALUE(x)    (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
+/// @brief Convert seconds to watchdog timer value (each step is 1/65536 seconds)
+#define RPI_PWRMGT_TIMER_SECONDS(x)     ((x) << 16)
 
 //---------------------------------------------
 // Raspberry Pi GPIO

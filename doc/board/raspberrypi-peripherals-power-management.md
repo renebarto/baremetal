@@ -31,7 +31,7 @@ For more information see:
 |          |                 | 0     | Sector bit 0           | R/W | Bit 0 of sector to boot from on write
 | WDOG     | Base+0x00100024 | 31:24 | Unknown                | R/W | When writing must be set to watchdog magic number 0x5A
 |          |                 | 23:20 | Unknown                | R/W | Unknown
-|          |                 | 19:0  | Watchdog timeout value | R/W | On write sets watchdog timeout value in seconds, on read specifies timeout value left
+|          |                 | 19:0  | Watchdog timeout value | R/W | On write sets watchdog timeout value in 1/65536 seconds, on read specifies timeout value left
 
 Note: Sector number 0x3F is a special number, instructing the system to halt.
 

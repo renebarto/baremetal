@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : Util.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : UART1
+// Class       : -
 //
-// Description : RPI UART1 class
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,48 +39,17 @@
 
 #pragma once
 
+#include "stdlib/Types.h"
+
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Standard C library utility functions
 
-/// @brief baremetal namespace
-namespace baremetal {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class IMemoryAccess;
+void* memset(void* buffer, int value, size_t length);
 
-/// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-/// </summary>
-class UART1
-{
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
-};
-
-UART1& GetUART1();
-
-} // namespace baremetal
+#ifdef __cplusplus
+}
+#endif

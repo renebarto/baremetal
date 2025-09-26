@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : PhysicalGPIOPin.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : PhysicalGPIOPin
 //
-// Description : RPI UART1 class
+// Description : Physical GPIO pin
 //
 //------------------------------------------------------------------------------
 //
@@ -39,48 +39,64 @@
 
 #pragma once
 
-/// @file
-/// Raspberry Pi UART1 serial device declaration
+#include "baremetal/IGPIOPin.h"
+#include "baremetal/MemoryAccess.h"
 
-/// @brief baremetal namespace
+/// @file
+/// Physical GPIO pin
+
 namespace baremetal {
 
-class IMemoryAccess;
+/// @brief GPIO function
+enum class GPIOFunction;
+
+/// @brief GPIO pull mode
+enum class GPIOPullMode;
+
+/// @brief Total count of GPIO pins, numbered from 0 through 53
+#define NUM_GPIO 54
 
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Physical GPIO pin (i.e. available on GPIO header)
 /// </summary>
-class UART1
+class PhysicalGPIOPin : public IGPIOPin
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
 private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
+    /// @brief Configured GPIO pin number (0..53)
+    uint8 m_pinNumber;
+    /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
+    GPIOMode m_mode;
+    /// @brief Configured GPIO function.
+    GPIOFunction m_function;
+    /// @brief Configured GPIO pull mode (only for input function).
+    GPIOPullMode m_pullMode;
+    /// @brief Current value of the GPIO pin (true for on, false for off).
+    bool m_value;
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
 
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
+    PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+
+    uint8 GetPinNumber() const override;
+    bool AssignPin(uint8 pinNumber) override;
+
+    void On() override;
+    void Off() override;
+    bool Get() override;
+    void Set(bool on) override;
+    void Invert() override;
+
+    GPIOMode GetMode();
+    bool SetMode(GPIOMode mode);
+    GPIOFunction GetFunction();
+    GPIOPullMode GetPullMode();
+    void SetPullMode(GPIOPullMode pullMode);
+
+private:
+    void SetFunction(GPIOFunction function);
 };
-
-UART1& GetUART1();
 
 } // namespace baremetal

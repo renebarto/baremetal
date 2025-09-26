@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : SysConfig.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : -
 //
-// Description : RPI UART1 class
+// Description : System configuration defines
 //
 //------------------------------------------------------------------------------
 //
@@ -40,47 +40,27 @@
 #pragma once
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 
-/// @brief baremetal namespace
-namespace baremetal {
+/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+#define CORES    4
 
-class IMemoryAccess;
+/// @brief Size of 1 Megabyte
+#define MEGABYTE 0x100000
+/// @brief Size of 1 Gigabyte
+#define GIGABYTE 0x40000000ULL
 
-/// <summary>
-/// Encapsulation for the UART1 device.
+/// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-/// </summary>
-class UART1
-{
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+/// If your kernel image contains big data areas it may be required to
+/// increase this value. The value must be a multiple of 16 KByte.
+#ifndef KERNEL_MAX_SIZE
+#define KERNEL_MAX_SIZE (2 * MEGABYTE)
+#endif
 
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
+/// @brief Set part to be used by GPU (normally set in config.txt)
+#ifndef GPU_MEM_SIZE
+#define GPU_MEM_SIZE (64 * MEGABYTE)
+#endif
 
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
-};
-
-UART1& GetUART1();
-
-} // namespace baremetal
+#include "baremetal/MemoryMap.h"

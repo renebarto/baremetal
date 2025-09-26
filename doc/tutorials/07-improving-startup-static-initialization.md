@@ -1128,11 +1128,13 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 95: /// @brief Raspberry Pi Power management partition bit clear mask for reset sector register. Sector number is a combination of bits 0, 2, 4, 6, 8 and 10, Sector 63 is a special case forcing a halt
 96: #define RPI_PWRMGT_RSTS_PARTITION_CLEAR 0xFFFFFAAA
 97: /// @brief Convert partition to register value. Partition value bits are interspersed with 0 bits
-98: #define RPI_PARTITIONVALUE(x)           (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
-99: 
-100: //---------------------------------------------
-101: // Raspberry Pi GPIO
+98: #define RPI_PWRMGT_PARTITIONVALUE(x)    (((x) >> 0) & 0x01) << 0 | (((x) >> 1) & 0x01) << 2 | (((x) >> 2) & 0x01) << 4 | (((x) >> 3) & 0x01) << 6 | (((x) >> 4) & 0x01) << 8 | (((x) >> 5) & 0x01) << 10
+99: /// @brief Convert seconds to watchdog timer value (each step is 1/65536 seconds)
+100: #define RPI_PWRMGT_TIMER_SECONDS(x)     ((x) << 16)
+101: 
 102: //---------------------------------------------
+103: // Raspberry Pi GPIO
+104: //---------------------------------------------
 ...
 ```
 
@@ -1162,9 +1164,9 @@ File: code/libraries/baremetal/src/System.cpp
 71:     // power off the SoC (GPU + CPU)
 72:     auto r = MemoryAccess::Read32(RPI_PWRMGT_RSTS);
 73:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
-74:     r |= RPI_PARTITIONVALUE(63);                        // Partition 63 used to indicate halt
+74:     r |= RPI_PWRMGT_PARTITIONVALUE(63); // Partition 63 used to indicate halt
 75:     MemoryAccess::Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r);
-76:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+76:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_TIMER_SECONDS(1));
 77:     MemoryAccess::Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 78: 
 79:     for (;;) // Satisfy [[noreturn]]
@@ -1181,9 +1183,9 @@ File: code/libraries/baremetal/src/System.cpp
 - Line 73: We mask out bits 1, 3, 5, 7, 9, 11. These contain the sector value
 These 6 bits indicate the partition we're booting from. 
 This is normally 0, but all 1's is a special case (sector 63 means halt)
-- Line 74: We set the partition to boot from to 63, to enforce a halt, we use the macro `RPI_PARTITIONVALUE` to align the bits correctly for the register
+- Line 74: We set the partition to boot from to 63, to enforce a halt, we use the macro `RPI_PWRMGT_PARTITIONVALUE` to align the bits correctly for the register
 - Line 75: We write the result to the `RPI_PWRMGT_RSTS` register, we apparently need to add a magic number to the value.
-- Line 76: We write to the watchdog timer, the value is the magic number with 10 added for 10 seconds.
+- Line 76: We write to the watchdog timer, the value is the magic number with `RPI_PWRMGT_TIMER_SECONDS(1)` for 1 second.
 - Line 77: We write a 1 to bit 5 in the reset control register, again with the magic number, in order to trigger a reset.
 
 #### Implement System::Reboot() {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_IMPLEMENTING_HALT_AND_REBOOT___STEP_3_SYSTEMCPP_IMPLEMENT_SYSTEMREBOOT}
@@ -1210,7 +1212,7 @@ File: code/libraries/baremetal/src/System.cpp
 100:     auto r = MemoryAccess::Read32(RPI_PWRMGT_RSTS);
 101:     r &= ~RPI_PWRMGT_RSTS_PARTITION_CLEAR;
 102:     MemoryAccess::Write32(RPI_PWRMGT_RSTS, RPI_PWRMGT_WDOG_MAGIC | r); // boot from partition 0
-103:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | 10);
+103:     MemoryAccess::Write32(RPI_PWRMGT_WDOG, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_TIMER_SECONDS(1));
 104:     MemoryAccess::Write32(RPI_PWRMGT_RSTC, RPI_PWRMGT_WDOG_MAGIC | RPI_PWRMGT_RSTC_REBOOT);
 105: 
 106:     for (;;) // Satisfy [[noreturn]]

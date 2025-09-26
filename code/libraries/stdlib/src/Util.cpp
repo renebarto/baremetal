@@ -59,3 +59,22 @@ void* memset(void* buffer, int value, size_t length)
     }
     return buffer;
 }
+
+/// <summary>
+/// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
+/// </summary>
+/// <param name="dest">Destination buffer pointer</param>
+/// <param name="src">Source buffer pointer</param>
+/// <param name="length">Size of buffer to copy in bytes</param>
+/// <returns>Pointer to destination buffer</returns>
+void* memcpy(void* dest, const void* src, size_t length)
+{
+    uint8* dstPtr = reinterpret_cast<uint8*>(dest);
+    const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
+
+    while (length-- > 0)
+    {
+        *dstPtr++ = *srcPtr++;
+    }
+    return dest;
+}

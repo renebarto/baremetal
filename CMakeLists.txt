@@ -97,11 +97,11 @@ set(FLAGS_C
 # -g is added by CMake
 set(FLAGS_C_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
 # -O3 is added by CMake
-set(FLAGS_C_RELEASE -D__USE_STRING_INLINES)
+set(FLAGS_C_RELEASE -D__USE_STRING_INLINES -Wno-unused-parameter)
 # -Os is added by CMake
-set(FLAGS_C_MINSIZEREL -O3)
+set(FLAGS_C_MINSIZEREL -O3 -Wno-unused-parameter)
 # -O2 -g is added by CMake
-set(FLAGS_C_RELWITHDEBINFO )
+set(FLAGS_C_RELWITHDEBINFO -Wno-unused-parameter)
 
 set(FLAGS_CXX
     ${BAREMETAL_ARCH_CPU_OPTIONS}
@@ -125,11 +125,11 @@ set(FLAGS_CXX
 # -g is added by CMake
 set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
 # -O3 is added by CMake
-set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES)
+set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES -Wno-unused-parameter)
 # -Os is added by CMake
-set(FLAGS_CXX_MINSIZEREL -O3)
+set(FLAGS_CXX_MINSIZEREL -O3 -Wno-unused-parameter)
 # -O2 -g is added by CMake
-set(FLAGS_CXX_RELWITHDEBINFO )
+set(FLAGS_CXX_RELWITHDEBINFO -Wno-unused-parameter)
 
 set(FLAGS_ASM ${BAREMETAL_ARCH_CPU_OPTIONS})
 set(FLAGS_ASM_DEBUG -O2)
@@ -228,9 +228,8 @@ endif()
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 
-if (NOT ${BAREMETAL_RPI_TARGET} EQUAL 5)
-    add_subdirectory(code)
-endif()
+add_subdirectory(code)
+
 if(BUILD_TUTORIALS)
     add_subdirectory(tutorial)
 endif()

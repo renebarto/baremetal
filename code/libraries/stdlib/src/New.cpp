@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : New.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : UART1
+// Class       : -
 //
-// Description : RPI UART1 class
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,50 +37,24 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "stdlib/New.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
-
-/// @brief baremetal namespace
-namespace baremetal {
-
-class IMemoryAccess;
+/// Basic memory allocation functions implementation
 
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Standard de-allocation for single value.
 /// </summary>
-class UART1
+/// <param name="address">Address to memory block to free</param>
+void operator delete(void* address) noexcept
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+}
 
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
-};
-
-UART1& GetUART1();
-
-} // namespace baremetal
+/// <summary>
+/// Standard de-allocation with size for single value.
+/// </summary>
+/// <param name="address">Address to memory block to free</param>
+/// <param name="size">Size of memory block to free</param>
+void operator delete(void* address, size_t size) noexcept
+{
+}

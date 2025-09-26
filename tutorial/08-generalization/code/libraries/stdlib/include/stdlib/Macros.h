@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : Macros.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : UART1
+// Class       : -
 //
-// Description : RPI UART1 class
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -40,47 +40,14 @@
 #pragma once
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Generic macros
 
-/// @brief baremetal namespace
-namespace baremetal {
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK    __attribute__((weak))
 
-class IMemoryAccess;
-
-/// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-/// </summary>
-class UART1
-{
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
-};
-
-UART1& GetUART1();
-
-} // namespace baremetal
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n) (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n) (1UL << (n))

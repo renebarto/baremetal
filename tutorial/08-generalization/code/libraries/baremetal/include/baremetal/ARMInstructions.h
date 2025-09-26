@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : ARMInstructions.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : UART1
+// Class       : -
 //
-// Description : RPI UART1 class
+// Description : Common instructions for e.g. synchronization
 //
 //------------------------------------------------------------------------------
 //
@@ -40,47 +40,24 @@
 #pragma once
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
-
-/// @brief baremetal namespace
-namespace baremetal {
-
-class IMemoryAccess;
-
-/// <summary>
-/// Encapsulation for the UART1 device.
+/// ARM instructions represented as macros for ease of use.
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-/// </summary>
-class UART1
-{
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+/// For specific registers, we also define the fields and their possible values.
 
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
+/// @brief NOP instruction
+#define NOP()              asm volatile("nop")
 
-    UART1();
+/// @brief Data sync barrier
+#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
 
-public:
-    UART1(IMemoryAccess& memoryAccess);
+/// @brief Wait for interrupt
+#define WaitForInterrupt() asm volatile("wfi")
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read();
-    void Write(char c);
-    void WriteString(const char* str);
-};
-
-UART1& GetUART1();
-
-} // namespace baremetal
+/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
+/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
+/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
+/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define DisableFIQs()      asm volatile("msr DAIFSet, #1")

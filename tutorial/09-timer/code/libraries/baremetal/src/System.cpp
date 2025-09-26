@@ -78,8 +78,8 @@ void __cxa_atexit([[maybe_unused]] void (*func)(void* param), [[maybe_unused]] v
 }
 #endif
 
-/// @brief Wait time in milliseconds to ensure that UART info is written before system halt or reboot
-static const uint32 WaitTime = 10;
+/// @brief Wait time in cycles to ensure that UART info is written before system halt or reboot/ Each cycles is a NOP instruction
+static const uint32 NumWaitCycles = 1000000;
 
 /// <summary>
 /// Constructs a default System instance. Note that the constructor is private, so GetSystem() is needed to instantiate the System.
@@ -104,7 +104,7 @@ System::System(IMemoryAccess& memoryAccess)
 void System::Halt()
 {
     GetUART1().WriteString("Halt\n");
-    Timer::WaitMilliSeconds(WaitTime);
+    Timer::WaitCycles(NumWaitCycles);
 
     // power off the SoC (GPU + CPU)
     auto r = m_memoryAccess.Read32(RPI_PWRMGT_RSTS);
@@ -127,7 +127,7 @@ void System::Halt()
 void System::Reboot()
 {
     GetUART1().WriteString("Reboot\n");
-    Timer::WaitMilliSeconds(WaitTime);
+    Timer::WaitCycles(NumWaitCycles);
 
     DisableIRQs();
     DisableFIQs();

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Timer.h
+// File        : ARMInstructions.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Timer
+// Class       : -
 //
-// Description : Timer class
+// Description : Common instructions for e.g. synchronization
 //
 //------------------------------------------------------------------------------
 //
@@ -40,46 +40,24 @@
 #pragma once
 
 /// @file
-/// Raspberry Pi Timer
-
-#include "stdlib/Types.h"
-
-namespace baremetal {
-
-class IMemoryAccess;
-
-/// <summary>
-/// Timer class. For now only contains busy waiting methods
+/// ARM instructions represented as macros for ease of use.
 ///
-/// Note that this class is created as a singleton, using the GetTimer() function.
-/// </summary>
-class Timer
-{
-    /// <summary>
-    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
-    /// </summary>
-    /// <returns>A reference to the singleton Timer</returns>
-    friend Timer& GetTimer();
+/// For specific registers, we also define the fields and their possible values.
 
-private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
-    IMemoryAccess& m_memoryAccess;
+/// @brief NOP instruction
+#define NOP()              asm volatile("nop")
 
-    Timer();
+/// @brief Data sync barrier
+#define DataSyncBarrier()  asm volatile("dsb sy" ::: "memory")
 
-public:
-    Timer(IMemoryAccess& memoryAccess);
+/// @brief Wait for interrupt
+#define WaitForInterrupt() asm volatile("wfi")
 
-    static void WaitCycles(uint32 numCycles);
-
-    uint64 GetSystemTimer();
-
-    static void WaitMilliSeconds(uint64 msec);
-    static void WaitMicroSeconds(uint64 usec);
-};
-
-Timer& GetTimer();
-
-} // namespace baremetal
+/// @brief Enable IRQs. Clear bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define EnableIRQs()       asm volatile("msr DAIFClr, #2")
+/// @brief Disable IRQs. Set bit 1 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define DisableIRQs()      asm volatile("msr DAIFSet, #2")
+/// @brief Enable FIQs. Clear bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define EnableFIQs()       asm volatile("msr DAIFClr, #1")
+/// @brief Disable FIQs. Set bit 0 of DAIF register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_DAIF_REGISTER
+#define DisableFIQs()      asm volatile("msr DAIFSet, #1")

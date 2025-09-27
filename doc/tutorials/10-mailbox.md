@@ -1558,66 +1558,68 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 159:     /// @brief Property tags to be handled, ended by end tag (PROPTAG_END). Each tag must be aligned to 4 bytes
 160:     uint8 tags[0];
 161:     // end tag follows
-162: } PACKED;
-163: 
-164: /// @brief Property tag, one for each request
-165: struct PropertyTag
-166: {
-167:     /// @brief Property ID, see PropertyID
-168:     uint32 tagID;
-169:     /// @brief Size of property tag buffer in bytes, so excluding tagID, tagBufferSize and tagRequestResponse, must be aligned to 4 bytes
-170:     uint32 tagBufferSize;
-171:     /// @brief Size of buffer for return data in bytes and return status
-172:     uint32 tagRequestResponse;
-173:     /// @brief Property tag request and response data, padded to align to 4 bytes
-174:     uint8 tagBuffer[0];
-175: } PACKED;
-176: 
-177: /// <summary>
-178: /// Basic tag structure for a simple property request sending or receiving a 32 bit unsigned number.
-179: ///
-180: /// This is also used for sanity checks on the size of the request
-181: /// </summary>
-182: struct PropertyTagSimple
-183: {
-184:     /// @brief Tag ID of the the requested property
-185:     PropertyTag tag;
-186:     /// @brief A 32 bit unsigned value being send or requested
-187:     uint32 value;
-188: } PACKED;
-189: 
-190: /// <summary>
-191: /// End tag structure to end the tag list.
-192: ///
-193: /// This has a different structure from normal tags, as it is only the tag ID
-194: /// </summary>
-195: struct PropertyTagEnd
-196: {
-197:     /// @brief Tag ID of the the requested property
-198:     uint32 tagID;
-199: } PACKED;
-200: 
-201: /// <summary>
-202: /// Low level functionality for requests on Mailbox interface
-203: /// </summary>
-204: class RPIPropertiesInterface
-205: {
-206: private:
-207:     /// @brief Reference to mailbox for functions requested
-208:     IMailbox& m_mailbox;
-209: 
-210: public:
-211:     explicit RPIPropertiesInterface(IMailbox& mailbox);
-212: 
-213:     bool GetTag(PropertyID tagID, void* tag, unsigned tagSize);
+162: }
+163: /// @brief Indicates this struct is to be packed
+164: PACKED;
+165: 
+166: /// @brief Property tag, one for each request
+167: struct PropertyTag
+168: {
+169:     /// @brief Property ID, see PropertyID
+170:     uint32 tagID;
+171:     /// @brief Size of property tag buffer in bytes, so excluding tagID, tagBufferSize and tagRequestResponse, must be aligned to 4 bytes
+172:     uint32 tagBufferSize;
+173:     /// @brief Size of buffer for return data in bytes and return status
+174:     uint32 tagRequestResponse;
+175:     /// @brief Property tag request and response data, padded to align to 4 bytes
+176:     uint8 tagBuffer[0];
+177: } PACKED;
+178: 
+179: /// <summary>
+180: /// Basic tag structure for a simple property request sending or receiving a 32 bit unsigned number.
+181: ///
+182: /// This is also used for sanity checks on the size of the request
+183: /// </summary>
+184: struct PropertyTagSimple
+185: {
+186:     /// @brief Tag ID of the the requested property
+187:     PropertyTag tag;
+188:     /// @brief A 32 bit unsigned value being send or requested
+189:     uint32 value;
+190: } PACKED;
+191: 
+192: /// <summary>
+193: /// End tag structure to end the tag list.
+194: ///
+195: /// This has a different structure from normal tags, as it is only the tag ID
+196: /// </summary>
+197: struct PropertyTagEnd
+198: {
+199:     /// @brief Tag ID of the the requested property
+200:     uint32 tagID;
+201: } PACKED;
+202: 
+203: /// <summary>
+204: /// Low level functionality for requests on Mailbox interface
+205: /// </summary>
+206: class RPIPropertiesInterface
+207: {
+208: private:
+209:     /// @brief Reference to mailbox for functions requested
+210:     IMailbox& m_mailbox;
+211: 
+212: public:
+213:     explicit RPIPropertiesInterface(IMailbox& mailbox);
 214: 
-215: private:
-216:     size_t FillTag(PropertyID tagID, void* tag, unsigned tagSize);
-217:     bool CheckTagResult(void* tag);
-218:     bool GetTags(void* tags, unsigned tagsSize);
-219: };
-220: 
-221: } // namespace baremetal
+215:     bool GetTag(PropertyID tagID, void* tag, unsigned tagSize);
+216: 
+217: private:
+218:     size_t FillTag(PropertyID tagID, void* tag, unsigned tagSize);
+219:     bool CheckTagResult(void* tag);
+220:     bool GetTags(void* tags, unsigned tagsSize);
+221: };
+222: 
+223: } // namespace baremetal
 ```
 
 - Line 51-150: We define all the known property tag IDs as an enum type `PropertyID`.
@@ -1628,32 +1630,32 @@ This contains the fields for the mailbox buffer shown in the image in [the appli
   - requestCode: The mailbox request code (always set to 0 on request)
   - tags: The space used for the tags, as a placeholder
   - Notice that this struct has property `PACKED`
-- Line 164-175: We declare a structure for the property tag `PropertyTag`.
+- Line 166-177: We declare a structure for the property tag `PropertyTag`.
 This contains the fields for the tag shown in the image in [the application update section above](#TUTORIAL_10_MAILBOX_ADDING_THE_MAILBOX___STEP_3_UPDATE_THE_APPLICATION_CODE):
   - tagID: The property tag id
   - tagBufferSize: The size of the tag buffer
   - tagRequestResponse: The tag request / response code
   - tagBuffer: The tag buffer contents, as a placeholder
   - Notice that this struct has property `PACKED`
-- Line 177-188: We declare a structure for a simple property `PropertyTagSimple` which only holds a single 32 bit value.
+- Line 179-190: We declare a structure for a simple property `PropertyTagSimple` which only holds a single 32 bit value.
 This will also be used for sanity checks on the tag sizes. Again this has the property `PACKED`
-- Line 190-199: We declare a structure for the end tag `PropertyTagEnd` which only holds the tag ID.
+- Line 192-201: We declare a structure for the end tag `PropertyTagEnd` which only holds the tag ID.
 This will be used to end the tag list. Again this has the property `PACKED`
-- Line 201-219: We declare the RPIPropertiesInterface class.
-  - Line 207-208: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
-  - Line 211: We declare the constructor, which receives a Mailbox instance
-  - Line 213: We declare the method `GetTag()` to request a property. This has three parameters:
+- Line 203-221: We declare the RPIPropertiesInterface class.
+  - Line 209-210: We declare a reference `m_mailbox` to the mailbox instance passed in through the constructor
+  - Line 213: We declare the constructor, which receives a Mailbox instance
+  - Line 215: We declare the method `GetTag()` to request a property. This has three parameters:
     - tagID: The property tag ID, from the enum specied in `PropertyID`
     - tag: a pointer to a buffer that contains sufficient space for the tag request and its response.
 We will declare types for this per property
     - tagSize: The size of the buffer passed as `tag`
-  - Line 216: We declare a private method `FillTag()` to fill the tag information with the correct structure for the request (tag ID and tag buffer size)
-  - Line 217: We declare a private method `CheckTagResult()` to check the result of a mailbox call (verifiying the returned address)
-  - Line 218: We declare a private method `GetTags()` to perform the actual call.
+  - Line 218: We declare a private method `FillTag()` to fill the tag information with the correct structure for the request (tag ID and tag buffer size)
+  - Line 219: We declare a private method `CheckTagResult()` to check the result of a mailbox call (verifiying the returned address)
+  - Line 220: We declare a private method `GetTags()` to perform the actual call.
 This will fill in the complete mailbox buffer, in the region retrieved from the memory manager for the coherent page,
 convert the address, and use the `Mailbox` to perform the call.
 
-You will notice that the structures declared in Line 153-162, 165-175 and 182-188 use the keyword `PACKED`.
+You will notice that the structures declared in Line 153-162, 166-177 and 179-201 use the keyword `PACKED`.
 We may be using the keyword `ALIGN` as well later.
 We will add the definitions for this in `Macros.h`.
 The reason for a definition is to make it possible to redefine this for a different compiler.

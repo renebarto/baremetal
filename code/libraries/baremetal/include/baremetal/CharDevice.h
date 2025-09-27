@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : UART1.h
+// File        : CharDevice.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : CharDevice
 //
-// Description : RPI UART1 class
+// Description : Abstract character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -39,50 +39,40 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
-
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Abstract character device
 
-/// @brief baremetal namespace
+#include "baremetal/Device.h"
+
 namespace baremetal {
 
-class IMemoryAccess;
-
 /// <summary>
-/// Encapsulation for the UART1 device.
+/// Abstract character device
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Abstraction of a CharDevice that can read and write characters
 /// </summary>
-class UART1 : public CharDevice
+class CharDevice : public Device
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    virtual ~CharDevice() = default;
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    bool IsBlockDevice() override
+    {
+        return false;
+    }
+    ssize_t Read(void* buffer, size_t count) override;
+    ssize_t Write(const void* buffer, size_t count) override;
+
+    /// <summary>
+    /// Read a character
+    /// </summary>
+    /// <returns>Character read</returns>
+    virtual char Read() = 0;
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="ch">Character to be written</param>
+    virtual void Write(char ch) = 0;
 };
-
-UART1& GetUART1();
 
 } // namespace baremetal

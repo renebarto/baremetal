@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : UART1.h
+// File        : MemoryManager.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : MemoryManager
 //
-// Description : RPI UART1 class
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,29 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
-
-/// @brief baremetal namespace
-namespace baremetal {
-
-class IMemoryAccess;
+/// Memory management
 
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Page slot for requesting coherent memory region
 /// </summary>
-class UART1 : public CharDevice
+enum class CoherentPageSlot
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    /// @brief Coherent memory page slot for Raspberry Pi mailbox
+    PropertyMailbox = 0,
 };
 
-UART1& GetUART1();
+namespace baremetal {
+
+/// <summary>
+/// For now, handles assignment of coherent memory slots.
+/// </summary>
+class MemoryManager
+{
+public:
+    static uintptr GetCoherentPage(CoherentPageSlot slot);
+};
 
 } // namespace baremetal

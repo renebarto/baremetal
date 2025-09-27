@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : MemoryAccess.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : MemoryAccess
 //
-// Description : RPI UART1 class
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,30 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
+#include "baremetal/IMemoryAccess.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Memory access class
 
-/// @brief baremetal namespace
 namespace baremetal {
 
-class IMemoryAccess;
-
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Memory access interface
 /// </summary>
-class UART1 : public CharDevice
+class MemoryAccess : public IMemoryAccess
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
 public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    uint8 Read8(regaddr address) override;
+    void Write8(regaddr address, uint8 data) override;
+    void ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void Write16(regaddr address, uint16 data) override;
+    void ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void Write32(regaddr address, uint32 data) override;
+    void ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
 };
 
-UART1& GetUART1();
+MemoryAccess& GetMemoryAccess();
 
 } // namespace baremetal

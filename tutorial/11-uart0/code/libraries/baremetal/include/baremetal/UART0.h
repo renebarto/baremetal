@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : UART1.h
+// File        : UART0.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : UART0
 //
-// Description : RPI UART1 class
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -42,47 +42,46 @@
 #include "baremetal/CharDevice.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Raspberry Pi UART0 serial device
 
-/// @brief baremetal namespace
 namespace baremetal {
 
 class IMemoryAccess;
 
 /// <summary>
-/// Encapsulation for the UART1 device.
+/// Encapsulation for the UART0 device.
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
 /// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-class UART1 : public CharDevice
+class UART0 : public CharDevice
 {
     /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// Construct the singleton UART0 instance if needed, and return a reference to the instance. This is a friend function of class UART0
     /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+    /// <returns>Reference to the singleton UART0 instance</returns>
+    friend UART0& GetUART0();
 
 private:
     /// @brief Flags if device was initialized. Used to guard against multiple initialization
     bool m_isInitialized;
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
+    /// @brief Baud rate set for this device
+    unsigned m_baudRate;
 
-    UART1();
+    UART0();
 
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    UART0(IMemoryAccess& memoryAccess);
 
     void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
+    unsigned GetBaudRate() const;
     char Read() override;
     void Write(char ch) override;
     void WriteString(const char* str);
 };
 
-UART1& GetUART1();
+UART0& GetUART0();
 
 } // namespace baremetal

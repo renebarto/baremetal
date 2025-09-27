@@ -1681,9 +1681,9 @@ File: code/libraries/baremetal/src/UART1.cpp
 83: /// <summary>
 84: /// Initialize the UART1 device. Only performed once, guarded by m_isInitialized.
 85: ///
-86: ///  Set baud rate and characteristics (8N1) and map to GPIO. Baud rate maximum is 115200
+86: ///  Set baud rate and characteristics (8N1) and map to GPIO
 87: /// </summary>
-88: /// <param name="baudrate">Baud rate to set</param>
+88: /// <param name="baudrate">Baud rate to set, maximum is 115200</param>
 89: void UART1::Initialize(unsigned baudrate)
 90: {
 91:     if (m_isInitialized)

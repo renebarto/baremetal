@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : Timer.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : Timer
 //
-// Description : RPI UART1 class
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,47 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
-
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Raspberry Pi Timer
 
-/// @brief baremetal namespace
+#include "stdlib/Types.h"
+
 namespace baremetal {
 
 class IMemoryAccess;
 
 /// <summary>
-/// Encapsulation for the UART1 device.
+/// Timer class. For now only contains busy waiting methods
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Note that this class is created as a singleton, using the GetTimer() function.
 /// </summary>
-class UART1 : public CharDevice
+class Timer
 {
     /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
     /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer& GetTimer();
 
 private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
     IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
 
-    UART1();
+    Timer();
 
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    Timer(IMemoryAccess& memoryAccess);
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    static void WaitCycles(uint32 numCycles);
+
+    uint64 GetSystemTimer();
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
 };
 
-UART1& GetUART1();
+Timer& GetTimer();
 
 } // namespace baremetal

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : UART1.h
+// File        : Mailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : Mailbox
 //
-// Description : RPI UART1 class
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,38 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
+#include "baremetal/IMailbox.h"
+#include "baremetal/MemoryAccess.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Raspberry Pi Mailbox
 
-/// @brief baremetal namespace
 namespace baremetal {
 
-class IMemoryAccess;
-
-/// <summary>
-/// Encapsulation for the UART1 device.
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
 ///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
-/// </summary>
-class UART1 : public CharDevice
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
 private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
     IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
 
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void Flush();
+    uintptr Read();
+    void Write(uintptr data);
 };
-
-UART1& GetUART1();
 
 } // namespace baremetal

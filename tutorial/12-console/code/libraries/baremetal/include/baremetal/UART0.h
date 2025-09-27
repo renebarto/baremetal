@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : UART0.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : UART0
 //
-// Description : Utility functions
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,20 +39,49 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
+#include "baremetal/CharDevice.h"
 
 /// @file
-/// Standard C library utility functions
+/// Raspberry Pi UART0 serial device
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+class IMemoryAccess;
 
-size_t strlen(const char* str);
+/// <summary>
+/// Encapsulation for the UART0 device.
+///
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// </summary>
+class UART0 : public CharDevice
+{
+    /// <summary>
+    /// Construct the singleton UART0 instance if needed, and return a reference to the instance. This is a friend function of class UART0
+    /// </summary>
+    /// <returns>Reference to the singleton UART0 instance</returns>
+    friend UART0& GetUART0();
 
-#ifdef __cplusplus
-}
-#endif
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+    /// @brief Baud rate set for this device
+    unsigned m_baudRate;
+
+    UART0();
+
+public:
+    UART0(IMemoryAccess& memoryAccess);
+
+    void Initialize(unsigned baudrate);
+    unsigned GetBaudRate() const;
+    char Read() override;
+    void Write(char ch) override;
+    void WriteString(const char* str);
+};
+
+UART0& GetUART0();
+
+} // namespace baremetal

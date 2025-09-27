@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : Serialization.h
 //
-// Namespace   : -
+// Namespace   : serialization
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Serialization of types to character buffer
 //
 //------------------------------------------------------------------------------
 //
@@ -42,17 +42,11 @@
 #include "stdlib/Types.h"
 
 /// @file
-/// Standard C library utility functions
+/// Type serialization functions
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
+void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
 
-size_t strlen(const char* str);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace baremetal

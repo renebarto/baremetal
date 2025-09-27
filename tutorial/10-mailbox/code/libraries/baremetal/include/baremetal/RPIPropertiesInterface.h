@@ -160,7 +160,7 @@ struct MailboxBuffer
     uint8 tags[0];
     // end tag follows
 }
-/// @brief keep in packed format
+/// @brief Indicates this struct is to be packed
 PACKED;
 
 /// @brief Property tag, one for each request

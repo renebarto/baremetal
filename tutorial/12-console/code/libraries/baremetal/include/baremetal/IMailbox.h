@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : IMailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : IMailbox
 //
-// Description : Utility functions
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -42,17 +42,54 @@
 #include "stdlib/Types.h"
 
 /// @file
-/// Standard C library utility functions
+/// Abstract Mailbox interface
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Mailbox channel
+/// </summary>
+enum class MailboxChannel
+{
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
+};
 
-size_t strlen(const char* str);
+/// <summary>
+/// Mailbox abstract interface
+/// </summary>
+class IMailbox
+{
+public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
 
-#ifdef __cplusplus
-}
-#endif
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
+
+} // namespace baremetal

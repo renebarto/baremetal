@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : MemoryManager.cpp
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryManager
 //
-// Description : Utility functions
+// Description : Memory handling
 //
 //------------------------------------------------------------------------------
 //
@@ -37,22 +37,25 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/MemoryManager.h"
 
-#include "stdlib/Types.h"
+#include "baremetal/SysConfig.h"
 
 /// @file
-/// Standard C library utility functions
+/// Memory management implementation
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+using namespace baremetal;
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Return the coherent memory page (allocated with the GPU) for the requested page slot
+/// </summary>
+/// <param name="slot">Page slot to return the address for</param>
+/// <returns>Page slot coherent memory address</returns>
+uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
+{
+    uint64 pageAddress = MEM_COHERENT_REGION;
 
-size_t strlen(const char* str);
+    pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
 
-#ifdef __cplusplus
+    return pageAddress;
 }
-#endif

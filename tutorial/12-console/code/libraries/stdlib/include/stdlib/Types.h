@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : Types.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Common types, platform dependent
 //
 //------------------------------------------------------------------------------
 //
@@ -39,20 +39,40 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
-
 /// @file
-/// Standard C library utility functions
+/// Standard types
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// @brief Unsigned 8 bit integer
+typedef unsigned char uint8;
+/// @brief Unsigned 16 bit integer
+typedef unsigned short uint16;
+/// @brief Unsigned 32 bit integer
+typedef unsigned int uint32;
+/// @brief Unsigned 64 bit integer
+typedef unsigned long uint64;
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// @brief Signed 8 bit integer
+typedef signed char int8;
+/// @brief Signed 16 bit integer
+typedef signed short int16;
+/// @brief Signed 32 bit integer
+typedef signed int int32;
+/// @brief Signed 64 bit integer
+typedef signed long int64;
 
-size_t strlen(const char* str);
+/// @brief Pointer as signed 64 bit integer
+typedef int64 intptr;
+/// @brief Pointer as unsigned 64 bit integer
+typedef uint64 uintptr;
+/// @brief Unsigned size type
+typedef uint64 size_type;
+/// @brief Signed size type
+typedef int64 ssize_type;
 
-#ifdef __cplusplus
-}
-#endif
+/// @brief Unsigned size
+typedef size_type size_t;
+/// @brief Signed size
+typedef ssize_type ssize_t;
+
+/// @brief Pointer to unsigned volatile byte (for registers)
+typedef volatile uint8* regaddr;

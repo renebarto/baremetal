@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : Macros.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Common defines
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -39,20 +39,20 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
-
 /// @file
-/// Standard C library utility functions
+/// Generic macros
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// @brief Make a struct packed (GNU compiler only)
+#define PACKED   __attribute__((packed))
+/// @brief Make a struct have alignment of n bytes (GNU compiler only)
+#define ALIGN(n) __attribute__((aligned(n)))
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// @brief Make a variable a weak instance (GCC compiler only)
+#define WEAK     __attribute__((weak))
 
-size_t strlen(const char* str);
-
-#ifdef __cplusplus
-}
-#endif
+/// @brief Convert bit index into integer with zero bit
+/// @param n Bit index
+#define BIT0(n)  (0)
+/// @brief Convert bit index into integer with one bit
+/// @param n Bit index
+#define BIT1(n)  (1UL << (n))

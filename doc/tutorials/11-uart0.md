@@ -1255,5 +1255,5 @@ Wait 5 seconds
 Press r to reboot, h to halt
 ```
 
-Next: [12-logger](12-logger.md)
+Next: [12-console](12-console.md)
 

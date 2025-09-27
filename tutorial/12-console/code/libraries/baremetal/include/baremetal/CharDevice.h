@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : CharDevice.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : CharDevice
 //
-// Description : Utility functions
+// Description : Abstract character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -39,20 +39,40 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
-
 /// @file
-/// Standard C library utility functions
+/// Abstract character device
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "baremetal/Device.h"
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+namespace baremetal {
 
-size_t strlen(const char* str);
+/// <summary>
+/// Abstract character device
+///
+/// Abstraction of a CharDevice that can read and write characters
+/// </summary>
+class CharDevice : public Device
+{
+public:
+    virtual ~CharDevice() = default;
 
-#ifdef __cplusplus
-}
-#endif
+    bool IsBlockDevice() override
+    {
+        return false;
+    }
+    ssize_t Read(void* buffer, size_t count) override;
+    ssize_t Write(const void* buffer, size_t count) override;
+
+    /// <summary>
+    /// Read a character
+    /// </summary>
+    /// <returns>Character read</returns>
+    virtual char Read() = 0;
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="ch">Character to be written</param>
+    virtual void Write(char ch) = 0;
+};
+
+} // namespace baremetal

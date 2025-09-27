@@ -44,6 +44,9 @@ else()
     message(FATAL_ERROR "Incorrect target ${BAREMETAL_TARGET} specified, must be RPI3, RPI4 or RPI5")
 endif()
 
+option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
+option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+
 message(STATUS "\n** Setting up project **\n--")
 
 message(STATUS "\n##################################################################################")
@@ -71,6 +74,12 @@ set(DEFINES_C
     PLATFORM_BAREMETAL
     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
     )
+if (BAREMETAL_CONSOLE_UART0)
+    list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART0)
+endif()
+if (BAREMETAL_CONSOLE_UART1)
+    list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART1)
+endif()
 set(DEFINES_C_DEBUG _DEBUG)
 set(DEFINES_C_RELEASE NDEBUG)
 set(DEFINES_C_MINSIZEREL NDEBUG)
@@ -225,6 +234,14 @@ elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
 else()
     message(FATAL_ERROR "Invalid build type: " ${CMAKE_BUILD_TYPE})
 endif()
+
+message(STATUS "Baremetal settings:")
+message(STATUS "-- RPI target:                      ${BAREMETAL_RPI_TARGET}")
+message(STATUS "-- Architecture options:            ${BAREMETAL_ARCH_CPU_OPTIONS}")
+message(STATUS "-- Kernel name:                     ${BAREMETAL_TARGET_KERNEL}")
+message(STATUS "-- Kernel load address:             ${BAREMETAL_LOAD_ADDRESS}")
+message(STATUS "-- Debug output to UART0:            ${BAREMETAL_CONSOLE_UART0}")
+message(STATUS "-- Debug output to UART1:            ${BAREMETAL_CONSOLE_UART1}")
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 

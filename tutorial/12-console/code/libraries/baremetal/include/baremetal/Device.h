@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : Device.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Device
 //
-// Description : Utility functions
+// Description : Generic device interface
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -42,17 +42,29 @@
 #include "stdlib/Types.h"
 
 /// @file
-/// Standard C library utility functions
+/// Abstract device
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// <summary>
+/// Generic device interface
+/// </summary>
+class Device
+{
+public:
+    virtual ~Device() = default;
 
-size_t strlen(const char* str);
+    /// <summary>
+    /// Determines whether the device is a block device.
+    /// </summary>
+    /// <returns>True if the device is a block device; otherwise, false.</returns>
+    virtual bool IsBlockDevice() = 0;
+    virtual ssize_t Read(void* buffer, size_t count);
+    virtual ssize_t Write(const void* buffer, size_t count);
+    virtual void Flush();
 
-#ifdef __cplusplus
-}
-#endif
+    virtual ssize_t Seek(size_t offset);
+    virtual ssize_t GetSize() const;
+};
+
+} // namespace baremetal

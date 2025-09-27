@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : Mailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Mailbox
 //
-// Description : Utility functions
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,20 +39,38 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
+#include "baremetal/IMailbox.h"
+#include "baremetal/MemoryAccess.h"
 
 /// @file
-/// Standard C library utility functions
+/// Raspberry Pi Mailbox
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
+{
+private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess& m_memoryAccess;
 
-size_t strlen(const char* str);
+public:
+    Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-#ifdef __cplusplus
-}
-#endif
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void Flush();
+    uintptr Read();
+    void Write(uintptr data);
+};
+
+} // namespace baremetal

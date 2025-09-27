@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : UART1.h
+// File        : System.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : System
 //
-// Description : RPI UART1 class
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,68 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// System startup / shutdown functionality
 
-/// @brief baremetal namespace
 namespace baremetal {
 
 class IMemoryAccess;
 
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// System startup / shutdown handling class
 /// </summary>
-class UART1 : public CharDevice
+class System
 {
     /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
     /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System& GetSystem();
 
 private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
 
-    UART1();
+    System();
 
 public:
-    UART1(IMemoryAccess& memoryAccess);
+    System(IMemoryAccess& memoryAccess);
 
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
 };
 
-UART1& GetUART1();
+System& GetSystem();
 
 } // namespace baremetal
+
+/// <summary>
+/// Return code for main() function
+/// </summary>
+enum class ReturnCode
+{
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+extern int main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
+}
+#endif

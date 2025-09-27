@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : UART1.h
+// File        : IMailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : UART1
+// Class       : IMailbox
 //
-// Description : RPI UART1 class
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,50 +39,57 @@
 
 #pragma once
 
-#include "baremetal/CharDevice.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Raspberry Pi UART1 serial device declaration
+/// Abstract Mailbox interface
 
-/// @brief baremetal namespace
 namespace baremetal {
 
-class IMemoryAccess;
-
 /// <summary>
-/// Encapsulation for the UART1 device.
-///
-/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
-/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// Mailbox channel
 /// </summary>
-class UART1 : public CharDevice
+enum class MailboxChannel
 {
-    /// <summary>
-    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
-    /// </summary>
-    /// <returns>Reference to the singleton UART1 instance</returns>
-    friend UART1& GetUART1();
-
-private:
-    /// @brief Flags if device was initialized. Used to guard against multiple initialization
-    bool m_isInitialized;
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-    /// @brief Baudrate set for device
-    unsigned m_baudrate;
-
-    UART1();
-
-public:
-    UART1(IMemoryAccess& memoryAccess);
-
-    void Initialize(unsigned baudrate);
-    unsigned GetBaudrate() const;
-    char Read() override;
-    void Write(char ch) override;
-    void WriteString(const char* str);
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
 };
 
-UART1& GetUART1();
+/// <summary>
+/// Mailbox abstract interface
+/// </summary>
+class IMailbox
+{
+public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
+
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
 
 } // namespace baremetal

@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : RPIProperties.h
+// File        : CharDevice.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : RPIProperties
+// Class       : CharDevice
 //
-// Description : Access to BCM2835/2836/2837/2711/2712 properties using mailbox
+// Description : Abstract character read / write device
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //
@@ -37,67 +37,46 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/CharDevice.h"
 
-#include "baremetal/IMailbox.h"
-#include "stdlib/Types.h"
+using namespace baremetal;
 
 /// @file
-/// Top level functionality handling for Raspberry Pi Mailbox
-
-namespace baremetal {
+/// Abstract character device
 
 /// <summary>
-/// Clock ID number. Used to retrieve and set the clock frequency for several clocks
+/// Read a specified number of bytes from the device into a buffer
 /// </summary>
-enum class ClockID : uint32
+/// <param name="buffer">Buffer, where read data will be placed</param>
+/// <param name="count">Maximum number of bytes to be read</param>
+/// <returns>Number of read bytes or < 0 on failure</returns>
+ssize_t CharDevice::Read(void* buffer, size_t count)
 {
-    /// @brief EMMC clock
-    EMMC = 1,
-    /// @brief UART0 clock
-    UART = 2,
-    /// @brief ARM processor clock
-    ARM = 3,
-    /// @brief Core SoC clock
-    CORE = 4,
-    /// @brief V3D clock
-    V3D = 5,
-    /// @brief H264 clock
-    H264 = 6,
-    /// @brief ISP clock
-    ISP = 7,
-    /// @brief SDRAM clock
-    SDRAM = 8,
-    /// @brief PIXEL clock
-    PIXEL = 9,
-    /// @brief PWM clock
-    PWM = 10,
-    /// @brief HEVC clock
-    HEVC = 11,
-    /// @brief EMMC2 clock 2
-    EMMC2 = 12,
-    /// @brief M2MC clock
-    M2MC = 14,
-    /// @brief Pixel clock
-    PIXEL_BVB = 14,
-};
+    if (buffer == nullptr)
+        return static_cast<ssize_t>(-1);
+    char* bufferPtr = reinterpret_cast<char*>(buffer);
+    for (size_t i = 0; i < count; ++i)
+        *bufferPtr++ = Read();
+    return count;
+}
 
 /// <summary>
-/// Top level functionality for requests on Mailbox interface
+/// Write a specified number of bytes to the device
 /// </summary>
-class RPIProperties
+/// <param name="buffer">Buffer, from which data will be fetched for write</param>
+/// <param name="count">Number of bytes to be written</param>
+/// <returns>Number of written bytes or < 0 on failure</returns>
+ssize_t CharDevice::Write(const void* buffer, size_t count)
 {
-private:
-    /// @brief Reference to mailbox for functions requested
-    IMailbox& m_mailbox;
-
-public:
-    explicit RPIProperties(IMailbox& mailbox);
-
-    bool GetBoardSerial(uint64& serial);
-    bool GetClockRate(ClockID clockID, uint32& freqHz);
-    bool GetMeasuredClockRate(ClockID clockID, uint32& freqHz);
-    bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
-};
-
-} // namespace baremetal
+    if (buffer == nullptr)
+        return static_cast<ssize_t>(-1);
+    const char* bufferPtr = reinterpret_cast<const char*>(buffer);
+    for (size_t i = 0; i < count; ++i)
+    {
+        // convert newline to carriage return + newline
+        if (*bufferPtr == '\n')
+            Write('\r');
+        Write(*bufferPtr++);
+    }
+    return count;
+}

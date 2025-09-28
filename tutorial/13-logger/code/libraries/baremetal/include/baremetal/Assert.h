@@ -47,17 +47,14 @@
 
 namespace baremetal {
 
-#ifdef NDEBUG
-/// If building for release, assert is replaced by nothing
-#define assert(expr) ((void)0)
-#else
-void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
-
 /// @brief Assertion callback function, which can be installed to handle a failed assertion
 using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
 
-void ResetAssertionCallback();
-void SetAssertionCallback(AssertionCallback* callback);
+#ifdef NDEBUG
+/// If building for release, assert is replaced by nothing
+#define assert(expr) ((void)0)
+void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
+#else
 
 /// @brief Assertion. If the assertion fails, AssertionFailed is called.
 ///
@@ -66,5 +63,8 @@ void SetAssertionCallback(AssertionCallback* callback);
 #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
 
 #endif
+
+void ResetAssertionCallback();
+void SetAssertionCallback(AssertionCallback* callback);
 
 } // namespace baremetal

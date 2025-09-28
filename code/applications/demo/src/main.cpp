@@ -25,7 +25,6 @@ int main()
     auto& console = GetConsole();
     LOG_DEBUG("Hello World!");
 
-    char buffer[128];
     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
     RPIProperties properties(mailbox);
 

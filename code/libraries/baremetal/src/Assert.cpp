@@ -50,6 +50,8 @@ LOG_MODULE("Assert");
 
 namespace baremetal {
 
+#ifndef NDEBUG
+
 static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
 
 /// @brief Assertion callback function
@@ -96,5 +98,24 @@ void SetAssertionCallback(AssertionCallback* callback)
 {
     s_callback = callback;
 }
+
+#else
+
+/// <summary>
+/// Reset the assertion failure handler to the default
+/// </summary>
+void ResetAssertionCallback()
+{
+}
+
+/// <summary>
+/// Sets up a custom assertion failure handler
+/// </summary>
+/// <param name="callback">Assertion failure handler</param>
+void SetAssertionCallback(AssertionCallback* callback)
+{
+}
+
+#endif
 
 } // namespace baremetal

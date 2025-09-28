@@ -2337,14 +2337,14 @@ The application will now print output in color, depending on the log severity le
 
 <img src="images/tutorial-13-logger.png" alt="Console output" width="600"/>
 
-## Assertion - Step 3 {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4}
+## Assertion - Step 3 {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3}
 
 It is handy to have a function or macro available to check for a condition, and panic if this is not fulfilled.
 This is very similar to the standard C assert() macro.
 
 So let's add this, and log a Panic message if the condition check fails.
 
-### Assert.h {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4_ASSERTH}
+### Assert.h {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_ASSERTH}
 
 Create the file `code/libraries/baremetal/include/baremetal/Assert.h`
 
@@ -2399,38 +2399,38 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 47: 
 48: namespace baremetal {
 49: 
-50: #ifdef NDEBUG
-51: /// If building for release, assert is replaced by nothing
-52: #define assert(expr) ((void)0)
-53: #else
-54: void AssertionFailed(const char *expression, const char *fileName, int lineNumber);
-55: 
-56: /// @brief Assertion callback function, which can be installed to handle a failed assertion
-57: using AssertionCallback = void(const char *expression, const char *fileName, int lineNumber);
+50: /// @brief Assertion callback function, which can be installed to handle a failed assertion
+51: using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
+52: 
+53: #ifdef NDEBUG
+54: /// If building for release, assert is replaced by nothing
+55: #define assert(expr) ((void)0)
+56: void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
+57: #else
 58: 
-59: void ResetAssertionCallback();
-60: void SetAssertionCallback(AssertionCallback* callback);
-61: 
-62: /// @brief Assertion. If the assertion fails, AssertionFailed is called.
-63: ///
-64: /// <param name="expression">Expression to evaluate.
-65: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
-66: #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
-67: 
-68: #endif
+59: /// @brief Assertion. If the assertion fails, AssertionFailed is called.
+60: ///
+61: /// <param name="expression">Expression to evaluate.
+62: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
+63: #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
+64: 
+65: #endif
+66: 
+67: void ResetAssertionCallback();
+68: void SetAssertionCallback(AssertionCallback* callback);
 69: 
 70: } // namespace baremetal
 ```
 
-- Line 52: If we build for release, we simply ignore the assertion
-- Line 54: We declare the assertion failure function `AssertionFailed()`.
+- Line 50-51: We declare the prototype of the assertion failure handler function `AssertionCallback`
+- Line 53: If we build for release, we simply ignore the assertion
+- Line 56: We declare the assertion failure function `AssertionFailed()`.
 This will call the assertion failure handler, which logs a `Panic` message and halts the system by default, unless a custom assertion failure handler is installed
-- Line 57: We declare the prototype of the assertion failure handler function `AssertionCallback`
-- Line 59: We declare the function `ResetAssertionCallback()` which resets the assertion failure handler to the default
-- Line 60: We declare the function `SetAssertionCallback()` which sets a custom assertion failure handler
-- Line 66: We define the `assert()` macro. This will invoke the assertion failure function `AssertionFailed()` in case the assertion fails
+- Line 59-63: We define the `assert()` macro. This will invoke the assertion failure function `AssertionFailed()` in case the assertion fails
+- Line 67: We declare the function `ResetAssertionCallback()` which resets the assertion failure handler to the default
+- Line 68: We declare the function `SetAssertionCallback()` which sets a custom assertion failure handler
 
-### Assert.cpp {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4_ASSERTCPP}
+### Assert.cpp {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_ASSERTCPP}
 
 Create the file `code/libraries/baremetal/src/Assert.cpp`
 
@@ -2474,79 +2474,104 @@ File: code/libraries/baremetal/src/Assert.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #include "baremetal/Assert.h"
-41:
+41: 
 42: #include "baremetal/Logger.h"
 43: #include "baremetal/System.h"
-44:
+44: 
 45: /// @file
 46: /// Assertion functions implementation
-47:
+47: 
 48: /// @brief Define log name
 49: LOG_MODULE("Assert");
-50:
+50: 
 51: namespace baremetal {
-52:
-53: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
-54:
-55: /// @brief Assertion callback function
-56: ///
-57: /// Set to the default assertion handler function at startup, but can be overriden
-58: static AssertionCallback *s_callback = AssertionFailedDefault;
-59:
-60: /// <summary>
-61: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
-62: /// </summary>
-63: /// <param name="expression">Expression to be printed</param>
-64: /// <param name="fileName">Filename of file causing the failed assertion</param>
-65: /// <param name="lineNumber">Line number causing the failed assertion</param>
-66: void AssertionFailed(const char *expression, const char *fileName, int lineNumber)
-67: {
-68:     if (s_callback != nullptr)
-69:         s_callback(expression, fileName, lineNumber);
-70: }
-71:
-72: /// <summary>
-73: /// Default failed assertion handler
-74: /// </summary>
-75: /// <param name="expression">Expression to be printed</param>
-76: /// <param name="fileName">Filename of file causing the failed assertion</param>
-77: /// <param name="lineNumber">Line number causing the failed assertion</param>
-78: static void AssertionFailedDefault(const char *expression, const char *fileName, int lineNumber)
-79: {
-80:     GetLogger().Log(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
-81: }
-82:
-83: /// <summary>
-84: /// Reset the assertion failure handler to the default
-85: /// </summary>
-86: void ResetAssertionCallback()
-87: {
-88:     s_callback = AssertionFailedDefault;
-89: }
-90:
-91: /// <summary>
-92: /// Sets up a custom assertion failure handler
-93: /// </summary>
-94: /// <param name="callback">Assertion failure handler</param>
-95: void SetAssertionCallback(AssertionCallback* callback)
-96: {
-97:     s_callback = callback;
-98: }
-99:
-100: } // namespace baremetal
+52: 
+53: #ifndef NDEBUG
+54: 
+55: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
+56: 
+57: /// @brief Assertion callback function
+58: ///
+59: /// Set to the default assertion handler function at startup, but can be overriden
+60: static AssertionCallback* s_callback = AssertionFailedDefault;
+61: 
+62: /// <summary>
+63: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
+64: /// </summary>
+65: /// <param name="expression">Expression to be printed</param>
+66: /// <param name="fileName">Filename of file causing the failed assertion</param>
+67: /// <param name="lineNumber">Line number causing the failed assertion</param>
+68: void AssertionFailed(const char* expression, const char* fileName, int lineNumber)
+69: {
+70:     if (s_callback != nullptr)
+71:         s_callback(expression, fileName, lineNumber);
+72: }
+73: 
+74: /// <summary>
+75: /// Default failed assertion handler
+76: /// </summary>
+77: /// <param name="expression">Expression to be printed</param>
+78: /// <param name="fileName">Filename of file causing the failed assertion</param>
+79: /// <param name="lineNumber">Line number causing the failed assertion</param>
+80: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber)
+81: {
+82:     GetLogger().Log(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
+83: }
+84: 
+85: /// <summary>
+86: /// Reset the assertion failure handler to the default
+87: /// </summary>
+88: void ResetAssertionCallback()
+89: {
+90:     s_callback = AssertionFailedDefault;
+91: }
+92: 
+93: /// <summary>
+94: /// Sets up a custom assertion failure handler
+95: /// </summary>
+96: /// <param name="callback">Assertion failure handler</param>
+97: void SetAssertionCallback(AssertionCallback* callback)
+98: {
+99:     s_callback = callback;
+100: }
+101: 
+102: #else
+103: 
+104: /// <summary>
+105: /// Reset the assertion failure handler to the default
+106: /// </summary>
+107: void ResetAssertionCallback()
+108: {
+109: }
+110: 
+111: /// <summary>
+112: /// Sets up a custom assertion failure handler
+113: /// </summary>
+114: /// <param name="callback">Assertion failure handler</param>
+115: void SetAssertionCallback(AssertionCallback* callback)
+116: {
+117: }
+118: 
+119: #endif
+120: 
+121: } // namespace baremetal
 ```
 
-- Line 53: We declare a static function `AssertionFailedDefault()` as the default assertion failure function
-- Line 55-58: We define a static variable to point to the set assertion failure handler function, which is set to `AssertionFailedDefault()` by default
-- Line 60-70: We implement the function `AssertionFailed()` which is called when the `assert()` macro fails.
+- Line 54-101: This section is only for non release builds
+- Line 55: We declare a static function `AssertionFailedDefault()` as the default assertion failure function
+- Line 57-60: We define a static variable to point to the set assertion failure handler function, which is set to `AssertionFailedDefault()` by default
+- Line 62-72: We implement the function `AssertionFailed()` which is called when the `assert()` macro fails.
 This will call the set assertion failure handler function, if any
-- Line 72-81: We implement the default assertion failure handler function `AssertionFailedDefault()`, which logs a `Panic` message, and will then halt the system
-- Line 83-89: We implement the function `ResetAssertionCallback()` which will reset the assertion failure handler function to default
-- Line 91-98: We implement the function `SetAssertionCallback()` which will set a custom assertion failure handler function
+- Line 74-83: We implement the default assertion failure handler function `AssertionFailedDefault()`, which logs a `Panic` message, and will then halt the system
+- Line 85-91: We implement the function `ResetAssertionCallback()` which will reset the assertion failure handler function to default
+- Line 93-100: We implement the function `SetAssertionCallback()` which will set a custom assertion failure handler function
+- Line 103-118: This section is only for release builds
+- Line 104-109: We implement the function `ResetAssertionCallback()` which will not do anything
+- Line 111-117: We implement the function `SetAssertionCallback()` which will not do anything
 
-### Macros.h {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4_MACROSH}
+### Macros.h {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_MACROSH}
 
 We use the construct `likely()` in the `assert()` macro. This needs to be defined.
 
@@ -2565,7 +2590,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 
 These macros make use of builtin functionality in the compiler to influence the branch prediction.
 
-### Update application code {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_UPDATE_APPLICATION_CODE}
 
 Let us for the sake of demonstration add a failing assertion to the application code.
 This will fire twice, once using our own handler function, the second time using the default handler function.
@@ -2582,57 +2607,69 @@ File: code/applications/demo/src/main.cpp
 6: #include "baremetal/Mailbox.h"
 7: #include "baremetal/MemoryManager.h"
 8: #include "baremetal/RPIProperties.h"
-9: #include "baremetal/SysConfig.h"
-10: #include "baremetal/Serialization.h"
+9: #include "baremetal/Serialization.h"
+10: #include "baremetal/SysConfig.h"
 11: #include "baremetal/System.h"
 12: #include "baremetal/Timer.h"
-13:
+13: 
 14: LOG_MODULE("main");
-15:
+15: 
 16: using namespace baremetal;
-17:
-18: int main()
+17: 
+18: void MyHandler(const char* expression, const char* fileName, int lineNumber)
 19: {
-20:     auto& console = GetConsole();
-21:     LOG_DEBUG("Hello World!");
-22:
-23:     char buffer[128];
-24:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
-25:     RPIProperties properties(mailbox);
-26:
-27:     uint64 serial{};
-28:     if (properties.GetBoardSerial(serial))
-29:     {
-30:         LOG_INFO("Mailbox call succeeded");
-31:         LOG_INFO("Serial: %016llx", serial);
-32:     }
-33:     else
-34:     {
-35:         LOG_ERROR("Mailbox call failed");
+20:     LOG_INFO("An assertion failed on location %s:%d, %s", fileName, lineNumber, expression);
+21: }
+22: 
+23: int main()
+24: {
+25:     auto& console = GetConsole();
+26:     LOG_DEBUG("Hello World!");
+27: 
+28:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
+29:     RPIProperties properties(mailbox);
+30: 
+31:     uint64 serial{};
+32:     if (properties.GetBoardSerial(serial))
+33:     {
+34:         LOG_INFO("Mailbox call succeeded");
+35:         LOG_INFO("Serial: %016llx", serial);
 36:     }
-37:
-38:     LOG_INFO("Wait 5 seconds");
-39:     Timer::WaitMilliSeconds(5000);
-40:
-41:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-42:     char ch{};
-43:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
-44:     {
-45:         ch = console.ReadChar();
-46:         console.WriteChar(ch);
-47:     }
-48:     if (ch == 'p')
-49:         assert(false);
-50:
-51:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-52: }
+37:     else
+38:     {
+39:         LOG_ERROR("Mailbox call failed");
+40:     }
+41: 
+42:     LOG_INFO("Wait 5 seconds");
+43:     Timer::WaitMilliSeconds(5000);
+44: 
+45:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
+46:     char ch{};
+47:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+48:     {
+49:         ch = console.ReadChar();
+50:         console.WriteChar(ch);
+51:     }
+52:     if (ch == 'p')
+53:     {
+54:         SetAssertionCallback(MyHandler);
+55:         assert(false);
+56:         ResetAssertionCallback();
+57:         assert(false);
+58:     }
+59: 
+60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+61: }
 ```
 
 - Line 2: We add the include for `Assert.h`
-- Line 41: We print a different message, adding the input `p` to force a panic
-- Line 48-49: If `p` was pressed, we perform a failed assertion
+- Line 18-21: We define an assertion callback function `MyHandler()` which will simply write a log message
+- Line 45: We print a different message, adding the input `p` to force a panic
+- Line 52-58: If `p` was pressed, we perform a failed assertion.
+First we set the handler for assertion to our own and fire the assertion.
+Next we reset the handler to default and fire the assertion again
 
-### Configuring, building and debugging {#TUTORIAL_13_LOGGER_ASSERTION___STEP_4_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

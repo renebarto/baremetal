@@ -10,6 +10,25 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${SCRIPTS_DIR})
 
+include (functions)
+
+get_git_tag(GIT_TAG)
+
+message(STATUS "Tag found: ${GIT_TAG}")
+
+if (NOT "${GIT_TAG}" STREQUAL "")
+    string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
+endif()
+
+if("${VERSION_NUMBER}" STREQUAL "")
+    set(VERSION_NUMBER 0.0.0)
+endif()
+
+parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
+
+set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
+message(STATUS "Version: ${VERSION_COMPOSED}")
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE Debug)
 endif()
@@ -46,6 +65,7 @@ endif()
 
 option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
+option(BAREMETAL_COLOR_LOGGING "Use ANSI colors in logging" ON)
 
 message(STATUS "\n** Setting up project **\n--")
 
@@ -68,12 +88,24 @@ elseif (BAREMETAL_TARGET STREQUAL "RPI5")
     set(BAREMETAL_TARGET_KERNEL kernel_2712)
     set(BAREMETAL_RPI_TARGET 5)
 endif()
+if (BAREMETAL_COLOR_LOGGING)
+    set(BAREMETAL_COLOR_OUTPUT 1)
+else ()
+    set(BAREMETAL_COLOR_OUTPUT 0)
+endif()
 set(BAREMETAL_LOAD_ADDRESS 0x80000)
 
 set(DEFINES_C
     PLATFORM_BAREMETAL
     BAREMETAL_RPI_TARGET=${BAREMETAL_RPI_TARGET}
+    BAREMETAL_COLOR_OUTPUT=${BAREMETAL_COLOR_OUTPUT}
+    BAREMETAL_MAJOR=${VERSION_MAJOR}
+    BAREMETAL_MINOR=${VERSION_MINOR}
+    BAREMETAL_LEVEL=${VERSION_LEVEL}
+    BAREMETAL_BUILD=${VERSION_BUILD}
+    BAREMETAL_VERSION="${VERSION_COMPOSED}"
     )
+
 if (BAREMETAL_CONSOLE_UART0)
     list(APPEND DEFINES_C BAREMETAL_CONSOLE_UART0)
 endif()
@@ -240,8 +272,14 @@ message(STATUS "-- RPI target:                      ${BAREMETAL_RPI_TARGET}")
 message(STATUS "-- Architecture options:            ${BAREMETAL_ARCH_CPU_OPTIONS}")
 message(STATUS "-- Kernel name:                     ${BAREMETAL_TARGET_KERNEL}")
 message(STATUS "-- Kernel load address:             ${BAREMETAL_LOAD_ADDRESS}")
-message(STATUS "-- Debug output to UART0:            ${BAREMETAL_CONSOLE_UART0}")
-message(STATUS "-- Debug output to UART1:            ${BAREMETAL_CONSOLE_UART1}")
+message(STATUS "-- Debug output to UART0:           ${BAREMETAL_CONSOLE_UART0}")
+message(STATUS "-- Debug output to UART1:           ${BAREMETAL_CONSOLE_UART1}")
+message(STATUS "-- Color log output:                ${BAREMETAL_COLOR_LOGGING}")
+message(STATUS "-- Version major:                   ${VERSION_MAJOR}")
+message(STATUS "-- Version minor:                   ${VERSION_MINOR}")
+message(STATUS "-- Version level:                   ${VERSION_LEVEL}")
+message(STATUS "-- Version build:                   ${VERSION_BUILD}")
+message(STATUS "-- Version composed:                ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}")
 
 option(BUILD_TUTORIALS "Build all tutorials" ON)
 

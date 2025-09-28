@@ -15,6 +15,63 @@ function(display_list text)
     message(STATUS ${text} ${list_str})
 endfunction()
 
+function(get_git_tag out)
+    if (UNIX)
+        find_package(Git)
+    else()
+        find_program(GIT_EXECUTABLE git PATHS "C:/Program Files/Git/bin")
+    endif()
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --match "[0-9]*.[0-9]*.[0-9]*" --tags --abbrev=5 HEAD
+        RESULT_VARIABLE RESULT
+        OUTPUT_VARIABLE OUTPUT
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (${RESULT} EQUAL 0)
+        set(${out} "${OUTPUT}" PARENT_SCOPE)
+    else()
+        set(${out} "" PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(parse_version version_number version_major version_minor version_level version_build)
+    if ("${${version_number}}" STREQUAL "")
+        set(${version_number} "0.0.0.0" PARENT_SCOPE)
+    endif()
+    string(REPLACE "." ";" VERSION_PARTS "${${version_number}}")
+    LIST(LENGTH VERSION_PARTS VERSION_NUM_PARTS)
+
+    set(VERSION_MAJOR 0)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 1)
+        list(GET VERSION_PARTS 0 VERSION_MAJOR)
+    endif()
+    set(${version_major} "${VERSION_MAJOR}" PARENT_SCOPE)
+
+    set(VERSION_MINOR 0)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 2)
+        list(GET VERSION_PARTS 1 VERSION_MINOR)
+    endif()
+    set(${version_minor} "${VERSION_MINOR}" PARENT_SCOPE)
+
+    set(VERSION_LEVEL 0)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 3)
+        list(GET VERSION_PARTS 2 VERSION_LEVEL)
+    endif()
+    set(${version_level} "${VERSION_LEVEL}" PARENT_SCOPE)
+
+    set(VERSION_BUILD 0)
+    if (VERSION_NUM_PARTS GREATER_EQUAL 4)
+        list(GET VERSION_PARTS 3 VERSION_BUILD)
+    endif()
+    set(${version_build} "${VERSION_BUILD}" PARENT_SCOPE)
+
+    if ("${VERSION_MAJOR}" STREQUAL "" OR
+        "${VERSION_MINOR}" STREQUAL "" OR
+        "${VERSION_LEVEL}" STREQUAL "" OR
+        "${VERSION_BUILD}" STREQUAL "")
+        message(SEND_ERROR "Incorrectly specified version number: ${version_number}")
+    endif()
+endfunction()
+
 function(show_target_properties target)
     if (CMAKE_VERBOSE_MAKEFILE)
         message(STATUS "")

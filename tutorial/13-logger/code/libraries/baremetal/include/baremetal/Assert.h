@@ -53,8 +53,9 @@ using AssertionCallback = void(const char* expression, const char* fileName, int
 #ifdef NDEBUG
 /// If building for release, assert is replaced by nothing
 #define assert(expr) ((void)0)
-void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
 #else
+
+void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
 
 /// @brief Assertion. If the assertion fails, AssertionFailed is called.
 ///

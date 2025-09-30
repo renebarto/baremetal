@@ -44,7 +44,7 @@
 #include "baremetal/System.h"
 #include "baremetal/Timer.h"
 #include "baremetal/Version.h"
-#include <stdlib/Util.h>
+#include "stdlib/Util.h"
 
 /// @file
 /// Logger functionality implementation

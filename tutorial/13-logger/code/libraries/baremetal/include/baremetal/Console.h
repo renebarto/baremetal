@@ -40,7 +40,7 @@
 #pragma once
 
 #include "baremetal/Device.h"
-#include <stdlib/Types.h>
+#include "stdlib/Types.h"
 
 /// @file
 /// Console

@@ -1671,8 +1671,8 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 40: #pragma once
 41: 
 42: #include "baremetal/Console.h"
-43: #include <stdlib/StdArg.h>
-44: #include <stdlib/Types.h>
+43: #include "stdlib/StdArg.h"
+44: #include "stdlib/Types.h"
 45: 
 46: /// @file
 47: /// Logger functionality
@@ -1851,7 +1851,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 44: #include "baremetal/System.h"
 45: #include "baremetal/Timer.h"
 46: #include "baremetal/Version.h"
-47: #include <stdlib/Util.h>
+47: #include "stdlib/Util.h"
 48: 
 49: /// @file
 50: /// Logger functionality implementation

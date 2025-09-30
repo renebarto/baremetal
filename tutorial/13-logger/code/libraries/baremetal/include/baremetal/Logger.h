@@ -40,8 +40,8 @@
 #pragma once
 
 #include "baremetal/Console.h"
-#include <stdlib/StdArg.h>
-#include <stdlib/Types.h>
+#include "stdlib/StdArg.h"
+#include "stdlib/Types.h"
 
 /// @file
 /// Logger functionality

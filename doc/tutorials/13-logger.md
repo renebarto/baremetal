@@ -2110,9 +2110,8 @@ File: code/libraries/baremetal/src/Logger.cpp
 303: Logger& baremetal::GetLogger()
 304: {
 305:     static Logger s_logger(LogSeverity::Debug, &GetTimer());
-306:     s_logger.Initialize();
-307:     return s_logger;
-308: }
+306:     return s_logger;
+307: }
 ```
 
 - Line 54-55: We use the macro `LOG_MODULE` also internally to specify that we are in the `Logger` class itself, and we can use the `LOG_` and `TRACE_` macros
@@ -2232,6 +2231,11 @@ File: code/libraries/baremetal/src/System.cpp
 134:     LOG_INFO("Reboot");
 135:     Timer::WaitMilliSeconds(WaitTime);
 ...
+178:     for (void (**func)(void) = &__init_start; func < &__init_end; func++)
+179:     {
+180:         (**func)();
+181:     }
+182: 
 183:     Device* logDevice{};
 184: #if defined(BAREMETAL_CONSOLE_UART0)
 185:     auto& uart = GetUART0();
@@ -2245,7 +2249,7 @@ File: code/libraries/baremetal/src/System.cpp
 193:     logDevice = &uart;
 194: #endif
 195:     GetConsole().AssignDevice(logDevice);
-196:     GetLogger();
+196:     GetLogger().Initialize();
 197:     LOG_INFO("Starting up");
 198: 
 199:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
@@ -2253,11 +2257,12 @@ File: code/libraries/baremetal/src/System.cpp
 
 - Line 45: We replace the include for `Console.h` with `Logger.h`
 - Line 57-58: We set the module name for logging to `System`
-- Line 111: We use `LOG_INFO` to log the message `Halt`
+- Line 121: We use `LOG_INFO` to log the message `Halt`
 - Line 134: We use `LOG_INFO` to log the message `Reboot`
 - Line 183: We keep a pointer to the device to be used for logging
 - Line 195: We get the console and assign the device to be used
-- Line 196: We instantiate  the `Logger` singleton by calling `GetLogger()`
+- Line 196: We instantiate  the `Logger` singleton by calling `GetLogger()` and initialize it.
+If the `Logger` instance would be created earlier, it will not be initialized before this point, so any tracing would get lost as we did not assign a device to the console yet
 - Line 197: We use `LOG_INFO` to log the message `Starting up`
 
 ### Update the application code {#TUTORIAL_13_LOGGER_ADDING_THE_LOGGER_CLASS___STEP_2_UPDATE_THE_APPLICATION_CODE}

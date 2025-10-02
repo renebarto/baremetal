@@ -96,25 +96,25 @@ File: code/libraries/stdlib/include/stdlib/StdArg.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Standard variable argument list handling using builtin functionality in GCC
-44: 
+44:
 45: // prevent warning, if <stdarg.h> from toolchain is included too
 46: #ifndef _STDARG_H
-47: 
+47:
 48: /// @brief declare standard va_list type
 49: typedef __builtin_va_list va_list;
-50: 
+50:
 51: /// @brief define standard va_start macro
 52: #define va_start(arg, last) __builtin_va_start(arg, last)
 53: /// @brief define standard va_end macro
 54: #define va_end(arg)         __builtin_va_end(arg)
 55: /// @brief define standard va_arg macro
 56: #define va_arg(arg, type)   __builtin_va_arg(arg, type)
-57: 
+57:
 58: #endif
 ```
 
@@ -236,17 +236,17 @@ File: code/libraries/baremetal/src/Format.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Format.h"
-41: 
+41:
 42: #include "baremetal/Serialization.h"
 43: #include "stdlib/Util.h"
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: /// @brief Size of buffer for destination
 48: const size_t BufferSize = 4096;
-49: 
+49:
 50: /// <summary>
 51: /// Append a character to the buffer
 52: /// </summary>
@@ -266,7 +266,7 @@ File: code/libraries/baremetal/src/Format.cpp
 66:         *p = '\0';
 67:     }
 68: }
-69: 
+69:
 70: /// <summary>
 71: /// Append a set of identical characters to the buffer
 72: /// </summary>
@@ -288,7 +288,7 @@ File: code/libraries/baremetal/src/Format.cpp
 88:         *p = '\0';
 89:     }
 90: }
-91: 
+91:
 92: /// <summary>
 93: /// Append a string to the buffer
 94: /// </summary>
@@ -299,7 +299,7 @@ File: code/libraries/baremetal/src/Format.cpp
 99: {
 100:     strncat(buffer, str, bufferSize);
 101: }
-102: 
+102:
 103: /// <summary>
 104: /// Print a formatted string to a buffer
 105: ///
@@ -312,12 +312,12 @@ File: code/libraries/baremetal/src/Format.cpp
 112: {
 113:     va_list var;
 114:     va_start(var, format);
-115: 
+115:
 116:     FormatV(buffer, bufferSize, format, var);
-117: 
+117:
 118:     va_end(var);
 119: }
-120: 
+120:
 121: /// <summary>
 122: /// Print a formatted string to a buffer
 123: ///
@@ -332,7 +332,7 @@ File: code/libraries/baremetal/src/Format.cpp
 132:     if (buffer == nullptr)
 133:         return;
 134:     buffer[0] = '\0';
-135: 
+135:
 136:     while (*format != '\0')
 137:     {
 138:         if (*format == '%')
@@ -343,35 +343,35 @@ File: code/libraries/baremetal/src/Format.cpp
 143:                 format++;
 144:                 continue;
 145:             }
-146: 
+146:
 147:             bool alternate = false;
 148:             if (*format == '#')
 149:             {
 150:                 alternate = true;
 151:                 format++;
 152:             }
-153: 
+153:
 154:             bool left = false;
 155:             if (*format == '-')
 156:             {
 157:                 left = true;
 158:                 format++;
 159:             }
-160: 
+160:
 161:             bool leadingZero = false;
 162:             if (*format == '0')
 163:             {
 164:                 leadingZero = true;
 165:                 format++;
 166:             }
-167: 
+167:
 168:             size_t width = 0;
 169:             while (('0' <= *format) && (*format <= '9'))
 170:             {
 171:                 width = width * 10 + (*format - '0');
 172:                 format++;
 173:             }
-174: 
+174:
 175:             unsigned precision = 6;
 176:             if (*format == '.')
 177:             {
@@ -380,30 +380,30 @@ File: code/libraries/baremetal/src/Format.cpp
 180:                 while ('0' <= *format && *format <= '9')
 181:                 {
 182:                     precision = precision * 10 + (*format - '0');
-183: 
+183:
 184:                     format++;
 185:                 }
 186:             }
-187: 
+187:
 188:             bool haveLong{};
 189:             bool haveLongLong{};
-190: 
+190:
 191:             if (*format == 'l')
 192:             {
 193:                 if (*(format + 1) == 'l')
 194:                 {
 195:                     haveLongLong = true;
-196: 
+196:
 197:                     format++;
 198:                 }
 199:                 else
 200:                 {
 201:                     haveLong = true;
 202:                 }
-203: 
+203:
 204:                 format++;
 205:             }
-206: 
+206:
 207:             switch (*format)
 208:             {
 209:             case 'c':
@@ -427,7 +427,7 @@ File: code/libraries/baremetal/src/Format.cpp
 227:                     }
 228:                 }
 229:                 break;
-230: 
+230:
 231:             case 'd':
 232:             case 'i':
 233:                 if (haveLongLong)
@@ -449,7 +449,7 @@ File: code/libraries/baremetal/src/Format.cpp
 249:                     Append(buffer, bufferSize, str);
 250:                 }
 251:                 break;
-252: 
+252:
 253:             case 'f':
 254:                 {
 255:                     char str[BufferSize]{};
@@ -457,7 +457,7 @@ File: code/libraries/baremetal/src/Format.cpp
 257:                     Append(buffer, bufferSize, str);
 258:                 }
 259:                 break;
-260: 
+260:
 261:             case 'b':
 262:                 if (alternate)
 263:                 {
@@ -482,7 +482,7 @@ File: code/libraries/baremetal/src/Format.cpp
 282:                     Append(buffer, bufferSize, str);
 283:                 }
 284:                 break;
-285: 
+285:
 286:             case 'o':
 287:                 if (alternate)
 288:                 {
@@ -507,7 +507,7 @@ File: code/libraries/baremetal/src/Format.cpp
 307:                     Append(buffer, bufferSize, str);
 308:                 }
 309:                 break;
-310: 
+310:
 311:             case 's':
 312:                 {
 313:                     char str[BufferSize]{};
@@ -515,7 +515,7 @@ File: code/libraries/baremetal/src/Format.cpp
 315:                     Append(buffer, bufferSize, str);
 316:                 }
 317:                 break;
-318: 
+318:
 319:             case 'u':
 320:                 if (haveLongLong)
 321:                 {
@@ -536,7 +536,7 @@ File: code/libraries/baremetal/src/Format.cpp
 336:                     Append(buffer, bufferSize, str);
 337:                 }
 338:                 break;
-339: 
+339:
 340:             case 'x':
 341:             case 'X':
 342:                 if (alternate)
@@ -562,7 +562,7 @@ File: code/libraries/baremetal/src/Format.cpp
 362:                     Append(buffer, bufferSize, str);
 363:                 }
 364:                 break;
-365: 
+365:
 366:             case 'p':
 367:                 if (alternate)
 368:                 {
@@ -574,7 +574,7 @@ File: code/libraries/baremetal/src/Format.cpp
 374:                     Append(buffer, bufferSize, str);
 375:                 }
 376:                 break;
-377: 
+377:
 378:             default:
 379:                 Append(buffer, bufferSize, '%');
 380:                 Append(buffer, bufferSize, *format);
@@ -585,11 +585,11 @@ File: code/libraries/baremetal/src/Format.cpp
 385:         {
 386:             Append(buffer, bufferSize, *format);
 387:         }
-388: 
+388:
 389:         format++;
 390:     }
 391: }
-392: 
+392:
 393: } // namespace baremetal
 ```
 
@@ -641,11 +641,11 @@ Update the file `code/libraries/baremetal/include/baremetal/Serialization.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Serialization.h
 47: namespace baremetal {
-48: 
+48:
 49: void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros);
 50: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
 51: void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros);
-52: 
+52:
 53: void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros);
 54: void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros);
 55: /// <summary>
@@ -678,7 +678,7 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 82: }
 83: void Serialize(char* buffer, size_t bufferSize, const char* value, int width, bool quote);
 84: void Serialize(char* buffer, size_t bufferSize, double value, int width, int precision);
-85: 
+85:
 86: } // namespace baremetal
 ```
 
@@ -699,20 +699,20 @@ Update the file `code/libraries/baremetal/src/Serialization.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Serialization.cpp
 40: #include "baremetal/Serialization.h"
-41: 
+41:
 42: #include "stdlib/Util.h"
-43: 
+43:
 44: /// @file
 45: /// Type serialization functions implementation
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: /// @brief Write characters with base above 10 as uppercase or not
 50: static bool Uppercase = true;
-51: 
+51:
 52: static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 53: static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
-54: 
+54:
 55: /// <summary>
 56: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
 57: /// </summary>
@@ -722,7 +722,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 61: {
 62:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 63: }
-64: 
+64:
 65: /// <summary>
 66: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
 67: /// </summary>
@@ -735,16 +735,16 @@ File: code/libraries/baremetal/src/Serialization.cpp
 74:     uint64 value = 0xFFFFFFFFFFFFFFFF;
 75:     if (bits < 64)
 76:         value &= ((1ULL << bits) - 1);
-77: 
+77:
 78:     while (value > 0)
 79:     {
 80:         value /= base;
 81:         result++;
 82:     }
-83: 
+83:
 84:     return result;
 85: }
-86: 
+86:
 87: /// <summary>
 88: /// Serialize a 8 bit unsigned value to buffer.
 89: ///
@@ -767,7 +767,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 106: {
 107:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 8);
 108: }
-109: 
+109:
 110: /// <summary>
 111: /// Serialize a 32 bit signed value to buffer.
 112: ///
@@ -790,7 +790,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 129: {
 130:     SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 131: }
-132: 
+132:
 133: /// <summary>
 134: /// Serialize a 32 bit unsigned value to buffer.
 135: ///
@@ -813,7 +813,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 152: {
 153:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 154: }
-155: 
+155:
 156: /// <summary>
 157: /// Serialize a 64 bit signed value to buffer.
 158: ///
@@ -836,7 +836,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 175: {
 176:     SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
 177: }
-178: 
+178:
 179: /// <summary>
 180: /// Serialize a 64 bit unsigned value to buffer.
 181: ///
@@ -859,7 +859,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 198: {
 199:     SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
 200: }
-201: 
+201:
 202: /// <summary>
 203: /// Serialize a double value to buffer. The value will be printed as a fixed point number.
 204: ///
@@ -880,46 +880,46 @@ File: code/libraries/baremetal/src/Serialization.cpp
 219:         negative = true;
 220:         value = -value;
 221:     }
-222: 
+222:
 223:     if (bufferSize == 0)
 224:         return;
-225: 
+225:
 226:     // We can only print values with integral parts up to what uint64 can hold
 227:     if (value > static_cast<double>(static_cast<uint64>(-1)))
 228:     {
 229:         strncpy(buffer, "overflow", bufferSize);
 230:         return;
 231:     }
-232: 
+232:
 233:     *buffer = '\0';
 234:     if (negative)
 235:         strncpy(buffer, "-", bufferSize);
-236: 
+236:
 237:     uint64 integralPart = static_cast<uint64>(value);
 238:     const size_t TmpBufferSize = 32;
 239:     char tmpBuffer[TmpBufferSize];
 240:     Serialize(tmpBuffer, TmpBufferSize, integralPart, 0, 10, false, false);
 241:     strncat(buffer, tmpBuffer, bufferSize);
 242:     const int MaxPrecision = 7;
-243: 
+243:
 244:     if (precision != 0)
 245:     {
 246:         strncat(buffer, ".", bufferSize);
-247: 
+247:
 248:         if (precision > MaxPrecision)
 249:         {
 250:             precision = MaxPrecision;
 251:         }
-252: 
+252:
 253:         uint64 precisionPower10 = 1;
 254:         for (int i = 1; i <= precision; i++)
 255:         {
 256:             precisionPower10 *= 10;
 257:         }
-258: 
+258:
 259:         value -= static_cast<double>(integralPart);
 260:         value *= static_cast<double>(precisionPower10);
-261: 
+261:
 262:         Serialize(tmpBuffer, TmpBufferSize, static_cast<uint64>(value), 0, 10, false, false);
 263:         strncat(buffer, tmpBuffer, bufferSize);
 264:         precision -= strlen(tmpBuffer);
@@ -929,7 +929,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 268:         }
 269:     }
 270: }
-271: 
+271:
 272: /// <summary>
 273: /// Serialize a const char * value to buffer. The value can be quoted.
 274: ///
@@ -946,13 +946,13 @@ File: code/libraries/baremetal/src/Serialization.cpp
 285:     size_t numChars = strlen(value);
 286:     if (quote)
 287:         numChars += 2;
-288: 
+288:
 289:     // Leave one character for \0
 290:     if (numChars > bufferSize - 1)
 291:         return;
-292: 
+292:
 293:     char* bufferPtr = buffer;
-294: 
+294:
 295:     if (quote)
 296:         *bufferPtr++ = '\"';
 297:     while (*value)
@@ -962,7 +962,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 301:     if (quote)
 302:         *bufferPtr++ = '\"';
 303: }
-304: 
+304:
 305: /// <summary>
 306: /// Internal serialization function, to be used for all signed values.
 307: ///
@@ -988,7 +988,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 327: {
 328:     if ((base < 2) || (base > 36))
 329:         return;
-330: 
+330:
 331:     int numDigits = 0;
 332:     bool negative = (value < 0);
 333:     uint64 absVal = static_cast<uint64>(negative ? -value : value);
@@ -1003,7 +1003,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 342:         ++numDigits;
 343:     }
 344:     divisor = divisorLast;
-345: 
+345:
 346:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 347:     if (showBase)
 348:     {
@@ -1018,13 +1018,13 @@ File: code/libraries/baremetal/src/Serialization.cpp
 357:     // Leave one character for \0
 358:     if (numChars > bufferSize - 1)
 359:         return;
-360: 
+360:
 361:     char* bufferPtr = buffer;
 362:     if (negative)
 363:     {
 364:         *bufferPtr++ = '-';
 365:     }
-366: 
+366:
 367:     if (showBase)
 368:     {
 369:         if (base == 2)
@@ -1067,7 +1067,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 406:     }
 407:     *bufferPtr++ = '\0';
 408: }
-409: 
+409:
 410: /// <summary>
 411: /// Internal serialization function, to be used for all unsigned values.
 412: ///
@@ -1093,7 +1093,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 432: {
 433:     if ((base < 2) || (base > 36))
 434:         return;
-435: 
+435:
 436:     int numDigits = 0;
 437:     uint64 divisor = 1;
 438:     uint64 divisorLast = 1;
@@ -1108,7 +1108,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 447:         ++numDigits;
 448:     }
 449:     divisor = divisorLast;
-450: 
+450:
 451:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 452:     if (showBase)
 453:     {
@@ -1119,9 +1119,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 458:     // Leave one character for \0
 459:     if (numChars > bufferSize - 1)
 460:         return;
-461: 
+461:
 462:     char* bufferPtr = buffer;
-463: 
+463:
 464:     if (showBase)
 465:     {
 466:         if (base == 2)
@@ -1164,7 +1164,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 503:     }
 504:     *bufferPtr++ = '\0';
 505: }
-506: 
+506:
 507: } // namespace baremetal
 ```
 
@@ -1291,24 +1291,24 @@ Update the file `CMakeLists.txt`.
 ```cmake
 File: CMakeLists.txt
 13: include (functions)
-14: 
+14:
 15: get_git_tag(GIT_TAG)
-16: 
+16:
 17: message(STATUS "Tag found: ${GIT_TAG}")
-18: 
+18:
 19: if (NOT "${GIT_TAG}" STREQUAL "")
 20:     string(REGEX MATCH "^[0-9]*\.[0-9]*\.[0-9]*" VERSION_NUMBER ${GIT_TAG})
 21: endif()
-22: 
+22:
 23: if("${VERSION_NUMBER}" STREQUAL "")
 24:     set(VERSION_NUMBER 0.0.0)
 25: endif()
-26: 
+26:
 27: parse_version(VERSION_NUMBER VERSION_MAJOR VERSION_MINOR VERSION_LEVEL VERSION_BUILD)
-28: 
+28:
 29: set(VERSION_COMPOSED ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}.${VERSION_BUILD})
 30: message(STATUS "Version: ${VERSION_COMPOSED}")
-31: 
+31:
 ...
 66: option(BAREMETAL_CONSOLE_UART0 "Debug output to UART0" OFF)
 67: option(BAREMETAL_CONSOLE_UART1 "Debug output to UART1" OFF)
@@ -1667,18 +1667,18 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/Console.h"
 43: #include "stdlib/StdArg.h"
 44: #include "stdlib/Types.h"
-45: 
+45:
 46: /// @file
 47: /// Logger functionality
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: /// <summary>
 52: /// Logging severity classes
 53: /// </summary>
@@ -1695,9 +1695,9 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 64:     /// @brief Message, which is only interesting for debugging this component
 65:     Debug
 66: };
-67: 
+67:
 68: class Timer;
-69: 
+69:
 70: /// <summary>
 71: /// Logger class
 72: /// </summary>
@@ -1708,7 +1708,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 77:     /// </summary>
 78:     /// <returns>Reference to the singleton logger instance</returns>
 79:     friend Logger& GetLogger();
-80: 
+80:
 81: private:
 82:     /// @brief True if class is already initialized
 83:     bool m_isInitialized;
@@ -1718,27 +1718,27 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 87:     LogSeverity m_level;
 88:     /// @brief Singleton console instance
 89:     static Console s_console;
-90: 
+90:
 91:     explicit Logger(LogSeverity logLevel, Timer* timer = nullptr);
-92: 
+92:
 93: public:
 94:     static bool HaveLogger();
-95: 
+95:
 96:     bool Initialize();
 97:     void SetLogLevel(LogSeverity logLevel);
-98: 
+98:
 99:     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);
 100:     void LogV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
-101: 
+101:
 102:     void Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
 103:     void TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
 104: };
-105: 
+105:
 106: Logger& GetLogger();
-107: 
+107:
 108: /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
 109: #define LOG_MODULE(name)         static const char From[] = name
-110: 
+110:
 111: /// @brief Log a panic message
 112: #define LOG_PANIC(...)           GetLogger().Log(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
 113: /// @brief Log an error message
@@ -1749,20 +1749,20 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 118: #define LOG_INFO(...)            GetLogger().Log(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
 119: /// @brief Log a debug message
 120: #define LOG_DEBUG(...)           GetLogger().Log(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
-121: 
+121:
 122: /// @brief Log a message with specified severity and message string
 123: #define LOG(severity, message)   GetLogger().Log(From, __LINE__, severity, message);
-124: 
+124:
 125: /// @brief Log a warning message
 126: #define TRACE_WARNING(...)       GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
 127: /// @brief Log a info message
 128: #define TRACE_INFO(...)          GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
 129: /// @brief Log a debug message
 130: #define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
-131: 
+131:
 132: /// @brief Log a message with specified severity and message string
 133: #define TRACE(severity, message) GetLogger().Write(From, __FILE_NAME__, __LINE__, __func__, severity, message);
-134: 
+134:
 135: } // namespace baremetal
 ```
 
@@ -1843,26 +1843,26 @@ File: code/libraries/baremetal/src/Logger.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Logger.h"
-41: 
+41:
 42: #include "baremetal/Console.h"
 43: #include "baremetal/Format.h"
 44: #include "baremetal/System.h"
 45: #include "baremetal/Timer.h"
 46: #include "baremetal/Version.h"
 47: #include "stdlib/Util.h"
-48: 
+48:
 49: /// @file
 50: /// Logger functionality implementation
-51: 
+51:
 52: using namespace baremetal;
-53: 
+53:
 54: /// @brief Define log name
 55: LOG_MODULE("Logger");
-56: 
+56:
 57: Console Logger::s_console(nullptr);
-58: 
+58:
 59: /// <summary>
 60: /// Construct a logger
 61: /// </summary>
@@ -1874,7 +1874,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 67:     , m_level{logLevel}
 68: {
 69: }
-70: 
+70:
 71: /// <summary>
 72: /// Check whether the singleton logger was instantiated and initialized
 73: /// </summary>
@@ -1883,7 +1883,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 76: {
 77:     return GetLogger().m_isInitialized;
 78: }
-79: 
+79:
 80: /// <summary>
 81: /// Initialize logger
 82: /// </summary>
@@ -1895,10 +1895,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 88:     SetupVersion();
 89:     m_isInitialized = true; // Stop reentrant calls from happening
 90:     LOG_INFO(BAREMETAL_NAME " %s started on %s %s (AArch64)", BAREMETAL_VERSION_STRING, "Raspberry Pi", BAREMETAL_RPI_TARGET);
-91: 
+91:
 92:     return true;
 93: }
-94: 
+94:
 95: /// <summary>
 96: /// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
 97: /// </summary>
@@ -1907,7 +1907,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 100: {
 101:     m_level = logLevel;
 102: }
-103: 
+103:
 104: /// <summary>
 105: /// Write a string with variable arguments to the logger
 106: /// </summary>
@@ -1922,7 +1922,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 115:     LogV(source, line, severity, message, var);
 116:     va_end(var);
 117: }
-118: 
+118:
 119: /// <summary>
 120: /// Write a string with variable arguments to the logger
 121: /// </summary>
@@ -1935,16 +1935,16 @@ File: code/libraries/baremetal/src/Logger.cpp
 128: {
 129:     if (static_cast<int>(severity) > static_cast<int>(m_level))
 130:         return;
-131: 
+131:
 132:     static const size_t BufferSize = 1024;
 133:     char buffer[BufferSize]{};
-134: 
+134:
 135:     char sourceString[BufferSize]{};
 136:     Format(sourceString, BufferSize, " (%s:%d)", source, line);
-137: 
+137:
 138:     char messageBuffer[BufferSize]{};
 139:     FormatV(messageBuffer, BufferSize, message, args);
-140: 
+140:
 141:     switch (severity)
 142:     {
 143:     case LogSeverity::Panic:
@@ -1963,7 +1963,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 156:         strncat(buffer, "Debug  ", BufferSize);
 157:         break;
 158:     }
-159: 
+159:
 160:     if (m_timer != nullptr)
 161:     {
 162:         const size_t TimeBufferSize = 32;
@@ -1975,11 +1975,11 @@ File: code/libraries/baremetal/src/Logger.cpp
 168:             strncat(buffer, " ", BufferSize);
 169:         }
 170:     }
-171: 
+171:
 172:     strncat(buffer, messageBuffer, BufferSize);
 173:     strncat(buffer, sourceString, BufferSize);
 174:     strncat(buffer, "\n", BufferSize);
-175: 
+175:
 176: #if BAREMETAL_COLOR_OUTPUT
 177:     switch (severity)
 178:     {
@@ -2005,13 +2005,13 @@ File: code/libraries/baremetal/src/Logger.cpp
 198: #else
 199:     s_console.Write(buffer);
 200: #endif
-201: 
+201:
 202:     if (severity == LogSeverity::Panic)
 203:     {
 204:         GetSystem().Halt();
 205:     }
 206: }
-207: 
+207:
 208: /// <summary>
 209: /// Write a trace string with variable arguments to the logger
 210: /// </summary>
@@ -2027,7 +2027,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 220:     TraceV(filename, line, function, severity, message, var);
 221:     va_end(var);
 222: }
-223: 
+223:
 224: /// <summary>
 225: /// Write a trace string with variable arguments to the logger
 226: /// </summary>
@@ -2041,16 +2041,16 @@ File: code/libraries/baremetal/src/Logger.cpp
 234: {
 235:     if (static_cast<int>(severity) > static_cast<int>(m_level))
 236:         return;
-237: 
+237:
 238:     static const size_t BufferSize = 1024;
 239:     char buffer[BufferSize]{};
-240: 
+240:
 241:     char sourceString[BufferSize]{};
 242:     Format(sourceString, BufferSize, "%s (%s:%d) ", function, filename, line);
-243: 
+243:
 244:     char messageBuffer[BufferSize]{};
 245:     FormatV(messageBuffer, BufferSize, message, args);
-246: 
+246:
 247:     switch (severity)
 248:     {
 249:     case LogSeverity::Warning:
@@ -2065,7 +2065,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 258:     default:
 259:         break;
 260:     }
-261: 
+261:
 262:     if (m_timer != nullptr)
 263:     {
 264:         const size_t TimeBufferSize = 32;
@@ -2077,11 +2077,11 @@ File: code/libraries/baremetal/src/Logger.cpp
 270:             strncat(buffer, " ", BufferSize);
 271:         }
 272:     }
-273: 
+273:
 274:     strncat(buffer, sourceString, BufferSize);
 275:     strncat(buffer, messageBuffer, BufferSize);
 276:     strncat(buffer, "\n", BufferSize);
-277: 
+277:
 278: #if BAREMETAL_COLOR_OUTPUT
 279:     switch (severity)
 280:     {
@@ -2102,7 +2102,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 295:     s_console.Write(buffer);
 296: #endif
 297: }
-298: 
+298:
 299: /// <summary>
 300: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
 301: /// </summary>
@@ -2159,9 +2159,9 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
 72: public:
 73:     Timer(IMemoryAccess& memoryAccess);
-74: 
+74:
 75:     void GetTimeString(char* buffer, size_t bufferSize);
-76: 
+76:
 77:     static void WaitCycles(uint32 numCycles);
 ...
 ```
@@ -2206,7 +2206,7 @@ Update the file `code/libraries/baremetal/src/System.cpp`
 File: code/libraries/baremetal/src/System.cpp
 ...
 40: #include "baremetal/System.h"
-41: 
+41:
 42: #include "stdlib/Util.h"
 43: #include "baremetal/ARMInstructions.h"
 44: #include "baremetal/BCMRegisters.h"
@@ -2219,7 +2219,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 57: /// @brief Define log name for this module
 58: LOG_MODULE("System");
-59: 
+59:
 ...
 119: void System::Halt()
 120: {
@@ -2235,7 +2235,7 @@ File: code/libraries/baremetal/src/System.cpp
 179:     {
 180:         (**func)();
 181:     }
-182: 
+182:
 183:     Device* logDevice{};
 184: #if defined(BAREMETAL_CONSOLE_UART0)
 185:     auto& uart = GetUART0();
@@ -2251,7 +2251,7 @@ File: code/libraries/baremetal/src/System.cpp
 195:     GetConsole().AssignDevice(logDevice);
 196:     GetLogger().Initialize();
 197:     LOG_INFO("Starting up");
-198: 
+198:
 199:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 ```
 
@@ -2393,37 +2393,37 @@ File: code/libraries/baremetal/include/baremetal/Assert.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Macros.h"
 43: #include "stdlib/Types.h"
-44: 
+44:
 45: /// @file
 46: /// Assertion functions
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: /// @brief Assertion callback function, which can be installed to handle a failed assertion
 51: using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
-52: 
+52:
 53: #ifdef NDEBUG
 54: /// If building for release, assert is replaced by nothing
-55: #define assert(expr) ((void)0)
+55: #define assert(expr) expr;
 56: void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
 57: #else
-58: 
+58:
 59: /// @brief Assertion. If the assertion fails, AssertionFailed is called.
 60: ///
 61: /// <param name="expression">Expression to evaluate.
 62: /// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
 63: #define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
-64: 
+64:
 65: #endif
-66: 
+66:
 67: void ResetAssertionCallback();
 68: void SetAssertionCallback(AssertionCallback* callback);
-69: 
+69:
 70: } // namespace baremetal
 ```
 
@@ -2479,29 +2479,29 @@ File: code/libraries/baremetal/src/Assert.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Assert.h"
-41: 
+41:
 42: #include "baremetal/Logger.h"
 43: #include "baremetal/System.h"
-44: 
+44:
 45: /// @file
 46: /// Assertion functions implementation
-47: 
+47:
 48: /// @brief Define log name
 49: LOG_MODULE("Assert");
-50: 
+50:
 51: namespace baremetal {
-52: 
+52:
 53: #ifndef NDEBUG
-54: 
+54:
 55: static void AssertionFailedDefault(const char* expression, const char* fileName, int lineNumber);
-56: 
+56:
 57: /// @brief Assertion callback function
 58: ///
 59: /// Set to the default assertion handler function at startup, but can be overriden
 60: static AssertionCallback* s_callback = AssertionFailedDefault;
-61: 
+61:
 62: /// <summary>
 63: /// Log assertion failure and halt, is not expected to return (but may if a different assertion failure function is set up)
 64: /// </summary>
@@ -2513,7 +2513,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 70:     if (s_callback != nullptr)
 71:         s_callback(expression, fileName, lineNumber);
 72: }
-73: 
+73:
 74: /// <summary>
 75: /// Default failed assertion handler
 76: /// </summary>
@@ -2524,7 +2524,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 81: {
 82:     GetLogger().Log(fileName, lineNumber, LogSeverity::Panic, "assertion failed: %s", expression);
 83: }
-84: 
+84:
 85: /// <summary>
 86: /// Reset the assertion failure handler to the default
 87: /// </summary>
@@ -2532,7 +2532,7 @@ File: code/libraries/baremetal/src/Assert.cpp
 89: {
 90:     s_callback = AssertionFailedDefault;
 91: }
-92: 
+92:
 93: /// <summary>
 94: /// Sets up a custom assertion failure handler
 95: /// </summary>
@@ -2541,16 +2541,16 @@ File: code/libraries/baremetal/src/Assert.cpp
 98: {
 99:     s_callback = callback;
 100: }
-101: 
+101:
 102: #else
-103: 
+103:
 104: /// <summary>
 105: /// Reset the assertion failure handler to the default
 106: /// </summary>
 107: void ResetAssertionCallback()
 108: {
 109: }
-110: 
+110:
 111: /// <summary>
 112: /// Sets up a custom assertion failure handler
 113: /// </summary>
@@ -2558,9 +2558,9 @@ File: code/libraries/baremetal/src/Assert.cpp
 115: void SetAssertionCallback(AssertionCallback* callback)
 116: {
 117: }
-118: 
+118:
 119: #endif
-120: 
+120:
 121: } // namespace baremetal
 ```
 
@@ -2616,24 +2616,24 @@ File: code/applications/demo/src/main.cpp
 10: #include "baremetal/SysConfig.h"
 11: #include "baremetal/System.h"
 12: #include "baremetal/Timer.h"
-13: 
+13:
 14: LOG_MODULE("main");
-15: 
+15:
 16: using namespace baremetal;
-17: 
+17:
 18: void MyHandler(const char* expression, const char* fileName, int lineNumber)
 19: {
 20:     LOG_INFO("An assertion failed on location %s:%d, %s", fileName, lineNumber, expression);
 21: }
-22: 
+22:
 23: int main()
 24: {
 25:     auto& console = GetConsole();
 26:     LOG_DEBUG("Hello World!");
-27: 
+27:
 28:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 29:     RPIProperties properties(mailbox);
-30: 
+30:
 31:     uint64 serial{};
 32:     if (properties.GetBoardSerial(serial))
 33:     {
@@ -2644,10 +2644,10 @@ File: code/applications/demo/src/main.cpp
 38:     {
 39:         LOG_ERROR("Mailbox call failed");
 40:     }
-41: 
+41:
 42:     LOG_INFO("Wait 5 seconds");
 43:     Timer::WaitMilliSeconds(5000);
-44: 
+44:
 45:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 46:     char ch{};
 47:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -2662,7 +2662,7 @@ File: code/applications/demo/src/main.cpp
 56:         ResetAssertionCallback();
 57:         assert(false);
 58:     }
-59: 
+59:
 60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 61: }
 ```

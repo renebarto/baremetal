@@ -52,7 +52,7 @@ using AssertionCallback = void(const char* expression, const char* fileName, int
 
 #ifdef NDEBUG
 /// If building for release, assert is replaced by nothing
-#define assert(expr) ((void)0)
+#define assert(expr) expr;
 #else
 
 void AssertionFailed(const char* expression, const char* fileName, int lineNumber);

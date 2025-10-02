@@ -203,6 +203,8 @@ void sysinit()
 
     LOG_INFO("Starting up");
 
+    extern int main();
+
     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
     {
 #if BAREMETAL_MEMORY_TRACING

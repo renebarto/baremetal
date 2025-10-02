@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : New.h
+// File        : Malloc.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Generic memory allocation functions
+// Description : Memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,10 +39,20 @@
 
 #pragma once
 
-/// @file
-/// Basic memory allocation functions
-
 #include "stdlib/Types.h"
 
-void operator delete(void* address) noexcept;
-void operator delete(void* address, size_t size) noexcept;
+/// @file
+/// Standard C library memory allocation functions
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void* malloc(size_t size);
+void* calloc(size_t num, size_t size);
+void* realloc(void* ptr, size_t new_size);
+void free(void* ptr);
+
+#ifdef __cplusplus
+}
+#endif

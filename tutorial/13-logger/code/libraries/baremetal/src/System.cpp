@@ -193,7 +193,7 @@ void sysinit()
     logDevice = &uart;
 #endif
     GetConsole().AssignDevice(logDevice);
-    GetLogger();
+    GetLogger().Initialize();
     LOG_INFO("Starting up");
 
     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)

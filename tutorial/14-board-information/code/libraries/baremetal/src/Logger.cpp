@@ -304,6 +304,5 @@ void Logger::TraceV(const char* filename, int line, const char* function, LogSev
 Logger& baremetal::GetLogger()
 {
     static Logger s_logger(LogSeverity::Info, &GetTimer());
-    s_logger.Initialize();
     return s_logger;
 }

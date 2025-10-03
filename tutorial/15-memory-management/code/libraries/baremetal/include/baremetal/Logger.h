@@ -130,6 +130,6 @@ Logger& GetLogger();
 #define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
 
 /// @brief Log a message with specified severity and message string
-#define TRACE(severity, message) GetLogger().Write(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+#define TRACE(severity, message) GetLogger().Trace(From, __FILE_NAME__, __LINE__, __func__, severity, message);
 
 } // namespace baremetal

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Util.h
+// File        : UART1.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : UART1
 //
-// Description : Utility functions
+// Description : RPI UART1 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,56 +39,50 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
+#include "baremetal/CharDevice.h"
 
 /// @file
-/// Standard C library utility functions
+/// Raspberry Pi UART1 serial device declaration
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// @brief baremetal namespace
+namespace baremetal {
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-int memcmp(const void* buffer1, const void* buffer2, size_t length);
-
-int toupper(int c);
-int tolower(int c);
-size_t strlen(const char* str);
-int strcmp(const char* str1, const char* str2);
-int strcasecmp(const char* str1, const char* str2);
-int strncmp(const char* str1, const char* str2, size_t maxLen);
-int strncasecmp(const char* str1, const char* str2, size_t maxLen);
-char* strncpy(char* dest, const char* src, size_t maxLen);
-char* strncat(char* dest, const char* src, size_t maxLen);
-
-#ifdef __cplusplus
-}
-#endif
+class IMemoryAccess;
 
 /// <summary>
-/// Determine the number of bits needed to represent the specified value
+/// Encapsulation for the UART1 device.
+///
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Number of bits used for value</returns>
-inline constexpr unsigned NextPowerOf2Bits(size_t value)
+class UART1 : public CharDevice
 {
-    unsigned bitCount{0};
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
-}
+    /// <summary>
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// </summary>
+    /// <returns>Reference to the singleton UART1 instance</returns>
+    friend UART1& GetUART1();
 
-/// <summary>
-/// Determine the next power of 2 greater than or equal to the specified value
-/// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Power of two greater or equal to value</returns>
-inline constexpr size_t NextPowerOf2(size_t value)
-{
-    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
-}
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+    /// @brief Baudrate set for device
+    unsigned m_baudrate;
+
+    UART1();
+
+public:
+    UART1(IMemoryAccess& memoryAccess);
+
+    void Initialize(unsigned baudrate);
+    unsigned GetBaudrate() const;
+    char Read() override;
+    void Write(char ch) override;
+    void WriteString(const char* str);
+};
+
+UART1& GetUART1();
+
+} // namespace baremetal

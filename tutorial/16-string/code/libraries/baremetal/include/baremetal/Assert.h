@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Util.h
+// File        : Assert.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Utility functions
+// Description : Assertion functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,56 +39,33 @@
 
 #pragma once
 
+#include "stdlib/Macros.h"
 #include "stdlib/Types.h"
 
 /// @file
-/// Standard C library utility functions
+/// Assertion functions
 
-#ifdef __cplusplus
-extern "C" {
+namespace baremetal {
+
+/// @brief Assertion callback function, which can be installed to handle a failed assertion
+using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
+
+#ifdef NDEBUG
+/// If building for release, assert is replaced by nothing
+#define assert(expr) expr;
+#else
+
+void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
+
+/// @brief Assertion. If the assertion fails, AssertionFailed is called.
+///
+/// <param name="expression">Expression to evaluate.
+/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
+#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
+
 #endif
 
-void* memset(void* buffer, int value, size_t length);
-void* memcpy(void* dest, const void* src, size_t length);
-int memcmp(const void* buffer1, const void* buffer2, size_t length);
+void ResetAssertionCallback();
+void SetAssertionCallback(AssertionCallback* callback);
 
-int toupper(int c);
-int tolower(int c);
-size_t strlen(const char* str);
-int strcmp(const char* str1, const char* str2);
-int strcasecmp(const char* str1, const char* str2);
-int strncmp(const char* str1, const char* str2, size_t maxLen);
-int strncasecmp(const char* str1, const char* str2, size_t maxLen);
-char* strncpy(char* dest, const char* src, size_t maxLen);
-char* strncat(char* dest, const char* src, size_t maxLen);
-
-#ifdef __cplusplus
-}
-#endif
-
-/// <summary>
-/// Determine the number of bits needed to represent the specified value
-/// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Number of bits used for value</returns>
-inline constexpr unsigned NextPowerOf2Bits(size_t value)
-{
-    unsigned bitCount{0};
-    size_t temp = value;
-    while (temp >= 1)
-    {
-        ++bitCount;
-        temp >>= 1;
-    }
-    return bitCount;
-}
-
-/// <summary>
-/// Determine the next power of 2 greater than or equal to the specified value
-/// </summary>
-/// <param name="value">Value to check</param>
-/// <returns>Power of two greater or equal to value</returns>
-inline constexpr size_t NextPowerOf2(size_t value)
-{
-    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
-}
+} // namespace baremetal

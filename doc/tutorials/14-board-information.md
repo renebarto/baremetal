@@ -1,13 +1,13 @@
-# Tutorial 13: Board information {#TUTORIAL_13_BOARD_INFORMATION}
+# Tutorial 14: Board information {#TUTORIAL_14_BOARD_INFORMATION}
 
 @tableofcontents
 
-## New tutorial setup {#TUTORIAL_13_BOARD_INFORMATION_NEW_TUTORIAL_SETUP}
+## New tutorial setup {#TUTORIAL_14_BOARD_INFORMATION_NEW_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/13-board-information`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_13_BOARD_INFORMATION_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_14_BOARD_INFORMATION_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-14.a`
@@ -15,21 +15,21 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/14-board-information.elf`
 - an image in `deploy/Debug/14-board-information-image`
 
-## Retrieving board information {#TUTORIAL_13_BOARD_INFORMATION_RETRIEVING_BOARD_INFORMATION}
+## Retrieving board information {#TUTORIAL_14_BOARD_INFORMATION_RETRIEVING_BOARD_INFORMATION}
 
 In order to start with memory management, we need to know how much memory is available.
 Next to this, we wish to have insight in the actual hardware we're running on.
 
 So let's gather some information, and print it.
 
-## MachineInfo {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO}
+## MachineInfo {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO}
 
 We will create a class `MachineInfo` to retrieve all machine / board specific information.
 Later we will update the `Logger` class to print the board type when starting up.
 
 In order to retrieve board information and other info, we will start by extending the functionality for the class `RPIProperties`.
 
-### RPIProperties.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESH}
+### RPIProperties.h {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESH}
 
 We will add a few methods to the `RPIProperties` class, to retrieve information about the hardware.
 
@@ -204,7 +204,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 - Line 232: We add the method `GetARMMemory()` to retrieve the base address and size of memory allocated to the ARM cores
 - Line 233: We add the method `GetVCMemory()` to retrieve the base address and size of memory allocated to the VideoCore
 
-### RPIProperties.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESCPP}
+### RPIProperties.cpp {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_RPIPROPERTIESCPP}
 
 Next we'll implement the new methods for class `RPIProperties`.
 
@@ -531,7 +531,7 @@ We use the `PropertyTagMemory` structure to retrieve the base address and size o
 - Line 355-368: We add tracing information to the member function `SetClockRate()`.
 Note we do not trace here, as the clock needs to be set for UART0 and possibly UART1 before tracing can be done
 
-### MachineInfo.h {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOH}
+### MachineInfo.h {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOH}
 
 Now we can add the class `MachineInfo` which uses the methods defined in `RPIProperties` to retrieve and process information on the hardware.
 
@@ -709,7 +709,7 @@ This is the memory available to the ARM cores up to the 1 Gb border, memory abov
   - Line 137: We declare the method `GetBoardRevision()` which returns the raw board revision
 - Line 140: We declare the friend function `GetMachineInfo()`
 
-### MachineInfo.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOCPP}
+### MachineInfo.cpp {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_MACHINEINFOCPP}
 
 We'll implement the method for class `MachineInfo`.
 
@@ -1213,7 +1213,7 @@ Notice that this uses the standard function `memcpy()` which we will need to add
 if not available the measured clock rate, and if all fails an estimate of the clock frequency
 - Line 440-449: We implement the `GetMachineInfo()` function
 
-### Logger.cpp {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_LOGGERCPP}
+### Logger.cpp {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_LOGGERCPP}
 
 We can now make use of information from `MachineInfo` to print where initializing the `Logger` instance.
 
@@ -1252,7 +1252,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 - Line 44: We need to include `MachineInfo.h`
 - Line 91: We will now using the methods `GetName()` and `GetSoCName()` from `MachineInfo` to print the board name and the SoC name.
 
-### Configuring, building and debugging {#TUTORIAL_13_BOARD_INFORMATION_MACHINEINFO_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_14_BOARD_INFORMATION_MACHINEINFO_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and start debugging.
 

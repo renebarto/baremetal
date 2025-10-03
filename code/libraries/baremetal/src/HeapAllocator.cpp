@@ -146,8 +146,8 @@ void* HeapAllocator::Allocate(size_t size)
         assert(blockHeader->magic == HEAP_BLOCK_MAGIC);
         bucket->freeList = blockHeader->next;
 #if BAREMETAL_MEMORY_TRACING_DETAIL
-        TRACE_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-        TRACE_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+        TRACE_NO_ALLOC_DEBUG("Reuse %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+        TRACE_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
 #endif
     }
     else
@@ -163,7 +163,7 @@ void* HeapAllocator::Allocate(size_t size)
 #if BAREMETAL_MEMORY_TRACING
             DumpStatus();
 #endif
-            LOG_ERROR("%s: Out of memory", m_heapName);
+            LOG_NO_ALLOC_ERROR("%s: Out of memory", m_heapName);
             return nullptr;
         }
 
@@ -173,8 +173,8 @@ void* HeapAllocator::Allocate(size_t size)
         blockHeader->size = static_cast<uint32>(size);
 
 #if BAREMETAL_MEMORY_TRACING_DETAIL
-        TRACE_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-        TRACE_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+        TRACE_NO_ALLOC_DEBUG("Allocate %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+        TRACE_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
 #endif
     }
 
@@ -253,8 +253,8 @@ void HeapAllocator::Free(void* block)
             ++bucket->totalFreedCount;
             bucket->totalFreed += blockHeader->size;
 #if BAREMETAL_MEMORY_TRACING_DETAIL
-            TRACE_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
-            TRACE_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
+            TRACE_NO_ALLOC_DEBUG("Free %lu bytes at %016llx", blockHeader->size, reinterpret_cast<uintptr>(blockHeader->data));
+            TRACE_NO_ALLOC_DEBUG("Current #allocations = %lu, max #allocations = %lu", bucket->count, bucket->maxCount);
 #endif
 #endif
 
@@ -263,7 +263,7 @@ void HeapAllocator::Free(void* block)
     }
 
 #if BAREMETAL_MEMORY_TRACING
-    LOG_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
+    LOG_NO_ALLOC_WARNING("%s: Trying to free large block (size %lu)", m_heapName, blockHeader->size);
 #endif
 }
 
@@ -273,20 +273,20 @@ void HeapAllocator::Free(void* block)
 /// </summary>
 void HeapAllocator::DumpStatus()
 {
-    TRACE_DEBUG("Heap allocator info:     %s", m_heapName);
-    TRACE_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
-    TRACE_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
-    TRACE_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
-    TRACE_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
-    TRACE_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
-    TRACE_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
-    TRACE_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
+    TRACE_NO_ALLOC_DEBUG("Heap allocator info:     %s", m_heapName);
+    TRACE_NO_ALLOC_DEBUG("Current #allocations:    %llu", GetCurrentAllocatedBlockCount());
+    TRACE_NO_ALLOC_DEBUG("Max #allocations:        %llu", GetMaxAllocatedBlockCount());
+    TRACE_NO_ALLOC_DEBUG("Current #allocated bytes:%llu", GetCurrentAllocationSize());
+    TRACE_NO_ALLOC_DEBUG("Total #allocated blocks: %llu", GetTotalAllocatedBlockCount());
+    TRACE_NO_ALLOC_DEBUG("Total #allocated bytes:  %llu", GetTotalAllocationSize());
+    TRACE_NO_ALLOC_DEBUG("Total #freed blocks:     %llu", GetTotalFreedBlockCount());
+    TRACE_NO_ALLOC_DEBUG("Total #freed bytes:      %llu", GetTotalFreeSize());
 
 #if BAREMETAL_MEMORY_TRACING_DETAIL
     for (HeapBlockBucket* bucket = m_buckets; bucket->size > 0; ++bucket)
     {
-        TRACE_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu", bucket->size, bucket->count, bucket->maxCount,
-                    bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
+        TRACE_NO_ALLOC_DEBUG("malloc(%lu): %lu blocks (max %lu) total alloc #blocks = %llu, #bytes = %llu, total free #blocks = %llu, #bytes = %llu", bucket->size, bucket->count, bucket->maxCount,
+                             bucket->totalAllocatedCount, bucket->totalAllocated, bucket->totalFreedCount, bucket->totalFreed);
     }
 #endif
 }

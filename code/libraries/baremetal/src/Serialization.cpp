@@ -49,8 +49,8 @@ namespace baremetal {
 /// @brief Write characters with base above 10 as uppercase or not
 static bool Uppercase = true;
 
-static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
-static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+static String SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
+static String SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
 
 /// <summary>
 /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
@@ -85,133 +85,230 @@ static constexpr int BitsToDigits(int bits, int base)
 }
 
 /// <summary>
-/// Serialize a 8 bit unsigned value to buffer.
+/// Serialize a character value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters, if negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <returns>Serialized String value</returns>
+String Serialize(char value, int width)
+{
+    String result;
+
+    int numDigits = 0;
+    bool negative = (value < 0);
+    uint64 absVal = static_cast<uint64>(negative ? -value : value);
+    uint64 divisor = 1;
+    int absWidth = (width < 0) ? -width : width;
+    while (absVal >= divisor)
+    {
+        divisor *= 10;
+        ++numDigits;
+    }
+
+    if (numDigits == 0)
+    {
+        result = "0";
+        return result;
+    }
+    if (negative)
+    {
+        result += '-';
+        absWidth--;
+    }
+    while (numDigits > 0)
+    {
+        divisor /= 10;
+        int digit = (absVal / divisor) % 10;
+        result += GetDigit(digit);
+        --numDigits;
+    }
+    return result.align(width);
+}
+
+/// <summary>
+/// Serialize a 8 bit signed value to String.
+///
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-void Serialize(char* buffer, size_t bufferSize, uint8 value, int width, int base, bool showBase, bool leadingZeros)
+/// <returns>Serialized String value</returns>
+String Serialize(int8 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 8);
+    return SerializeInternalInt(value, width, base, showBase, leadingZeros, 8);
 }
 
 /// <summary>
-/// Serialize a 32 bit signed value to buffer.
+/// Serialize a 8 bit unsigned value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-void Serialize(char* buffer, size_t bufferSize, int32 value, int width, int base, bool showBase, bool leadingZeros)
+/// <returns>Serialized String value</returns>
+String Serialize(uint8 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+    return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 8);
 }
 
 /// <summary>
-/// Serialize a 32 bit unsigned value to buffer.
+/// Serialize a 16 bit signed value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros)
+/// <returns>Serialized String value</returns>
+String Serialize(int16 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
+    return SerializeInternalInt(value, width, base, showBase, leadingZeros, 16);
 }
 
 /// <summary>
-/// Serialize a 64 bit signed value to buffer.
+/// Serialize a 16 bit unsigned value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters, excluding any base prefix. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-void Serialize(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros)
+/// <returns>Serialized String value</returns>
+String Serialize(uint16 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    SerializeInternalInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+    return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 16);
 }
 
 /// <summary>
-/// Serialize a 64 bit unsigned value to buffer.
+/// Serialize a 32 bit signed value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
-void Serialize(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros)
+/// <returns>Serialized String value</returns>
+String Serialize(int32 value, int width, int base, bool showBase, bool leadingZeros)
 {
-    SerializeInternalUInt(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
+    return SerializeInternalInt(value, width, base, showBase, leadingZeros, 32);
 }
 
 /// <summary>
-/// Serialize a double value to buffer. The value will be printed as a fixed point number.
+/// Serialize a 32 bit unsigned value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, the string is terminated to hold maximum bufferSize - 1 characters.
-/// Width is currently unused.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+///
+/// Base is the digit base, which can range from 2 to 36.
+/// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+/// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+/// <returns>Serialized String value</returns>
+String Serialize(uint32 value, int width, int base, bool showBase, bool leadingZeros)
+{
+    return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 32);
+}
+
+/// <summary>
+/// Serialize a 64 bit signed value to String.
+///
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+///
+/// Base is the digit base, which can range from 2 to 36.
+/// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+/// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+/// <returns>Serialized String value</returns>
+String Serialize(int64 value, int width, int base, bool showBase, bool leadingZeros)
+{
+    return SerializeInternalInt(value, width, base, showBase, leadingZeros, 64);
+}
+
+/// <summary>
+/// Serialize a 64 bit unsigned value to String.
+///
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+///
+/// Base is the digit base, which can range from 2 to 36.
+/// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
+/// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters, excluding any base prefix. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
+/// <returns>Serialized String value</returns>
+String Serialize(uint64 value, int width, int base, bool showBase, bool leadingZeros)
+{
+    return SerializeInternalUInt(value, width, base, showBase, leadingZeros, 64);
+}
+
+/// <summary>
+/// Serialize a float value to String. The value will be printed as a fixed point number.
+///
+/// Width specifies the minimum width in characters. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+///
 /// Precision specifies the number of digits behind the decimal pointer
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
-/// <param name="width">Unused</param>
-/// <param name="precision">Number of digits after the decimal point to use</param>
-void Serialize(char* buffer, size_t bufferSize, double value, int width, int precision)
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="precision">Number of digits after the decimal point to use (limited to 7 decimals</param>
+/// <returns>Serialized String value</returns>
+String Serialize(float value, int width, int precision)
 {
     bool negative{};
     if (value < 0)
@@ -220,30 +317,87 @@ void Serialize(char* buffer, size_t bufferSize, double value, int width, int pre
         value = -value;
     }
 
-    if (bufferSize == 0)
-        return;
-
     // We can only print values with integral parts up to what uint64 can hold
-    if (value > static_cast<double>(static_cast<uint64>(-1)))
+    if (value > static_cast<float>(static_cast<uint64>(-1)))
     {
-        strncpy(buffer, "overflow", bufferSize);
-        return;
+        return String("overflow");
     }
 
-    *buffer = '\0';
+    String result;
     if (negative)
-        strncpy(buffer, "-", bufferSize);
+        result += '-';
 
     uint64 integralPart = static_cast<uint64>(value);
-    const size_t TmpBufferSize = 32;
-    char tmpBuffer[TmpBufferSize];
-    Serialize(tmpBuffer, TmpBufferSize, integralPart, 0, 10, false, false);
-    strncat(buffer, tmpBuffer, bufferSize);
+    result += Serialize(integralPart, 0, 10, false, false);
     const int MaxPrecision = 7;
 
     if (precision != 0)
     {
-        strncat(buffer, ".", bufferSize);
+        result += '.';
+
+        if (precision > MaxPrecision)
+        {
+            precision = MaxPrecision;
+        }
+
+        uint64 precisionPower10 = 1;
+        for (int i = 1; i <= precision; i++)
+        {
+            precisionPower10 *= 10;
+        }
+
+        value -= static_cast<float>(integralPart);
+        value *= static_cast<float>(precisionPower10);
+
+        String fractional = Serialize(static_cast<uint64>(value + 0.5F), 0, 10, false, false);
+        result += fractional;
+        precision -= fractional.length();
+        while (precision--)
+        {
+            result += '0';
+        }
+    }
+    return result.align(width);
+}
+
+/// <summary>
+/// Serialize a double value to String. The value will be printed as a fixed point number.
+///
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+///
+/// Precision specifies the number of digits behind the decimal pointer
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="precision">Number of digits after the decimal point to use (limited to 10 decimals</param>
+/// <returns>Serialized String value</returns>
+String Serialize(double value, int width, int precision)
+{
+    bool negative{};
+    if (value < 0)
+    {
+        negative = true;
+        value = -value;
+    }
+
+    // We can only print values with integral parts up to what uint64 can hold
+    if (value > static_cast<double>(static_cast<uint64>(-1)))
+    {
+        return String("overflow");
+    }
+
+    String result;
+    if (negative)
+        result += '-';
+
+    uint64 integralPart = static_cast<uint64>(value);
+    result += Serialize(integralPart, 0, 10, false, false);
+    const int MaxPrecision = 14;
+
+    if (precision != 0)
+    {
+        result += '.';
 
         if (precision > MaxPrecision)
         {
@@ -259,84 +413,129 @@ void Serialize(char* buffer, size_t bufferSize, double value, int width, int pre
         value -= static_cast<double>(integralPart);
         value *= static_cast<double>(precisionPower10);
 
-        Serialize(tmpBuffer, TmpBufferSize, static_cast<uint64>(value), 0, 10, false, false);
-        strncat(buffer, tmpBuffer, bufferSize);
-        precision -= strlen(tmpBuffer);
+        String fractional = Serialize(static_cast<uint64>(value + 0.5), 0, 10, false, false);
+        result += fractional;
+        precision -= fractional.length();
         while (precision--)
         {
-            strncat(buffer, "0", bufferSize);
+            result += '0';
         }
     }
+    return result.align(width);
 }
 
 /// <summary>
-/// Serialize a const char * value to buffer. The value can be quoted.
-///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// If quote is true, the string is printed within double quotes (\")
+/// Serialize a String to String.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+/// If requested, the String is placed between double quotes (").
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
-/// <param name="value">String to be serialized</param>
-/// <param name="width">Unused</param>
-/// <param name="quote">If true, value is printed between double quotes, if false, no quotes are used</param>
-void Serialize(char* buffer, size_t bufferSize, const char* value, int width, bool quote)
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="quote">If true places String between double quotes</param>
+/// <returns>Serialized String value</returns>
+String Serialize(const String& value, int width, bool quote)
 {
-    size_t numChars = strlen(value);
-    if (quote)
-        numChars += 2;
-
-    // Leave one character for \0
-    if (numChars > bufferSize - 1)
-        return;
-
-    char* bufferPtr = buffer;
-
-    if (quote)
-        *bufferPtr++ = '\"';
-    while (*value)
-    {
-        *bufferPtr++ = *value++;
-    }
-    if (quote)
-        *bufferPtr++ = '\"';
+    return Serialize(value.data(), width, quote);
 }
 
 /// <summary>
-/// Internal serialization function, to be used for all signed values.
+/// Serialize a String to String
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+/// If requested, the String is placed between double quotes (").
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <param name="quote">If true places String between double quotes</param>
+/// <returns>Serialized String value</returns>
+String Serialize(const char* value, int width, bool quote)
+{
+    String result;
+
+    if (quote)
+        result += '\"';
+    result += value;
+    if (quote)
+        result += '\"';
+
+    return result.align(width);
+}
+
+/// <summary>
+/// Serialize a const void pointer to String
 ///
-/// Serialize a signed value to buffer.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <returns>Serialized String value</returns>
+String Serialize(const void* value, int width)
+{
+    String result;
+
+    if (value != nullptr)
+    {
+        result = Serialize(reinterpret_cast<uintptr>(value), 16, 16, true, true);
+    }
+    else
+    {
+        result = "null";
+    }
+
+    return result.align(width);
+}
+
+/// <summary>
+/// Serialize a void pointer to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
+/// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
+/// </summary>
+/// <param name="value">Value to be serialized</param>
+/// <param name="width">Minimum width in characters. If negative, aligns to left, if positive, aligns to right. If 0, uses as many characters as needed</param>
+/// <returns>Serialized String value</returns>
+String Serialize(void* value, int width)
+{
+    return Serialize(const_cast<const void*>(value), width);
+}
+
+/// <summary>
+/// Internal serialization function returning String, to be used for all signed values.
+///
+/// Serialize a signed value to String.
+///
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
 /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
 /// <param name="numBits">Specifies the number of bits used for the value</param>
-static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+/// <returns>Serialized stirng</returns>
+static String SerializeInternalInt(int64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
 {
     if ((base < 2) || (base > 36))
-        return;
+        return {};
 
     int numDigits = 0;
     bool negative = (value < 0);
     uint64 absVal = static_cast<uint64>(negative ? -value : value);
     uint64 divisor = 1;
+    uint64 divisorHigh = 0;
     uint64 divisorLast = 1;
     size_t absWidth = (width < 0) ? -width : width;
     const int maxDigits = BitsToDigits(numBits, base);
-    while ((absVal >= divisor) && (numDigits <= maxDigits))
+    while ((divisorHigh == 0) && (absVal >= divisor) && (numDigits <= maxDigits))
     {
+        divisorHigh = ((divisor >> 32) * base >> 32); // Take care of overflow
         divisorLast = divisor;
         divisor *= base;
         ++numDigits;
@@ -355,30 +554,27 @@ static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, i
     if (absWidth > numChars)
         numChars = absWidth;
     // Leave one character for \0
-    if (numChars > bufferSize - 1)
-        return;
+    String result;
+    result.reserve(numChars + 1);
 
-    char* bufferPtr = buffer;
     if (negative)
     {
-        *bufferPtr++ = '-';
+        result += '-';
     }
 
     if (showBase)
     {
         if (base == 2)
         {
-            *bufferPtr++ = '0';
-            *bufferPtr++ = 'b';
+            result += "0b";
         }
         else if (base == 8)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
         else if (base == 16)
         {
-            *bufferPtr++ = '0';
-            *bufferPtr++ = 'x';
+            result += "0x";
         }
     }
     if (leadingZeros)
@@ -387,51 +583,49 @@ static void SerializeInternalInt(char* buffer, size_t bufferSize, int64 value, i
             absWidth = maxDigits;
         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
     }
     else
     {
         if (numDigits == 0)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
     }
     while (numDigits > 0)
     {
         int digit = (absVal / divisor) % base;
-        *bufferPtr++ = GetDigit(digit);
+        result += GetDigit(digit);
         --numDigits;
         divisor /= base;
     }
-    *bufferPtr++ = '\0';
+    return result.align(width);
 }
 
 /// <summary>
-/// Internal serialization function, to be used for all unsigned values.
+/// Internal serialization function returning String, to be used for all unsigned values.
 ///
-/// Serialize a unsigned value to buffer.
+/// Serialize a unsigned value to String.
 ///
-/// The buffer will be filled to a maximum of bufferSize bytes, including end of string character. If this does not fit, nothing is written.
-/// Width specifies the minimum width in characters. The value is always written right aligned.
+/// Width specifies the minimum width in characters, excluding any base prefix. The value is written right aligned if width is positive, left aligned if width is negative.
 /// If 0 is specified, the value will take as many characters as it needs to serialize, taking into account digit base and prefix.
 ///
 /// Base is the digit base, which can range from 2 to 36.
 /// If showBase is true, and the base is either 2, 8, or 16, a prefix is added to the serialization (0b for base 2, 0 for base 8 and 0x for base 16.
 /// If leadingZeros is true, the maximum amount of digits for the type and base is used, and '0' characters are prefixed to the value to fill up to this amount of characters.
 /// </summary>
-/// <param name="buffer">Pointer to buffer receiving the characters written</param>
-/// <param name="bufferSize">Size of buffer, up to this size the buffer may be filled, if more space would be needed, nothing is written</param>
 /// <param name="value">Value to be serialized</param>
 /// <param name="width">Minimum width in characters, excluding any base prefix. If 0, uses as many characters as needed</param>
 /// <param name="base">Digit base for serialization. Must be between 2 and 36</param>
-/// <param name="showBase">If true, prefix value with base dependent string (0b for base 2, 0 for base 8, 0x for base 16)</param>
+/// <param name="showBase">If true, prefix value with base dependent String (0b for base 2, 0 for base 8, 0x for base 16)</param>
 /// <param name="leadingZeros">If true, use as many digits as needed for the maximum value</param>
 /// <param name="numBits">Specifies the number of bits used for the value</param>
-static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
+/// <returns>Serialized stirng</returns>
+static String SerializeInternalUInt(uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits)
 {
     if ((base < 2) || (base > 36))
-        return;
+        return {};
 
     int numDigits = 0;
     uint64 divisor = 1;
@@ -456,26 +650,22 @@ static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value,
     if (absWidth > numChars)
         numChars = absWidth;
     // Leave one character for \0
-    if (numChars > bufferSize - 1)
-        return;
-
-    char* bufferPtr = buffer;
+    String result;
+    result.reserve(numChars + 1);
 
     if (showBase)
     {
         if (base == 2)
         {
-            *bufferPtr++ = '0';
-            *bufferPtr++ = 'b';
+            result += "0b";
         }
         else if (base == 8)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
         else if (base == 16)
         {
-            *bufferPtr++ = '0';
-            *bufferPtr++ = 'x';
+            result += "0x";
         }
     }
     if (leadingZeros)
@@ -484,24 +674,24 @@ static void SerializeInternalUInt(char* buffer, size_t bufferSize, uint64 value,
             absWidth = maxDigits;
         for (size_t digitIndex = numDigits; digitIndex < absWidth; ++digitIndex)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
     }
     else
     {
         if (numDigits == 0)
         {
-            *bufferPtr++ = '0';
+            result += '0';
         }
     }
     while (numDigits > 0)
     {
         int digit = (value / divisor) % base;
-        *bufferPtr++ = GetDigit(digit);
+        result += GetDigit(digit);
         --numDigits;
         divisor /= base;
     }
-    *bufferPtr++ = '\0';
+    return result.align(width);
 }
 
 } // namespace baremetal

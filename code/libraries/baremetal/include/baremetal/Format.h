@@ -47,7 +47,11 @@
 
 namespace baremetal {
 
-void FormatV(char* buffer, size_t bufferSize, const char* format, va_list args);
-void Format(char* buffer, size_t bufferSize, const char* format, ...);
+class String;
+
+String FormatV(const char* format, va_list args);
+String Format(const char* format, ...);
+void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args);
+void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...);
 
 } // namespace baremetal

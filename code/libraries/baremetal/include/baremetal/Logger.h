@@ -99,37 +99,67 @@ public:
     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);
     void LogV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
 
+    void LogNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...);
+    void LogNoAllocV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
+
     void Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
     void TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
+
+    void TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
+    void TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
 };
 
 Logger& GetLogger();
 
 /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
-#define LOG_MODULE(name)         static const char From[] = name
+#define LOG_MODULE(name)                  static const char From[] = name
 
 /// @brief Log a panic message
-#define LOG_PANIC(...)           GetLogger().Log(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
+#define LOG_PANIC(...)                    GetLogger().Log(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
 /// @brief Log an error message
-#define LOG_ERROR(...)           GetLogger().Log(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
+#define LOG_ERROR(...)                    GetLogger().Log(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
 /// @brief Log a warning message
-#define LOG_WARNING(...)         GetLogger().Log(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
+#define LOG_WARNING(...)                  GetLogger().Log(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
 /// @brief Log a info message
-#define LOG_INFO(...)            GetLogger().Log(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
+#define LOG_INFO(...)                     GetLogger().Log(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
 /// @brief Log a debug message
-#define LOG_DEBUG(...)           GetLogger().Log(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
+#define LOG_DEBUG(...)                    GetLogger().Log(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
 
 /// @brief Log a message with specified severity and message string
-#define LOG(severity, message)   GetLogger().Log(From, __LINE__, severity, message);
+#define LOG(severity, message)            GetLogger().Log(From, __LINE__, severity, message);
 
+/// @brief Log a panic message
+#define LOG_NO_ALLOC_PANIC(...)           GetLogger().LogNoAlloc(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
+/// @brief Log an error message
+#define LOG_NO_ALLOC_ERROR(...)           GetLogger().LogNoAlloc(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
 /// @brief Log a warning message
-#define TRACE_WARNING(...)       GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
+#define LOG_NO_ALLOC_WARNING(...)         GetLogger().LogNoAlloc(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
 /// @brief Log a info message
-#define TRACE_INFO(...)          GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
+#define LOG_NO_ALLOC_INFO(...)            GetLogger().LogNoAlloc(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
 /// @brief Log a debug message
-#define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+#define LOG_NO_ALLOC_DEBUG(...)           GetLogger().LogNoAlloc(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
 
 /// @brief Log a message with specified severity and message string
-#define TRACE(severity, message) GetLogger().Write(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+#define LOG_NO_ALLOC(severity, message)   GetLogger().LogNoAlloc(From, __LINE__, severity, message);
+
+/// @brief Log a warning message
+#define TRACE_WARNING(...)                GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
+/// @brief Log a info message
+#define TRACE_INFO(...)                   GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
+/// @brief Log a debug message
+#define TRACE_DEBUG(...)                  GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+
+/// @brief Log a message with specified severity and message string
+#define TRACE(severity, message)          GetLogger().Trace(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+
+/// @brief Log a warning message
+#define TRACE_NO_ALLOC_WARNING(...)       GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
+/// @brief Log a info message
+#define TRACE_NO_ALLOC_INFO(...)          GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
+/// @brief Log a debug message
+#define TRACE_NO_ALLOC_DEBUG(...)         GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+
+/// @brief Log a message with specified severity and message string
+#define TRACE_NO_ALLOC(severity, message) GetLogger().TraceNoAlloc(From, __FILE_NAME__, __LINE__, __func__, severity, message);
 
 } // namespace baremetal

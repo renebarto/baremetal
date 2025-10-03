@@ -62,7 +62,7 @@ void baremetal::SetupVersion()
 {
     if (!s_baremetalVersionSetupDone)
     {
-        Format(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
+        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
         s_baremetalVersionSetupDone = true;
     }
 }

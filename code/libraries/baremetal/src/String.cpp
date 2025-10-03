@@ -83,6 +83,10 @@ String::String()
 /// </summary>
 String::~String()
 {
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    if (m_buffer != nullptr)
+        LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+#endif
     delete[] m_buffer;
 }
 
@@ -1476,6 +1480,9 @@ bool String::reallocate_allocation_size(size_t allocationSize)
         return false;
     }
     m_buffer = newBuffer;
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+#endif
     if (m_end == nullptr)
         m_end = m_buffer;
     if (m_end > m_buffer + allocationSize)

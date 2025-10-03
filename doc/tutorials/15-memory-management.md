@@ -1285,7 +1285,7 @@ If the returned size is 0, we default to the full memory (1 Gb) with 64 Mb alloc
 - Line 115-144: We implement the method `HeapAllocate()`
   - Line 123: As this is a static method, we retrieve the `MemoryManager` instance
   - Line 125-137: In case of Raspberry Pi 4 or higher, we allow for high heap selection, and allocate accordingly
-If any heap was selected, we first attempt to claim from the high heap, if that fails we try the low heap
+If any heap was selected, we first attempt to claim from the low heap, if that fails we try the high heap
   - Line 139-146: In case of Raspberry Pi 3, we only allow the low heap
 - Line 150-168: We implement the method `HeapReAllocate()`
   - Line 158: As this is a static method, we retrieve the `MemoryManager` instance
@@ -1790,7 +1790,7 @@ File: code/libraries/baremetal/src/Malloc.cpp
 - Line 42: We need to include `MemoryManager.h` for declaration of the `MemoryManager` class
 - Line 43: We need to include `SysConfig.h` for declaration of the default heap type
 - Line 48-56: We implement `malloc()` by calling `MemoryManager::HeapAlloc()`
-We use any heap, so on Raspberry Pi 4 and higher in case the high heap is exhausted, we will use the low heap
+We use any heap, so on Raspberry Pi 4 and higher in case the low heap is exhausted, we will use the high heap
 - Line 58-69: We implement `calloc()` by calling `malloc()` with num x size
 - Line 71-80: We implement `realloc()` by calling `MemoryManager::HeapReAlloc()`
 - Line 82-89: We implement `free()` by calling `MemoryManager::HeapFree()`

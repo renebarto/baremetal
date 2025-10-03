@@ -1761,7 +1761,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 130: #define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
 131:
 132: /// @brief Log a message with specified severity and message string
-133: #define TRACE(severity, message) GetLogger().Write(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+133: #define TRACE(severity, message) GetLogger().Trace(From, __FILE_NAME__, __LINE__, __func__, severity, message);
 134:
 135: } // namespace baremetal
 ```

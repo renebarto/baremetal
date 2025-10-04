@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : System.h
+// File        : PhysicalGPIOPin.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : PhysicalGPIOPin
 //
-// Description : Generic character read / write device interface
+// Description : Physical GPIO pin
 //
 //------------------------------------------------------------------------------
 //
@@ -39,74 +39,64 @@
 
 #pragma once
 
-#include "stdlib/Types.h"
+#include "baremetal/IGPIOPin.h"
+#include "baremetal/MemoryAccess.h"
 
 /// @file
-/// System startup / shutdown functionality
+/// Physical GPIO pin
 
 namespace baremetal {
 
-class IMemoryAccess;
+/// @brief GPIO function
+enum class GPIOFunction;
+
+/// @brief GPIO pull mode
+enum class GPIOPullMode;
+
+/// @brief Total count of GPIO pins, numbered from 0 through 53
+#define NUM_GPIO 54
 
 /// <summary>
-/// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
+/// Physical GPIO pin (i.e. available on GPIO header)
 /// </summary>
-/// <returns>Current exception level (0..3)</returns>
-extern uint8 CurrentEL();
-
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
+class PhysicalGPIOPin : public IGPIOPin
 {
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System& GetSystem();
-
 private:
+    /// @brief Configured GPIO pin number (0..53)
+    uint8 m_pinNumber;
+    /// @brief Configured GPIO mode. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
+    GPIOMode m_mode;
+    /// @brief Configured GPIO function.
+    GPIOFunction m_function;
+    /// @brief Configured GPIO pull mode (only for input function).
+    GPIOPullMode m_pullMode;
+    /// @brief Current value of the GPIO pin (true for on, false for off).
+    bool m_value;
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
 
-    System();
-
 public:
-    System(IMemoryAccess& memoryAccess);
+    PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+
+    uint8 GetPinNumber() const override;
+    bool AssignPin(uint8 pinNumber) override;
+
+    void On() override;
+    void Off() override;
+    bool Get() override;
+    void Set(bool on) override;
+    void Invert() override;
+
+    GPIOMode GetMode();
+    bool SetMode(GPIOMode mode);
+    GPIOFunction GetFunction();
+    GPIOPullMode GetPullMode();
+    void SetPullMode(GPIOPullMode pullMode);
+
+private:
+    void SetFunction(GPIOFunction function);
 };
-
-System& GetSystem();
 
 } // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-extern int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif

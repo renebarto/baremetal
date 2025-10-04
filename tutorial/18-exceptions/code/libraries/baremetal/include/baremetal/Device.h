@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : Device.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Device
 //
-// Description : Common defines
+// Description : Generic device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,32 @@
 
 #pragma once
 
+#include "stdlib/Types.h"
+
 /// @file
-/// Generic macros
+/// Abstract device
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+namespace baremetal {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// <summary>
+/// Generic device interface
+/// </summary>
+class Device
+{
+public:
+    virtual ~Device() = default;
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+    /// <summary>
+    /// Determines whether the device is a block device.
+    /// </summary>
+    /// <returns>True if the device is a block device; otherwise, false.</returns>
+    virtual bool IsBlockDevice() = 0;
+    virtual ssize_t Read(void* buffer, size_t count);
+    virtual ssize_t Write(const void* buffer, size_t count);
+    virtual void Flush();
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+    virtual ssize_t Seek(size_t offset);
+    virtual ssize_t GetSize() const;
+};
+
+} // namespace baremetal

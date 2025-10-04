@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : System.h
+// File        : IMailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : System
+// Class       : IMailbox
 //
-// Description : Generic character read / write device interface
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -42,71 +42,54 @@
 #include "stdlib/Types.h"
 
 /// @file
-/// System startup / shutdown functionality
+/// Abstract Mailbox interface
 
 namespace baremetal {
 
-class IMemoryAccess;
-
 /// <summary>
-/// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
+/// Mailbox channel
 /// </summary>
-/// <returns>Current exception level (0..3)</returns>
-extern uint8 CurrentEL();
-
-/// <summary>
-/// System startup / shutdown handling class
-/// </summary>
-class System
+enum class MailboxChannel
 {
-    /// <summary>
-    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
-    /// </summary>
-    /// <returns>Reference to the singleton system instance</returns>
-    friend System& GetSystem();
-
-private:
-    /// @brief Memory access interface reference for accessing registers.
-    IMemoryAccess& m_memoryAccess;
-
-    System();
-
-public:
-    System(IMemoryAccess& memoryAccess);
-
-    [[noreturn]] void Halt();
-    [[noreturn]] void Reboot();
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
 };
 
-System& GetSystem();
+/// <summary>
+/// Mailbox abstract interface
+/// </summary>
+class IMailbox
+{
+public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
+
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
 
 } // namespace baremetal
-
-/// <summary>
-/// Return code for main() function
-/// </summary>
-enum class ReturnCode
-{
-    /// @brief If main() returns this, the system will be halted
-    ExitHalt,
-    /// @brief If main() returns this, the system will be rebooted
-    ExitReboot,
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/// <summary>
-/// Forward declared main() function
-/// </summary>
-/// <returns>Integer cast of ReturnCode</returns>
-extern int main();
-/// <summary>
-/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
-/// </summary>
-[[noreturn]] void sysinit();
-
-#ifdef __cplusplus
-}
-#endif

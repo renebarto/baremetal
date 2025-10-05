@@ -85,14 +85,14 @@ VectorTable:
 
     // from current EL with sp_el0 (mode EL0, El1t, El2t, EL3t)
     vector  SynchronousStub
-    vector  UnexpectedStub
-    vector  UnexpectedStub
+    vector  IRQStub
+    vector  FIQStub
     vector  SErrorStub
 
     // from current EL with sp_elx, x != 0  (mode El1h, El2h, EL3h)
     vector  SynchronousStub
-    vector  UnexpectedStub
-    vector  UnexpectedStub
+    vector  IRQStub
+    vector  FIQStub
     vector  SErrorStub
 
     // from lower EL, target EL minus 1 is AArch64
@@ -107,6 +107,189 @@ VectorTable:
     vector  UnexpectedStub
     vector  UnexpectedStub
 
+//*************************************************
+// IRQ stub
+//*************************************************
+.macro irq_stub name, handler
+    .globl  \name
+\name:
+    stp     x29, x30, [sp, #-16]!       // Save x29, x30 onto stack
+    mrs     x29, elr_el1                // Read Exception Link Register (EL1)
+    mrs     x30, spsr_el1               // Read Saved Program Status Register (EL1)
+    stp     x29, x30, [sp, #-16]!       // Save onto stack
+    msr     DAIFClr, #1                 // Enable FIQ
+
+#ifdef SAVE_VFP_REGS_ON_IRQ
+    stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+    stp     q28, q29, [sp, #-32]!
+    stp     q26, q27, [sp, #-32]!
+    stp     q24, q25, [sp, #-32]!
+    stp     q22, q23, [sp, #-32]!
+    stp     q20, q21, [sp, #-32]!
+    stp     q18, q19, [sp, #-32]!
+    stp     q16, q17, [sp, #-32]!
+    stp     q14, q15, [sp, #-32]!
+    stp     q12, q13, [sp, #-32]!
+    stp     q10, q11, [sp, #-32]!
+    stp     q8, q9, [sp, #-32]!
+    stp     q6, q7, [sp, #-32]!
+    stp     q4, q5, [sp, #-32]!
+    stp     q2, q3, [sp, #-32]!
+    stp     q0, q1, [sp, #-32]!
+#endif
+    stp     x27, x28, [sp, #-16]!       // Save x0-x28 onto stack
+    stp     x25, x26, [sp, #-16]!
+    stp     x23, x24, [sp, #-16]!
+    stp     x21, x22, [sp, #-16]!
+    stp     x19, x20, [sp, #-16]!
+    stp     x17, x18, [sp, #-16]!
+    stp     x15, x16, [sp, #-16]!
+    stp     x13, x14, [sp, #-16]!
+    stp     x11, x12, [sp, #-16]!
+    stp     x9, x10, [sp, #-16]!
+    stp     x7, x8, [sp, #-16]!
+    stp     x5, x6, [sp, #-16]!
+    stp     x3, x4, [sp, #-16]!
+    stp     x1, x2, [sp, #-16]!
+    str     x0, [sp, #-16]!
+
+    bl      \handler                    // Call interrupt handler
+
+    ldr     x0, [sp], #16               // Restore x0-x28 from stack
+    ldp     x1, x2, [sp], #16
+    ldp     x3, x4, [sp], #16
+    ldp     x5, x6, [sp], #16
+    ldp     x7, x8, [sp], #16
+    ldp     x9, x10, [sp], #16
+    ldp     x11, x12, [sp], #16
+    ldp     x13, x14, [sp], #16
+    ldp     x15, x16, [sp], #16
+    ldp     x17, x18, [sp], #16
+    ldp     x19, x20, [sp], #16
+    ldp     x21, x22, [sp], #16
+    ldp     x23, x24, [sp], #16
+    ldp     x25, x26, [sp], #16
+    ldp     x27, x28, [sp], #16
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_IRQ
+    ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+    ldp     q2, q3, [sp], #32
+    ldp     q4, q5, [sp], #32
+    ldp     q6, q7, [sp], #32
+    ldp     q8, q9, [sp], #32
+    ldp     q10, q11, [sp], #32
+    ldp     q12, q13, [sp], #32
+    ldp     q14, q15, [sp], #32
+    ldp     q16, q17, [sp], #32
+    ldp     q18, q19, [sp], #32
+    ldp     q20, q21, [sp], #32
+    ldp     q22, q23, [sp], #32
+    ldp     q24, q25, [sp], #32
+    ldp     q26, q27, [sp], #32
+    ldp     q28, q29, [sp], #32
+    ldp     q30, q31, [sp], #32
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_IRQ
+
+    msr     DAIFSet, #1                 // Disable FIQ
+    ldp     x29, x30, [sp], #16         // Restore from stack
+    msr     elr_el1, x29                // Restore Exception Link Register (EL1)
+    msr     spsr_el1, x30               // Restore Saved Program Status Register (EL1)
+    ldp     x29, x30, [sp], #16         // restore x29, x30 from stack
+
+    eret                                // Restore previous EL
+
+.endm
+
+//*************************************************
+// FIQ stub
+//*************************************************
+    .globl  FIQStub
+FIQStub:
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+    stp     q30, q31, [sp, #-32]!       // Save q0-q31 onto stack
+    stp     q28, q29, [sp, #-32]!
+    stp     q26, q27, [sp, #-32]!
+    stp     q24, q25, [sp, #-32]!
+    stp     q22, q23, [sp, #-32]!
+    stp     q20, q21, [sp, #-32]!
+    stp     q18, q19, [sp, #-32]!
+    stp     q16, q17, [sp, #-32]!
+    stp     q14, q15, [sp, #-32]!
+    stp     q12, q13, [sp, #-32]!
+    stp     q10, q11, [sp, #-32]!
+    stp     q8, q9, [sp, #-32]!
+    stp     q6, q7, [sp, #-32]!
+    stp     q4, q5, [sp, #-32]!
+    stp     q2, q3, [sp, #-32]!
+    stp     q0, q1, [sp, #-32]!
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+    stp     x29, x30, [sp, #-16]!       // Save x0-x28 onto stack
+    stp     x27, x28, [sp, #-16]!
+    stp     x25, x26, [sp, #-16]!
+    stp     x23, x24, [sp, #-16]!
+    stp     x21, x22, [sp, #-16]!
+    stp     x19, x20, [sp, #-16]!
+    stp     x17, x18, [sp, #-16]!
+    stp     x15, x16, [sp, #-16]!
+    stp     x13, x14, [sp, #-16]!
+    stp     x11, x12, [sp, #-16]!
+    stp     x9, x10, [sp, #-16]!
+    stp     x7, x8, [sp, #-16]!
+    stp     x5, x6, [sp, #-16]!
+    stp     x3, x4, [sp, #-16]!
+    stp     x1, x2, [sp, #-16]!
+    str     x0, [sp, #-16]!
+
+    ldr     x2, =s_fiqData
+    ldr     x1, [x2]                    // Get s_fiqData.handler
+    cmp     x1, #0                      // Is handler set?
+    b.eq    no_fiq_handler
+    ldr     x0, [x2, #8]                // Get s_fiqData.param
+    blr     x1                          // Call handler
+
+restore_after_fiq_handler:
+    ldr     x0, [sp], #16               // Restore x0-x28 from stack
+    ldp     x1, x2, [sp], #16
+    ldp     x3, x4, [sp], #16
+    ldp     x5, x6, [sp], #16
+    ldp     x7, x8, [sp], #16
+    ldp     x9, x10, [sp], #16
+    ldp     x11, x12, [sp], #16
+    ldp     x13, x14, [sp], #16
+    ldp     x15, x16, [sp], #16
+    ldp     x17, x18, [sp], #16
+    ldp     x19, x20, [sp], #16
+    ldp     x21, x22, [sp], #16
+    ldp     x23, x24, [sp], #16
+    ldp     x25, x26, [sp], #16
+    ldp     x27, x28, [sp], #16
+    ldp     x29, x30, [sp], #16
+#ifdef BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+    ldp     q0, q1, [sp], #32           // Restore q0-q31 from stack
+    ldp     q2, q3, [sp], #32
+    ldp     q4, q5, [sp], #32
+    ldp     q6, q7, [sp], #32
+    ldp     q8, q9, [sp], #32
+    ldp     q10, q11, [sp], #32
+    ldp     q12, q13, [sp], #32
+    ldp     q14, q15, [sp], #32
+    ldp     q16, q17, [sp], #32
+    ldp     q18, q19, [sp], #32
+    ldp     q20, q21, [sp], #32
+    ldp     q22, q23, [sp], #32
+    ldp     q24, q25, [sp], #32
+    ldp     q26, q27, [sp], #32
+    ldp     q28, q29, [sp], #32
+    ldp     q30, q31, [sp], #32
+#endif // BAREMETAL_SAVE_VFP_REGS_ON_FIQ
+
+    eret                                // Restore previous EL
+
+no_fiq_handler:
+    ldr     x1, =RPI_INTRCTRL_FIQ_CONTROL // Disable FIQ (if handler is not set)
+    mov     w0, #0
+    str     w0, [x1]
+    b       restore_after_fiq_handler
+
 /*
  * HVC stub
  */
@@ -119,8 +302,12 @@ HVCStub:                                // Return to EL2h mode
     eret                                // Move to EL2h
 
     .data
-
     .align  3
+    .globl  s_fiqData
+s_fiqData:                              // Matches FIQData:
+    .quad   0                           // handler
+    .quad   0                           // param
+    .word   0                           // fiqID (unused)
 
 //*************************************************
 // Abort stubs
@@ -128,5 +315,6 @@ HVCStub:                                // Return to EL2h mode
     stub        UnexpectedStub,     EXCEPTION_UNEXPECTED,   ExceptionHandler
     stub        SynchronousStub,    EXCEPTION_SYNCHRONOUS,  ExceptionHandler
     stub        SErrorStub,         EXCEPTION_SYSTEM_ERROR, ExceptionHandler
+    irq_stub    IRQStub,                                    InterruptHandler
 
 // End

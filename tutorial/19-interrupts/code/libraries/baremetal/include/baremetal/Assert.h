@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : Assert.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
 // Class       : -
 //
-// Description : Common defines
+// Description : Assertion functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,33 @@
 
 #pragma once
 
+#include "stdlib/Macros.h"
+#include "stdlib/Types.h"
+
 /// @file
-/// Generic macros
+/// Assertion functions
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+namespace baremetal {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// @brief Assertion callback function, which can be installed to handle a failed assertion
+using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+#ifdef NDEBUG
+/// If building for release, assert is replaced by nothing
+#define assert(expr) expr;
+#else
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
+
+/// @brief Assertion. If the assertion fails, AssertionFailed is called.
+///
+/// <param name="expression">Expression to evaluate.
+/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
+#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
+
+#endif
+
+void ResetAssertionCallback();
+void SetAssertionCallback(AssertionCallback* callback);
+
+} // namespace baremetal

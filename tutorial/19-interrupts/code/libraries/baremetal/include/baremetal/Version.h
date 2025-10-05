@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : Version.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common defines
+// Description : Baremetal version information
 //
 //------------------------------------------------------------------------------
 //
@@ -40,30 +40,23 @@
 #pragma once
 
 /// @file
-/// Generic macros
+/// Build version
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+/// @brief Platform name
+#define BAREMETAL_NAME           "Baremetal"
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// @brief Major version number (specified by define at compile time)
+#define BAREMETAL_MAJOR_VERSION  BAREMETAL_MAJOR
+/// @brief Minor version number (specified by define at compile time)
+#define BAREMETAL_MINOR_VERSION  BAREMETAL_MINOR
+/// @brief Level version number (specified by define at compile time)
+#define BAREMETAL_LEVEL_VERSION  BAREMETAL_LEVEL
+/// @brief Version string
+#define BAREMETAL_VERSION_STRING GetVersion()
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+namespace baremetal {
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+void SetupVersion();
+const char* GetVersion();
+
+} // namespace baremetal

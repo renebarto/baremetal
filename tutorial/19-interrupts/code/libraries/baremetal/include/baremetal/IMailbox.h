@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Device.cpp
+// File        : IMailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : Device
+// Class       : IMailbox
 //
-// Description : Generic device interface
+// Description : Arm <-> VC mailbox abstract interface
 //
 //------------------------------------------------------------------------------
 //
@@ -37,62 +37,59 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Device.h"
+#pragma once
 
-using namespace baremetal;
+#include "stdlib/Types.h"
 
 /// @file
-/// Generic device
+/// Abstract Mailbox interface
+
+namespace baremetal {
 
 /// <summary>
-/// Read a specified number of bytes from the device into a buffer
+/// Mailbox channel
 /// </summary>
-/// <param name="buffer">Buffer, where read data will be placed</param>
-/// <param name="count">Maximum number of bytes to be read</param>
-/// <returns>Number of read bytes or < 0 on failure</returns>
-ssize_t Device::Read(void* buffer, size_t count)
+enum class MailboxChannel
 {
-    return static_cast<ssize_t>(-1);
-}
+    /// Power management
+    ARM_MAILBOX_CH_POWER = 0,
+    /// Frame buffer
+    ARM_MAILBOX_CH_FB = 1,
+    /// Virtual UART
+    ARM_MAILBOX_CH_VUART = 2,
+    /// VCHIQ / GPU
+    ARM_MAILBOX_CH_VCHIQ = 3,
+    /// LEDs
+    ARM_MAILBOX_CH_LEDS = 4,
+    /// Buttons
+    ARM_MAILBOX_CH_BTNS = 5,
+    /// Touch screen
+    ARM_MAILBOX_CH_TOUCH = 6,
+    /// ?
+    ARM_MAILBOX_CH_COUNT = 7,
+    /// Properties / tags ARM -> VC
+    ARM_MAILBOX_CH_PROP_OUT = 8,
+    /// Properties / tags VC -> ARM
+    ARM_MAILBOX_CH_PROP_IN = 9,
+};
 
 /// <summary>
-/// Write a specified number of bytes to the device
+/// Mailbox abstract interface
 /// </summary>
-/// <param name="buffer">Buffer, from which data will be fetched for write</param>
-/// <param name="count">Number of bytes to be written</param>
-/// <returns>Number of written bytes or < 0 on failure</returns>
-ssize_t Device::Write(const void* buffer, size_t count)
+class IMailbox
 {
-    return static_cast<ssize_t>(-1);
-}
+public:
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IMailbox() = default;
 
-/// <summary>
-/// Flush any buffers for device
-/// </summary>
-void Device::Flush()
-{
-    // Do nothing
-}
+    /// <summary>
+    /// Perform a write - read cycle on the mailbox
+    /// </summary>
+    /// <param name="address">Address of mailbox data block (converted to GPU address space)</param>
+    /// <returns>Address of mailbox data block, should be equal to input address</returns>
+    virtual uintptr WriteRead(uintptr address) = 0;
+};
 
-/// <summary>
-/// Seek to a specified offset in the device file.
-///
-/// This is only supported by block devices.
-/// </summary>
-/// <param name="offset">Byte offset from start</param>
-/// <returns>The resulting offset, (ssize_t) -1 on error</returns>
-ssize_t Device::Seek(size_t offset)
-{
-    return static_cast<uint64>(-1);
-}
-
-/// <summary>
-/// Get size for a device file
-///
-/// This is only supported by block devices.
-/// </summary>
-/// <returns>Total byte size of a block device, (ssize_t) -1 on error</returns>
-ssize_t Device::GetSize() const
-{
-    return static_cast<ssize_t>(-1);
-}
+} // namespace baremetal

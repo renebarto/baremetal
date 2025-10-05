@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Device.cpp
+// File        : System.h
 //
 // Namespace   : baremetal
 //
-// Class       : Device
+// Class       : System
 //
-// Description : Generic device interface
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -37,62 +37,76 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Device.h"
+#pragma once
 
-using namespace baremetal;
+#include "stdlib/Types.h"
 
 /// @file
-/// Generic device
+/// System startup / shutdown functionality
+
+namespace baremetal {
+
+class IMemoryAccess;
 
 /// <summary>
-/// Read a specified number of bytes from the device into a buffer
+/// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
 /// </summary>
-/// <param name="buffer">Buffer, where read data will be placed</param>
-/// <param name="count">Maximum number of bytes to be read</param>
-/// <returns>Number of read bytes or < 0 on failure</returns>
-ssize_t Device::Read(void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
+/// <returns>Current exception level (0..3)</returns>
+extern uint8 CurrentEL();
 
 /// <summary>
-/// Write a specified number of bytes to the device
+/// System startup / shutdown handling class
 /// </summary>
-/// <param name="buffer">Buffer, from which data will be fetched for write</param>
-/// <param name="count">Number of bytes to be written</param>
-/// <returns>Number of written bytes or < 0 on failure</returns>
-ssize_t Device::Write(const void* buffer, size_t count)
+class System
 {
-    return static_cast<ssize_t>(-1);
-}
+    /// <summary>
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System& GetSystem();
+
+private:
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+
+    System();
+
+public:
+    System(IMemoryAccess& memoryAccess);
+
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
+};
+
+System& GetSystem();
+
+} // namespace baremetal
 
 /// <summary>
-/// Flush any buffers for device
+/// Return code for main() function
 /// </summary>
-void Device::Flush()
+enum class ReturnCode
 {
-    // Do nothing
-}
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /// <summary>
-/// Seek to a specified offset in the device file.
-///
-/// This is only supported by block devices.
+/// Forward declared main() function
 /// </summary>
-/// <param name="offset">Byte offset from start</param>
-/// <returns>The resulting offset, (ssize_t) -1 on error</returns>
-ssize_t Device::Seek(size_t offset)
-{
-    return static_cast<uint64>(-1);
-}
-
+/// <returns>Integer cast of ReturnCode</returns>
+extern int main();
 /// <summary>
-/// Get size for a device file
-///
-/// This is only supported by block devices.
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
 /// </summary>
-/// <returns>Total byte size of a block device, (ssize_t) -1 on error</returns>
-ssize_t Device::GetSize() const
-{
-    return static_cast<ssize_t>(-1);
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
 }
+#endif

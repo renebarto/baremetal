@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Device.cpp
+// File        : Malloc.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Device
+// Class       : -
 //
-// Description : Generic device interface
+// Description : Memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -37,62 +37,53 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Device.h"
+#include "baremetal/Malloc.h"
 
-using namespace baremetal;
+#include "baremetal/MemoryManager.h"
+#include "baremetal/SysConfig.h"
 
 /// @file
-/// Generic device
+/// Standard C memory allocation functions implementation
 
 /// <summary>
-/// Read a specified number of bytes from the device into a buffer
+/// Allocates a block of memory of the desired size.
 /// </summary>
-/// <param name="buffer">Buffer, where read data will be placed</param>
-/// <param name="count">Maximum number of bytes to be read</param>
-/// <returns>Number of read bytes or < 0 on failure</returns>
-ssize_t Device::Read(void* buffer, size_t count)
+/// <param name="size">The desired size of the memory block</param>
+/// <returns></returns>
+void* malloc(size_t size)
 {
-    return static_cast<ssize_t>(-1);
+    return baremetal::MemoryManager::HeapAllocate(size, HEAP_DEFAULT_MALLOC);
 }
 
 /// <summary>
-/// Write a specified number of bytes to the device
-/// </summary>
-/// <param name="buffer">Buffer, from which data will be fetched for write</param>
-/// <param name="count">Number of bytes to be written</param>
-/// <returns>Number of written bytes or < 0 on failure</returns>
-ssize_t Device::Write(const void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
-
-/// <summary>
-/// Flush any buffers for device
-/// </summary>
-void Device::Flush()
-{
-    // Do nothing
-}
-
-/// <summary>
-/// Seek to a specified offset in the device file.
+/// Allocates a contiguous block of memory for the desired number of cells of the desired size each.
 ///
-/// This is only supported by block devices.
+/// The memory allocated is num x size bytes
 /// </summary>
-/// <param name="offset">Byte offset from start</param>
-/// <returns>The resulting offset, (ssize_t) -1 on error</returns>
-ssize_t Device::Seek(size_t offset)
+/// <param name="num">Number of cells to allocate memory for</param>
+/// <param name="size">Size of each cell</param>
+/// <returns></returns>
+void* calloc(size_t num, size_t size)
 {
-    return static_cast<uint64>(-1);
+    return malloc(num * size);
 }
 
 /// <summary>
-/// Get size for a device file
-///
-/// This is only supported by block devices.
+/// Re-allocates memory previously allocated with malloc() or calloc() to a new size
 /// </summary>
-/// <returns>Total byte size of a block device, (ssize_t) -1 on error</returns>
-ssize_t Device::GetSize() const
+/// <param name="ptr">Pointer to memory block to be re-allocated</param>
+/// <param name="new_size">The desired new size of the memory block</param>
+/// <returns></returns>
+void* realloc(void* ptr, size_t new_size)
 {
-    return static_cast<ssize_t>(-1);
+    return baremetal::MemoryManager::HeapReAllocate(ptr, new_size);
+}
+
+/// <summary>
+/// Frees memory previously allocated with malloc() or calloc()
+/// </summary>
+/// <param name="ptr">Pointer to memory block to be freed</param>
+void free(void* ptr)
+{
+    baremetal::MemoryManager::HeapFree(ptr);
 }

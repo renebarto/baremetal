@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Macros.h
+// File        : Timer.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Timer
 //
-// Description : Common defines
+// Description : Timer class
 //
 //------------------------------------------------------------------------------
 //
@@ -40,30 +40,48 @@
 #pragma once
 
 /// @file
-/// Generic macros
+/// Raspberry Pi Timer
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+#include "stdlib/Types.h"
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+namespace baremetal {
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+class IMemoryAccess;
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+/// <summary>
+/// Timer class. For now only contains busy waiting methods
+///
+/// Note that this class is created as a singleton, using the GetTimer() function.
+/// </summary>
+class Timer
+{
+    /// <summary>
+    /// Retrieves the singleton Timer instance. It is created in the first call to this function. This is a friend function of class Timer
+    /// </summary>
+    /// <returns>A reference to the singleton Timer</returns>
+    friend Timer& GetTimer();
+
+private:
+    /// <summary>
+    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
+    /// </summary>
+    IMemoryAccess& m_memoryAccess;
+
+    Timer();
+
+public:
+    Timer(IMemoryAccess& memoryAccess);
+
+    void GetTimeString(char* buffer, size_t bufferSize);
+
+    static void WaitCycles(uint32 numCycles);
+
+    uint64 GetSystemTimer();
+
+    static void WaitMilliSeconds(uint64 msec);
+    static void WaitMicroSeconds(uint64 usec);
+};
+
+Timer& GetTimer();
+
+} // namespace baremetal

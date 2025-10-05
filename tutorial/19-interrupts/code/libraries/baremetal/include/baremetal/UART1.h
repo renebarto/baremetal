@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Macros.h
+// File        : UART1.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : UART1
 //
-// Description : Common defines
+// Description : RPI UART1 class
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,50 @@
 
 #pragma once
 
+#include "baremetal/CharDevice.h"
+
 /// @file
-/// Generic macros
+/// Raspberry Pi UART1 serial device declaration
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+/// @brief baremetal namespace
+namespace baremetal {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+class IMemoryAccess;
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+/// <summary>
+/// Encapsulation for the UART1 device.
+///
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART1() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
+/// </summary>
+class UART1 : public CharDevice
+{
+    /// <summary>
+    /// Construct the singleton UART1 instance if needed, and return a reference to the instance. This is a friend function of class UART1
+    /// </summary>
+    /// <returns>Reference to the singleton UART1 instance</returns>
+    friend UART1& GetUART1();
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+    /// @brief Baudrate set for device
+    unsigned m_baudrate;
+
+    UART1();
+
+public:
+    UART1(IMemoryAccess& memoryAccess);
+
+    void Initialize(unsigned baudrate);
+    unsigned GetBaudrate() const;
+    char Read() override;
+    void Write(char ch) override;
+    void WriteString(const char* str);
+};
+
+UART1& GetUART1();
+
+} // namespace baremetal

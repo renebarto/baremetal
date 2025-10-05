@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Device.cpp
+// File        : Version.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : Device
+// Class       : -
 //
-// Description : Generic device interface
+// Description : Baremetal version information
 //
 //------------------------------------------------------------------------------
 //
@@ -37,62 +37,41 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Device.h"
+#include "baremetal/Version.h"
 
-using namespace baremetal;
+#include "baremetal/Format.h"
+#include "stdlib/Util.h"
 
 /// @file
-/// Generic device
+/// Build version implementation
+
+/// @brief Buffer size of version string buffer
+static const size_t BufferSize = 20;
+/// @brief Version string buffer
+static char s_baremetalVersionString[BufferSize]{};
+/// @brief Flag to check if version set up was already done
+static bool s_baremetalVersionSetupDone = false;
 
 /// <summary>
-/// Read a specified number of bytes from the device into a buffer
-/// </summary>
-/// <param name="buffer">Buffer, where read data will be placed</param>
-/// <param name="count">Maximum number of bytes to be read</param>
-/// <returns>Number of read bytes or < 0 on failure</returns>
-ssize_t Device::Read(void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
-
-/// <summary>
-/// Write a specified number of bytes to the device
-/// </summary>
-/// <param name="buffer">Buffer, from which data will be fetched for write</param>
-/// <param name="count">Number of bytes to be written</param>
-/// <returns>Number of written bytes or < 0 on failure</returns>
-ssize_t Device::Write(const void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
-
-/// <summary>
-/// Flush any buffers for device
-/// </summary>
-void Device::Flush()
-{
-    // Do nothing
-}
-
-/// <summary>
-/// Seek to a specified offset in the device file.
+/// Set up version string
 ///
-/// This is only supported by block devices.
+/// The version string is written into a buffer without allocating memory.
+/// This is important, as we may be logging before memory management is set up.
 /// </summary>
-/// <param name="offset">Byte offset from start</param>
-/// <returns>The resulting offset, (ssize_t) -1 on error</returns>
-ssize_t Device::Seek(size_t offset)
+void baremetal::SetupVersion()
 {
-    return static_cast<uint64>(-1);
+    if (!s_baremetalVersionSetupDone)
+    {
+        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
+        s_baremetalVersionSetupDone = true;
+    }
 }
 
 /// <summary>
-/// Get size for a device file
-///
-/// This is only supported by block devices.
+/// Return version string
 /// </summary>
-/// <returns>Total byte size of a block device, (ssize_t) -1 on error</returns>
-ssize_t Device::GetSize() const
+/// <returns>Version string</returns>
+const char* baremetal::GetVersion()
 {
-    return static_cast<ssize_t>(-1);
+    return s_baremetalVersionString;
 }

@@ -5,7 +5,7 @@
 //
 // Namespace   : baremetal
 //
-// Class       : ExceptionSystem
+// Class       : -
 //
 // Description : Exception handler
 //

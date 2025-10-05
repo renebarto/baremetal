@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : StdArg.h
 //
 // Namespace   : -
 //
 // Class       : -
 //
-// Description : Common defines
+// Description : Variable arguments handling
 //
 //------------------------------------------------------------------------------
 //
@@ -40,30 +40,19 @@
 #pragma once
 
 /// @file
-/// Generic macros
+/// Standard variable argument list handling using builtin functionality in GCC
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+// prevent warning, if <stdarg.h> from toolchain is included too
+#ifndef _STDARG_H
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// @brief declare standard va_list type
+typedef __builtin_va_list va_list;
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+/// @brief define standard va_start macro
+#define va_start(arg, last) __builtin_va_start(arg, last)
+/// @brief define standard va_end macro
+#define va_end(arg)         __builtin_va_end(arg)
+/// @brief define standard va_arg macro
+#define va_arg(arg, type)   __builtin_va_arg(arg, type)
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+#endif

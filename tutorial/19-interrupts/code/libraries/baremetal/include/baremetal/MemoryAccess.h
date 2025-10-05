@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : Macros.h
+// File        : MemoryAccess.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : MemoryAccess
 //
-// Description : Common defines
+// Description : Memory read/write
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,30 @@
 
 #pragma once
 
+#include "baremetal/IMemoryAccess.h"
+
 /// @file
-/// Generic macros
+/// Memory access class
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+namespace baremetal {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// <summary>
+/// Memory access interface
+/// </summary>
+class MemoryAccess : public IMemoryAccess
+{
+public:
+    uint8 Read8(regaddr address) override;
+    void Write8(regaddr address, uint8 data) override;
+    void ReadModifyWrite8(regaddr address, uint8 mask, uint8 data, uint8 shift) override;
+    uint16 Read16(regaddr address) override;
+    void Write16(regaddr address, uint16 data) override;
+    void ReadModifyWrite16(regaddr address, uint16 mask, uint16 data, uint8 shift) override;
+    uint32 Read32(regaddr address) override;
+    void Write32(regaddr address, uint32 data) override;
+    void ReadModifyWrite32(regaddr address, uint32 mask, uint32 data, uint8 shift) override;
+};
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+MemoryAccess& GetMemoryAccess();
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+} // namespace baremetal

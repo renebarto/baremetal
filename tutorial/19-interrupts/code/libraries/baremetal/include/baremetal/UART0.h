@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Device.cpp
+// File        : UART0.h
 //
 // Namespace   : baremetal
 //
-// Class       : Device
+// Class       : UART0
 //
-// Description : Generic device interface
+// Description : RPI UART0 class
 //
 //------------------------------------------------------------------------------
 //
@@ -37,62 +37,51 @@
 //
 //------------------------------------------------------------------------------
 
-#include "baremetal/Device.h"
+#pragma once
 
-using namespace baremetal;
+#include "baremetal/CharDevice.h"
 
 /// @file
-/// Generic device
+/// Raspberry Pi UART0 serial device
+
+namespace baremetal {
+
+class IMemoryAccess;
 
 /// <summary>
-/// Read a specified number of bytes from the device into a buffer
-/// </summary>
-/// <param name="buffer">Buffer, where read data will be placed</param>
-/// <param name="count">Maximum number of bytes to be read</param>
-/// <returns>Number of read bytes or < 0 on failure</returns>
-ssize_t Device::Read(void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
-
-/// <summary>
-/// Write a specified number of bytes to the device
-/// </summary>
-/// <param name="buffer">Buffer, from which data will be fetched for write</param>
-/// <param name="count">Number of bytes to be written</param>
-/// <returns>Number of written bytes or < 0 on failure</returns>
-ssize_t Device::Write(const void* buffer, size_t count)
-{
-    return static_cast<ssize_t>(-1);
-}
-
-/// <summary>
-/// Flush any buffers for device
-/// </summary>
-void Device::Flush()
-{
-    // Do nothing
-}
-
-/// <summary>
-/// Seek to a specified offset in the device file.
+/// Encapsulation for the UART0 device.
 ///
-/// This is only supported by block devices.
+/// This is a pseudo singleton, in that it is not possible to create a default instance (GetUART0() needs to be used for this),
+/// but it is possible to create an instance with a custom IMemoryAccess instance for testing.
 /// </summary>
-/// <param name="offset">Byte offset from start</param>
-/// <returns>The resulting offset, (ssize_t) -1 on error</returns>
-ssize_t Device::Seek(size_t offset)
+class UART0 : public CharDevice
 {
-    return static_cast<uint64>(-1);
-}
+    /// <summary>
+    /// Construct the singleton UART0 instance if needed, and return a reference to the instance. This is a friend function of class UART0
+    /// </summary>
+    /// <returns>Reference to the singleton UART0 instance</returns>
+    friend UART0& GetUART0();
 
-/// <summary>
-/// Get size for a device file
-///
-/// This is only supported by block devices.
-/// </summary>
-/// <returns>Total byte size of a block device, (ssize_t) -1 on error</returns>
-ssize_t Device::GetSize() const
-{
-    return static_cast<ssize_t>(-1);
-}
+private:
+    /// @brief Flags if device was initialized. Used to guard against multiple initialization
+    bool m_isInitialized;
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+    /// @brief Baud rate set for this device
+    unsigned m_baudRate;
+
+    UART0();
+
+public:
+    UART0(IMemoryAccess& memoryAccess);
+
+    void Initialize(unsigned baudrate);
+    unsigned GetBaudRate() const;
+    char Read() override;
+    void Write(char ch) override;
+    void WriteString(const char* str);
+};
+
+UART0& GetUART0();
+
+} // namespace baremetal

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : Mailbox.h
 //
-// Namespace   : -
+// Namespace   : baremetal
 //
-// Class       : -
+// Class       : Mailbox
 //
-// Description : Common defines
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,31 +39,38 @@
 
 #pragma once
 
+#include "baremetal/IMailbox.h"
+#include "baremetal/MemoryAccess.h"
+
 /// @file
-/// Generic macros
+/// Raspberry Pi Mailbox
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+namespace baremetal {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
+{
+private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess& m_memoryAccess;
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+public:
+    Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+    uintptr WriteRead(uintptr address) override;
+
+private:
+    void Flush();
+    uintptr Read();
+    void Write(uintptr data);
+};
+
+} // namespace baremetal

@@ -11,7 +11,7 @@
 //
 //------------------------------------------------------------------------------
 //
-// Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
 // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 //

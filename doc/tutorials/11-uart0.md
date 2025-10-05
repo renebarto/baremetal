@@ -51,7 +51,7 @@ File: code/libraries/baremetal/include/baremetal/Device.h
 11: //
 12: //------------------------------------------------------------------------------
 13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
@@ -138,7 +138,7 @@ File: code/libraries/baremetal/src/Device.cpp
 11: //
 12: //------------------------------------------------------------------------------
 13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
@@ -252,7 +252,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 11: //
 12: //------------------------------------------------------------------------------
 13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //
@@ -354,7 +354,7 @@ File: code/libraries/baremetal/src/CharDevice.cpp
 11: //
 12: //------------------------------------------------------------------------------
 13: //
-14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM CharDevices
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 15: //
 16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
 17: //

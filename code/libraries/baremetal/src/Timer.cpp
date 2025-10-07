@@ -40,18 +40,14 @@
 #include "baremetal/Timer.h"
 
 #include "baremetal/ARMInstructions.h"
+#include "baremetal/Assert.h"
 #include "baremetal/BCMRegisters.h"
+#include "baremetal/InterruptHandler.h"
 #include "baremetal/MemoryAccess.h"
+#include "stdlib/Util.h"
 
 /// @file
 /// Raspberry Pi Timer implementation
-
-/// @brief Number of milliseconds in a second
-#define MSEC_PER_SEC  1000
-/// @brief Number of microseconds in a second
-#define USEC_PER_SEC  1000000
-/// @brief Number of microseconds in a millisecond
-#define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
 
 using namespace baremetal;
 
@@ -59,7 +55,14 @@ using namespace baremetal;
 /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
 /// </summary>
 Timer::Timer()
-    : m_memoryAccess{GetMemoryAccess()}
+    : m_interruptSystem{GetInterruptSystem()}
+    , m_memoryAccess{GetMemoryAccess()}
+    , m_clockTicksPerSystemTick{}
+    , m_ticks{}
+    , m_upTime{}
+    , m_time{}
+    , m_periodicHandlers{}
+    , m_numPeriodicHandlers{}
 {
 }
 
@@ -68,21 +71,147 @@ Timer::Timer()
 /// </summary>
 /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
 Timer::Timer(IMemoryAccess& memoryAccess)
-    : m_memoryAccess{memoryAccess}
+    : m_interruptSystem{GetInterruptSystem()}
+    , m_memoryAccess{memoryAccess}
+    , m_clockTicksPerSystemTick{}
+    , m_ticks{}
+    , m_upTime{}
+    , m_time{}
+    , m_periodicHandlers{}
+    , m_numPeriodicHandlers{}
 {
 }
 
 /// <summary>
-/// Write string representing current time according to our time zone to the buffer.
+/// Destructor
+///
+/// Disables the timer, as well as the timer interrupt
+/// </summary>
+Timer::~Timer()
+{
+    SetTimerControl(~CNTP_CTL_EL0_ENABLE);
+
+    m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+}
+
+/// <summary>
+/// Timer initialization
+///
+/// Add a timer interrupt handler, calculate the number of clock ticks per timer tick, set the next timer deadline.
+/// Then enables the timer
+/// </summary>
+void Timer::Initialize()
+{
+    if (m_isInitialized)
+        return;
+
+    memset(m_periodicHandlers, 0, TIMER_MAX_PERIODIC_HANDLERS * sizeof(PeriodicTimerHandler*));
+    m_interruptSystem.RegisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS, InterruptHandler, this);
+
+    uint64 counterFreq{};
+    GetTimerFrequency(counterFreq);
+    assert(counterFreq % TICKS_PER_SECOND == 0);
+    m_clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
+
+    uint64 counter{};
+    GetTimerCounter(counter);
+    SetTimerCompareValue(counter + m_clockTicksPerSystemTick);
+    SetTimerControl(CNTP_CTL_EL0_ENABLE);
+
+    m_isInitialized = true;
+}
+
+/// <summary>
+/// Return the current timer tick cound
+/// </summary>
+/// <returns>The current timer tick count</returns>
+uint64 Timer::GetTicks() const
+{
+    return m_ticks;
+}
+
+/// <summary>
+/// Return the uptime in seconds
+/// </summary>
+/// <returns>Uptime in seconds</returns>
+uint32 Timer::GetUptime() const
+{
+    return m_upTime;
+}
+
+/// <summary>
+/// Return the current time in seconds (epoch time)
+/// </summary>
+/// <returns>Current time in seconds (epoch time)</returns>
+uint64 Timer::GetTime() const
+{
+    return m_time;
+}
+
+/// <summary>
+/// Writes a representation of the current time to a buffer, or of the uptime if the current time is not valid.
 ///
 /// For now returns an empty string
 /// </summary>
-/// <param name="buffer">Buffer to receive the time string</param>
-/// <param name="bufferSize">Size of the buffer, to protect against overflowing the buffer</param>
+/// <param name="buffer">Buffer to write the time string to</param>
+/// <param name="bufferSize">Size of the buffer</param>
 void Timer::GetTimeString(char* buffer, size_t bufferSize)
 {
-    if (bufferSize > 0)
-        *buffer = '\0';
+    if ((buffer == nullptr) || (bufferSize == 0))
+    {
+        return;
+    }
+    *buffer = '\0';
+}
+
+/// <summary>
+/// Register a periodic timer handler
+///
+/// Registers a periodic timer handler function. The handler function will be called every timer tick.
+/// </summary>
+/// <param name="handler">Pointer to periodic timer handler to register</param>
+void Timer::RegisterPeriodicHandler(PeriodicTimerHandler* handler)
+{
+    assert(handler != nullptr);
+    assert(m_numPeriodicHandlers < TIMER_MAX_PERIODIC_HANDLERS);
+
+    size_t index{};
+    for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+    {
+        if (m_periodicHandlers[index] == nullptr)
+            break;
+    }
+    assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+    m_periodicHandlers[index] = handler;
+
+    DataSyncBarrier();
+
+    m_numPeriodicHandlers++;
+}
+
+/// <summary>
+/// Unregister a periodic timer handler
+///
+/// Removes aperiodic timer handler function from the registration. The handler function will no longer be called.
+/// </summary>
+/// <param name="handler">Pointer to periodic timer handler to unregister</param>
+void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler* handler)
+{
+    assert(handler != nullptr);
+    assert(m_numPeriodicHandlers > 0);
+
+    size_t index{};
+    for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+    {
+        if (m_periodicHandlers[index] == handler)
+            break;
+    }
+    assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+    m_periodicHandlers[index] = nullptr;
+
+    DataSyncBarrier();
+
+    m_numPeriodicHandlers--;
 }
 
 /// <summary>
@@ -120,21 +249,15 @@ void Timer::WaitMilliSeconds(uint64 msec)
 /// <param name="usec">Wait time in microseconds</param>
 void Timer::WaitMicroSeconds(uint64 usec)
 {
-    unsigned long freq{};
-    unsigned long start{};
-    unsigned long current{};
-    // Get the current counter frequency (ticks per second)
-    GetTimerFrequency(freq);
-    // Read the current counter
-    GetTimerCounter(start);
-    // Calculate required count increase
-    unsigned long wait = (freq / USEC_PER_SEC) * usec;
-    // Loop while counter increase is less than wait
+    auto& timer = GetTimer();
+    uint64 startTime = timer.GetSystemTimer();
+    uint64 currentTime{};
+    // Loop while counter elapse time is less than wait
     // Careful: busy wait
     do
     {
-        GetTimerCounter(current);
-    } while (current - start < wait);
+        currentTime = timer.GetSystemTimer();
+    } while (currentTime - startTime < usec);
 }
 
 /// <summary>
@@ -159,11 +282,50 @@ uint64 Timer::GetSystemTimer()
 }
 
 /// <summary>
+/// Interrupt handler for the timer
+///
+/// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
+/// </summary>
+void Timer::InterruptHandler()
+{
+    uint64 compareValue;
+    GetTimerCompareValue(compareValue);
+    SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+
+    if (++m_ticks % TICKS_PER_SECOND == 0)
+    {
+        m_upTime++;
+        m_time++;
+    }
+
+    for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+    {
+        if (m_periodicHandlers[i] != nullptr)
+            (*m_periodicHandlers[i])();
+    }
+}
+
+/// <summary>
+/// Static interrupt handler
+///
+/// Calls the instance interrupt handler
+/// </summary>
+/// <param name="param"></param>
+void Timer::InterruptHandler(void* param)
+{
+    Timer* instance = reinterpret_cast<Timer*>(param);
+    assert(instance != nullptr);
+
+    instance->InterruptHandler();
+}
+
+/// <summary>
 /// Retrieves the singleton Timer instance. It is created in the first call to this function.
 /// </summary>
 /// <returns>A reference to the singleton Timer</returns>
 Timer& baremetal::GetTimer()
 {
     static Timer timer;
+    timer.Initialize();
     return timer;
 }

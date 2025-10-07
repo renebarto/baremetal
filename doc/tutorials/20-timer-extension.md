@@ -264,107 +264,121 @@ File: code/libraries/baremetal/src/Timer.cpp
 148:     return m_time;
 149: }
 150: 
-...
-164: /// <summary>
-165: /// Register a periodic timer handler
-166: ///
-167: /// Registers a periodic timer handler function. The handler function will be called every timer tick.
-168: /// </summary>
-169: /// <param name="handler">Pointer to periodic timer handler to register</param>
-170: void Timer::RegisterPeriodicHandler(PeriodicTimerHandler* handler)
-171: {
-172:     assert(handler != nullptr);
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Timer.cpp
-173:     assert(m_numPeriodicHandlers < TIMER_MAX_PERIODIC_HANDLERS);
-174: 
-175:     size_t index{};
-176:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
-177:     {
-178:         if (m_periodicHandlers[index] == nullptr)
-179:             break;
-180:     }
-181:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
-182:     m_periodicHandlers[index] = handler;
-183: 
-184:     DataSyncBarrier();
-185: 
-186:     m_numPeriodicHandlers++;
-187: }
+151: /// <summary>
+152: /// Writes a representation of the current time to a buffer, or of the uptime if the current time is not valid.
+153: ///
+154: /// For now returns an empty string
+155: /// </summary>
+156: /// <param name="buffer">Buffer to write the time string to</param>
+157: /// <param name="bufferSize">Size of the buffer</param>
+158: void Timer::GetTimeString(char* buffer, size_t bufferSize)
+159: {
+160:     if ((buffer == nullptr) || (bufferSize == 0))
+161:     {
+162:         return;
+163:     }
+164:     *buffer = '\0';
+165: }
+166: 
+167: /// <summary>
+168: /// Register a periodic timer handler
+169: ///
+170: /// Registers a periodic timer handler function. The handler function will be called every timer tick.
+171: /// </summary>
+172: /// <param name="handler">Pointer to periodic timer handler to register</param>
+173: void Timer::RegisterPeriodicHandler(PeriodicTimerHandler* handler)
+174: {
+175:     assert(handler != nullptr);
+176:     assert(m_numPeriodicHandlers < TIMER_MAX_PERIODIC_HANDLERS);
+177: 
+178:     size_t index{};
+179:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+180:     {
+181:         if (m_periodicHandlers[index] == nullptr)
+182:             break;
+183:     }
+184:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+185:     m_periodicHandlers[index] = handler;
+186: 
+187:     DataSyncBarrier();
 188: 
-189: /// <summary>
-190: /// Unregister a periodic timer handler
-191: ///
-192: /// Removes aperiodic timer handler function from the registration. The handler function will no longer be called.
-193: /// </summary>
-194: /// <param name="handler">Pointer to periodic timer handler to unregister</param>
-195: void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler* handler)
-196: {
-197:     assert(handler != nullptr);
-198:     assert(m_numPeriodicHandlers > 0);
-199: 
-200:     size_t index{};
-201:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
-202:     {
-203:         if (m_periodicHandlers[index] == handler)
-204:             break;
-205:     }
-206:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
-207:     m_periodicHandlers[index] = nullptr;
-208: 
-209:     DataSyncBarrier();
-210: 
-211:     m_numPeriodicHandlers--;
-212: }
+189:     m_numPeriodicHandlers++;
+190: }
+191: 
+192: /// <summary>
+193: /// Unregister a periodic timer handler
+194: ///
+195: /// Removes aperiodic timer handler function from the registration. The handler function will no longer be called.
+196: /// </summary>
+197: /// <param name="handler">Pointer to periodic timer handler to unregister</param>
+198: void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler* handler)
+199: {
+200:     assert(handler != nullptr);
+201:     assert(m_numPeriodicHandlers > 0);
+202: 
+203:     size_t index{};
+204:     for (index = 0; index < TIMER_MAX_PERIODIC_HANDLERS; ++index)
+205:     {
+206:         if (m_periodicHandlers[index] == handler)
+207:             break;
+208:     }
+209:     assert(index < TIMER_MAX_PERIODIC_HANDLERS);
+210:     m_periodicHandlers[index] = nullptr;
+211: 
+212:     DataSyncBarrier();
 213: 
+214:     m_numPeriodicHandlers--;
+215: }
+216: 
 ...
-287: /// <summary>
-288: /// Interrupt handler for the timer
-289: ///
-290: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
-291: /// </summary>
-292: void Timer::InterruptHandler()
-293: {
-294:     uint64 compareValue;
-295:     GetTimerCompareValue(compareValue);
-296:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
-297: 
-298:     if (++m_ticks % TICKS_PER_SECOND == 0)
-299:     {
-300:         m_upTime++;
-301:         m_time++;
-302:     }
-303: 
-304:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
-305:     {
-306:         if (m_periodicHandlers[i] != nullptr)
-307:             (*m_periodicHandlers[i])();
-308:     }
-309: }
-310: 
-311: /// <summary>
-312: /// Static interrupt handler
-313: ///
-314: /// Calls the instance interrupt handler
-315: /// </summary>
-316: /// <param name="param"></param>
-317: void Timer::InterruptHandler(void* param)
-318: {
-319:     Timer* instance = reinterpret_cast<Timer*>(param);
-320:     assert(instance != nullptr);
-321: 
-322:     instance->InterruptHandler();
-323: }
+290: /// <summary>
+291: /// Interrupt handler for the timer
+292: ///
+293: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
+294: /// </summary>
+295: void Timer::InterruptHandler()
+296: {
+297:     uint64 compareValue;
+298:     GetTimerCompareValue(compareValue);
+299:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+300: 
+301:     if (++m_ticks % TICKS_PER_SECOND == 0)
+302:     {
+303:         m_upTime++;
+304:         m_time++;
+305:     }
+306: 
+307:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+308:     {
+309:         if (m_periodicHandlers[i] != nullptr)
+310:             (*m_periodicHandlers[i])();
+311:     }
+312: }
+313: 
+314: /// <summary>
+315: /// Static interrupt handler
+316: ///
+317: /// Calls the instance interrupt handler
+318: /// </summary>
+319: /// <param name="param"></param>
+320: void Timer::InterruptHandler(void* param)
+321: {
+322:     Timer* instance = reinterpret_cast<Timer*>(param);
+323:     assert(instance != nullptr);
 324: 
-325: /// <summary>
-326: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
-327: /// </summary>
-328: /// <returns>A reference to the singleton Timer</returns>
-329: Timer& baremetal::GetTimer()
-330: {
-331:     static Timer timer;
-332:     timer.Initialize();
-333:     return timer;
-334: }
+325:     instance->InterruptHandler();
+326: }
+327: 
+328: /// <summary>
+329: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
+330: /// </summary>
+331: /// <returns>A reference to the singleton Timer</returns>
+332: Timer& baremetal::GetTimer()
+333: {
+334:     static Timer timer;
+335:     timer.Initialize();
+336:     return timer;
+337: }
 ...
 ```
 
@@ -384,29 +398,31 @@ File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Time
 - Line 124-131: We implement the method `GetTicks`
 - Line 133-140: We implement the method `GetUptime`
 - Line 142-149: We implement the method `GetTime`
-- Line 164-186: We implement the method `RegisterPeriodicHandler`
-  - Line 172: We perform a sanity check if the handler is not null
-  - Line 173: We perform a sanity check if the number of registered periodic handlers is not the maximum
-  - Line 175-180: We find an empty slot in the array of periodic handlers
-  - Line 181: We perform a sanity check whether we found an empty slot
-  - Line 182: We store the handler in the array
-  - Line 186: We increment the number of periodic handlers
-- Line 189-212: We implement the method `UnregisterPeriodicHandler`
-  - Line 197: We perform a sanity check if the handler is not null
-  - Line 198: We perform a sanity check if there are periodic handlers registered
-  - Line 200-205: We find the handler in the array of periodic handlers
-  - Line 206: We perform a sanity check whether we found the handler
-  - Line 207: We remove the handler from the array
-  - Line 211: We decrement the number of periodic handlers
-- Line 287-309: We implement the instance method `InterruptHandler`
-  - Line 295: We retrieve the current timer compare value
-  - Line 296: We set the next timer deadline
-  - Line 298-302: We increment the timer tick count, we check if a second has passed, if so we increment the uptime and the time
-  - Line 304-308: We call the periodic handlers
-- Line 311-323: We implement the static method `InterruptHandler`
-  - Line 319-320: We cast the `param` to a `Timer` instance and perform a sanity check
-  - Line 322: We call the instance method `InterruptHandler`
-- Line 332: We call `Initialize()` in `GetTimer()`
+- Line 151-165: We make a few small changes to `GetTimeString()`.
+If the buffer pointer is null or the size is 0, we return immediately
+- Line 167-190: We implement the method `RegisterPeriodicHandler`
+  - Line 175: We perform a sanity check if the handler is not null
+  - Line 176: We perform a sanity check if the number of registered periodic handlers is not the maximum
+  - Line 178-183: We find an empty slot in the array of periodic handlers
+  - Line 184: We perform a sanity check whether we found an empty slot
+  - Line 185: We store the handler in the array
+  - Line 189: We increment the number of periodic handlers
+- Line 192-216: We implement the method `UnregisterPeriodicHandler`
+  - Line 200: We perform a sanity check if the handler is not null
+  - Line 201: We perform a sanity check if there are periodic handlers registered
+  - Line 203-208: We find the handler in the array of periodic handlers
+  - Line 209: We perform a sanity check whether we found the handler
+  - Line 210: We remove the handler from the array
+  - Line 214: We decrement the number of periodic handlers
+- Line 290-312: We implement the instance method `InterruptHandler`
+  - Line 298: We retrieve the current timer compare value
+  - Line 299: We set the next timer deadline
+  - Line 301-305: We increment the timer tick count, we check if a second has passed, if so we increment the uptime and the time
+  - Line 307-311: We call the periodic handlers
+- Line 314-326: We implement the static method `InterruptHandler`
+  - Line 322-323: We cast the `param` to a `Timer` instance and perform a sanity check
+  - Line 325: We call the instance method `InterruptHandler`
+- Line 335: We call `Initialize()` in `GetTimer()`
 
 ### Update application code {#TUTORIAL_20_TIMER_EXTENSION_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_UPDATE_APPLICATION_CODE}
 

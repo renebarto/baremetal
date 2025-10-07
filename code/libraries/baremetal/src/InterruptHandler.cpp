@@ -106,8 +106,13 @@ void InterruptSystem::Initialize()
     if (m_isInitialized)
         return;
 
-    memset(m_irqHandlers, 0, IRQ_LINES * sizeof(IRQHandler*));
-    memset(m_irqHandlersParam, 0, IRQ_LINES * sizeof(void*));
+    for (int i = 0; i < IRQ_LINES; i++)
+    {
+        m_irqHandlers[i] = nullptr;
+        m_irqHandlersParam[i] = nullptr;
+    }
+    // memset(m_irqHandlers, 0, IRQ_LINES * sizeof(IRQHandler*));
+    // memset(m_irqHandlersParam, 0, IRQ_LINES * sizeof(void*));
 
     DisableInterrupts();
 

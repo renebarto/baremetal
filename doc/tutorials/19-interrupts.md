@@ -326,33 +326,33 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 114: //---------------------------------------------
 115:
 116: /// @brief Raspberry Pi Interrupt Control Registers base address. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
-117: #define RPI_INTRCTRL_BASE               RPI_BCM_IO_BASE + 0x0000B000
-118:
-119: /// @brief Raspberry Pi Interrupt Control basic IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
-120: #define RPI_INTRCTRL_IRQ_BASIC_PENDING  reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000200)
-121: /// @brief Raspberry Pi Interrupt Control register 1 IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
-122: #define RPI_INTRCTRL_IRQ_PENDING_1      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000204)
-123: /// @brief Raspberry Pi Interrupt Control register 2 IRQ pending register. See @ref RASPBERRY_PI_MAILBOX
-124: #define RPI_INTRCTRL_IRQ_PENDING_2      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000208)
-125: /// @brief Raspberry Pi Interrupt Control FIQ enable register. See @ref RASPBERRY_PI_MAILBOX
+117: #define RPI_INTRCTRL_BASE              RPI_BCM_IO_BASE + 0x0000B000
+118: 
+119: /// @brief Raspberry Pi Interrupt Control basic IRQ pending register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+120: #define RPI_INTRCTRL_IRQ_BASIC_PENDING reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000200)
+121: /// @brief Raspberry Pi Interrupt Control register 1 IRQ pending register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+122: #define RPI_INTRCTRL_IRQ_PENDING_1     reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000204)
+123: /// @brief Raspberry Pi Interrupt Control register 2 IRQ pending register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+124: #define RPI_INTRCTRL_IRQ_PENDING_2     reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000208)
+125: /// @brief Raspberry Pi Interrupt Control FIQ enable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
 126: #ifdef __cplusplus
-127: #define RPI_INTRCTRL_FIQ_CONTROL        reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000020C)
+127: #define RPI_INTRCTRL_FIQ_CONTROL reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x0000020C)
 128: #else
-129: #define RPI_INTRCTRL_FIQ_CONTROL        (RPI_MAILBOX_BASE + 0x0000020C)
+129: #define RPI_INTRCTRL_FIQ_CONTROL (RPI_INTRCTRL_BASE + 0x0000020C)
 130: #endif
-131: /// @brief Raspberry Pi Interrupt Control register 1 IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
-132: #define RPI_INTRCTRL_ENABLE_IRQS_1      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000210)
-133: /// @brief Raspberry Pi Interrupt Control register 2 IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
-134: #define RPI_INTRCTRL_ENABLE_IRQS_2      reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000214)
-135: /// @brief Raspberry Pi Interrupt Control basic IRQ enable register. See @ref RASPBERRY_PI_MAILBOX
-136: #define RPI_INTRCTRL_ENABLE_BASIC_IRQS  reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000218)
-137: /// @brief Raspberry Pi Interrupt Control register 1 IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
-138: #define RPI_INTRCTRL_DISABLE_IRQS_1     reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x0000021C)
-139: /// @brief Raspberry Pi Interrupt Control register 2 IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
-140: #define RPI_INTRCTRL_DISABLE_IRQS_2     reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000220)
-141: /// @brief Raspberry Pi Interrupt Control basic IRQ disable register. See @ref RASPBERRY_PI_MAILBOX
-142: #define RPI_INTRCTRL_DISABLE_BASIC_IRQS reinterpret_cast<regaddr>(RPI_MAILBOX_BASE + 0x00000224)
-143:
+131: /// @brief Raspberry Pi Interrupt Control register 1 IRQ enable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+132: #define RPI_INTRCTRL_ENABLE_IRQS_1      reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000210)
+133: /// @brief Raspberry Pi Interrupt Control register 2 IRQ enable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+134: #define RPI_INTRCTRL_ENABLE_IRQS_2      reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000214)
+135: /// @brief Raspberry Pi Interrupt Control basic IRQ enable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+136: #define RPI_INTRCTRL_ENABLE_BASIC_IRQS  reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000218)
+137: /// @brief Raspberry Pi Interrupt Control register 1 IRQ disable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+138: #define RPI_INTRCTRL_DISABLE_IRQS_1     reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x0000021C)
+139: /// @brief Raspberry Pi Interrupt Control register 2 IRQ disable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+140: #define RPI_INTRCTRL_DISABLE_IRQS_2     reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000220)
+141: /// @brief Raspberry Pi Interrupt Control basic IRQ disable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
+142: #define RPI_INTRCTRL_DISABLE_BASIC_IRQS reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000224)
+143: 
 144: #else
 145: //---------------------------------------------
 146: // RPI 4 / 5 Interrupt Controller (GIC-400)

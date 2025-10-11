@@ -788,294 +788,288 @@ File: code/libraries/baremetal/include/baremetal/List.h
 58:     /// </summary>
 59:     struct Element
 60:     {
-61: #ifndef NDEBUG
-62:         /// @brief Magic number to check if element is valid
-63:         unsigned m_magic;
-64: #endif
-65:         /// @brief Actual pointer
-66:         Pointer m_ptr;
-67: 
-68:         /// @brief Pointer to previous element
-69:         Element* m_prev;
-70:         /// @brief Pointer to next element
-71:         Element* m_next;
+61:         /// @brief Magic number to check if element is valid
+62:         unsigned m_magic;
+63:         /// @brief Actual pointer
+64:         Pointer m_ptr;
+65: 
+66:         /// @brief Pointer to previous element
+67:         Element* m_prev;
+68:         /// @brief Pointer to next element
+69:         Element* m_next;
+70: 
+71:         explicit Element(Pointer ptr);
 72: 
-73:         explicit Element(Pointer ptr);
-74: 
-75:         bool CheckMagic() const;
-76:     };
-77: 
-78: private:
-79:     /// @brief Pointer to first element in list
-80:     DoubleLinkedList<Pointer>::Element* m_head;
-81: 
-82: public:
-83:     DoubleLinkedList();
-84:     ~DoubleLinkedList();
-85: 
-86:     DoubleLinkedList<Pointer>::Element* GetFirst();                                                 // Returns nullptr if list is empty
-87:     DoubleLinkedList<Pointer>::Element* GetNext(const DoubleLinkedList<Pointer>::Element* element); // Returns nullptr if nothing follows
+73:         bool CheckMagic() const;
+74:     };
+75: 
+76: private:
+77:     /// @brief Pointer to first element in list
+78:     DoubleLinkedList<Pointer>::Element* m_head;
+79: 
+80: public:
+81:     DoubleLinkedList();
+82:     ~DoubleLinkedList();
+83: 
+84:     DoubleLinkedList<Pointer>::Element* GetFirst();                                                 // Returns nullptr if list is empty
+85:     DoubleLinkedList<Pointer>::Element* GetNext(const DoubleLinkedList<Pointer>::Element* element); // Returns nullptr if nothing follows
+86: 
+87:     Pointer GetPointer(const DoubleLinkedList<Pointer>::Element* element); // get pointer for element
 88: 
-89:     Pointer GetPointer(const DoubleLinkedList<Pointer>::Element* element); // get pointer for element
-90: 
-91:     void InsertBefore(DoubleLinkedList<Pointer>::Element* before, Pointer pointer); // after must be != nullptr
-92:     void InsertAfter(DoubleLinkedList<Pointer>::Element* after, Pointer pointer);   // before == nullptr to set first element
+89:     void InsertBefore(DoubleLinkedList<Pointer>::Element* before, Pointer pointer); // after must be != nullptr
+90:     void InsertAfter(DoubleLinkedList<Pointer>::Element* after, Pointer pointer);   // before == nullptr to set first element
+91: 
+92:     void Remove(DoubleLinkedList<Pointer>::Element* element); // remove this element
 93: 
-94:     void Remove(DoubleLinkedList<Pointer>::Element* element); // remove this element
-95: 
-96:     DoubleLinkedList<Pointer>::Element* Find(Pointer pointer); // find element using pointer
-97: };
-98: 
-99: /// <summary>
-100: /// Construct element for pointer
-101: /// </summary>
-102: /// <typeparam name="Pointer"></typeparam>
-103: /// <param name="ptr">ptr Pointer to store in element</param>
-104: template <class Pointer>
-105: DoubleLinkedList<Pointer>::Element::Element(Pointer ptr)
-106:     : m_magic{PTR_LIST_MAGIC}
-107:     , m_ptr{ptr}
-108:     , m_prev{}
-109:     , m_next{}
-110: {
-111: }
-112: 
-113: /// <summary>
-114: /// Verify magic number
-115: /// </summary>
-116: /// <typeparam name="Pointer"></typeparam>
-117: /// <returns>True if the magic number is correct, false otherwise</returns>
-118: template <class Pointer> bool DoubleLinkedList<Pointer>::Element::CheckMagic() const
-119: {
-120: #ifndef NDEBUG
-121:     return (m_magic == PTR_LIST_MAGIC);
-122: #else
-123:     return true;
-124: #endif
-125: }
-126: 
-127: /// <summary>
-128: /// Construct a default double linked list
-129: /// </summary>
-130: /// <typeparam name="Pointer"></typeparam>
-131: template <class Pointer>
-132: DoubleLinkedList<Pointer>::DoubleLinkedList()
-133:     : m_head{}
-134: {
-135: }
-136: 
-137: /// <summary>
-138: /// Destruct a double linked list
-139: /// </summary>
-140: /// <typeparam name="Pointer"></typeparam>
-141: template <class Pointer> DoubleLinkedList<Pointer>::~DoubleLinkedList()
-142: {
-143:     assert(m_head == nullptr);
-144: }
-145: 
-146: /// <summary>
-147: /// Get the first element in the list
-148: /// </summary>
-149: /// <typeparam name="Pointer"></typeparam>
-150: /// <returns>Pointer to first element in the list, or nullptr if none exists</returns>
-151: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::GetFirst()
-152: {
-153:     return m_head;
-154: }
-155: 
-156: /// <summary>
-157: /// Get the next element in the list
-158: /// </summary>
-159: /// <typeparam name="Pointer"></typeparam>
-160: /// <param name="element">Current element</param>
-161: /// <returns>Pointer to next element, or nullptr if none exists</returns>
-162: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::GetNext(const DoubleLinkedList<Pointer>::Element* element)
-163: {
-164:     assert(element != nullptr);
-165:     assert(element->CheckMagic());
-166: 
-167:     return element->m_next;
-168: }
-169: 
-170: /// <summary>
-171: /// Extract pointer from element
-172: /// </summary>
-173: /// <typeparam name="Pointer"></typeparam>
-174: /// <param name="element">Current element</param>
-175: /// <returns>Pointer stored inside element</returns>
-176: template <class Pointer> Pointer DoubleLinkedList<Pointer>::GetPointer(const typename DoubleLinkedList<Pointer>::Element* element)
-177: {
-178:     assert(element != nullptr);
-179:     assert(element->CheckMagic());
-180: 
-181:     return element->m_ptr;
-182: }
-183: 
-184: /// <summary>
-185: /// Insert a pointer before a given element
-186: /// </summary>
-187: /// <typeparam name="Pointer"></typeparam>
-188: /// <param name="before">Pointer to element before which to store e new element for the pointer</param>
-189: /// <param name="pointer">Pointer to store in new element</param>
-190: template <class Pointer> void DoubleLinkedList<Pointer>::InsertBefore(typename DoubleLinkedList<Pointer>::Element* before, Pointer pointer)
-191: {
-192:     assert(m_head != nullptr);
-193:     assert(before != nullptr);
-194:     assert(before->CheckMagic());
-195: 
-196:     Element* element = new Element(pointer);
-197:     assert(element != nullptr);
-198: 
-199:     if (before == m_head)
-200:     {
-201:         element->m_prev = nullptr;
-202:         element->m_next = before;
-203: 
-204:         m_head->m_prev = element;
-205: 
-206:         m_head = element;
-207:     }
-208:     else
-209:     {
-210:         element->m_prev = before->m_prev;
-211:         element->m_next = before;
+94:     DoubleLinkedList<Pointer>::Element* Find(Pointer pointer); // find element using pointer
+95: };
+96: 
+97: /// <summary>
+98: /// Construct element for pointer
+99: /// </summary>
+100: /// <typeparam name="Pointer"></typeparam>
+101: /// <param name="ptr">ptr Pointer to store in element</param>
+102: template <class Pointer>
+103: DoubleLinkedList<Pointer>::Element::Element(Pointer ptr)
+104:     : m_magic{PTR_LIST_MAGIC}
+105:     , m_ptr{ptr}
+106:     , m_prev{}
+107:     , m_next{}
+108: {
+109: }
+110: 
+111: /// <summary>
+112: /// Verify magic number
+113: /// </summary>
+114: /// <typeparam name="Pointer"></typeparam>
+115: /// <returns>True if the magic number is correct, false otherwise</returns>
+116: template <class Pointer> bool DoubleLinkedList<Pointer>::Element::CheckMagic() const
+117: {
+118:     return (m_magic == PTR_LIST_MAGIC);
+119: }
+120: 
+121: /// <summary>
+122: /// Construct a default double linked list
+123: /// </summary>
+124: /// <typeparam name="Pointer"></typeparam>
+125: template <class Pointer>
+126: DoubleLinkedList<Pointer>::DoubleLinkedList()
+127:     : m_head{}
+128: {
+129: }
+130: 
+131: /// <summary>
+132: /// Destruct a double linked list
+133: /// </summary>
+134: /// <typeparam name="Pointer"></typeparam>
+135: template <class Pointer> DoubleLinkedList<Pointer>::~DoubleLinkedList()
+136: {
+137:     assert(m_head == nullptr);
+138: }
+139: 
+140: /// <summary>
+141: /// Get the first element in the list
+142: /// </summary>
+143: /// <typeparam name="Pointer"></typeparam>
+144: /// <returns>Pointer to first element in the list, or nullptr if none exists</returns>
+145: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::GetFirst()
+146: {
+147:     return m_head;
+148: }
+149: 
+150: /// <summary>
+151: /// Get the next element in the list
+152: /// </summary>
+153: /// <typeparam name="Pointer"></typeparam>
+154: /// <param name="element">Current element</param>
+155: /// <returns>Pointer to next element, or nullptr if none exists</returns>
+156: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::GetNext(const DoubleLinkedList<Pointer>::Element* element)
+157: {
+158:     assert(element != nullptr);
+159:     assert(element->CheckMagic());
+160: 
+161:     return element->m_next;
+162: }
+163: 
+164: /// <summary>
+165: /// Extract pointer from element
+166: /// </summary>
+167: /// <typeparam name="Pointer"></typeparam>
+168: /// <param name="element">Current element</param>
+169: /// <returns>Pointer stored inside element</returns>
+170: template <class Pointer> Pointer DoubleLinkedList<Pointer>::GetPointer(const typename DoubleLinkedList<Pointer>::Element* element)
+171: {
+172:     assert(element != nullptr);
+173:     assert(element->CheckMagic());
+174: 
+175:     return element->m_ptr;
+176: }
+177: 
+178: /// <summary>
+179: /// Insert a pointer before a given element
+180: /// </summary>
+181: /// <typeparam name="Pointer"></typeparam>
+182: /// <param name="before">Pointer to element before which to store e new element for the pointer</param>
+183: /// <param name="pointer">Pointer to store in new element</param>
+184: template <class Pointer> void DoubleLinkedList<Pointer>::InsertBefore(typename DoubleLinkedList<Pointer>::Element* before, Pointer pointer)
+185: {
+186:     assert(m_head != nullptr);
+187:     assert(before != nullptr);
+188:     assert(before->CheckMagic());
+189: 
+190:     Element* element = new Element(pointer);
+191:     assert(element != nullptr);
+192: 
+193:     if (before == m_head)
+194:     {
+195:         element->m_prev = nullptr;
+196:         element->m_next = before;
+197: 
+198:         m_head->m_prev = element;
+199: 
+200:         m_head = element;
+201:     }
+202:     else
+203:     {
+204:         element->m_prev = before->m_prev;
+205:         element->m_next = before;
+206: 
+207:         if (before->m_prev != nullptr)
+208:         {
+209:             assert(before->m_prev->CheckMagic());
+210:             before->m_prev->m_next = element;
+211:         }
 212: 
-213:         if (before->m_prev != nullptr)
-214:         {
-215:             assert(before->m_prev->CheckMagic());
-216:             before->m_prev->m_next = element;
-217:         }
-218: 
-219:         before->m_prev = element;
-220:     }
-221: }
-222: 
-223: /// <summary>
-224: /// Insert a pointer after a given element
-225: /// </summary>
-226: /// <typeparam name="Pointer"></typeparam>
-227: /// <param name="after">Pointer to element after which to store e new element for the pointer</param>
-228: /// <param name="pointer">Pointer to store in new element</param>
-229: template <class Pointer> void DoubleLinkedList<Pointer>::InsertAfter(typename DoubleLinkedList<Pointer>::Element* after, Pointer pointer)
-230: {
-231:     Element* element = new Element(pointer);
-232:     assert(element != nullptr);
-233: 
-234:     if (after == nullptr)
-235:     {
-236:         assert(m_head == nullptr);
-237: 
-238:         element->m_prev = nullptr;
-239:         element->m_next = nullptr;
-240: 
-241:         m_head = element;
-242:     }
-243:     else
-244:     {
-245:         assert(m_head != nullptr);
-246:         assert(after->CheckMagic());
-247: 
-248:         element->m_prev = after;
-249:         element->m_next = after->m_next;
+213:         before->m_prev = element;
+214:     }
+215: }
+216: 
+217: /// <summary>
+218: /// Insert a pointer after a given element
+219: /// </summary>
+220: /// <typeparam name="Pointer"></typeparam>
+221: /// <param name="after">Pointer to element after which to store e new element for the pointer</param>
+222: /// <param name="pointer">Pointer to store in new element</param>
+223: template <class Pointer> void DoubleLinkedList<Pointer>::InsertAfter(typename DoubleLinkedList<Pointer>::Element* after, Pointer pointer)
+224: {
+225:     Element* element = new Element(pointer);
+226:     assert(element != nullptr);
+227: 
+228:     if (after == nullptr)
+229:     {
+230:         assert(m_head == nullptr);
+231: 
+232:         element->m_prev = nullptr;
+233:         element->m_next = nullptr;
+234: 
+235:         m_head = element;
+236:     }
+237:     else
+238:     {
+239:         assert(m_head != nullptr);
+240:         assert(after->CheckMagic());
+241: 
+242:         element->m_prev = after;
+243:         element->m_next = after->m_next;
+244: 
+245:         if (after->m_next != nullptr)
+246:         {
+247:             assert(after->m_next->CheckMagic());
+248:             after->m_next->m_prev = element;
+249:         }
 250: 
-251:         if (after->m_next != nullptr)
-252:         {
-253:             assert(after->m_next->CheckMagic());
-254:             after->m_next->m_prev = element;
-255:         }
-256: 
-257:         after->m_next = element;
-258:     }
-259: }
-260: 
-261: /// <summary>
-262: /// Remove an element
-263: /// </summary>
-264: /// <typeparam name="Pointer"></typeparam>
-265: /// <param name="element">Pointer to element to remove</param>
-266: template <class Pointer> void DoubleLinkedList<Pointer>::Remove(typename DoubleLinkedList<Pointer>::Element* element)
-267: {
-268:     assert(element != nullptr);
-269:     assert(element->CheckMagic());
-270: 
-271:     if (element == m_head)
-272:     {
-273:         m_head = element->m_next;
-274: 
-275:         if (element->m_next != nullptr)
-276:         {
-277:             assert(element->m_next->CheckMagic());
-278:             element->m_next->m_prev = nullptr;
-279:         }
-280:     }
-281:     else
-282:     {
-283:         assert(element->m_prev != nullptr);
-284:         assert(element->m_prev->CheckMagic());
-285:         element->m_prev->m_next = element->m_next;
-286: 
-287:         if (element->m_next != nullptr)
-288:         {
-289:             assert(element->m_next->CheckMagic());
-290:             element->m_next->m_prev = element->m_prev;
-291:         }
-292:     }
+251:         after->m_next = element;
+252:     }
+253: }
+254: 
+255: /// <summary>
+256: /// Remove an element
+257: /// </summary>
+258: /// <typeparam name="Pointer"></typeparam>
+259: /// <param name="element">Pointer to element to remove</param>
+260: template <class Pointer> void DoubleLinkedList<Pointer>::Remove(typename DoubleLinkedList<Pointer>::Element* element)
+261: {
+262:     assert(element != nullptr);
+263:     assert(element->CheckMagic());
+264: 
+265:     if (element == m_head)
+266:     {
+267:         m_head = element->m_next;
+268: 
+269:         if (element->m_next != nullptr)
+270:         {
+271:             assert(element->m_next->CheckMagic());
+272:             element->m_next->m_prev = nullptr;
+273:         }
+274:     }
+275:     else
+276:     {
+277:         assert(element->m_prev != nullptr);
+278:         assert(element->m_prev->CheckMagic());
+279:         element->m_prev->m_next = element->m_next;
+280: 
+281:         if (element->m_next != nullptr)
+282:         {
+283:             assert(element->m_next->CheckMagic());
+284:             element->m_next->m_prev = element->m_prev;
+285:         }
+286:     }
+287: 
+288: #ifndef NDEBUG
+289:     element->m_magic = 0;
+290: #endif
+291:     delete element;
+292: }
 293: 
-294: #ifndef NDEBUG
-295:     element->m_magic = 0;
-296: #endif
-297:     delete element;
-298: }
-299: 
-300: /// <summary>
-301: /// Find the element containing a pointer
-302: /// </summary>
-303: /// <typeparam name="Pointer"></typeparam>
-304: /// <param name="pointer">Pointer to search for</param>
-305: /// <returns>Pointer stored inside element</returns>
-306: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::Find(Pointer pointer)
-307: {
-308:     for (Element* element = m_head; element != nullptr; element = element->m_next)
-309:     {
-310:         assert(element->CheckMagic());
+294: /// <summary>
+295: /// Find the element containing a pointer
+296: /// </summary>
+297: /// <typeparam name="Pointer"></typeparam>
+298: /// <param name="pointer">Pointer to search for</param>
+299: /// <returns>Pointer stored inside element</returns>
+300: template <class Pointer> typename DoubleLinkedList<Pointer>::Element* DoubleLinkedList<Pointer>::Find(Pointer pointer)
+301: {
+302:     for (Element* element = m_head; element != nullptr; element = element->m_next)
+303:     {
+304:         assert(element->CheckMagic());
+305: 
+306:         if (element->m_ptr == pointer)
+307:         {
+308:             return element;
+309:         }
+310:     }
 311: 
-312:         if (element->m_ptr == pointer)
-313:         {
-314:             return element;
-315:         }
-316:     }
-317: 
-318:     return nullptr;
-319: }
-320: 
-321: } // namespace baremetal
+312:     return nullptr;
+313: }
+314: 
+315: } // namespace baremetal
 ```
 
 - Line 47: We define a magic number for the list to check against corruption
-- Line 49-97: We declare a template class `DoubleLinkedList` to hold a list of pointers
-  - Line 57-77: We declare a struct `Element` to be an element in the list
-    - Line 62-72: We declare the magic number, the pointer, and the previous and next element
-    - Line 74: We declare a constructor for the element
-    - Line 76: We declare a method `CheckMagic()` to check the magic number
-  - Line 80-81: We declare the head of the list
-  - Line 84: We declare a constructor for the list
-  - Line 85: We declare a destructor for the list
-  - Line 87-88: We declare methods to get the first `GetFirst()` and next element `GetNext()`
-  - Line 89: We declare a method `GetPointer()` to extract the pointer of an element
-  - Line 91-92: We declare methods `InsertBefore()` and `InsertAfter()`, to insert a new element before or after an element
-  - Line 94: We declare a method `Remove()` to remove an element
-  - Line 96: We declare a method `Find()` to find an element by the pointer
-- Line 99-111: We implement the `Element` constructor for the element
-- Line 113-125: We implement the `Element` method `CheckMagic()`
-- Line 127-135: We implement the `DoubleLinkedList` constructor
-- Line 137-144: We implement the `DoubleLinkedList` destructor
-- Line 146-154: We implement the `DoubleLinkedList` method `GetFirst()`
-- Line 156-168: We implement the `DoubleLinkedList` method `GetNext()`
-- Line 170-182: We implement the `DoubleLinkedList` method `GetPointer()`
-- Line 184-221: We implement the `DoubleLinkedList` method `InsertBefore()`
-- Line 223-259: We implement the `DoubleLinkedList` method `InsertAfter()`
-- Line 261-298: We implement the `DoubleLinkedList` method `Remove()`
-- Line 300-319: We implement the `DoubleLinkedList` method `Find()`
+- Line 49-95: We declare a template class `DoubleLinkedList` to hold a list of pointers
+  - Line 56-74: We declare a struct `Element` to be an element in the list
+    - Line 61-69: We declare the magic number, the pointer, and the previous and next element
+    - Line 71: We declare a constructor for the element
+    - Line 73: We declare a method `CheckMagic()` to check the magic number
+  - Line 77-78: We declare the head of the list
+  - Line 81: We declare a constructor for the list
+  - Line 82: We declare a destructor for the list
+  - Line 84-85: We declare methods to get the first `GetFirst()` and next element `GetNext()`
+  - Line 87: We declare a method `GetPointer()` to extract the pointer of an element
+  - Line 89-90: We declare methods `InsertBefore()` and `InsertAfter()`, to insert a new element before or after an element
+  - Line 92: We declare a method `Remove()` to remove an element
+  - Line 94: We declare a method `Find()` to find an element by the pointer
+- Line 97-109: We implement the `Element` constructor for the element
+- Line 111-119: We implement the `Element` method `CheckMagic()`
+- Line 121-129: We implement the `DoubleLinkedList` constructor
+- Line 131-138: We implement the `DoubleLinkedList` destructor
+- Line 140-148: We implement the `DoubleLinkedList` method `GetFirst()`
+- Line 150-162: We implement the `DoubleLinkedList` method `GetNext()`
+- Line 164-176: We implement the `DoubleLinkedList` method `GetPointer()`
+- Line 178-215: We implement the `DoubleLinkedList` method `InsertBefore()`
+- Line 217-253: We implement the `DoubleLinkedList` method `InsertAfter()`
+- Line 255-292: We implement the `DoubleLinkedList` method `Remove()`
+- Line 294-313: We implement the `DoubleLinkedList` method `Find()`
 
 ### Timer.h {#TUTORIAL_20_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_TIMERH}
 
@@ -1183,296 +1177,286 @@ File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Time
 65: /// <typeparam name="Pointer"></typeparam>
 66: struct KernelTimer
 67: {
-68: #ifndef NDEBUG
-69:     /// @brief Magic number to check if element is valid
-70:     unsigned m_magic;
-71: #endif
-72:     /// @brief Kernel timer deadline in timer ticks
-73:     unsigned m_elapsesAtTicks;
-74:     /// @brief Pointer to kernel timer handler
-75:     KernelTimerHandler* m_handler;
-76:     /// @brief Kernel timer handler parameter
-77:     void* m_param;
-78:     /// @brief Kernel timer handler context
-79:     void* m_context;
-80: 
-81:     /// <summary>
-82:     /// Construct a kernel timer administration element
-83:     /// </summary>
-84:     /// <param name="elapseTimeTicks">Timer deadline in timer ticks</param>
-85:     /// <param name="handler">Kernel timer handler pointer</param>
-86:     /// <param name="param">Kernel timer handler parameter</param>
-87:     /// <param name="context">Kernerl timer handler context</param>
-88:     KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler* handler, void* param, void* context)
-89:         :
-90: #ifndef NDEBUG
-91:         m_magic{KERNEL_TIMER_MAGIC}
-92:         ,
-93: #endif
-94:         m_elapsesAtTicks{elapseTimeTicks}
-95:         , m_handler{handler}
-96:         , m_param{param}
-97:         , m_context{context}
-98: 
-99:     {
-100:     }
-101:     /// <summary>
-102:     /// Verify magic number
-103:     /// </summary>
-104:     /// <returns>True if the magic number is correct, false otherwise</returns>
-105:     bool CheckMagic() const
-106:     {
-107:         return m_magic == KERNEL_TIMER_MAGIC;
-108:     }
-109: };
-110: /// @brief Kernel timer element, element which is stored in the kernel time list
-111: using KernelTimerElement = DoubleLinkedList<KernelTimer*>::Element;
-112: 
-113: const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-114: 
-115: const char* Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-116: 
-117: /// <summary>
-118: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
-119: /// </summary>
-120: Timer::Timer()
-121:     : m_interruptSystem{GetInterruptSystem()}
-122:     , m_memoryAccess{GetMemoryAccess()}
-123:     , m_clockTicksPerSystemTick{}
-124:     , m_ticks{}
-125:     , m_upTime{}
-126:     , m_time{}
-127:     , m_periodicHandlers{}
-128:     , m_numPeriodicHandlers{}
-129:     , m_kernelTimerList{}
-130: {
-131: }
-132: 
-133: /// <summary>
-134: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
-135: /// </summary>
-136: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
-137: Timer::Timer(IMemoryAccess& memoryAccess)
-138:     : m_interruptSystem{GetInterruptSystem()}
-139:     , m_memoryAccess{memoryAccess}
-140:     , m_clockTicksPerSystemTick{}
-141:     , m_ticks{}
-142:     , m_upTime{}
-143:     , m_time{}
-144:     , m_periodicHandlers{}
-145:     , m_numPeriodicHandlers{}
-146:     , m_kernelTimerList{}
-147: {
-148: }
-149: 
-150: /// <summary>
-151: /// Destructor
-152: ///
-153: /// Disables the timer, as well as the timer interrupt
-154: /// </summary>
-155: Timer::~Timer()
-156: {
-157:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
-158: 
-159:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
-160: 
-161:     KernelTimerElement* element;
-162:     while ((element = m_kernelTimerList.GetFirst()) != 0)
-163:     {
-164:         CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
-165:     }
-166: }
+68:     /// @brief Magic number to check if element is valid
+69:     unsigned m_magic;
+70:     /// @brief Kernel timer deadline in timer ticks
+71:     unsigned m_elapsesAtTicks;
+72:     /// @brief Pointer to kernel timer handler
+73:     KernelTimerHandler* m_handler;
+74:     /// @brief Kernel timer handler parameter
+75:     void* m_param;
+76:     /// @brief Kernel timer handler context
+77:     void* m_context;
+78: 
+79:     /// <summary>
+80:     /// Construct a kernel timer administration element
+81:     /// </summary>
+82:     /// <param name="elapseTimeTicks">Timer deadline in timer ticks</param>
+83:     /// <param name="handler">Kernel timer handler pointer</param>
+84:     /// <param name="param">Kernel timer handler parameter</param>
+85:     /// <param name="context">Kernerl timer handler context</param>
+86:     KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler* handler, void* param, void* context)
+87:         : m_magic{KERNEL_TIMER_MAGIC}
+88:         , m_elapsesAtTicks{elapseTimeTicks}
+89:         , m_handler{handler}
+90:         , m_param{param}
+91:         , m_context{context}
+92: 
+93:     {
+94:     }
+95:     /// <summary>
+96:     /// Verify magic number
+97:     /// </summary>
+98:     /// <returns>True if the magic number is correct, false otherwise</returns>
+99:     bool CheckMagic() const
+100:     {
+101:         return m_magic == KERNEL_TIMER_MAGIC;
+102:     }
+103: };
+104: /// @brief Kernel timer element, element which is stored in the kernel time list
+105: using KernelTimerElement = DoubleLinkedList<KernelTimer*>::Element;
+106: 
+107: const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+108: 
+109: const char* Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+110: 
+111: /// <summary>
+112: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
+113: /// </summary>
+114: Timer::Timer()
+115:     : m_interruptSystem{GetInterruptSystem()}
+116:     , m_memoryAccess{GetMemoryAccess()}
+117:     , m_clockTicksPerSystemTick{}
+118:     , m_ticks{}
+119:     , m_upTime{}
+120:     , m_time{}
+121:     , m_periodicHandlers{}
+122:     , m_numPeriodicHandlers{}
+123:     , m_kernelTimerList{}
+124: {
+125: }
+126: 
+127: /// <summary>
+128: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
+129: /// </summary>
+130: /// <param name="memoryAccess">Injected IMemoryAccess instance for testing</param>
+131: Timer::Timer(IMemoryAccess& memoryAccess)
+132:     : m_interruptSystem{GetInterruptSystem()}
+133:     , m_memoryAccess{memoryAccess}
+134:     , m_clockTicksPerSystemTick{}
+135:     , m_ticks{}
+136:     , m_upTime{}
+137:     , m_time{}
+138:     , m_periodicHandlers{}
+139:     , m_numPeriodicHandlers{}
+140:     , m_kernelTimerList{}
+141: {
+142: }
+143: 
+144: /// <summary>
+145: /// Destructor
+146: ///
+147: /// Disables the timer, as well as the timer interrupt
+148: /// </summary>
+149: Timer::~Timer()
+150: {
+151:     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
+152: 
+153:     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+154: 
+155:     KernelTimerElement* element;
+156:     while ((element = m_kernelTimerList.GetFirst()) != 0)
+157:     {
+158:         CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
+159:     }
+160: }
 ...
-347: /// <summary>
-348: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
-349: /// </summary>
-350: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
-351: /// <param name="handler">Kernel timer handler to call when time elapses</param>
-352: /// <param name="param">Parameter to pass to kernel timer handler</param>
-353: /// <param name="context">Kernel timer handler context</param>
-354: /// <returns>Handle to kernel timer</returns>
-355: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler* handler, void* param, void* context)
-356: {
-357:     unsigned elapseTimeTicks = m_ticks + delayTicks;
-358:     assert(handler != nullptr);
-359: 
-360:     KernelTimer* timer = new KernelTimer(elapseTimeTicks, handler, param, context);
-361:     assert(timer != nullptr);
-362:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
-363: 
-364:     KernelTimerElement* prevElement{};
-365:     KernelTimerElement* element = m_kernelTimerList.GetFirst();
-366:     while (element != nullptr)
-367:     {
-368:         const KernelTimer* timer2 = m_kernelTimerList.GetPointer(element);
-369:         assert(timer2 != nullptr);
-370:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
-371: 
-372:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
-373:         {
-374:             break;
-375:         }
-376: 
-377:         prevElement = element;
-378:         element = m_kernelTimerList.GetNext(element);
-379:     }
-380: 
-381:     if (element != nullptr)
-382:     {
-383:         m_kernelTimerList.InsertBefore(element, timer);
-384:     }
-385:     else
-386:     {
-387:         m_kernelTimerList.InsertAfter(prevElement, timer);
-388:     }
-389: 
-390:     return reinterpret_cast<KernelTimerHandle>(timer);
-391: }
-392: 
-393: /// <summary>
-394: /// Cancels and removes a kernel timer.
-395: /// </summary>
-396: /// <param name="handle">Handle to kernel timer to cancel</param>
-397: void Timer::CancelKernelTimer(KernelTimerHandle handle)
-398: {
-399:     KernelTimer* timer = reinterpret_cast<KernelTimer*>(handle);
-400:     assert(timer != 0);
-401:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
-402: 
-403:     KernelTimerElement* element = m_kernelTimerList.Find(timer);
-404:     if (element != nullptr)
-405:     {
-406:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-407: 
-408:         m_kernelTimerList.Remove(element);
-409: 
-410: #ifndef NDEBUG
-411:         timer->m_magic = 0;
-412: #endif
-413:         delete timer;
-414:     }
-415: }
-416: 
-417: /// <summary>
-418: /// Update all registered kernel timers, and handle expiration of timers
-419: /// </summary>
-420: void Timer::PollKernelTimers()
-421: {
-422:     auto element = m_kernelTimerList.GetFirst();
-423:     while (element != nullptr)
-424:     {
-425:         KernelTimer* timer = m_kernelTimerList.GetPointer(element);
-426:         assert(timer != nullptr);
-427:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
-428: 
-429:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
-430:         {
-431:             break;
-432:         }
+341: /// <summary>
+342: /// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
+343: /// </summary>
+344: /// <param name="delayTicks">Delay time for timer in timer ticks</param>
+345: /// <param name="handler">Kernel timer handler to call when time elapses</param>
+346: /// <param name="param">Parameter to pass to kernel timer handler</param>
+347: /// <param name="context">Kernel timer handler context</param>
+348: /// <returns>Handle to kernel timer</returns>
+349: KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler* handler, void* param, void* context)
+350: {
+351:     unsigned elapseTimeTicks = m_ticks + delayTicks;
+352:     assert(handler != nullptr);
+353: 
+354:     KernelTimer* timer = new KernelTimer(elapseTimeTicks, handler, param, context);
+355:     assert(timer != nullptr);
+356:     LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
+357: 
+358:     KernelTimerElement* prevElement{};
+359:     KernelTimerElement* element = m_kernelTimerList.GetFirst();
+360:     while (element != nullptr)
+361:     {
+362:         const KernelTimer* timer2 = m_kernelTimerList.GetPointer(element);
+363:         assert(timer2 != nullptr);
+364:         assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
+365: 
+366:         if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
+367:         {
+368:             break;
+369:         }
+370: 
+371:         prevElement = element;
+372:         element = m_kernelTimerList.GetNext(element);
+373:     }
+374: 
+375:     if (element != nullptr)
+376:     {
+377:         m_kernelTimerList.InsertBefore(element, timer);
+378:     }
+379:     else
+380:     {
+381:         m_kernelTimerList.InsertAfter(prevElement, timer);
+382:     }
+383: 
+384:     return reinterpret_cast<KernelTimerHandle>(timer);
+385: }
+386: 
+387: /// <summary>
+388: /// Cancels and removes a kernel timer.
+389: /// </summary>
+390: /// <param name="handle">Handle to kernel timer to cancel</param>
+391: void Timer::CancelKernelTimer(KernelTimerHandle handle)
+392: {
+393:     KernelTimer* timer = reinterpret_cast<KernelTimer*>(handle);
+394:     assert(timer != 0);
+395:     LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+396: 
+397:     KernelTimerElement* element = m_kernelTimerList.Find(timer);
+398:     if (element != nullptr)
+399:     {
+400:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+401: 
+402:         m_kernelTimerList.Remove(element);
+403: 
+404:         timer->m_magic = 0;
+405:         delete timer;
+406:     }
+407: }
+408: 
+409: /// <summary>
+410: /// Update all registered kernel timers, and handle expiration of timers
+411: /// </summary>
+412: void Timer::PollKernelTimers()
+413: {
+414:     auto element = m_kernelTimerList.GetFirst();
+415:     while (element != nullptr)
+416:     {
+417:         KernelTimer* timer = m_kernelTimerList.GetPointer(element);
+418:         assert(timer != nullptr);
+419:         assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+420: 
+421:         if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
+422:         {
+423:             break;
+424:         }
+425: 
+426:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+427: 
+428:         m_kernelTimerList.Remove(element);
+429: 
+430:         KernelTimerHandler* handler = timer->m_handler;
+431:         assert(handler != nullptr);
+432:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
 433: 
-434:         LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
-435: 
-436:         m_kernelTimerList.Remove(element);
-437: 
-438:         KernelTimerHandler* handler = timer->m_handler;
-439:         assert(handler != nullptr);
-440:         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
+434:         timer->m_magic = 0;
+435:         delete timer;
+436: 
+437:         // The list may have changed due to the handler callback, so re-initialize
+438:         element = m_kernelTimerList.GetFirst();
+439:     }
+440: }
 441: 
-442: #ifndef NDEBUG
-443:         timer->m_magic = 0;
-444: #endif
-445:         delete timer;
-446: 
-447:         // The list may have changed due to the handler callback, so re-initialize
-448:         element = m_kernelTimerList.GetFirst();
-449:     }
-450: }
-451: 
 ...
-550: /// <summary>
-551: /// Interrupt handler for the timer
-552: ///
-553: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
-554: /// </summary>
-555: void Timer::InterruptHandler()
-556: {
-557:     uint64 compareValue;
-558:     GetTimerCompareValue(compareValue);
-559:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
-560: 
-561:     if (++m_ticks % TICKS_PER_SECOND == 0)
-562:     {
-563:         m_upTime++;
-564:         m_time++;
-565:     }
-566: 
-567:     PollKernelTimers();
-568: 
-569:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
-570:     {
-571:         if (m_periodicHandlers[i] != nullptr)
-572:             (*m_periodicHandlers[i])();
-573:     }
-574: }
-575: 
-576: /// <summary>
-577: /// Static interrupt handler
-578: ///
-579: /// Calls the instance interrupt handler
-580: /// </summary>
-581: /// <param name="param"></param>
-582: void Timer::InterruptHandler(void* param)
-583: {
-584:     Timer* instance = reinterpret_cast<Timer*>(param);
-585:     assert(instance != nullptr);
-586: 
-587:     instance->InterruptHandler();
-588: }
-589: 
-590: /// <summary>
-591: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
-592: /// </summary>
-593: /// <returns>A reference to the singleton Timer</returns>
-594: Timer& GetTimer()
-595: {
-596:     static Timer timer;
-597:     timer.Initialize();
-598:     return timer;
-599: }
-600: 
-601: } // namespace baremetal
+540: /// <summary>
+541: /// Interrupt handler for the timer
+542: ///
+543: /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
+544: /// </summary>
+545: void Timer::InterruptHandler()
+546: {
+547:     uint64 compareValue;
+548:     GetTimerCompareValue(compareValue);
+549:     SetTimerCompareValue(compareValue + m_clockTicksPerSystemTick);
+550: 
+551:     if (++m_ticks % TICKS_PER_SECOND == 0)
+552:     {
+553:         m_upTime++;
+554:         m_time++;
+555:     }
+556: 
+557:     PollKernelTimers();
+558: 
+559:     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
+560:     {
+561:         if (m_periodicHandlers[i] != nullptr)
+562:             (*m_periodicHandlers[i])();
+563:     }
+564: }
+565: 
+566: /// <summary>
+567: /// Static interrupt handler
+568: ///
+569: /// Calls the instance interrupt handler
+570: /// </summary>
+571: /// <param name="param"></param>
+572: void Timer::InterruptHandler(void* param)
+573: {
+574:     Timer* instance = reinterpret_cast<Timer*>(param);
+575:     assert(instance != nullptr);
+576: 
+577:     instance->InterruptHandler();
+578: }
+579: 
+580: /// <summary>
+581: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
+582: /// </summary>
+583: /// <returns>A reference to the singleton Timer</returns>
+584: Timer& GetTimer()
+585: {
+586:     static Timer timer;
+587:     timer.Initialize();
+588:     return timer;
+589: }
+590: 
+591: } // namespace baremetal
 ```
 
 - Line 47: We include the header file for the `Logger` class
 - Line 54: We place the implementation inside the `baremetal` namespace
 - Line 56-57: We define the log module name
 - Line 59-50: We define a magic number for the kernel timer administration
-- Line 62-109: We declare a struct `KernelTimer` to hold the kernel timer administration
-  - Line 68-79: We declare the magic number, the timer deadline in ticks, the handler function pointer, the handler parameter, and the handler context
-  - Line 81-100: We declare and implement the constructor for `KernelTimer`
-  - Line 101-108: We declare and implement a method `CheckMagic()` to check the magic number
-- Line 129: We update the constructor to initialize the kernel timer list
-- Line 146: We update the special constructor to initialize the kernel timer list
-- Line 161-165: We update the destructor to clean up the timers
-- Line 347-391: We implement the method `StartKernelTimer()` to start a kernel timer
-  - Line 357: We calculate the time the timer should expire
-  - Line 358: We perform a sanity check that the handler is valid
-  - Line 360-361: We create a new kernel timer, and verify it was created
-  - Line 364-379: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
-  - Line 381-388: We then insert the timer in the list at the correct position
-- Line 393-415: We implement the method `CancelKernelTimer()` to cancel a kernel timer
-  - Line 399-400: We convert the handle back to a pointer, and verify it is valid
-  - Line 403-414: We find the element in the list, and remove it
-- Line 417-450: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
-  - Line 422: We get the first element in the list
-  - Line 423-449: We loop through all elements in the list
-     - Line 425-427: We get the timer from the element, and verify it is valid, and has the correct magic number
-     - Line 429-432: We check if the timer has expired, if not we break out of the loop, as all following timers also have not expired yet due to the ordering
-     - Line 436: We remove the timer from the list
-     - Line 438-440: We extract the handler, verify it is valid, and call it
-     - Line 445: We delete the timer
-     - Line 448: We re-initialize the element, as the list may have changed
-- Line 567: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
+- Line 62-103: We declare a struct `KernelTimer` to hold the kernel timer administration
+  - Line 68-77: We declare the magic number, the timer deadline in ticks, the handler function pointer, the handler parameter, and the handler context
+  - Line 79-94: We declare and implement the constructor for `KernelTimer`
+  - Line 95-102: We declare and implement a method `CheckMagic()` to check the magic number
+- Line 123: We update the constructor to initialize the kernel timer list
+- Line 140: We update the special constructor to initialize the kernel timer list
+- Line 155-159: We update the destructor to clean up the timers
+- Line 341-385: We implement the method `StartKernelTimer()` to start a kernel timer
+  - Line 351: We calculate the time the timer should expire
+  - Line 352: We perform a sanity check that the handler is valid
+  - Line 354-355: We create a new kernel timer, and verify it was created
+  - Line 358-373: We first find the correct position in the list to insert the new timer (the list is order by expiration time)
+  - Line 375-382: We then insert the timer in the list at the correct position
+- Line 387-407: We implement the method `CancelKernelTimer()` to cancel a kernel timer
+  - Line 393-394: We convert the handle back to a pointer, and verify it is valid
+  - Line 397-406: We find the element in the list, and remove it
+- Line 409-440: We implement the method `PollKernelTimers()` to check all registered kernel timers for expiration, and handle them
+  - Line 414: We get the first element in the list
+  - Line 415-439: We loop through all elements in the list
+     - Line 417-419: We get the timer from the element, and verify it is valid, and has the correct magic number
+     - Line 421-424: We check if the timer has expired, if not we break out of the loop, as all following timers also have not expired yet due to the ordering
+     - Line 428: We remove the timer from the list
+     - Line 430-432: We extract the handler, verify it is valid, and call it
+     - Line 435: We delete the timer
+     - Line 438: We re-initialize the element, as the list may have changed
+- Line 557: We call `PollKernelTimers()` from the interrupt handler, to update the kernel timers
 
 ### Update application code {#TUTORIAL_20_TIMER_EXTENSION_ADDING_KERNEL_TIMERS___STEP_3_UPDATE_APPLICATION_CODE}
 
@@ -1522,7 +1506,7 @@ File: code/applications/baremetal/src/main.cpp
 38: 
 39:     Timer& timer = GetTimer();
 40:     LOG_INFO("Starting kernel timer 1 to fire in 1 second");
-41:     auto timer1Handle = timer.StartKernelTimer(1 * TICKS_PER_SECOND, KernelTimerHandler1, nullptr, nullptr);
+41:     timer.StartKernelTimer(1 * TICKS_PER_SECOND, KernelTimerHandler1, nullptr, nullptr);
 42: 
 43:     LOG_INFO("Starting kernel timer 3 to fire in 10 seconds");
 44:     auto timer3Handle = timer.StartKernelTimer(10 * TICKS_PER_SECOND, KernelTimerHandler3, nullptr, nullptr);

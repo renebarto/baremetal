@@ -65,10 +65,8 @@ LOG_MODULE("Timer");
 /// <typeparam name="Pointer"></typeparam>
 struct KernelTimer
 {
-#ifndef NDEBUG
     /// @brief Magic number to check if element is valid
     unsigned m_magic;
-#endif
     /// @brief Kernel timer deadline in timer ticks
     unsigned m_elapsesAtTicks;
     /// @brief Pointer to kernel timer handler
@@ -86,12 +84,8 @@ struct KernelTimer
     /// <param name="param">Kernel timer handler parameter</param>
     /// <param name="context">Kernerl timer handler context</param>
     KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler* handler, void* param, void* context)
-        :
-#ifndef NDEBUG
-        m_magic{KERNEL_TIMER_MAGIC}
-        ,
-#endif
-        m_elapsesAtTicks{elapseTimeTicks}
+        : m_magic{KERNEL_TIMER_MAGIC}
+        , m_elapsesAtTicks{elapseTimeTicks}
         , m_handler{handler}
         , m_param{param}
         , m_context{context}
@@ -407,9 +401,7 @@ void Timer::CancelKernelTimer(KernelTimerHandle handle)
 
         m_kernelTimerList.Remove(element);
 
-#ifndef NDEBUG
         timer->m_magic = 0;
-#endif
         delete timer;
     }
 }
@@ -439,9 +431,7 @@ void Timer::PollKernelTimers()
         assert(handler != nullptr);
         (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
 
-#ifndef NDEBUG
         timer->m_magic = 0;
-#endif
         delete timer;
 
         // The list may have changed due to the handler callback, so re-initialize

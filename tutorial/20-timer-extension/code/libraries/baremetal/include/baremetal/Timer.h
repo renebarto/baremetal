@@ -42,11 +42,38 @@
 /// @file
 /// Raspberry Pi Timer
 
+#include "baremetal/DoubleLinkedList.h"
 #include "stdlib/Types.h"
 
 namespace baremetal {
 
+/// @brief Number of milliseconds in a second
+#define MSEC_PER_SEC     1000
+/// @brief Number of microseconds in a second
+#define USEC_PER_SEC     1000000
+/// @brief Number of microseconds in a millisecond
+#define USEC_PER_MSEC    USEC_PER_SEC / MSEC_PER_SEC
+/// @brief Number of timer ticks per second
+#define TICKS_PER_SECOND 100
+/// @brief Convert milliseconds to timer ticks
+#define MSEC2TICKS(msec) (((msec) * TICKS_PER_SECOND) / MSEC_PER_SEC)
+
+class InterruptSystem;
 class IMemoryAccess;
+
+/// @brief Periodic timer tick handler
+using PeriodicTimerHandler = void(void);
+
+/// @brief Maximum number of periodic tick handlers which can be installed
+#define TIMER_MAX_PERIODIC_HANDLERS 4
+
+struct KernelTimer;
+
+/// @brief Handle to a kernel timer
+using KernelTimerHandle = uintptr;
+
+/// @brief Kernel timer handler
+using KernelTimerHandler = void(KernelTimerHandle timerHandle, void* param, void* context);
 
 /// <summary>
 /// Timer class. For now only contains busy waiting methods
@@ -62,17 +89,52 @@ class Timer
     friend Timer& GetTimer();
 
 private:
-    /// <summary>
-    /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
-    /// </summary>
+    /// @brief True if class is already initialized
+    bool m_isInitialized;
+    /// @brief Reference to the singleton InterruptSystem instantiation.
+    InterruptSystem& m_interruptSystem;
+    /// @brief Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
     IMemoryAccess& m_memoryAccess;
+    /// @brief Clock ticks per timer tick
+    uint64 m_clockTicksPerSystemTick;
+    /// @brief Timer tick counter
+    volatile uint64 m_ticks;
+    /// @brief Uptime in seconds
+    volatile uint32 m_upTime;
+    /// @brief Time in seconds (epoch time)
+    volatile uint64 m_time;
+    /// @brief Periodic tick handler functions
+    PeriodicTimerHandler* m_periodicHandlers[TIMER_MAX_PERIODIC_HANDLERS];
+    /// @brief Number of periodic tick handler functions installed
+    volatile unsigned m_numPeriodicHandlers;
+    /// @brief Kernel timer list
+    DoubleLinkedList<KernelTimer*> m_kernelTimerList;
+    /// @brief Number of days is each month (0 = January, etc.)
+    static const unsigned s_daysInMonth[12];
+    /// @brief Name of each month (0 = January, etc.)
+    static const char* s_monthName[12];
 
     Timer();
 
 public:
     Timer(IMemoryAccess& memoryAccess);
+    ~Timer();
+
+    void Initialize();
+
+    uint64 GetTicks() const;
+
+    uint32 GetUptime() const;
+
+    uint64 GetTime() const;
 
     void GetTimeString(char* buffer, size_t bufferSize);
+
+    void RegisterPeriodicHandler(PeriodicTimerHandler* handler);
+    void UnregisterPeriodicHandler(PeriodicTimerHandler* handler);
+
+    KernelTimerHandle StartKernelTimer(uint32 delayTicks, KernelTimerHandler* handler, void* param = nullptr, void* context = nullptr);
+    void CancelKernelTimer(KernelTimerHandle handle);
 
     static void WaitCycles(uint32 numCycles);
 
@@ -80,6 +142,14 @@ public:
 
     static void WaitMilliSeconds(uint64 msec);
     static void WaitMicroSeconds(uint64 usec);
+
+    static bool IsLeapYear(unsigned year);
+    static unsigned GetDaysInMonth(unsigned month, unsigned year);
+
+private:
+    void PollKernelTimers();
+    void InterruptHandler();
+    static void InterruptHandler(void* param);
 };
 
 Timer& GetTimer();

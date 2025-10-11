@@ -38,7 +38,7 @@ int main()
 
     Timer& timer = GetTimer();
     LOG_INFO("Starting kernel timer 1 to fire in 1 second");
-    auto timer1Handle = timer.StartKernelTimer(1 * TICKS_PER_SECOND, KernelTimerHandler1, nullptr, nullptr);
+    timer.StartKernelTimer(1 * TICKS_PER_SECOND, KernelTimerHandler1, nullptr, nullptr);
 
     LOG_INFO("Starting kernel timer 3 to fire in 10 seconds");
     auto timer3Handle = timer.StartKernelTimer(10 * TICKS_PER_SECOND, KernelTimerHandler3, nullptr, nullptr);

@@ -41,6 +41,7 @@
 
 #include "baremetal/ARMInstructions.h"
 #include "baremetal/BCMRegisters.h"
+#include "baremetal/InterruptHandler.h"
 #include "baremetal/Logger.h"
 #include "baremetal/MemoryAccess.h"
 #include "baremetal/MemoryManager.h"
@@ -207,6 +208,7 @@ void sysinit()
 #endif
     GetConsole().AssignDevice(logDevice);
     GetLogger().Initialize();
+    GetInterruptSystem();
 
     LOG_INFO("Starting up");
 

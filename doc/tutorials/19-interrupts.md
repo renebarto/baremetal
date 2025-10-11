@@ -1985,126 +1985,127 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 250: /// <summary>
 251: /// Disable and unregister a FIQ interrupt handler
 252: /// </summary>
-253: void InterruptSystem::UnregisterFIQHandler(FIQ_ID fiqID)
-254: {
-255:     uint32 fiq = static_cast<int>(fiqID);
-256:     assert(s_fiqData.handler != nullptr);
-257:     assert(s_fiqData.fiqID == fiq);
-258:     DisableFIQ(fiqID);
-259: 
-260:     s_fiqData.handler = nullptr;
-261:     s_fiqData.param = nullptr;
-262: }
-263: 
-264: /// <summary>
-265: /// Handles an interrupt.
-266: ///
-267: /// The interrupt handler is called from assembly code (ExceptionStub.S)
-268: /// </summary>
-269: void InterruptSystem::InterruptHandler()
-270: {
-271: #if BAREMETAL_RPI_TARGET == 3
-272:     uint32 localpendingIRQs = m_memoryAccess.Read32(ARM_LOCAL_IRQ_PENDING0);
-273:     if (localpendingIRQs & ARM_LOCAL_INTSRC_TIMER1) // the only implemented local IRQ so far
-274:     {
-275:         CallIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
-276: 
-277:         return;
-278:     }
-279: 
-280:     uint32 pendingIRQs[ARM_IRQS_NUM_REGS];
-281:     pendingIRQs[0] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_1);
-282:     pendingIRQs[1] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_2);
-283:     pendingIRQs[2] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_BASIC_PENDING) & 0xFF; // Only 8 basic interrupts
-284: 
-285:     for (unsigned reg = 0; reg < ARM_IRQS_NUM_REGS; reg++)
-286:     {
-287:         uint32 pendingIRQ = pendingIRQs[reg];
-288:         if (pendingIRQ != 0)
-289:         {
-290:             unsigned irqID = reg * ARM_IRQS_PER_REG;
-291: 
-292:             do
-293:             {
-294:                 if ((pendingIRQ & 1) && CallIRQHandler(static_cast<IRQ_ID>(irqID)))
-295:                 {
-296:                     return;
-297:                 }
-298: 
-299:                 pendingIRQ >>= 1;
-300:                 irqID++;
-301:             } while (pendingIRQ != 0);
-302:         }
-303:     }
-304: 
-305: #else
-306: 
-307:     uint32 iarValue = m_memoryAccess.Read32(RPI_GICC_IAR); // Read Interrupt Acknowledge Register
-308: 
-309:     uint32 irq = iarValue & RPI_GICC_IAR_INTERRUPT_ID_MASK; // Select the currently active interrupt
-310:     if (irq < IRQ_LINES)
-311:     {
-312:         if (irq >= GIC_PPI(0))
-313:         {
-314:             // Peripheral interrupts (PPI and SPI)
-315:             CallIRQHandler(static_cast<IRQ_ID>(irq));
-316:         }
-317:         else
-318:         {
-319:             // Handle SGI interrupt
-320:         }
-321:         m_memoryAccess.Write32(RPI_GICC_EOIR, iarValue); // Flag end of interrupt
-322:     }
-323: #ifndef NDEBUG
-324:     else
-325:     {
-326:         // spurious interrupts
-327:         assert(irq >= 1020);
-328:         LOG_INFO("Received spurious interrupt %d", iarValue);
-329:     }
-330: #endif
-331: 
-332: #endif
-333: }
-334: 
-335: /// <summary>
-336: /// Call the IRQ handler for the specified IRQ ID
-337: /// </summary>
-338: /// <param name="irqID">ID of the IRQ</param>
-339: /// <returns>True if a IRQ handler was found, false if not</returns>
-340: bool InterruptSystem::CallIRQHandler(IRQ_ID irqID)
-341: {
-342:     uint32 irq = static_cast<int>(irqID);
-343:     assert(irq < IRQ_LINES);
-344:     IRQHandler* handler = m_irqHandlers[irq];
-345: 
-346:     if (handler != nullptr)
-347:     {
-348:         (*handler)(m_irqHandlersParam[irq]);
-349: 
-350:         return true;
-351:     }
-352: #ifndef NDEBUG
-353:     LOG_INFO("Unhandled interrupt %d", irq);
-354: #endif
-355: 
-356:     DisableIRQ(irqID);
-357: 
-358:     return false;
-359: }
-360: 
-361: /// <summary>
-362: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
-363: ///
-364: /// This is a friend function of class InterruptSystem
-365: /// </summary>
-366: /// <returns>Reference to the singleton interrupt system instance</returns>
-367: InterruptSystem& baremetal::GetInterruptSystem()
-368: {
-369:     static InterruptSystem singleton;
-370:     singleton.Initialize();
-371:     return singleton;
-372: }
+253: /// <param name="fiqID">FIQ interrupt number, to check against set FIQ</param>
+254: void InterruptSystem::UnregisterFIQHandler(FIQ_ID fiqID)
+255: {
+256:     uint32 fiq = static_cast<int>(fiqID);
+257:     assert(s_fiqData.handler != nullptr);
+258:     assert(s_fiqData.fiqID == fiq);
+259:     DisableFIQ(fiqID);
+260: 
+261:     s_fiqData.handler = nullptr;
+262:     s_fiqData.param = nullptr;
+263: }
+264: 
+265: /// <summary>
+266: /// Handles an interrupt.
+267: ///
+268: /// The interrupt handler is called from assembly code (ExceptionStub.S)
+269: /// </summary>
+270: void InterruptSystem::InterruptHandler()
+271: {
+272: #if BAREMETAL_RPI_TARGET == 3
+273:     uint32 localpendingIRQs = m_memoryAccess.Read32(ARM_LOCAL_IRQ_PENDING0);
+274:     if (localpendingIRQs & ARM_LOCAL_INTSRC_TIMER1) // the only implemented local IRQ so far
+275:     {
+276:         CallIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+277: 
+278:         return;
+279:     }
+280: 
+281:     uint32 pendingIRQs[ARM_IRQS_NUM_REGS];
+282:     pendingIRQs[0] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_1);
+283:     pendingIRQs[1] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_2);
+284:     pendingIRQs[2] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_BASIC_PENDING) & 0xFF; // Only 8 basic interrupts
+285: 
+286:     for (unsigned reg = 0; reg < ARM_IRQS_NUM_REGS; reg++)
+287:     {
+288:         uint32 pendingIRQ = pendingIRQs[reg];
+289:         if (pendingIRQ != 0)
+290:         {
+291:             unsigned irqID = reg * ARM_IRQS_PER_REG;
+292: 
+293:             do
+294:             {
+295:                 if ((pendingIRQ & 1) && CallIRQHandler(static_cast<IRQ_ID>(irqID)))
+296:                 {
+297:                     return;
+298:                 }
+299: 
+300:                 pendingIRQ >>= 1;
+301:                 irqID++;
+302:             } while (pendingIRQ != 0);
+303:         }
+304:     }
+305: 
+306: #else
+307: 
+308:     uint32 iarValue = m_memoryAccess.Read32(RPI_GICC_IAR); // Read Interrupt Acknowledge Register
+309: 
+310:     uint32 irq = iarValue & RPI_GICC_IAR_INTERRUPT_ID_MASK; // Select the currently active interrupt
+311:     if (irq < IRQ_LINES)
+312:     {
+313:         if (irq >= GIC_PPI(0))
+314:         {
+315:             // Peripheral interrupts (PPI and SPI)
+316:             CallIRQHandler(static_cast<IRQ_ID>(irq));
+317:         }
+318:         else
+319:         {
+320:             // Handle SGI interrupt
+321:         }
+322:         m_memoryAccess.Write32(RPI_GICC_EOIR, iarValue); // Flag end of interrupt
+323:     }
+324: #ifndef NDEBUG
+325:     else
+326:     {
+327:         // spurious interrupts
+328:         assert(irq >= 1020);
+329:         LOG_INFO("Received spurious interrupt %d", iarValue);
+330:     }
+331: #endif
+332: 
+333: #endif
+334: }
+335: 
+336: /// <summary>
+337: /// Call the IRQ handler for the specified IRQ ID
+338: /// </summary>
+339: /// <param name="irqID">ID of the IRQ</param>
+340: /// <returns>True if a IRQ handler was found, false if not</returns>
+341: bool InterruptSystem::CallIRQHandler(IRQ_ID irqID)
+342: {
+343:     uint32 irq = static_cast<int>(irqID);
+344:     assert(irq < IRQ_LINES);
+345:     IRQHandler* handler = m_irqHandlers[irq];
+346: 
+347:     if (handler != nullptr)
+348:     {
+349:         (*handler)(m_irqHandlersParam[irq]);
+350: 
+351:         return true;
+352:     }
+353: #ifndef NDEBUG
+354:     LOG_INFO("Unhandled interrupt %d", irq);
+355: #endif
+356: 
+357:     DisableIRQ(irqID);
+358: 
+359:     return false;
+360: }
+361: 
+362: /// <summary>
+363: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
+364: ///
+365: /// This is a friend function of class InterruptSystem
+366: /// </summary>
+367: /// <returns>Reference to the singleton interrupt system instance</returns>
+368: InterruptSystem& baremetal::GetInterruptSystem()
+369: {
+370:     static InterruptSystem singleton;
+371:     singleton.Initialize();
+372:     return singleton;
+373: }
 ```
 
 - Line 42: We need to include the header for ARM instructions as we need to enable / disable interrupts
@@ -2134,23 +2135,23 @@ Notice that some initialization is moved to `DisableInterrupts()`, and we use `E
 - Line 191-209: We update the `RegisterIRQHandler()` method to register the IRQ handler, and enable its IRQ line
 - Line 211-227: We update the `UnregisterIRQHandler()` method to remove the registered IRQ handler, and disable its IRQ line
 - Line 229-248: We implement the `RegisterFIQHandler()` method to register the FIQ handler, and enable it
-- Line 250-262: We implement the `UnregisterIRQHandler()` method to remove the registered FIQ handler, and disable it
-- Line 264-333: We update the `InterruptHandler()` method
-  - Line 272-303: For Raspberry Pi 3
-    - Line 272-278: We check whether the ARM local timer fired, and call its interrupt handler if so
-    - Line 280-283: We read all interrupt pending bits for the IRQ1, IRQ2 and Basic IRQ groups
-    - Line 285-303: We scan through all pending bits, if one is set, we call its interrupt handler and return.
+- Line 250-263: We implement the `UnregisterIRQHandler()` method to remove the registered FIQ handler, and disable it
+- Line 265-334: We update the `InterruptHandler()` method
+  - Line 273-304: For Raspberry Pi 3
+    - Line 273-279: We check whether the ARM local timer fired, and call its interrupt handler if so
+    - Line 281-284: We read all interrupt pending bits for the IRQ1, IRQ2 and Basic IRQ groups
+    - Line 286-304: We scan through all pending bits, if one is set, we call its interrupt handler and return.
 So at most one interrupt handler is called
-  - Line 307-330: For Raspberry Pi 4 / 5
-    - Line 307: We read the IAR register to find which interrupt we need to handle
-    - Line 310-323: If the interrupt id is within limits, we call its interrupt handler, and acknowledge the interrupt
-    - Line 325-329: If not, and debug mode is on, we check that this is a spurious interrupt, and print a message with the interrupt id
-- Line 335-359: We implement the `CallIRQHandler()` method
-  - Line 342-343: We perform a sanity check that the interrupt is within limits
-  - Line 344: We retrieve the interrupt handler pointer
-  - Line 346-351: If the interrupt handler is installed, we call it and return true
-  - Line 353: If no handler is installed and debug mode is on, we print a message
-  - Line 356-358: As at this point the interrupt is not handled, we disable the interrupt for the future and return false
+  - Line 308-331: For Raspberry Pi 4 / 5
+    - Line 308: We read the IAR register to find which interrupt we need to handle
+    - Line 311-324: If the interrupt id is within limits, we call its interrupt handler, and acknowledge the interrupt
+    - Line 326-330: If not, and debug mode is on, we check that this is a spurious interrupt, and print a message with the interrupt id
+- Line 336-360: We implement the `CallIRQHandler()` method
+  - Line 343-344: We perform a sanity check that the interrupt is within limits
+  - Line 345: We retrieve the interrupt handler pointer
+  - Line 347-352: If the interrupt handler is installed, we call it and return true
+  - Line 354: If no handler is installed and debug mode is on, we print a message
+  - Line 357-359: As at this point the interrupt is not handled, we disable the interrupt for the future and return false
 
 ### Interrupt.h {#TUTORIAL_19_INTERRUPTS_INTERRUPT_SYSTEM___STEP_2_INTERRUPTH}
 

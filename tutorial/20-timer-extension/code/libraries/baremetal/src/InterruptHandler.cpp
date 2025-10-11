@@ -250,7 +250,6 @@ void InterruptSystem::RegisterFIQHandler(FIQ_ID fiqID, FIQHandler* handler, void
 /// <summary>
 /// Disable and unregister a FIQ interrupt handler
 /// </summary>
-/// <param name="fiqID">FIQ interrupt number, to check against set FIQ</param>
 void InterruptSystem::UnregisterFIQHandler(FIQ_ID fiqID)
 {
     uint32 fiq = static_cast<int>(fiqID);

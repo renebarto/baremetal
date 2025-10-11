@@ -42,14 +42,77 @@
 #include "baremetal/ARMInstructions.h"
 #include "baremetal/Assert.h"
 #include "baremetal/BCMRegisters.h"
+#include "baremetal/Format.h"
 #include "baremetal/InterruptHandler.h"
+#include "baremetal/Logger.h"
 #include "baremetal/MemoryAccess.h"
 #include "stdlib/Util.h"
 
 /// @file
 /// Raspberry Pi Timer implementation
 
-using namespace baremetal;
+namespace baremetal {
+
+/// @brief Define log name
+LOG_MODULE("Timer");
+
+/// @brief Magic number for kernel timer (KTMC)
+#define KERNEL_TIMER_MAGIC 0x4B544D43
+
+/// <summary>
+/// Kernel timer administration
+/// </summary>
+/// <typeparam name="Pointer"></typeparam>
+struct KernelTimer
+{
+#ifndef NDEBUG
+    /// @brief Magic number to check if element is valid
+    unsigned m_magic;
+#endif
+    /// @brief Kernel timer deadline in timer ticks
+    unsigned m_elapsesAtTicks;
+    /// @brief Pointer to kernel timer handler
+    KernelTimerHandler* m_handler;
+    /// @brief Kernel timer handler parameter
+    void* m_param;
+    /// @brief Kernel timer handler context
+    void* m_context;
+
+    /// <summary>
+    /// Construct a kernel timer administration element
+    /// </summary>
+    /// <param name="elapseTimeTicks">Timer deadline in timer ticks</param>
+    /// <param name="handler">Kernel timer handler pointer</param>
+    /// <param name="param">Kernel timer handler parameter</param>
+    /// <param name="context">Kernerl timer handler context</param>
+    KernelTimer(unsigned elapseTimeTicks, KernelTimerHandler* handler, void* param, void* context)
+        :
+#ifndef NDEBUG
+        m_magic{KERNEL_TIMER_MAGIC}
+        ,
+#endif
+        m_elapsesAtTicks{elapseTimeTicks}
+        , m_handler{handler}
+        , m_param{param}
+        , m_context{context}
+
+    {
+    }
+    /// <summary>
+    /// Verify magic number
+    /// </summary>
+    /// <returns>True if the magic number is correct, false otherwise</returns>
+    bool CheckMagic() const
+    {
+        return m_magic == KERNEL_TIMER_MAGIC;
+    }
+};
+/// @brief Kernel timer element, element which is stored in the kernel time list
+using KernelTimerElement = DoubleLinkedList<KernelTimer*>::Element;
+
+const unsigned Timer::s_daysInMonth[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+const char* Timer::s_monthName[12]{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 /// <summary>
 /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
@@ -63,6 +126,7 @@ Timer::Timer()
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
+    , m_kernelTimerList{}
 {
 }
 
@@ -79,6 +143,7 @@ Timer::Timer(IMemoryAccess& memoryAccess)
     , m_time{}
     , m_periodicHandlers{}
     , m_numPeriodicHandlers{}
+    , m_kernelTimerList{}
 {
 }
 
@@ -92,6 +157,12 @@ Timer::~Timer()
     SetTimerControl(~CNTP_CTL_EL0_ENABLE);
 
     m_interruptSystem.UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
+
+    KernelTimerElement* element;
+    while ((element = m_kernelTimerList.GetFirst()) != 0)
+    {
+        CancelKernelTimer(reinterpret_cast<KernelTimerHandle>(m_kernelTimerList.GetPointer(element)));
+    }
 }
 
 /// <summary>
@@ -151,17 +222,76 @@ uint64 Timer::GetTime() const
 /// <summary>
 /// Writes a representation of the current time to a buffer, or of the uptime if the current time is not valid.
 ///
-/// For now returns an empty string
+/// The current time will be in the format "MMM dd HH:MM:SS.mmm", according to our time zone, if the time is valid.
+/// If the time is not known yet, it we be the uptime in the format "ddd.HH:MM:SS.mmm".
+/// If not yet initialized, an empty string is returned
 /// </summary>
 /// <param name="buffer">Buffer to write the time string to</param>
 /// <param name="bufferSize">Size of the buffer</param>
 void Timer::GetTimeString(char* buffer, size_t bufferSize)
 {
-    if ((buffer == nullptr) || (bufferSize == 0))
+    uint64 time = m_time;
+    uint64 ticks = m_ticks;
+
+    if (bufferSize == 0)
     {
         return;
     }
-    *buffer = '\0';
+    if (!m_isInitialized)
+    {
+        *buffer = '\0';
+        return;
+    }
+
+    unsigned second = time % 60;
+    time /= 60; // Time is now in minute
+    unsigned minute = time % 60;
+    time /= 60; // Time is now in hour
+    unsigned hour = time % 24;
+    time /= 24; // Time is now in days
+    unsigned daysTotal = time;
+
+    unsigned year = 1970; // Epoch start
+    while (true)
+    {
+        unsigned daysInYear = IsLeapYear(year) ? 366 : 365;
+        if (time < daysInYear)
+        {
+            break;
+        }
+
+        time -= daysInYear;
+        year++;
+    }
+
+    unsigned month = 0;
+    while (1)
+    {
+        unsigned daysInMonth = GetDaysInMonth(month, year);
+        if (time < daysInMonth)
+        {
+            break;
+        }
+
+        time -= daysInMonth;
+        month++;
+    }
+
+    unsigned monthDay = time + 1;
+
+#if (TICKS_PER_SECOND != MSEC_PER_SEC)
+    ticks = ticks * MSEC_PER_SEC / TICKS_PER_SECOND;
+#endif
+    auto milliSeconds = ticks % MSEC_PER_SEC;
+
+    if (year > 1975) // Just a sanity check to see if we have an actual time
+    {
+        FormatNoAlloc(buffer, bufferSize, "%s %2u, %04u %02u:%02u:%02u.%03u", s_monthName[month], monthDay, year, hour, minute, second, milliSeconds);
+    }
+    else
+    {
+        FormatNoAlloc(buffer, bufferSize, "%u.%02u:%02u:%02u.%03u", daysTotal, hour, minute, second, milliSeconds);
+    }
 }
 
 /// <summary>
@@ -212,6 +342,111 @@ void Timer::UnregisterPeriodicHandler(const PeriodicTimerHandler* handler)
     DataSyncBarrier();
 
     m_numPeriodicHandlers--;
+}
+
+/// <summary>
+/// Starts a kernel timer. After delayTicks timer ticks, it elapses and call the kernel timer handler.
+/// </summary>
+/// <param name="delayTicks">Delay time for timer in timer ticks</param>
+/// <param name="handler">Kernel timer handler to call when time elapses</param>
+/// <param name="param">Parameter to pass to kernel timer handler</param>
+/// <param name="context">Kernel timer handler context</param>
+/// <returns>Handle to kernel timer</returns>
+KernelTimerHandle Timer::StartKernelTimer(unsigned delayTicks, KernelTimerHandler* handler, void* param, void* context)
+{
+    unsigned elapseTimeTicks = m_ticks + delayTicks;
+    assert(handler != nullptr);
+
+    KernelTimer* timer = new KernelTimer(elapseTimeTicks, handler, param, context);
+    assert(timer != nullptr);
+    LOG_DEBUG("Create new timer to expire at %d ticks, handle %p", elapseTimeTicks, timer);
+
+    KernelTimerElement* prevElement{};
+    KernelTimerElement* element = m_kernelTimerList.GetFirst();
+    while (element != nullptr)
+    {
+        const KernelTimer* timer2 = m_kernelTimerList.GetPointer(element);
+        assert(timer2 != nullptr);
+        assert(timer2->m_magic == KERNEL_TIMER_MAGIC);
+
+        if (static_cast<int>(timer2->m_elapsesAtTicks - elapseTimeTicks) > 0)
+        {
+            break;
+        }
+
+        prevElement = element;
+        element = m_kernelTimerList.GetNext(element);
+    }
+
+    if (element != nullptr)
+    {
+        m_kernelTimerList.InsertBefore(element, timer);
+    }
+    else
+    {
+        m_kernelTimerList.InsertAfter(prevElement, timer);
+    }
+
+    return reinterpret_cast<KernelTimerHandle>(timer);
+}
+
+/// <summary>
+/// Cancels and removes a kernel timer.
+/// </summary>
+/// <param name="handle">Handle to kernel timer to cancel</param>
+void Timer::CancelKernelTimer(KernelTimerHandle handle)
+{
+    KernelTimer* timer = reinterpret_cast<KernelTimer*>(handle);
+    assert(timer != 0);
+    LOG_DEBUG("Cancel timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+
+    KernelTimerElement* element = m_kernelTimerList.Find(timer);
+    if (element != nullptr)
+    {
+        assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+
+        m_kernelTimerList.Remove(element);
+
+#ifndef NDEBUG
+        timer->m_magic = 0;
+#endif
+        delete timer;
+    }
+}
+
+/// <summary>
+/// Update all registered kernel timers, and handle expiration of timers
+/// </summary>
+void Timer::PollKernelTimers()
+{
+    auto element = m_kernelTimerList.GetFirst();
+    while (element != nullptr)
+    {
+        KernelTimer* timer = m_kernelTimerList.GetPointer(element);
+        assert(timer != nullptr);
+        assert(timer->m_magic == KERNEL_TIMER_MAGIC);
+
+        if (static_cast<int>(timer->m_elapsesAtTicks - m_ticks) > 0)
+        {
+            break;
+        }
+
+        LOG_DEBUG("Expire timer, expire time %d ticks, handle %p", timer->m_elapsesAtTicks, timer);
+
+        m_kernelTimerList.Remove(element);
+
+        KernelTimerHandler* handler = timer->m_handler;
+        assert(handler != nullptr);
+        (*handler)(reinterpret_cast<KernelTimerHandle>(timer), timer->m_param, timer->m_context);
+
+#ifndef NDEBUG
+        timer->m_magic = 0;
+#endif
+        delete timer;
+
+        // The list may have changed due to the handler callback, so re-initialize
+        element = m_kernelTimerList.GetFirst();
+    }
 }
 
 /// <summary>
@@ -282,6 +517,37 @@ uint64 Timer::GetSystemTimer()
 }
 
 /// <summary>
+/// Determine if the specified year is a leap year
+/// </summary>
+/// <param name="year">Year</param>
+/// <returns>Returns true if year is a leap year, false otherwise</returns>
+bool Timer::IsLeapYear(unsigned year)
+{
+    if (year % 100 == 0)
+    {
+        return year % 400 == 0;
+    }
+
+    return year % 4 == 0;
+}
+
+/// <summary>
+/// Calculates the number days in the specified month of the specified year
+/// </summary>
+/// <param name="month">Month, 0=January, 1=February, etc.</param>
+/// <param name="year">Year</param>
+/// <returns></returns>
+unsigned Timer::GetDaysInMonth(unsigned month, unsigned year)
+{
+    if (month == 1 && IsLeapYear(year))
+    {
+        return 29;
+    }
+
+    return s_daysInMonth[month];
+}
+
+/// <summary>
 /// Interrupt handler for the timer
 ///
 /// Sets the next timer deadline, increments the timer tick count, as well as the time if needed, and calls the periodic handlers.
@@ -297,6 +563,8 @@ void Timer::InterruptHandler()
         m_upTime++;
         m_time++;
     }
+
+    PollKernelTimers();
 
     for (unsigned i = 0; i < m_numPeriodicHandlers; i++)
     {
@@ -323,9 +591,11 @@ void Timer::InterruptHandler(void* param)
 /// Retrieves the singleton Timer instance. It is created in the first call to this function.
 /// </summary>
 /// <returns>A reference to the singleton Timer</returns>
-Timer& baremetal::GetTimer()
+Timer& GetTimer()
 {
     static Timer timer;
     timer.Initialize();
     return timer;
 }
+
+} // namespace baremetal

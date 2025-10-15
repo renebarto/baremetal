@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : CharDevice.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : CharDevice
 //
-// Description : Memory read/write
+// Description : Abstract character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,40 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Abstract character device
+
+#include "baremetal/Device.h"
 
 namespace baremetal {
 
 /// <summary>
-/// Memory access interface
+/// Abstract character device
+///
+/// Abstraction of a CharDevice that can read and write characters
 /// </summary>
-class MemoryAccess : public IMemoryAccess
+class CharDevice : public Device
 {
 public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    virtual ~CharDevice() = default;
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
+    bool IsBlockDevice() override
+    {
+        return false;
+    }
+    ssize_t Read(void* buffer, size_t count) override;
+    ssize_t Write(const void* buffer, size_t count) override;
 
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
+    /// <summary>
+    /// Read a character
+    /// </summary>
+    /// <returns>Character read</returns>
+    virtual char Read() = 0;
+    /// <summary>
+    /// Write a character
+    /// </summary>
+    /// <param name="ch">Character to be written</param>
+    virtual void Write(char ch) = 0;
 };
-
-MemoryAccess& GetMemoryAccess();
 
 } // namespace baremetal

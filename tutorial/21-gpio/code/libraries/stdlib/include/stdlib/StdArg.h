@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : StdArg.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Variable arguments handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,20 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Standard variable argument list handling using builtin functionality in GCC
 
-namespace baremetal {
+// prevent warning, if <stdarg.h> from toolchain is included too
+#ifndef _STDARG_H
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
-{
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+/// @brief declare standard va_list type
+typedef __builtin_va_list va_list;
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
+/// @brief define standard va_start macro
+#define va_start(arg, last) __builtin_va_start(arg, last)
+/// @brief define standard va_end macro
+#define va_end(arg)         __builtin_va_end(arg)
+/// @brief define standard va_arg macro
+#define va_arg(arg, type)   __builtin_va_arg(arg, type)
 
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+#endif

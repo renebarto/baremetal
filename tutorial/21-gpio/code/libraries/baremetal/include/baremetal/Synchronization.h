@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Synchronization.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Synchronization functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,10 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Synchronization functionality
 
-namespace baremetal {
-
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
-{
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
-
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+/// @brief Minimum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MIN 64
+/// @brief Maximum cache line length (16 x 32 bit word) as specified in CTR_EL0 register, see @ref ARM_REGISTERS
+#define DATA_CACHE_LINE_LENGTH_MAX 64

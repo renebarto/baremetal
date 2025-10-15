@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : System.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : System
 //
-// Description : Memory read/write
+// Description : Generic character read / write device interface
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,74 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Memory access class
+/// System startup / shutdown functionality
 
 namespace baremetal {
 
+class IMemoryAccess;
+
 /// <summary>
-/// Memory access interface
+/// Determine current exception level. See also \ref ARM_REGISTERS_REGISTER_OVERVIEW_CURRENTEL_REGISTER
 /// </summary>
-class MemoryAccess : public IMemoryAccess
+/// <returns>Current exception level (0..3)</returns>
+extern uint8 CurrentEL();
+
+/// <summary>
+/// System startup / shutdown handling class
+/// </summary>
+class System
 {
+    /// <summary>
+    /// Construct the singleton System instance if needed, and return a reference to the instance. This is a friend function of class System
+    /// </summary>
+    /// <returns>Reference to the singleton system instance</returns>
+    friend System& GetSystem();
+
+private:
+    /// @brief Memory access interface reference for accessing registers.
+    IMemoryAccess& m_memoryAccess;
+
+    System();
+
 public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    System(IMemoryAccess& memoryAccess);
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
+    [[noreturn]] void Halt();
+    [[noreturn]] void Reboot();
 };
 
-MemoryAccess& GetMemoryAccess();
+System& GetSystem();
 
 } // namespace baremetal
+
+/// <summary>
+/// Return code for main() function
+/// </summary>
+enum class ReturnCode
+{
+    /// @brief If main() returns this, the system will be halted
+    ExitHalt,
+    /// @brief If main() returns this, the system will be rebooted
+    ExitReboot,
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/// <summary>
+/// Forward declared main() function
+/// </summary>
+/// <returns>Integer cast of ReturnCode</returns>
+extern int main();
+/// <summary>
+/// System initialization function. This is the entry point of the C / C++ code for the system for Core 0
+/// </summary>
+[[noreturn]] void sysinit();
+
+#ifdef __cplusplus
+}
+#endif

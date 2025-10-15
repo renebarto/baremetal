@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Mailbox.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : Mailbox
 //
-// Description : Memory read/write
+// Description : Arm <-> VC mailbox handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,38 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
+#include "baremetal/IMailbox.h"
+#include "baremetal/MemoryAccess.h"
 
 /// @file
-/// Memory access class
+/// Raspberry Pi Mailbox
 
 namespace baremetal {
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
+/// @brief Mailbox: Handles access to system parameters, stored in the VC
+///
+/// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
+class Mailbox : public IMailbox
 {
+private:
+    /// <summary>
+    /// Channel to be used for mailbox
+    /// </summary>
+    MailboxChannel m_channel;
+    /// <summary>
+    /// Memory access interface
+    /// </summary>
+    IMemoryAccess& m_memoryAccess;
+
 public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
+    uintptr WriteRead(uintptr address) override;
 
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
+private:
+    void Flush();
+    uintptr Read();
+    void Write(uintptr data);
 };
-
-MemoryAccess& GetMemoryAccess();
 
 } // namespace baremetal

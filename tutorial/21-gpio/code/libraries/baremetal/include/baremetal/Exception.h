@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Exception.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Exception definitions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,12 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Exception types
 
-namespace baremetal {
-
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
-{
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
-
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+/// @brief Unexpected exception
+#define EXCEPTION_UNEXPECTED   0
+/// @brief Synchronous exception
+#define EXCEPTION_SYNCHRONOUS  1
+/// @brief System error
+#define EXCEPTION_SYSTEM_ERROR 2

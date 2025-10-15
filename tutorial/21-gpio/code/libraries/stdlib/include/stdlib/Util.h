@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2024 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Util.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Utility functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,56 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Memory access class
+/// Standard C library utility functions
 
-namespace baremetal {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void* memset(void* buffer, int value, size_t length);
+void* memcpy(void* dest, const void* src, size_t length);
+int memcmp(const void* buffer1, const void* buffer2, size_t length);
+
+int toupper(int c);
+int tolower(int c);
+size_t strlen(const char* str);
+int strcmp(const char* str1, const char* str2);
+int strcasecmp(const char* str1, const char* str2);
+int strncmp(const char* str1, const char* str2, size_t maxLen);
+int strncasecmp(const char* str1, const char* str2, size_t maxLen);
+char* strncpy(char* dest, const char* src, size_t maxLen);
+char* strncat(char* dest, const char* src, size_t maxLen);
+
+#ifdef __cplusplus
+}
+#endif
 
 /// <summary>
-/// Memory access interface
+/// Determine the number of bits needed to represent the specified value
 /// </summary>
-class MemoryAccess : public IMemoryAccess
+/// <param name="value">Value to check</param>
+/// <returns>Number of bits used for value</returns>
+inline constexpr unsigned NextPowerOf2Bits(size_t value)
 {
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    unsigned bitCount{0};
+    size_t temp = value;
+    while (temp >= 1)
+    {
+        ++bitCount;
+        temp >>= 1;
+    }
+    return bitCount;
+}
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+/// <summary>
+/// Determine the next power of 2 greater than or equal to the specified value
+/// </summary>
+/// <param name="value">Value to check</param>
+/// <returns>Power of two greater or equal to value</returns>
+inline constexpr size_t NextPowerOf2(size_t value)
+{
+    return 1 << NextPowerOf2Bits((value != 0) ? value - 1 : 0);
+}

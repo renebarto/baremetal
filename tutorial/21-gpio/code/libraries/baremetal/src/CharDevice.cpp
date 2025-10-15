@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : CharDevice.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : CharDevice
 //
-// Description : Memory read/write
+// Description : Abstract character read / write device
 //
 //------------------------------------------------------------------------------
 //
@@ -37,31 +37,46 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/CharDevice.h"
 
-#include "baremetal/IMemoryAccess.h"
+using namespace baremetal;
 
 /// @file
-/// Memory access class
-
-namespace baremetal {
+/// Abstract character device
 
 /// <summary>
-/// Memory access interface
+/// Read a specified number of bytes from the device into a buffer
 /// </summary>
-class MemoryAccess : public IMemoryAccess
+/// <param name="buffer">Buffer, where read data will be placed</param>
+/// <param name="count">Maximum number of bytes to be read</param>
+/// <returns>Number of read bytes or < 0 on failure</returns>
+ssize_t CharDevice::Read(void* buffer, size_t count)
 {
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    if (buffer == nullptr)
+        return static_cast<ssize_t>(-1);
+    char* bufferPtr = reinterpret_cast<char*>(buffer);
+    for (size_t i = 0; i < count; ++i)
+        *bufferPtr++ = Read();
+    return count;
+}
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+/// <summary>
+/// Write a specified number of bytes to the device
+/// </summary>
+/// <param name="buffer">Buffer, from which data will be fetched for write</param>
+/// <param name="count">Number of bytes to be written</param>
+/// <returns>Number of written bytes or < 0 on failure</returns>
+ssize_t CharDevice::Write(const void* buffer, size_t count)
+{
+    if (buffer == nullptr)
+        return static_cast<ssize_t>(-1);
+    const char* bufferPtr = reinterpret_cast<const char*>(buffer);
+    for (size_t i = 0; i < count; ++i)
+    {
+        // convert newline to carriage return + newline
+        if (*bufferPtr == '\n')
+            Write('\r');
+        Write(*bufferPtr++);
+    }
+    return count;
+}

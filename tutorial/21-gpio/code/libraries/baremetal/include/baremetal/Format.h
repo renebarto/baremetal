@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Format.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : String formatting using standard argument handling
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,19 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Formatting functionality
+
+#include "stdlib/StdArg.h"
+#include "stdlib/Types.h"
 
 namespace baremetal {
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
-{
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+class String;
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
+String FormatV(const char* format, va_list args);
+String Format(const char* format, ...);
+void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list args);
+void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...);
 
 } // namespace baremetal

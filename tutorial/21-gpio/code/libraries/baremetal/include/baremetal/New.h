@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : New.h
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Generic memory allocation functions
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,20 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
-
 /// @file
-/// Memory access class
+/// Basic memory allocation functions
 
-namespace baremetal {
+#include "baremetal/MemoryManager.h"
+#include "stdlib/Types.h"
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
-{
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+void* operator new(size_t size, HeapType type);
+void* operator new[](size_t size, HeapType type);
+void* operator new(size_t size, void* address);
+void* operator new[](size_t size, void* address);
+void* operator new(size_t size);
+void* operator new[](size_t size);
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+void operator delete(void* block) noexcept;
+void operator delete[](void* address) noexcept;
+void operator delete(void* block, size_t size) noexcept;
+void operator delete[](void* address, size_t size) noexcept;

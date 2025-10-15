@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : Version.cpp
 //
-// Namespace   : baremetal
+// Namespace   : -
 //
-// Class       : MemoryAccess
+// Class       : -
 //
-// Description : Memory read/write
+// Description : Baremetal version information
 //
 //------------------------------------------------------------------------------
 //
@@ -37,31 +37,41 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "baremetal/Version.h"
 
-#include "baremetal/IMemoryAccess.h"
+#include "baremetal/Format.h"
+#include "stdlib/Util.h"
 
 /// @file
-/// Memory access class
+/// Build version implementation
 
-namespace baremetal {
+/// @brief Buffer size of version string buffer
+static const size_t BufferSize = 20;
+/// @brief Version string buffer
+static char s_baremetalVersionString[BufferSize]{};
+/// @brief Flag to check if version set up was already done
+static bool s_baremetalVersionSetupDone = false;
 
 /// <summary>
-/// Memory access interface
+/// Set up version string
+///
+/// The version string is written into a buffer without allocating memory.
+/// This is important, as we may be logging before memory management is set up.
 /// </summary>
-class MemoryAccess : public IMemoryAccess
+void baremetal::SetupVersion()
 {
-public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    if (!s_baremetalVersionSetupDone)
+    {
+        FormatNoAlloc(s_baremetalVersionString, BufferSize, "%d.%d.%d", BAREMETAL_MAJOR_VERSION, BAREMETAL_MINOR_VERSION, BAREMETAL_LEVEL_VERSION);
+        s_baremetalVersionSetupDone = true;
+    }
+}
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
-
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
-};
-
-MemoryAccess& GetMemoryAccess();
-
-} // namespace baremetal
+/// <summary>
+/// Return version string
+/// </summary>
+/// <returns>Version string</returns>
+const char* baremetal::GetVersion()
+{
+    return s_baremetalVersionString;
+}

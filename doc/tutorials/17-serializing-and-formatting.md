@@ -80,7 +80,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 150: #define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
 151: 
 152: /// @brief Log a message with specified severity and message string
-153: #define TRACE(severity, message) GetLogger().Trace(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+153: #define TRACE(severity, message) GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, severity, message);
 154: 
 155: /// @brief Log a warning message
 156: #define TRACE_NO_ALLOC_WARNING(...)       GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
@@ -224,10 +224,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 213: /// <param name="message">Formatted message string, with variable arguments</param>
 214: void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
 215: {
-216:     va_list var;
-217:     va_start(var, message);
-218:     LogNoAllocV(source, line, severity, message, var);
-219:     va_end(var);
+216:     va_list args;
+217:     va_start(args, message);
+218:     LogNoAllocV(source, line, severity, message, args);
+219:     va_end(args);
 220: }
 221: 
 222: /// <summary>
@@ -402,10 +402,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 406: /// <param name="message">Formatted message string, with variable arguments</param>
 407: void Logger::TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 408: {
-409:     va_list var;
-410:     va_start(var, message);
-411:     TraceNoAllocV(filename, line, function, severity, message, var);
-412:     va_end(var);
+409:     va_list args;
+410:     va_start(args, message);
+411:     TraceNoAllocV(filename, line, function, severity, message, args);
+412:     va_end(args);
 413: }
 414: 
 415: /// <summary>
@@ -1027,12 +1027,12 @@ File: code/libraries/baremetal/src/Format.cpp
 580: /// <returns>Resulting string</returns>
 581: String Format(const char* format, ...)
 582: {
-583:     va_list var;
-584:     va_start(var, format);
+583:     va_list args;
+584:     va_start(args, format);
 585: 
-586:     String result = FormatV(format, var);
+586:     String result = FormatV(format, args);
 587: 
-588:     va_end(var);
+588:     va_end(args);
 589: 
 590:     return result;
 591: }
@@ -1282,12 +1282,12 @@ File: code/libraries/baremetal/src/Format.cpp
 835: /// <param name="format">Format string</param>
 836: void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
 837: {
-838:     va_list var;
-839:     va_start(var, format);
+838:     va_list args;
+839:     va_start(args, format);
 840: 
-841:     FormatNoAllocV(buffer, bufferSize, format, var);
+841:     FormatNoAllocV(buffer, bufferSize, format, args);
 842: 
-843:     va_end(var);
+843:     va_end(args);
 844: }
 845: 
 846: /// <summary>

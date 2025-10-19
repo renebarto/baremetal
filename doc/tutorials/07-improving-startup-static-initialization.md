@@ -129,7 +129,7 @@ Create a file `code/libraries/baremetal/include/baremetal/System.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/System.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : System.h
 5: //
@@ -247,7 +247,7 @@ We add the implementation for `System.h`. Create a file `code/libraries/baremeta
 ```cpp
 File: code/libraries/baremetal/src/System.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : System.cpp
 5: //
@@ -432,7 +432,7 @@ Create a file `code/libraries/baremetal/include/baremetal/Util.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Util.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Util.h
 5: //
@@ -500,7 +500,7 @@ Create a file `code/libraries/baremetal/src/Util.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/Util.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Util.cpp
 5: //
@@ -617,7 +617,7 @@ Update the file `code/libraries/baremetal/src/Startup.S`:
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Startup.S
 5: //
@@ -930,7 +930,7 @@ Create a file `code/libraries/baremetal/include/baremetal/CXAGuard.cpp':
 ```cpp
 File: code/libraries/baremetal/src/CXAGuard.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : CXAGuard.cpp
 5: //

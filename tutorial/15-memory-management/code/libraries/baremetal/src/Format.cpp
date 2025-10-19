@@ -110,12 +110,12 @@ static void Append(char* buffer, size_t bufferSize, const char* str)
 /// <param name="format">Format string</param>
 void Format(char* buffer, size_t bufferSize, const char* format, ...)
 {
-    va_list var;
-    va_start(var, format);
+    va_list args;
+    va_start(args, format);
 
-    FormatV(buffer, bufferSize, format, var);
+    FormatV(buffer, bufferSize, format, args);
 
-    va_end(var);
+    va_end(args);
 }
 
 /// <summary>

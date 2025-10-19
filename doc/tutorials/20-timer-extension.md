@@ -729,7 +729,7 @@ Create a new file `code/libraries/baremetal/include/baremetal/DoubleLinkedList.h
 ```cpp
 File: code/libraries/baremetal/include/baremetal/List.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : DoubleLinkedList.h
 5: //

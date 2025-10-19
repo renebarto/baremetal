@@ -310,12 +310,12 @@ File: code/libraries/baremetal/src/Format.cpp
 110: /// <param name="format">Format string</param>
 111: void Format(char* buffer, size_t bufferSize, const char* format, ...)
 112: {
-113:     va_list var;
-114:     va_start(var, format);
+113:     va_list args;
+114:     va_start(args, format);
 115:
-116:     FormatV(buffer, bufferSize, format, var);
+116:     FormatV(buffer, bufferSize, format, args);
 117:
-118:     va_end(var);
+118:     va_end(args);
 119: }
 120:
 121: /// <summary>
@@ -1761,7 +1761,7 @@ File: code/libraries/baremetal/include/baremetal/Logger.h
 130: #define TRACE_DEBUG(...)         GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
 131:
 132: /// @brief Log a message with specified severity and message string
-133: #define TRACE(severity, message) GetLogger().Trace(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+133: #define TRACE(severity, message) GetLogger().Trace(__FILE_NAME__, __LINE__, __func__, severity, message);
 134:
 135: } // namespace baremetal
 ```
@@ -1917,10 +1917,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 110: /// <param name="message">Formatted message string, with variable arguments</param>
 111: void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
 112: {
-113:     va_list var;
-114:     va_start(var, message);
-115:     LogV(source, line, severity, message, var);
-116:     va_end(var);
+113:     va_list args;
+114:     va_start(args, message);
+115:     LogV(source, line, severity, message, args);
+116:     va_end(args);
 117: }
 118:
 119: /// <summary>
@@ -2022,10 +2022,10 @@ File: code/libraries/baremetal/src/Logger.cpp
 215: /// <param name="message">Formatted message string, with variable arguments</param>
 216: void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 217: {
-218:     va_list var;
-219:     va_start(var, message);
-220:     TraceV(filename, line, function, severity, message, var);
-221:     va_end(var);
+218:     va_list args;
+219:     va_start(args, message);
+220:     TraceV(filename, line, function, severity, message, args);
+221:     va_end(args);
 222: }
 223:
 224: /// <summary>
@@ -2442,7 +2442,7 @@ Create the file `code/libraries/baremetal/src/Assert.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Assert.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Assert.cpp
 5: //

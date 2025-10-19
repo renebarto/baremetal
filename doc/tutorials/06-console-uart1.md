@@ -98,7 +98,7 @@ Create the file `code/libraries/baremetal/include/baremetal/ARMInstructions.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : ARMInstructions.h
 5: //
@@ -795,7 +795,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Macros.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Macros.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Macros.h
 5: //
@@ -860,7 +860,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Types.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Types.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Types.h
 5: //
@@ -957,7 +957,7 @@ Create the file `code/libraries/baremetal/include/baremetal/MemoryAccess.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : MemoryAccess.h
 5: //
@@ -1028,7 +1028,7 @@ Create the file `code/libraries/baremetal/src/MemoryAccess.cpp`:
 ```cpp
 File: code/libraries/baremetal/src/MemoryAccess.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : MemoryAccess.cpp
 5: //
@@ -1109,7 +1109,7 @@ Create the file `code/libraries/baremetal/include/baremetal/BCMRegisters.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : BCMRegisters.h
 5: //
@@ -1412,7 +1412,7 @@ Create the file `code/libraries/baremetal/include/baremetal/UART1.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/UART1.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : UART1.h
 5: //
@@ -1597,7 +1597,7 @@ Create the file `code/libraries/baremetal/src/UART1.cpp`:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : UART1.cpp
 5: //
@@ -2141,7 +2141,7 @@ We therefore remove `code/applications/demo/src/start.S`, and add a new file `co
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Startup.S
 5: //
@@ -2463,7 +2463,7 @@ Create the file `code/libraries/baremetal/include/baremetal/SysConfig.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/SysConfig.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : SysConfig.h
 5: //
@@ -2553,7 +2553,7 @@ Create the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`:
 ```cpp
 File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : MemoryMap.h
 5: //

@@ -42,7 +42,7 @@ Create the file `code/libraries/baremetal/include/baremetal/IMemoryAccess.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : IMemoryAccess.h
 5: //
@@ -939,7 +939,7 @@ Create the file `code/libraries/baremetal/include/baremetal/New.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/New.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : New.h
 5: //
@@ -993,7 +993,7 @@ Create the file `code/libraries/baremetal/src/New.cpp`
 ```cpp
 File: code/libraries/baremetal/src/New.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : New.cpp
 5: //
@@ -1077,7 +1077,7 @@ Create the file `code/libraries/baremetal/include/baremetal/IGPIOPin.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : IGPIOPin.h
 5: //
@@ -1220,7 +1220,7 @@ Create the file `code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h`
 File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\include\baremetal\PhysicalGPIOPin.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : PhysicalGPIOPin.h
 5: //
@@ -1356,7 +1356,7 @@ Create the file `code/libraries/baremetal/src/PhysicalGPIOPin.cpp`
 ```cpp
 File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : PhysicalGPIOPin.cpp
 5: //
@@ -1925,7 +1925,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Timer.h`.
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Timer.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Timer.h
 5: //
@@ -1997,7 +1997,7 @@ Create the file `code/libraries/baremetal/src/Timer.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Timer.cpp
 5: //

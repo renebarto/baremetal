@@ -328,7 +328,7 @@ Create the file `code/libraries/baremetal/include/baremetal/Exception.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Exception.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Exception.h
 5: //
@@ -1001,7 +1001,7 @@ Update the file `code/libraries/baremetal/src/Startup.S`
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Startup.S
 5: //

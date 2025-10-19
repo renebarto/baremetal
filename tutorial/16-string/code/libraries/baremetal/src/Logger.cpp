@@ -111,10 +111,10 @@ void Logger::SetLogLevel(LogSeverity logLevel)
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
 {
-    va_list var;
-    va_start(var, message);
-    LogV(source, line, severity, message, var);
-    va_end(var);
+    va_list args;
+    va_start(args, message);
+    LogV(source, line, severity, message, args);
+    va_end(args);
 }
 
 /// <summary>
@@ -216,10 +216,10 @@ void Logger::LogV(const char* source, int line, LogSeverity severity, const char
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
-    va_list var;
-    va_start(var, message);
-    TraceV(filename, line, function, severity, message, var);
-    va_end(var);
+    va_list args;
+    va_start(args, message);
+    TraceV(filename, line, function, severity, message, args);
+    va_end(args);
 }
 
 /// <summary>

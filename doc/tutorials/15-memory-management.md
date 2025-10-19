@@ -509,7 +509,7 @@ Create the file `code/libraries/baremetal/src/HeapAllocator.cpp`
 ```cpp
 File: code/libraries/baremetal/src/HeapAllocator.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : HeapAllocator.cpp
 5: //

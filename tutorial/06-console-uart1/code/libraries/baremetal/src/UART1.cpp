@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2024 Rene Barto
+// Copyright   : Copyright(c) 2025 Rene Barto
 //
 // File        : UART1.cpp
 //
@@ -99,16 +99,14 @@ void UART1::Initialize(unsigned baudrate)
 
     SetMode(15, GPIOMode::AlternateFunction5);
 
-    MemoryAccess::Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1); // enable UART1, AUX mini uart
-    MemoryAccess::Write32(RPI_AUX_MU_CNTL, 0);                             // Disable Tx, Rx
-    MemoryAccess::Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);     // 8 bit mode
-    MemoryAccess::Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);        // RTS high
-    MemoryAccess::Write32(RPI_AUX_MU_IER, 0);                              // Disable interrupts
-    MemoryAccess::Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE |
-                                              RPI_AUX_MU_IIR_TX_FIFO_CLEAR |
-                                              RPI_AUX_MU_IIR_RX_FIFO_CLEAR);                       // Clear FIFO
-    MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(baudrate));                       // Set baudrate
-    MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX); // Enable Tx, Rx
+    MemoryAccess::Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);                                                                                              // enable UART1, AUX mini uart
+    MemoryAccess::Write32(RPI_AUX_MU_CNTL, 0);                                                                                                                          // Disable Tx, Rx
+    MemoryAccess::Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);                                                                                                  // 8 bit mode
+    MemoryAccess::Write32(RPI_AUX_MU_MCR, RPI_AUX_MU_MCR_RTS_HIGH);                                                                                                     // RTS high
+    MemoryAccess::Write32(RPI_AUX_MU_IER, 0);                                                                                                                           // Disable interrupts
+    MemoryAccess::Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR); // Clear FIFO
+    MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(baudrate));                                                                                            // Set baudrate
+    MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);                                                                      // Enable Tx, Rx
 
     m_baudrate = baudrate;
     m_isInitialized = true;
@@ -181,9 +179,8 @@ bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
             return false;
 
-        if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) -
-                                                              static_cast<unsigned>(GPIOMode::AlternateFunction0) +
-                                                              static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
+        if (!SetFunction(pinNumber,
+                         static_cast<GPIOFunction>(static_cast<unsigned>(mode) - static_cast<unsigned>(GPIOMode::AlternateFunction0) + static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
             return false;
     }
     else if (GPIOMode::Output == mode)
@@ -196,9 +193,7 @@ bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
     }
     else
     {
-        if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp)     ? GPIOPullMode::PullUp
-                                    : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown
-                                                                        : GPIOPullMode::Off))
+        if (!SetPullMode(pinNumber, (mode == GPIOMode::InputPullUp) ? GPIOPullMode::PullUp : (mode == GPIOMode::InputPullDown) ? GPIOPullMode::PullDown : GPIOPullMode::Off))
             return false;
         if (!SetFunction(pinNumber, GPIOFunction::Input))
             return false;

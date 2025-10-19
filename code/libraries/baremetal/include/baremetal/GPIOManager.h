@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : GPIOManager.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : GPIOManager
 //
-// Description : Memory read/write
+// Description : GPIO control
 //
 //------------------------------------------------------------------------------
 //
@@ -39,29 +39,55 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
+#include "baremetal/IGPIOManager.h"
+#include "baremetal/PhysicalGPIOPin.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Memory access class
+/// GPIO configuration and control
 
 namespace baremetal {
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
+class IMemoryAccess;
+
+/// @brief Handles configuration, setting and getting GPIO controls
+/// This is a singleton class, created as soon as GetGPIOManager() is called
+class GPIOManager : public IGPIOManager
 {
+    /// <summary>
+    /// Construct the singleton GPIOManager instance if needed, and return a reference to the instance. This is a friend function of class GPIOManager
+    /// </summary>
+    /// <returns>Reference to the singleton GPIOManager instance</returns>
+    friend GPIOManager& GetGPIOManager();
+
+private:
+    /// @brief True if class is already initialized
+    bool m_isInitialized;
+    /// @brief Array of all registered GPIO pins (nullptr if the GPIO is not registered)
+    IGPIOPin* m_pins[NUM_GPIO];
+    /// @brief Memory access interface
+    IMemoryAccess& m_memoryAccess;
+
+    GPIOManager();
+
 public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    explicit GPIOManager(IMemoryAccess& memoryAccess);
+    ~GPIOManager();
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
+    void Initialize() override;
 
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
+    void ConnectInterrupt(IGPIOPin* pin) override;
+    void DisconnectInterrupt(const IGPIOPin* pin) override;
+
+    void InterruptHandler() override;
+
+    void AllOff() override;
+
+    void DisableAllInterrupts(uint8 pinNumber);
+
+private:
 };
 
-MemoryAccess& GetMemoryAccess();
+GPIOManager& GetGPIOManager();
 
 } // namespace baremetal

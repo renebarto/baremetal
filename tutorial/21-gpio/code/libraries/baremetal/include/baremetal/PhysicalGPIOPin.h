@@ -53,8 +53,49 @@ enum class GPIOFunction;
 /// @brief GPIO pull mode
 enum class GPIOPullMode;
 
+#if BAREMETAL_RPI_TARGET == 3
 /// @brief Total count of GPIO pins, numbered from 0 through 53
 #define NUM_GPIO 54
+#else
+/// @brief Total count of GPIO pins, numbered from 0 through 56
+#define NUM_GPIO 57
+#endif
+
+/// @brief Interrupt type to enable
+enum class GPIOInterruptTypes : uint8
+{
+    /// @brief Interrupt on rising edge
+    RisingEdge = 0x01,
+    /// @brief Interrupt on falling edge
+    FallingEdge = 0x02,
+    /// @brief Interrupt on low level
+    HighLevel = 0x04,
+    /// @brief Interrupt on high level
+    LowLevel = 0x08,
+    /// @brief Interrupt on asynchronous rising edge
+    AsyncRisingEdge = 0x10,
+    /// @brief Interrupt on asynchronous falling edge
+    AsyncFallingEdge = 0x20,
+    /// @brief No interrupts
+    None = 0x00,
+    /// @brief All interrupts
+    All = 0x3F,
+};
+/// <summary>
+/// Combine two GPIO pin interrupt types, by performing a binary or on the two bit patterns
+/// </summary>
+/// <param name="lhs">First GPIO pin interrupt type</param>
+/// <param name="rhs">Second GPIO pin interrupt type</param>
+/// <returns>Combined GPIO pin interrupt type</returns>
+inline GPIOInterruptTypes operator|(GPIOInterruptTypes lhs, GPIOInterruptTypes rhs)
+{
+    return static_cast<GPIOInterruptTypes>(static_cast<uint8>(lhs) | static_cast<uint8>(rhs));
+}
+
+/// <summary>
+/// GPIO pin interrupt handler
+/// </summary>
+using GPIOPinInterruptHandler = void(IGPIOPin* pin, void* param);
 
 /// <summary>
 /// Physical GPIO pin (i.e. available on GPIO header)
@@ -74,6 +115,18 @@ private:
     bool m_value;
     /// @brief Memory access interface reference for accessing registers.
     IMemoryAccess& m_memoryAccess;
+    /// @brief Register offset for enabling interrupts, setting / clearing GPIO levels and checking GPIO level and interrupt events
+    unsigned m_regOffset;
+    /// @brief Register mask for enabling interrupts, setting / clearing GPIO levels and checking GPIO level and interrupt events
+    uint32 m_regMask;
+    /// @brief Interrupt handler for the pin
+    GPIOPinInterruptHandler* m_handler;
+    /// @brief Interrupt handler parameter for the pin
+    void* m_handlerParam;
+    /// @brief Auto acknowledge interrupt for the pin. If true, the interrupt handler will of the GPIOManager will automatically reset the event state
+    bool m_autoAcknowledge;
+    /// @brief GPIO interrupt types enabled
+    uint8 m_interruptMask;
 
 public:
     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
@@ -88,12 +141,25 @@ public:
     bool Get() override;
     void Set(bool on) override;
     void Invert() override;
+    bool GetEvent() override;
+    void ClearEvent() override;
 
     GPIOMode GetMode();
     bool SetMode(GPIOMode mode);
     GPIOFunction GetFunction();
     GPIOPullMode GetPullMode();
     void SetPullMode(GPIOPullMode pullMode);
+
+    bool GetAutoAcknowledgeInterrupt() const override;
+    void AcknowledgeInterrupt() override;
+    void InterruptHandler() override;
+
+    void ConnectInterrupt(GPIOPinInterruptHandler* handler, void* param, bool autoAcknowledge = true);
+    void DisconnectInterrupt();
+
+    void EnableInterrupt(GPIOInterruptTypes interruptTypes);
+    void DisableInterrupt(GPIOInterruptTypes interruptTypes);
+    void DisableAllInterrupts();
 
 private:
     void SetFunction(GPIOFunction function);

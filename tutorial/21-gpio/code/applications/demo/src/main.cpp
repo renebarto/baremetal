@@ -1,61 +1,70 @@
 #include "baremetal/ARMInstructions.h"
 #include "baremetal/Assert.h"
 #include "baremetal/Console.h"
-#include "baremetal/InterruptHandler.h"
-#include "baremetal/Interrupts.h"
 #include "baremetal/Logger.h"
 #include "baremetal/System.h"
 #include "baremetal/Timer.h"
+#include <device/gpio/KY-040.h>
 
 LOG_MODULE("main");
 
 using namespace baremetal;
+using namespace device;
 
-void KernelTimerHandler3(KernelTimerHandle /*timerHandle*/, void* /*param*/, void* /*context*/)
-{
-    LOG_INFO("Timer 3 will never expire in time");
-}
+static int value = 0;
+static int holdCounter = 0;
+static const int HoldThreshold = 2;
+static bool reboot = false;
 
-void KernelTimerHandler2(KernelTimerHandle /*timerHandle*/, void* /*param*/, void* /*context*/)
+void OnEvent(KY040::Event event, void* param)
 {
-    LOG_INFO("Timer 2 expired");
-}
-
-void KernelTimerHandler1(KernelTimerHandle /*timerHandle*/, void* /*param*/, void* /*context*/)
-{
-    LOG_INFO("Timer 1 expired");
-    LOG_INFO("Starting kernel timer 2 to fire in 2 seconds");
-    GetTimer().StartKernelTimer(2 * TICKS_PER_SECOND, KernelTimerHandler2, nullptr, nullptr);
+    LOG_INFO("Event %s", KY040::EventToString(event));
+    switch (event)
+    {
+    case KY040::Event::SwitchDown:
+        LOG_INFO("Value %d", value);
+        break;
+    case KY040::Event::RotateClockwise:
+        value++;
+        break;
+    case KY040::Event::RotateCounterclockwise:
+        value--;
+        break;
+    case KY040::Event::SwitchHold:
+        holdCounter++;
+        if (holdCounter >= HoldThreshold)
+        {
+            reboot = true;
+            LOG_INFO("Reboot triggered");
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 int main()
 {
     auto& console = GetConsole();
-    GetLogger().SetLogLevel(LogSeverity::Debug);
+    GetLogger().SetLogLevel(LogSeverity::Info);
 
     auto exceptionLevel = CurrentEL();
     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 
-    Timer& timer = GetTimer();
-    LOG_INFO("Starting kernel timer 1 to fire in 1 second");
-    timer.StartKernelTimer(1 * TICKS_PER_SECOND, KernelTimerHandler1, nullptr, nullptr);
+    KY040 rotarySwitch(11, 9, 10);
+    rotarySwitch.Initialize();
+    rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
 
-    LOG_INFO("Starting kernel timer 3 to fire in 10 seconds");
-    auto timer3Handle = timer.StartKernelTimer(10 * TICKS_PER_SECOND, KernelTimerHandler3, nullptr, nullptr);
-
-    LOG_INFO("Wait 5 seconds");
-    Timer::WaitMilliSeconds(5000);
-
-    LOG_INFO("Cancelling kernel timer 3");
-    timer.CancelKernelTimer(timer3Handle);
-
-    console.Write("Press r to reboot, h to halt\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h'))
+    LOG_INFO("Hold down switch button for %d seconds to reboot", HoldThreshold);
+    while (!reboot)
     {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
+        WaitForInterrupt();
     }
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    rotarySwitch.UnregisterEventHandler(OnEvent);
+    rotarySwitch.Uninitialize();
+
+    LOG_INFO("Rebooting");
+
+    return static_cast<int>(ReturnCode::ExitReboot);
 }

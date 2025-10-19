@@ -580,12 +580,12 @@ static void Append(char* buffer, size_t bufferSize, const char* str)
 /// <returns>Resulting string</returns>
 String Format(const char* format, ...)
 {
-    va_list var;
-    va_start(var, format);
+    va_list args;
+    va_start(args, format);
 
-    String result = FormatV(format, var);
+    String result = FormatV(format, args);
 
-    va_end(var);
+    va_end(args);
 
     return result;
 }
@@ -835,12 +835,12 @@ String FormatV(const char* format, va_list args)
 /// <param name="format">Format string</param>
 void FormatNoAlloc(char* buffer, size_t bufferSize, const char* format, ...)
 {
-    va_list var;
-    va_start(var, format);
+    va_list args;
+    va_start(args, format);
 
-    FormatNoAllocV(buffer, bufferSize, format, var);
+    FormatNoAllocV(buffer, bufferSize, format, args);
 
-    va_end(var);
+    va_end(args);
 }
 
 /// <summary>

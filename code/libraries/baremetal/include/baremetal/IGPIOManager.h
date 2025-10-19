@@ -1,19 +1,19 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccess.h
+// File        : IGPIOManager.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccess
+// Class       : IGPIOManager
 //
-// Description : Memory read/write
+// Description : GPIO control abstract interface
 //
 //------------------------------------------------------------------------------
 //
 // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
 //
-// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or 4) and Odroid
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -39,29 +39,50 @@
 
 #pragma once
 
-#include "baremetal/IMemoryAccess.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// Memory access class
+/// GPIO configuration and control
 
 namespace baremetal {
 
-/// <summary>
-/// Memory access interface
-/// </summary>
-class MemoryAccess : public IMemoryAccess
+class IGPIOPin;
+
+/// @brief Handles configuration, setting and getting GPIO controls
+/// This is a singleton class, created as soon as GetIGPIOManager() is called
+class IGPIOManager
 {
 public:
-    uint8 Read8(regaddr address) override;
-    void Write8(regaddr address, uint8 data) override;
+    /// <summary>
+    /// Default destructor needed for abstract interface
+    /// </summary>
+    virtual ~IGPIOManager() = default;
 
-    uint16 Read16(regaddr address) override;
-    void Write16(regaddr address, uint16 data) override;
+    /// <summary>
+    /// Initialize GPIO manager
+    /// </summary>
+    virtual void Initialize() = 0;
 
-    uint32 Read32(regaddr address) override;
-    void Write32(regaddr address, uint32 data) override;
+    /// <summary>
+    /// Connect the GPIO pin interrupt for the specified pin
+    /// </summary>
+    /// <param name="pin">GPIO pin to connect interrupt for</param>
+    virtual void ConnectInterrupt(IGPIOPin* pin) = 0;
+    /// <summary>
+    /// Disconnect the GPIO pin interrupt for the specified pin
+    /// </summary>
+    /// <param name="pin">GPIO pin to disconnect interrupt for</param>
+    virtual void DisconnectInterrupt(const IGPIOPin* pin) = 0;
+
+    /// <summary>
+    /// GPIO pin interrupt handler, called by the static entry point GPIOInterruptHandler()
+    /// </summary>
+    virtual void InterruptHandler() = 0;
+
+    /// <summary>
+    /// Switch all GPIO pins to input mode, without pull-up or pull-down
+    /// </summary>
+    virtual void AllOff() = 0;
 };
-
-MemoryAccess& GetMemoryAccess();
 
 } // namespace baremetal

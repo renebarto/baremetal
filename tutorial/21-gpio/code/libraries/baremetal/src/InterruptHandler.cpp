@@ -144,6 +144,8 @@ void InterruptSystem::Initialize()
 /// </summary>
 void InterruptSystem::Shutdown()
 {
+    if (Logger::HaveLogger())
+        LOG_INFO("InterruptSystem::Shutdown");
     DisableIRQs();
 
     DisableInterrupts();
@@ -155,6 +157,8 @@ void InterruptSystem::Shutdown()
 /// </summary>
 void InterruptSystem::DisableInterrupts()
 {
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::DisableInterrupts");
 #if BAREMETAL_RPI_TARGET == 3
     m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
 
@@ -163,7 +167,8 @@ void InterruptSystem::DisableInterrupts()
     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_BASIC_IRQS, static_cast<uint32>(-1));
     m_memoryAccess.Write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
 #else
-    // initialize distributor
+    // initialize distributor:
+
     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_DISABLE);
     m_memoryAccess.Write32(RPI_GICC_CTLR, RPI_GICC_CTLR_DISABLE);
     // disable, acknowledge and deactivate all interrupts
@@ -181,6 +186,8 @@ void InterruptSystem::DisableInterrupts()
 /// </summary>
 void InterruptSystem::EnableInterrupts()
 {
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::EnableInterrupts");
 #if BAREMETAL_RPI_TARGET == 3
 #else
     m_memoryAccess.Write32(RPI_GICC_CTLR, RPI_GICC_CTLR_ENABLE);
@@ -200,6 +207,8 @@ void InterruptSystem::RegisterIRQHandler(IRQ_ID irqID, IRQHandler* handler, void
 {
     uint32 irq = static_cast<int>(irqID);
     assert(irq < IRQ_LINES);
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::RegisterIRQHandler IRQ=%d", irq);
     assert(m_irqHandlers[irq] == nullptr);
 
     EnableIRQ(irqID);
@@ -218,6 +227,8 @@ void InterruptSystem::UnregisterIRQHandler(IRQ_ID irqID)
 {
     uint32 irq = static_cast<int>(irqID);
     assert(irq < IRQ_LINES);
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::UnregisterIRQHandler IRQ=%d", irq);
     assert(m_irqHandlers[irq] != nullptr);
 
     m_irqHandlers[irq] = nullptr;
@@ -237,6 +248,8 @@ void InterruptSystem::RegisterFIQHandler(FIQ_ID fiqID, FIQHandler* handler, void
 {
     uint32 fiq = static_cast<int>(fiqID);
     assert(fiq <= IRQ_LINES);
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::RegisterFIQHandler IRQ=%d", fiq);
     assert(handler != nullptr);
     assert(s_fiqData.handler == nullptr);
 
@@ -250,12 +263,14 @@ void InterruptSystem::RegisterFIQHandler(FIQ_ID fiqID, FIQHandler* handler, void
 /// <summary>
 /// Disable and unregister a FIQ interrupt handler
 /// </summary>
-/// <param name="fiqID">FIQ interrupt number, to check against set FIQ</param>
+/// <param name="fiqID">FIQ interrupt number</param>
 void InterruptSystem::UnregisterFIQHandler(FIQ_ID fiqID)
 {
     uint32 fiq = static_cast<int>(fiqID);
     assert(s_fiqData.handler != nullptr);
     assert(s_fiqData.fiqID == fiq);
+    if (Logger::HaveLogger())
+        LOG_DEBUG("InterruptSystem::UnregisterFIQHandler IRQ=%d", fiq);
     DisableFIQ(fiqID);
 
     s_fiqData.handler = nullptr;

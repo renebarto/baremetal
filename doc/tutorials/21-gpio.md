@@ -1034,9 +1034,9 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 222:                 uint8 pin = pinBase + pinIndex;
 223:                 uint8 value = (*registerField >> shift) & 0x00000001;
 224:                 if (value)
-225:                     line += " - Pin %d ON ";
+225:                     line += Format(" - Pin %d ON ", pin);
 226:                 else
-227:                     line += " - Pin %d OFF";
+227:                     line += Format(" - Pin %d OFF", pin);
 228:             }
 229:             TRACE_DEBUG(line.c_str());
 230:             break;
@@ -1052,9 +1052,9 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 240:                 uint8 pin = pinBase + pinIndex;
 241:                 uint8 value = (*registerField >> shift) & 0x00000001;
 242:                 if (value)
-243:                     line += " - Pin %d ON ";
+243:                     line += Format(" - Pin %d ON ", pin);
 244:                 else
-245:                     line += " - Pin %d OFF";
+245:                     line += Format(" - Pin %d OFF", pin);
 246:             }
 247:             TRACE_DEBUG(line.c_str());
 248:             break;

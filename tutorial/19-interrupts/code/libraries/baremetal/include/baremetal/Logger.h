@@ -160,6 +160,6 @@ Logger& GetLogger();
 #define TRACE_NO_ALLOC_DEBUG(...)         GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
 
 /// @brief Log a message with specified severity and message string
-#define TRACE_NO_ALLOC(severity, message) GetLogger().TraceNoAlloc(From, __FILE_NAME__, __LINE__, __func__, severity, message);
+#define TRACE_NO_ALLOC(severity, message) GetLogger().TraceNoAlloc(__FILE_NAME__, __LINE__, __func__, severity, message);
 
 } // namespace baremetal

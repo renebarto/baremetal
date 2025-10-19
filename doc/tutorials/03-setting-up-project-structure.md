@@ -307,7 +307,7 @@ The startup assembly code will for now be equal to that of the `02-setting-up-a-
 ```asm
 File: code/applications/demo/src/start.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : start.S
 5: //

@@ -2442,7 +2442,7 @@ Create the file `code/libraries/baremetal/src/Assert.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Assert.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Assert.cpp
 5: //

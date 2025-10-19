@@ -841,7 +841,7 @@ We'll name this file `link.ld` as used by the linker options and add the followi
 ```text
 File: tutorial/02-setting-up-a-project/link.ld
 1: /*------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : link.ld
 5: //
@@ -986,7 +986,7 @@ The startup code will be stored in the `start.S` assembly file:
 ```assembly
 File: tutorial/02-setting-up-a-project/start.S
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : start.S
 5: //

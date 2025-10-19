@@ -222,9 +222,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += " - Pin %d ON ";
+                    line += Format(" - Pin %d ON ", pin);
                 else
-                    line += " - Pin %d OFF";
+                    line += Format(" - Pin %d OFF", pin);
             }
             TRACE_DEBUG(line.c_str());
             break;
@@ -240,9 +240,9 @@ uint32 MemoryAccessStubGPIO::Read32(regaddr address)
                 uint8 pin = pinBase + pinIndex;
                 uint8 value = (*registerField >> shift) & 0x00000001;
                 if (value)
-                    line += " - Pin %d ON ";
+                    line += Format(" - Pin %d ON ", pin);
                 else
-                    line += " - Pin %d OFF";
+                    line += Format(" - Pin %d OFF", pin);
             }
             TRACE_DEBUG(line.c_str());
             break;

@@ -45,7 +45,6 @@ void OnEvent(KY040::Event event, void* param)
 
 int main()
 {
-    auto& console = GetConsole();
     GetLogger().SetLogLevel(LogSeverity::Info);
 
     auto exceptionLevel = CurrentEL();

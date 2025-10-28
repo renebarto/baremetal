@@ -2,12 +2,12 @@
 
 @tableofcontents
 
-## New tutorial setup {#TUTORIAL_05_SETTING_UP_TOOLS_NEW_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_05_SETTING_UP_TOOLS_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/05-setting-up-tools`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_05_SETTING_UP_TOOLS_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_05_SETTING_UP_TOOLS_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - an application `output/<platform>/Debug/bin/05-setting-up-tools.elf`

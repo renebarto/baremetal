@@ -2,12 +2,12 @@
 
 @tableofcontents
 
-## New tutorial setup {#TUTORIAL_19_INTERRUPTS_NEW_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_19_INTERRUPTS_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/19-interrupts`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_19_INTERRUPTS_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_19_INTERRUPTS_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-19.a`

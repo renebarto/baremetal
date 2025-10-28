@@ -62,7 +62,9 @@ enum class LogSeverity
     /// @brief Informative message, which is interesting for the system user
     Info,
     /// @brief Message, which is only interesting for debugging this component
-    Debug
+    Debug,
+    /// @brief Data, which is only interesting for detailed information for this component
+    Data,
 };
 
 class Timer;
@@ -97,6 +99,7 @@ public:
 
     bool Initialize();
     void SetLogLevel(LogSeverity logLevel);
+    bool IsLogSeverityEnabled(LogSeverity severity);
 
     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);
     void LogV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
@@ -149,24 +152,28 @@ Logger& GetLogger();
 /// @brief Log a message with specified severity and message string
 #define LOG_NO_ALLOC(severity, message)   Logger::LogEntryNoAlloc(From, __LINE__, severity, message)
 
-/// @brief Log a warning message
+/// @brief Trace a warning message
 #define TRACE_WARNING(...)                Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
-/// @brief Log a info message
+/// @brief Trace a info message
 #define TRACE_INFO(...)                   Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
-/// @brief Log a debug message
+/// @brief Trace a debug message
 #define TRACE_DEBUG(...)                  Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+/// @brief Trace a data message
+#define TRACE_DATA(...)                   Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Data, __VA_ARGS__)
 
-/// @brief Log a message with specified severity and message string
+/// @brief Trace a message with specified severity and message string
 #define TRACE(severity, message)          Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, severity, message)
 
-/// @brief Log a warning message
+/// @brief Trace a warning message
 #define TRACE_NO_ALLOC_WARNING(...)       Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
-/// @brief Log a info message
+/// @brief Trace a info message
 #define TRACE_NO_ALLOC_INFO(...)          Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
-/// @brief Log a debug message
+/// @brief Trace a debug message
 #define TRACE_NO_ALLOC_DEBUG(...)         Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+/// @brief Trace a data message
+#define TRACE_NO_ALLOC_DATA(...)          Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Data, __VA_ARGS__)
 
-/// @brief Log a message with specified severity and message string
+/// @brief Trace a message with specified severity and message string
 #define TRACE_NO_ALLOC(severity, message) Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, severity, message)
 
 } // namespace baremetal

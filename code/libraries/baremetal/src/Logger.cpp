@@ -105,11 +105,20 @@ void Logger::SetLogLevel(LogSeverity logLevel)
 }
 
 /// <summary>
+/// Check if the log level will result in output
+/// </summary>
+/// <param name="severity">True if the log level is enabled, false otherwise</param>
+bool Logger::IsLogSeverityEnabled(LogSeverity severity)
+{
+    return (static_cast<int>(severity) <= static_cast<int>(m_level));
+}
+
+/// <summary>
 /// Write a string with variable arguments to the logger
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
 {
@@ -124,12 +133,12 @@ void Logger::Log(const char* source, int line, LogSeverity severity, const char*
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
 {
-    if (static_cast<int>(severity) > static_cast<int>(m_level))
+    if (!IsLogSeverityEnabled(severity))
         return;
 
     String lineBuffer;
@@ -154,6 +163,9 @@ void Logger::LogV(const char* source, int line, LogSeverity severity, const char
         break;
     case LogSeverity::Debug:
         lineBuffer += "Debug  ";
+        break;
+    case LogSeverity::Data:
+        lineBuffer += "Data   ";
         break;
     }
 
@@ -191,6 +203,9 @@ void Logger::LogV(const char* source, int line, LogSeverity severity, const char
     case LogSeverity::Debug:
         s_console.Write(lineBuffer, ConsoleColor::Yellow);
         break;
+    case LogSeverity::Data:
+        s_console.Write(lineBuffer, ConsoleColor::Magenta);
+        break;
     default:
         s_console.Write(lineBuffer, ConsoleColor::White);
         break;
@@ -210,7 +225,7 @@ void Logger::LogV(const char* source, int line, LogSeverity severity, const char
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
 {
@@ -225,12 +240,12 @@ void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, cons
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
 {
-    if (static_cast<int>(severity) > static_cast<int>(m_level))
+    if (!IsLogSeverityEnabled(severity))
         return;
 
     static const size_t BufferSize = 1024;
@@ -258,6 +273,9 @@ void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, con
         break;
     case LogSeverity::Debug:
         strncat(buffer, "Debug  ", BufferSize);
+        break;
+    case LogSeverity::Data:
+        strncat(buffer, "Data   ", BufferSize);
         break;
     }
 
@@ -295,6 +313,9 @@ void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, con
     case LogSeverity::Debug:
         s_console.Write(buffer, ConsoleColor::Yellow);
         break;
+    case LogSeverity::Data:
+        s_console.Write(buffer, ConsoleColor::Magenta);
+        break;
     default:
         s_console.Write(buffer, ConsoleColor::White);
         break;
@@ -315,7 +336,7 @@ void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, con
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
@@ -331,12 +352,12 @@ void Logger::Trace(const char* filename, int line, const char* function, LogSeve
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
 {
-    if (static_cast<int>(severity) > static_cast<int>(m_level))
+    if (!IsLogSeverityEnabled(severity))
         return;
 
     String lineBuffer;
@@ -355,6 +376,9 @@ void Logger::TraceV(const char* filename, int line, const char* function, LogSev
         break;
     case LogSeverity::Debug:
         lineBuffer += "Debug  ";
+        break;
+    case LogSeverity::Data:
+        lineBuffer += "Data   ";
         break;
     default:
         break;
@@ -388,6 +412,9 @@ void Logger::TraceV(const char* filename, int line, const char* function, LogSev
     case LogSeverity::Debug:
         s_console.Write(lineBuffer, ConsoleColor::Yellow);
         break;
+    case LogSeverity::Data:
+        s_console.Write(lineBuffer, ConsoleColor::Magenta);
+        break;
     default:
         s_console.Write(lineBuffer, ConsoleColor::White);
         break;
@@ -403,7 +430,7 @@ void Logger::TraceV(const char* filename, int line, const char* function, LogSev
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
@@ -419,12 +446,12 @@ void Logger::TraceNoAlloc(const char* filename, int line, const char* function, 
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
 {
-    if (static_cast<int>(severity) > static_cast<int>(m_level))
+    if (!IsLogSeverityEnabled(severity))
         return;
 
     static const size_t BufferSize = 1024;
@@ -446,6 +473,9 @@ void Logger::TraceNoAllocV(const char* filename, int line, const char* function,
         break;
     case LogSeverity::Debug:
         strncat(buffer, "Debug  ", BufferSize);
+        break;
+    case LogSeverity::Data:
+        strncat(buffer, "Data   ", BufferSize);
         break;
     default:
         break;
@@ -479,6 +509,9 @@ void Logger::TraceNoAllocV(const char* filename, int line, const char* function,
     case LogSeverity::Debug:
         s_console.Write(buffer, ConsoleColor::Yellow);
         break;
+    case LogSeverity::Data:
+        s_console.Write(buffer, ConsoleColor::Magenta);
+        break;
     default:
         s_console.Write(buffer, ConsoleColor::White);
         break;
@@ -493,7 +526,7 @@ void Logger::TraceNoAllocV(const char* filename, int line, const char* function,
 /// </summary>
 /// <param name="from">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...)
 {
@@ -511,7 +544,7 @@ void Logger::LogEntry(const char* from, int line, LogSeverity severity, const ch
 /// </summary>
 /// <param name="from">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...)
 {
@@ -530,7 +563,7 @@ void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, c
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
@@ -549,7 +582,7 @@ void Logger::TraceEntry(const char* filename, int line, const char* function, Lo
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {

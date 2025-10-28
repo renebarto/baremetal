@@ -2,7 +2,7 @@
 
 @tableofcontents
 
-## New tutorial setup {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_NEW_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/07-improving-startup-static-initialization`.
 In the same way, the project names are adapted to make sure there are no conflicts.
@@ -12,7 +12,7 @@ here there is a complete copy of what we work towards in this section.
 Its CMake root will clearly be `tutorial/07-improving-startup-static-initialization`.
 Please be aware of this when e.g. debugging, the paths in vs.launch.json may not match your specific case.
 
-### Tutorial results {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_07_IMPROVING_STARTUP_AND_STATIC_INITIALIZATION_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-07.a`

@@ -2,15 +2,16 @@
 
 @tableofcontents
 
-## New tutorial setup {#TUTORIAL_21_GPIO_NEW_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_21_GPIO_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/21-gpio`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_21_GPIO_NEW_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_21_GPIO_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-21.a`
+- a library `output/Debug/lib/device-21.a`
 - a library `output/Debug/lib/stdlib-21.a`
 - an application `output/Debug/bin/21-gpio.elf`
 - an image in `deploy/Debug/21-gpio-image`
@@ -157,7 +158,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 286: //---------------------------------------------
 287: // Raspberry Pi GPIO
 288: //---------------------------------------------
-289: 
+289:
 290: /// @brief Raspberry Pi GPIO registers base address. See @ref RASPBERRY_PI_GPIO
 291: #define RPI_GPIO_BASE                   RPI_BCM_IO_BASE + 0x00200000
 292: /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W) offset. See @ref RASPBERRY_PI_GPIO
@@ -331,7 +332,7 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 56:     /// Default destructor needed for abstract interface
 57:     /// </summary>
 58:     virtual ~IMemoryAccess() = default;
-59: 
+59:
 60:     /// <summary>
 61:     /// Read a 8 bit value from register at address
 62:     /// </summary>
@@ -362,7 +363,7 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 87:         value |= ((data << shift) & mask);
 88:         Write8(address, value);
 89:     }
-90: 
+90:
 91:     /// <summary>
 92:     /// Read a 16 bit value from register at address
 93:     /// </summary>
@@ -393,7 +394,7 @@ File: code/libraries/baremetal/include/baremetal/IMemoryAccess.h
 118:         value |= ((data << shift) & mask);
 119:         Write16(address, value);
 120:     }
-121: 
+121:
 122:     /// <summary>
 123:     /// Read a 32 bit value from register at address
 124:     /// </summary>
@@ -449,10 +450,10 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 54: public:
 55:     uint8 Read8(regaddr address) override;
 56:     void Write8(regaddr address, uint8 data) override;
-57: 
+57:
 58:     uint16 Read16(regaddr address) override;
 59:     void Write16(regaddr address, uint16 data) override;
-60: 
+60:
 61:     uint32 Read32(regaddr address) override;
 62:     void Write32(regaddr address, uint32 data) override;
 63: };
@@ -477,7 +478,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 53: {
 54:     return *reinterpret_cast<uint8 volatile*>(address);
 55: }
-56: 
+56:
 57: /// <summary>
 58: /// Write a 8 bit value to register at address
 59: /// </summary>
@@ -487,7 +488,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 63: {
 64:     *reinterpret_cast<uint8 volatile*>(address) = data;
 65: }
-66: 
+66:
 67: /// <summary>
 68: /// Read a 16 bit value from register at address
 69: /// </summary>
@@ -497,7 +498,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 73: {
 74:     return *reinterpret_cast<uint16 volatile*>(address);
 75: }
-76: 
+76:
 77: /// <summary>
 78: /// Write a 16 bit value to register at address
 79: /// </summary>
@@ -507,7 +508,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 83: {
 84:     *reinterpret_cast<uint16 volatile*>(address) = data;
 85: }
-86: 
+86:
 87: /// <summary>
 88: /// Read a 32 bit value from register at address
 89: /// </summary>
@@ -517,7 +518,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 93: {
 94:     return *reinterpret_cast<uint32 volatile*>(address);
 95: }
-96: 
+96:
 97: /// <summary>
 98: /// Write a 32 bit value to register at address
 99: /// </summary>
@@ -527,7 +528,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 103: {
 104:     *reinterpret_cast<uint32 volatile*>(address) = data;
 105: }
-106: 
+106:
 107: /// <summary>
 108: /// Construct the singleton memory access interface if needed, and return a reference to the instance
 109: /// </summary>
@@ -586,17 +587,17 @@ File: code/libraries/baremetal/include/baremetal/stubs/MemoryAccessStubGPIO.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/IMemoryAccess.h"
 43: #include "stdlib/Macros.h"
-44: 
+44:
 45: /// @file
 46: /// MemoryAccessStubGPIO
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: /// @brief GPIO registers storage
 51: struct GPIORegisters
 52: {
@@ -701,7 +702,7 @@ File: code/libraries/baremetal/include/baremetal/stubs/MemoryAccessStubGPIO.h
 151:     uint32 Reserved_16;    // 0xF4: Alignment
 152:     uint32 Reserved_17[2]; // 0xF8-FC: Alignment
 153: #endif
-154: 
+154:
 155:     /// <summary>
 156:     /// Constructor for GPIORegisters
 157:     ///
@@ -764,29 +765,29 @@ File: code/libraries/baremetal/include/baremetal/stubs/MemoryAccessStubGPIO.h
 214:     {
 215:     }
 216: } PACKED;
-217: 
+217:
 218: /// @brief MemoryAccess implementation for GPIO stub
 219: class MemoryAccessStubGPIO : public IMemoryAccess
 220: {
 221: private:
 222:     /// @brief Saved GPIO register values
 223:     GPIORegisters m_registers;
-224: 
+224:
 225: public:
 226:     MemoryAccessStubGPIO();
 227:     uint8 Read8(regaddr address) override;
 228:     void Write8(regaddr address, uint8 data) override;
-229: 
+229:
 230:     uint16 Read16(regaddr address) override;
 231:     void Write16(regaddr address, uint16 data) override;
-232: 
+232:
 233:     uint32 Read32(regaddr address) override;
 234:     void Write32(regaddr address, uint32 data) override;
-235: 
+235:
 236: private:
 237:     uint32 GetRegisterOffset(regaddr address);
 238: };
-239: 
+239:
 240: } // namespace baremetal
 ```
 
@@ -848,28 +849,28 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/stubs/MemoryAccessStubGPIO.h"
-41: 
+41:
 42: #include "baremetal/Assert.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/Format.h"
 45: #include "baremetal/Logger.h"
 46: #include "baremetal/String.h"
-47: 
+47:
 48: /// @file
 49: /// MemoryAccessStubGPIO
-50: 
+50:
 51: /// @brief Define log name
 52: LOG_MODULE("MemoryAccessStubGPIO");
-53: 
+53:
 54: using namespace baremetal;
-55: 
+55:
 56: /// @brief GPIO base address
 57: static uintptr GPIOBaseAddress{RPI_GPIO_BASE};
 58: /// @brief Mask used to check whether an address is in the GPIO register range
 59: static uintptr GPIOBaseAddressMask{0xFFFFFFFFFFFFFF00};
-60: 
+60:
 61: /// <summary>
 62: /// MemoryAccessStubGPIO constructor
 63: /// </summary>
@@ -877,7 +878,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 65:     : m_registers{}
 66: {
 67: }
-68: 
+68:
 69: /// <summary>
 70: /// Read a 8 bit value from register at address
 71: /// </summary>
@@ -888,7 +889,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 76:     LOG_PANIC("Call to Read8 should not happen");
 77:     return {};
 78: }
-79: 
+79:
 80: /// <summary>
 81: /// Write a 8 bit value to register at address
 82: /// </summary>
@@ -898,7 +899,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 86: {
 87:     LOG_PANIC("Call to Write8 should not happen");
 88: }
-89: 
+89:
 90: /// <summary>
 91: /// Read a 16 bit value from register at address
 92: /// </summary>
@@ -909,7 +910,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 97:     LOG_PANIC("Call to Read16 should not happen");
 98:     return {};
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Write a 16 bit value to register at address
 103: /// </summary>
@@ -919,7 +920,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 107: {
 108:     LOG_PANIC("Call to Write16 should not happen");
 109: }
-110: 
+110:
 111: /// <summary>
 112: /// Convert pin mode to string
 113: /// </summary>
@@ -957,7 +958,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 145:     }
 146:     return result;
 147: }
-148: 
+148:
 149: /// <summary>
 150: /// Convert pull up/down mode to string
 151: /// </summary>
@@ -991,7 +992,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 179:     }
 180:     return result;
 181: }
-182: 
+182:
 183: /// <summary>
 184: /// Read a 32 bit value from register at address
 185: /// </summary>
@@ -1223,7 +1224,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 411:     }
 412:     return *registerField;
 413: }
-414: 
+414:
 415: /// <summary>
 416: /// Write a 32 bit value to register at address
 417: /// </summary>
@@ -1498,7 +1499,7 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 686:     }
 687:     *registerField = data;
 688: }
-689: 
+689:
 690: /// <summary>
 691: /// Determine register address offset relative to GPIO base address
 692: ///
@@ -1567,120 +1568,154 @@ Even though we protected against early logging and tracing, we want to make sure
 So we'll change the singleton instance to a pointer, and check whether this pointer is initialized.
 Also, whenever we use the macros, we check whether the static `HaveLogger()` method returns true.
 For this, we'll introduce static `Log()`, `LogNoAlloc()`, `Trace()` and `TraceNoAlloc()` methods.
+Also, we're going to add an additional severity level `Data` for tracing data.
+In order to not have to process data when it is not going to be output, we add a method `IsLogSeverityEnabled()`.
 
 Update the file `code/libraries/baremetal/include/baremetal/Logger.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Logger.h
-70: /// <summary>
-71: /// Logger class
-72: /// </summary>
-73: class Logger
-74: {
-75:     /// <summary>
-76:     /// Construct the singleton Logger instance if needed, and return a reference to the instance. This is a friend function of class Logger
-77:     /// </summary>
-78:     /// <returns>Reference to the singleton logger instance</returns>
-79:     friend Logger& GetLogger();
-80: 
-81: private:
-82:     /// @brief True if class is already initialized
-83:     bool m_isInitialized;
-84:     /// @brief Pointer to timer instance
-85:     Timer* m_timer;
-86:     /// @brief Currently set logging severity level
-87:     LogSeverity m_level;
-88:     /// @brief Singleton console instance
-89:     static Console s_console;
-90:     /// @brief Singleton logger instance
-91:     static Logger* s_logger;
-92: 
-93:     explicit Logger(LogSeverity logLevel, Timer* timer = nullptr);
+49: namespace baremetal {
+50: 
+51: /// <summary>
+52: /// Logging severity classes
+53: /// </summary>
+54: enum class LogSeverity
+55: {
+56:     /// @brief Halt the system after processing this message
+57:     Panic,
+58:     /// @brief Severe error in this component, system may continue to work
+59:     Error,
+60:     /// @brief Non-severe problem, component continues to work
+61:     Warning,
+62:     /// @brief Informative message, which is interesting for the system user
+63:     Info,
+64:     /// @brief Message, which is only interesting for debugging this component
+65:     Debug,
+66:     /// @brief Data, which is only interesting for detailed information for this component
+67:     Data,
+68: };
+69: 
+70: class Timer;
+71: 
+72: /// <summary>
+73: /// Logger class
+74: /// </summary>
+75: class Logger
+76: {
+77:     /// <summary>
+78:     /// Construct the singleton Logger instance if needed, and return a reference to the instance. This is a friend function of class Logger
+79:     /// </summary>
+80:     /// <returns>Reference to the singleton logger instance</returns>
+81:     friend Logger& GetLogger();
+82: 
+83: private:
+84:     /// @brief True if class is already initialized
+85:     bool m_isInitialized;
+86:     /// @brief Pointer to timer instance
+87:     Timer* m_timer;
+88:     /// @brief Currently set logging severity level
+89:     LogSeverity m_level;
+90:     /// @brief Singleton console instance
+91:     static Console s_console;
+92:     /// @brief Singleton logger instance
+93:     static Logger* s_logger;
 94: 
-95: public:
-96:     static bool HaveLogger();
-97: 
-98:     bool Initialize();
-99:     void SetLogLevel(LogSeverity logLevel);
-100: 
-101:     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);
-102:     void LogV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
+95:     explicit Logger(LogSeverity logLevel, Timer* timer = nullptr);
+96: 
+97: public:
+98:     static bool HaveLogger();
+99: 
+100:     bool Initialize();
+101:     void SetLogLevel(LogSeverity logLevel);
+102:     bool IsLogSeverityEnabled(LogSeverity severity);
 103: 
-104:     void LogNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...);
-105:     void LogNoAllocV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
+104:     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);
+105:     void LogV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
 106: 
-107:     void Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
-108:     void TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
+107:     void LogNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...);
+108:     void LogNoAllocV(const char* from, int line, LogSeverity severity, const char* message, va_list args);
 109: 
-110:     void TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
-111:     void TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
+110:     void Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
+111:     void TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
 112: 
-113:     static void LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...);
-114:     static void LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...);
-115:     static void TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
-116:     static void TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
-117: };
-118: 
-119: Logger& GetLogger();
-120: 
-121: /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
-122: #define LOG_MODULE(name)                  static const char From[] = name
+113:     void TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
+114:     void TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args);
+115: 
+116:     static void LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...);
+117:     static void LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...);
+118:     static void TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
+119:     static void TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...);
+120: };
+121: 
+122: Logger& GetLogger();
 123: 
-124: /// @brief Log a panic message
-125: #define LOG_PANIC(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
-126: /// @brief Log an error message
-127: #define LOG_ERROR(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
-128: /// @brief Log a warning message
-129: #define LOG_WARNING(...)                  Logger::LogEntry(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
-130: /// @brief Log a info message
-131: #define LOG_INFO(...)                     Logger::LogEntry(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
-132: /// @brief Log a debug message
-133: #define LOG_DEBUG(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
-134: 
-135: /// @brief Log a message with specified severity and message string
-136: #define LOG(severity, message)            Logger::LogEntry(From, __LINE__, severity, message)
+124: /// @brief Define the static variable From to the specified name, to support printing a different file specification in LOG_* macros
+125: #define LOG_MODULE(name)                  static const char From[] = name
+126: 
+127: /// @brief Log a panic message
+128: #define LOG_PANIC(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
+129: /// @brief Log an error message
+130: #define LOG_ERROR(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
+131: /// @brief Log a warning message
+132: #define LOG_WARNING(...)                  Logger::LogEntry(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
+133: /// @brief Log a info message
+134: #define LOG_INFO(...)                     Logger::LogEntry(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
+135: /// @brief Log a debug message
+136: #define LOG_DEBUG(...)                    Logger::LogEntry(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
 137: 
-138: /// @brief Log a panic message
-139: #define LOG_NO_ALLOC_PANIC(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
-140: /// @brief Log an error message
-141: #define LOG_NO_ALLOC_ERROR(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
-142: /// @brief Log a warning message
-143: #define LOG_NO_ALLOC_WARNING(...)         Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
-144: /// @brief Log a info message
-145: #define LOG_NO_ALLOC_INFO(...)            Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
-146: /// @brief Log a debug message
-147: #define LOG_NO_ALLOC_DEBUG(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
-148: 
-149: /// @brief Log a message with specified severity and message string
-150: #define LOG_NO_ALLOC(severity, message)   Logger::LogEntryNoAlloc(From, __LINE__, severity, message)
+138: /// @brief Log a message with specified severity and message string
+139: #define LOG(severity, message)            Logger::LogEntry(From, __LINE__, severity, message)
+140: 
+141: /// @brief Log a panic message
+142: #define LOG_NO_ALLOC_PANIC(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Panic, __VA_ARGS__)
+143: /// @brief Log an error message
+144: #define LOG_NO_ALLOC_ERROR(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Error, __VA_ARGS__)
+145: /// @brief Log a warning message
+146: #define LOG_NO_ALLOC_WARNING(...)         Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Warning, __VA_ARGS__)
+147: /// @brief Log a info message
+148: #define LOG_NO_ALLOC_INFO(...)            Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Info, __VA_ARGS__)
+149: /// @brief Log a debug message
+150: #define LOG_NO_ALLOC_DEBUG(...)           Logger::LogEntryNoAlloc(From, __LINE__, LogSeverity::Debug, __VA_ARGS__)
 151: 
-152: /// @brief Log a warning message
-153: #define TRACE_WARNING(...)                Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
-154: /// @brief Log a info message
-155: #define TRACE_INFO(...)                   Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
-156: /// @brief Log a debug message
-157: #define TRACE_DEBUG(...)                  Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
-158: 
-159: /// @brief Log a message with specified severity and message string
-160: #define TRACE(severity, message)          Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, severity, message)
-161: 
-162: /// @brief Log a warning message
-163: #define TRACE_NO_ALLOC_WARNING(...)       Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
-164: /// @brief Log a info message
-165: #define TRACE_NO_ALLOC_INFO(...)          Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
-166: /// @brief Log a debug message
-167: #define TRACE_NO_ALLOC_DEBUG(...)         Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
-168: 
-169: /// @brief Log a message with specified severity and message string
-170: #define TRACE_NO_ALLOC(severity, message) Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, severity, message)
+152: /// @brief Log a message with specified severity and message string
+153: #define LOG_NO_ALLOC(severity, message)   Logger::LogEntryNoAlloc(From, __LINE__, severity, message)
+154: 
+155: /// @brief Trace a warning message
+156: #define TRACE_WARNING(...)                Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
+157: /// @brief Trace a info message
+158: #define TRACE_INFO(...)                   Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
+159: /// @brief Trace a debug message
+160: #define TRACE_DEBUG(...)                  Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+161: /// @brief Trace a data message
+162: #define TRACE_DATA(...)                   Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, LogSeverity::Data, __VA_ARGS__)
+163: 
+164: /// @brief Trace a message with specified severity and message string
+165: #define TRACE(severity, message)          Logger::TraceEntry(__FILE_NAME__, __LINE__, __func__, severity, message)
+166: 
+167: /// @brief Trace a warning message
+168: #define TRACE_NO_ALLOC_WARNING(...)       Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Warning, __VA_ARGS__)
+169: /// @brief Trace a info message
+170: #define TRACE_NO_ALLOC_INFO(...)          Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Info, __VA_ARGS__)
+171: /// @brief Trace a debug message
+172: #define TRACE_NO_ALLOC_DEBUG(...)         Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Debug, __VA_ARGS__)
+173: /// @brief Trace a data message
+174: #define TRACE_NO_ALLOC_DATA(...)          Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, LogSeverity::Data, __VA_ARGS__)
+175: 
+176: /// @brief Trace a message with specified severity and message string
+177: #define TRACE_NO_ALLOC(severity, message) Logger::TraceEntryNoAlloc(__FILE_NAME__, __LINE__, __func__, severity, message)
+178: 
+179: } // namespace baremetal
 ```
 
-- Line 90-91: We declare a static class variable `s_logger` to point to the singleton instance
-- Line 113-116: We declare the new static methods
-- Line 124-136: We now call the static method `LogEntry()` instead of retrieving the singleton instance and calling `Log()` on it
-- Line 138-150: We now call the static method `LogEntryNoAlloc()` instead of retrieving the singleton instance and calling `LogNoAlloc()` on it
-- Line 152-160: We now call the static method `TraceEntry()` instead of retrieving the singleton instance and calling `Trace()` on it
-- Line 162-170: We now call the static method `TraceEntryNoAlloc()` instead of retrieving the singleton instance and calling `TraceNoAlloc()` on it
+- Line 66-67: We introduce a new severity level `Data`
+- Line 92-93: We declare a static class variable `s_logger` to point to the singleton instance
+- Line 102: We declare a method `IsLogSeverityEnabled()`
+- Line 116-119: We declare the new static methods
+- Line 127-139: We now call the static method `LogEntry()` instead of retrieving the singleton instance and calling `Log()` on it
+- Line 141-153: We now call the static method `LogEntryNoAlloc()` instead of retrieving the singleton instance and calling `LogNoAlloc()` on it
+- Line 155-165: We now call the static method `TraceEntry()` instead of retrieving the singleton instance and calling `Trace()` on it
+- Line 167-177: We now call the static method `TraceEntryNoAlloc()` instead of retrieving the singleton instance and calling `TraceNoAlloc()` on it
 
 ### Logger.cpp {#TUTORIAL_21_GPIO_FAKING_GPIO____STEP_1_LOGGERCPP}
 
@@ -1693,7 +1728,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 ...
 59: Console Logger::s_console(nullptr);
 60: Logger* Logger::s_logger{};
-61: 
+61:
 62: /// <summary>
 63: /// Construct a logger
 64: /// </summary>
@@ -1705,7 +1740,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 70:     , m_level{logLevel}
 71: {
 72: }
-73: 
+73:
 74: /// <summary>
 75: /// Check whether the singleton logger was instantiated and initialized
 76: /// </summary>
@@ -1715,103 +1750,448 @@ File: code/libraries/baremetal/src/Logger.cpp
 80:     return (s_logger != nullptr) && (s_logger->m_isInitialized);
 81: }
 ...
-491: /// <summary>
-492: /// Write a string with variable arguments to the logger. Static entry point for Log() method
-493: /// </summary>
-494: /// <param name="source">Source name or file name</param>
-495: /// <param name="line">Source line number</param>
-496: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-497: /// <param name="message">Formatted message string, with variable arguments</param>
-498: void Logger::LogEntry(const char *from, int line, LogSeverity severity, const char *message, ...)
-499: {
-500:     if (HaveLogger())
-501:     {
-502:         va_list args;
-503:         va_start(args, message);
-504:         GetLogger().LogV(from, line, severity, message, args);
-505:         va_end(args);
-506:     }
-507: }
-508: 
-509: /// <summary>
-510: /// Write a string with variable arguments to the logger, not using memory allocation. Static entry point for LogNoAlloc() method
-511: /// </summary>
-512: /// <param name="source">Source name or file name</param>
-513: /// <param name="line">Source line number</param>
-514: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-515: /// <param name="message">Formatted message string, with variable arguments</param>
-516: void Logger::LogEntryNoAlloc(const char *from, int line, LogSeverity severity, const char *message, ...)
-517: {
-518:     if (HaveLogger())
-519:     {
-520:         va_list args;
-521:         va_start(args, message);
-522:         GetLogger().LogNoAllocV(from, line, severity, message, args);
-523:         va_end(args);
-524:     }
-525: }
-526: 
-527: /// <summary>
-528: /// Write a trace string with variable arguments to the logger. Static entry point for Trace() method
-529: /// </summary>
-530: /// <param name="filename">File name</param>
-531: /// <param name="line">Source line number</param>
-532: /// <param name="function">Function name</param>
-533: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-534: /// <param name="message">Formatted message string, with variable arguments</param>
-535: void Logger::TraceEntry(const char *filename, int line, const char *function, LogSeverity severity, const char *message, ...)
-536: {
-537:     if (HaveLogger())
-538:     {
-539:         va_list args;
-540:         va_start(args, message);
-541:         GetLogger().TraceV(filename, line, function, severity, message, args);
-542:         va_end(args);
-543:     }
-544: }
-545: 
-546: /// <summary>
-547: /// Write a trace string with variable arguments to the logger, not using memory allocation. Static entry point for TraceNoAlloc() method
-548: /// </summary>
-549: /// <param name="filename">File name</param>
-550: /// <param name="line">Source line number</param>
-551: /// <param name="function">Function name</param>
-552: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
-553: /// <param name="message">Formatted message string, with variable arguments</param>
-554: void Logger::TraceEntryNoAlloc(const char *filename, int line, const char *function, LogSeverity severity, const char *message, ...)
-555: {
-556:     if (HaveLogger())
-557:     {
-558:         va_list args;
-559:         va_start(args, message);
-560:         GetLogger().TraceNoAllocV(filename, line, function, severity, message, args);
-561:         va_end(args);
-562:     }
-563: }
-564: 
-565: /// <summary>
-566: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
-567: /// </summary>
-568: /// <returns>Reference to the singleton logger instance</returns>
-569: Logger& baremetal::GetLogger()
-570: {
-571:     if (Logger::s_logger == nullptr)
-572:     {
-573:         Logger::s_logger = new Logger(LogSeverity::Info, &GetTimer());
-574:         Logger::s_logger->Initialize();
-575: 
+107: /// <summary>
+108: /// Check if the log level will result in output
+109: /// </summary>
+110: /// <param name="severity">True if the log level is enabled, false otherwise</param>
+111: bool Logger::IsLogSeverityEnabled(LogSeverity severity)
+112: {
+113:     return (static_cast<int>(severity) <= static_cast<int>(m_level));
+114: }
+115: 
+116: 
+...
+139: void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+140: {
+141:     if (!IsLogSeverityEnabled(severity))
+142:         return;
+143: 
+144:     String lineBuffer;
+145: 
+146:     auto sourceString = Format(" (%s:%d)", source, line);
+147: 
+148:     auto messageBuffer = FormatV(message, args);
+149: 
+150:     switch (severity)
+151:     {
+152:     case LogSeverity::Panic:
+153:         lineBuffer += "!Panic!";
+154:         break;
+155:     case LogSeverity::Error:
+156:         lineBuffer += "Error  ";
+157:         break;
+158:     case LogSeverity::Warning:
+159:         lineBuffer += "Warning";
+160:         break;
+161:     case LogSeverity::Info:
+162:         lineBuffer += "Info   ";
+163:         break;
+164:     case LogSeverity::Debug:
+165:         lineBuffer += "Debug  ";
+166:         break;
+167:     case LogSeverity::Data:
+168:         lineBuffer += "Data   ";
+169:         break;
+170:     }
+171: 
+172:     if (m_timer != nullptr)
+173:     {
+174:         const size_t TimeBufferSize = 32;
+175:         char timeBuffer[TimeBufferSize]{};
+176:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+177:         if (strlen(timeBuffer) > 0)
+178:         {
+179:             lineBuffer += timeBuffer;
+180:             lineBuffer += ' ';
+181:         }
+182:     }
+183: 
+184:     lineBuffer += messageBuffer;
+185:     lineBuffer += sourceString;
+186:     lineBuffer += "\n";
+187: 
+188: #if BAREMETAL_COLOR_OUTPUT
+189:     switch (severity)
+190:     {
+191:     case LogSeverity::Panic:
+192:         s_console.Write(lineBuffer, ConsoleColor::BrightRed);
+193:         break;
+194:     case LogSeverity::Error:
+195:         s_console.Write(lineBuffer, ConsoleColor::Red);
+196:         break;
+197:     case LogSeverity::Warning:
+198:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+199:         break;
+200:     case LogSeverity::Info:
+201:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
+202:         break;
+203:     case LogSeverity::Debug:
+204:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
+205:         break;
+206:     case LogSeverity::Data:
+207:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
+208:         break;
+209:     default:
+210:         s_console.Write(lineBuffer, ConsoleColor::White);
+211:         break;
+212:     }
+213: #else
+214:     s_console.Write(lineBuffer);
+215: #endif
+216: 
+217:     if (severity == LogSeverity::Panic)
+218:     {
+219:         GetSystem().Halt();
+220:     }
+221: }
+...
+246: void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+247: {
+248:     if (!IsLogSeverityEnabled(severity))
+249:         return;
+250: 
+251:     static const size_t BufferSize = 1024;
+252:     char buffer[BufferSize]{};
+253: 
+254:     char sourceString[BufferSize]{};
+255:     FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
+256: 
+257:     char messageBuffer[BufferSize]{};
+258:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
+259: 
+260:     switch (severity)
+261:     {
+262:     case LogSeverity::Panic:
+263:         strncat(buffer, "!Panic!", BufferSize);
+264:         break;
+265:     case LogSeverity::Error:
+266:         strncat(buffer, "Error  ", BufferSize);
+267:         break;
+268:     case LogSeverity::Warning:
+269:         strncat(buffer, "Warning", BufferSize);
+270:         break;
+271:     case LogSeverity::Info:
+272:         strncat(buffer, "Info   ", BufferSize);
+273:         break;
+274:     case LogSeverity::Debug:
+275:         strncat(buffer, "Debug  ", BufferSize);
+276:         break;
+277:     case LogSeverity::Data:
+278:         strncat(buffer, "Data   ", BufferSize);
+279:         break;
+280:     }
+281: 
+282:     if (m_timer != nullptr)
+283:     {
+284:         const size_t TimeBufferSize = 32;
+285:         char timeBuffer[TimeBufferSize]{};
+286:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+287:         if (strlen(timeBuffer) > 0)
+288:         {
+289:             strncat(buffer, timeBuffer, BufferSize);
+290:             strncat(buffer, " ", BufferSize);
+291:         }
+292:     }
+293: 
+294:     strncat(buffer, messageBuffer, BufferSize);
+295:     strncat(buffer, sourceString, BufferSize);
+296:     strncat(buffer, "\n", BufferSize);
+297: 
+298: #if BAREMETAL_COLOR_OUTPUT
+299:     switch (severity)
+300:     {
+301:     case LogSeverity::Panic:
+302:         s_console.Write(buffer, ConsoleColor::BrightRed);
+303:         break;
+304:     case LogSeverity::Error:
+305:         s_console.Write(buffer, ConsoleColor::Red);
+306:         break;
+307:     case LogSeverity::Warning:
+308:         s_console.Write(buffer, ConsoleColor::BrightYellow);
+309:         break;
+310:     case LogSeverity::Info:
+311:         s_console.Write(buffer, ConsoleColor::Cyan);
+312:         break;
+313:     case LogSeverity::Debug:
+314:         s_console.Write(buffer, ConsoleColor::Yellow);
+315:         break;
+316:     case LogSeverity::Data:
+317:         s_console.Write(buffer, ConsoleColor::Magenta);
+318:         break;
+319:     default:
+320:         s_console.Write(buffer, ConsoleColor::White);
+321:         break;
+322:     }
+323: #else
+324:     s_console.Write(buffer);
+325: #endif
+326: 
+327:     if (severity == LogSeverity::Panic)
+328:     {
+329:         GetSystem().Halt();
+330:     }
+331: }
+...
+349: /// <summary>
+350: /// Write a trace string with variable arguments to the logger
+351: /// </summary>
+352: /// <param name="filename">File name</param>
+353: /// <param name="line">Source line number</param>
+354: /// <param name="function">Function name</param>
+355: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+356: /// <param name="message">Formatted message string</param>
+357: /// <param name="args">Variable argument list</param>
+358: void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+359: {
+360:     if (!IsLogSeverityEnabled(severity))
+361:         return;
+362: 
+363:     String lineBuffer;
+364: 
+365:     auto sourceString = Format(" (%s:%d)", filename, line);
+366: 
+367:     auto messageBuffer = FormatV(message, args);
+368: 
+369:     switch (severity)
+370:     {
+371:     case LogSeverity::Warning:
+372:         lineBuffer += "Warning";
+373:         break;
+374:     case LogSeverity::Info:
+375:         lineBuffer += "Info   ";
+376:         break;
+377:     case LogSeverity::Debug:
+378:         lineBuffer += "Debug  ";
+379:         break;
+380:     case LogSeverity::Data:
+381:         lineBuffer += "Data   ";
+382:         break;
+383:     default:
+384:         break;
+385:     }
+386: 
+387:     if (m_timer != nullptr)
+388:     {
+389:         const size_t TimeBufferSize = 32;
+390:         char timeBuffer[TimeBufferSize]{};
+391:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+392:         if (strlen(timeBuffer) > 0)
+393:         {
+394:             lineBuffer += timeBuffer;
+395:             lineBuffer += ' ';
+396:         }
+397:     }
+398: 
+399:     lineBuffer += messageBuffer;
+400:     lineBuffer += sourceString;
+401:     lineBuffer += "\n";
+402: 
+403: #if BAREMETAL_COLOR_OUTPUT
+404:     switch (severity)
+405:     {
+406:     case LogSeverity::Warning:
+407:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+408:         break;
+409:     case LogSeverity::Info:
+410:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
+411:         break;
+412:     case LogSeverity::Debug:
+413:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
+414:         break;
+415:     case LogSeverity::Data:
+416:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
+417:         break;
+418:     default:
+419:         s_console.Write(lineBuffer, ConsoleColor::White);
+420:         break;
+421:     }
+422: #else
+423:     s_console.Write(lineBuffer);
+424: #endif
+425: }
+426: 
+...
+452: void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+453: {
+454:     if (!IsLogSeverityEnabled(severity))
+455:         return;
+456: 
+457:     static const size_t BufferSize = 1024;
+458:     char buffer[BufferSize]{};
+459: 
+460:     char sourceString[BufferSize]{};
+461:     FormatNoAlloc(sourceString, BufferSize, "%s (%s:%d) ", function, filename, line);
+462: 
+463:     char messageBuffer[BufferSize]{};
+464:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
+465: 
+466:     switch (severity)
+467:     {
+468:     case LogSeverity::Warning:
+469:         strncat(buffer, "Warning", BufferSize);
+470:         break;
+471:     case LogSeverity::Info:
+472:         strncat(buffer, "Info   ", BufferSize);
+473:         break;
+474:     case LogSeverity::Debug:
+475:         strncat(buffer, "Debug  ", BufferSize);
+476:         break;
+477:     case LogSeverity::Data:
+478:         strncat(buffer, "Data   ", BufferSize);
+479:         break;
+480:     default:
+481:         break;
+482:     }
+483: 
+484:     if (m_timer != nullptr)
+485:     {
+486:         const size_t TimeBufferSize = 32;
+487:         char timeBuffer[TimeBufferSize]{};
+488:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+489:         if (strlen(timeBuffer) > 0)
+490:         {
+491:             strncat(buffer, timeBuffer, BufferSize);
+492:             strncat(buffer, " ", BufferSize);
+493:         }
+494:     }
+495: 
+496:     strncat(buffer, sourceString, BufferSize);
+497:     strncat(buffer, messageBuffer, BufferSize);
+498:     strncat(buffer, "\n", BufferSize);
+499: 
+500: #if BAREMETAL_COLOR_OUTPUT
+501:     switch (severity)
+502:     {
+503:     case LogSeverity::Warning:
+504:         s_console.Write(buffer, ConsoleColor::BrightYellow);
+505:         break;
+506:     case LogSeverity::Info:
+507:         s_console.Write(buffer, ConsoleColor::Cyan);
+508:         break;
+509:     case LogSeverity::Debug:
+510:         s_console.Write(buffer, ConsoleColor::Yellow);
+511:         break;
+512:     case LogSeverity::Data:
+513:         s_console.Write(buffer, ConsoleColor::Magenta);
+514:         break;
+515:     default:
+516:         s_console.Write(buffer, ConsoleColor::White);
+517:         break;
+518:     }
+519: #else
+520:     s_console.Write(buffer);
+521: #endif
+522: }
+523: 
+524: /// <summary>
+525: /// Write a string with variable arguments to the logger. Static entry point for Log() method
+526: /// </summary>
+527: /// <param name="from">Source name or file name</param>
+528: /// <param name="line">Source line number</param>
+529: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+530: /// <param name="message">Formatted message string, with variable arguments</param>
+531: void Logger::LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...)
+532: {
+533:     if (HaveLogger())
+534:     {
+535:         va_list args;
+536:         va_start(args, message);
+537:         GetLogger().LogV(from, line, severity, message, args);
+538:         va_end(args);
+539:     }
+540: }
+541: 
+542: /// <summary>
+543: /// Write a string with variable arguments to the logger, not using memory allocation. Static entry point for LogNoAlloc() method
+544: /// </summary>
+545: /// <param name="from">Source name or file name</param>
+546: /// <param name="line">Source line number</param>
+547: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+548: /// <param name="message">Formatted message string, with variable arguments</param>
+549: void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...)
+550: {
+551:     if (HaveLogger())
+552:     {
+553:         va_list args;
+554:         va_start(args, message);
+555:         GetLogger().LogNoAllocV(from, line, severity, message, args);
+556:         va_end(args);
+557:     }
+558: }
+559: 
+560: /// <summary>
+561: /// Write a trace string with variable arguments to the logger. Static entry point for Trace() method
+562: /// </summary>
+563: /// <param name="filename">File name</param>
+564: /// <param name="line">Source line number</param>
+565: /// <param name="function">Function name</param>
+566: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+567: /// <param name="message">Formatted message string, with variable arguments</param>
+568: void Logger::TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+569: {
+570:     if (HaveLogger())
+571:     {
+572:         va_list args;
+573:         va_start(args, message);
+574:         GetLogger().TraceV(filename, line, function, severity, message, args);
+575:         va_end(args);
 576:     }
-577:     return *Logger::s_logger;
-578: }
+577: }
+578: 
+579: /// <summary>
+580: /// Write a trace string with variable arguments to the logger, not using memory allocation. Static entry point for TraceNoAlloc() method
+581: /// </summary>
+582: /// <param name="filename">File name</param>
+583: /// <param name="line">Source line number</param>
+584: /// <param name="function">Function name</param>
+585: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+586: /// <param name="message">Formatted message string, with variable arguments</param>
+587: void Logger::TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+588: {
+589:     if (HaveLogger())
+590:     {
+591:         va_list args;
+592:         va_start(args, message);
+593:         GetLogger().TraceNoAllocV(filename, line, function, severity, message, args);
+594:         va_end(args);
+595:     }
+596: }
+597: 
+598: /// <summary>
+599: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
+600: /// </summary>
+601: /// <returns>Reference to the singleton logger instance</returns>
+602: Logger& baremetal::GetLogger()
+603: {
+604:     if (Logger::s_logger == nullptr)
+605:     {
+606:         Logger::s_logger = new Logger(LogSeverity::Info, &GetTimer());
+607:         Logger::s_logger->Initialize();
+608:     }
+609:     return *Logger::s_logger;
+610: }
 ```
 
 - Line 60: We define and initialize the class variable `s_logger`
 - Line 80: We now use `s_logger` and check that it is not null, and if not null that the class is initialized
-- Line 491-507: We implement `LogEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogV()`
-- Line 509-525: We implement `LogEntryNoAlloc)`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogNoAllocV()`
-- Line 527-544: We implement `TraceEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceV()`
-- Line 546-563: We implement `TraceEntryNoAlloc()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceNoAllocV()`
-- Line 565-578: We update the implementation of `GetLogger()` to create a new object if the pointer is still null
+- Line 107-114: We implement the method `IsLogSeverityEnabled()`
+- Line 141: We use `IsLogSeverityEnabled()` to filter
+- Line 167-169: We add handling of sevierity `Data`
+- Line 206-208: We add handling of sevierity `Data`
+- Line 248: We use `IsLogSeverityEnabled()` to filter
+- Line 277-279: We add handling of sevierity `Data`
+- Line 316-318: We add handling of sevierity `Data`
+- Line 360: We use `IsLogSeverityEnabled()` to filter
+- Line 380-382: We add handling of sevierity `Data`
+- Line 415-417: We add handling of sevierity `Data`
+- Line 454: We use `IsLogSeverityEnabled()` to filter
+- Line 477-479: We add handling of sevierity `Data`
+- Line 512-514: We add handling of sevierity `Data`
+- Line 524-540: We implement `LogEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogV()`
+- Line 542-558: We implement `LogEntryNoAlloc)`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogNoAllocV()`
+- Line 560-577: We implement `TraceEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceV()`
+- Line 579-596: We implement `TraceEntryNoAlloc()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceNoAllocV()`
+- Line 598-610: We update the implementation of `GetLogger()` to create a new object if the pointer is still null
 
 ### Update application code : Use GPIO stub {#TUTORIAL_21_GPIO_FAKING_GPIO____STEP_1_UPDATE_APPLICATION_CODE__USE_GPIO_STUB}
 
@@ -1845,7 +2225,7 @@ File: code/applications/demo/src/main.cpp
 22:     PhysicalGPIOPin swPin(SWPinNumber, GPIOMode::InputPullUp, fakeMemoryAccess);
 23:
 24:     LOG_INFO("Rebooting");
-25: 
+25:
 26:     return static_cast<int>(ReturnCode::ExitReboot);
 27: }
 ```
@@ -2122,7 +2502,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 83:     /// Default destructor needed for abstract interface
 84:     /// </summary>
 85:     virtual ~IGPIOPin() = default;
-86: 
+86:
 87:     /// <summary>
 88:     /// Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
 89:     /// </summary>
@@ -2134,7 +2514,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 95:     /// <param name="pinNumber">Pin number</param>
 96:     /// <returns>true if successful, false otherwise</returns>
 97:     virtual bool AssignPin(uint8 pinNumber) = 0;
-98: 
+98:
 99:     /// <summary>
 100:     /// Switch GPIO on
 101:     /// </summary>
@@ -2181,13 +2561,13 @@ Update the file `code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h`
 File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 ...
 48: namespace baremetal {
-49: 
+49:
 50: /// @brief GPIO function
 51: enum class GPIOFunction;
-52: 
+52:
 53: /// @brief GPIO pull mode
 54: enum class GPIOPullMode;
-55: 
+55:
 56: #if BAREMETAL_RPI_TARGET == 3
 57: /// @brief Total count of GPIO pins, numbered from 0 through 53
 58: #define NUM_GPIO 54
@@ -2195,7 +2575,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 60: /// @brief Total count of GPIO pins, numbered from 0 through 56
 61: #define NUM_GPIO 57
 62: #endif
-63: 
+63:
 64: /// @brief Interrupt type to enable
 65: enum class GPIOInterruptType
 66: {
@@ -2214,7 +2594,7 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 79:     /// @brief Invalid / unknown
 80:     Unknown,
 81: };
-82: 
+82:
 83: /// <summary>
 84: /// Physical GPIO pin (i.e. available on GPIO header)
 85: /// </summary>
@@ -2239,15 +2619,15 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 104:     uint32 m_regMask;
 105:     /// @brief GPIO interrupt types enabled
 106:     bool m_interruptEnabled[static_cast<size_t>(GPIOInterruptType::Unknown)];
-107: 
+107:
 108: public:
 109:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
-110: 
+110:
 111:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
-112: 
+112:
 113:     uint8 GetPinNumber() const override;
 114:     bool AssignPin(uint8 pinNumber) override;
-115: 
+115:
 116:     void On() override;
 117:     void Off() override;
 118:     bool Get() override;
@@ -2255,21 +2635,21 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 120:     void Invert() override;
 121:     bool GetEvent() override;
 122:     void ClearEvent() override;
-123: 
+123:
 124:     GPIOMode GetMode();
 125:     bool SetMode(GPIOMode mode);
 126:     GPIOFunction GetFunction();
 127:     GPIOPullMode GetPullMode();
 128:     void SetPullMode(GPIOPullMode pullMode);
-129: 
+129:
 130:     void EnableInterrupt(GPIOInterruptType interruptType);
 131:     void DisableInterrupt(GPIOInterruptType interruptType);
 132:     void DisableAllInterrupts();
-133: 
+133:
 134: private:
 135:     void SetFunction(GPIOFunction function);
 136: };
-137: 
+137:
 138: } // namespace baremetal
 ```
 
@@ -2308,7 +2688,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 106:     , m_interruptEnabled{}
 107: {
 108: }
-109: 
+109:
 110: /// <summary>
 111: /// Creates a virtual GPIO pin
 112: /// </summary>
@@ -2339,10 +2719,10 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 146:     if (m_pinNumber != NUM_GPIO)
 147:         return false;
 148:     m_pinNumber = pinNumber;
-149: 
+149:
 150:     m_regOffset = (m_pinNumber / 32) * 4;
 151:     m_regMask = 1 << (m_pinNumber % 32);
-152: 
+152:
 153:     return true;
 154: }
 ...
@@ -2354,7 +2734,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 227: {
 228:     return (m_memoryAccess.Read32(RPI_GPIO_GPEDS0 + m_regOffset) & m_regMask) != 0;
 229: }
-230: 
+230:
 231: /// <summary>
 232: /// Clear GPIO event status
 233: /// </summary>
@@ -2362,7 +2742,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 235: {
 236:     m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
 237: }
-238: 
+238:
 ...
 361: /// <summary>
 362: /// Enable interrupts for the specified type
@@ -2371,18 +2751,18 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 365: void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptType interruptType)
 366: {
 367:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-368: 
+368:
 369:     assert(interruptType < GPIOInterruptType::Unknown);
 370:     if (!m_interruptEnabled[static_cast<size_t>(interruptType)])
 371:     {
 372:         m_interruptEnabled[static_cast<size_t>(interruptType)] = true;
-373: 
+373:
 374:         regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + (static_cast<unsigned>(interruptType) - static_cast<unsigned>(GPIOInterruptType::RisingEdge)) * 12;
-375: 
+375:
 376:         m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) | m_regMask);
 377:     }
 378: }
-379: 
+379:
 380: /// <summary>
 381: /// Disable interrupts for the specified type
 382: /// </summary>
@@ -2393,13 +2773,13 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 387:     if (m_interruptEnabled[static_cast<size_t>(interruptType)])
 388:     {
 389:         m_interruptEnabled[static_cast<size_t>(interruptType)] = false;
-390: 
+390:
 391:         regaddr regAddress = RPI_GPIO_GPREN0 + m_regOffset + (static_cast<unsigned>(interruptType) - static_cast<unsigned>(GPIOInterruptType::RisingEdge)) * 12;
-392: 
+392:
 393:         m_memoryAccess.Write32(regAddress, m_memoryAccess.Read32(regAddress) & ~m_regMask);
 394:     }
 395: }
-396: 
+396:
 397: /// <summary>
 398: /// Disable all interrupts
 399: /// </summary>
@@ -2412,7 +2792,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 406:     DisableInterrupt(GPIOInterruptType::AsyncRisingEdge);
 407:     DisableInterrupt(GPIOInterruptType::AsyncFallingEdge);
 408: }
-409: 
+409:
 ...
 ```
 
@@ -2452,18 +2832,18 @@ File: code/applications/demo/src/main.cpp
 7: #include "baremetal/PhysicalGPIOPin.h"
 8: #include "baremetal/System.h"
 9: #include "baremetal/Timer.h"
-10: 
+10:
 11: LOG_MODULE("main");
-12: 
+12:
 13: using namespace baremetal;
-14: 
+14:
 15: struct GPIOPins
 16: {
 17:     IGPIOPin& pinCLK;
 18:     IGPIOPin& pinDT;
 19:     IGPIOPin& pinSW;
 20: };
-21: 
+21:
 22: void InterruptHandler(void *param)
 23: {
 24:     TRACE_DEBUG("GPIO3");
@@ -2487,38 +2867,38 @@ File: code/applications/demo/src/main.cpp
 42:         pins->pinSW.ClearEvent();
 43:     }
 44: }
-45: 
+45:
 46: int main()
 47: {
 48:     auto& console = GetConsole();
 49:     GetLogger().SetLogLevel(LogSeverity::Debug);
-50: 
+50:
 51:     auto exceptionLevel = CurrentEL();
 52:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-53: 
+53:
 54:     PhysicalGPIOPin pinCLK(11, GPIOMode::InputPullUp);
 55:     PhysicalGPIOPin pinDT(9, GPIOMode::InputPullUp);
 56:     PhysicalGPIOPin pinSW(10, GPIOMode::InputPullUp);
 57:     GPIOPins pins { pinCLK, pinDT, pinSW };
-58: 
+58:
 59:     GetInterruptSystem().RegisterIRQHandler(IRQ_ID::IRQ_GPIO3, InterruptHandler, &pins);
-60: 
+60:
 61:     pinCLK.EnableInterrupt(GPIOInterruptType::RisingEdge);
 62:     pinCLK.EnableInterrupt(GPIOInterruptType::FallingEdge);
 63:     pinDT.EnableInterrupt(GPIOInterruptType::RisingEdge);
 64:     pinDT.EnableInterrupt(GPIOInterruptType::FallingEdge);
 65:     pinSW.EnableInterrupt(GPIOInterruptType::RisingEdge);
 66:     pinSW.EnableInterrupt(GPIOInterruptType::FallingEdge);
-67: 
+67:
 68:     LOG_INFO("Wait 5 seconds");
 69:     Timer::WaitMilliSeconds(5000);
-70: 
+70:
 71:     GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_GPIO3);
-72: 
+72:
 73:     pinCLK.DisableAllInterrupts();
 74:     pinDT.DisableAllInterrupts();
 75:     pinSW.DisableAllInterrupts();
-76: 
+76:
 77:     console.Write("Press r to reboot, h to halt\n");
 78:     char ch{};
 79:     while ((ch != 'r') && (ch != 'h'))
@@ -2526,7 +2906,7 @@ File: code/applications/demo/src/main.cpp
 81:         ch = console.ReadChar();
 82:         console.WriteChar(ch);
 83:     }
-84: 
+84:
 85:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 86: }
 ```
@@ -2652,18 +3032,18 @@ File: code/libraries/baremetal/include/baremetal/IGPIOManager.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Types.h"
-43: 
+43:
 44: /// @file
 45: /// GPIO configuration and control
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: class IGPIOPin;
-50: 
+50:
 51: /// @brief Handles configuration, setting and getting GPIO controls
 52: /// This is a singleton class, created as soon as GetIGPIOManager() is called
 53: class IGPIOManager
@@ -2673,12 +3053,12 @@ File: code/libraries/baremetal/include/baremetal/IGPIOManager.h
 57:     /// Default destructor needed for abstract interface
 58:     /// </summary>
 59:     virtual ~IGPIOManager() = default;
-60: 
+60:
 61:     /// <summary>
 62:     /// Initialize GPIO manager
 63:     /// </summary>
 64:     virtual void Initialize() = 0;
-65: 
+65:
 66:     /// <summary>
 67:     /// Connect the GPIO pin interrupt for the specified pin
 68:     /// </summary>
@@ -2689,18 +3069,18 @@ File: code/libraries/baremetal/include/baremetal/IGPIOManager.h
 73:     /// </summary>
 74:     /// <param name="pin">GPIO pin to disconnect interrupt for</param>
 75:     virtual void DisconnectInterrupt(const IGPIOPin* pin) = 0;
-76: 
+76:
 77:     /// <summary>
 78:     /// GPIO pin interrupt handler, called by the static entry point GPIOInterruptHandler()
 79:     /// </summary>
 80:     virtual void InterruptHandler() = 0;
-81: 
+81:
 82:     /// <summary>
 83:     /// Switch all GPIO pins to input mode, without pull-up or pull-down
 84:     /// </summary>
 85:     virtual void AllOff() = 0;
 86: };
-87: 
+87:
 88: } // namespace baremetal
 ```
 
@@ -2757,20 +3137,20 @@ File: code/libraries/baremetal/include/baremetal/GPIOManager.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/IGPIOManager.h"
 43: #include "baremetal/PhysicalGPIOPin.h"
 44: #include "stdlib/Types.h"
-45: 
+45:
 46: /// @file
 47: /// GPIO configuration and control
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: class IMemoryAccess;
-52: 
+52:
 53: /// @brief Handles configuration, setting and getting GPIO controls
 54: /// This is a singleton class, created as soon as GetGPIOManager() is called
 55: class GPIOManager : public IGPIOManager
@@ -2780,7 +3160,7 @@ File: code/libraries/baremetal/include/baremetal/GPIOManager.h
 59:     /// </summary>
 60:     /// <returns>Reference to the singleton GPIOManager instance</returns>
 61:     friend GPIOManager& GetGPIOManager();
-62: 
+62:
 63: private:
 64:     /// @brief True if class is already initialized
 65:     bool m_isInitialized;
@@ -2788,29 +3168,29 @@ File: code/libraries/baremetal/include/baremetal/GPIOManager.h
 67:     IGPIOPin* m_pins[NUM_GPIO];
 68:     /// @brief Memory access interface
 69:     IMemoryAccess& m_memoryAccess;
-70: 
+70:
 71:     GPIOManager();
-72: 
+72:
 73: public:
 74:     explicit GPIOManager(IMemoryAccess& memoryAccess);
 75:     ~GPIOManager();
-76: 
+76:
 77:     void Initialize() override;
-78: 
+78:
 79:     void ConnectInterrupt(IGPIOPin* pin) override;
 80:     void DisconnectInterrupt(const IGPIOPin* pin) override;
-81: 
+81:
 82:     void InterruptHandler() override;
-83: 
+83:
 84:     void AllOff() override;
-85: 
+85:
 86:     void DisableAllInterrupts(uint8 pinNumber);
-87: 
+87:
 88: private:
 89: };
-90: 
+90:
 91: GPIOManager& GetGPIOManager();
-92: 
+92:
 93: } // namespace baremetal
 ```
 
@@ -2874,9 +3254,9 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/GPIOManager.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/InterruptHandler.h"
@@ -2884,18 +3264,18 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 46: #include "baremetal/MemoryAccess.h"
 47: #include "baremetal/PhysicalGPIOPin.h"
 48: #include "baremetal/Timer.h"
-49: 
+49:
 50: using namespace baremetal;
-51: 
+51:
 52: static const int WaitCycles = 150;
-53: 
+53:
 54: static const IRQ_ID GPIO_IRQ{IRQ_ID::IRQ_GPIO3}; // shared IRQ line for all GPIOs
-55: 
+55:
 56: static void GPIOInterruptHandler(void* param);
-57: 
+57:
 58: /// @brief Define log name
 59: LOG_MODULE("GPIOManager");
-60: 
+60:
 61: /// <summary>
 62: /// Create a GPIO control. Note that the constructor is private, so GetGPIOManager() is needed to instantiate the GPIO control
 63: /// </summary>
@@ -2905,7 +3285,7 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 67:     , m_memoryAccess{GetMemoryAccess()}
 68: {
 69: }
-70: 
+70:
 71: /// <summary>
 72: /// Create a GPIO control with a custom memory access instance (for testing)
 73: /// </summary>
@@ -2916,7 +3296,7 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 78:     , m_memoryAccess{memoryAccess}
 79: {
 80: }
-81: 
+81:
 82: /// <summary>
 83: /// GPIO manager destructor
 84: /// </summary>
@@ -2928,13 +3308,13 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 90:         assert(m_pins[pin] == nullptr);
 91:     }
 92: #endif
-93: 
+93:
 94:     if (m_isInitialized)
 95:     {
 96:         GetInterruptSystem().UnregisterIRQHandler(GPIO_IRQ);
 97:     }
 98: }
-99: 
+99:
 100: /// <summary>
 101: /// Initialize GPIO manager
 102: /// </summary>
@@ -2945,7 +3325,7 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 107:     GetInterruptSystem().RegisterIRQHandler(GPIO_IRQ, GPIOInterruptHandler, this);
 108:     m_isInitialized = true;
 109: }
-110: 
+110:
 111: /// <summary>
 112: /// Connect the GPIO pin interrupt for the specified pin
 113: /// </summary>
@@ -2953,15 +3333,15 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 115: void GPIOManager::ConnectInterrupt(IGPIOPin* pin)
 116: {
 117:     assert(m_isInitialized);
-118: 
+118:
 119:     assert(pin != nullptr);
 120:     auto pinNumber = pin->GetPinNumber();
 121:     assert(pinNumber < NUM_GPIO);
-122: 
+122:
 123:     assert(m_pins[pinNumber] == nullptr);
 124:     m_pins[pinNumber] = pin;
 125: }
-126: 
+126:
 127: /// <summary>
 128: /// Disconnect the GPIO pin interrupt for the specified pin
 129: /// </summary>
@@ -2969,15 +3349,15 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 131: void GPIOManager::DisconnectInterrupt(const IGPIOPin* pin)
 132: {
 133:     assert(m_isInitialized);
-134: 
+134:
 135:     assert(pin != nullptr);
 136:     auto pinNumber = pin->GetPinNumber();
 137:     assert(pinNumber < NUM_GPIO);
-138: 
+138:
 139:     assert(m_pins[pinNumber] != nullptr);
 140:     m_pins[pinNumber] = nullptr;
 141: }
-142: 
+142:
 143: /// <summary>
 144: /// Switch all GPIO pins to input mode, without pull-up or pull-down
 145: /// </summary>
@@ -3003,16 +3383,16 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 165:     m_memoryAccess.Write32(RPI_GPIO_GPPUPPDN1, 0);
 166: #endif
 167: }
-168: 
+168:
 169: /// <summary>
 170: /// GPIO pin interrupt handler, called by the static entry point GPIOInterruptHandler()
 171: /// </summary>
 172: void GPIOManager::InterruptHandler()
 173: {
 174:     assert(m_isInitialized);
-175: 
+175:
 176:     uint32 eventStatus = m_memoryAccess.Read32(RPI_GPIO_GPEDS0);
-177: 
+177:
 178:     uint8 pinNumber = 0;
 179:     while (pinNumber < NUM_GPIO)
 180:     {
@@ -3021,20 +3401,20 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 183:             break;
 184:         }
 185:         eventStatus >>= 1;
-186: 
+186:
 187:         if (++pinNumber % 32 == 0)
 188:         {
 189:             eventStatus = m_memoryAccess.Read32(RPI_GPIO_GPEDS1);
 190:         }
 191:     }
-192: 
+192:
 193:     if (pinNumber < NUM_GPIO)
 194:     {
 195:         auto pin = m_pins[pinNumber];
 196:         if (pin != nullptr)
 197:         {
 198:             pin->InterruptHandler();
-199: 
+199:
 200:             if (pin->GetAutoAcknowledgeInterrupt())
 201:             {
 202:                 pin->AcknowledgeInterrupt();
@@ -3043,14 +3423,14 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 205:         else
 206:         {
 207:             LOG_ERROR("No pin found for interrupt");
-208: 
+208:
 209:             uint32 regOffset{static_cast<uint32>((pinNumber / 32) * 4)};
 210:             uint32 regMask{static_cast<uint32>(1 << (pinNumber % 32))};
 211:             m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + regOffset, regMask);
 212:         }
 213:     }
 214: }
-215: 
+215:
 216: /// <summary>
 217: /// Disable all GPIO interrupt types for the specified in number
 218: /// </summary>
@@ -3058,15 +3438,15 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 220: void GPIOManager::DisableAllInterrupts(uint8 pinNumber)
 221: {
 222:     assert(pinNumber < NUM_GPIO);
-223: 
+223:
 224:     uint32 mask = 1 << (pinNumber % 32);
-225: 
+225:
 226:     for (auto reg = RPI_GPIO_GPREN0 + (pinNumber / 32) * 4; reg < RPI_GPIO_GPAFEN0 + 4; reg += 12)
 227:     {
 228:         m_memoryAccess.Write32(reg, m_memoryAccess.Read32(reg) & ~mask);
 229:     }
 230: }
-231: 
+231:
 232: /// <summary>
 233: /// GPIO IRQ entry pointer, calls Interrupt handle on the GPIOManager instance passed through param
 234: /// </summary>
@@ -3075,10 +3455,10 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 237: {
 238:     GPIOManager* pThis = reinterpret_cast<GPIOManager*>(param);
 239:     assert(pThis != nullptr);
-240: 
+240:
 241:     pThis->InterruptHandler();
 242: }
-243: 
+243:
 244: /// <summary>
 245: /// Create a singleton GPIOManager if neededm and return the singleton instance
 246: /// </summary>
@@ -3150,7 +3530,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 83:     /// Default destructor needed for abstract interface
 84:     /// </summary>
 85:     virtual ~IGPIOPin() = default;
-86: 
+86:
 87:     /// <summary>
 88:     /// Return pin number (high bit = 0 for a phsical pin, 1 for a virtual pin)
 89:     /// </summary>
@@ -3162,7 +3542,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 95:     /// <param name="pinNumber">Pin number</param>
 96:     /// <returns>true if successful, false otherwise</returns>
 97:     virtual bool AssignPin(uint8 pinNumber) = 0;
-98: 
+98:
 99:     /// <summary>
 100:     /// Switch GPIO on
 101:     /// </summary>
@@ -3255,12 +3635,12 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 91: {
 92:     return static_cast<GPIOInterruptTypes>(static_cast<uint8>(lhs) | static_cast<uint8>(rhs));
 93: }
-94: 
+94:
 95: /// <summary>
 96: /// GPIO pin interrupt handler
 97: /// </summary>
 98: using GPIOPinInterruptHandler = void(IGPIOPin* pin, void* param);
-99: 
+99:
 100: /// <summary>
 101: /// Physical GPIO pin (i.e. available on GPIO header)
 102: /// </summary>
@@ -3291,15 +3671,15 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 127:     bool m_autoAcknowledge;
 128:     /// @brief GPIO interrupt types enabled
 129:     uint8 m_interruptMask;
-130: 
+130:
 131: public:
 132:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
-133: 
+133:
 134:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
-135: 
+135:
 136:     uint8 GetPinNumber() const override;
 137:     bool AssignPin(uint8 pinNumber) override;
-138: 
+138:
 139:     void On() override;
 140:     void Off() override;
 141:     bool Get() override;
@@ -3307,28 +3687,28 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 143:     void Invert() override;
 144:     bool GetEvent() override;
 145:     void ClearEvent() override;
-146: 
+146:
 147:     GPIOMode GetMode();
 148:     bool SetMode(GPIOMode mode);
 149:     GPIOFunction GetFunction();
 150:     GPIOPullMode GetPullMode();
 151:     void SetPullMode(GPIOPullMode pullMode);
-152: 
+152:
 153:     bool GetAutoAcknowledgeInterrupt() const override;
 154:     void AcknowledgeInterrupt() override;
 155:     void InterruptHandler() override;
-156: 
+156:
 157:     void ConnectInterrupt(GPIOPinInterruptHandler* handler, void* param, bool autoAcknowledge = true);
 158:     void DisconnectInterrupt();
-159: 
+159:
 160:     void EnableInterrupt(GPIOInterruptTypes interruptTypes);
 161:     void DisableInterrupt(GPIOInterruptTypes interruptTypes);
 162:     void DisableAllInterrupts();
-163: 
+163:
 164: private:
 165:     void SetFunction(GPIOFunction function);
 166: };
-167: 
+167:
 168: } // namespace baremetal
 ```
 
@@ -3355,22 +3735,22 @@ Update the file `code/libraries/baremetal/src/PhysicalGPIOPin.cpp`
 File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 ...
 40: #include "baremetal/PhysicalGPIOPin.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/GPIOManager.h"
 45: #include "baremetal/Logger.h"
 46: #include "baremetal/MemoryAccess.h"
 47: #include "baremetal/Timer.h"
-48: 
+48:
 49: /// @file
 50: /// Physical GPIO pin implementation
-51: 
+51:
 52: /// @brief Define log name
 53: LOG_MODULE("PhysicalGPIOPin");
-54: 
+54:
 55: namespace baremetal {
-56: 
+56:
 57: /// @brief Interrupt type register offset
 58: enum GPIOInterruptTypeOffset
 59: {
@@ -3387,7 +3767,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 70:     /// @brief Interrupt on asynchronous falling edge
 71:     OffsetAsyncFallingEdge = 60,
 72: };
-73: 
+73:
 74: /// @brief GPIO function
 75: enum class GPIOFunction
 76: {
@@ -3410,7 +3790,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 93:     /// @brief GPIO function unknown / not set / invalid
 94:     Unknown,
 95: };
-96: 
+96:
 97: /// @brief GPIO pull mode
 98: enum class GPIOPullMode
 99: {
@@ -3423,12 +3803,12 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 106:     /// @brief GPIO pull mode unknown / not set / invalid
 107:     Unknown,
 108: };
-109: 
+109:
 110: #if BAREMETAL_RPI_TARGET == 3
 111: /// @brief Number of cycles to wait when setting pull mode for GPIO pin (Raspberry Pi 3 only)
 112: static const int NumWaitCycles = 150;
 113: #endif // BAREMETAL_RPI_TARGET == 3
-114: 
+114:
 115: /// <summary>
 116: /// Creates a virtual GPIO pin
 117: /// </summary>
@@ -3448,7 +3828,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 131:     , m_interruptMask{}
 132: {
 133: }
-134: 
+134:
 135: /// <summary>
 136: /// Creates a virtual GPIO pin
 137: /// </summary>
@@ -3470,7 +3850,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 153:     AssignPin(pinNumber);
 154:     SetMode(mode);
 155: }
-156: 
+156:
 157: /// <summary>
 158: /// Return the configured GPIO pin number
 159: /// </summary>
@@ -3479,7 +3859,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 162: {
 163:     return m_pinNumber;
 164: }
-165: 
+165:
 166: /// <summary>
 167: /// Assign a GPIO pin
 168: /// </summary>
@@ -3491,13 +3871,13 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 174:     if (m_pinNumber != NUM_GPIO)
 175:         return false;
 176:     m_pinNumber = pinNumber;
-177: 
+177:
 178:     m_regOffset = (m_pinNumber / 32) * 4;
 179:     m_regMask = 1 << (m_pinNumber % 32);
-180: 
+180:
 181:     return true;
 182: }
-183: 
+183:
 184: /// <summary>
 185: /// Switch GPIO on
 186: /// </summary>
@@ -3505,7 +3885,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 188: {
 189:     Set(true);
 190: }
-191: 
+191:
 192: /// <summary>
 193: /// Switch GPIO off
 194: /// </summary>
@@ -3513,7 +3893,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 196: {
 197:     Set(false);
 198: }
-199: 
+199:
 200: /// <summary>
 201: /// Get GPIO value
 202: /// </summary>
@@ -3523,7 +3903,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 206:     // Check if pin is assigned
 207:     if (m_pinNumber >= NUM_GPIO)
 208:         return false;
-209: 
+209:
 210:     if ((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown))
 211:     {
 212:         uint32 regOffset = (m_pinNumber / 32);
@@ -3532,7 +3912,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 215:     }
 216:     return m_value;
 217: }
-218: 
+218:
 219: /// <summary>
 220: /// Set GPIO on (true) or off (false)
 221: /// </summary>
@@ -3542,20 +3922,20 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 225:     // Check if pin is assigned
 226:     if (m_pinNumber >= NUM_GPIO)
 227:         return;
-228: 
+228:
 229:     // Check if mode is output
 230:     if (m_mode != GPIOMode::Output)
 231:         return;
-232: 
+232:
 233:     m_value = on;
-234: 
+234:
 235:     uint32 regOffset = (m_pinNumber / 32);
 236:     uint32 regMask = 1 << (m_pinNumber % 32);
 237:     regaddr regAddress = (m_value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset * 4;
-238: 
+238:
 239:     m_memoryAccess.Write32(regAddress, regMask);
 240: }
-241: 
+241:
 242: /// <summary>
 243: /// Invert GPIO value on->off off->on
 244: /// </summary>
@@ -3563,7 +3943,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 246: {
 247:     Set(!Get());
 248: }
-249: 
+249:
 250: /// <summary>
 251: /// Get GPIO event status
 252: /// </summary>
@@ -3572,7 +3952,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 255: {
 256:     return (m_memoryAccess.Read32(RPI_GPIO_GPEDS0 + m_regOffset) & m_regMask) != 0;
 257: }
-258: 
+258:
 259: /// <summary>
 260: /// Clear GPIO event status
 261: /// </summary>
@@ -3580,7 +3960,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 263: {
 264:     m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
 265: }
-266: 
+266:
 267: /// /// <summary>
 268: /// Get the mode for the GPIO pin
 269: /// </summary>
@@ -3589,7 +3969,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 272: {
 273:     return m_mode;
 274: }
-275: 
+275:
 276: /// <summary>
 277: /// Convert GPIO mode to GPIO function. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.
 278: /// </summary>
@@ -3608,7 +3988,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 291:     }
 292:     return GPIOFunction::Input;
 293: }
-294: 
+294:
 295: /// <summary>
 296: /// Set the mode for the GPIO pin
 297: /// </summary>
@@ -3619,21 +3999,21 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 302:     // Check if pin is assigned
 303:     if (m_pinNumber >= NUM_GPIO)
 304:         return false;
-305: 
+305:
 306:     // Check if mode is valid
 307:     if (mode >= GPIOMode::Unknown)
 308:         return false;
-309: 
+309:
 310:     if ((GPIOMode::AlternateFunction0 <= mode) && (mode <= GPIOMode::AlternateFunction5))
 311:     {
 312:         SetPullMode(GPIOPullMode::Off);
-313: 
+313:
 314:         SetFunction(ConvertGPIOModeToFunction(mode));
 315:     }
 316:     else if (GPIOMode::Output == mode)
 317:     {
 318:         SetPullMode(GPIOPullMode::Off);
-319: 
+319:
 320:         SetFunction(ConvertGPIOModeToFunction(mode));
 321:     }
 322:     else
@@ -3646,7 +4026,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 329:         Off();
 330:     return true;
 331: }
-332: 
+332:
 333: /// <summary>
 334: /// Get GPIO pin function
 335: /// </summary>
@@ -3655,7 +4035,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 338: {
 339:     return m_function;
 340: }
-341: 
+341:
 342: /// <summary>
 343: /// Get GPIO pin pull mode
 344: /// </summary>
@@ -3664,7 +4044,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 347: {
 348:     return m_pullMode;
 349: }
-350: 
+350:
 351: /// <summary>
 352: /// Set GPIO pin pull mode
 353: /// </summary>
@@ -3674,15 +4054,15 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 357:     // Check if pin is assigned
 358:     if (m_pinNumber >= NUM_GPIO)
 359:         return;
-360: 
+360:
 361:     // Check if mode is valid
 362:     if (pullMode >= GPIOPullMode::Unknown)
 363:         return;
-364: 
+364:
 365: #if BAREMETAL_RPI_TARGET == 3
 366:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (m_pinNumber / 32) * 4;
 367:     uint32 shift = m_pinNumber % 32;
-368: 
+368:
 369:     m_memoryAccess.Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 370:     Timer::WaitCycles(NumWaitCycles);
 371:     m_memoryAccess.Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -3691,18 +4071,18 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 374: #else
 375:     regaddr modeReg = RPI_GPIO_GPPUPPDN0 + (m_pinNumber / 16) * 4;
 376:     unsigned shift = (m_pinNumber % 16) * 2;
-377: 
+377:
 378:     static const unsigned ModeMap[3] = {0, 2, 1};
-379: 
+379:
 380:     uint32 value = m_memoryAccess.Read32(modeReg);
 381:     value &= ~(3 << shift);
 382:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 383:     m_memoryAccess.Write32(modeReg, value);
 384: #endif
-385: 
+385:
 386:     m_pullMode = pullMode;
 387: }
-388: 
+388:
 389: /// <summary>
 390: /// Set up an interrupt handler for the GPIO pin
 391: /// </summary>
@@ -3712,32 +4092,32 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 395: void PhysicalGPIOPin::ConnectInterrupt(GPIOPinInterruptHandler* handler, void* param, bool autoAcknowledge /*= true*/)
 396: {
 397:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-398: 
+398:
 399:     assert(m_interruptMask == static_cast<uint8>(GPIOInterruptTypes::None));
-400: 
+400:
 401:     assert(handler != nullptr);
 402:     assert(m_handler == nullptr);
 403:     m_handler = handler;
 404:     m_handlerParam = param;
 405:     m_autoAcknowledge = autoAcknowledge;
-406: 
+406:
 407:     GetGPIOManager().ConnectInterrupt(this);
 408: }
-409: 
+409:
 410: /// <summary>
 411: /// Remove the interrupt handler for the GPIO pin.
 412: /// </summary>
 413: void PhysicalGPIOPin::DisconnectInterrupt()
 414: {
 415:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-416: 
+416:
 417:     DisableAllInterrupts();
-418: 
+418:
 419:     m_handler = nullptr;
-420: 
+420:
 421:     GetGPIOManager().DisconnectInterrupt(this);
 422: }
-423: 
+423:
 424: /// <summary>
 425: /// Return the interrupt auto acknowledge setting
 426: /// </summary>
@@ -3746,17 +4126,17 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 429: {
 430:     return m_autoAcknowledge;
 431: }
-432: 
+432:
 433: /// <summary>
 434: /// Acknowledge the GPIO pin interrupt by resetting the event status for this GPIO
 435: /// </summary>
 436: void PhysicalGPIOPin::AcknowledgeInterrupt()
 437: {
 438:     assert(m_handler != nullptr);
-439: 
+439:
 440:     m_memoryAccess.Write32(RPI_GPIO_GPEDS0 + m_regOffset, m_regMask);
 441: }
-442: 
+442:
 443: /// <summary>
 444: /// GPIO pin interrupt handler
 445: /// </summary>
@@ -3764,12 +4144,12 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 447: {
 448:     LOG_DEBUG("Interrupt for GPIO pin %d handled", m_pinNumber);
 449:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-450: 
+450:
 451:     assert(m_handler != nullptr);
 452:     if (m_interruptMask != static_cast<uint8>(GPIOInterruptTypes::None))
 453:         (*m_handler)(this, m_handlerParam);
 454: }
-455: 
+455:
 456: /// <summary>
 457: /// Convert an interrupt type to a register offset
 458: /// </summary>
@@ -3795,7 +4175,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 478:         return GPIOInterruptTypeOffset::OffsetRisingEdge;
 479:     }
 480: }
-481: 
+481:
 482: /// <summary>
 483: /// Enable interrupts for the specified type
 484: /// </summary>
@@ -3803,7 +4183,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 486: void PhysicalGPIOPin::EnableInterrupt(GPIOInterruptTypes interruptTypes)
 487: {
 488:     assert((m_mode == GPIOMode::Input) || (m_mode == GPIOMode::InputPullUp) || (m_mode == GPIOMode::InputPullDown));
-489: 
+489:
 490:     uint8 interruptMask = static_cast<uint8>(interruptTypes);
 491:     assert((interruptMask & ~static_cast<uint8>(GPIOInterruptTypes::All)) == 0);
 492:     uint8 pattern = static_cast<uint8>(GPIOInterruptTypes::AsyncFallingEdge);
@@ -3818,7 +4198,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 501:         pattern >>= 1;
 502:     }
 503: }
-504: 
+504:
 505: /// <summary>
 506: /// Disable interrupts for the specified type
 507: /// </summary>
@@ -3839,7 +4219,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 522:         pattern >>= 1;
 523:     }
 524: }
-525: 
+525:
 526: /// <summary>
 527: /// Disable all interrupts
 528: /// </summary>
@@ -3847,7 +4227,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 530: {
 531:     DisableInterrupt(GPIOInterruptTypes::All);
 532: }
-533: 
+533:
 534: /// <summary>
 535: /// Set GPIO pin function
 536: /// </summary>
@@ -3857,23 +4237,23 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 540:     // Check if pin is assigned
 541:     if (m_pinNumber >= NUM_GPIO)
 542:         return;
-543: 
+543:
 544:     // Check if mode is valid
 545:     if (function >= GPIOFunction::Unknown)
 546:         return;
-547: 
+547:
 548:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (m_pinNumber / 10) * 4;
 549:     uint32 shift = (m_pinNumber % 10) * 3;
-550: 
+550:
 551:     static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
-552: 
+552:
 553:     uint32 value = m_memoryAccess.Read32(selectRegister);
 554:     value &= ~(7 << shift);
 555:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
 556:     m_memoryAccess.Write32(selectRegister, value);
 557:     m_function = function;
 558: }
-559: 
+559:
 560: } // namespace baremetal
 ```
 
@@ -3932,11 +4312,11 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 147:     if (Logger::HaveLogger())
 148:         LOG_INFO("InterruptSystem::Shutdown");
 149:     DisableIRQs();
-150: 
+150:
 151:     DisableInterrupts();
 152:     m_isInitialized = false;
 153: }
-154: 
+154:
 155: /// <summary>
 156: /// Disable all IRQ interrupts
 157: /// </summary>
@@ -3946,14 +4326,14 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 161:         LOG_DEBUG("InterruptSystem::DisableInterrupts");
 162: #if BAREMETAL_RPI_TARGET == 3
 163:     m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
-164: 
+164:
 165:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_1, static_cast<uint32>(-1));
 166:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_2, static_cast<uint32>(-1));
 167:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_BASIC_IRQS, static_cast<uint32>(-1));
 168:     m_memoryAccess.Write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
 169: #else
 170:     // initialize distributor:
-171: 
+171:
 172:     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_DISABLE);
 173:     m_memoryAccess.Write32(RPI_GICC_CTLR, RPI_GICC_CTLR_DISABLE);
 174:     // disable, acknowledge and deactivate all interrupts
@@ -3965,7 +4345,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 180:     }
 181: #endif
 182: }
-183: 
+183:
 184: /// <summary>
 185: /// Enable IRQ interrupts
 186: /// </summary>
@@ -3979,7 +4359,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 194:     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_ENABLE);
 195: #endif
 196: }
-197: 
+197:
 198: /// <summary>
 199: /// Enable and register an IRQ handler
 200: ///
@@ -3995,13 +4375,13 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 210:     if (Logger::HaveLogger())
 211:         LOG_DEBUG("InterruptSystem::RegisterIRQHandler IRQ=%d", irq);
 212:     assert(m_irqHandlers[irq] == nullptr);
-213: 
+213:
 214:     EnableIRQ(irqID);
-215: 
+215:
 216:     m_irqHandlers[irq] = handler;
 217:     m_irqHandlersParam[irq] = param;
 218: }
-219: 
+219:
 220: /// <summary>
 221: /// Disable and unregister an IRQ handler
 222: ///
@@ -4015,13 +4395,13 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 230:     if (Logger::HaveLogger())
 231:         LOG_DEBUG("InterruptSystem::UnregisterIRQHandler IRQ=%d", irq);
 232:     assert(m_irqHandlers[irq] != nullptr);
-233: 
+233:
 234:     m_irqHandlers[irq] = nullptr;
 235:     m_irqHandlersParam[irq] = nullptr;
-236: 
+236:
 237:     DisableIRQ(irqID);
 238: }
-239: 
+239:
 240: /// <summary>
 241: /// Enable and register a FIQ interrupt handler. Only one can be enabled at any time.
 242: /// </summary>
@@ -4037,14 +4417,14 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 252:         LOG_DEBUG("InterruptSystem::RegisterFIQHandler IRQ=%d", fiq);
 253:     assert(handler != nullptr);
 254:     assert(s_fiqData.handler == nullptr);
-255: 
+255:
 256:     s_fiqData.handler = handler;
 257:     s_fiqData.param   = param;
 258:     s_fiqData.fiqID   = fiq;
-259: 
+259:
 260:     EnableFIQ(fiqID);
 261: }
-262: 
+262:
 263: /// <summary>
 264: /// Disable and unregister a FIQ interrupt handler
 265: /// </summary>
@@ -4057,7 +4437,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 272:     if (Logger::HaveLogger())
 273:         LOG_DEBUG("InterruptSystem::UnregisterFIQHandler IRQ=%d", fiq);
 274:     DisableFIQ(fiqID);
-275: 
+275:
 276:     s_fiqData.handler = nullptr;
 277:     s_fiqData.param   = nullptr;
 278: }
@@ -4087,11 +4467,11 @@ File: code/applications/demo/src/main.cpp
 7: #include "baremetal/PhysicalGPIOPin.h"
 8: #include "baremetal/System.h"
 9: #include "baremetal/Timer.h"
-10: 
+10:
 11: LOG_MODULE("main");
-12: 
+12:
 13: using namespace baremetal;
-14: 
+14:
 15: void InterruptHandlerCLK(IGPIOPin* pin, void *param)
 16: {
 17:     LOG_DEBUG("GPIO CLK");
@@ -4102,7 +4482,7 @@ File: code/applications/demo/src/main.cpp
 22:         pin->ClearEvent();
 23:     }
 24: }
-25: 
+25:
 26: void InterruptHandlerDT(IGPIOPin* pin, void *param)
 27: {
 28:     LOG_DEBUG("GPIO DT");
@@ -4113,7 +4493,7 @@ File: code/applications/demo/src/main.cpp
 33:         pin->ClearEvent();
 34:     }
 35: }
-36: 
+36:
 37: void InterruptHandlerSW(IGPIOPin* pin, void *param)
 38: {
 39:     LOG_DEBUG("GPIO SW");
@@ -4124,35 +4504,35 @@ File: code/applications/demo/src/main.cpp
 44:         pin->ClearEvent();
 45:     }
 46: }
-47: 
+47:
 48: int main()
 49: {
 50:     auto& console = GetConsole();
 51:     GetLogger().SetLogLevel(LogSeverity::Debug);
-52: 
+52:
 53:     auto exceptionLevel = CurrentEL();
 54:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-55: 
+55:
 56:     PhysicalGPIOPin pinCLK(11, GPIOMode::InputPullUp);
 57:     PhysicalGPIOPin pinDT(9, GPIOMode::InputPullUp);
 58:     PhysicalGPIOPin pinSW(10, GPIOMode::InputPullUp);
-59: 
+59:
 60:     pinCLK.ConnectInterrupt(InterruptHandlerCLK, nullptr);
 61:     pinCLK.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
 62:     pinDT.ConnectInterrupt(InterruptHandlerDT, nullptr);
 63:     pinDT.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
 64:     pinSW.ConnectInterrupt(InterruptHandlerSW, nullptr);
 65:     pinSW.EnableInterrupt(GPIOInterruptTypes::RisingEdge | GPIOInterruptTypes::FallingEdge);
-66: 
+66:
 67:     LOG_INFO("Wait 5 seconds");
 68:     Timer::WaitMilliSeconds(5000);
-69: 
+69:
 70:     GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_GPIO3);
-71: 
+71:
 72:     pinCLK.DisconnectInterrupt();
 73:     pinDT.DisconnectInterrupt();
 74:     pinSW.DisconnectInterrupt();
-75: 
+75:
 76:     console.Write("Press r to reboot, h to halt\n");
 77:     char ch{};
 78:     while ((ch != 'r') && (ch != 'h'))
@@ -4160,7 +4540,7 @@ File: code/applications/demo/src/main.cpp
 80:         ch = console.ReadChar();
 81:         console.WriteChar(ch);
 82:     }
-83: 
+83:
 84:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 85: }
 ```
@@ -4261,13 +4641,13 @@ Create the file `code/libraries/device/CMakeLists.txt`
 File: code/libraries/device/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3: 
+3:
 4: project(device
 5:     DESCRIPTION "Bare metal device library"
 6:     LANGUAGES CXX ASM)
-7: 
+7:
 8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
-9: 
+9:
 10: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 11: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 12: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
@@ -4276,24 +4656,24 @@ File: code/libraries/device/CMakeLists.txt
 15: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
 16: set(PROJECT_INCLUDE_DIRS_PRIVATE )
 17: set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-18: 
+18:
 19: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-20: 
+20:
 21: set(PROJECT_DEPENDENCIES
 22:     baremetal
 23:     )
-24: 
+24:
 25: set(PROJECT_LIBS
 26:     ${LINKER_LIBRARIES}
 27:     ${PROJECT_DEPENDENCIES}
 28:     )
-29: 
+29:
 30: file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp src/*.S)
 31: set(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/*.h)
 32: set(PROJECT_INCLUDES_PRIVATE )
-33: 
+33:
 34: set(PROJECT_INCLUDES_PRIVATE )
-35: 
+35:
 36: if (CMAKE_VERBOSE_MAKEFILE)
 37:     display_list("Package                           : " ${PROJECT_NAME} )
 38:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
@@ -4316,7 +4696,7 @@ File: code/libraries/device/CMakeLists.txt
 55:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
 56:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 57: endif()
-58: 
+58:
 59: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 60: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
 61: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
@@ -4341,18 +4721,18 @@ File: code/libraries/device/CMakeLists.txt
 80:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
 81:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
 82:     )
-83: 
+83:
 84: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-85: 
+85:
 86: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
 87: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
 88:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
 89: endif()
-90: 
+90:
 91: link_directories(${LINK_DIRECTORIES})
 92: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 93: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-94: 
+94:
 95: show_target_properties(${PROJECT_NAME})
 ```
 
@@ -4418,22 +4798,22 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/PhysicalGPIOPin.h"
 43: #include "baremetal/Timer.h"
 44: #include "stdlib/Types.h"
-45: 
+45:
 46: /// @file
 47: /// KY-040 rotary switch support declaration.
-48: 
+48:
 49: /// @brief Device library namespace
 50: namespace device {
-51: 
+51:
 52: enum class SwitchButtonEvent;
 53: enum class SwitchButtonState;
-54: 
+54:
 55: /// <summary>
 56: /// KY-040 rotary switch device
 57: /// </summary>
@@ -4460,12 +4840,12 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 78:         /// @brief Unknown event
 79:         Unknown
 80:     };
-81: 
+81:
 82:     /// <summary>
 83:     /// Pointer to event handler function to be registered by an application
 84:     /// </summary>
 85:     using EventHandler = void(Event event, void* param);
-86: 
+86:
 87: private:
 88:     /// @brief True if the rotary switch was initialized
 89:     bool m_isInitialized;
@@ -4489,23 +4869,23 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 107:     unsigned m_lastPressTicks;
 108:     /// @brief Time at which the last button release occurred
 109:     unsigned m_lastReleaseTicks;
-110: 
+110:
 111:     /// @brief Registered event handler
 112:     EventHandler* m_eventHandler;
 113:     /// @brief Parameter for registered event handler
 114:     void* m_eventHandlerParam;
-115: 
+115:
 116: public:
 117:     KY040(uint8 clkPin, uint8 dtPin, uint8 swPin);
 118:     virtual ~KY040();
-119: 
+119:
 120:     void Initialize();
 121:     void Uninitialize();
-122: 
+122:
 123:     void RegisterEventHandler(EventHandler* handler, void* param);
 124:     void UnregisterEventHandler(EventHandler* handler);
 125:     static const char* EventToString(Event event);
-126: 
+126:
 127: private:
 128:     static void SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin, void* param);
 129:     void SwitchButtonInterruptHandler(baremetal::IGPIOPin* pin);
@@ -4515,7 +4895,7 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 133:     void SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void* param);
 134:     void HandleSwitchButtonEvent(SwitchButtonEvent switchEvent);
 135: };
-136: 
+136:
 137: } // namespace device
 ```
 
@@ -4605,19 +4985,19 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include <device/gpio/KY-040.h>
-41: 
+41:
 42: #include "baremetal/Assert.h"
 43: #include "baremetal/Logger.h"
-44: 
+44:
 45: /// @brief Define log name
 46: LOG_MODULE("KY-040");
-47: 
+47:
 48: using namespace baremetal;
-49: 
+49:
 50: namespace device {
-51: 
+51:
 52: /// @brief Time delay for debounding switch button
 53: static const unsigned SwitchDebounceDelayMilliseconds = 50;
 54: /// @brief Tick delay for determining if switch button was held down
@@ -4626,7 +5006,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 57: static const unsigned SwitchClickMaxDelayMilliseconds = 400;
 58: /// @brief Maximum delay between two presses for a double click (or triple click)
 59: static const unsigned SwitchDoubleClickMaxDelayMilliseconds = 800;
-60: 
+60:
 61: /// <summary>
 62: /// Switch button internal event
 63: /// </summary>
@@ -4645,7 +5025,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 76:     /// @brief Unknown event
 77:     Unknown
 78: };
-79: 
+79:
 80: /// <summary>
 81: /// Switch button internal state
 82: /// </summary>
@@ -4668,7 +5048,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 99:     /// @brief Unknown state
 100:     Unknown
 101: };
-102: 
+102:
 103: /// <summary>
 104: /// Convert rotary switch event to a string
 105: /// </summary>
@@ -4696,7 +5076,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 127:     }
 128:     return "Unknown";
 129: }
-130: 
+130:
 131: /// <summary>
 132: /// Convert internal switch button event to a string
 133: /// </summary>
@@ -4722,7 +5102,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 153:     }
 154:     return "Unknown";
 155: }
-156: 
+156:
 157: /// <summary>
 158: /// Convert internal switch button state to a string
 159: /// </summary>
@@ -4752,7 +5132,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 183:     }
 184:     return "Unknown";
 185: }
-186: 
+186:
 187: /// <summary>
 188: /// Event lookup for handling switch button state versus switch button event
 189: ///
@@ -4760,7 +5140,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 191: /// </summary>
 192: static const KY040::Event s_switchOutput[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
 193:     // {Down,               Up,                    Click,                           DoubleClick,                     Tick}
-194: 
+194:
 195:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::Unknown          }, // SwitchButtonState::Start
 196:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::SwitchHold       }, // SwitchButtonState::Down
 197:     {KY040::Event::Unknown, KY040::Event::Unknown, KY040::Event::SwitchClick,       KY040::Event::SwitchDoubleClick, KY040::Event::SwitchClick      }, // SwitchButtonState::Click
@@ -4779,7 +5159,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 210: {
 211:     return s_switchOutput[static_cast<size_t>(state)][static_cast<size_t>(event)];
 212: }
-213: 
+213:
 214: /// <summary>
 215: /// State machine for handling switch button state
 216: ///
@@ -4787,7 +5167,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 218: /// </summary>
 219: static const SwitchButtonState s_nextSwitchState[static_cast<size_t>(SwitchButtonState::Unknown)][static_cast<size_t>(SwitchButtonEvent::Unknown)] = {
 220:     // {Down,              Up,                  Click,               DoubleClick,          Tick}
-221: 
+221:
 222:     {SwitchButtonState::Down, SwitchButtonState::Start,  SwitchButtonState::Click,  SwitchButtonState::Click2, SwitchButtonState::Start  }, // SwitchButtonState::Start
 223:     {SwitchButtonState::Down, SwitchButtonState::Start,  SwitchButtonState::Click,  SwitchButtonState::Click2, SwitchButtonState::Hold   }, // SwitchButtonState::Down
 224:     {SwitchButtonState::Down, SwitchButtonState::Start,  SwitchButtonState::Click,  SwitchButtonState::Click2, SwitchButtonState::Invalid}, // SwitchButtonState::Click
@@ -4806,7 +5186,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 237: {
 238:     return s_nextSwitchState[static_cast<size_t>(state)][static_cast<size_t>(event)];
 239: }
-240: 
+240:
 241: /// <summary>
 242: /// Constructor for KY040 class
 243: /// </summary>
@@ -4825,13 +5205,13 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 256:     , m_currentReleaseTicks{}
 257:     , m_lastPressTicks{}
 258:     , m_lastReleaseTicks{}
-259: 
+259:
 260:     , m_eventHandler{}
 261:     , m_eventHandlerParam{}
 262: {
 263:     LOG_DEBUG("KY040 constructor");
 264: }
-265: 
+265:
 266: /// <summary>
 267: /// Destructor for KY040 class
 268: /// </summary>
@@ -4840,7 +5220,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 271:     LOG_DEBUG("KY040 destructor");
 272:     Uninitialize();
 273: }
-274: 
+274:
 275: /// <summary>
 276: /// Initialize the KY040 rotary switch
 277: /// </summary>
@@ -4848,15 +5228,15 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 279: {
 280:     if (m_isInitialized)
 281:         return;
-282: 
+282:
 283:     LOG_DEBUG("KY040 Initialize");
 284:     m_swPin.ConnectInterrupt(SwitchButtonInterruptHandler, this);
-285: 
+285:
 286:     m_swPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
-287: 
+287:
 288:     m_isInitialized = true;
 289: }
-290: 
+290:
 291: /// <summary>
 292: /// Uninitialize the KY040 rotary switch
 293: /// </summary>
@@ -4878,7 +5258,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 309:         GetTimer().CancelKernelTimer(m_tickTimerHandle);
 310:     }
 311: }
-312: 
+312:
 313: /// <summary>
 314: /// Register an event handler for the rotary switch
 315: /// </summary>
@@ -4891,7 +5271,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 322:     assert(m_eventHandler);
 323:     m_eventHandlerParam = param;
 324: }
-325: 
+325:
 326: /// <summary>
 327: /// Unregister event handler for the rotary switch
 328: /// </summary>
@@ -4902,7 +5282,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 333:     m_eventHandler = nullptr;
 334:     m_eventHandlerParam = nullptr;
 335: }
-336: 
+336:
 337: /// <summary>
 338: /// Global GPIO pin interrupt handler for the switch button
 339: /// </summary>
@@ -4914,7 +5294,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 345:     assert(pThis != nullptr);
 346:     pThis->SwitchButtonInterruptHandler(pin);
 347: }
-348: 
+348:
 349: /// <summary>
 350: /// GPIO pin interrupt handlerthe switch button
 351: /// </summary>
@@ -4923,7 +5303,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 354: {
 355:     LOG_DEBUG("KY040 SwitchButtonInterruptHandler");
 356:     assert(pin != nullptr);
-357: 
+357:
 358:     /// Get Switch state (false = pressed, true = released)
 359:     bool swValue = pin->Get();
 360:     if (swValue)
@@ -4934,17 +5314,17 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 365:     {
 366:         m_currentPressTicks = GetTimer().GetTicks();
 367:     }
-368: 
+368:
 369:     if (m_debounceTimerHandle)
 370:     {
 371:         LOG_DEBUG("KY040 Cancel debounce timer");
 372:         GetTimer().CancelKernelTimer(m_debounceTimerHandle);
 373:     }
-374: 
+374:
 375:     LOG_DEBUG("KY040 Start debounce timer");
 376:     m_debounceTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchDebounceDelayMilliseconds), SwitchButtonDebounceHandler, nullptr, this);
 377: }
-378: 
+378:
 379: /// <summary>
 380: /// Global switch button debounce handler, called by the switch button debounce timer on timeout
 381: ///
@@ -4959,7 +5339,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 390:     assert(pThis != nullptr);
 391:     pThis->SwitchButtonDebounceHandler(handle, param);
 392: }
-393: 
+393:
 394: /// <summary>
 395: /// Switch button debounce handler, called by the global switch button debounce handler on timeout
 396: /// </summary>
@@ -4969,7 +5349,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 400: {
 401:     LOG_DEBUG("KY040 Timeout debounce timer");
 402:     m_debounceTimerHandle = 0;
-403: 
+403:
 404:     bool swValue = m_swPin.Get();
 405:     auto event = swValue ? Event::SwitchUp : Event::SwitchDown;
 406:     auto switchButtonEvent = swValue ? SwitchButtonEvent::Up : SwitchButtonEvent::Down;
@@ -5000,25 +5380,25 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 431:     {
 432:         m_lastPressTicks = m_currentPressTicks;
 433:     }
-434: 
+434:
 435:     LOG_DEBUG("KY040 Event             : %s", EventToString(event));
 436:     LOG_DEBUG("KY040 Switch Event      : %s", SwitchButtonEventToString(switchButtonEvent));
 437:     if (m_eventHandler)
 438:     {
 439:         (*m_eventHandler)(event, m_eventHandlerParam);
 440:     }
-441: 
+441:
 442:     if (m_tickTimerHandle)
 443:     {
 444:         GetTimer().CancelKernelTimer(m_tickTimerHandle);
 445:     }
-446: 
+446:
 447:     if (!swValue) // If pressed, check for hold
 448:         m_tickTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchTickDelayMilliseconds), SwitchButtonTickHandler, nullptr, this);
-449: 
+449:
 450:     HandleSwitchButtonEvent(switchButtonEvent);
 451: }
-452: 
+452:
 453: /// <summary>
 454: /// Global switch button tick handler, called by the switch button tick timer on timeout
 455: ///
@@ -5031,10 +5411,10 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 462: {
 463:     KY040* pThis = reinterpret_cast<KY040*>(context);
 464:     assert(pThis != nullptr);
-465: 
+465:
 466:     pThis->SwitchButtonTickHandler(handle, param);
 467: }
-468: 
+468:
 469: /// <summary>
 470: /// Switch button tick handler, called by the global switch button tick handler on timeout
 471: /// </summary>
@@ -5045,10 +5425,10 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 476:     LOG_DEBUG("KY040 Timeout tick timer");
 477:     // Timer timed out, so we need to generate a tick
 478:     m_tickTimerHandle = GetTimer().StartKernelTimer(MSEC2TICKS(SwitchTickDelayMilliseconds), SwitchButtonTickHandler, nullptr, this);
-479: 
+479:
 480:     HandleSwitchButtonEvent(SwitchButtonEvent::Tick);
 481: }
-482: 
+482:
 483: /// <summary>
 484: /// Handle a switch button event
 485: ///
@@ -5058,23 +5438,23 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 489: void KY040::HandleSwitchButtonEvent(SwitchButtonEvent switchButtonEvent)
 490: {
 491:     assert(switchButtonEvent < SwitchButtonEvent::Unknown);
-492: 
+492:
 493:     LOG_DEBUG("KY040 Current state     : %s", SwitchButtonStateToString(m_switchButtonState));
 494:     LOG_DEBUG("KY040 Switch Event      : %s", SwitchButtonEventToString(switchButtonEvent));
 495:     Event event = GetSwitchOutput(m_switchButtonState, switchButtonEvent);
 496:     SwitchButtonState nextState = GetSwitchNextState(m_switchButtonState, switchButtonEvent);
-497: 
+497:
 498:     LOG_DEBUG("KY040 Event             : %s", EventToString(event));
 499:     LOG_DEBUG("KY040 Next state        : %s", SwitchButtonStateToString(nextState));
-500: 
+500:
 501:     m_switchButtonState = nextState;
-502: 
+502:
 503:     if ((event != Event::Unknown) && (m_eventHandler != nullptr))
 504:     {
 505:         (*m_eventHandler)(event, m_eventHandlerParam);
 506:     }
 507: }
-508: 
+508:
 509: } // namespace device
 ```
 
@@ -5341,11 +5721,11 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 ...
 49: /// @brief Device library namespace
 50: namespace device {
-51: 
+51:
 52: enum class SwitchEncoderState;
 53: enum class SwitchButtonEvent;
 54: enum class SwitchButtonState;
-55: 
+55:
 56: /// <summary>
 57: /// KY-040 rotary switch device
 58: /// </summary>
@@ -5376,12 +5756,12 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 83:         /// @brief Unknown event
 84:         Unknown
 85:     };
-86: 
+86:
 87:     /// <summary>
 88:     /// Pointer to event handler function to be registered by an application
 89:     /// </summary>
 90:     using EventHandler = void(Event event, void* param);
-91: 
+91:
 92: private:
 93:     /// @brief True if the rotary switch was initialized
 94:     bool m_isInitialized;
@@ -5407,23 +5787,23 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 114:     unsigned m_lastPressTicks;
 115:     /// @brief Time at which the last button release occurred
 116:     unsigned m_lastReleaseTicks;
-117: 
+117:
 118:     /// @brief Registered event handler
 119:     EventHandler* m_eventHandler;
 120:     /// @brief Parameter for registered event handler
 121:     void* m_eventHandlerParam;
-122: 
+122:
 123: public:
 124:     KY040(uint8 clkPin, uint8 dtPin, uint8 swPin, baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
 125:     virtual ~KY040();
-126: 
+126:
 127:     void Initialize();
 128:     void Uninitialize();
-129: 
+129:
 130:     void RegisterEventHandler(EventHandler* handler, void* param);
 131:     void UnregisterEventHandler(EventHandler* handler);
 132:     static const char* EventToString(Event event);
-133: 
+133:
 134: private:
 135:     static void SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin, void* param);
 136:     void SwitchEncoderInterruptHandler(baremetal::IGPIOPin* pin);
@@ -5435,7 +5815,7 @@ File: code/libraries/device/include/device/gpio/KY-040.h
 142:     void SwitchButtonTickHandler(baremetal::KernelTimerHandle handle, void* param);
 143:     void HandleSwitchButtonEvent(SwitchButtonEvent switchEvent);
 144: };
-145: 
+145:
 146: } // namespace device
 ```
 
@@ -5456,14 +5836,14 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 ...
 45: /// @file
 46: /// KY-040 rotary switch support imlementation.
-47: 
+47:
 48: /// @brief Define log name
 49: LOG_MODULE("KY-040");
-50: 
+50:
 51: using namespace baremetal;
-52: 
+52:
 53: namespace device {
-54: 
+54:
 55: /// @brief Time delay for debounding switch button
 56: static const unsigned SwitchDebounceDelayMilliseconds = 50;
 57: /// @brief Tick delay for determining if switch button was held down
@@ -5472,7 +5852,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 60: static const unsigned SwitchClickMaxDelayMilliseconds = 300;
 61: /// @brief Maximum delay between two presses for a double click (or triple click)
 62: static const unsigned SwitchDoubleClickMaxDelayMilliseconds = 800;
-63: 
+63:
 64: /// <summary>
 65: /// Switch encoder internal state
 66: /// </summary>
@@ -5497,7 +5877,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 85:     /// @brief Unknown
 86:     Unknown
 87: };
-88: 
+88:
 ...
 131: /// <summary>
 132: /// Convert rotary switch encoder state to a string
@@ -5530,7 +5910,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 159:     }
 160:     return "Unknown";
 161: }
-162: 
+162:
 163: /// <summary>
 164: /// Convert rotary switch event to a string
 165: /// </summary>
@@ -5568,17 +5948,17 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 253: /// </summary>
 254: static const KY040::Event s_encoderOutput[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
 255:     //  {{CLK=0/DT=0,            CLK=0/DT=1},            {CLK=1/DT=0,            CLK=1/DT=1}}
-256: 
+256:
 257:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }, // Start
-258: 
+258:
 259:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }, // CWStart
 260:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }, // CWDataFall
 261:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::RotateClockwise}       }, // CWClockRise
-262: 
+262:
 263:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }, // CCWStart
 264:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }, // CCWClockFall
 265:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::RotateCounterclockwise}}, // CCWDataRise
-266: 
+266:
 267:     {{KY040::Event::Unknown, KY040::Event::Unknown}, {KY040::Event::Unknown, KY040::Event::Unknown}               }  // Invalid
 268: };
 269: /// <summary>
@@ -5592,23 +5972,23 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 277: {
 278:     return s_encoderOutput[static_cast<size_t>(state)][clkValue][dtValue];
 279: }
-280: 
+280:
 281: /// <summary>
 282: /// Lookup table for rotary switch to create an new internal state from an the status of the CLK and DT GPIO inputs when in a certain internal state
 283: /// </summary>
 284: static const SwitchEncoderState s_encoderNextState[static_cast<size_t>(SwitchEncoderState::Unknown)][2][2] = {
 285:     //  {{CLK=0/DT=0,                       CLK=0/DT=1},                      {CLK=1/DT=0,                      CLK=1/DT=1}}
-286: 
+286:
 287:     {{SwitchEncoderState::Invalid, SwitchEncoderState::CWStart},          {SwitchEncoderState::CCWStart, SwitchEncoderState::Start}     }, // Start (1, 1), this is the default state between two clicks
-288: 
+288:
 289:     {{SwitchEncoderState::CWDataFall, SwitchEncoderState::CWStart},       {SwitchEncoderState::CWClockRise, SwitchEncoderState::Start}  }, // CWStart (1, 0)
 290:     {{SwitchEncoderState::CWDataFall, SwitchEncoderState::CWStart},       {SwitchEncoderState::CWClockRise, SwitchEncoderState::Invalid}}, // CWDataFall (0, 0)
 291:     {{SwitchEncoderState::CWDataFall, SwitchEncoderState::Invalid},       {SwitchEncoderState::CWClockRise, SwitchEncoderState::Start}  }, // CWClockRise (0, 1)
-292: 
+292:
 293:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::CCWStart, SwitchEncoderState::Start}     }, // CCWStart (0, 1)
 294:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::CCWStart, SwitchEncoderState::Invalid}   }, // CCWClockFall (0, 0)
 295:     {{SwitchEncoderState::CCWClockFall, SwitchEncoderState::CCWDataRise}, {SwitchEncoderState::Invalid, SwitchEncoderState::Start}      }, // CCWDataRise (1, 0)
-296: 
+296:
 297:     {{SwitchEncoderState::Invalid, SwitchEncoderState::Invalid},          {SwitchEncoderState::Invalid, SwitchEncoderState::Start}      }  // Invalid
 298: };
 299: /// <summary>
@@ -5622,7 +6002,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 307: {
 308:     return s_encoderNextState[static_cast<size_t>(state)][clkValue][dtValue];
 309: }
-310: 
+310:
 ...
 365: /// <summary>
 366: /// Constructor for KY040 class
@@ -5657,19 +6037,19 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 404: {
 405:     if (m_isInitialized)
 406:         return;
-407: 
+407:
 408:     TRACE_DEBUG("KY040 Initialize");
 409:     m_clkPin.ConnectInterrupt(SwitchEncoderInterruptHandler, this);
 410:     m_dtPin.ConnectInterrupt(SwitchEncoderInterruptHandler, this);
 411:     m_swPin.ConnectInterrupt(SwitchButtonInterruptHandler, this);
-412: 
+412:
 413:     m_clkPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
 414:     m_dtPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
 415:     m_swPin.EnableInterrupt(GPIOInterruptTypes::FallingEdge | GPIOInterruptTypes::RisingEdge);
-416: 
+416:
 417:     m_isInitialized = true;
 418: }
-419: 
+419:
 420: /// <summary>
 421: /// Uninitialize the KY040 rotary switch
 422: /// </summary>
@@ -5707,7 +6087,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 478:     assert(pThis != nullptr);
 479:     pThis->SwitchEncoderInterruptHandler(pin);
 480: }
-481: 
+481:
 482: /// <summary>
 483: /// GPIO pin interrupt handler for switch encoder
 484: /// </summary>
@@ -5719,19 +6099,19 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 490:     TRACE_DEBUG("KY040 CLK: %d", clkValue);
 491:     TRACE_DEBUG("KY040 DT:  %d", dtValue);
 492:     assert(m_switchEncoderState < SwitchEncoderState::Unknown);
-493: 
+493:
 494:     TRACE_DEBUG("KY040 Current state: %s", EncoderStateToString(m_switchEncoderState));
 495:     Event event = GetEncoderOutput(m_switchEncoderState, clkValue, dtValue);
 496:     m_switchEncoderState = GetEncoderNextState(m_switchEncoderState, clkValue, dtValue);
 497:     TRACE_DEBUG("KY040 Event: %s", EventToString(event));
 498:     TRACE_DEBUG("KY040 Next state: %s", EncoderStateToString(m_switchEncoderState));
-499: 
+499:
 500:     if ((event != Event::Unknown) && (m_eventHandler != nullptr))
 501:     {
 502:         (*m_eventHandler)(event, m_eventHandlerParam);
 503:     }
 504: }
-505: 
+505:
 ```
 
 - Line 64-87: We declare the `SwitchEncoderState` enum values.

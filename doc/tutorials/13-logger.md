@@ -1913,7 +1913,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 106: /// </summary>
 107: /// <param name="source">Source name or file name</param>
 108: /// <param name="line">Source line number</param>
-109: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+109: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 110: /// <param name="message">Formatted message string, with variable arguments</param>
 111: void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
 112: {
@@ -1928,7 +1928,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 121: /// </summary>
 122: /// <param name="source">Source name or file name</param>
 123: /// <param name="line">Source line number</param>
-124: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+124: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 125: /// <param name="message">Formatted message string</param>
 126: /// <param name="args">Variable argument list</param>
 127: void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
@@ -2018,7 +2018,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 211: /// <param name="filename">File name</param>
 212: /// <param name="line">Source line number</param>
 213: /// <param name="function">Function name</param>
-214: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+214: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 215: /// <param name="message">Formatted message string, with variable arguments</param>
 216: void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 217: {
@@ -2034,7 +2034,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 227: /// <param name="filename">File name</param>
 228: /// <param name="line">Source line number</param>
 229: /// <param name="function">Function name</param>
-230: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+230: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 231: /// <param name="message">Formatted message string</param>
 232: /// <param name="args">Variable argument list</param>
 233: void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)

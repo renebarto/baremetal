@@ -6,6 +6,7 @@
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid, using e.g. [Macoy Madson's page](https://macoy.me/blog/programming/RaspberryPi5Debugging)
 - Explain setting up development environment on Windows for Windows build : "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+- Release builds seem to not work if -O2 or -O3 is used
 
 @todo Possibly add explanation on VSCode.
 - It should be possible to add a kit to .vscode\cmake-kits.json:

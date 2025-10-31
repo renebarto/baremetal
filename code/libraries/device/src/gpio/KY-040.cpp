@@ -37,7 +37,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include <device/gpio/KY-040.h>
+#include "device/gpio/KY-040.h"
 
 #include "baremetal/Assert.h"
 #include "baremetal/Logger.h"

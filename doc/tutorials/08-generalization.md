@@ -430,13 +430,13 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 147: 
 148: private:
 149:     // Set GPIO pin mode
-150:     bool SetMode(uint8 pinNumber, GPIOMode mode);
+150:     bool SetMode(MCP23017Pin pinNumber, GPIOMode mode);
 151:     // Set GPIO pin function
-152:     bool SetFunction(uint8 pinNumber, GPIOFunction function);
+152:     bool SetFunction(MCP23017Pin pinNumber, GPIOFunction function);
 153:     // Set GPIO pin pull mode
-154:     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
+154:     bool SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode);
 155:     // Switch GPIO off
-156:     bool Off(uint8 pinNumber, GPIOMode mode);
+156:     bool Off(MCP23017Pin pinNumber, GPIOMode mode);
 157: };
 158: 
 159: UART1& GetUART1();
@@ -579,7 +579,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 180:     }
 181: }
 182: 
-183: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+183: bool UART1::SetMode(MCP23017Pin pinNumber, GPIOMode mode)
 184: {
 185:     if (pinNumber >= NUM_GPIO)
 186:         return false;
@@ -614,7 +614,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 215:     return true;
 216: }
 217: 
-218: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+218: bool UART1::SetFunction(MCP23017Pin pinNumber, GPIOFunction function)
 219: {
 220:     if (pinNumber >= NUM_GPIO)
 221:         return false;
@@ -633,7 +633,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 234:     return true;
 235: }
 236: 
-237: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+237: bool UART1::SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode)
 238: {
 239:     if (pullMode >= GPIOPullMode::Unknown)
 240:         return false;
@@ -664,7 +664,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 265:     return true;
 266: }
 267: 
-268: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+268: bool UART1::Off(MCP23017Pin pinNumber, GPIOMode mode)
 269: {
 270:     if (pinNumber >= NUM_GPIO)
 271:         return false;
@@ -1172,7 +1172,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 94:     /// </summary>
 95:     /// <param name="pinNumber">Pin number</param>
 96:     /// <returns>true if successful, false otherwise</returns>
-97:     virtual bool AssignPin(uint8 pinNumber) = 0;
+97:     virtual bool AssignPin(MCP23017Pin pinNumber) = 0;
 98: 
 99:     /// <summary>
 100:     /// Switch GPIO on
@@ -1218,7 +1218,6 @@ Create the file `code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h`
 
 ```cpp
 File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\include\baremetal\PhysicalGPIOPin.h
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
@@ -1299,10 +1298,10 @@ File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\include\
 78: public:
 79:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 80: 
-81:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+81:     PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 82: 
 83:     uint8 GetPinNumber() const override;
-84:     bool AssignPin(uint8 pinNumber) override;
+84:     bool AssignPin(MCP23017Pin pinNumber) override;
 85: 
 86:     void On() override;
 87:     void Off() override;
@@ -1477,7 +1476,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 120: /// <param name="pinNumber">GPIO pin number (0..53)</param>
 121: /// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
 122: /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
-123: PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
+123: PhysicalGPIOPin::PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
 124:     : m_pinNumber{NUM_GPIO}
 125:     , m_mode{GPIOMode::Unknown}
 126:     , m_value{}
@@ -1501,7 +1500,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 144: /// </summary>
 145: /// <param name="pinNumber">GPIO pin number to set (0..53)</param>
 146: /// <returns>Return true on success, false on failure</returns>
-147: bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
+147: bool PhysicalGPIOPin::AssignPin(MCP23017Pin pinNumber)
 148: {
 149:     // Check if pin already assigned
 150:     if (m_pinNumber != NUM_GPIO)
@@ -1829,7 +1828,6 @@ Update the file `code/libraries/baremetal/src/UART1.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 ...
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\UART1.cpp
 40: #include "baremetal/UART1.h"
 41: 
 42: #include "baremetal/ARMInstructions.h"

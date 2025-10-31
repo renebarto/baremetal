@@ -1436,82 +1436,78 @@ File: code/libraries/baremetal/src/stubs/MemoryAccessStubGPIO.cpp
 623: #if BAREMETAL_RPI_TARGET == 3
 624:     case RPI_GPIO_GPPUD_OFFSET:
 625:         {
-626:             uint32 diff = data ^ *registerField;
-627:             if ((diff & 0x00000003) != 0)
-628:             {
-629:                 uint8 value = data & 0x00000003;
-630:                 String modeName = PullUpDownModeToString(value);
-631:                 TRACE_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
-632:             }
-633:             break;
-634:         }
-635:     case RPI_GPIO_GPPUDCLK0_OFFSET:
-636:     case RPI_GPIO_GPPUDCLK1_OFFSET:
-637:         {
-638:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
-639:             uint32 diff = data ^ *registerField;
-640:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
-641:             {
-642:                 int shift = pinIndex;
-643:                 if (((diff >> shift) & 0x00000001) != 0)
-644:                 {
-645:                     uint8 pin = pinBase + pinIndex;
-646:                     uint8 value = (data >> shift) & 0x00000001;
-647:                     if (value != 0)
-648:                         TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock ON", pin);
-649:                     else
-650:                         TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock OFF", pin);
-651:                 }
-652:             }
-653:             break;
-654:         }
-655: #elif BAREMETAL_RPI_TARGET == 4
-656:     case RPI_GPIO_GPPINMUXSD_OFFSET:
-657:         {
-658:             uint32 value = *registerField;
-659:             TRACE_DEBUG("GPIO Set Pin Mux Mode %x", value);
-660:             break;
-661:         }
-662:     case RPI_GPIO_GPPUPPDN0_OFFSET:
-663:     case RPI_GPIO_GPPUPPDN1_OFFSET:
-664:     case RPI_GPIO_GPPUPPDN2_OFFSET:
-665:     case RPI_GPIO_GPPUPPDN3_OFFSET:
-666:         {
-667:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
-668:             uint32 diff = data ^ *registerField;
-669:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
-670:             {
-671:                 int shift = pinIndex * 2;
-672:                 if (((diff >> shift) & 0x00000003) != 0)
-673:                 {
-674:                     uint8 pin = pinBase + pinIndex;
-675:                     uint8 value = (data >> shift) & 0x00000003;
-676:                     String modeName = PullUpDownModeToString(value);
-677:                     TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Mode %s", pin, modeName.c_str());
-678:                 }
-679:             }
-680:             break;
-681:         }
-682: #endif
-683:     default:
-684:         LOG_ERROR("Invalid GPIO register access for writing: offset %d", offset);
-685:         break;
-686:     }
-687:     *registerField = data;
-688: }
-689:
-690: /// <summary>
-691: /// Determine register address offset relative to GPIO base address
-692: ///
-693: /// If the address is not in the correct range, an assert is fired
-694: /// </summary>
-695: /// <param name="address">Address to check</param>
-696: /// <returns>Offset relative to GPIO base address</returns>
-697: uint32 MemoryAccessStubGPIO::GetRegisterOffset(regaddr address)
-698: {
-699:     assert((reinterpret_cast<uintptr>(address) & GPIOBaseAddressMask) == GPIOBaseAddress);
-700:     return reinterpret_cast<uintptr>(address) - GPIOBaseAddress;
-701: }
+626:             uint8 value = data & 0x00000003;
+627:             String modeName = PullUpDownModeToString(value);
+628:             TRACE_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
+629:             break;
+630:         }
+631:     case RPI_GPIO_GPPUDCLK0_OFFSET:
+632:     case RPI_GPIO_GPPUDCLK1_OFFSET:
+633:         {
+634:             uint8 pinBase = (offset - RPI_GPIO_GPPUDCLK0_OFFSET) / 4 * 32;
+635:             uint32 diff = data ^ *registerField;
+636:             for (uint8 pinIndex = 0; pinIndex < 32; ++pinIndex)
+637:             {
+638:                 int shift = pinIndex;
+639:                 if (((diff >> shift) & 0x00000001) != 0)
+640:                 {
+641:                     uint8 pin = pinBase + pinIndex;
+642:                     uint8 value = (data >> shift) & 0x00000001;
+643:                     if (value != 0)
+644:                         TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock ON", pin);
+645:                     else
+646:                         TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Enable Clock OFF", pin);
+647:                 }
+648:             }
+649:             break;
+650:         }
+651: #elif BAREMETAL_RPI_TARGET == 4
+652:     case RPI_GPIO_GPPINMUXSD_OFFSET:
+653:         {
+654:             uint32 value = *registerField;
+655:             TRACE_DEBUG("GPIO Set Pin Mux Mode %x", value);
+656:             break;
+657:         }
+658:     case RPI_GPIO_GPPUPPDN0_OFFSET:
+659:     case RPI_GPIO_GPPUPPDN1_OFFSET:
+660:     case RPI_GPIO_GPPUPPDN2_OFFSET:
+661:     case RPI_GPIO_GPPUPPDN3_OFFSET:
+662:         {
+663:             uint8 pinBase = (offset - RPI_GPIO_GPPUPPDN0_OFFSET) / 4 * 16;
+664:             uint32 diff = data ^ *registerField;
+665:             for (uint8 pinIndex = 0; pinIndex < 16; ++pinIndex)
+666:             {
+667:                 int shift = pinIndex * 2;
+668:                 if (((diff >> shift) & 0x00000003) != 0)
+669:                 {
+670:                     uint8 pin = pinBase + pinIndex;
+671:                     uint8 value = (data >> shift) & 0x00000003;
+672:                     String modeName = PullUpDownModeToString(value);
+673:                     TRACE_DEBUG("GPIO Set Pin %d Pull Up/Down Mode %s", pin, modeName.c_str());
+674:                 }
+675:             }
+676:             break;
+677:         }
+678: #endif
+679:     default:
+680:         LOG_ERROR("Invalid GPIO register access for writing: offset %d", offset);
+681:         break;
+682:     }
+683:     *registerField = data;
+684: }
+685: 
+686: /// <summary>
+687: /// Determine register address offset relative to GPIO base address
+688: ///
+689: /// If the address is not in the correct range, an assert is fired
+690: /// </summary>
+691: /// <param name="address">Address to check</param>
+692: /// <returns>Offset relative to GPIO base address</returns>
+693: uint32 MemoryAccessStubGPIO::GetRegisterOffset(regaddr address)
+694: {
+695:     assert((reinterpret_cast<uintptr>(address) & GPIOBaseAddressMask) == GPIOBaseAddress);
+696:     return reinterpret_cast<uintptr>(address) - GPIOBaseAddress;
+697: }
 ```
 
 - Line 57: We define a variable `GPIOBaseAddress` to hold the base address of the GPIO registers
@@ -1754,444 +1750,471 @@ File: code/libraries/baremetal/src/Logger.cpp
 108: /// Check if the log level will result in output
 109: /// </summary>
 110: /// <param name="severity">True if the log level is enabled, false otherwise</param>
-111: bool Logger::IsLogSeverityEnabled(LogSeverity severity)
-112: {
-113:     return (static_cast<int>(severity) <= static_cast<int>(m_level));
-114: }
-115: 
+111: /// <returns>True is the severity level is enabled, false if not</returns>
+112: bool Logger::IsLogSeverityEnabled(LogSeverity severity)
+113: {
+114:     return (static_cast<int>(severity) <= static_cast<int>(m_level));
+115: }
 116: 
 ...
-139: void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
-140: {
-141:     if (!IsLogSeverityEnabled(severity))
-142:         return;
-143: 
-144:     String lineBuffer;
-145: 
-146:     auto sourceString = Format(" (%s:%d)", source, line);
-147: 
-148:     auto messageBuffer = FormatV(message, args);
-149: 
-150:     switch (severity)
-151:     {
-152:     case LogSeverity::Panic:
-153:         lineBuffer += "!Panic!";
-154:         break;
-155:     case LogSeverity::Error:
-156:         lineBuffer += "Error  ";
-157:         break;
-158:     case LogSeverity::Warning:
-159:         lineBuffer += "Warning";
-160:         break;
-161:     case LogSeverity::Info:
-162:         lineBuffer += "Info   ";
-163:         break;
-164:     case LogSeverity::Debug:
-165:         lineBuffer += "Debug  ";
-166:         break;
-167:     case LogSeverity::Data:
-168:         lineBuffer += "Data   ";
-169:         break;
-170:     }
-171: 
-172:     if (m_timer != nullptr)
-173:     {
-174:         const size_t TimeBufferSize = 32;
-175:         char timeBuffer[TimeBufferSize]{};
-176:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-177:         if (strlen(timeBuffer) > 0)
-178:         {
-179:             lineBuffer += timeBuffer;
-180:             lineBuffer += ' ';
-181:         }
-182:     }
-183: 
-184:     lineBuffer += messageBuffer;
-185:     lineBuffer += sourceString;
-186:     lineBuffer += "\n";
-187: 
-188: #if BAREMETAL_COLOR_OUTPUT
-189:     switch (severity)
-190:     {
-191:     case LogSeverity::Panic:
-192:         s_console.Write(lineBuffer, ConsoleColor::BrightRed);
-193:         break;
-194:     case LogSeverity::Error:
-195:         s_console.Write(lineBuffer, ConsoleColor::Red);
-196:         break;
-197:     case LogSeverity::Warning:
-198:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
-199:         break;
-200:     case LogSeverity::Info:
-201:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
-202:         break;
-203:     case LogSeverity::Debug:
-204:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
-205:         break;
-206:     case LogSeverity::Data:
-207:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
-208:         break;
-209:     default:
-210:         s_console.Write(lineBuffer, ConsoleColor::White);
-211:         break;
-212:     }
-213: #else
-214:     s_console.Write(lineBuffer);
-215: #endif
-216: 
-217:     if (severity == LogSeverity::Panic)
-218:     {
-219:         GetSystem().Halt();
-220:     }
-221: }
+132: /// <summary>
+133: /// Write a string with variable arguments to the logger
+134: /// </summary>
+135: /// <param name="source">Source name or file name</param>
+136: /// <param name="line">Source line number</param>
+137: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+138: /// <param name="message">Formatted message string</param>
+139: /// <param name="args">Variable argument list</param>
+140: void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+141: {
+142:     if (!IsLogSeverityEnabled(severity))
+143:         return;
+144: 
+145:     String lineBuffer;
+146: 
+147:     auto sourceString = Format(" (%s:%d)", source, line);
+148: 
+149:     auto messageBuffer = FormatV(message, args);
+150: 
+151:     switch (severity)
+152:     {
+153:     case LogSeverity::Panic:
+154:         lineBuffer += "!Panic!";
+155:         break;
+156:     case LogSeverity::Error:
+157:         lineBuffer += "Error  ";
+158:         break;
+159:     case LogSeverity::Warning:
+160:         lineBuffer += "Warning";
+161:         break;
+162:     case LogSeverity::Info:
+163:         lineBuffer += "Info   ";
+164:         break;
+165:     case LogSeverity::Debug:
+166:         lineBuffer += "Debug  ";
+167:         break;
+168:     case LogSeverity::Data:
+169:         lineBuffer += "Data   ";
+170:         break;
+171:     }
+172: 
+173:     if (m_timer != nullptr)
+174:     {
+175:         const size_t TimeBufferSize = 32;
+176:         char timeBuffer[TimeBufferSize]{};
+177:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+178:         if (strlen(timeBuffer) > 0)
+179:         {
+180:             lineBuffer += timeBuffer;
+181:             lineBuffer += ' ';
+182:         }
+183:     }
+184: 
+185:     lineBuffer += messageBuffer;
+186:     lineBuffer += sourceString;
+187:     lineBuffer += "\n";
+188: 
+189: #if BAREMETAL_COLOR_OUTPUT
+190:     switch (severity)
+191:     {
+192:     case LogSeverity::Panic:
+193:         s_console.Write(lineBuffer, ConsoleColor::BrightRed);
+194:         break;
+195:     case LogSeverity::Error:
+196:         s_console.Write(lineBuffer, ConsoleColor::Red);
+197:         break;
+198:     case LogSeverity::Warning:
+199:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+200:         break;
+201:     case LogSeverity::Info:
+202:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
+203:         break;
+204:     case LogSeverity::Debug:
+205:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
+206:         break;
+207:     case LogSeverity::Data:
+208:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
+209:         break;
+210:     default:
+211:         s_console.Write(lineBuffer, ConsoleColor::White);
+212:         break;
+213:     }
+214: #else
+215:     s_console.Write(lineBuffer);
+216: #endif
+217: 
+218:     if (severity == LogSeverity::Panic)
+219:     {
+220:         GetSystem().Halt();
+221:     }
+222: }
+223: 
 ...
-246: void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
-247: {
-248:     if (!IsLogSeverityEnabled(severity))
-249:         return;
-250: 
-251:     static const size_t BufferSize = 1024;
-252:     char buffer[BufferSize]{};
-253: 
-254:     char sourceString[BufferSize]{};
-255:     FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
-256: 
-257:     char messageBuffer[BufferSize]{};
-258:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
-259: 
-260:     switch (severity)
-261:     {
-262:     case LogSeverity::Panic:
-263:         strncat(buffer, "!Panic!", BufferSize);
-264:         break;
-265:     case LogSeverity::Error:
-266:         strncat(buffer, "Error  ", BufferSize);
-267:         break;
-268:     case LogSeverity::Warning:
-269:         strncat(buffer, "Warning", BufferSize);
-270:         break;
-271:     case LogSeverity::Info:
-272:         strncat(buffer, "Info   ", BufferSize);
-273:         break;
-274:     case LogSeverity::Debug:
-275:         strncat(buffer, "Debug  ", BufferSize);
-276:         break;
-277:     case LogSeverity::Data:
-278:         strncat(buffer, "Data   ", BufferSize);
-279:         break;
-280:     }
-281: 
-282:     if (m_timer != nullptr)
-283:     {
-284:         const size_t TimeBufferSize = 32;
-285:         char timeBuffer[TimeBufferSize]{};
-286:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-287:         if (strlen(timeBuffer) > 0)
-288:         {
-289:             strncat(buffer, timeBuffer, BufferSize);
-290:             strncat(buffer, " ", BufferSize);
-291:         }
-292:     }
-293: 
-294:     strncat(buffer, messageBuffer, BufferSize);
-295:     strncat(buffer, sourceString, BufferSize);
-296:     strncat(buffer, "\n", BufferSize);
-297: 
-298: #if BAREMETAL_COLOR_OUTPUT
-299:     switch (severity)
-300:     {
-301:     case LogSeverity::Panic:
-302:         s_console.Write(buffer, ConsoleColor::BrightRed);
-303:         break;
-304:     case LogSeverity::Error:
-305:         s_console.Write(buffer, ConsoleColor::Red);
-306:         break;
-307:     case LogSeverity::Warning:
-308:         s_console.Write(buffer, ConsoleColor::BrightYellow);
-309:         break;
-310:     case LogSeverity::Info:
-311:         s_console.Write(buffer, ConsoleColor::Cyan);
-312:         break;
-313:     case LogSeverity::Debug:
-314:         s_console.Write(buffer, ConsoleColor::Yellow);
-315:         break;
-316:     case LogSeverity::Data:
-317:         s_console.Write(buffer, ConsoleColor::Magenta);
-318:         break;
-319:     default:
-320:         s_console.Write(buffer, ConsoleColor::White);
-321:         break;
-322:     }
-323: #else
-324:     s_console.Write(buffer);
-325: #endif
-326: 
-327:     if (severity == LogSeverity::Panic)
-328:     {
-329:         GetSystem().Halt();
-330:     }
-331: }
+239: /// <summary>
+240: /// Write a string with variable arguments to the logger, not using memory allocation
+241: /// </summary>
+242: /// <param name="source">Source name or file name</param>
+243: /// <param name="line">Source line number</param>
+244: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+245: /// <param name="message">Formatted message string</param>
+246: /// <param name="args">Variable argument list</param>
+247: void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+248: {
+249:     if (!IsLogSeverityEnabled(severity))
+250:         return;
+251: 
+252:     static const size_t BufferSize = 1024;
+253:     char buffer[BufferSize]{};
+254: 
+255:     char sourceString[BufferSize]{};
+256:     FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
+257: 
+258:     char messageBuffer[BufferSize]{};
+259:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
+260: 
+261:     switch (severity)
+262:     {
+263:     case LogSeverity::Panic:
+264:         strncat(buffer, "!Panic!", BufferSize);
+265:         break;
+266:     case LogSeverity::Error:
+267:         strncat(buffer, "Error  ", BufferSize);
+268:         break;
+269:     case LogSeverity::Warning:
+270:         strncat(buffer, "Warning", BufferSize);
+271:         break;
+272:     case LogSeverity::Info:
+273:         strncat(buffer, "Info   ", BufferSize);
+274:         break;
+275:     case LogSeverity::Debug:
+276:         strncat(buffer, "Debug  ", BufferSize);
+277:         break;
+278:     case LogSeverity::Data:
+279:         strncat(buffer, "Data   ", BufferSize);
+280:         break;
+281:     }
+282: 
+283:     if (m_timer != nullptr)
+284:     {
+285:         const size_t TimeBufferSize = 32;
+286:         char timeBuffer[TimeBufferSize]{};
+287:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+288:         if (strlen(timeBuffer) > 0)
+289:         {
+290:             strncat(buffer, timeBuffer, BufferSize);
+291:             strncat(buffer, " ", BufferSize);
+292:         }
+293:     }
+294: 
+295:     strncat(buffer, messageBuffer, BufferSize);
+296:     strncat(buffer, sourceString, BufferSize);
+297:     strncat(buffer, "\n", BufferSize);
+298: 
+299: #if BAREMETAL_COLOR_OUTPUT
+300:     switch (severity)
+301:     {
+302:     case LogSeverity::Panic:
+303:         s_console.Write(buffer, ConsoleColor::BrightRed);
+304:         break;
+305:     case LogSeverity::Error:
+306:         s_console.Write(buffer, ConsoleColor::Red);
+307:         break;
+308:     case LogSeverity::Warning:
+309:         s_console.Write(buffer, ConsoleColor::BrightYellow);
+310:         break;
+311:     case LogSeverity::Info:
+312:         s_console.Write(buffer, ConsoleColor::Cyan);
+313:         break;
+314:     case LogSeverity::Debug:
+315:         s_console.Write(buffer, ConsoleColor::Yellow);
+316:         break;
+317:     case LogSeverity::Data:
+318:         s_console.Write(buffer, ConsoleColor::Magenta);
+319:         break;
+320:     default:
+321:         s_console.Write(buffer, ConsoleColor::White);
+322:         break;
+323:     }
+324: #else
+325:     s_console.Write(buffer);
+326: #endif
+327: 
+328:     if (severity == LogSeverity::Panic)
+329:     {
+330:         GetSystem().Halt();
+331:     }
+332: }
+333: 
 ...
-349: /// <summary>
-350: /// Write a trace string with variable arguments to the logger
-351: /// </summary>
-352: /// <param name="filename">File name</param>
-353: /// <param name="line">Source line number</param>
-354: /// <param name="function">Function name</param>
-355: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
-356: /// <param name="message">Formatted message string</param>
-357: /// <param name="args">Variable argument list</param>
-358: void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
-359: {
-360:     if (!IsLogSeverityEnabled(severity))
-361:         return;
-362: 
-363:     String lineBuffer;
-364: 
-365:     auto sourceString = Format(" (%s:%d)", filename, line);
-366: 
-367:     auto messageBuffer = FormatV(message, args);
-368: 
-369:     switch (severity)
-370:     {
-371:     case LogSeverity::Warning:
-372:         lineBuffer += "Warning";
-373:         break;
-374:     case LogSeverity::Info:
-375:         lineBuffer += "Info   ";
-376:         break;
-377:     case LogSeverity::Debug:
-378:         lineBuffer += "Debug  ";
-379:         break;
-380:     case LogSeverity::Data:
-381:         lineBuffer += "Data   ";
-382:         break;
-383:     default:
-384:         break;
-385:     }
-386: 
-387:     if (m_timer != nullptr)
-388:     {
-389:         const size_t TimeBufferSize = 32;
-390:         char timeBuffer[TimeBufferSize]{};
-391:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-392:         if (strlen(timeBuffer) > 0)
-393:         {
-394:             lineBuffer += timeBuffer;
-395:             lineBuffer += ' ';
-396:         }
-397:     }
-398: 
-399:     lineBuffer += messageBuffer;
-400:     lineBuffer += sourceString;
-401:     lineBuffer += "\n";
-402: 
-403: #if BAREMETAL_COLOR_OUTPUT
-404:     switch (severity)
-405:     {
-406:     case LogSeverity::Warning:
-407:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
-408:         break;
-409:     case LogSeverity::Info:
-410:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
-411:         break;
-412:     case LogSeverity::Debug:
-413:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
-414:         break;
-415:     case LogSeverity::Data:
-416:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
-417:         break;
-418:     default:
-419:         s_console.Write(lineBuffer, ConsoleColor::White);
-420:         break;
-421:     }
-422: #else
-423:     s_console.Write(lineBuffer);
-424: #endif
-425: }
-426: 
+350: /// <summary>
+351: /// Write a trace string with variable arguments to the logger
+352: /// </summary>
+353: /// <param name="filename">File name</param>
+354: /// <param name="line">Source line number</param>
+355: /// <param name="function">Function name</param>
+356: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+357: /// <param name="message">Formatted message string</param>
+358: /// <param name="args">Variable argument list</param>
+359: void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+360: {
+361:     if (!IsLogSeverityEnabled(severity))
+362:         return;
+363: 
+364:     String lineBuffer;
+365: 
+366:     auto sourceString = Format(" (%s:%d)", filename, line);
+367: 
+368:     auto messageBuffer = FormatV(message, args);
+369: 
+370:     switch (severity)
+371:     {
+372:     case LogSeverity::Warning:
+373:         lineBuffer += "Warning";
+374:         break;
+375:     case LogSeverity::Info:
+376:         lineBuffer += "Info   ";
+377:         break;
+378:     case LogSeverity::Debug:
+379:         lineBuffer += "Debug  ";
+380:         break;
+381:     case LogSeverity::Data:
+382:         lineBuffer += "Data   ";
+383:         break;
+384:     default:
+385:         break;
+386:     }
+387: 
+388:     if (m_timer != nullptr)
+389:     {
+390:         const size_t TimeBufferSize = 32;
+391:         char timeBuffer[TimeBufferSize]{};
+392:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+393:         if (strlen(timeBuffer) > 0)
+394:         {
+395:             lineBuffer += timeBuffer;
+396:             lineBuffer += ' ';
+397:         }
+398:     }
+399: 
+400:     lineBuffer += messageBuffer;
+401:     lineBuffer += sourceString;
+402:     lineBuffer += "\n";
+403: 
+404: #if BAREMETAL_COLOR_OUTPUT
+405:     switch (severity)
+406:     {
+407:     case LogSeverity::Warning:
+408:         s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+409:         break;
+410:     case LogSeverity::Info:
+411:         s_console.Write(lineBuffer, ConsoleColor::Cyan);
+412:         break;
+413:     case LogSeverity::Debug:
+414:         s_console.Write(lineBuffer, ConsoleColor::Yellow);
+415:         break;
+416:     case LogSeverity::Data:
+417:         s_console.Write(lineBuffer, ConsoleColor::Magenta);
+418:         break;
+419:     default:
+420:         s_console.Write(lineBuffer, ConsoleColor::White);
+421:         break;
+422:     }
+423: #else
+424:     s_console.Write(lineBuffer);
+425: #endif
+426: }
+427: 
 ...
-452: void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
-453: {
-454:     if (!IsLogSeverityEnabled(severity))
-455:         return;
-456: 
-457:     static const size_t BufferSize = 1024;
-458:     char buffer[BufferSize]{};
-459: 
-460:     char sourceString[BufferSize]{};
-461:     FormatNoAlloc(sourceString, BufferSize, "%s (%s:%d) ", function, filename, line);
-462: 
-463:     char messageBuffer[BufferSize]{};
-464:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
-465: 
-466:     switch (severity)
-467:     {
-468:     case LogSeverity::Warning:
-469:         strncat(buffer, "Warning", BufferSize);
-470:         break;
-471:     case LogSeverity::Info:
-472:         strncat(buffer, "Info   ", BufferSize);
-473:         break;
-474:     case LogSeverity::Debug:
-475:         strncat(buffer, "Debug  ", BufferSize);
-476:         break;
-477:     case LogSeverity::Data:
-478:         strncat(buffer, "Data   ", BufferSize);
-479:         break;
-480:     default:
-481:         break;
-482:     }
-483: 
-484:     if (m_timer != nullptr)
-485:     {
-486:         const size_t TimeBufferSize = 32;
-487:         char timeBuffer[TimeBufferSize]{};
-488:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
-489:         if (strlen(timeBuffer) > 0)
-490:         {
-491:             strncat(buffer, timeBuffer, BufferSize);
-492:             strncat(buffer, " ", BufferSize);
-493:         }
-494:     }
-495: 
-496:     strncat(buffer, sourceString, BufferSize);
-497:     strncat(buffer, messageBuffer, BufferSize);
-498:     strncat(buffer, "\n", BufferSize);
-499: 
-500: #if BAREMETAL_COLOR_OUTPUT
-501:     switch (severity)
-502:     {
-503:     case LogSeverity::Warning:
-504:         s_console.Write(buffer, ConsoleColor::BrightYellow);
-505:         break;
-506:     case LogSeverity::Info:
-507:         s_console.Write(buffer, ConsoleColor::Cyan);
-508:         break;
-509:     case LogSeverity::Debug:
-510:         s_console.Write(buffer, ConsoleColor::Yellow);
-511:         break;
-512:     case LogSeverity::Data:
-513:         s_console.Write(buffer, ConsoleColor::Magenta);
-514:         break;
-515:     default:
-516:         s_console.Write(buffer, ConsoleColor::White);
-517:         break;
-518:     }
-519: #else
-520:     s_console.Write(buffer);
-521: #endif
-522: }
-523: 
-524: /// <summary>
-525: /// Write a string with variable arguments to the logger. Static entry point for Log() method
-526: /// </summary>
-527: /// <param name="from">Source name or file name</param>
-528: /// <param name="line">Source line number</param>
-529: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
-530: /// <param name="message">Formatted message string, with variable arguments</param>
-531: void Logger::LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...)
-532: {
-533:     if (HaveLogger())
-534:     {
-535:         va_list args;
-536:         va_start(args, message);
-537:         GetLogger().LogV(from, line, severity, message, args);
-538:         va_end(args);
-539:     }
-540: }
-541: 
-542: /// <summary>
-543: /// Write a string with variable arguments to the logger, not using memory allocation. Static entry point for LogNoAlloc() method
-544: /// </summary>
-545: /// <param name="from">Source name or file name</param>
-546: /// <param name="line">Source line number</param>
-547: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
-548: /// <param name="message">Formatted message string, with variable arguments</param>
-549: void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...)
-550: {
-551:     if (HaveLogger())
-552:     {
-553:         va_list args;
-554:         va_start(args, message);
-555:         GetLogger().LogNoAllocV(from, line, severity, message, args);
-556:         va_end(args);
-557:     }
-558: }
-559: 
-560: /// <summary>
-561: /// Write a trace string with variable arguments to the logger. Static entry point for Trace() method
-562: /// </summary>
-563: /// <param name="filename">File name</param>
-564: /// <param name="line">Source line number</param>
-565: /// <param name="function">Function name</param>
-566: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
-567: /// <param name="message">Formatted message string, with variable arguments</param>
-568: void Logger::TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
-569: {
-570:     if (HaveLogger())
-571:     {
-572:         va_list args;
-573:         va_start(args, message);
-574:         GetLogger().TraceV(filename, line, function, severity, message, args);
-575:         va_end(args);
-576:     }
-577: }
-578: 
-579: /// <summary>
-580: /// Write a trace string with variable arguments to the logger, not using memory allocation. Static entry point for TraceNoAlloc() method
-581: /// </summary>
-582: /// <param name="filename">File name</param>
-583: /// <param name="line">Source line number</param>
-584: /// <param name="function">Function name</param>
-585: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
-586: /// <param name="message">Formatted message string, with variable arguments</param>
-587: void Logger::TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
-588: {
-589:     if (HaveLogger())
-590:     {
-591:         va_list args;
-592:         va_start(args, message);
-593:         GetLogger().TraceNoAllocV(filename, line, function, severity, message, args);
-594:         va_end(args);
-595:     }
-596: }
-597: 
-598: /// <summary>
-599: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
-600: /// </summary>
-601: /// <returns>Reference to the singleton logger instance</returns>
-602: Logger& baremetal::GetLogger()
-603: {
-604:     if (Logger::s_logger == nullptr)
-605:     {
-606:         Logger::s_logger = new Logger(LogSeverity::Info, &GetTimer());
-607:         Logger::s_logger->Initialize();
-608:     }
-609:     return *Logger::s_logger;
-610: }
+444: /// <summary>
+445: /// Write a trace string with variable arguments to the logger, not using memory allocation
+446: /// </summary>
+447: /// <param name="filename">File name</param>
+448: /// <param name="line">Source line number</param>
+449: /// <param name="function">Function name</param>
+450: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+451: /// <param name="message">Formatted message string</param>
+452: /// <param name="args">Variable argument list</param>
+453: void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+454: {
+455:     if (!IsLogSeverityEnabled(severity))
+456:         return;
+457: 
+458:     static const size_t BufferSize = 1024;
+459:     char buffer[BufferSize]{};
+460: 
+461:     char sourceString[BufferSize]{};
+462:     FormatNoAlloc(sourceString, BufferSize, "%s (%s:%d) ", function, filename, line);
+463: 
+464:     char messageBuffer[BufferSize]{};
+465:     FormatNoAllocV(messageBuffer, BufferSize, message, args);
+466: 
+467:     switch (severity)
+468:     {
+469:     case LogSeverity::Warning:
+470:         strncat(buffer, "Warning", BufferSize);
+471:         break;
+472:     case LogSeverity::Info:
+473:         strncat(buffer, "Info   ", BufferSize);
+474:         break;
+475:     case LogSeverity::Debug:
+476:         strncat(buffer, "Debug  ", BufferSize);
+477:         break;
+478:     case LogSeverity::Data:
+479:         strncat(buffer, "Data   ", BufferSize);
+480:         break;
+481:     default:
+482:         break;
+483:     }
+484: 
+485:     if (m_timer != nullptr)
+486:     {
+487:         const size_t TimeBufferSize = 32;
+488:         char timeBuffer[TimeBufferSize]{};
+489:         m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+490:         if (strlen(timeBuffer) > 0)
+491:         {
+492:             strncat(buffer, timeBuffer, BufferSize);
+493:             strncat(buffer, " ", BufferSize);
+494:         }
+495:     }
+496: 
+497:     strncat(buffer, sourceString, BufferSize);
+498:     strncat(buffer, messageBuffer, BufferSize);
+499:     strncat(buffer, "\n", BufferSize);
+500: 
+501: #if BAREMETAL_COLOR_OUTPUT
+502:     switch (severity)
+503:     {
+504:     case LogSeverity::Warning:
+505:         s_console.Write(buffer, ConsoleColor::BrightYellow);
+506:         break;
+507:     case LogSeverity::Info:
+508:         s_console.Write(buffer, ConsoleColor::Cyan);
+509:         break;
+510:     case LogSeverity::Debug:
+511:         s_console.Write(buffer, ConsoleColor::Yellow);
+512:         break;
+513:     case LogSeverity::Data:
+514:         s_console.Write(buffer, ConsoleColor::Magenta);
+515:         break;
+516:     default:
+517:         s_console.Write(buffer, ConsoleColor::White);
+518:         break;
+519:     }
+520: #else
+521:     s_console.Write(buffer);
+522: #endif
+523: }
+524: 
+525: /// <summary>
+526: /// Write a string with variable arguments to the logger. Static entry point for Log() method
+527: /// </summary>
+528: /// <param name="from">Source name or file name</param>
+529: /// <param name="line">Source line number</param>
+530: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+531: /// <param name="message">Formatted message string, with variable arguments</param>
+532: void Logger::LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...)
+533: {
+534:     if (HaveLogger())
+535:     {
+536:         va_list args;
+537:         va_start(args, message);
+538:         GetLogger().LogV(from, line, severity, message, args);
+539:         va_end(args);
+540:     }
+541: }
+542: 
+543: /// <summary>
+544: /// Write a string with variable arguments to the logger, not using memory allocation. Static entry point for LogNoAlloc() method
+545: /// </summary>
+546: /// <param name="from">Source name or file name</param>
+547: /// <param name="line">Source line number</param>
+548: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+549: /// <param name="message">Formatted message string, with variable arguments</param>
+550: void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...)
+551: {
+552:     if (HaveLogger())
+553:     {
+554:         va_list args;
+555:         va_start(args, message);
+556:         GetLogger().LogNoAllocV(from, line, severity, message, args);
+557:         va_end(args);
+558:     }
+559: }
+560: 
+561: /// <summary>
+562: /// Write a trace string with variable arguments to the logger. Static entry point for Trace() method
+563: /// </summary>
+564: /// <param name="filename">File name</param>
+565: /// <param name="line">Source line number</param>
+566: /// <param name="function">Function name</param>
+567: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+568: /// <param name="message">Formatted message string, with variable arguments</param>
+569: void Logger::TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+570: {
+571:     if (HaveLogger())
+572:     {
+573:         va_list args;
+574:         va_start(args, message);
+575:         GetLogger().TraceV(filename, line, function, severity, message, args);
+576:         va_end(args);
+577:     }
+578: }
+579: 
+580: /// <summary>
+581: /// Write a trace string with variable arguments to the logger, not using memory allocation. Static entry point for TraceNoAlloc() method
+582: /// </summary>
+583: /// <param name="filename">File name</param>
+584: /// <param name="line">Source line number</param>
+585: /// <param name="function">Function name</param>
+586: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+587: /// <param name="message">Formatted message string, with variable arguments</param>
+588: void Logger::TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+589: {
+590:     if (HaveLogger())
+591:     {
+592:         va_list args;
+593:         va_start(args, message);
+594:         GetLogger().TraceNoAllocV(filename, line, function, severity, message, args);
+595:         va_end(args);
+596:     }
+597: }
+598: 
+599: /// <summary>
+600: /// Construct the singleton logger and initializat it if needed, and return a reference to the instance
+601: /// </summary>
+602: /// <returns>Reference to the singleton logger instance</returns>
+603: Logger& baremetal::GetLogger()
+604: {
+605:     if (Logger::s_logger == nullptr)
+606:     {
+607:         Logger::s_logger = new Logger(LogSeverity::Info, &GetTimer());
+608:         Logger::s_logger->Initialize();
+609:     }
+610:     return *Logger::s_logger;
+611: }
 ```
 
 - Line 60: We define and initialize the class variable `s_logger`
 - Line 80: We now use `s_logger` and check that it is not null, and if not null that the class is initialized
-- Line 107-114: We implement the method `IsLogSeverityEnabled()`
-- Line 141: We use `IsLogSeverityEnabled()` to filter
-- Line 167-169: We add handling of sevierity `Data`
-- Line 206-208: We add handling of sevierity `Data`
-- Line 248: We use `IsLogSeverityEnabled()` to filter
-- Line 277-279: We add handling of sevierity `Data`
-- Line 316-318: We add handling of sevierity `Data`
-- Line 360: We use `IsLogSeverityEnabled()` to filter
-- Line 380-382: We add handling of sevierity `Data`
-- Line 415-417: We add handling of sevierity `Data`
-- Line 454: We use `IsLogSeverityEnabled()` to filter
-- Line 477-479: We add handling of sevierity `Data`
-- Line 512-514: We add handling of sevierity `Data`
-- Line 524-540: We implement `LogEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogV()`
-- Line 542-558: We implement `LogEntryNoAlloc)`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogNoAllocV()`
-- Line 560-577: We implement `TraceEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceV()`
-- Line 579-596: We implement `TraceEntryNoAlloc()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceNoAllocV()`
-- Line 598-610: We update the implementation of `GetLogger()` to create a new object if the pointer is still null
+- Line 107-115: We implement the method `IsLogSeverityEnabled()`
+- Line 142: We use `IsLogSeverityEnabled()` to filter
+- Line 168-170: We add handling of sevierity `Data`
+- Line 207-209: We add handling of sevierity `Data`
+- Line 249: We use `IsLogSeverityEnabled()` to filter
+- Line 278-280: We add handling of sevierity `Data`
+- Line 317-319: We add handling of sevierity `Data`
+- Line 361: We use `IsLogSeverityEnabled()` to filter
+- Line 381-383: We add handling of sevierity `Data`
+- Line 416-418: We add handling of sevierity `Data`
+- Line 455: We use `IsLogSeverityEnabled()` to filter
+- Line 478-480: We add handling of sevierity `Data`
+- Line 513-515: We add handling of sevierity `Data`
+- Line 525-541: We implement `LogEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogV()`
+- Line 543-559: We implement `LogEntryNoAlloc)`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `LogNoAllocV()`
+- Line 561-578: We implement `TraceEntry()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceV()`
+- Line 580-597: We implement `TraceEntryNoAlloc()`, which first checks whether `HaveLogger()` returns true, then builds the variable argument list and calls `TraceNoAllocV()`
+- Line 599-611: We update the implementation of `GetLogger()` to create a new object if the pointer is still null
 
 ### Update application code : Use GPIO stub {#TUTORIAL_21_GPIO_FAKING_GPIO____STEP_1_UPDATE_APPLICATION_CODE__USE_GPIO_STUB}
 
@@ -2237,25 +2260,27 @@ Notice that the setup of the GPIO pins is logged by the stub.
 
 ```text
 1: Setting up UART0
-2: Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:93)
-3: Info   0.00:00:00.050 Starting up (System:213)
-4: Debug  0.00:00:00.070 GPIO Set Pin Pull Up/Down Mode PullUp (MemoryAccessStubGPIO.cpp:631)
-5: Debug  0.00:00:00.090 GPIO Set Pin 11 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:648)
-6: Debug  0.00:00:00.120 GPIO Set Pin 11 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:650)
-7: Debug  0.00:00:00.150 GPIO Read Pin Mode  - Pin 10 mode Input - Pin 11 mode Input - Pin 12 mode Input - Pin 13 mode Input - Pin 14 mode Input - Pin 15 mode Input - Pin 16 mode Input - Pin 17 mode Input - Pin 18 mode Input - Pin 19 mode Input (MemoryAccessStubGPIO.cpp:211)
-8: Debug  0.00:00:00.190 GPIO Set Pin 9 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:648)
-9: Debug  0.00:00:00.210 GPIO Set Pin 9 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:650)
-10: Debug  0.00:00:00.250 GPIO Read Pin Mode  - Pin 0 mode Input - Pin 1 mode Input - Pin 2 mode Input - Pin 3 mode Input - Pin 4 mode Input - Pin 5 mode Input - Pin 6 mode Input - Pin 7 mode Input - Pin 8 mode Input - Pin 9 mode Input (MemoryAccessStubGPIO.cpp:211)
-11: Debug  0.00:00:00.280 GPIO Set Pin 10 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:648)
-12: Debug  0.00:00:00.310 GPIO Set Pin 10 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:650)
-13: Debug  0.00:00:00.340 GPIO Read Pin Mode  - Pin 10 mode Input - Pin 11 mode Input - Pin 12 mode Input - Pin 13 mode Input - Pin 14 mode Input - Pin 15 mode Input - Pin 16 mode Input - Pin 17 mode Input - Pin 18 mode Input - Pin 19 mode Input (MemoryAccessStubGPIO.cpp:211)
-14: Info   0.00:00:00.380 Rebooting (main:24)
-15: Info   0.00:00:00.400 Reboot (System:144)
+2: Info   0.00:00:00.000 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:93)
+3: Info   0.00:00:00.000 Starting up (System:213)
+4: Debug  0.00:00:00.010 GPIO Set Pin Pull Up/Down Mode PullUp (MemoryAccessStubGPIO.cpp:628)
+5: Debug  0.00:00:00.020 GPIO Set Pin 11 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:644)
+6: Debug  0.00:00:00.020 GPIO Set Pin 11 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:646)
+7: Debug  0.00:00:00.030 GPIO Read Pin Mode  - Pin 10 mode Input - Pin 11 mode Input - Pin 12 mode Input - Pin 13 mode Input - Pin 14 mode Input - Pin 15 mode Input - Pin 16 mode Input - Pin 17 mode Input - Pin 18 mode Input - Pin 19 mode Input (MemoryAccessStubGPIO.cpp:211)
+8: Debug  0.00:00:00.040 GPIO Set Pin Pull Up/Down Mode PullUp (MemoryAccessStubGPIO.cpp:628)
+9: Debug  0.00:00:00.050 GPIO Set Pin 9 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:644)
+10: Debug  0.00:00:00.050 GPIO Set Pin 9 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:646)
+11: Debug  0.00:00:00.060 GPIO Read Pin Mode  - Pin 0 mode Input - Pin 1 mode Input - Pin 2 mode Input - Pin 3 mode Input - Pin 4 mode Input - Pin 5 mode Input - Pin 6 mode Input - Pin 7 mode Input - Pin 8 mode Input - Pin 9 mode Input (MemoryAccessStubGPIO.cpp:211)
+12: Debug  0.00:00:00.070 GPIO Set Pin Pull Up/Down Mode PullUp (MemoryAccessStubGPIO.cpp:628)
+13: Debug  0.00:00:00.070 GPIO Set Pin 10 Pull Up/Down Enable Clock ON (MemoryAccessStubGPIO.cpp:644)
+14: Debug  0.00:00:00.080 GPIO Set Pin 10 Pull Up/Down Enable Clock OFF (MemoryAccessStubGPIO.cpp:646)
+15: Debug  0.00:00:00.080 GPIO Read Pin Mode  - Pin 10 mode Input - Pin 11 mode Input - Pin 12 mode Input - Pin 13 mode Input - Pin 14 mode Input - Pin 15 mode Input - Pin 16 mode Input - Pin 17 mode Input - Pin 18 mode Input - Pin 19 mode Input (MemoryAccessStubGPIO.cpp:211)
+16: Info   0.00:00:00.090 Rebooting (main:24)
+17: Info   0.00:00:00.100 Reboot (System:144)
 ```
 
-- Line 5-7 We set pin 11 to Pull-up mode, and set the pin to input
-- Line 8-10 We set pin 9 to Pull-up mode, and set the pin to input
-- Line 11-13 We set pin 10 to Pull-up mode, and set the pin to input
+- Line 4-7 We set pin 11 to Pull-up mode, and set the pin to input
+- Line 8-11 We set pin 9 to Pull-up mode, and set the pin to input
+- Line 12-16 We set pin 10 to Pull-up mode, and set the pin to input
 
 ## Setting up GPIO and reading data - Step 2 {#TUTORIAL_21_GPIO_SETTING_UP_GPIO_AND_READING_DATA___STEP_2}
 
@@ -2513,7 +2538,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 94:     /// </summary>
 95:     /// <param name="pinNumber">Pin number</param>
 96:     /// <returns>true if successful, false otherwise</returns>
-97:     virtual bool AssignPin(uint8 pinNumber) = 0;
+97:     virtual bool AssignPin(MCP23017Pin pinNumber) = 0;
 98:
 99:     /// <summary>
 100:     /// Switch GPIO on
@@ -2623,10 +2648,10 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 108: public:
 109:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 110:
-111:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+111:     PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 112:
 113:     uint8 GetPinNumber() const override;
-114:     bool AssignPin(uint8 pinNumber) override;
+114:     bool AssignPin(MCP23017Pin pinNumber) override;
 115:
 116:     void On() override;
 117:     void Off() override;
@@ -2695,7 +2720,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 113: /// <param name="pinNumber">GPIO pin number (0..53)</param>
 114: /// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
 115: /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
-116: PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
+116: PhysicalGPIOPin::PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
 117:     : m_pinNumber{NUM_GPIO}
 118:     , m_mode{GPIOMode::Unknown}
 119:     , m_value{}
@@ -2713,7 +2738,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 140: /// </summary>
 141: /// <param name="pinNumber">GPIO pin number to set (0..53)</param>
 142: /// <returns>Return true on success, false on failure</returns>
-143: bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
+143: bool PhysicalGPIOPin::AssignPin(MCP23017Pin pinNumber)
 144: {
 145:     // Check if pin already assigned
 146:     if (m_pinNumber != NUM_GPIO)
@@ -3184,7 +3209,7 @@ File: code/libraries/baremetal/include/baremetal/GPIOManager.h
 83:
 84:     void AllOff() override;
 85:
-86:     void DisableAllInterrupts(uint8 pinNumber);
+86:     void DisableAllInterrupts(MCP23017Pin pinNumber);
 87:
 88: private:
 89: };
@@ -3393,7 +3418,7 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 175:
 176:     uint32 eventStatus = m_memoryAccess.Read32(RPI_GPIO_GPEDS0);
 177:
-178:     uint8 pinNumber = 0;
+178:     MCP23017Pin pinNumber = 0;
 179:     while (pinNumber < NUM_GPIO)
 180:     {
 181:         if (eventStatus & 1)
@@ -3435,7 +3460,7 @@ File: code/libraries/baremetal/src/GPIOManager.cpp
 217: /// Disable all GPIO interrupt types for the specified in number
 218: /// </summary>
 219: /// <param name="pinNumber">Pin number of GPIO to disable interrupts for</param>
-220: void GPIOManager::DisableAllInterrupts(uint8 pinNumber)
+220: void GPIOManager::DisableAllInterrupts(MCP23017Pin pinNumber)
 221: {
 222:     assert(pinNumber < NUM_GPIO);
 223:
@@ -3541,7 +3566,7 @@ File: code/libraries/baremetal/include/baremetal/IGPIOPin.h
 94:     /// </summary>
 95:     /// <param name="pinNumber">Pin number</param>
 96:     /// <returns>true if successful, false otherwise</returns>
-97:     virtual bool AssignPin(uint8 pinNumber) = 0;
+97:     virtual bool AssignPin(MCP23017Pin pinNumber) = 0;
 98:
 99:     /// <summary>
 100:     /// Switch GPIO on
@@ -3675,10 +3700,10 @@ File: code/libraries/baremetal/include/baremetal/PhysicalGPIOPin.h
 131: public:
 132:     PhysicalGPIOPin(IMemoryAccess& memoryAccess = GetMemoryAccess());
 133:
-134:     PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
+134:     PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess = GetMemoryAccess());
 135:
 136:     uint8 GetPinNumber() const override;
-137:     bool AssignPin(uint8 pinNumber) override;
+137:     bool AssignPin(MCP23017Pin pinNumber) override;
 138:
 139:     void On() override;
 140:     void Off() override;
@@ -3835,7 +3860,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 138: /// <param name="pinNumber">GPIO pin number (0..53)</param>
 139: /// <param name="mode">Mode for the pin. The mode is valid combination of the function and the pull mode. Only the input function has valid pull modes.</param>
 140: /// <param name="memoryAccess">Memory access interface. Default is the Memory Access interface singleton</param>
-141: PhysicalGPIOPin::PhysicalGPIOPin(uint8 pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
+141: PhysicalGPIOPin::PhysicalGPIOPin(MCP23017Pin pinNumber, GPIOMode mode, IMemoryAccess& memoryAccess /*= m_memoryAccess*/)
 142:     : m_pinNumber{NUM_GPIO}
 143:     , m_mode{GPIOMode::Unknown}
 144:     , m_value{}
@@ -3865,7 +3890,7 @@ File: code/libraries/baremetal/src/PhysicalGPIOPin.cpp
 168: /// </summary>
 169: /// <param name="pinNumber">GPIO pin number to set (0..53)</param>
 170: /// <returns>Return true on success, false on failure</returns>
-171: bool PhysicalGPIOPin::AssignPin(uint8 pinNumber)
+171: bool PhysicalGPIOPin::AssignPin(MCP23017Pin pinNumber)
 172: {
 173:     // Check if pin already assigned
 174:     if (m_pinNumber != NUM_GPIO)
@@ -4986,7 +5011,7 @@ File: code/libraries/device/src/gpio/KY-040.cpp
 37: //
 38: //------------------------------------------------------------------------------
 39:
-40: #include <device/gpio/KY-040.h>
+40: #include "device/gpio/KY-040.h"
 41:
 42: #include "baremetal/Assert.h"
 43: #include "baremetal/Logger.h"
@@ -5531,7 +5556,7 @@ File: code/applications/demo/src/main.cpp
 4: #include "baremetal/Logger.h"
 5: #include "baremetal/System.h"
 6: #include "baremetal/Timer.h"
-7: #include <device/gpio/KY-040.h>
+7: #include "device/gpio/KY-040.h"
 8:
 9: LOG_MODULE("main");
 10:
@@ -6154,7 +6179,7 @@ File: code/applications/demo/src/main.cpp
 4: #include "baremetal/Logger.h"
 5: #include "baremetal/System.h"
 6: #include "baremetal/Timer.h"
-7: #include <device/gpio/KY-040.h>
+7: #include "device/gpio/KY-040.h"
 8:
 9: LOG_MODULE("main");
 10:

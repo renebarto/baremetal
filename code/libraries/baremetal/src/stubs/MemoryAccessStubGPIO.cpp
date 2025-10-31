@@ -623,13 +623,9 @@ void MemoryAccessStubGPIO::Write32(regaddr address, uint32 data)
 #if BAREMETAL_RPI_TARGET == 3
     case RPI_GPIO_GPPUD_OFFSET:
         {
-            uint32 diff = data ^ *registerField;
-            if ((diff & 0x00000003) != 0)
-            {
-                uint8 value = data & 0x00000003;
-                String modeName = PullUpDownModeToString(value);
-                TRACE_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
-            }
+            uint8 value = data & 0x00000003;
+            String modeName = PullUpDownModeToString(value);
+            TRACE_DEBUG("GPIO Set Pin Pull Up/Down Mode %s", modeName.c_str());
             break;
         }
     case RPI_GPIO_GPPUDCLK0_OFFSET:

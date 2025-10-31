@@ -180,7 +180,6 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 42: #include "stdlib/Macros.h"
 43:
 ...
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\include\baremetal\ARMInstructions.h
 91: /// @brief Get current exception level
 92: #define GetCurrentEL(value)                            asm volatile("mrs %0, CurrentEL" : "=r"(value))
 93: /// @brief EL value shift

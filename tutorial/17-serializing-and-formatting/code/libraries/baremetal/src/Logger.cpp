@@ -108,7 +108,7 @@ void Logger::SetLogLevel(LogSeverity logLevel)
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
 {
@@ -123,7 +123,7 @@ void Logger::Log(const char* source, int line, LogSeverity severity, const char*
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
@@ -209,7 +209,7 @@ void Logger::LogV(const char* source, int line, LogSeverity severity, const char
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
 {
@@ -224,7 +224,7 @@ void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, cons
 /// </summary>
 /// <param name="source">Source name or file name</param>
 /// <param name="line">Source line number</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
@@ -314,7 +314,7 @@ void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, con
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
@@ -330,7 +330,7 @@ void Logger::Trace(const char* filename, int line, const char* function, LogSeve
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
@@ -402,7 +402,7 @@ void Logger::TraceV(const char* filename, int line, const char* function, LogSev
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string, with variable arguments</param>
 void Logger::TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 {
@@ -418,7 +418,7 @@ void Logger::TraceNoAlloc(const char* filename, int line, const char* function, 
 /// <param name="filename">File name</param>
 /// <param name="line">Source line number</param>
 /// <param name="function">Function name</param>
-/// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 /// <param name="message">Formatted message string</param>
 /// <param name="args">Variable argument list</param>
 void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)

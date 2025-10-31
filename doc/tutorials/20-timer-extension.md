@@ -1150,7 +1150,6 @@ Update the new file `code/libraries/baremetal/src/Timer.cpp`
 ```cpp
 File: code/libraries/baremetal/src/Timer.cpp
 ...
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\Timer.cpp
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/Assert.h"
 44: #include "baremetal/BCMRegisters.h"

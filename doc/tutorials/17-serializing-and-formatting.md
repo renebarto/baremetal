@@ -134,7 +134,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 123: /// </summary>
 124: /// <param name="source">Source name or file name</param>
 125: /// <param name="line">Source line number</param>
-126: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+126: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 127: /// <param name="message">Formatted message string</param>
 128: /// <param name="args">Variable argument list</param>
 129: void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
@@ -220,7 +220,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 209: /// </summary>
 210: /// <param name="source">Source name or file name</param>
 211: /// <param name="line">Source line number</param>
-212: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+212: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 213: /// <param name="message">Formatted message string, with variable arguments</param>
 214: void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
 215: {
@@ -235,7 +235,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 224: /// </summary>
 225: /// <param name="source">Source name or file name</param>
 226: /// <param name="line">Source line number</param>
-227: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+227: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 228: /// <param name="message">Formatted message string</param>
 229: /// <param name="args">Variable argument list</param>
 230: void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
@@ -326,7 +326,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 330: /// <param name="filename">File name</param>
 331: /// <param name="line">Source line number</param>
 332: /// <param name="function">Function name</param>
-333: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+333: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 334: /// <param name="message">Formatted message string</param>
 335: /// <param name="args">Variable argument list</param>
 336: void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
@@ -398,7 +398,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 402: /// <param name="filename">File name</param>
 403: /// <param name="line">Source line number</param>
 404: /// <param name="function">Function name</param>
-405: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+405: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 406: /// <param name="message">Formatted message string, with variable arguments</param>
 407: void Logger::TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
 408: {
@@ -414,7 +414,7 @@ File: code/libraries/baremetal/src/Logger.cpp
 418: /// <param name="filename">File name</param>
 419: /// <param name="line">Source line number</param>
 420: /// <param name="function">Function name</param>
-421: /// <param name="severity">Severity to log with (log severity levels equal to or greater than the current set log level wil be ignored</param>
+421: /// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
 422: /// <param name="message">Formatted message string</param>
 423: /// <param name="args">Variable argument list</param>
 424: void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)

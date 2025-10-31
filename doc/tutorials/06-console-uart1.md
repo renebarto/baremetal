@@ -1552,13 +1552,13 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 139: 
 140: private:
 141:     // Set GPIO pin mode
-142:     bool SetMode(uint8 pinNumber, GPIOMode mode);
+142:     bool SetMode(MCP23017Pin pinNumber, GPIOMode mode);
 143:     // Set GPIO pin function
-144:     bool SetFunction(uint8 pinNumber, GPIOFunction function);
+144:     bool SetFunction(MCP23017Pin pinNumber, GPIOFunction function);
 145:     // Set GPIO pin pull mode
-146:     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
+146:     bool SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode);
 147:     // Switch GPIO off
-148:     bool Off(uint8 pinNumber, GPIOMode mode);
+148:     bool Off(MCP23017Pin pinNumber, GPIOMode mode);
 149: };
 150: 
 151: } // namespace baremetal
@@ -1768,7 +1768,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 170:     }
 171: }
 172: 
-173: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+173: bool UART1::SetMode(MCP23017Pin pinNumber, GPIOMode mode)
 174: {
 175:     if (pinNumber >= NUM_GPIO)
 176:         return false;
@@ -1806,7 +1806,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 208:     return true;
 209: }
 210: 
-211: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+211: bool UART1::SetFunction(MCP23017Pin pinNumber, GPIOFunction function)
 212: {
 213:     if (pinNumber >= NUM_GPIO)
 214:         return false;
@@ -1825,7 +1825,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 227:     return true;
 228: }
 229: 
-230: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+230: bool UART1::SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode)
 231: {
 232:     if (pullMode >= GPIOPullMode::Unknown)
 233:         return false;
@@ -1856,7 +1856,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 258:     return true;
 259: }
 260: 
-261: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+261: bool UART1::Off(MCP23017Pin pinNumber, GPIOMode mode)
 262: {
 263:     if (pinNumber >= NUM_GPIO)
 264:         return false;
@@ -1923,8 +1923,8 @@ Be aware that some of the documentation for BCM2835 contains errors, which have 
 
 The `SetMode()` method used in line 98 and 100 is implemented as:
 ```cpp
-File: d:\Projects\RaspberryPi\baremetal.github\tutorial\06-console-uart1\code\libraries\baremetal\src\UART1.cpp
-173: bool UART1::SetMode(uint8 pinNumber, GPIOMode mode)
+File: code/libraries/baremetal/src/UART1.cpp
+173: bool UART1::SetMode(MCP23017Pin pinNumber, GPIOMode mode)
 174: {
 175:     if (pinNumber >= NUM_GPIO)
 176:         return false;
@@ -1974,8 +1974,7 @@ File: d:\Projects\RaspberryPi\baremetal.github\tutorial\06-console-uart1\code\li
 The `SetFunction()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-File: d:\Projects\RaspberryPi\baremetal.github\tutorial\06-console-uart1\code\libraries\baremetal\src\UART1.cpp
-211: bool UART1::SetFunction(uint8 pinNumber, GPIOFunction function)
+211: bool UART1::SetFunction(MCP23017Pin pinNumber, GPIOFunction function)
 212: {
 213:     if (pinNumber >= NUM_GPIO)
 214:         return false;
@@ -2020,7 +2019,7 @@ Notice again that we use the `MemoryAccess` class for this
 The `SetPullMode()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-230: bool UART1::SetPullMode(uint8 pinNumber, GPIOPullMode pullMode)
+230: bool UART1::SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode)
 231: {
 232:     if (pullMode >= GPIOPullMode::Unknown)
 233:         return false;
@@ -2088,7 +2087,7 @@ Note that these values are different than for Raspberry Pi 3, hence the mapping
 The `Off()` method is implemented as:
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
-261: bool UART1::Off(uint8 pinNumber, GPIOMode mode)
+261: bool UART1::Off(MCP23017Pin pinNumber, GPIOMode mode)
 262: {
 263:     if (pinNumber >= NUM_GPIO)
 264:         return false;

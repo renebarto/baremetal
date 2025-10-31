@@ -108,6 +108,7 @@ void Logger::SetLogLevel(LogSeverity logLevel)
 /// Check if the log level will result in output
 /// </summary>
 /// <param name="severity">True if the log level is enabled, false otherwise</param>
+/// <returns>True is the severity level is enabled, false if not</returns>
 bool Logger::IsLogSeverityEnabled(LogSeverity severity)
 {
     return (static_cast<int>(severity) <= static_cast<int>(m_level));

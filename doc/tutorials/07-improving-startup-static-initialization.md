@@ -75,13 +75,13 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 146: 
 147: private:
 148:     // Set GPIO pin mode
-149:     bool SetMode(uint8 pinNumber, GPIOMode mode);
+149:     bool SetMode(MCP23017Pin pinNumber, GPIOMode mode);
 150:     // Set GPIO pin function
-151:     bool SetFunction(uint8 pinNumber, GPIOFunction function);
+151:     bool SetFunction(MCP23017Pin pinNumber, GPIOFunction function);
 152:     // Set GPIO pin pull mode
-153:     bool SetPullMode(uint8 pinNumber, GPIOPullMode pullMode);
+153:     bool SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode);
 154:     // Switch GPIO off
-155:     bool Off(uint8 pinNumber, GPIOMode mode);
+155:     bool Off(MCP23017Pin pinNumber, GPIOMode mode);
 156: };
 157: 
 158: UART1 &GetUART1();
@@ -883,7 +883,6 @@ Update 'code/libraries\baremetal/include/baremetal/UART1.cpp':
 ```cpp
 File: code/libraries/baremetal/src/UART1.cpp
 ...
-File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\UART1.cpp
 282: /// <summary>
 283: /// Construct the singleton UART1 device if needed, and return a reference to the instance
 284: /// </summary>

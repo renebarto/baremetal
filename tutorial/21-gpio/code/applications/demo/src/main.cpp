@@ -4,7 +4,7 @@
 #include "baremetal/Logger.h"
 #include "baremetal/System.h"
 #include "baremetal/Timer.h"
-#include <device/gpio/KY-040.h>
+#include "device/gpio/KY-040.h"
 
 LOG_MODULE("main");
 

@@ -431,44 +431,132 @@
 // Not supported yet
 #endif
 /// @brief End of GPIO register region
-#define RPI_GPIO_END                           RPI_GPIO_BASE + 0x00000100
+#define RPI_GPIO_END          RPI_GPIO_BASE + 0x00000100
 
 //---------------------------------------------
 // Raspberry Pi UART0
 //---------------------------------------------
 
 /// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_BASE                         RPI_BCM_IO_BASE + 0x00201000
+#define RPI_UART0_BASE        RPI_BCM_IO_BASE + 0x00201000
 /// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_DR                           reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
+#define RPI_UART0_DR          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000000)
 /// @brief Raspberry Pi UART0 flag register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_FR                           reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
+#define RPI_UART0_FR          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000018)
 /// @brief Raspberry Pi UART0 integer baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_IBRD                         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
+#define RPI_UART0_IBRD        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000024)
 /// @brief Raspberry Pi UART0 factional baud rate divisor register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_FBRD                         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
+#define RPI_UART0_FBRD        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000028)
 /// @brief Raspberry Pi UART0 line control register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_LCRH                         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
+#define RPI_UART0_LCRH        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000002C)
 /// @brief Raspberry Pi UART0 control register register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_CR                           reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
+#define RPI_UART0_CR          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000030)
 /// @brief Raspberry Pi UART0 interrupt FIFO level select register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_IFLS                         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
+#define RPI_UART0_IFLS        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000034)
 /// @brief Raspberry Pi UART0 interrupt mask set/clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_IMSC                         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
+#define RPI_UART0_IMSC        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000038)
 /// @brief Raspberry Pi UART0 raw interrupt status register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_RIS                          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
+#define RPI_UART0_RIS         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x0000003C)
 /// @brief Raspberry Pi UART0 masked interrupt status  register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_MIS                          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
+#define RPI_UART0_MIS         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000040)
 /// @brief Raspberry Pi UART0 interrupt clear register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_ICR                          reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
+#define RPI_UART0_ICR         reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
 /// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_DMACR                        reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
+#define RPI_UART0_DMACR       reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
 
 /// @brief Raspberry Pi UART0 flag register values
 /// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_FR_RX_READY                  BIT1(4)
+#define RPI_UART0_FR_RX_READY BIT1(4)
 /// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_PL011_UART
-#define RPI_UART0_FR_TX_EMPTY                  BIT1(5)
+#define RPI_UART0_FR_TX_EMPTY BIT1(5)
+
+//---------------------------------------------
+// Raspberry Pi I2C
+//---------------------------------------------
+
+/// @brief Raspberry Pi I2C bus 0 registers base address.
+#define RPI_I2C0_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00205000)
+/// @brief Raspberry Pi I2C bus 1 registers base address.
+#define RPI_I2C1_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00804000)
+
+#if BAREMETAL_RPI_TARGET == 3
+/// @brief Raspberry Pi I2C bus 2 registers base address.
+#define RPI_I2C2_BASE reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00805000)
+#elif BAREMETAL_RPI_TARGET == 4
+/// @brief Raspberry Pi I2C bus 3 registers base address.
+#define RPI_I2C3_BASE reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00205600)
+/// @brief Raspberry Pi I2C bus 4 registers base address.
+#define RPI_I2C4_BASE reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00205800)
+/// @brief Raspberry Pi I2C bus 5 registers base address.
+#define RPI_I2C5_BASE reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00205A80)
+/// @brief Raspberry Pi I2C bus 6 registers base address.
+#define RPI_I2C6_BASE reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00205C00)
+#endif
+
+/// @brief Raspberry Pi I2C control register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_C_OFFSET                       0x00000000
+/// @brief Disable BSC (I2C) controller
+#define RPI_I2C_C_DISABLE                      BIT0(15)
+/// @brief Enable BSC (I2C) controller
+#define RPI_I2C_C_ENABLE                       BIT1(15)
+/// @brief Disable interrupt on receive 3/4 full
+#define RPI_I2C_C_INTR_DISABLE                 BIT0(10)
+/// @brief Enable interrupt on receive 3/4 full
+#define RPI_I2C_C_INTR_ENABLE                  BIT1(10)
+/// @brief Disable interrupt on transmit 1/4 full
+#define RPI_I2C_C_INTT_DISABLE                 BIT0(9)
+/// @brief Enable interrupt on transmit 1/4 full
+#define RPI_I2C_C_INTT_ENABLE                  BIT1(9)
+/// @brief Disable interrupt on transfer done
+#define RPI_I2C_C_INTD_DISABLE                 BIT0(8)
+/// @brief Enable interrupt on transfer done
+#define RPI_I2C_C_INTD_ENABLE                  BIT1(8)
+/// @brief Transfer start (start condition)
+#define RPI_I2C_C_ST                           BIT1(7)
+/// @brief Clear FIFO
+#define RPI_I2C_C_CLEAR                        BITS(4, 5)
+/// @brief Write transfer
+#define RPI_I2C_C_WRITE                        BIT0(0)
+/// @brief Read transfer
+#define RPI_I2C_C_READ                         BIT1(0)
+
+/// @brief Raspberry Pi I2C status register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_S_OFFSET                       0x00000004
+/// @brief Clock stretch timeout
+#define RPI_I2C_S_CLKT                         BIT1(9)
+/// @brief ACK error
+#define RPI_I2C_S_ERR                          BIT1(8)
+/// @brief Receive FIFO full
+#define RPI_I2C_S_RXF                          BIT1(7)
+/// @brief Transmit FIFO empty
+#define RPI_I2C_S_TXE                          BIT1(6)
+/// @brief Receive FIFO has data
+#define RPI_I2C_S_RXD                          BIT1(5)
+/// @brief Transmit FIFO has space
+#define RPI_I2C_S_TXD                          BIT1(4)
+/// @brief Receive FIFO is 3/4 full
+#define RPI_I2C_S_RXR                          BIT1(3)
+/// @brief Transmit FIFO is 1/4 full
+#define RPI_I2C_S_TXW                          BIT1(2)
+/// @brief Transfer is done
+#define RPI_I2C_S_DONE                         BIT1(1)
+/// @brief Transfer is active
+#define RPI_I2C_S_TA                           BIT1(0)
+
+/// /// @brief Raspberry Pi I2C data length register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_DLEN_OFFSET                    0x00000008
+/// @brief Raspberry Pi I2C slave address register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_A_OFFSET                       0x0000000C
+/// @brief Raspberry Pi I2C data FIFO register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_FIFO_OFFSET                    0x00000010
+/// @brief Raspberry Pi I2C clock divider register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_DIV_OFFSET                     0x00000014
+/// @brief Raspberry Pi I2C data delay register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_DEL_OFFSET                     0x00000018
+/// @brief Raspberry Pi I2C clock stretch timeout register (R/W) offset relative to RPI_I2Cx_BASE
+#define RPI_I2C_CLKT_OFFSET                    0x0000001C
+/// @brief Raspberry Pi I2C register address from base address and offset
+#define RPI_I2C_REG_ADDRESS(base, offset)      reinterpret_cast<regaddr>((base) + (offset))
 
 //---------------------------------------------
 // Raspberry Pi auxiliary (SPI1 / SPI2 / UART1)

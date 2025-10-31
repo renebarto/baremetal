@@ -55,11 +55,18 @@
             "configurationType": "Release",
             "buildRoot": "${projectDir}\\cmake-${name}",
             "installRoot": "${projectDir}\\output\\install\\${name}",
-            "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI4 -DBUILD_TUTORIALS=OFF -DBAREMETAL_CONSOLE_UART0=ON",
+            "cmakeCommandArgs": "-DVERBOSE_BUILD=ON -DBAREMETAL_TARGET=RPI4 -DBUILD_TUTORIALS=ON -DBAREMETAL_CONSOLE_UART0=ON",
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
             "cmakeToolchain": "${projectDir}\\baremetal.toolchain",
-            "inheritEnvironments": [ "gcc-arm" ]
+            "inheritEnvironments": [ "gcc-arm" ],
+            "variables": [
+                {
+                    "name": "BAREMETAL_TRACE_MEMORY",
+                    "value": "False",
+                    "type": "BOOL"
+                }
+            ]
         },
         {
             "name": "BareMetal-RPI5-Release",

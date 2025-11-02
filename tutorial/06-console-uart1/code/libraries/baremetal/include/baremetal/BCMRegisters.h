@@ -48,22 +48,22 @@
 #include "baremetal/Types.h"
 
 #if BAREMETAL_RPI_TARGET == 3
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 3
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 3
 #define RPI_BCM_IO_BASE 0x3F000000
 #elif BAREMETAL_RPI_TARGET == 4
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 4
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 4
 #define RPI_BCM_IO_BASE 0xFE000000
 #define ARM_IO_BASE     0xFF840000
 #else
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 5
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 5
 #define RPI_BCM_IO_BASE 0x107C000000UL
 #define ARM_IO_BASE     0x107C000000UL
 #endif
 #if BAREMETAL_RPI_TARGET <= 4
-/// @brief End address for Raspberry PI 3 / 4 BCM I/O
+/// @brief End address for Raspberry Pi 3 / 4 BCM I/O
 #define RPI_BCM_IO_END (RPI_BCM_IO_BASE + 0xFFFFFF)
 #else
-/// @brief End address for Raspberry PI 5 BCM I/O
+/// @brief End address for Raspberry Pi 5 BCM I/O
 #define RPI_BCM_IO_END (RPI_BCM_IO_BASE + 0x3FFFFFF)
 #endif
 
@@ -193,10 +193,10 @@
 /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_BAUD       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
 #if BAREMETAL_RPI_TARGET == 3
-/// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 3
+/// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 3
 #define AUX_UART_CLOCK 250000000
 #elif BAREMETAL_RPI_TARGET == 4
-/// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 4
+/// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 4
 #define AUX_UART_CLOCK 267300000
 #else
 // Not supported yet

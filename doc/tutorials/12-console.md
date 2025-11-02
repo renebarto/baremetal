@@ -24,7 +24,7 @@ For this, we will need to be able to set a default console, by injecting an inst
 Later on, we can add the screen or maybe a file as a device for logging as well.
 
 The first step we need to take is get hold of a console, depending on what is set as the default.
-We will add a definition in the root CMake file to select whether this is is UART0 or UART1, and retrieve a console based on this.
+We will add a definition in the root CMake file to select whether this is UART0 or UART1, and retrieve a console based on this.
 The console will have some additional functionality, such as enabling the use of ANSI colors.
 
 ### CMakeSettings.json {#TUTORIAL_12_CONSOLE_ADDING_A_CONSOLE_CMAKESETTINGSJSON}
@@ -182,19 +182,19 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/Device.h"
 43: #include "stdlib/Types.h"
-44: 
+44:
 45: /// @file
 46: /// Console
 47: ///
 48: /// Used to write logging information. Supports use of ANSI color coding
-49: 
+49:
 50: namespace baremetal {
-51: 
+51:
 52: /// @brief  Console color (foreground or background)
 53: enum class ConsoleColor
 54: {
@@ -233,7 +233,7 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 87:     /// @brief White color (light version of LightGray)
 88:     White,
 89: };
-90: 
+90:
 91: /// @brief Class to output to the console.
 92: ///
 93: /// This is a singleton, in that it is not possible to create a default instance (GetConsole() needs to be used for this)
@@ -244,7 +244,7 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 98:     /// </summary>
 99:     /// <returns>Reference to the singleton Console instance</returns>
 100:     friend Console& GetConsole();
-101: 
+101:
 102: private:
 103:     /// @brief Default device to write to, specified in constructor. This device will be used when AssignDevice() is called with nullptr
 104:     Device* m_defaultDevice;
@@ -252,27 +252,27 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 106:     Device* m_device;
 107:     /// @brief Singleton instance
 108:     static Console* s_instance;
-109: 
+109:
 110: public:
 111:     explicit Console(Device* device);
 112:     void AssignDevice(Device* device);
 113:     void SetTerminalColor(ConsoleColor foregroundColor = ConsoleColor::Default, ConsoleColor backgroundColor = ConsoleColor::Default);
 114:     void ResetTerminalColor();
-115: 
+115:
 116:     void Write(const char* str, ConsoleColor foregroundColor, ConsoleColor backgroundColor = ConsoleColor::Default);
 117:     void Write(const char* str);
 118:     void Flush();
-119: 
+119:
 120:     char ReadChar();
 121:     void WriteChar(char ch);
-122: 
+122:
 123: private:
 124: };
-125: 
+125:
 126: Console& GetConsole();
-127: 
+127:
 128: } // namespace baremetal
-129: 
+129:
 ```
 
 - Line 54-89: We declare an enum class `ConsoleColor` for the foreground or background color
@@ -345,20 +345,20 @@ File: code/libraries/baremetal/src/Console.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Console.h"
-41: 
+41:
 42: #include "baremetal/Serialization.h"
 43: #include "baremetal/Timer.h"
 44: #include "baremetal/UART0.h"
 45: #include "baremetal/UART1.h"
 46: #include "stdlib/Util.h"
-47: 
+47:
 48: /// @file
 49: /// Console implementation
-50: 
+50:
 51: namespace baremetal {
-52: 
+52:
 53: /// <summary>
 54: /// Determine ANSI color string for specified color
 55: /// </summary>
@@ -396,9 +396,9 @@ File: code/libraries/baremetal/src/Console.cpp
 87:         return 0;
 88:     };
 89: }
-90: 
+90:
 91: Console* Console::s_instance{};
-92: 
+92:
 93: /// <summary>
 94: /// Create a console linked to the specified character device. Note that the constructor is private, so GetConsole() is needed to instantiate the console
 95: /// </summary>
@@ -409,7 +409,7 @@ File: code/libraries/baremetal/src/Console.cpp
 100: {
 101:     s_instance = this;
 102: }
-103: 
+103:
 104: /// <summary>
 105: /// Change the attached device
 106: /// </summary>
@@ -420,7 +420,7 @@ File: code/libraries/baremetal/src/Console.cpp
 111:     if (device == nullptr)
 112:         m_device = m_defaultDevice;
 113: }
-114: 
+114:
 115: /// <summary>
 116: /// Set console foreground and background color (will output ANSI color codes)
 117: /// </summary>
@@ -455,7 +455,7 @@ File: code/libraries/baremetal/src/Console.cpp
 146:     }
 147:     Write("m");
 148: }
-149: 
+149:
 150: /// <summary>
 151: /// Reset console foreground and background back to original (will output ANSI color codes)
 152: /// </summary>
@@ -463,7 +463,7 @@ File: code/libraries/baremetal/src/Console.cpp
 154: {
 155:     SetTerminalColor();
 156: }
-157: 
+157:
 158: /// <summary>
 159: /// Write a string, using the specified foreground and background color
 160: /// </summary>
@@ -473,20 +473,20 @@ File: code/libraries/baremetal/src/Console.cpp
 164: void Console::Write(const char* str, ConsoleColor foregroundColor, ConsoleColor backgroundColor /*= ConsoleColor::Default*/)
 165: {
 166:     static volatile bool inUse{};
-167: 
+167:
 168:     while (inUse)
 169:     {
 170:         Timer::WaitMilliSeconds(1);
 171:     }
 172:     inUse = true;
-173: 
+173:
 174:     SetTerminalColor(foregroundColor, backgroundColor);
 175:     Write(str);
 176:     SetTerminalColor();
-177: 
+177:
 178:     inUse = false;
 179: }
-180: 
+180:
 181: /// <summary>
 182: /// Write a string without changing the foreground and background color
 183: /// </summary>
@@ -498,7 +498,7 @@ File: code/libraries/baremetal/src/Console.cpp
 189:         m_device->Write(str, strlen(str));
 190:     }
 191: }
-192: 
+192:
 193: /// <summary>
 194: /// Flush the device buffers
 195: /// </summary>
@@ -509,7 +509,7 @@ File: code/libraries/baremetal/src/Console.cpp
 200:         m_device->Flush();
 201:     }
 202: }
-203: 
+203:
 204: /// <summary>
 205: /// Read a character
 206: /// </summary>
@@ -523,7 +523,7 @@ File: code/libraries/baremetal/src/Console.cpp
 214:     }
 215:     return ch;
 216: }
-217: 
+217:
 218: /// Write a single character.
 219: /// </summary>
 220: /// <param name="ch">Character to be written</param>
@@ -534,7 +534,7 @@ File: code/libraries/baremetal/src/Console.cpp
 225:         m_device->Write(ch);
 226:     }
 227: }
-228: 
+228:
 229: /// <summary>
 230: /// Retrieve the singleton console
 231: ///
@@ -545,7 +545,7 @@ File: code/libraries/baremetal/src/Console.cpp
 236: {
 237:     return *Console::s_instance;
 238: }
-239: 
+239:
 240: } // namespace baremetal
 ```
 
@@ -560,7 +560,7 @@ So the constructor is expected to only be run once.
 We have no way to enforce this yet, this will be done later
 - Line 104-113: We implement the method `AssignDevice()`.
 If the device pointer is a null pointer, we use the set default device.
-This needs to be instantiated first 
+This needs to be instantiated first
 - Line 115-148: We implement the method `SetTerminalColor()`.
 Here we see that normal and light foreground colors use a different prefix, and similarly for background colors
 - Line 150-156: We implement the method `ResetTerminalColor()`, which simply calls `SetTerminalColor()` with default arguments
@@ -588,7 +588,7 @@ Update the file `code/libraries/stdlib/include/stdlib/Util.h`:
 File: code/libraries/stdlib/include/stdlib/Util.h
 51: void* memset(void* buffer, int value, size_t length);
 52: void* memcpy(void* dest, const void* src, size_t length);
-53: 
+53:
 54: size_t strlen(const char* str);
 ```
 
@@ -601,7 +601,7 @@ Update the file `code/libraries/stdlib/src/Util.cpp`:
 ```cpp
 File: code/libraries/stdlib/src/Util.cpp
 ...
-81: 
+81:
 82: /// <summary>
 83: /// Standard C strlen function. Calculates the length of a string, in other words the index to the first '\0' character
 84: /// </summary>
@@ -610,12 +610,12 @@ File: code/libraries/stdlib/src/Util.cpp
 87: size_t strlen(const char* str)
 88: {
 89:     size_t result = 0;
-90: 
+90:
 91:     while (*str++)
 92:     {
 93:         result++;
 94:     }
-95: 
+95:
 96:     return result;
 97: }
 ```
@@ -630,7 +630,7 @@ Update the file `code/libraries/baremetal/src/System.cpp`
 File: code/libraries/baremetal/src/System.cpp
 ...
 40: #include "baremetal/System.h"
-41: 
+41:
 42: #include "stdlib/Util.h"
 43: #include "baremetal/ARMInstructions.h"
 44: #include "baremetal/BCMRegisters.h"
@@ -665,7 +665,7 @@ File: code/libraries/baremetal/src/System.cpp
 191:     Console console(nullptr);
 192: #endif
 193:     console.Write("Starting up\n", ConsoleColor::Cyan);
-194: 
+194:
 195:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 ...
 ```

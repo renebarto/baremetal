@@ -435,7 +435,7 @@ mber">0.01</span>
 =20
 <span class=3D"token comment"># Initial readout of the pin_CLK</span>
 PIN_CLK_LETZTER <span class=3D"token operator">=3D</span> GPIO<span class=
-=3D"token punctuation">.</span><span class=3D"token builtin">input</span><s=
+=3D"token punctuation">.</span><span class=3D"token built-in">input</span><s=
 pan class=3D"token punctuation">(</span>PIN_CLK<span class=3D"token punctua=
 tion">)</span>
 =20
@@ -447,7 +447,7 @@ putFunction</span><span class=3D"token punctuation">(</span>null<span class=
     <span class=3D"token keyword">global</span> Counter
 =20
     PIN_CLK_CURRENT <span class=3D"token operator">=3D</span> GPIO<span cla=
-ss=3D"token punctuation">.</span><span class=3D"token builtin">input</span>=
+ss=3D"token punctuation">.</span><span class=3D"token built-in">input</span>=
 <span class=3D"token punctuation">(</span>PIN_CLK<span class=3D"token punct=
 uation">)</span>
 =20
@@ -456,7 +456,7 @@ oken operator">!=3D</span> PIN_CLK_LETZTER<span class=3D"token punctuation"=
 >:</span>
 =20
         <span class=3D"token keyword">if</span> GPIO<span class=3D"token pu=
-nctuation">.</span><span class=3D"token builtin">input</span><span class=3D=
+nctuation">.</span><span class=3D"token built-in">input</span><span class=3D=
 "token punctuation">(</span>PIN_DT<span class=3D"token punctuation">)</span=
 > <span class=3D"token operator">!=3D</span> PIN_CLK_ACTUAL<span class=3D"t=
 oken punctuation">:</span>

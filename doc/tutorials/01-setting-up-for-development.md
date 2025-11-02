@@ -6,14 +6,16 @@ If we want to do development for an embedded board, a number of things need to b
 
 ## Compiler toolchain {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_COMPILER_TOOLCHAIN}
 
+We're going to cover the toolchain to build our code.
+
 In order to perform a cross-build (building on one machine to create code that runs on a different target machine), we will need a so-called toolchain.
 This is the complete set of compilers, assemblers, linkers, etc. to build binaries for the target platform.
 
-When building for a specific OS, we also need a sysroot, simply said a SDK, that contains all header files and libraries to compile and link with for the specific OS installation.
+When building for a specific OS, we also need a sysroot, simply put an SDK, that contains all header files and libraries to compile and link with for the specific OS installation.
 This requires all libraries needed to build the SW to be present in the sysroot, otherwise we clearly cannot build the SW.
-However, since we're going build for baremetal, the only libraries we'll need is the compiler's set of libraries. So no sysroot is needed.
+However, since we're going to build for bare metal, the only libraries we'll need is the compiler's set of libraries. So no sysroot is needed.
 The whole idea is that we are going to add library code ourselves.
-If however we would build against the Raspberry Pi OS for example, a sysroot would be needed.
+If however we would build against e.g. the Raspberry Pi OS, a sysroot would be needed.
 
 For the toolchain, we're going to choose the GNU toolchain for ARM64. It is possible to use Clang for this as well, but we'll not cover that here.
 
@@ -22,7 +24,7 @@ The current version as of writing this document is 13.3 rel 1.
 ### Windows {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_COMPILER_TOOLCHAIN_WINDOWS}
 
 For building on Windows, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-arm-none-linux-gnueabihf.zip).
-Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
+Be careful to use the aarch64 version (64 bit), for target none-elf (bare metal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
 The best way to install on Windows is to create a directory with a short path, say `D:\Toolchains`, and place the unzipped files in a folder underneath this directory.
 Then make sure to add the path to the compiler, etc. to the environment (PATH) at system level, so in this case `D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin`:
@@ -54,7 +56,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ### Linux {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_COMPILER_TOOLCHAIN_LINUX}
 
 For building on Linux, download [this version](https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz).
-Be careful to use the aarch64 version (64 bit), for target none-elf (baremetal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
+Be careful to use the aarch64 version (64 bit), for target none-elf (bare metal). Using the none-linux-gnu version will enable you to build against Linux, however that is not what we need.
 
 The easiest way to install on Linux is as follows:
 
@@ -65,14 +67,14 @@ tar xvf arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz
 sudo mv arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/ /opt/toolchains/
 ```
 
-In order to add the path to your environment, edit `.bashrc` in your home directory, and add the following line, for example at the end:
+In order to add the path to your environment, edit `.bashrc` in your home directory, and add the following line, e.g. at the end:
 
 ```text
 export PATH=/opt/toolchains/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf/bin:$PATH
 ```
 
 To test, first log out and log in again, open a command line prompt, and execute:
-```bat
+```bash
 aarch64-none-elf-gcc --version
 ```
 
@@ -108,7 +110,7 @@ cmake version 3.20.21032501-MSVC_2
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
 
-When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest), 
+When not using Visual Studio, or if you prefer to use the latest and greatest version of `CMake`, install CMake by downloading [here](https://cmake.org/download/#latest),
 by selecting Windows x64 Installer and install it. This will also give you a more recent version of CMake.
 The latest stable release at the moment of writing this document is [3.30.1](https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-windows-x86_64.msi).
 
@@ -269,11 +271,11 @@ The command should execute without error, and print the version of the Ninja:
 ## Development environment {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEVELOPMENT_ENVIRONMENT}
 
 The development environment can be as simple as a text editor and running commands on the command prompt.
-For Linux, we will use this approach. For Windows, we will be using Visual Studio, however we will also start with the command line, as using Visual Studio requires a bit more configuration. 
+For Linux, we will use this approach. For Windows, we will be using Visual Studio, however we will also start with the command line, as using Visual Studio requires a bit more configuration.
 
 ### Windows {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEVELOPMENT_ENVIRONMENT_WINDOWS}
 
-The current choice for Visual Studio 2019 has to do with the fact that previously, debugging on QEMU (Linux or baremetal) with Visual Studio 2022 did not work from within VS, due to a bug.
+The current choice for Visual Studio 2019 has to do with the fact that previously, debugging on QEMU (Linux or bare metal) with Visual Studio 2022 did not work from within VS, due to a bug.
 This was resolved at least in version 17.14.12.
 This tutorial is still based on Visual Studio 2019, but with a few small changes, can also be used for Visual Studio 2022.
 
@@ -312,9 +314,9 @@ Configuration of the project is described later in [Setting up a project](02-set
 
 ## Deployment mechanism {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM}
 
-In order to deploy a baremetal application, we will need to follow a couple of steps:
+In order to deploy a bare metal application, we will need to follow a couple of steps:
 
-- Compile sources and create an application (just a single one, as this is a baremetal system) as a ELF application (.elf)
+- Compile sources and create an application (just a single one, as this is a bare metal system) as a ELF application (.elf)
 - Convert the application into a kernel image (.img)
 - Place the image onto the target using one of the following methods:
   - Copy the image onto an SD card and start the system (see [Running from SD card](#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_FROM_SD_CARD)).
@@ -382,7 +384,7 @@ The converter is automatically powered through USB, and connecting this wire wil
 
 ### Running from SD card {#TUTORIAL_01_SETTING_UP_FOR_DEVELOPMENT_DEPLOYMENT_MECHANISM_RUNNING_FROM_SD_CARD}
 
-The SD card needs certain other files as well, so it's best to unzip the file `tutorial/01-demo/Netboot.zip`, copy the contents to the SD card, 
+The SD card needs certain other files as well, so it's best to unzip the file `tutorial/01-demo/Netboot.zip`, copy the contents to the SD card,
 then copy `tutorial/01-demo/windows/kernel8.img` or `tutorial/01-demo/linux/kernel8.img` (the functionality is the same) over the existing one.
 Please make sure to __eject / sync your SD card__ first before removing it from the reader.
 
@@ -856,20 +858,20 @@ Breakpoint 1 at 0x8080c: file /home/rene/repo/baremetal/code/applications/demo/s
 43	#include "baremetal/Serialization.h"
 44	#include "baremetal/Timer.h"
 45	#include "baremetal/UART0.h"
-46	
+46
 47	using namespace baremetal;
-48	
+48
 49	static UART0 &uart = GetUART0();
-50	
+50
 (gdb) l
 51	LOG_MODULE("Main");
-52	
+52
 53	int main()
 54	{
 55	    uart.Initialize();
-56	
+56
 57	    auto &machineInfo = GetMachineInfo();
-58	
+58
 59	    LOG_INFO("%s (64 bits) %d Mb RAM", machineInfo.GetName(), machineInfo.GetRAMSize());
 60	    LOG_INFO("Serial:              %016llx", machineInfo.GetSerial());
 (gdb) c

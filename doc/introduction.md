@@ -219,7 +219,7 @@ Compared to the model 3B+ the differences are:
 - support for 802.11b/g/n/ac WiFi 5
 - support for Bluetooth 5.0 BLE
 - power connector changed to USB-C
-  
+
 
 <img src="images/rpi4b-board-layout.png" alt="Top view" width="500"/>
 
@@ -232,7 +232,7 @@ As with model 3, also a model 4 CM was released in 2020.
 The model is basically a Model 4B with the similar changes as the model 3B versus CM3:
 - all connectors are replaced with a double barrel connector instead of the SO DIMM connector employed before
 - the SD card slot is replaced by an on-board eMMC chip of 0 (CM4L), 8, 16 or 32 Gb
-- there are versions with Wifi and Bluetooth support, with builtin or external antenna
+- there are versions with Wifi and Bluetooth support, with built-in or external antenna
 
 <img src="images/rpi4cm-board-layout-top.png" alt="Raspberry Pi CM4 - Top view" width="500"/>
 

@@ -103,7 +103,7 @@ void Timer::WaitCycles(uint32 numCycles)
 /// <summary>
 /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
 ///
-/// The timer used for the delays is the ARM builtin timer.
+/// The timer used for the delays is the ARM built-in timer.
 /// </summary>
 /// <param name="msec">Wait time in milliseconds</param>
 void Timer::WaitMilliSeconds(uint64 msec)
@@ -115,7 +115,7 @@ void Timer::WaitMilliSeconds(uint64 msec)
 /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 /// counter). Busy wait
 ///
-/// The timer used is the ARM builtin timer.
+/// The timer used is the ARM built-in timer.
 /// </summary>
 /// <param name="usec">Wait time in microseconds</param>
 void Timer::WaitMicroSeconds(uint64 usec)

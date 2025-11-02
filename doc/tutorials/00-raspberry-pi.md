@@ -8,12 +8,12 @@ However, you might just learn something :)
 
 ## What is Raspberry Pi {#TUTORIAL_00_RASPBERRY_PI_WHAT_IS_RASPBERRY_PI}
 
-Raspberry Pi, RPI, or simply Pi is an embedded computing board initially intended for school students to learn more about computers.
+The Raspberry Pi (often called RPi or simply "Pi") is a low-cost single-board computer originally designed to help students learn about computing.
 The board was created by the Raspberry Pi Foundation, and has had multiple revisions of the board.
 Due to its success also outside schools, also for a large part because of its pricing and the open source approach to supporting it, it has become one of the most sold computing platforms.
 Nowadays it is used in school, by hobbyists, and even in industry, with a wide range of applications.
 
-I'm going to focus only on Raspberry Pi 3 and later, as these boards allow for 64 bit code, which is what I'd like to limit myself to for simplicity.
+I'll focus on Raspberry Pi 3 and later because these boards support 64-bit (AArch64) code. Restricting to 64-bit simplifies the examples in this tutorial series.
 
 <img src="images/rpi3b-board-layout.png" alt="Raspberry Pi 3B" width="400"/>
 
@@ -29,13 +29,13 @@ Raspberry Pi 5B
 
 The family of Raspberry Pi boards is extensive (see also [here](#RASPBERRY_PI_PLATFORMS) as well as [Wikipedia](https://en.wikipedia.org/wiki/Raspberry_Pi)):
 
-The first board was Raspberry Pi Model B, which was soon followed by a slimmed down version with no USB and no ethernet, model A.
+The first board was Raspberry Pi Model B (2012), which in 2013 followed by a slimmed down version with no USB and no ethernet, model A.
 As of 2016, there was a revision of Model 2, which had a Cortex-A53 multi-core processor on board.
 All later versions have quad core CPUs, with gradually higher clock frequencies.
 
 Each Raspberry Pi board consists of some common components:
 
-- SoC (System on Chip) which contains the CPU as well as the VPU (also GPU or VideoCore) produced by Broadcom
+- SoC (System on Chip) which contains the CPU as well as the VideoCore (GPU or VPU) produced by Broadcom
 - RAM: ranging from 256Mb in the first models, to 2, 4 or 8 Gb on model 5
 - Power inlet: first micro USB, later USB-C to power the board
 - Video output: first composite video as well as HDMI, later only HDMI, from model 4 onwards double HDMI
@@ -48,7 +48,7 @@ Each Raspberry Pi board consists of some common components:
 This enables connection of e.g. I2C, I2S, SPI, UART, PWM, and also other hardware)
 - Camera and display: through as so-called MIPI interface using CSI / DSI (Camera / Display Serial Interface)
 
-It is quite hard to find more detailed information on what's inside the SoC (due the proprietary nature of the Broadcom SoC), however a while ago a block diagram of the SoC in Raspberry Pi 4 (BCM 2711) was included in the German C'T Magazin. I based the following picture on this (while translating to English):
+It is quite hard to find more detailed information on what's inside the SoC (due to the proprietary nature of the Broadcom SoC), however a while ago a block diagram of the SoC in Raspberry Pi 4 (BCM 2711) was included in the German C'T Magazin. I based the following picture on this (while translating to English):
 
 <img src="images/rpi4b-block-diagram.png" alt="Raspberry Pi 4 block diagram" width="800"/>
 
@@ -60,18 +60,18 @@ If you wish to read more about the different Raspberry Pi models, see [Introduct
 
 ## Raspberry Pi peripherals {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS}
 
-The peripherals mentioned in the previous section will be descibed in a bit more detail.
+The peripherals mentioned in the previous section will be described in a bit more detail.
 
 ### Video {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_VIDEO}
 
 Raspberry Pi 3 has a single HDMI output capable of Full HD, Raspberry Pi 4 has a dual output capable of 4K@30 fps. Raspberry Pi 5 is able to support up to 4K@60 fps on both outputs.
 Next to video the HDMI ports also support audio output for 2 channels.
 Video is output by the GPU or VPU, also named VideoCore or VC.
-Raspberry Pi3 has a VideoCore IV built in, Raspberry Pi 4 has VideoCore VI and Raspberry Pi 5 has VideoCore VII.
+Raspberry Pi 3 has a VideoCore IV built in, Raspberry Pi 4 has VideoCore VI and Raspberry Pi 5 has VideoCore VII.
 Not much is known about these circuits inside the BCM chips, as the are proprietary.
 The different models show support for video encoding and decoding.
-Raspberry Pi 3 did not have hardware support for decoding H.264 (1080p60 decoding and 1080p30 encoding) or H.265 (4Kp60 decoding), however Raspberry Pi 4 has builtin support for both, and even (though not at full rate) encoding of these streams.
-For Raspberry Pi 5, it was decided to drop hardware accelleration of video encoding.
+Raspberry Pi 3 did not have hardware support for decoding H.264 (1080p60 decoding and 1080p30 encoding) or H.265 (4Kp60 decoding), however Raspberry Pi 4 has built-in support for both, and even (though not at full rate) encoding of these streams.
+For Raspberry Pi 5, it was decided to drop hardware acceleration of video encoding.
 
 ### Audio {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_AUDIO}
 
@@ -94,14 +94,14 @@ This was resolved in Raspberry Pi 4, which can support a full 1 Gbps, using the 
 
 ### Wifi / Bluetooth {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_WIFI__BLUETOOTH}
 
-Wifi and Bluetooth were introduced in Raspbery Pi 3 with the addition of the BCM 43438 chip, which supports 2.4 GHz IEEE 802.11ac b/g/n Wifi and BT 4.1 BLE.
+Wifi and Bluetooth were introduced in Raspberry Pi 3 with the addition of the BCM 43438 chip, which supports 2.4 GHz IEEE 802.11ac b/g/n Wifi and BT 4.1 BLE.
 This chip uses a SPI channel for Wifi, and a UART channel for Bluetooth. The antenna is integrated, leading to limited signal quality, but Raspberry Pi can communicate quite well using radio.
 In Raspberry Pi 4 this chip was replaced by Cypress CYW43455, which supports 2.4 / 5 GHz IEEE 802.11ac b/g/n Wifi and BT 5.0 BLE.
 There is a possibility to add an external antenna, however the connection point is quite hard to find and attach to.
 
 ### GPIO {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_GPIO}
 
-GPIO is one of the main reason for the popularity of Raspberry Pi. Since Raspberry Pi 2, there is a more or less standard 40 pin header with access to different interface signals:
+GPIO is one of the main reasons for the popularity of Raspberry Pi. Since Raspberry Pi 2, there is a more or less standard 40 pin header with access to different interface signals:
 
 <img src="images/rpi-gpio-pinout-only.png" alt="Raspberry Pi 4 GPIO pinout" width="400"/>
 
@@ -110,7 +110,7 @@ It is important to be aware that not all interfaces are available, or at the sam
 This depends on how GPIO is configured. For each pin there is a normal GPIO (simple digital signal) function as input or output, but also up to 6 special functions, depending on this configuration.
 Although the pinning is mostly the same for different versions of Raspberry Pi, there are differences. Please refer to [Alternative functions for GPIO, Raspberry Pi 3](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_3),  and [Alternative functions for GPIO, Raspberry Pi 4](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_4) and [Alternative functions for GPIO, Raspberry Pi 5](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO_RASPBERRY_PI_5)
 
-This makes it quite complicated to figure out how to connected to a certain interface, and it also limits the number of parallel devices that can be connected.
+This makes it quite complicated to figure out how to connect to a certain interface, and it also limits the number of parallel devices that can be connected.
 Also, be aware that only part of the GPIO are actually available on the header (GPIO 0 through GPIO 27), even though a larger number of GPIO pins is mentioned in documentation (up to GPIO54).
 
 ### I2C {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_I2C}
@@ -118,7 +118,7 @@ Also, be aware that only part of the GPIO are actually available on the header (
 The I2C (Inter IC) interfaces is used for short distance, low data rate interfacing between ICs.
 Raspberry Pi 3 has 2 different I2C buses, Raspberry Pi 4 and later support 7 I2C buses (of which one not usable due to the Bluetooth interface using this).
 
-A I2C bus uses two wires, and uses the following pins:
+An I2C (Inter-Integrated Circuit) bus uses two wires:
 - SDA: Serial Data
 - SCL: Serial Clock
 
@@ -146,7 +146,7 @@ A I2C bus uses two wires, and uses the following pins:
 | 23   | 5                    | SCL6   | RPI4/5
 
 SDA0 and SCL0 should not be used except for HAT boards (see [Other hardware - the HAT](#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_OTHER_HARDWARE___THE_HAT)). It provides for HAT boards to identify themselves.
-SDA2/7 and SCL2/7 do not on the GPIO header, they are used for HDMI control.
+SDA2/7 and SCL2/7 do not exist on the GPIO header, they are used for HDMI control.
 SDA1,3,4,5,6 and SCL1,3,4,5,6 are meant for connecting external I2C circuits, e.g. a text display such as the Joy-IT LCD-16x2 or LCD-20x4 displays.
 
 ### I2S {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_I2S}
@@ -162,7 +162,7 @@ For I2S to be available, you need to use Alternate function 0 for these pins:
 ### SPI {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_SPI}
 
 The SPI (or Serial Peripheral Interface) is a high data rate bi-directional point to point serial interface.
-This 3+-wire interface uses the following pins:
+This 3+ wire interface uses the following pins:
 - MOSI (Main Out Sub In)
 - MISO (Main In Sub Out)
 - SCLK (Serial Clock) from main to sub
@@ -241,12 +241,12 @@ Raspberry Pi 3 supports 2 UART channels, Raspberry Pi 4 and later support 6 UART
 | 17   | 3                    | RTS0       |
 | 17   | 5                    | RTS1       |
 
-Some of the UART are full 1655O UART devices, some are limited in functionality (mini UART).
+Some of the UART are full 16550 UART devices, some are limited in functionality (mini UART).
 
 ### PWM {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_PERIPHERALS_PWM}
 
 PWM (Pulse Width Modulation) can be used to drive electronics that require dimming, e.g. LEDs.
-Using PWM is is possible to not only turn a LED on or off, but dim it by varying the dutycycle.
+PWM (Pulse Width Modulation) lets you not only turn an LED on or off but also dim it by varying the duty cycle.
 
 Raspberry Pi supports 4 PWM signals (of which two are not usable):
 - PWM0_0: PWM 0 channel 0
@@ -274,7 +274,7 @@ A JTAG interface has 5 or 6 wires:
 - RTCK: Return Test Clock
 - TRST: Test Reset
 
-Raspberry PI 3 has two possible ways to connect JTAG, Raspberry Pi 4 and later have only one:
+Raspberry Pi 3 has two possible ways to connect JTAG, Raspberry Pi 4 and later have only one:
 
 | GPIO | Alternative function | Signal                |
 |------|----------------------|-----------------------|
@@ -395,7 +395,7 @@ For RPI 5, the GPU firmware is embedded into the kernel image, so the kernel ima
 
 ### config.txt {#TUTORIAL_00_RASPBERRY_PI_RASPBERRY_PI_STARTUP_CONFIGTXT}
 
-For 64 bit systems, the mimimal contents of config.txt are similar to:
+For 64 bit systems, the minimal contents of config.txt are similar to:
 
 ```text
 #
@@ -443,7 +443,7 @@ The name of the kernel image loaded depends on the Raspberry Pi model as well as
 
 kernel8.img is the default kernel to start for normal 64 bit Linux distributions.
 
-For baremetal, the defaults are as follows:
+For bare metal, the defaults are as follows:
 
 | Board  | Architecture     | Image            |
 |--------|------------------|------------------|
@@ -477,6 +477,6 @@ For Core 0, this is done by the firmware, for the other cores, we need to progra
 | 3    | 000000F0               |
 
 I know this was a lot of information, but we need to lay a foundation in order to start programming.
-The next tutorial will be about setting up for development. Be patient, there is some grounwork to do before we can start coding.
+The next tutorial will be about setting up for development. Be patient, there is some groundwork to do before we can start coding.
 
 Next: [01-setting-up-for-development](01-setting-up-for-development.md)

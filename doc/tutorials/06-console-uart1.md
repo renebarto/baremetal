@@ -135,14 +135,14 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// ARM instructions represented as macros for ease of use.
 44: ///
 45: /// For specific registers, we also define the fields and their possible values.
-46: 
+46:
 47: /// @brief NOP instruction
 48: #define NOP()                           asm volatile("nop")
 ```
@@ -169,13 +169,13 @@ First let's set up the project for the library:
 File: code/libraries/baremetal/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3: 
+3:
 4: project(baremetal
 5:     DESCRIPTION "Bare metal library"
 6:     LANGUAGES CXX ASM)
-7: 
+7:
 8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
-9: 
+9:
 10: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 11: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 12: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
@@ -184,23 +184,23 @@ File: code/libraries/baremetal/CMakeLists.txt
 15: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
 16: set(PROJECT_INCLUDE_DIRS_PRIVATE )
 17: set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-18: 
+18:
 19: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-20: 
+20:
 21: set(PROJECT_DEPENDENCIES
 22:     )
-23: 
+23:
 24: set(PROJECT_LIBS
 25:     ${LINKER_LIBRARIES}
 26:     ${PROJECT_DEPENDENCIES}
 27:     )
-28: 
+28:
 29: file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp src/*.S)
 30: set(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/*.h)
 31: set(PROJECT_INCLUDES_PRIVATE )
-32: 
+32:
 33: set(PROJECT_INCLUDES_PRIVATE )
-34: 
+34:
 35: if (CMAKE_VERBOSE_MAKEFILE)
 36:     display_list("Package                           : " ${PROJECT_NAME} )
 37:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
@@ -223,7 +223,7 @@ File: code/libraries/baremetal/CMakeLists.txt
 54:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
 55:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 56: endif()
-57: 
+57:
 58: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
 59: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
 60: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
@@ -248,18 +248,18 @@ File: code/libraries/baremetal/CMakeLists.txt
 79:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
 80:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
 81:     )
-82: 
+82:
 83: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-84: 
+84:
 85: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
 86: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
 87:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
 88: endif()
-89: 
+89:
 90: link_directories(${LINK_DIRECTORIES})
 91: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 92: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-93: 
+93:
 94: show_target_properties(${PROJECT_NAME})
 ```
 
@@ -275,10 +275,10 @@ We will use the NOP instruction (which is part of the baremetal library) in a si
 ```cpp
 File: code/applications/demo/src/main.cpp
 1: #include "baremetal/ARMInstructions.h"
-2: 
+2:
 3: /// @file
 4: /// Demo application main code
-5: 
+5:
 6: /// <summary>
 7: /// Demo application main code
 8: /// </summary>
@@ -302,16 +302,16 @@ File: code/applications/demo/CMakeLists.txt
 1: project(demo
 2:     DESCRIPTION "Demo application"
 3:     LANGUAGES CXX ASM)
-: 
+:
 5: message(STATUS "\n**********************************************************************************\n")
 6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-7: 
+7:
 8: message("\n** Setting up ${PROJECT_NAME} **\n")
-9: 
+9:
 10: include(functions)
-11: 
+11:
 12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
-13: 
+13:
 14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
@@ -322,13 +322,13 @@ File: code/applications/demo/CMakeLists.txt
 21: set(PROJECT_COMPILE_OPTIONS_ASM_PUBLIC )
 22: set(PROJECT_INCLUDE_DIRS_PRIVATE )
 23: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-24: 
+24:
 25: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-26: 
+26:
 27: set(PROJECT_DEPENDENCIES
 28:     baremetal
 29:     )
-30: 
+30:
 31: set(PROJECT_LIBS
 32:     ${LINKER_LIBRARIES}
 33:     ${PROJECT_DEPENDENCIES}
@@ -349,9 +349,9 @@ Update the main CMake file:
 File: CMakeLists.txt
 ...
 229: option(BUILD_TUTORIALS "Build all tutorials" ON)
-230: 
+230:
 231: add_subdirectory(code)
-232: 
+232:
 233: if(BUILD_TUTORIALS)
 234:     add_subdirectory(tutorial)
 235: endif()
@@ -462,12 +462,12 @@ The output for the configure step should be similar to:
 1> Working directory: D:\Projects\baremetal\cmake-BareMetal-RPI3-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ** Setting up project **
 1> [CMake] --
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ##################################################################################
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
 1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
@@ -484,45 +484,45 @@ The output for the configure step should be similar to:
 1> [CMake] -- C++ compiler version:    13.3.1
 1> [CMake] -- C compiler version:      13.3.1
 1> [CMake] -- C++ supported standard:  17
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications/demo
-1> [CMake] 
+1> [CMake]
 1> [CMake] ** Setting up demo **
-1> [CMake] 
+1> [CMake]
 1> [CMake] -- Package                           :  demo
 1> [CMake] -- Package description               :  Demo application
-1> [CMake] -- Defines C - public                : 
-1> [CMake] -- Defines C - private               : 
-1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C - public                :
+1> [CMake] -- Defines C - private               :
+1> [CMake] -- Defines C++ - public              :
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       : 
-1> [CMake] -- Compiler options C - private      : 
-1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C - public       :
+1> [CMake] -- Compiler options C - private      :
+1> [CMake] -- Compiler options C++ - public     :
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             : 
-1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Include dirs - public             :
+1> [CMake] -- Include dirs - private            :
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
 1> [CMake] -- Source files                      :  D:/Projects/RaspberryPi/baremetal.github/code/applications/demo/src/main.cpp D:/Projects/RaspberryPi/baremetal.github/code/applications/demo/src/start.S
-1> [CMake] -- Include files - public            : 
-1> [CMake] -- Include files - private           : 
-1> [CMake] -- 
+1> [CMake] -- Include files - public            :
+1> [CMake] -- Include files - private           :
+1> [CMake] --
 1> [CMake] -- Properties for demo
 1> [CMake] -- Target type                       :  EXECUTABLE
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
@@ -530,65 +530,65 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
 1> [CMake] -- Target exported link libraries    :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target imported dependencies      : 
-1> [CMake] -- Target imported link libraries    : 
+1> [CMake] -- Target imported dependencies      :
+1> [CMake] -- Target imported link libraries    :
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
 1> [CMake] -- Target C++ standard               :  17
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications/demo
-1> [CMake] 
+1> [CMake]
 1> [CMake] ** Setting up demo-image **
-1> [CMake] 
+1> [CMake]
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
 1> [CMake] -- generate D:/Projects/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/libraries
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
-1> [CMake] -- Defines C - public                : 
-1> [CMake] -- Defines C - private               : 
-1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C - public                :
+1> [CMake] -- Defines C - private               :
+1> [CMake] -- Defines C++ - public              :
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       : 
-1> [CMake] -- Compiler options C - private      : 
-1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C - public       :
+1> [CMake] -- Compiler options C - private      :
+1> [CMake] -- Compiler options C++ - public     :
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Include dirs - private            :
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
-1> [CMake] -- Dependencies                      : 
-1> [CMake] -- Link libs                         : 
+1> [CMake] -- Dependencies                      :
+1> [CMake] -- Link libs                         :
 1> [CMake] -- Source files                      :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/src/Dummy.cpp
-1> [CMake] -- Include files - public            : 
-1> [CMake] -- Include files - private           : 
-1> [CMake] -- 
+1> [CMake] -- Include files - public            :
+1> [CMake] -- Include files - private           :
+1> [CMake] --
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
@@ -596,19 +596,19 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target include dirs private       :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
-1> [CMake] -- Target imported dependencies      : 
-1> [CMake] -- Target imported link libraries    : 
+1> [CMake] -- Target imported dependencies      :
+1> [CMake] -- Target imported link libraries    :
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal
@@ -637,7 +637,7 @@ We can then build:
   [5/6] cmd.exe /C "cd . && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-g++.exe -g -LD:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf/lib/gcc/aarch64-none-elf/13.3.1   -Wl,--section-start=.init=0x80000 -T D:/Projects/baremetal/baremetal.ld -nostdlib -nostartfiles code/applications/demo/CMakeFiles/demo.dir/src/main.cpp.obj code/applications/demo/CMakeFiles/demo.dir/src/start.S.obj -o ..\output\RPI3\Debug\bin\demo.elf  -Wl,--start-group  ../output/RPI3/Debug/lib/libbaremetal.a  -Wl,--end-group && cd ."
   [6/6] cmd.exe /C "cd /D D:\Projects\baremetal\cmake-Baremetal-RPI3-Debug\code\applications\demo && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory D:/Projects/baremetal/deploy/Debug/demo-image && D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-objcopy.exe D:/Projects/baremetal/output/RPI3/Debug/bin/demo.elf -O binary D:/Projects/baremetal/deploy/Debug/demo-image/kernel8.img"
 
-Build All succeeded. 
+Build All succeeded.
 ```
 
 - You can see that the demo application's main.cpp file and baremetal library's Dummy.cpp file are compiled (step 1 and 2)
@@ -656,7 +656,7 @@ The baremetal library is removed and re-created using the following command:
 cmd.exe /C
   "cd . &&
   "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
-    -E 
+    -E
       rm -f ..\output\RPI3\Debug\lib\libbaremetal.a &&
       D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-ar.exe
         qc ..\output\RPI3\Debug\lib\libbaremetal.a
@@ -726,7 +726,7 @@ In order to set up the console, we will need access to two devices:
 
 As you can see in [Alternative functions for GPIO](#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO), using UART1 means connecting TXD1 (UART1 transmit) to GPIO14 and RXD1 (UART1 receive) to GPIO15.
 For this we need to set the function of GPIO 14 and 15 to alternate function 5.
-As can be seen in [Raspberry PI auxiliary peripheral](#RASPBERRY_PI_AUXILIARY_PERIPHERAL), [Raspberry Pi UART1](#RASPBERRY_PI_UART1) and [Raspberry Pi GPIO](#RASPBERRY_PI_GPIO), we need to set a number of registers:
+As can be seen in [Raspberry Pi auxiliary peripheral](#RASPBERRY_PI_AUXILIARY_PERIPHERAL), [Raspberry Pi UART1](#RASPBERRY_PI_UART1) and [Raspberry Pi GPIO](#RASPBERRY_PI_GPIO), we need to set a number of registers:
 
 - First we need to switch off UART1 so we can program the GPIO pins. So we must write 0 to bit 0 of `AUX_ENABLES`
 - Then we need to program GPIO 14 and 15
@@ -832,12 +832,12 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Generic macros
-44: 
+44:
 45: /// @brief Convert bit index into integer with zero bit
 46: /// @param n Bit index
 47: #define BIT0(n)              (0)
@@ -897,12 +897,12 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Standard types
-44: 
+44:
 45: /// @brief Unsigned 8 bit integer
 46: typedef unsigned char uint8;
 47: /// @brief Unsigned 16 bit integer
@@ -911,7 +911,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 50: typedef unsigned int uint32;
 51: /// @brief Unsigned 64 bit integer
 52: typedef unsigned long uint64;
-53: 
+53:
 54: /// @brief Signed 8 bit integer
 55: typedef signed char int8;
 56: /// @brief Signed 16 bit integer
@@ -920,7 +920,7 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 59: typedef signed int int32;
 60: /// @brief Signed 64 bit integer
 61: typedef signed long int64;
-62: 
+62:
 63: /// @brief Pointer as signed 64 bit integer
 64: typedef int64 intptr;
 65: /// @brief Pointer as unsigned 64 bit integer
@@ -929,12 +929,12 @@ File: code/libraries/baremetal/include/baremetal/Types.h
 68: typedef uint64 size_type;
 69: /// @brief Signed size type
 70: typedef int64 ssize_type;
-71: 
+71:
 72: /// @brief Unsigned size
 73: typedef size_type size_t;
 74: /// @brief Signed size
 75: typedef ssize_type ssize_t;
-76: 
+76:
 77: /// @brief Pointer to unsigned volatile byte (for registers)
 78: typedef volatile uint8 *regaddr;
 ```
@@ -994,16 +994,16 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Memory access class
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: /// <summary>
 50: /// Memory access interface
 51: /// </summary>
@@ -1013,7 +1013,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryAccess.h
 55:     static uint32 Read32(regaddr address);
 56:     static void Write32(regaddr address, uint32 data);
 57: };
-58: 
+58:
 59: } // namespace baremetal
 ```
 
@@ -1065,14 +1065,14 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/MemoryAccess.h"
-41: 
+41:
 42: /// @file
 43: /// Memory access class implementation
-44: 
+44:
 45: using namespace baremetal;
-46: 
+46:
 47: /// <summary>
 48: /// Read a 32 bit value from register at address
 49: /// </summary>
@@ -1082,7 +1082,7 @@ File: code/libraries/baremetal/src/MemoryAccess.cpp
 53: {
 54:     return *reinterpret_cast<uint32 volatile *>(address);
 55: }
-56: 
+56:
 57: /// <summary>
 58: /// Write a 32 bit value to register at address
 59: /// </summary>
@@ -1146,41 +1146,41 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: /// @file
 41: /// Register addresses of Raspberry Pi peripheral registers.
 42: ///
 43: /// For specific registers, we also define the fields and their possible values.
-44: 
+44:
 45: #pragma once
-46: 
+46:
 47: #include "baremetal/Macros.h"
 48: #include "baremetal/Types.h"
-49: 
+49:
 50: #if BAREMETAL_RPI_TARGET == 3
-51: /// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 3
+51: /// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 3
 52: #define RPI_BCM_IO_BASE                 0x3F000000
 53: #elif BAREMETAL_RPI_TARGET == 4
-54: /// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 4
+54: /// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 4
 55: #define RPI_BCM_IO_BASE                 0xFE000000
 56: #define ARM_IO_BASE                     0xFF840000
 57: #else
-58: /// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 5
+58: /// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 5
 59: #define RPI_BCM_IO_BASE                 0x107C000000UL
 60: #define ARM_IO_BASE                     0x107C000000UL
 61: #endif
 62: #if BAREMETAL_RPI_TARGET <= 4
-63: /// @brief End address for Raspberry PI 3 / 4 BCM I/O
+63: /// @brief End address for Raspberry Pi 3 / 4 BCM I/O
 64: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0xFFFFFF)
 65: #else
-66: /// @brief End address for Raspberry PI 5 BCM I/O
+66: /// @brief End address for Raspberry Pi 5 BCM I/O
 67: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0x3FFFFFF)
 68: #endif
-69: 
+69:
 70: //---------------------------------------------
 71: // Raspberry Pi GPIO
 72: //---------------------------------------------
-73: 
+73:
 74: /// @brief Raspberry Pi GPIO registers base address. See @ref RASPBERRY_PI_GPIO
 75: #define RPI_GPIO_BASE    RPI_BCM_IO_BASE + 0x00200000
 76: /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
@@ -1256,18 +1256,18 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 146: #else // RPI target 5
 147: // Not supported yet
 148: #endif
-149: 
+149:
 150: //---------------------------------------------
 151: // Raspberry Pi auxiliary (SPI1 / SPI2 / UART1)
 152: //---------------------------------------------
-153: 
+153:
 154: /// @brief Raspberry Pi Auxilary registers base address. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 155: #define RPI_AUX_BASE          RPI_BCM_IO_BASE + 0x00215000
 156: /// @brief Raspberry Pi Auxiliary IRQ register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 157: #define RPI_AUX_IRQ           reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
 158: /// @brief Raspberry Pi Auxiliary Enable register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 159: #define RPI_AUX_ENABLES       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
-160: 
+160:
 161: /// @brief Raspberry Pi Auxiliary Enable register values
 162: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 163: #define RPI_AUX_ENABLES_SPI2  BIT1(2)
@@ -1275,11 +1275,11 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 165: #define RPI_AUX_ENABLES_SPI1  BIT1(1)
 166: /// @brief Raspberry Pi Auxiliary Enable register Enable UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 167: #define RPI_AUX_ENABLES_UART1 BIT1(0)
-168: 
+168:
 169: //---------------------------------------------
 170: // Raspberry Pi auxiliary mini UART (UART1)
 171: //---------------------------------------------
-172: 
+172:
 173: /// @brief Raspberry Pi Mini UART (UART1) I/O register. See @ref RASPBERRY_PI_UART1
 174: #define RPI_AUX_MU_IO         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
 175: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register. See @ref RASPBERRY_PI_UART1
@@ -1303,23 +1303,23 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 193: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
 194: #define RPI_AUX_MU_BAUD       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
 195: #if BAREMETAL_RPI_TARGET == 3
-196: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 3
+196: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 3
 197: #define AUX_UART_CLOCK 250000000
 198: #elif BAREMETAL_RPI_TARGET == 4
-199: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry PI 4
+199: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 4
 200: #define AUX_UART_CLOCK 267300000
 201: #else
 202: // Not supported yet
 203: #endif
 204: /// @brief Calculate Raspberry Pi Mini UART (UART1) baud rate value from frequency
 205: #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
-206: 
+206:
 207: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
 208: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
 209: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
 210: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
 211: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
-212: 
+212:
 213: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
 214: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
 215: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
@@ -1329,19 +1329,19 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 219: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
 220: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
 221: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
-222: 
+222:
 223: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
 224: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
 225: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
 226: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters. See @ref RASPBERRY_PI_UART1
 227: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT1(0) | BIT1(1)
-228: 
+228:
 229: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
 230: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low. See @ref RASPBERRY_PI_UART1
 231: #define RPI_AUX_MU_MCR_RTS_LOW        BIT1(1)
 232: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high. See @ref RASPBERRY_PI_UART1
 233: #define RPI_AUX_MU_MCR_RTS_HIGH       BIT0(1)
-234: 
+234:
 235: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
 236: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle. See @ref RASPBERRY_PI_UART1
 237: #define RPI_AUX_MU_LSR_TX_IDLE        BIT1(6)
@@ -1351,7 +1351,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 241: #define RPI_AUX_MU_LSR_RX_OVERRUN     BIT1(1)
 242: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready. See @ref RASPBERRY_PI_UART1
 243: #define RPI_AUX_MU_LSR_RX_READY       BIT1(0)
-244: 
+244:
 245: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
 246: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS. See @ref RASPBERRY_PI_UART1
 247: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT1(3)
@@ -1391,7 +1391,7 @@ for Raspberry Pi 4, we simply write the pull up / down status directly to a regi
 
 Some tutorials will show the same approach for Raspberry Pi 3 and 4, as apparently the 'old' way still works on Raspberry Pi 4.
 
-More information on the Mini UART (UART1) registers can be found in [Raspberry PI auxiliary peripheral](#RASPBERRY_PI_AUXILIARY_PERIPHERAL) and [Raspberry Pi UART1](#RASPBERRY_PI_UART1),
+More information on the Mini UART (UART1) registers can be found in [Raspberry Pi auxiliary peripheral](#RASPBERRY_PI_AUXILIARY_PERIPHERAL) and [Raspberry Pi UART1](#RASPBERRY_PI_UART1),
 as well as in the official [BCM2837 ARM Peripherals](pdf/bcm2837-peripherals.pdf) (page 8) and
 [BCM2711 ARM Peripherals](pdf/bcm2711-peripherals.pdf) (page 10).
 Raspberry Pi 5 no longer has a mini UART, so this code will not work there. We will be using another UART, UART0, later on.
@@ -1449,17 +1449,17 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Raspberry Pi UART1 serial device declaration
-46: 
+46:
 47: /// @brief baremetal namespace
 48: namespace baremetal {
-49: 
+49:
 50: /// @brief GPIO mode
 51: enum class GPIOMode
 52: {
@@ -1486,7 +1486,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 73:     /// @brief GPIO mode unknown / not set / invalid
 74:     Unknown,
 75: };
-76: 
+76:
 77: /// @brief GPIO function
 78: enum class GPIOFunction
 79: {
@@ -1509,7 +1509,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 96:     /// @brief GPIO function unknown / not set / invalid
 97:     Unknown,
 98: };
-99: 
+99:
 100: /// @brief GPIO pull mode
 101: enum class GPIOPullMode
 102: {
@@ -1522,7 +1522,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 109:     /// @brief GPIO pull mode unknown / not set / invalid
 110:     Unknown,
 111: };
-112: 
+112:
 113: /// <summary>
 114: /// Encapsulation for the UART1 device.
 115: /// </summary>
@@ -1533,7 +1533,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 120:     bool m_isInitialized;
 121:     /// @brief Baudrate set for device
 122:     unsigned m_baudrate;
-123: 
+123:
 124: public:
 125:     // Constructs a default UART1 instance.
 126:     UART1();
@@ -1549,7 +1549,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 136:     void Write(char c);
 137:     // Write a string
 138:     void WriteString(const char* str);
-139: 
+139:
 140: private:
 141:     // Set GPIO pin mode
 142:     bool SetMode(MCP23017Pin pinNumber, GPIOMode mode);
@@ -1560,7 +1560,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 147:     // Switch GPIO off
 148:     bool Off(MCP23017Pin pinNumber, GPIOMode mode);
 149: };
-150: 
+150:
 151: } // namespace baremetal
 ```
 
@@ -1634,25 +1634,25 @@ File: code/libraries/baremetal/src/UART1.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/UART1.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/MemoryAccess.h"
-45: 
+45:
 46: /// @file
 47: /// Raspberry Pi UART1 serial device implementation
-48: 
+48:
 49: /// @brief Total count of GPIO pins, numbered from 0 through 53
 50: #define NUM_GPIO 54
-51: 
+51:
 52: namespace baremetal {
-53: 
+53:
 54: #if BAREMETAL_RPI_TARGET == 3
 55: /// @brief Count of NOP instructions to pause when programming GPIO for Raspberry Pi 3
 56: static const int NumWaitCycles = 150;
-57: 
+57:
 58: /// <summary>
 59: /// ait the specified number of cycles, by executing a NOP instruction for each cycle
 60: /// </summary>
@@ -1668,7 +1668,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 70:     }
 71: }
 72: #endif // BAREMETAL_RPI_TARGET == 3
-73: 
+73:
 74: /// <summary>
 75: /// Constructs a UART1 instance.
 76: /// </summary>
@@ -1677,7 +1677,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 79:     , m_baudrate{}
 80: {
 81: }
-82: 
+82:
 83: /// <summary>
 84: /// Initialize the UART1 device. Only performed once, guarded by m_isInitialized.
 85: ///
@@ -1688,15 +1688,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 90: {
 91:     if (m_isInitialized)
 92:         return;
-93: 
+93:
 94:     // initialize UART
 95:     auto value = MemoryAccess::Read32(RPI_AUX_ENABLES);
 96:     MemoryAccess::Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1); // Disable UART1, AUX mini uart
-97: 
+97:
 98:     SetMode(14, GPIOMode::AlternateFunction5);
-99: 
+99:
 100:     SetMode(15, GPIOMode::AlternateFunction5);
-101: 
+101:
 102:     MemoryAccess::Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1); // enable UART1, AUX mini uart
 103:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, 0);                             // Disable Tx, Rx
 104:     MemoryAccess::Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);     // 8 bit mode
@@ -1707,11 +1707,11 @@ File: code/libraries/baremetal/src/UART1.cpp
 109:                                               RPI_AUX_MU_IIR_RX_FIFO_CLEAR);                       // Clear FIFO
 110:     MemoryAccess::Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(baudrate));                       // Set baudrate
 111:     MemoryAccess::Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX); // Enable Tx, Rx
-112: 
+112:
 113:     m_baudrate = baudrate;
 114:     m_isInitialized = true;
 115: }
-116: 
+116:
 117: /// <summary>
 118: /// Return set baudrate
 119: /// </summary>
@@ -1720,7 +1720,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 122: {
 123:     return m_baudrate;
 124: }
-125: 
+125:
 126: /// <summary>
 127: /// Receive a character
 128: /// </summary>
@@ -1736,7 +1736,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 138:     // Read it and return
 139:     return static_cast<char>(MemoryAccess::Read32(RPI_AUX_MU_IO));
 140: }
-141: 
+141:
 142: /// <summary>
 143: /// Send a character
 144: /// </summary>
@@ -1752,7 +1752,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 154:     // Write the character to the buffer
 155:     MemoryAccess::Write32(RPI_AUX_MU_IO, static_cast<uint32>(c));
 156: }
-157: 
+157:
 158: /// <summary>
 159: /// Write a string
 160: /// </summary>
@@ -1767,7 +1767,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 169:         Write(*str++);
 170:     }
 171: }
-172: 
+172:
 173: bool UART1::SetMode(MCP23017Pin pinNumber, GPIOMode mode)
 174: {
 175:     if (pinNumber >= NUM_GPIO)
@@ -1778,7 +1778,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 180:     {
 181:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 182:             return false;
-183: 
+183:
 184:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) -
 185:                                                               static_cast<unsigned>(GPIOMode::AlternateFunction0) +
 186:                                                               static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
@@ -1788,7 +1788,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 190:     {
 191:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 192:             return false;
-193: 
+193:
 194:         if (!SetFunction(pinNumber, GPIOFunction::Output))
 195:             return false;
 196:     }
@@ -1805,37 +1805,37 @@ File: code/libraries/baremetal/src/UART1.cpp
 207:         Off(pinNumber, mode);
 208:     return true;
 209: }
-210: 
+210:
 211: bool UART1::SetFunction(MCP23017Pin pinNumber, GPIOFunction function)
 212: {
 213:     if (pinNumber >= NUM_GPIO)
 214:         return false;
 215:     if (function >= GPIOFunction::Unknown)
 216:         return false;
-217: 
+217:
 218:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
 219:     uint32 shift = (pinNumber % 10) * 3;
-220: 
+220:
 221:     static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
-222: 
+222:
 223:     uint32 value = MemoryAccess::Read32(selectRegister);
 224:     value &= ~(7 << shift);
 225:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
 226:     MemoryAccess::Write32(selectRegister, value);
 227:     return true;
 228: }
-229: 
+229:
 230: bool UART1::SetPullMode(MCP23017Pin pinNumber, GPIOPullMode pullMode)
 231: {
 232:     if (pullMode >= GPIOPullMode::Unknown)
 233:         return false;
 234:     if (pinNumber >= NUM_GPIO)
 235:         return false;
-236: 
+236:
 237: #if BAREMETAL_RPI_TARGET == 3
 238:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
 239:     uint32 shift = pinNumber % 32;
-240: 
+240:
 241:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 242:     WaitCycles(NumWaitCycles);
 243:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -1844,39 +1844,39 @@ File: code/libraries/baremetal/src/UART1.cpp
 246: #else
 247:     regaddr modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
 248:     unsigned shift = (pinNumber % 16) * 2;
-249: 
+249:
 250:     static const unsigned ModeMap[3] = {0, 2, 1};
-251: 
+251:
 252:     uint32 value = MemoryAccess::Read32(modeReg);
 253:     value &= ~(3 << shift);
 254:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 255:     MemoryAccess::Write32(modeReg, value);
 256: #endif
-257: 
+257:
 258:     return true;
 259: }
-260: 
+260:
 261: bool UART1::Off(MCP23017Pin pinNumber, GPIOMode mode)
 262: {
 263:     if (pinNumber >= NUM_GPIO)
 264:         return false;
-265: 
+265:
 266:     // Output level can be set in input mode for subsequent switch to output
 267:     if (mode >= GPIOMode::Unknown)
 268:         return false;
-269: 
+269:
 270:     unsigned regOffset = (pinNumber / 32) * 4;
 271:     uint32 regMask = 1 << (pinNumber % 32);
-272: 
+272:
 273:     bool value = false;
-274: 
+274:
 275:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-276: 
+276:
 277:     MemoryAccess::Write32(setClrReg, regMask);
-278: 
+278:
 279:     return true;
 280: }
-281: 
+281:
 282: } // namespace baremetal
 ```
 
@@ -1934,7 +1934,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 180:     {
 181:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 182:             return false;
-183: 
+183:
 184:         if (!SetFunction(pinNumber, static_cast<GPIOFunction>(static_cast<unsigned>(mode) -
 185:                                                               static_cast<unsigned>(GPIOMode::AlternateFunction0) +
 186:                                                               static_cast<unsigned>(GPIOFunction::AlternateFunction0))))
@@ -1944,7 +1944,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 190:     {
 191:         if (!SetPullMode(pinNumber, GPIOPullMode::Off))
 192:             return false;
-193: 
+193:
 194:         if (!SetFunction(pinNumber, GPIOFunction::Output))
 195:             return false;
 196:     }
@@ -1980,12 +1980,12 @@ File: code/libraries/baremetal/src/UART1.cpp
 214:         return false;
 215:     if (function >= GPIOFunction::Unknown)
 216:         return false;
-217: 
+217:
 218:     regaddr selectRegister = RPI_GPIO_GPFSEL0 + (pinNumber / 10) * 4;
 219:     uint32 shift = (pinNumber % 10) * 3;
-220: 
+220:
 221:     static const unsigned FunctionMap[] = {0, 1, 4, 5, 6, 7, 3, 2};
-222: 
+222:
 223:     uint32 value = MemoryAccess::Read32(selectRegister);
 224:     value &= ~(7 << shift);
 225:     value |= static_cast<uint32>(FunctionMap[static_cast<size_t>(function)]) << shift;
@@ -2025,11 +2025,11 @@ File: code/libraries/baremetal/src/UART1.cpp
 233:         return false;
 234:     if (pinNumber >= NUM_GPIO)
 235:         return false;
-236: 
+236:
 237: #if BAREMETAL_RPI_TARGET == 3
 238:     regaddr clkRegister = RPI_GPIO_GPPUDCLK0 + (pinNumber / 32) * 4;
 239:     uint32 shift = pinNumber % 32;
-240: 
+240:
 241:     MemoryAccess::Write32(RPI_GPIO_GPPUD, static_cast<uint32>(pullMode));
 242:     WaitCycles(NumWaitCycles);
 243:     MemoryAccess::Write32(clkRegister, static_cast<uint32>(1 << shift));
@@ -2038,15 +2038,15 @@ File: code/libraries/baremetal/src/UART1.cpp
 246: #else
 247:     regaddr modeReg = RPI_GPIO_GPPUPPDN0 + (pinNumber / 16) * 4;
 248:     unsigned shift = (pinNumber % 16) * 2;
-249: 
+249:
 250:     static const unsigned ModeMap[3] = {0, 2, 1};
-251: 
+251:
 252:     uint32 value = MemoryAccess::Read32(modeReg);
 253:     value &= ~(3 << shift);
 254:     value |= ModeMap[static_cast<size_t>(pullMode)] << shift;
 255:     MemoryAccess::Write32(modeReg, value);
 256: #endif
-257: 
+257:
 258:     return true;
 259: }
 ```
@@ -2091,20 +2091,20 @@ File: code/libraries/baremetal/src/UART1.cpp
 262: {
 263:     if (pinNumber >= NUM_GPIO)
 264:         return false;
-265: 
+265:
 266:     // Output level can be set in input mode for subsequent switch to output
 267:     if (mode >= GPIOMode::Unknown)
 268:         return false;
-269: 
+269:
 270:     unsigned regOffset = (pinNumber / 32) * 4;
 271:     uint32 regMask = 1 << (pinNumber % 32);
-272: 
+272:
 273:     bool value = false;
-274: 
+274:
 275:     regaddr setClrReg = (value ? RPI_GPIO_GPSET0 : RPI_GPIO_GPCLR0) + regOffset;
-276: 
+276:
 277:     MemoryAccess::Write32(setClrReg, regMask);
-278: 
+278:
 279:     return true;
 280: }
 ```
@@ -2179,34 +2179,34 @@ File: code/libraries/baremetal/src/Startup.S
 38: // DEALINGS IN THE SOFTWARE.
 39: //
 40: //------------------------------------------------------------------------------
-41: 
+41:
 42: #include "baremetal/SysConfig.h"
-43: 
+43:
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
-45: 
+45:
 46:     // Initialize Generic Timers
 47:     mrs     \xreg1, cnthctl_el2
 48:     orr     \xreg1, \xreg1, #0x3        // Enable EL1 access to timers
 49:     msr     cnthctl_el2, \xreg1
 50:     msr     cntvoff_el2, xzr
-51: 
+51:
 52:     // Initilize MPID/MPIDR registers
 53:     mrs     \xreg1, midr_el1
 54:     mrs     \xreg2, mpidr_el1
 55:     msr     vpidr_el2, \xreg1
 56:     msr     vmpidr_el2, \xreg2
-57: 
+57:
 58:     // Disable coprocessor traps
 59:     mov     \xreg1, #0x33ff
 60:     msr     cptr_el2, \xreg1            // Disable coprocessor traps to EL2
 61:     msr     hstr_el2, xzr               // Disable coprocessor traps to EL2
 62:     mov     \xreg1, #3 << 20
 63:     msr     cpacr_el1, \xreg1           // Enable FP/SIMD at EL1
-64: 
+64:
 65:     // Initialize HCR_EL2
 66:     mov     \xreg1, #(1 << 31)          // 64bit EL1
 67:     msr     hcr_el2, \xreg1
-68: 
+68:
 69:     // SCTLR_EL1 initialization
 70:     //
 71:     // setting RES1 bits (29,28,23,22,20,11) to 1
@@ -2216,7 +2216,7 @@ File: code/libraries/baremetal/src/Startup.S
 75:     mov     \xreg1, #0x0800
 76:     movk    \xreg1, #0x30d0, lsl #16
 77:     msr     sctlr_el1, \xreg1
-78: 
+78:
 79:     // Return to the EL1_SP1 mode from EL2
 80:     mov     \xreg1, #0x3c4
 81:     msr     spsr_el2, \xreg1            // EL1_SP0 | D | A | I | F
@@ -2225,9 +2225,9 @@ File: code/libraries/baremetal/src/Startup.S
 84:     eret
 85: label1:
 86: .endm
-87: 
+87:
 88: .section .init
-89: 
+89:
 90:     .globl _start
 91: _start:                                 // normally entered from armstub8 in EL2 after boot
 92:     // Read MPIDR_EL1 register, low 7 bits contain core id (as we have 4 cores, we mask only lowest two bits)
@@ -2240,22 +2240,22 @@ File: code/libraries/baremetal/src/Startup.S
 99: waitevent:
 100:     wfe
 101:     b       waitevent
-102: 
+102:
 103: core0:
 104:     // core 0
 105:     mrs     x0, CurrentEL               // check if already in EL1t mode?
 106:     cmp     x0, #4
 107:     beq     EL1
-108: 
+108:
 109:     ldr     x0, =MEM_EXCEPTION_STACK    // IRQ, FIQ and exception handler run in EL1h
 110:     msr     sp_el1, x0                  // init their stack
-111: 
+111:
 112:     armv8_switch_to_el1_m x0, x1
-113: 
+113:
 114: EL1:
 115:     ldr     x0, =MEM_KERNEL_STACK       // main thread runs in EL1t and uses sp_el0
 116:     mov     sp, x0                      // init its stack
-117: 
+117:
 118:     // clear bss
 119:     // Load bss start
 120:     ldr     x1, =__bss_start
@@ -2263,7 +2263,7 @@ File: code/libraries/baremetal/src/Startup.S
 122:     ldr     w2, =__bss_size // In 8 byte chunks, so actual size is __bss_size * 8
 123:     // If bss is empty
 124:     cbz     w2, empty_bss
-125: 
+125:
 126: clear_bss_loop:
 127:     // Store 0 in x1 location for 8 bytes, increment x1 by 8
 128:     str     xzr, [x1], #8
@@ -2271,13 +2271,13 @@ File: code/libraries/baremetal/src/Startup.S
 130:     sub     w2, w2, #1
 131:     // Loop as long as the end is not reached
 132:     cbnz    w2, clear_bss_loop
-133: 
+133:
 134:     // jump to C code, should not return
 135: empty_bss:
 136:     bl      main                        // Jump to main()
 137:     // For fail safety, halt this core too
 138:     b       waitevent
-139: 
+139:
 140: // End
 ```
 
@@ -2316,30 +2316,30 @@ This contains quite some intricate details, so bare with me.
 ```asm
 File: code/libraries/baremetal/src/Startup.S
 44: .macro armv8_switch_to_el1_m, xreg1, xreg2
-45: 
+45:
 46:     // Initialize Generic Timers
 47:     mrs     \xreg1, cnthctl_el2
 48:     orr     \xreg1, \xreg1, #0x3        // Enable EL1 access to timers
 49:     msr     cnthctl_el2, \xreg1
 50:     msr     cntvoff_el2, xzr
-51: 
+51:
 52:     // Initilize MPID/MPIDR registers
 53:     mrs     \xreg1, midr_el1
 54:     mrs     \xreg2, mpidr_el1
 55:     msr     vpidr_el2, \xreg1
 56:     msr     vmpidr_el2, \xreg2
-57: 
+57:
 58:     // Disable coprocessor traps
 59:     mov     \xreg1, #0x33ff
 60:     msr     cptr_el2, \xreg1            // Disable coprocessor traps to EL2
 61:     msr     hstr_el2, xzr               // Disable coprocessor traps to EL2
 62:     mov     \xreg1, #3 << 20
 63:     msr     cpacr_el1, \xreg1           // Enable FP/SIMD at EL1
-64: 
+64:
 65:     // Initialize HCR_EL2
 66:     mov     \xreg1, #(1 << 31)          // 64bit EL1
 67:     msr     hcr_el2, \xreg1
-68: 
+68:
 69:     // SCTLR_EL1 initialization
 70:     //
 71:     // setting RES1 bits (29,28,23,22,20,11) to 1
@@ -2349,7 +2349,7 @@ File: code/libraries/baremetal/src/Startup.S
 75:     mov     \xreg1, #0x0800
 76:     movk    \xreg1, #0x30d0, lsl #16
 77:     msr     sctlr_el1, \xreg1
-78: 
+78:
 79:     // Return to the EL1_SP1 mode from EL2
 80:     mov     \xreg1, #0x3c4
 81:     msr     spsr_el2, \xreg1            // EL1_SP0 | D | A | I | F
@@ -2499,20 +2499,20 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
-44: 
+44:
 45: /// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
 46: #define CORES    4
-47: 
+47:
 48: /// @brief Size of 1 Megabyte
 49: #define MEGABYTE 0x100000
 50: /// @brief Size of 1 Gigabyte
 51: #define GIGABYTE 0x40000000ULL
-52: 
+52:
 53: /// @brief KERNEL_MAX_SIZE is the maximum allowed size of a built kernel image.
 54: ///
 55: /// If your kernel image contains big data areas it may be required to
@@ -2520,12 +2520,12 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 57: #ifndef KERNEL_MAX_SIZE
 58: #define KERNEL_MAX_SIZE (2 * MEGABYTE)
 59: #endif
-60: 
+60:
 61: /// @brief Set part to be used by GPU (normally set in config.txt)
 62: #ifndef GPU_MEM_SIZE
 63: #define GPU_MEM_SIZE (64 * MEGABYTE)
 64: #endif
-65: 
+65:
 66: #include "baremetal/MemoryMap.h"
 ```
 
@@ -2589,14 +2589,14 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Memory map definitions
 44: ///
 45: /// Some of the definitions could be pre-defined in either SysConfig.h or by the build, so include SysConfig.h instead of MemoryMap.h directly
-46: 
+46:
 47: /// @brief Default RAM memory size (minimum size as of RPI 3)
 48: #define MEM_SIZE (1024 * MEGABYTE)
 49: /// @brief Part of RAM mapped to GPU (minimum size is 64Mb)
@@ -2606,13 +2606,13 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 53: #endif
 54: /// @brief Part of RAM mapped to ARM (this is the total amount - amount allocated to GPU)
 55: #define ARM_MEM_SIZE (MEM_SIZE - GPU_MEM_SIZE)
-56: 
+56:
 57: /// @brief Memory reserved for paging. Paging memory is placed just below the low heap
 58: #define PAGE_RESERVE (16 * MEGABYTE)
-59: 
+59:
 60: /// @brief Size of every page
 61: #define PAGE_SIZE    0x10000 // 64Kb
-62: 
+62:
 63: /// @brief Maximum size of the kernel space (if not already specified in SysConfig.h)
 64: #if !defined(KERNEL_MAX_SIZE)
 65: #define KERNEL_MAX_SIZE (2 * MEGABYTE)
@@ -2739,10 +2739,10 @@ So we change the code in main.cpp:
 File: code/applications/demo/src/main.cpp
 1: #include "baremetal/ARMInstructions.h"
 2: #include "baremetal/UART1.h"
-3: 
+3:
 4: /// @file
 5: /// Demo application main code
-6: 
+6:
 7: /// <summary>
 8: /// Demo application main code
 9: /// </summary>
@@ -2751,7 +2751,7 @@ File: code/applications/demo/src/main.cpp
 12: {
 13:     baremetal::UART1 uart;
 14:     uart.Initialize(115200);
-15: 
+15:
 16:     uart.WriteString("Hello World!\n");
 17:     for (int i = 0; i < 1000000; ++i)
 18:         NOP();
@@ -2790,12 +2790,12 @@ The output for the configure step should be similar to:
 1> Working directory: D:\Projects\baremetal\cmake-BareMetal-RPI3-Debug
 1> [CMake] -- CMake 3.20.21032501-MSVC_2
 1> [CMake] -- Building for Raspberry Pi 3
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ** Setting up project **
 1> [CMake] --
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ##################################################################################
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] ** Setting up toolchain **
 1> [CMake] --
 1> [CMake] -- TOOLCHAIN_ROOT           D:\Toolchains\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-aarch64-none-elf
@@ -2812,45 +2812,45 @@ The output for the configure step should be similar to:
 1> [CMake] -- C++ compiler version:    13.3.1
 1> [CMake] -- C compiler version:      13.3.1
 1> [CMake] -- C++ supported standard:  17
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications/demo
-1> [CMake] 
+1> [CMake]
 1> [CMake] ** Setting up demo **
-1> [CMake] 
+1> [CMake]
 1> [CMake] -- Package                           :  demo
 1> [CMake] -- Package description               :  Demo application
-1> [CMake] -- Defines C - public                : 
-1> [CMake] -- Defines C - private               : 
-1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C - public                :
+1> [CMake] -- Defines C - private               :
+1> [CMake] -- Defines C++ - public              :
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       : 
-1> [CMake] -- Compiler options C - private      : 
-1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C - public       :
+1> [CMake] -- Compiler options C - private      :
+1> [CMake] -- Compiler options C++ - public     :
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
-1> [CMake] -- Include dirs - public             : 
-1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Include dirs - public             :
+1> [CMake] -- Include dirs - private            :
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Dependencies                      :  baremetal
 1> [CMake] -- Link libs                         :  baremetal
 1> [CMake] -- Source files                      :  D:/Projects/RaspberryPi/baremetal.github/code/applications/demo/src/main.cpp
-1> [CMake] -- Include files - public            : 
-1> [CMake] -- Include files - private           : 
-1> [CMake] -- 
+1> [CMake] -- Include files - public            :
+1> [CMake] -- Include files - private           :
+1> [CMake] --
 1> [CMake] -- Properties for demo
 1> [CMake] -- Target type                       :  EXECUTABLE
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
@@ -2858,65 +2858,65 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  INCLUDES-NOTFOUND
 1> [CMake] -- Target include dirs private       :  INCLUDES-NOTFOUND
 1> [CMake] -- Target link libraries             :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  INCLUDE_DIRS_EXPORTS-NOTFOUND
 1> [CMake] -- Target exported link libraries    :  -Wl,--start-group baremetal -Wl,--end-group
-1> [CMake] -- Target imported dependencies      : 
-1> [CMake] -- Target imported link libraries    : 
+1> [CMake] -- Target imported dependencies      :
+1> [CMake] -- Target imported link libraries    :
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/bin
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  demo.elf
 1> [CMake] -- Target C++ standard               :  17
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/applications/demo
-1> [CMake] 
+1> [CMake]
 1> [CMake] ** Setting up demo-image **
-1> [CMake] 
+1> [CMake]
 1> [CMake] -- create_image demo-image kernel8.img demo
 1> [CMake] -- TARGET_NAME demo.elf
 1> [CMake] -- generate D:/Projects/RaspberryPi/baremetal.github/deploy/Debug/demo-image/kernel8.img from D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/bin/demo
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/libraries
-1> [CMake] -- 
+1> [CMake] --
 1> [CMake] **********************************************************************************
-1> [CMake] 
-1> [CMake] -- 
+1> [CMake]
+1> [CMake] --
 1> [CMake] ## In directory: D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal
 1> [CMake] -- Package                           :  baremetal
 1> [CMake] -- Package description               :  Bare metal library
-1> [CMake] -- Defines C - public                : 
-1> [CMake] -- Defines C - private               : 
-1> [CMake] -- Defines C++ - public              : 
+1> [CMake] -- Defines C - public                :
+1> [CMake] -- Defines C - private               :
+1> [CMake] -- Defines C++ - public              :
 1> [CMake] -- Defines C++ - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG
 1> [CMake] -- Defines ASM - private             :  PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3
-1> [CMake] -- Compiler options C - public       : 
-1> [CMake] -- Compiler options C - private      : 
-1> [CMake] -- Compiler options C++ - public     : 
+1> [CMake] -- Compiler options C - public       :
+1> [CMake] -- Compiler options C - private      :
+1> [CMake] -- Compiler options C++ - public     :
 1> [CMake] -- Compiler options C++ - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-value -Wno-aligned-new -ffreestanding -fsigned-char -nostartfiles -mno-outline-atomics -nostdinc -nostdlib -nostdinc++ -fno-exceptions -fno-rtti -O0 -Wno-unused-variable -Wno-unused-parameter
 1> [CMake] -- Compiler options ASM - private    :  -mcpu=cortex-a53 -mlittle-endian -mcmodel=small -O2
 1> [CMake] -- Include dirs - public             :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
-1> [CMake] -- Include dirs - private            : 
+1> [CMake] -- Include dirs - private            :
 1> [CMake] -- Linker options                    :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
-1> [CMake] -- Dependencies                      : 
-1> [CMake] -- Link libs                         : 
+1> [CMake] -- Dependencies                      :
+1> [CMake] -- Link libs                         :
 1> [CMake] -- Source files                      :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/src/MemoryAccess.cpp D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/src/Startup.S D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/src/UART1.cpp
-1> [CMake] -- Include files - public            : 
-1> [CMake] -- Include files - private           : 
-1> [CMake] -- 
+1> [CMake] -- Include files - public            :
+1> [CMake] -- Include files - private           :
+1> [CMake] --
 1> [CMake] -- Properties for baremetal
 1> [CMake] -- Target type                       :  STATIC_LIBRARY
 1> [CMake] -- Target defines                    :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3 _DEBUG> $<$<COMPILE_LANGUAGE:ASM>:PLATFORM_BAREMETAL BAREMETAL_RPI_TARGET=3> $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
@@ -2924,19 +2924,19 @@ The output for the configure step should be similar to:
 1> [CMake] -- Target include dirs public        :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target include dirs private       :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target link libraries             :  LIBRARIES-NOTFOUND
-1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link options               :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target exported defines           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported options           :  $<$<COMPILE_LANGUAGE:C>:> $<$<COMPILE_LANGUAGE:CXX>:> $<$<COMPILE_LANGUAGE:ASM>:>
 1> [CMake] -- Target exported include dirs      :  D:/Projects/RaspberryPi/baremetal.github/code/libraries/baremetal/include
 1> [CMake] -- Target exported link libraries    :  LIBRARIES_EXPORTS-NOTFOUND
-1> [CMake] -- Target imported dependencies      : 
-1> [CMake] -- Target imported link libraries    : 
+1> [CMake] -- Target imported dependencies      :
+1> [CMake] -- Target imported link libraries    :
 1> [CMake] -- Target link dependencies          :  LINK_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target manual dependencies        :  EXPLICIT_DEPENDENCIES-NOTFOUND
 1> [CMake] -- Target static library location    :  D:/Projects/RaspberryPi/baremetal.github/output/RPI3/Debug/lib
 1> [CMake] -- Target dynamic library location   :  LIBRARY_LOCATION-NOTFOUND
 1> [CMake] -- Target binary location            :  RUNTIME_LOCATION-NOTFOUND
-1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles 
+1> [CMake] -- Target link flags                 :  -Wl,--section-start=.init=0x80000 -T D:/Projects/RaspberryPi/baremetal.github/baremetal.ld -nostdlib -nostartfiles
 1> [CMake] -- Target version                    :  TARGET_VERSION-NOTFOUND
 1> [CMake] -- Target so-version                 :  TARGET_SOVERSION-NOTFOUND
 1> [CMake] -- Target output name                :  baremetal

@@ -1,7 +1,7 @@
 # TODO {#TODO}
 
 @todo
-- Overview of Raspberry Pi and baremetal development
+- Overview of Raspberry Pi and bare metal development
 - Overall project structure
 - Find and add Raspberry Pi 5 information, extend samples for this platform as soon as possible (look at circle)
 - Add description of how to use JTAG device with Raspberry Pi and possibly Odroid, using e.g. [Macoy Madson's page](https://macoy.me/blog/programming/RaspberryPi5Debugging)
@@ -55,7 +55,7 @@
             "setupCommands": [
                 { "text": "set architecture aarch64", "description": "ARM64 architecture", "ignoreFailures": false },
                 { "text": "target remote localhost:1234", "description": "Connect to QEMU", "ignoreFailures": false },
-                { "text": "load", "description": "Start executable", "ignoreFailures": false }                
+                { "text": "load", "description": "Start executable", "ignoreFailures": false }
             ],
             "customLaunchSetupCommands": []
         }

@@ -46,7 +46,7 @@ Update the file `code/libraries/baremetal/include/baremetal/MemoryMap.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 ...
-81: 
+81:
 82: #if BAREMETAL_RPI_TARGET == 3
 83: /// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 1 Mb, but make sure then end is rounded
 84: #define COHERENT_REGION_SIZE 1 * MEGABYTE
@@ -54,7 +54,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryMap.h
 86: /// @brief Region reserved for coherent memory (memory shared between ARM and GPU). We reserve 4 Mb, but make sure then end is rounded
 87: #define COHERENT_REGION_SIZE 4 * MEGABYTE
 88: #endif
-89: 
+89:
 90: /// @brief Region reserved for coherent memory rounded up to 1 Mb with 1 Mb extra space
 91: #define MEM_COHERENT_REGION ((MEM_EXCEPTION_STACK_END + 2 * MEGABYTE) & ~(MEGABYTE - 1))
 ```
@@ -118,18 +118,18 @@ File: code/libraries/baremetal/include/baremetal/Serialization.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Type serialization functions
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: void Serialize(char* buffer, size_t bufferSize, uint32 value, int width, int base, bool showBase, bool leadingZeros);
-50: 
+50:
 51: } // namespace baremetal
 ```
 
@@ -185,18 +185,18 @@ File: code/libraries/baremetal/src/Serialization.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Serialization.h"
-41: 
+41:
 42: /// @file
 43: /// Type serialization functions implementation
-44: 
+44:
 45: namespace baremetal {
-46: 
+46:
 47: /// @brief Write characters with base above 10 as uppercase or not
-48: 
+48:
 49: static bool Uppercase = true;
-50: 
+50:
 51: /// <summary>
 52: /// Convert a value to a digit. Character range is 0..9-A..Z or a..z depending on value of Uppercase
 53: /// </summary>
@@ -206,7 +206,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 57: {
 58:     return value + ((value < 10) ? '0' : 'A' - 10 + (Uppercase ? 0 : 0x20));
 59: }
-60: 
+60:
 61: /// <summary>
 62: /// Calculated the amount of digits needed to represent an unsigned value of bits using base
 63: /// </summary>
@@ -219,16 +219,16 @@ File: code/libraries/baremetal/src/Serialization.cpp
 70:     uint64 value = 0xFFFFFFFFFFFFFFFF;
 71:     if (bits < 64)
 72:         value &= ((1ULL << bits) - 1);
-73: 
+73:
 74:     while (value > 0)
 75:     {
 76:         value /= base;
 77:         result++;
 78:     }
-79: 
+79:
 80:     return result;
 81: }
-82: 
+82:
 83: /// <summary>
 84: /// Serialize a 32 bit unsigned value to buffer.
 85: ///
@@ -251,7 +251,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 102: {
 103:     if ((base < 2) || (base > 36))
 104:         return;
-105: 
+105:
 106:     int numDigits = 0;
 107:     uint64 divisor = 1;
 108:     uint64 divisorLast = 1;
@@ -265,7 +265,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 116:         ++numDigits;
 117:     }
 118:     divisor = divisorLast;
-119: 
+119:
 120:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 121:     if (showBase)
 122:     {
@@ -275,9 +275,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 126:         numChars = absWidth;
 127:     if (numChars > bufferSize - 1) // Leave one character for \0
 128:         return;
-129: 
+129:
 130:     char* bufferPtr = buffer;
-131: 
+131:
 132:     if (showBase)
 133:     {
 134:         if (base == 2)
@@ -313,7 +313,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 164:     }
 165:     *bufferPtr++ = '\0';
 166: }
-167: 
+167:
 168: } // namespace baremetal
 ```
 
@@ -605,14 +605,14 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Memory management
-46: 
+46:
 47: /// <summary>
 48: /// Page slot for requesting coherent memory region
 49: /// </summary>
@@ -621,9 +621,9 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 52:     /// @brief Coherent memory page slot for Raspberry Pi mailbox
 53:     PropertyMailbox = 0,
 54: };
-55: 
+55:
 56: namespace baremetal {
-57: 
+57:
 58: /// <summary>
 59: /// For now, handles assignment of coherent memory slots.
 60: /// </summary>
@@ -632,7 +632,7 @@ File: code/libraries/baremetal/include/baremetal/MemoryManager.h
 63: public:
 64:     static uintptr GetCoherentPage(CoherentPageSlot slot);
 65: };
-66: 
+66:
 67: } // namespace baremetal
 ```
 
@@ -685,16 +685,16 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/MemoryManager.h"
-41: 
+41:
 42: #include "baremetal/SysConfig.h"
-43: 
+43:
 44: /// @file
 45: /// Memory management implementation
-46: 
+46:
 47: using namespace baremetal;
-48: 
+48:
 49: /// <summary>
 50: /// Return the coherent memory page (allocated with the GPU) for the requested page slot
 51: /// </summary>
@@ -703,9 +703,9 @@ File: code/libraries/baremetal/src/MemoryManager.cpp
 54: uintptr MemoryManager::GetCoherentPage(CoherentPageSlot slot)
 55: {
 56:     uint64 pageAddress = MEM_COHERENT_REGION;
-57: 
+57:
 58:     pageAddress += static_cast<uint32>(slot) * PAGE_SIZE;
-59: 
+59:
 60:     return pageAddress;
 61: }
 ```
@@ -737,23 +737,23 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 51: #define GPU_CACHED_BASE   0x40000000
 52: /// @brief Address of GPU memory accessible from ARM, mapped as uncached memory
 53: #define GPU_UNCACHED_BASE 0xC0000000
-54: 
+54:
 55: /// @brief User base address of GPU memory from ARM
 56: #define GPU_MEM_BASE      GPU_UNCACHED_BASE
-57: 
+57:
 58: /// @brief Convert ARM address to GPU bus address (also works for aliases)
 59: #define ARM_TO_GPU(addr)  (((addr) & ~0xC0000000) | GPU_MEM_BASE)
 60: /// @brief Convert GPU bus address to ARM address (also works for aliases)
 61: #define GPU_TO_ARM(addr)  ((addr) & ~0xC0000000)
-62: 
+62:
 63: #if BAREMETAL_RPI_TARGET == 3
-64: /// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 3
+64: /// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 3
 65: #define RPI_BCM_IO_BASE 0x3F000000
 ...
 104: //---------------------------------------------
 105: // Raspberry Pi Mailbox
 106: //---------------------------------------------
-107: 
+107:
 108: /// @brief Raspberry Pi Mailbox Registers base address. See @ref RASPBERRY_PI_MAILBOX
 109: #define RPI_MAILBOX_BASE                RPI_BCM_IO_BASE + 0x0000B880
 110: /// @brief Raspberry Pi Mailbox 0 (incoming) Read register. See @ref RASPBERRY_PI_MAILBOX
@@ -788,7 +788,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 139: #define RPI_MAILBOX_STATUS_FULL         BIT1(31)
 140: /// @brief Raspberry Pi Mailbox buffer requestCode value for request. See @ref RASPBERRY_PI_MAILBOX
 141: #define RPI_MAILBOX_REQUEST             0
-142: 
+142:
 ```
 
 - Line 50-51:  We define the address of the VC mapped to ARM address space when L2 caching is enabled (we will not use this for now)
@@ -852,16 +852,16 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Abstract Mailbox interface
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: /// <summary>
 50: /// Mailbox channel
 51: /// </summary>
@@ -888,7 +888,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 72:     /// Properties / tags VC -> ARM
 73:     ARM_MAILBOX_CH_PROP_IN = 9,
 74: };
-75: 
+75:
 76: /// <summary>
 77: /// Mailbox abstract interface
 78: /// </summary>
@@ -899,7 +899,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 83:     /// Default destructor needed for abstract interface
 84:     /// </summary>
 85:     virtual ~IMailbox() = default;
-86: 
+86:
 87:     /// <summary>
 88:     /// Perform a write - read cycle on the mailbox
 89:     /// </summary>
@@ -907,7 +907,7 @@ File: code/libraries/baremetal/include/baremetal/IMailbox.h
 91:     /// <returns>Address of mailbox data block, should be equal to input address</returns>
 92:     virtual uintptr WriteRead(uintptr address) = 0;
 93: };
-94: 
+94:
 95: } // namespace baremetal
 ```
 
@@ -970,17 +970,17 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/IMailbox.h"
 43: #include "baremetal/MemoryAccess.h"
-44: 
+44:
 45: /// @file
 46: /// Raspberry Pi Mailbox
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: /// @brief Mailbox: Handles access to system parameters, stored in the VC
 51: ///
 52: /// The mailbox handles communication with the Raspberry Pi GPU using communication channels. The most frequently used is the ARM_MAILBOX_CH_PROP_OUT channel
@@ -995,18 +995,18 @@ File: code/libraries/baremetal/include/baremetal/Mailbox.h
 61:     /// Memory access interface
 62:     /// </summary>
 63:     IMemoryAccess& m_memoryAccess;
-64: 
+64:
 65: public:
 66:     Mailbox(MailboxChannel channel, IMemoryAccess& memoryAccess = GetMemoryAccess());
-67: 
+67:
 68:     uintptr WriteRead(uintptr address) override;
-69: 
+69:
 70: private:
 71:     void Flush();
 72:     uintptr Read();
 73:     void Write(uintptr data);
 74: };
-75: 
+75:
 76: } // namespace baremetal
 ```
 
@@ -1065,19 +1065,19 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Mailbox.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/MemoryAccess.h"
 45: #include "baremetal/Timer.h"
-46: 
+46:
 47: /// @file
 48: /// Raspberry Pi Mailbox implementation
-49: 
+49:
 50: using namespace baremetal;
-51: 
+51:
 52: /// <summary>
 53: /// Construct a mailbox
 54: /// </summary>
@@ -1088,7 +1088,7 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 59:     , m_memoryAccess{memoryAccess}
 60: {
 61: }
-62: 
+62:
 63: /// <summary>
 64: /// Perform a write - read cycle on the mailbox for the selected channel (m_channel)
 65: /// </summary>
@@ -1097,14 +1097,14 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 68: uintptr Mailbox::WriteRead(uintptr address)
 69: {
 70:     Flush();
-71: 
+71:
 72:     Write(address);
-73: 
+73:
 74:     uint32 result = Read();
-75: 
+75:
 76:     return result;
 77: }
-78: 
+78:
 79: /// <summary>
 80: /// Flush the mailbox for the selected channel (m_channel), by reading until it is empty. A short wait is added for synchronization reasons.
 81: /// </summary>
@@ -1113,11 +1113,11 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 84:     while (!(m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY))
 85:     {
 86:         m_memoryAccess.Read32(RPI_MAILBOX0_READ);
-87: 
+87:
 88:         Timer::WaitMilliSeconds(20);
 89:     }
 90: }
-91: 
+91:
 92: /// <summary>
 93: /// Read back the address of the data block to the mailbox for the selected channel (m_channel)
 94: // The address should be equal to what was written, as the mailbox can only handle sequential requests for a channel
@@ -1126,20 +1126,20 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 97: uintptr Mailbox::Read()
 98: {
 99:     uintptr result;
-100: 
+100:
 101:     do
 102:     {
 103:         while (m_memoryAccess.Read32(RPI_MAILBOX0_STATUS) & RPI_MAILBOX_STATUS_EMPTY)
 104:         {
 105:             NOP();
 106:         }
-107: 
+107:
 108:         result = static_cast<uintptr>(m_memoryAccess.Read32(RPI_MAILBOX0_READ));
 109:     } while ((result & 0xF) != static_cast<uint32>(m_channel)); // channel number is in the lower 4 bits
-110: 
+110:
 111:     return result & ~0xF;
 112: }
-113: 
+113:
 114: /// <summary>
 115: /// Write to the mailbox on the selected channel
 116: /// </summary>
@@ -1149,12 +1149,12 @@ File: code/libraries/baremetal/src/Mailbox.cpp
 120:     // Data must be 16 byte aligned
 121:     if ((data & 0xF) != 0)
 122:         return;
-123: 
+123:
 124:     while (m_memoryAccess.Read32(RPI_MAILBOX1_STATUS) & RPI_MAILBOX_STATUS_FULL)
 125:     {
 126:         NOP();
 127:     }
-128: 
+128:
 129:     m_memoryAccess.Write32(RPI_MAILBOX1_WRITE, static_cast<uint32>(m_channel) | static_cast<uint32>(data)); // channel number is in the lower 4 bits
 130: }
 ```
@@ -1198,14 +1198,14 @@ File: code/applications/demo/src/main.cpp
 7: #include "baremetal/System.h"
 8: #include "baremetal/Timer.h"
 9: #include "baremetal/UART1.h"
-10: 
+10:
 11: using namespace baremetal;
-12: 
+12:
 13: int main()
 14: {
 15:     auto& uart = GetUART1();
 16:     uart.WriteString("Hello World!\n");
-17: 
+17:
 18:     char buffer[128];
 19:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 20:     auto mailboxBuffer = MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox);
@@ -1221,11 +1221,11 @@ File: code/applications/demo/src/main.cpp
 30:     mailboxData[6] = 0; // return value high word
 31:     // Tag end
 32:     mailboxData[7] = 0; // Tag for end of list
-33: 
+33:
 34:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(mailboxBuffer));
-35: 
+35:
 36:     DataSyncBarrier();
-37: 
+37:
 38:     uart.WriteString("Send\n");
 39:     for (int i = 0; i < 8; ++i)
 40:     {
@@ -1254,12 +1254,12 @@ File: code/applications/demo/src/main.cpp
 63:     {
 64:         uart.WriteString("Mailbox call failed\n");
 65:     }
-66: 
+66:
 67:     DataMemBarrier();
-68: 
+68:
 69:     uart.WriteString("Wait 5 seconds\n");
 70:     Timer::WaitMilliSeconds(5000);
-71: 
+71:
 72:     uart.WriteString("Press r to reboot, h to halt\n");
 73:     char ch{};
 74:     while ((ch != 'r') && (ch != 'h'))
@@ -1267,7 +1267,7 @@ File: code/applications/demo/src/main.cpp
 76:         ch = uart.Read();
 77:         uart.Write(ch);
 78:     }
-79: 
+79:
 80:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 81: }
 ```
@@ -1435,18 +1435,18 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Macros.h"
 43: #include "baremetal/IMailbox.h"
 44: #include "baremetal/MemoryAccess.h"
-45: 
+45:
 46: /// @file
 47: /// Functionality handling for Raspberry Pi Mailbox
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: /// @brief Raspberry Pi mailbox property tags
 52: enum class PropertyID : uint32
 53: {
@@ -1547,7 +1547,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 148:     /// @brief @todo To be defined
 149:     PROPTAG_GET_DMA_CHANNELS = 0x00060001,
 150: };
-151: 
+151:
 152: /// @brief Buffer passed to the Raspberry Pi Mailbox
 153: struct MailboxBuffer
 154: {
@@ -1561,7 +1561,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 162: }
 163: /// @brief Indicates this struct is to be packed
 164: PACKED;
-165: 
+165:
 166: /// @brief Property tag, one for each request
 167: struct PropertyTag
 168: {
@@ -1574,7 +1574,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 175:     /// @brief Property tag request and response data, padded to align to 4 bytes
 176:     uint8 tagBuffer[0];
 177: } PACKED;
-178: 
+178:
 179: /// <summary>
 180: /// Basic tag structure for a simple property request sending or receiving a 32 bit unsigned number.
 181: ///
@@ -1587,7 +1587,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 188:     /// @brief A 32 bit unsigned value being send or requested
 189:     uint32 value;
 190: } PACKED;
-191: 
+191:
 192: /// <summary>
 193: /// End tag structure to end the tag list.
 194: ///
@@ -1598,7 +1598,7 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 199:     /// @brief Tag ID of the the requested property
 200:     uint32 tagID;
 201: } PACKED;
-202: 
+202:
 203: /// <summary>
 204: /// Low level functionality for requests on Mailbox interface
 205: /// </summary>
@@ -1607,18 +1607,18 @@ File: code/libraries/baremetal/include/baremetal/RPIPropertiesInterface.h
 208: private:
 209:     /// @brief Reference to mailbox for functions requested
 210:     IMailbox& m_mailbox;
-211: 
+211:
 212: public:
 213:     explicit RPIPropertiesInterface(IMailbox& mailbox);
-214: 
+214:
 215:     bool GetTag(PropertyID tagID, void* tag, unsigned tagSize);
-216: 
+216:
 217: private:
 218:     size_t FillTag(PropertyID tagID, void* tag, unsigned tagSize);
 219:     bool CheckTagResult(void* tag);
 220:     bool GetTags(void* tags, unsigned tagsSize);
 221: };
-222: 
+222:
 223: } // namespace baremetal
 ```
 
@@ -1672,7 +1672,7 @@ File: code/libraries/stdlib/include/stdlib/Macros.h
 46: #define PACKED   __attribute__((packed))
 47: /// @brief Make a struct have alignment of n bytes (GNU compiler only)
 48: #define ALIGN(n) __attribute__((aligned(n)))
-49: 
+49:
 50: /// @brief Make a variable a weak instance (GCC compiler only)
 51: #define WEAK     __attribute__((weak))
 ```
@@ -1723,19 +1723,19 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/RPIPropertiesInterface.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/MemoryManager.h"
 45: #include "stdlib/Util.h"
-46: 
+46:
 47: /// @file
 48: /// Functionality handling for Raspberry Pi Mailbox implementation
-49: 
+49:
 50: namespace baremetal {
-51: 
+51:
 52: /// <summary>
 53: /// Constructs a RPI properties interface object
 54: /// </summary>
@@ -1744,7 +1744,7 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 57:     : m_mailbox{mailbox}
 58: {
 59: }
-60: 
+60:
 61: /// <summary>
 62: /// Request property tag. The tag data for request must be filled in, the header will be filled in to the buffer.
 63: /// The buffer must be large enough to hold the complete tag including its header.
@@ -1758,17 +1758,17 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 71: {
 72:     if (FillTag(tagID, tag, tagSize) != tagSize)
 73:         return false;
-74: 
+74:
 75:     auto result = GetTags(tag, tagSize);
-76: 
+76:
 77:     if (!result)
 78:     {
 79:         return false;
 80:     }
-81: 
+81:
 82:     return CheckTagResult(tag);
 83: }
-84: 
+84:
 85: /// <summary>
 86: /// Check whether the property tag was successfully requested, by checking the tagRequestResponse field in the Property header
 87: /// </summary>
@@ -1777,14 +1777,14 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 90: bool RPIPropertiesInterface::CheckTagResult(void* tag)
 91: {
 92:     PropertyTag* header = reinterpret_cast<PropertyTag*>(tag);
-93: 
+93:
 94:     if ((header->tagRequestResponse & RPI_MAILBOX_TAG_RESPONSE) == 0)
 95:         return false;
-96: 
+96:
 97:     header->tagRequestResponse &= ~RPI_MAILBOX_TAG_RESPONSE;
 98:     return (header->tagRequestResponse != 0);
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Fill in tag header for the requested property tag.
 103: /// </summary>
@@ -1796,15 +1796,15 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 109: {
 110:     if ((tag == nullptr) || (tagSize < sizeof(PropertyTagSimple)))
 111:         return 0;
-112: 
+112:
 113:     PropertyTag* header = reinterpret_cast<PropertyTag*>(tag);
 114:     header->tagID = static_cast<uint32>(tagID);
 115:     header->tagBufferSize = tagSize - sizeof(PropertyTag);
 116:     header->tagRequestResponse = 0;
-117: 
+117:
 118:     return tagSize;
 119: }
-120: 
+120:
 121: /// <summary>
 122: /// Fill in the Mailbox buffer with the tags requested, and perform the request.
 123: /// Will fill in the mailbox buffer header, and the tag data, append the end tag, and perform the mailbox request.
@@ -1816,40 +1816,40 @@ File: code/libraries/baremetal/src/RPIPropertiesInterface.cpp
 129: {
 130:     if ((tags == nullptr) || (tagsSize < sizeof(PropertyTagSimple)))
 131:         return false;
-132: 
+132:
 133:     unsigned bufferSize = sizeof(MailboxBuffer) + tagsSize + sizeof(PropertyTagEnd);
 134:     if ((bufferSize & 3) != 0)
 135:         return false;
-136: 
+136:
 137:     MailboxBuffer* buffer = reinterpret_cast<MailboxBuffer*>(MemoryManager::GetCoherentPage(CoherentPageSlot::PropertyMailbox));
-138: 
+138:
 139:     buffer->bufferSize = bufferSize;
 140:     buffer->requestCode = RPI_MAILBOX_REQUEST;
 141:     memcpy(buffer->tags, tags, tagsSize);
-142: 
+142:
 143:     PropertyTagEnd* endTag = reinterpret_cast<PropertyTagEnd*>(buffer->tags + tagsSize);
 144:     endTag->tagID = static_cast<uint32>(PropertyID::PROPTAG_END);
-145: 
+145:
 146:     DataSyncBarrier();
-147: 
+147:
 148:     uintptr bufferAddress = ARM_TO_GPU(reinterpret_cast<uintptr>(buffer));
 149:     if (m_mailbox.WriteRead(bufferAddress) != bufferAddress)
 150:     {
 151:         return false;
 152:     }
-153: 
+153:
 154:     DataMemBarrier();
-155: 
+155:
 156:     if (buffer->requestCode != RPI_MAILBOX_RESPONSE_SUCCESS)
 157:     {
 158:         return false;
 159:     }
-160: 
+160:
 161:     memcpy(tags, buffer->tags, tagsSize);
-162: 
+162:
 163:     return true;
 164: }
-165: 
+165:
 166: } // namespace baremetal
 ```
 
@@ -1905,10 +1905,10 @@ File: code/libraries/stdlib/include/stdlib/Util.h
 47: #ifdef __cplusplus
 48: extern "C" {
 49: #endif
-50: 
+50:
 51: void *memset(void *buffer, int value, size_t length);
 52: void* memcpy(void* dest, const void* src, size_t length);
-53: 
+53:
 54: #ifdef __cplusplus
 55: }
 56: #endif
@@ -1924,7 +1924,7 @@ Update the file `code/libraries/baremetal/src/Util.cpp`.
 ```cpp
 File: code/libraries/baremetal/src/Util.cpp
 ...
-62: 
+62:
 63: /// <summary>
 64: /// Standard C memcpy function. Copies memory pointed to by src to buffer pointed to by dest over length bytes
 65: /// </summary>
@@ -1936,7 +1936,7 @@ File: code/libraries/baremetal/src/Util.cpp
 71: {
 72:     uint8* dstPtr = reinterpret_cast<uint8*>(dest);
 73:     const uint8* srcPtr = reinterpret_cast<const uint8*>(src);
-74: 
+74:
 75:     while (length-- > 0)
 76:     {
 77:         *dstPtr++ = *srcPtr++;
@@ -1963,24 +1963,24 @@ File: code/applications/demo/src/main.cpp
 8: #include "baremetal/System.h"
 9: #include "baremetal/Timer.h"
 10: #include "baremetal/UART1.h"
-11: 
+11:
 12: using namespace baremetal;
-13: 
+13:
 14: int main()
 15: {
 16:     auto& uart = GetUART1();
 17:     uart.WriteString("Hello World!\n");
-18: 
+18:
 19:     char buffer[128];
 20:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT);
 21:     RPIPropertiesInterface properties(mailbox);
-22: 
+22:
 23:     struct PropertyTagSerial
 24:     {
 25:         PropertyTag tag;
 26:         uint32   serial[2];
 27:     } PACKED;
-28: 
+28:
 29:     PropertyTagSerial serialProperty;
 30:     if (properties.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &serialProperty, sizeof(serialProperty)))
 31:     {
@@ -1996,10 +1996,10 @@ File: code/applications/demo/src/main.cpp
 41:     {
 42:         uart.WriteString("Mailbox call failed\n");
 43:     }
-44: 
+44:
 45:     uart.WriteString("Wait 5 seconds\n");
 46:     Timer::WaitMilliSeconds(5000);
-47: 
+47:
 48:     uart.WriteString("Press r to reboot, h to halt\n");
 49:     char ch{};
 50:     while ((ch != 'r') && (ch != 'h'))
@@ -2007,7 +2007,7 @@ File: code/applications/demo/src/main.cpp
 52:         ch = uart.Read();
 53:         uart.Write(ch);
 54:     }
-55: 
+55:
 56:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 57: }
 ```
@@ -2086,17 +2086,17 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/IMailbox.h"
 43: #include "stdlib/Types.h"
-44: 
+44:
 45: /// @file
 46: /// Top level functionality handling for Raspberry Pi Mailbox
-47: 
+47:
 48: namespace baremetal {
-49: 
+49:
 50: /// <summary>
 51: /// Top level functionality for requests on Mailbox interface
 52: /// </summary>
@@ -2105,13 +2105,13 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 55: private:
 56:     /// @brief Reference to mailbox for functions requested
 57:     IMailbox& m_mailbox;
-58: 
+58:
 59: public:
 60:     explicit RPIProperties(IMailbox& mailbox);
-61: 
+61:
 62:     bool GetBoardSerial(uint64& serial);
 63: };
-64: 
+64:
 65: } // namespace baremetal
 ```
 
@@ -2163,18 +2163,18 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/RPIProperties.h"
-41: 
+41:
 42: #include "baremetal/BCMRegisters.h"
 43: #include "baremetal/RPIPropertiesInterface.h"
 44: #include "stdlib/Util.h"
-45: 
+45:
 46: /// @file
 47: /// Top level functionality handling for Raspberry Pi Mailbox implementation
-48: 
+48:
 49: namespace baremetal {
-50: 
+50:
 51: /// <summary>
 52: /// Mailbox property tag structure for requesting board serial number.
 53: /// </summary>
@@ -2185,7 +2185,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 58:     /// The requested serial number/ This is a 64 bit unsigned number, divided up into two times a 32 bit number
 59:     uint32 serial[2];
 60: } PACKED;
-61: 
+61:
 62: /// <summary>
 63: /// Constructor
 64: /// </summary>
@@ -2194,7 +2194,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 67:     : m_mailbox{mailbox}
 68: {
 69: }
-70: 
+70:
 71: /// <summary>
 72: /// Request board serial number
 73: /// </summary>
@@ -2204,17 +2204,17 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 77: {
 78:     PropertyTagSerial tag{};
 79:     RPIPropertiesInterface interface(m_mailbox);
-80: 
+80:
 81:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_BOARD_SERIAL, &tag, sizeof(tag));
-82: 
+82:
 83:     if (result)
 84:     {
 85:         serial = (static_cast<uint64>(tag.serial[1]) << 32 | static_cast<uint64>(tag.serial[0]));
 86:     }
-87: 
+87:
 88:     return result;
 89: }
-90: 
+90:
 91: } // namespace baremetal
 ```
 
@@ -2255,9 +2255,9 @@ Create the file `code/libraries/baremetal/src/Serialization.cpp`
 File: code/libraries/baremetal/src/Serialization.cpp
 ...
 49: static bool Uppercase = true;
-50: 
+50:
 51: static void SerializeInternal(char* buffer, size_t bufferSize, uint64 value, int width, int base, bool showBase, bool leadingZeros, int numBits);
-52: 
+52:
 ...
 85: /// <summary>
 86: /// Serialize a 32 bit unsigned value to buffer.
@@ -2281,7 +2281,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 104: {
 105:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 32);
 106: }
-107: 
+107:
 108: /// <summary>
 109: /// Serialize a 64 bit unsigned value to buffer.
 110: ///
@@ -2307,7 +2307,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 130: {
 131:     SerializeInternal(buffer, bufferSize, value, width, base, showBase, leadingZeros, 64);
 132: }
-133: 
+133:
 134: /// <summary>
 135: /// Internal serialization function, to be used for all unsigned values.
 136: ///
@@ -2334,7 +2334,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 157: {
 158:     if ((base < 2) || (base > 36))
 159:         return;
-160: 
+160:
 161:     int numDigits = 0;
 162:     uint64 divisor = 1;
 163:     uint64 divisorLast = 1;
@@ -2349,7 +2349,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 172:         ++numDigits;
 173:     }
 174:     divisor = divisorLast;
-175: 
+175:
 176:     size_t numChars = (numDigits > 0) ? numDigits : 1;
 177:     if (showBase)
 178:     {
@@ -2359,9 +2359,9 @@ File: code/libraries/baremetal/src/Serialization.cpp
 182:         numChars = absWidth;
 183:     if (numChars > bufferSize - 1) // Leave one character for \0
 184:         return;
-185: 
+185:
 186:     char* bufferPtr = buffer;
-187: 
+187:
 188:     if (showBase)
 189:     {
 190:         if (base == 2)
@@ -2397,7 +2397,7 @@ File: code/libraries/baremetal/src/Serialization.cpp
 220:     }
 221:     *bufferPtr++ = '\0';
 222: }
-223: 
+223:
 224: } // namespace baremetal
 ```
 

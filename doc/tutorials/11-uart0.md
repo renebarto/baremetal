@@ -76,16 +76,16 @@ File: code/libraries/baremetal/include/baremetal/Device.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Types.h"
-43: 
+43:
 44: /// @file
 45: /// Abstract device
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: /// <summary>
 50: /// Generic device interface
 51: /// </summary>
@@ -93,16 +93,16 @@ File: code/libraries/baremetal/include/baremetal/Device.h
 53: {
 54: public:
 55:     virtual ~Device() = default;
-56: 
+56:
 57:     virtual bool IsBlockDevice() = 0;
 58:     virtual ssize_t Read(void* buffer, size_t count);
 59:     virtual ssize_t Write(const void* buffer, size_t count);
 60:     virtual void Flush();
-61: 
+61:
 62:     virtual ssize_t Seek(size_t offset);
 63:     virtual ssize_t GetSize() const;
 64: };
-65: 
+65:
 66: } // namespace baremetal
 ```
 
@@ -163,14 +163,14 @@ File: code/libraries/baremetal/src/Device.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Device.h"
-41: 
+41:
 42: using namespace baremetal;
-43: 
+43:
 44: /// @file
 45: /// Generic device
-46: 
+46:
 47: /// <summary>
 48: /// Read a specified number of bytes from the device into a buffer
 49: /// </summary>
@@ -181,7 +181,7 @@ File: code/libraries/baremetal/src/Device.cpp
 54: {
 55:     return static_cast<ssize_t>(-1);
 56: }
-57: 
+57:
 58: /// <summary>
 59: /// Write a specified number of bytes to the device
 60: /// </summary>
@@ -192,7 +192,7 @@ File: code/libraries/baremetal/src/Device.cpp
 65: {
 66:     return static_cast<ssize_t>(-1);
 67: }
-68: 
+68:
 69: /// <summary>
 70: /// Flush any buffers for device
 71: /// </summary>
@@ -200,7 +200,7 @@ File: code/libraries/baremetal/src/Device.cpp
 73: {
 74:     // Do nothing
 75: }
-76: 
+76:
 77: /// <summary>
 78: /// Seek to a specified offset in the device file.
 79: ///
@@ -212,7 +212,7 @@ File: code/libraries/baremetal/src/Device.cpp
 85: {
 86:     return static_cast<ssize_t>(-1);
 87: }
-88: 
+88:
 89: /// <summary>
 90: /// Get size for a device file
 91: ///
@@ -277,16 +277,16 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Abstract character device
-44: 
+44:
 45: #include "baremetal/Device.h"
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: /// <summary>
 50: /// Abstract character device
 51: ///
@@ -296,14 +296,14 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 55: {
 56: public:
 57:     virtual ~CharDevice() = default;
-58: 
+58:
 59:     bool IsBlockDevice() override
 60:     {
 61:         return false;
 62:     }
 63:     ssize_t Read(void* buffer, size_t count) override;
 64:     ssize_t Write(const void* buffer, size_t count) override;
-65: 
+65:
 66:     /// <summary>
 67:     /// Read a character
 68:     /// </summary>
@@ -315,7 +315,7 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 74:     /// <param name="ch">Character to be written</param>
 75:     virtual void Write(char ch) = 0;
 76: };
-77: 
+77:
 78: } // namespace baremetal
 ```
 
@@ -379,14 +379,14 @@ File: code/libraries/baremetal/src/CharDevice.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/CharDevice.h"
-41: 
+41:
 42: using namespace baremetal;
-43: 
+43:
 44: /// @file
 45: /// Abstract character device
-46: 
+46:
 47: /// <summary>
 48: /// Read a specified number of bytes from the device into a buffer
 49: /// </summary>
@@ -402,7 +402,7 @@ File: code/libraries/baremetal/src/CharDevice.cpp
 59:         *bufferPtr++ = Read();
 60:     return count;
 61: }
-62: 
+62:
 63: /// <summary>
 64: /// Write a specified number of bytes to the device
 65: /// </summary>
@@ -446,15 +446,15 @@ Update the file `code/libraries/baremetal/include/baremetal/UART1.h`
 File: code/libraries/baremetal/include/baremetal/UART1.h
 ...
 42: #include "baremetal/CharDevice.h"
-43: 
+43:
 44: /// @file
 45: /// Raspberry Pi UART1 serial device declaration
-46: 
+46:
 47: /// @brief baremetal namespace
 48: namespace baremetal {
-49: 
+49:
 50: class IMemoryAccess;
-51: 
+51:
 52: /// <summary>
 53: /// Encapsulation for the UART1 device.
 54: ///
@@ -468,7 +468,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 62:     /// </summary>
 63:     /// <returns>Reference to the singleton UART1 instance</returns>
 64:     friend UART1& GetUART1();
-65: 
+65:
 66: private:
 67:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
 68:     bool m_isInitialized;
@@ -476,21 +476,21 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 70:     IMemoryAccess& m_memoryAccess;
 71:     /// @brief Baudrate set for device
 72:     unsigned m_baudrate;
-73: 
+73:
 74:     UART1();
-75: 
+75:
 76: public:
 77:     UART1(IMemoryAccess& memoryAccess);
-78: 
+78:
 79:     void Initialize(unsigned baudrate);
 80:     unsigned GetBaudrate() const;
 81:     char Read() override;
 82:     void Write(char ch) override;
 83:     void WriteString(const char* str);
 84: };
-85: 
+85:
 86: UART1& GetUART1();
-87: 
+87:
 88: } // namespace baremetal
 ```
 
@@ -521,7 +521,7 @@ Update the file `code/libraries/baremetal/include/baremetal/RPIProperties.h`
 File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 ...
 48: namespace baremetal {
-49: 
+49:
 50: /// <summary>
 51: /// Clock ID number. Used to retrieve and set the clock frequency for several clocks
 52: /// </summary>
@@ -556,7 +556,7 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 81:     /// @brief Pixel clock
 82:     PIXEL_BVB = 14,
 83: };
-84: 
+84:
 85: /// <summary>
 86: /// Top level functionality for requests on Mailbox interface
 87: /// </summary>
@@ -565,16 +565,16 @@ File: code/libraries/baremetal/include/baremetal/RPIProperties.h
 90: private:
 91:     /// @brief Reference to mailbox for functions requested
 92:     IMailbox& m_mailbox;
-93: 
+93:
 94: public:
 95:     explicit RPIProperties(IMailbox& mailbox);
-96: 
+96:
 97:     bool GetBoardSerial(uint64& serial);
 98:     bool GetClockRate(ClockID clockID, uint32& freqHz);
 99:     bool GetMeasuredClockRate(ClockID clockID, uint32& freqHz);
 100:     bool SetClockRate(ClockID clockID, uint32 freqHz, bool skipTurbo);
 101: };
-102: 
+102:
 103: } // namespace baremetal
 ```
 
@@ -608,7 +608,7 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 74:     /// Otherwise, default behaviour is to switch to turbo setting when ARM clock is set above default frequency.
 75:     uint32 skipTurbo;
 76: } PACKED;
-77: 
+77:
 ...
 107: /// <summary>
 108: /// Get clock rate for specified clock
@@ -620,18 +620,18 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 114: {
 115:     PropertyTagClockRate tag{};
 116:     RPIPropertiesInterface interface(m_mailbox);
-117: 
+117:
 118:     tag.clockID = static_cast<uint32>(clockID);
 119:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE, &tag, sizeof(tag));
-120: 
+120:
 121:     if (result)
 122:     {
 123:         freqHz = tag.rate;
 124:     }
-125: 
+125:
 126:     return result;
 127: }
-128: 
+128:
 129: /// <summary>
 130: /// Get measured clock rate for specified clock
 131: /// </summary>
@@ -642,18 +642,18 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 136: {
 137:     PropertyTagClockRate tag{};
 138:     RPIPropertiesInterface interface(m_mailbox);
-139: 
+139:
 140:     tag.clockID = static_cast<uint32>(clockID);
 141:     auto result = interface.GetTag(PropertyID::PROPTAG_GET_CLOCK_RATE_MEASURED, &tag, sizeof(tag));
-142: 
+142:
 143:     if (result)
 144:     {
 145:         freqHz = tag.rate;
 146:     }
-147: 
+147:
 148:     return result;
 149: }
-150: 
+150:
 151: /// <summary>
 152: /// Set clock rate for specified clock
 153: /// </summary>
@@ -666,17 +666,17 @@ File: code/libraries/baremetal/src/RPIProperties.cpp
 160: {
 161:     PropertyTagClockRate tag{};
 162:     RPIPropertiesInterface interface(m_mailbox);
-163: 
+163:
 164:     tag.clockID = static_cast<uint32>(clockID);
 165:     tag.rate = freqHz;
 166:     tag.skipTurbo = skipTurbo;
 167:     auto result = interface.GetTag(PropertyID::PROPTAG_SET_CLOCK_RATE, &tag, sizeof(tag));
-168: 
+168:
 169:     // Do not write to console here, as this call is needed to set up the console
-170: 
+170:
 171:     return result;
 172: }
-173: 
+173:
 174: } // namespace baremetal
 ```
 
@@ -706,7 +706,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 255: //---------------------------------------------
 256: // Raspberry Pi UART0
 257: //---------------------------------------------
-258: 
+258:
 259: /// @brief Raspberry Pi UART0 registers base address. See @ref RASPBERRY_PI_PL011_UART
 260: #define RPI_UART0_BASE                RPI_BCM_IO_BASE + 0x00201000
 261: /// @brief Raspberry Pi UART0 data register (R/W). See @ref RASPBERRY_PI_PL011_UART
@@ -733,13 +733,13 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 282: #define RPI_UART0_ICR                 reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000044)
 283: /// @brief Raspberry Pi UART0 DMA control register (R/W). See @ref RASPBERRY_PI_PL011_UART
 284: #define RPI_UART0_DMACR               reinterpret_cast<regaddr>(RPI_UART0_BASE + 0x00000048)
-285: 
+285:
 286: /// @brief Raspberry Pi UART0 flag register values
 287: /// @brief Raspberry Pi UART0 flag register Receive data ready bit. See @ref RASPBERRY_PI_PL011_UART
 288: #define RPI_UART0_FR_RX_READY         BIT1(4)
 289: /// @brief Raspberry Pi UART0 flag register Transmit data empty bit. See @ref RASPBERRY_PI_PL011_UART
 290: #define RPI_UART0_FR_TX_EMPTY         BIT1(5)
-291: 
+291:
 ...
 335: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
 336: #define RPI_AUX_MU_BAUD       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
@@ -749,7 +749,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 ```
 
 We will not go into details here, we'll cover this when we use the registers.
-More information on the PL011 UARTs (UART0 and others on Raspberry PI 4 and 5) registers can be found [here](#RASPBERRY_PI_PL011_UART) as well as in the official
+More information on the PL011 UARTs (UART0 and others on Raspberry Pi 4 and 5) registers can be found [here](#RASPBERRY_PI_PL011_UART) as well as in the official
 [Broadcom documentation BCM2837 (Raspberry Pi 3)](pdf/bcm2837-peripherals.pdf) (page 175),
 [Broadcom documentation BCM2711 (Raspberry Pi 4)](pdf/bcm2711-peripherals.pdf) (page 144) and
 [Broadcom documentation RP1 (Raspberry Pi 5)](pdf/rp1-peripherals.pdf) (page 34)
@@ -778,19 +778,19 @@ File: code/libraries/baremetal/src/UART1.cpp
 82: {
 83:     if (m_isInitialized)
 84:         return;
-85: 
+85:
 86:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
 87:     RPIProperties property(mailbox);
 88:     uint32 clockFrequency;
 89:     property.GetClockRate(ClockID::CORE, clockFrequency);
-90: 
+90:
 91:     // initialize UART
 92:     auto value = m_memoryAccess.Read32(RPI_AUX_ENABLES);
 93:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value & ~RPI_AUX_ENABLES_UART1); // Disable UART1, AUX mini uart
-94: 
+94:
 95:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction5, m_memoryAccess);
 96:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction5, m_memoryAccess);
-97: 
+97:
 98:     m_memoryAccess.Write32(RPI_AUX_ENABLES, value | RPI_AUX_ENABLES_UART1);                                                                                              // enable UART1, AUX mini uart
 99:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, 0);                                                                                                                          // Disable Tx, Rx
 100:     m_memoryAccess.Write32(RPI_AUX_MU_LCR, RPI_AUX_MU_LCR_DATA_SIZE_8);                                                                                                  // 8 bit mode
@@ -799,7 +799,7 @@ File: code/libraries/baremetal/src/UART1.cpp
 103:     m_memoryAccess.Write32(RPI_AUX_MU_IIR, RPI_AUX_MU_IIR_TX_FIFO_ENABLE | RPI_AUX_MU_IIR_RX_FIFO_ENABLE | RPI_AUX_MU_IIR_TX_FIFO_CLEAR | RPI_AUX_MU_IIR_RX_FIFO_CLEAR); // Clear FIFO
 104:     m_memoryAccess.Write32(RPI_AUX_MU_BAUD, RPI_AUX_MU_BAUD_VALUE(clockFrequency, baudrate));                                                                                            // Set baudrate
 105:     m_memoryAccess.Write32(RPI_AUX_MU_CNTL, RPI_AUX_MU_CNTL_ENABLE_RX | RPI_AUX_MU_CNTL_ENABLE_TX);                                                                      // Enable Tx, Rx
-106: 
+106:
 107:     m_baudrate = baudrate;
 108:     m_isInitialized = true;
 109: }
@@ -857,18 +857,18 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/CharDevice.h"
-43: 
+43:
 44: /// @file
 45: /// Raspberry Pi UART0 serial device
-46: 
+46:
 47: namespace baremetal {
-48: 
+48:
 49: class IMemoryAccess;
-50: 
+50:
 51: /// <summary>
 52: /// Encapsulation for the UART0 device.
 53: ///
@@ -882,7 +882,7 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 61:     /// </summary>
 62:     /// <returns>Reference to the singleton UART0 instance</returns>
 63:     friend UART0 &GetUART0();
-64: 
+64:
 65: private:
 66:     /// @brief Flags if device was initialized. Used to guard against multiple initialization
 67:     bool            m_isInitialized;
@@ -890,21 +890,21 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 69:     IMemoryAccess  &m_memoryAccess;
 70:     /// @brief Baud rate set for this device
 71:     unsigned        m_baudRate;
-72: 
+72:
 73:     UART0();
-74: 
+74:
 75: public:
 76:     UART0(IMemoryAccess &memoryAccess);
-77: 
+77:
 78:     void Initialize(unsigned baudrate);
 79:     unsigned GetBaudRate() const;
 80:     char Read() override;
 81:     void Write(char ch) override;
 82:     void WriteString(const char* str);
 83: };
-84: 
+84:
 85: UART0 &GetUART0();
-86: 
+86:
 87: } // namespace baremetal
 ```
 
@@ -956,21 +956,21 @@ File: code/libraries/baremetal/src/UART0.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/UART0.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/Mailbox.h"
 45: #include "baremetal/MemoryAccess.h"
 46: #include "baremetal/PhysicalGPIOPin.h"
 47: #include "baremetal/RPIProperties.h"
-48: 
+48:
 49: /// @file
 50: /// Raspberry Pi UART0 serial device implementation
-51: 
+51:
 52: namespace baremetal {
-53: 
+53:
 54: /// <summary>
 55: /// Constructs a default UART0 instance.
 56: ///
@@ -982,7 +982,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 62:     , m_baudRate{}
 63: {
 64: }
-65: 
+65:
 66: /// <summary>
 67: /// Constructs a specialized UART1 instance with a custom IMemoryAccess instance. This is intended for testing.
 68: /// </summary>
@@ -993,7 +993,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 73:     , m_baudRate{}
 74: {
 75: }
-76: 
+76:
 77: /// <summary>
 78: /// Convert the requested baudrate to the values for the integer and fractional part of the divisor to be set for UART0
 79: /// </summary>
@@ -1008,7 +1008,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 88:     intPart = quotient / 128;                      // 16 bits
 89:     fracPart = (quotient - 128 * intPart + 1) / 2; // 6 bits, round
 90: }
-91: 
+91:
 92: /// <summary>
 93: /// Initialize the UART0 device. Only performed once, guarded by m_isInitialized.
 94: ///
@@ -1021,13 +1021,13 @@ File: code/libraries/baremetal/src/UART0.cpp
 101:         return;
 102:     // initialize UART
 103:     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
-104: 
+104:
 105:     Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
 106:     RPIProperties properties(mailbox);
 107:     unsigned baudClock = 32000000;
 108:     if (!properties.SetClockRate(ClockID::UART, baudClock, false))
 109:         return;
-110: 
+110:
 111:     // map UART0 to GPIO pins
 112:     PhysicalGPIOPin txdPin(14, GPIOMode::AlternateFunction0, m_memoryAccess);
 113:     PhysicalGPIOPin rxdPin(15, GPIOMode::AlternateFunction0, m_memoryAccess);
@@ -1039,11 +1039,11 @@ File: code/libraries/baremetal/src/UART0.cpp
 119:     m_memoryAccess.Write32(RPI_UART0_FBRD, fracPart);
 120:     m_memoryAccess.Write32(RPI_UART0_LCRH, 0x7 << 4); // 8N1, enable FIFOs
 121:     m_memoryAccess.Write32(RPI_UART0_CR, 0x301);      // enable Tx, Rx, UART
-122: 
+122:
 123:     m_baudRate = baudrate;
 124:     m_isInitialized = true;
 125: }
-126: 
+126:
 127: /// <summary>
 128: /// Return set baudrate
 129: /// </summary>
@@ -1052,7 +1052,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 132: {
 133:     return m_baudRate;
 134: }
-135: 
+135:
 136: /// <summary>
 137: /// Send a character
 138: /// </summary>
@@ -1068,7 +1068,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 148:     // Write the character to the buffer
 149:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(ch));
 150: }
-151: 
+151:
 152: /// <summary>
 153: /// Receive a character
 154: /// </summary>
@@ -1084,7 +1084,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 164:     // Read it and return
 165:     return static_cast<char>(m_memoryAccess.Read32(RPI_UART0_DR));
 166: }
-167: 
+167:
 168: /// <summary>
 169: /// Write a string
 170: /// </summary>
@@ -1099,7 +1099,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 179:         Write(*str++);
 180:     }
 181: }
-182: 
+182:
 183: /// <summary>
 184: /// Construct the singleton UART0 device if needed, and return a reference to the instance
 185: /// </summary>
@@ -1109,9 +1109,9 @@ File: code/libraries/baremetal/src/UART0.cpp
 189:     static UART0 value;
 190:     return value;
 191: }
-192: 
+192:
 193: } // namespace baremetal
-194: 
+194:
 ```
 
 The implementation is very similar to that for `UART1`
@@ -1235,7 +1235,7 @@ File: code/libraries/baremetal/src/System.cpp
 ...
 178:     GetUART0().Initialize(115200);
 179:     GetUART0().WriteString("Starting up\n");
-180: 
+180:
 181:     if (static_cast<ReturnCode>(main()) == ReturnCode::ExitReboot)
 ...
 ```

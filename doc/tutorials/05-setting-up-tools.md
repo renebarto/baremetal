@@ -301,7 +301,7 @@ We don't need to add Markdown (`.md`) files, they will automatically be found if
 #### A caveat with Doxygen {#TUTORIAL_05_SETTING_UP_TOOLS_AN_INTERMEZZO_TOOLS_DOCUMENTING_CODE_A_CAVEAT_WITH_DOXYGEN}
 
 Doxygen does have one issue, related to Markdown and images.
-In Markdown, we can use relative paths for all links, for example to other Markdown files, but also to say PDF files.
+In Markdown, we can use relative paths for all links, e.g. to other Markdown files, but also to say PDF files.
 We use the standard link syntax for that:
 
 ```text
@@ -608,7 +608,7 @@ If the method or function returns a value, a `@return` or `<returns></returns>` 
 92:     /// <summary>
 93:     /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
 94:     ///
-95:     /// The timer used is the ARM builtin timer.
+95:     /// The timer used is the ARM built-in timer.
 96:     /// </summary>
 97:     /// <param name="msec">Wait time in milliseconds</param>
 98:     static void WaitMilliSeconds(uint64 msec);
@@ -686,7 +686,7 @@ In Markdown this has no meaning, but in Doxygen, it creates a tree with subpages
 
 ##### todo tag {#TUTORIAL_05_SETTING_UP_TOOLS_AN_INTERMEZZO_TOOLS_DOCUMENTING_CODE_VIEWING_DOXYGEN_OUTPUT_TODO_TAG}
 
-The todo tag is used to gather things still to do under one page. This is handy to collect open issues for example.
+The todo tag is used to gather things still to do under one page. This is e.g. handy to collect open issues.
 
 ```
 @todo Add register details
@@ -811,7 +811,7 @@ File: tools/run-cppcheck.bat
 2: set this_dir=%~dp0
 3: set root_dir=%this_dir%..
 4: set log_dir=%root_dir%\output\log
-5: 
+5:
 6: set build_dir=%root_dir%\cppcheck-build-dir
 7: mkdir %build_dir%
 8: mkdir %log_dir%
@@ -825,7 +825,7 @@ File: tools/run-cppcheck.sh
 1: this_dir=$(dirname "$0")
 2: root_dir=$this_dir/..
 3: log_dir=$root_dir/output/log
-4: 
+4:
 5: build_dir=$root_dir/cppcheck-build-dir
 6: mkdir -p $build_dir
 7: mkdir -p $log_dir
@@ -1017,10 +1017,10 @@ File: .git/hooks/pre-commit
 1: #!/bin/sh
 2: # Redirect output to stderr
 3: #exec 1>&2
-4: 
+4:
 5: # Get list of all staged files
 6: FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cpp|h|hpp)$')
-7: 
+7:
 8: # Run clang-format on each file
 9: for FILE in $FILES; do
 10:   echo Run clang-format on $FILE

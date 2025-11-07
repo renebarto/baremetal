@@ -45,7 +45,7 @@ In order to introduce the actual logging functionality, we would like to be able
 much like the standard C `printf()` function.
 
 We need to be able to handle variable arguments these. Normally we would have functions or definitions such as `va_start`, `va_end` and `va_arg` for this, by including `stdarg.h`.
-Luckily, GCC offers these as builtin functions.
+Luckily, GCC offers these as built-in functions.
 We will then need to implement formatting of strings to a buffer, using format strings like `printf()` uses.
 We'll also want to support printing version information, so we'll provide for a way to pass on the version in the build, and make a string out of it.
 Finally we can then add the logger class.
@@ -100,7 +100,7 @@ File: code/libraries/stdlib/include/stdlib/StdArg.h
 40: #pragma once
 41:
 42: /// @file
-43: /// Standard variable argument list handling using builtin functionality in GCC
+43: /// Standard variable argument list handling using built-in functionality in GCC
 44:
 45: // prevent warning, if <stdarg.h> from toolchain is included too
 46: #ifndef _STDARG_H
@@ -2593,7 +2593,7 @@ File: code/libraries/baremetal/include/baremetal/Macros.h
 59:
 ```
 
-These macros make use of builtin functionality in the compiler to influence the branch prediction.
+These macros make use of built-in functionality in the compiler to influence the branch prediction.
 
 ### Update application code {#TUTORIAL_13_LOGGER_ASSERTION___STEP_3_UPDATE_APPLICATION_CODE}
 

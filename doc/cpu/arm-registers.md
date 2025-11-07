@@ -246,7 +246,7 @@ Holds syndrome information for an exception taken to EL1.
 </tr>
 <tr><td>31:26<td>EC<td>Exception Class. Indicates the reason for the exception that this register holds information about.<br>
                         For each EC value, the table references a subsection that gives information about :<br>
-                        The cause of the exception, for example the configuration required to enable the trap.<br>
+                        The cause of the exception, e.g. the configuration required to enable the trap.<br>
                         The encoding of the associated ISS.<br>
                         Possible values of the EC field are :<br>
 <table>

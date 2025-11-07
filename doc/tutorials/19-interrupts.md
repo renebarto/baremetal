@@ -327,7 +327,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 115:
 116: /// @brief Raspberry Pi Interrupt Control Registers base address. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
 117: #define RPI_INTRCTRL_BASE              RPI_BCM_IO_BASE + 0x0000B000
-118: 
+118:
 119: /// @brief Raspberry Pi Interrupt Control basic IRQ pending register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
 120: #define RPI_INTRCTRL_IRQ_BASIC_PENDING reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000200)
 121: /// @brief Raspberry Pi Interrupt Control register 1 IRQ pending register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
@@ -352,7 +352,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 140: #define RPI_INTRCTRL_DISABLE_IRQS_2     reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000220)
 141: /// @brief Raspberry Pi Interrupt Control basic IRQ disable register. See @ref RASPBERRY_PI_INTERRUPT_CONTROL
 142: #define RPI_INTRCTRL_DISABLE_BASIC_IRQS reinterpret_cast<regaddr>(RPI_INTRCTRL_BASE + 0x00000224)
-143: 
+143:
 144: #else
 145: //---------------------------------------------
 146: // RPI 4 / 5 Interrupt Controller (GIC-400)
@@ -511,15 +511,15 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "baremetal/BCMRegisters.h"
-43: 
+43:
 44: namespace baremetal {
-45: 
+45:
 46: #if BAREMETAL_RPI_TARGET == 3
-47: 
+47:
 48: // IRQs
 49: /// @brief Number of IRQ lines per register for regular ARM_IRQ1 and ARM_IRQ2
 50: #define ARM_IRQS_PER_REG         32
@@ -527,13 +527,13 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 52: #define ARM_IRQS_BASIC_REG       8
 53: /// @brief Number of IRQ lines for ARM_IRQ_LOCAL
 54: #define ARM_IRQS_LOCAL_REG       12
-55: 
+55:
 56: /// @brief Number of normal IRQ registers (IRQ1, IRQ2, Basic IRQ)
 57: #define ARM_IRQS_NUM_REGS        3
-58: 
+58:
 59: /// @brief Total number of IRQ lines Raspberry Pi 3
 60: #define IRQ_LINES                (ARM_IRQS_PER_REG * 2 + ARM_IRQS_BASIC_REG + ARM_IRQS_LOCAL_REG)
-61: 
+61:
 62: /// @brief Offset for interrupts in IRQ1 group
 63: #define ARM_IRQ1_BASE            0
 64: /// @brief Offset for interrupts in IRQ2 group
@@ -550,7 +550,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 75: #define ARM_IRQ_BASIC(n)         (ARM_IRQ_BASIC_BASE + (n))
 76: /// @brief Calculate IRQ number for IRQ in ARM local group
 77: #define ARM_IRQ_LOCAL(n)         (ARM_IRQ_LOCAL_BASE + (n))
-78: 
+78:
 79: /// @brief Check whether an IRQ is pending (only for IRQ1, IRQ2, Basic IRQ group)
 80: #define ARM_IC_IRQ_PENDING(irq)  ((irq) < ARM_IRQ2_BASE ? RPI_INTRCTRL_IRQ_PENDING_1 : ((irq) < ARM_IRQBASIC_BASE ? RPI_INTRCTRL_IRQ_PENDING_2 : RPI_INTRCTRL_IRQ_BASIC_PENDING))
 81: /// @brief Enable an IRQ (only for IRQ1, IRQ2, Basic IRQ group)
@@ -559,7 +559,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 84: #define ARM_IC_IRQS_DISABLE(irq) ((irq) < ARM_IRQ2_BASE ? RPI_INTRCTRL_DISABLE_IRQS_1 : ((irq) < ARM_IRQ_BASIC_BASE ? RPI_INTRCTRL_DISABLE_IRQS_2 : RPI_INTRCTRL_DISABLE_BASIC_IRQS))
 85: /// @brief Calculate bitmask for an IRQ (only for IRQ1, IRQ2, Basic IRQ group)
 86: #define ARM_IRQ_MASK(irq)        BIT1((irq) & (ARM_IRQS_PER_REG - 1))
-87: 
+87:
 88: /// <summary>
 89: /// @brief IRQ interrupt numbers
 90: /// </summary>
@@ -582,7 +582,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 107:     /// @brief Mailbox 3
 108:     IRQ_LOCAL_MAILBOX3 = ARM_IRQ_LOCAL(0x07),
 109: };
-110: 
+110:
 111: /// <summary>
 112: /// @brief FIQ interrupt numbers
 113: /// </summary>
@@ -605,11 +605,11 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 130:     /// @brief Mailbox 3
 131:     FIQ_LOCAL_MAILBOX3 = ARM_IRQ_LOCAL(0x07),
 132: };
-133: 
+133:
 134: #define ARM_MAX_FIQ 71
-135: 
+135:
 136: #else
-137: 
+137:
 138: // IRQs
 139: /// @brief Software generated interrupt, per core
 140: #define GIC_SGI(n)  (0 + (n))
@@ -617,10 +617,10 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 142: #define GIC_PPI(n)  (16 + (n))
 143: /// @brief Shared peripheral interrupt, shared between cores
 144: #define GIC_SPI(n)  (32 + (n))
-145: 
+145:
 146: /// @brief Total number of IRQ lines Raspberry Pi 4 and 5
 147: #define IRQ_LINES   256
-148: 
+148:
 149: /// <summary>
 150: /// @brief IRQ interrupt numbers
 151: /// </summary>
@@ -631,7 +631,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 156:     IRQ_LOCAL_CNTPS = GIC_PPI(0x0D),
 157:     IRQ_LOCAL_CNTPNS = GIC_PPI(0x0E),
 158: };
-159: 
+159:
 160: /// <summary>
 161: /// @brief FIQ interrupt numbers
 162: /// </summary>
@@ -642,17 +642,17 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 167:     FIQ_LOCAL_CNTPS = GIC_PPI(0x0D),
 168:     FIQ_LOCAL_CNTPNS = GIC_PPI(0x0E),
 169: };
-170: 
+170:
 171: #define ARM_MAX_FIQ IRQ_LINES
-172: 
+172:
 173: #endif
-174: 
+174:
 175: void EnableIRQ(IRQ_ID irqID);
 176: void DisableIRQ(IRQ_ID irqID);
-177: 
+177:
 178: void EnableFIQ(FIQ_ID fiqID);
 179: void DisableFIQ(FIQ_ID fiqID);
-180: 
+180:
 181: } // namespace baremetal
 ```
 
@@ -723,23 +723,23 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/Interrupts.h"
-41: 
+41:
 42: #include "baremetal/ARMRegisters.h"
 43: #include "baremetal/Assert.h"
 44: #include "baremetal/Logger.h"
 45: #include "baremetal/MemoryAccess.h"
-46: 
+46:
 47: /// @file
 48: /// Interrupt numbers and enable / disable functionality
-49: 
+49:
 50: /// @brief Define log name
 51: LOG_MODULE("Interrupts");
-52: 
+52:
 53: /// @brief Convert irq number to bit pattern for register on GIC (Raspberry Pi 4/5)
 54: #define RPI_GICD_IRQ_MASK(irq)        BIT1(irq % 32)
-55: 
+55:
 56: /// <summary>
 57: /// Enable the requested IRQ
 58: /// </summary>
@@ -750,7 +750,7 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 63:     assert(irq < IRQ_LINES);
 64:     MemoryAccess mem;
 65: #if BAREMETAL_RPI_TARGET == 3
-66: 
+66:
 67:     if (irq < ARM_IRQ_LOCAL_BASE)
 68:     {
 69:         mem.Write32(ARM_IC_IRQS_ENABLE(irq), ARM_IRQ_MASK(irq));
@@ -761,14 +761,14 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 74:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
 75:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0, mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(irq - ARM_IRQ_LOCAL_BASE));
 76:     }
-77: 
+77:
 78: #else
-79: 
+79:
 80:     mem.Write32(RPI_GICD_ISENABLER0 + 4 * (irq / 32), RPI_GICD_IRQ_MASK(irq));
-81: 
+81:
 82: #endif
 83: }
-84: 
+84:
 85: /// <summary>
 86: /// Disable the requested IRQ
 87: /// </summary>
@@ -779,7 +779,7 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 92:     assert(irq < IRQ_LINES);
 93:     MemoryAccess mem;
 94: #if BAREMETAL_RPI_TARGET == 3
-95: 
+95:
 96:     if (irq < ARM_IRQ_LOCAL_BASE)
 97:     {
 98:         mem.Write32(ARM_IC_IRQS_DISABLE(irq), ARM_IRQ_MASK(irq));
@@ -790,14 +790,14 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 103:         assert(irqID == IRQ_ID::IRQ_LOCAL_CNTPNS);
 104:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0, mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(irq - ARM_IRQ_LOCAL_BASE));
 105:     }
-106: 
+106:
 107: #else
-108: 
+108:
 109:     mem.Write32(RPI_GICD_ICENABLER0 + 4 * (irq / 32), BIT1(irq % 32));
-110: 
+110:
 111: #endif
 112: }
-113: 
+113:
 114: /// <summary>
 115: /// Enable the requested FIQ
 116: /// </summary>
@@ -808,7 +808,7 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 121:     assert(fiq <= IRQ_LINES);
 122:     MemoryAccess mem;
 123: #if BAREMETAL_RPI_TARGET == 3
-124: 
+124:
 125:     if (fiq < ARM_IRQ_LOCAL_BASE)
 126:     {
 127:         mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, fiq | BIT1(7));
@@ -820,14 +820,14 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 133:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
 134:                     mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(fiq - ARM_IRQ_LOCAL_BASE + 4)); // FIQ enable bits are bit 4..7
 135:     }
-136: 
+136:
 137: #else
-138: 
+138:
 139:     LOG_PANIC("FIQ not supported yet");
-140: 
+140:
 141: #endif
 142: }
-143: 
+143:
 144: /// <summary>
 145: /// Disable the requested FIQ
 146: /// </summary>
@@ -838,7 +838,7 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 151:     assert(fiq <= IRQ_LINES);
 152:     MemoryAccess mem;
 153: #if BAREMETAL_RPI_TARGET == 3
-154: 
+154:
 155:     if (fiq < ARM_IRQ_LOCAL_BASE)
 156:     {
 157:         mem.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
@@ -850,11 +850,11 @@ File: code/libraries/baremetal/src/Interrupts.cpp
 163:         mem.Write32(ARM_LOCAL_TIMER_INT_CONTROL0,
 164:                     mem.Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(fiq - ARM_IRQ_LOCAL_BASE + 4)); // FIQ enable bits are bit 4..7
 165:     }
-166: 
+166:
 167: #else
-168: 
+168:
 169:     LOG_PANIC("FIQ not supported yet");
-170: 
+170:
 171: #endif
 172: }
 ```
@@ -941,34 +941,34 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "stdlib/Macros.h"
 43: #include "stdlib/Types.h"
-44: 
+44:
 45: /// @file
 46: /// Interrupt handler function
-47: 
+47:
 48: #ifdef __cplusplus
 49: extern "C" {
 50: #endif
-51: 
+51:
 52: void InterruptHandler();
-53: 
+53:
 54: #ifdef __cplusplus
 55: }
 56: #endif
-57: 
+57:
 58: namespace baremetal {
-59: 
+59:
 60: class IMemoryAccess;
-61: 
+61:
 62: /// <summary>
 63: /// IRQ handler function
 64: /// </summary>
 65: using IRQHandler = void(void* param);
-66: 
+66:
 67: /// <summary>
 68: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
 69: /// This is a SINGLETON class
@@ -983,29 +983,29 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 78:     IRQHandler* m_irqHandler;
 79:     /// @brief Pointer to parameter to pass to registered IRQ handler
 80:     void* m_irqHandlerParams;
-81: 
+81:
 82:     /// <summary>
 83:     /// Construct the singleton InterruptSystem instance if needed, and return a reference to the instance. This is a friend function of class InterruptSystem
 84:     /// </summary>
 85:     /// <returns>Reference to the singleton InterruptSystem instance</returns>
 86:     friend InterruptSystem& GetInterruptSystem();
-87: 
+87:
 88: private:
 89:     InterruptSystem();
-90: 
+90:
 91: public:
 92:     ~InterruptSystem();
-93: 
+93:
 94:     void Initialize();
-95: 
+95:
 96:     void RegisterIRQHandler(IRQHandler* handler, void* param);
 97:     void UnregisterIRQHandler();
-98: 
+98:
 99:     void InterruptHandler();
 100: };
-101: 
+101:
 102: InterruptSystem& GetInterruptSystem();
-103: 
+103:
 104: } // namespace baremetal
 ```
 
@@ -1073,23 +1073,23 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "baremetal/InterruptHandler.h"
-41: 
+41:
 42: #include "baremetal/Assert.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/Interrupts.h"
 45: #include "baremetal/Logger.h"
 46: #include "baremetal/MemoryAccess.h"
-47: 
+47:
 48: /// @file
 49: /// Interrupt handler function implementation
-50: 
+50:
 51: using namespace baremetal;
-52: 
+52:
 53: /// @brief Define log name
 54: LOG_MODULE("InterruptHandler");
-55: 
+55:
 56: /// <summary>
 57: /// Global interrupt handler function
 58: ///
@@ -1099,7 +1099,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 62: {
 63:     GetInterruptSystem().InterruptHandler();
 64: }
-65: 
+65:
 66: /// <summary>
 67: /// Create a interrupt system
 68: ///
@@ -1112,13 +1112,13 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 75:     , m_irqHandlerParams{}
 76: {
 77: }
-78: 
+78:
 79: /// <summary>
 80: /// Destructor/// </summary>
 81: InterruptSystem::~InterruptSystem()
 82: {
 83: }
-84: 
+84:
 85: /// <summary>
 86: /// Initialize interrupt system
 87: /// </summary>
@@ -1129,9 +1129,9 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 92: #if BAREMETAL_RPI_TARGET == 3
 93: #else
 94:     // initialize distributor:
-95: 
+95:
 96:     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_DISABLE);
-97: 
+97:
 98:     // disable, acknowledge and deactivate all interrupts
 99:     for (unsigned n = 0; n < IRQ_LINES / 32; n++)
 100:     {
@@ -1139,32 +1139,32 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 102:         m_memoryAccess.Write32(RPI_GICD_ICPENDR0 + 4 * n, ~0);
 103:         m_memoryAccess.Write32(RPI_GICD_ICACTIVER0 + 4 * n, ~0);
 104:     }
-105: 
+105:
 106:     // direct all interrupts to core 0 with default priority
 107:     for (unsigned n = 0; n < IRQ_LINES / 4; n++)
 108:     {
 109:         m_memoryAccess.Write32(RPI_GICD_IPRIORITYR0 + 4 * n, RPI_GICD_IPRIORITYR_DEFAULT | RPI_GICD_IPRIORITYR_DEFAULT << 8 | RPI_GICD_IPRIORITYR_DEFAULT << 16 | RPI_GICD_IPRIORITYR_DEFAULT << 24);
-110: 
+110:
 111:         m_memoryAccess.Write32(RPI_GICD_ITARGETSR0 + 4 * n, RPI_GICD_ITARGETSR_CORE0 | RPI_GICD_ITARGETSR_CORE0 << 8 | RPI_GICD_ITARGETSR_CORE0 << 16 | RPI_GICD_ITARGETSR_CORE0 << 24);
 112:     }
-113: 
+113:
 114:     // set all interrupts to level triggered
 115:     for (unsigned n = 0; n < IRQ_LINES / 16; n++)
 116:     {
 117:         m_memoryAccess.Write32(RPI_GICD_ICFGR0 + 4 * n, 0);
 118:     }
-119: 
+119:
 120:     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_ENABLE);
-121: 
+121:
 122:     // initialize core 0 CPU interface:
-123: 
+123:
 124:     m_memoryAccess.Write32(RPI_GICC_PMR, RPI_GICC_PMR_PRIORITY);
 125:     m_memoryAccess.Write32(RPI_GICC_CTLR, RPI_GICC_CTLR_ENABLE);
-126: 
+126:
 127: #endif
 128:     m_isInitialized = true;
 129: }
-130: 
+130:
 131: /// <summary>
 132: /// Register an IRQ handler
 133: /// </summary>
@@ -1173,22 +1173,22 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 136: void InterruptSystem::RegisterIRQHandler(IRQHandler* handler, void* param)
 137: {
 138:     assert(m_irqHandler == nullptr);
-139: 
+139:
 140:     m_irqHandler = handler;
 141:     m_irqHandlerParams = param;
 142: }
-143: 
+143:
 144: /// <summary>
 145: /// Unregister an IRQ handler
 146: /// </summary>
 147: void InterruptSystem::UnregisterIRQHandler()
 148: {
 149:     assert(m_irqHandler != nullptr);
-150: 
+150:
 151:     m_irqHandler = nullptr;
 152:     m_irqHandlerParams = nullptr;
 153: }
-154: 
+154:
 155: /// <summary>
 156: /// Handles an interrupt.
 157: ///
@@ -1199,11 +1199,11 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 162: #if BAREMETAL_RPI_TARGET == 3
 163:     if (m_irqHandler)
 164:         m_irqHandler(m_irqHandlerParams);
-165: 
+165:
 166: #else
-167: 
+167:
 168:     uint32 iarValue = m_memoryAccess.Read32(RPI_GICC_IAR); // Read Interrupt Acknowledge Register
-169: 
+169:
 170:     unsigned irq = iarValue & RPI_GICC_IAR_INTERRUPT_ID_MASK; // Select the currently active interrupt
 171:     if (irq < IRQ_LINES)
 172:     {
@@ -1226,10 +1226,10 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 189:         LOG_INFO("Received spurious interrupt %d", iarValue);
 190:     }
 191: #endif
-192: 
+192:
 193: #endif
 194: }
-195: 
+195:
 196: /// <summary>
 197: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
 198: ///
@@ -1330,18 +1330,18 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: /// @file
 41: /// Register addresses of Raspberry Pi ARM local registers.
 42: ///
 43: /// ARM local registers are implemented in the Raspberry Pi BCM chip, but are intended to control functionality in the ARM core.
 44: /// For specific registers, we also define the fields and their possible values.
-45: 
+45:
 46: #pragma once
-47: 
+47:
 48: #include "stdlib/Macros.h"
 49: #include "stdlib/Types.h"
-50: 
+50:
 51: #if BAREMETAL_RPI_TARGET <= 3
 52: /// @brief Base address for ARM Local registers
 53: #define ARM_LOCAL_BASE 0x40000000
@@ -1349,7 +1349,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 55: /// @brief Base address for ARM Local registers
 56: #define ARM_LOCAL_BASE 0xFF800000
 57: #endif
-58: 
+58:
 59: /// @brief Raspberry Pi ARM Local Control Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 60: #define ARM_LOCAL_CONTROL              reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000000)
 61: /// @brief Raspberry Pi ARM Local Core Timer Prescaler Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1374,7 +1374,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 80: #define ARM_LOCAL_TIMER_CONTROL        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000034)
 81: /// @brief Raspberry Pi ARM Local Timer IRQ Clear / Reload Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 82: #define ARM_LOCAL_TIMER_WRITE          reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000038)
-83: 
+83:
 84: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 85: #define ARM_LOCAL_TIMER_INT_CONTROL0   reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000040)
 86: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1383,7 +1383,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 89: #define ARM_LOCAL_TIMER_INT_CONTROL2   reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000048)
 90: /// @brief Raspberry Pi ARM Local Core Timer Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 91: #define ARM_LOCAL_TIMER_INT_CONTROL3   reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000004C)
-92: 
+92:
 93: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 0 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 94: #define ARM_LOCAL_MAILBOX_INT_CONTROL0 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000050)
 95: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 1 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1392,7 +1392,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 98: #define ARM_LOCAL_MAILBOX_INT_CONTROL2 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000058)
 99: /// @brief Raspberry Pi ARM Local Core Mailbox Interrupt Control Core 3 Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 100: #define ARM_LOCAL_MAILBOX_INT_CONTROL3 reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000005C)
-101: 
+101:
 102: /// @brief Raspberry Pi ARM Local Core 0 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 103: #define ARM_LOCAL_IRQ_PENDING0         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000060)
 104: /// @brief Raspberry Pi ARM Local Core 1 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1401,7 +1401,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 107: #define ARM_LOCAL_IRQ_PENDING2         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000068)
 108: /// @brief Raspberry Pi ARM Local Core 3 Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 109: #define ARM_LOCAL_IRQ_PENDING3         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000006C)
-110: 
+110:
 111: /// @brief Raspberry Pi ARM Local Core 0 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 112: #define ARM_LOCAL_FIQ_PENDING0         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000070)
 113: /// @brief Raspberry Pi ARM Local Core 1 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1410,7 +1410,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 116: #define ARM_LOCAL_FIQ_PENDING2         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000078)
 117: /// @brief Raspberry Pi ARM Local Core 3 Fast Interrupt Source Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 118: #define ARM_LOCAL_FIQ_PENDING3         reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000007C)
-119: 
+119:
 120: /// @brief Raspberry Pi ARM Local Interrupt Source Timer 0
 121: #define ARM_LOCAL_INTSRC_TIMER0        BIT1(0)
 122: /// @brief Raspberry Pi ARM Local Interrupt Source Timer 1
@@ -1431,7 +1431,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 137: #define ARM_LOCAL_INTSRC_GPU           BIT1(8)
 138: /// @brief Raspberry Pi ARM Local Interrupt Source PMU
 139: #define ARM_LOCAL_INTSRC_PMU           BIT1(9)
-140: 
+140:
 141: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 142: #define ARM_LOCAL_MAILBOX0_SET0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000080)
 143: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1440,7 +1440,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 146: #define ARM_LOCAL_MAILBOX2_SET0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000088)
 147: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 148: #define ARM_LOCAL_MAILBOX3_SET0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000008C)
-149: 
+149:
 150: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 151: #define ARM_LOCAL_MAILBOX0_SET1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000090)
 152: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1449,7 +1449,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 155: #define ARM_LOCAL_MAILBOX2_SET1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x00000098)
 156: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 157: #define ARM_LOCAL_MAILBOX3_SET1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x0000009C)
-158: 
+158:
 159: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 160: #define ARM_LOCAL_MAILBOX0_SET2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A0)
 161: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1458,7 +1458,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 164: #define ARM_LOCAL_MAILBOX2_SET2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000A8)
 165: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 166: #define ARM_LOCAL_MAILBOX3_SET2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000AC)
-167: 
+167:
 168: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 169: #define ARM_LOCAL_MAILBOX0_SET3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B0)
 170: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1467,7 +1467,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 173: #define ARM_LOCAL_MAILBOX2_SET3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000B8)
 174: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Set Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 175: #define ARM_LOCAL_MAILBOX3_SET3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000BC)
-176: 
+176:
 177: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 178: #define ARM_LOCAL_MAILBOX0_CLR0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C0)
 179: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1476,7 +1476,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 182: #define ARM_LOCAL_MAILBOX2_CLR0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000C8)
 183: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 0 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 184: #define ARM_LOCAL_MAILBOX3_CLR0        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000CC)
-185: 
+185:
 186: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 187: #define ARM_LOCAL_MAILBOX0_CLR1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D0)
 188: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1485,7 +1485,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 191: #define ARM_LOCAL_MAILBOX2_CLR1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000D8)
 192: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 1 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 193: #define ARM_LOCAL_MAILBOX3_CLR1        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000DC)
-194: 
+194:
 195: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 196: #define ARM_LOCAL_MAILBOX0_CLR2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E0)
 197: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1494,7 +1494,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 200: #define ARM_LOCAL_MAILBOX2_CLR2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000E8)
 201: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 2 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 202: #define ARM_LOCAL_MAILBOX3_CLR2        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000EC)
-203: 
+203:
 204: /// @brief Raspberry Pi ARM Local Core Mailbox 0 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 205: #define ARM_LOCAL_MAILBOX0_CLR3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F0)
 206: /// @brief Raspberry Pi ARM Local Core Mailbox 1 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
@@ -1503,7 +1503,7 @@ File: code/libraries/baremetal/include/baremetal/ARMRegisters.h
 209: #define ARM_LOCAL_MAILBOX2_CLR3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000F8)
 210: /// @brief Raspberry Pi ARM Local Core Mailbox 3 Core 3 Clear Register base address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 211: #define ARM_LOCAL_MAILBOX3_CLR3        reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000000FC)
-212: 
+212:
 213: /// @brief Raspberry Pi ARM Local Register region end address. See @ref RASPBERRY_PI_ARM_LOCAL_DEVICE_REGISTERS
 214: #define ARM_LOCAL_END                  reinterpret_cast<regaddr>(ARM_LOCAL_BASE + 0x000003FFFF)
 ```
@@ -1534,65 +1534,65 @@ File: code/applications/demo/src/main.cpp
 9: #include "baremetal/MemoryAccess.h"
 10: #include "baremetal/System.h"
 11: #include "baremetal/Timer.h"
-12: 
+12:
 13: LOG_MODULE("main");
-14: 
+14:
 15: using namespace baremetal;
-16: 
+16:
 17: #define TICKS_PER_SECOND 2 // Timer ticks per second
-18: 
+18:
 19: static uint32 clockTicksPerSystemTick;
-20: 
+20:
 21: void IntHandler(void* param)
 22: {
 23:     uint64 counterCompareValue;
 24:     GetTimerCompareValue(counterCompareValue);
 25:     SetTimerCompareValue(counterCompareValue + clockTicksPerSystemTick);
-26: 
+26:
 27:     LOG_INFO("Ping");
 28: }
-29: 
+29:
 30: void EnableIRQ()
 31: {
 32:     GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0, GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) | BIT1(1));
 33:     EnableIRQ(IRQ_ID::IRQ_LOCAL_CNTPNS);
 34: }
-35: 
+35:
 36: void DisableIRQ()
 37: {
 38:     GetMemoryAccess().Write32(ARM_LOCAL_TIMER_INT_CONTROL0, GetMemoryAccess().Read32(ARM_LOCAL_TIMER_INT_CONTROL0) & ~BIT1(1));
 39:     DisableIRQ(IRQ_ID::IRQ_LOCAL_CNTPNS);
 40: }
-41: 
+41:
 42: int main()
 43: {
 44:     auto& console = GetConsole();
-45: 
+45:
 46:     auto exceptionLevel = CurrentEL();
 47:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
-48: 
+48:
 49:     uint64 counterFreq{};
 50:     GetTimerFrequency(counterFreq);
 51:     assert(counterFreq % TICKS_PER_SECOND == 0);
 52:     clockTicksPerSystemTick = counterFreq / TICKS_PER_SECOND;
 53:     LOG_INFO("Clock ticks per second: %d, clock ticks per interrupt: %d", counterFreq, clockTicksPerSystemTick);
-54: 
+54:
 55:     GetInterruptSystem().RegisterIRQHandler(IntHandler, nullptr);
-56: 
+56:
 57:     EnableIRQ();
-58: 
+58:
 59:     uint64 counter;
 60:     GetTimerCounter(counter);
 61:     SetTimerCompareValue(counter + clockTicksPerSystemTick);
 62:     SetTimerControl(CNTP_CTL_EL0_ENABLE);
-63: 
+63:
 64:     LOG_INFO("Wait 5 seconds");
 65:     Timer::WaitMilliSeconds(5000);
-66: 
+66:
 67:     DisableIRQ();
-68: 
+68:
 69:     GetInterruptSystem().UnregisterIRQHandler();
-70: 
+70:
 71:     console.Write("Press r to reboot, h to halt\n");
 72:     char ch{};
 73:     while ((ch != 'r') && (ch != 'h'))
@@ -1600,7 +1600,7 @@ File: code/applications/demo/src/main.cpp
 75:         ch = console.ReadChar();
 76:         console.WriteChar(ch);
 77:     }
-78: 
+78:
 79:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 80: }
 ```
@@ -1681,17 +1681,17 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 44: #include "baremetal/Interrupts.h"
 ...
 59: namespace baremetal {
-60: 
+60:
 61: /// <summary>
 62: /// FIQ handler function
 63: /// </summary>
 64: using FIQHandler = void(void* param);
-65: 
+65:
 66: /// <summary>
 67: /// IRQ handler function
 68: /// </summary>
 69: using IRQHandler = void(void* param);
-70: 
+70:
 71: /// <summary>
 72: /// FIQ data
 73: ///
@@ -1706,9 +1706,9 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 82:     /// @brief ID of FIQ
 83:     uint32 fiqID;
 84: } PACKED;
-85: 
+85:
 86: class IMemoryAccess;
-87: 
+87:
 88: /// <summary>
 89: /// InterruptSystem: Handles IRQ and FIQ interrupts for Raspberry Pi
 90: /// This is a SINGLETON class
@@ -1723,43 +1723,43 @@ File: code/libraries/baremetal/include/baremetal/InterruptHandler.h
 99:     IRQHandler* m_irqHandlers[IRQ_LINES];
 100:     /// @brief Parameter to pass to registered IRQ handler
 101:     void* m_irqHandlersParam[IRQ_LINES];
-102: 
+102:
 103:     /// <summary>
 104:     /// Construct the singleton InterruptSystem instance if needed, and return a reference to the instance. This is a friend function of class InterruptSystem
 105:     /// </summary>
 106:     /// <returns>Reference to the singleton InterruptSystem instance</returns>
 107:     friend InterruptSystem& GetInterruptSystem();
-108: 
+108:
 109: private:
 110:     /// @brief Create a interrupt system. Note that the constructor is private, so GetInterruptSystem() is needed to instantiate the interrupt system control
 111:     InterruptSystem();
-112: 
+112:
 113: public:
 114:     InterruptSystem(IMemoryAccess& memoryAccess);
 115:     ~InterruptSystem();
-116: 
+116:
 117:     void Initialize();
 118:     void Shutdown();
-119: 
+119:
 120:     void DisableInterrupts();
 121:     void EnableInterrupts();
-122: 
+122:
 123:     void RegisterIRQHandler(IRQ_ID irqID, IRQHandler* handler, void* param);
 124:     void UnregisterIRQHandler(IRQ_ID irqID);
-125: 
+125:
 126:     void RegisterFIQHandler(FIQ_ID fiqID, FIQHandler* handler, void* param);
 127:     void UnregisterFIQHandler(FIQ_ID fiqID);
-128: 
+128:
 129:     void InterruptHandler();
-130: 
+130:
 131: private:
 132:     bool CallIRQHandler(IRQ_ID irqID);
 133: };
-134: 
+134:
 135: InterruptSystem& GetInterruptSystem();
-136: 
+136:
 137: } // namespace baremetal
-138: 
+138:
 139: /// @brief FIQ administration, see Exception.S
 140: extern baremetal::FIQData s_fiqData;
 ```
@@ -1791,7 +1791,7 @@ Create the file `code/libraries/baremetal/src/InterruptHandler.cpp`
 File: code/libraries/baremetal/src/InterruptHandler.cpp
 ...
 40: #include "baremetal/InterruptHandler.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/ARMRegisters.h"
 44: #include "baremetal/Assert.h"
@@ -1813,7 +1813,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 78:     , m_irqHandlersParam{}
 79: {
 80: }
-81: 
+81:
 82: /// <summary>
 83: /// Constructs a specialized InterruptSystem instance which injects a custom IMemoryAccess instance. This is intended for testing.
 84: /// </summary>
@@ -1825,14 +1825,14 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 90:     , m_irqHandlersParam{}
 91: {
 92: }
-93: 
+93:
 94: /// <summary>
 95: /// Destructor/// </summary>
 96: InterruptSystem::~InterruptSystem()
 97: {
 98:     Shutdown();
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Initialize interrupt system
 103: /// </summary>
@@ -1840,51 +1840,51 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 105: {
 106:     if (m_isInitialized)
 107:         return;
-108: 
+108:
 109:     memset(m_irqHandlers, 0, IRQ_LINES * sizeof(IRQHandler*));
 110:     memset(m_irqHandlersParam, 0, IRQ_LINES * sizeof(void*));
-111: 
+111:
 112:     DisableInterrupts();
-113: 
+113:
 114:     EnableIRQs();
-115: 
+115:
 116: #if BAREMETAL_RPI_TARGET == 3
 117: #else
 118:     // direct all interrupts to core 0 with default priority
 119:     for (unsigned n = 0; n < IRQ_LINES / 4; n++)
 120:     {
 121:         m_memoryAccess.Write32(RPI_GICD_IPRIORITYR0 + 4 * n, RPI_GICD_IPRIORITYR_DEFAULT | RPI_GICD_IPRIORITYR_DEFAULT << 8 | RPI_GICD_IPRIORITYR_DEFAULT << 16 | RPI_GICD_IPRIORITYR_DEFAULT << 24);
-122: 
+122:
 123:         m_memoryAccess.Write32(RPI_GICD_ITARGETSR0 + 4 * n, RPI_GICD_ITARGETSR_CORE0 | RPI_GICD_ITARGETSR_CORE0 << 8 | RPI_GICD_ITARGETSR_CORE0 << 16 | RPI_GICD_ITARGETSR_CORE0 << 24);
 124:     }
-125: 
+125:
 126:     // set all interrupts to level triggered
 127:     for (unsigned n = 0; n < IRQ_LINES / 16; n++)
 128:     {
 129:         m_memoryAccess.Write32(RPI_GICD_ICFGR0 + 4 * n, 0);
 130:     }
-131: 
+131:
 132:     // initialize core 0 CPU interface:
-133: 
+133:
 134:     m_memoryAccess.Write32(RPI_GICC_PMR, RPI_GICC_PMR_PRIORITY);
 135: #endif
-136: 
+136:
 137:     EnableInterrupts();
-138: 
+138:
 139:     m_isInitialized = true;
 140: }
-141: 
+141:
 142: /// <summary>
 143: /// Shutdown interrupt system, disable all
 144: /// </summary>
 145: void InterruptSystem::Shutdown()
 146: {
 147:     DisableIRQs();
-148: 
+148:
 149:     DisableInterrupts();
 150:     m_isInitialized = false;
 151: }
-152: 
+152:
 153: /// <summary>
 154: /// Disable all IRQ interrupts
 155: /// </summary>
@@ -1892,7 +1892,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 157: {
 158: #if BAREMETAL_RPI_TARGET == 3
 159:     m_memoryAccess.Write32(RPI_INTRCTRL_FIQ_CONTROL, 0);
-160: 
+160:
 161:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_1, static_cast<uint32>(-1));
 162:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_IRQS_2, static_cast<uint32>(-1));
 163:     m_memoryAccess.Write32(RPI_INTRCTRL_DISABLE_BASIC_IRQS, static_cast<uint32>(-1));
@@ -1910,7 +1910,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 175:     }
 176: #endif
 177: }
-178: 
+178:
 179: /// <summary>
 180: /// Enable IRQ interrupts
 181: /// </summary>
@@ -1922,7 +1922,7 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 187:     m_memoryAccess.Write32(RPI_GICD_CTLR, RPI_GICD_CTLR_ENABLE);
 188: #endif
 189: }
-190: 
+190:
 191: /// <summary>
 192: /// Enable and register an IRQ handler
 193: ///
@@ -1936,13 +1936,13 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 201:     uint32 irq = static_cast<int>(irqID);
 202:     assert(irq < IRQ_LINES);
 203:     assert(m_irqHandlers[irq] == nullptr);
-204: 
+204:
 205:     EnableIRQ(irqID);
-206: 
+206:
 207:     m_irqHandlers[irq] = handler;
 208:     m_irqHandlersParam[irq] = param;
 209: }
-210: 
+210:
 211: /// <summary>
 212: /// Disable and unregister an IRQ handler
 213: ///
@@ -1954,13 +1954,13 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 219:     uint32 irq = static_cast<int>(irqID);
 220:     assert(irq < IRQ_LINES);
 221:     assert(m_irqHandlers[irq] != nullptr);
-222: 
+222:
 223:     m_irqHandlers[irq] = nullptr;
 224:     m_irqHandlersParam[irq] = nullptr;
-225: 
+225:
 226:     DisableIRQ(irqID);
 227: }
-228: 
+228:
 229: /// <summary>
 230: /// Enable and register a FIQ interrupt handler. Only one can be enabled at any time.
 231: /// </summary>
@@ -1974,14 +1974,14 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 239:     assert(fiq <= IRQ_LINES);
 240:     assert(handler != nullptr);
 241:     assert(s_fiqData.handler == nullptr);
-242: 
+242:
 243:     s_fiqData.handler = handler;
 244:     s_fiqData.param = param;
 245:     s_fiqData.fiqID = fiq;
-246: 
+246:
 247:     EnableFIQ(fiqID);
 248: }
-249: 
+249:
 250: /// <summary>
 251: /// Disable and unregister a FIQ interrupt handler
 252: /// </summary>
@@ -1992,11 +1992,11 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 257:     assert(s_fiqData.handler != nullptr);
 258:     assert(s_fiqData.fiqID == fiq);
 259:     DisableFIQ(fiqID);
-260: 
+260:
 261:     s_fiqData.handler = nullptr;
 262:     s_fiqData.param = nullptr;
 263: }
-264: 
+264:
 265: /// <summary>
 266: /// Handles an interrupt.
 267: ///
@@ -2009,39 +2009,39 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 274:     if (localpendingIRQs & ARM_LOCAL_INTSRC_TIMER1) // the only implemented local IRQ so far
 275:     {
 276:         CallIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
-277: 
+277:
 278:         return;
 279:     }
-280: 
+280:
 281:     uint32 pendingIRQs[ARM_IRQS_NUM_REGS];
 282:     pendingIRQs[0] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_1);
 283:     pendingIRQs[1] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_PENDING_2);
 284:     pendingIRQs[2] = m_memoryAccess.Read32(RPI_INTRCTRL_IRQ_BASIC_PENDING) & 0xFF; // Only 8 basic interrupts
-285: 
+285:
 286:     for (unsigned reg = 0; reg < ARM_IRQS_NUM_REGS; reg++)
 287:     {
 288:         uint32 pendingIRQ = pendingIRQs[reg];
 289:         if (pendingIRQ != 0)
 290:         {
 291:             unsigned irqID = reg * ARM_IRQS_PER_REG;
-292: 
+292:
 293:             do
 294:             {
 295:                 if ((pendingIRQ & 1) && CallIRQHandler(static_cast<IRQ_ID>(irqID)))
 296:                 {
 297:                     return;
 298:                 }
-299: 
+299:
 300:                 pendingIRQ >>= 1;
 301:                 irqID++;
 302:             } while (pendingIRQ != 0);
 303:         }
 304:     }
-305: 
+305:
 306: #else
-307: 
+307:
 308:     uint32 iarValue = m_memoryAccess.Read32(RPI_GICC_IAR); // Read Interrupt Acknowledge Register
-309: 
+309:
 310:     uint32 irq = iarValue & RPI_GICC_IAR_INTERRUPT_ID_MASK; // Select the currently active interrupt
 311:     if (irq < IRQ_LINES)
 312:     {
@@ -2064,10 +2064,10 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 329:         LOG_INFO("Received spurious interrupt %d", iarValue);
 330:     }
 331: #endif
-332: 
+332:
 333: #endif
 334: }
-335: 
+335:
 336: /// <summary>
 337: /// Call the IRQ handler for the specified IRQ ID
 338: /// </summary>
@@ -2078,22 +2078,22 @@ File: code/libraries/baremetal/src/InterruptHandler.cpp
 343:     uint32 irq = static_cast<int>(irqID);
 344:     assert(irq < IRQ_LINES);
 345:     IRQHandler* handler = m_irqHandlers[irq];
-346: 
+346:
 347:     if (handler != nullptr)
 348:     {
 349:         (*handler)(m_irqHandlersParam[irq]);
-350: 
+350:
 351:         return true;
 352:     }
 353: #ifndef NDEBUG
 354:     LOG_INFO("Unhandled interrupt %d", irq);
 355: #endif
-356: 
+356:
 357:     DisableIRQ(irqID);
-358: 
+358:
 359:     return false;
 360: }
-361: 
+361:
 362: /// <summary>
 363: /// Construct the singleton interrupt system instance if needed, initialize it, and return a reference to the instance
 364: ///
@@ -2162,9 +2162,9 @@ Update the file `code/libraries/baremetal/include/baremetal/Interrupts.h`
 ```cpp
 File: code/libraries/baremetal/include/baremetal/Interrupts.h
 44: namespace baremetal {
-45: 
+45:
 46: #if BAREMETAL_RPI_TARGET == 3
-47: 
+47:
 48: // IRQs
 49: /// @brief Number of IRQ lines per register for regular ARM_IRQ1 and ARM_IRQ2
 50: #define ARM_IRQS_PER_REG         32
@@ -2172,13 +2172,13 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 52: #define ARM_IRQS_BASIC_REG       8
 53: /// @brief Number of IRQ lines for ARM_IRQ_LOCAL
 54: #define ARM_IRQS_LOCAL_REG       12
-55: 
+55:
 56: /// @brief Number of normal IRQ registers (IRQ1, IRQ2, Basic IRQ)
 57: #define ARM_IRQS_NUM_REGS        3
-58: 
+58:
 59: /// @brief Total number of IRQ lines Raspberry Pi 3
 60: #define IRQ_LINES                (ARM_IRQS_PER_REG * 2 + ARM_IRQS_BASIC_REG + ARM_IRQS_LOCAL_REG)
-61: 
+61:
 62: /// @brief Offset for interrupts in IRQ1 group
 63: #define ARM_IRQ1_BASE            0
 64: /// @brief Offset for interrupts in IRQ2 group
@@ -2195,7 +2195,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 75: #define ARM_IRQ_BASIC(n)         (ARM_IRQ_BASIC_BASE + (n))
 76: /// @brief Calculate IRQ number for IRQ in ARM local group
 77: #define ARM_IRQ_LOCAL(n)         (ARM_IRQ_LOCAL_BASE + (n))
-78: 
+78:
 79: /// @brief Check whether an IRQ is pending (only for IRQ1, IRQ2, Basic IRQ group)
 80: #define ARM_IC_IRQ_PENDING(irq)  ((irq) < ARM_IRQ2_BASE ? RPI_INTRCTRL_IRQ_PENDING_1 : ((irq) < ARM_IRQ_BASIC_BASE ? RPI_INTRCTRL_IRQ_PENDING_2 : RPI_INTRCTRL_IRQ_BASIC_PENDING))
 81: /// @brief Enable an IRQ (only for IRQ1, IRQ2, Basic IRQ group)
@@ -2204,7 +2204,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 84: #define ARM_IC_IRQS_DISABLE(irq) ((irq) < ARM_IRQ2_BASE ? RPI_INTRCTRL_DISABLE_IRQS_1 : ((irq) < ARM_IRQ_BASIC_BASE ? RPI_INTRCTRL_DISABLE_IRQS_2 : RPI_INTRCTRL_DISABLE_BASIC_IRQS))
 85: /// @brief Calculate bitmask for an IRQ (only for IRQ1, IRQ2, Basic IRQ group)
 86: #define ARM_IRQ_MASK(irq)        BIT1((irq) & (ARM_IRQS_PER_REG - 1))
-87: 
+87:
 88: /// <summary>
 89: /// @brief IRQ interrupt numbers
 90: /// </summary>
@@ -2280,7 +2280,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 160:     IRQ_ARM = ARM_IRQ1(0x1E),
 161:     /// @brief VPU interrupt
 162:     IRQ_VPUDMA = ARM_IRQ1(0x1F),
-163: 
+163:
 164:     /// @brief USB Host Port interrupt
 165:     IRQ_HOSTPORT = ARM_IRQ2(0x00),
 166:     /// @brief JPEHVS interruptG
@@ -2345,7 +2345,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 225:     IRQ_ARASANSDIO = ARM_IRQ2(0x1E),
 226:     /// @brief AVSPMON interrupt
 227:     IRQ_AVSPMON = ARM_IRQ2(0x1F),
-228: 
+228:
 229:     /// @brief ARM timer interrupt
 230:     IRQ_ARM_TIMER = ARM_IRQ_BASIC(0x00),
 231:     /// @brief ARM mailbox interrupt
@@ -2362,7 +2362,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 242:     IRQ_ILLEGAL_TYPE0 = ARM_IRQ_BASIC(0x06),
 243:     /// @brief Illegal type 1 interrupt
 244:     IRQ_ILLEGAL_TYPE1 = ARM_IRQ_BASIC(0x07),
-245: 
+245:
 246:     /// @brief Non secure Physical ARM timer
 247:     IRQ_LOCAL_CNTPS = ARM_IRQ_LOCAL(0x00), // armv7-timer
 248:     /// @brief Secure Physical ARM timer
@@ -2388,7 +2388,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 268:     /// @brief Local timer
 269:     IRQ_LOCAL_LOCALTIMER = ARM_IRQ_LOCAL(0x0B),
 270: };
-271: 
+271:
 272: /// <summary>
 273: /// @brief FIQ interrupt numbers
 274: /// </summary>
@@ -2464,7 +2464,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 344:     FIQ_ARM = ARM_IRQ1(0x1E),
 345:     /// @brief VPU interrupt
 346:     FIQ_VPUDMA = ARM_IRQ1(0x1F),
-347: 
+347:
 348:     /// @brief USB Host Port interrupt
 349:     FIQ_HOSTPORT = ARM_IRQ2(0x00),
 350:     /// @brief JPEHVS interruptG
@@ -2529,7 +2529,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 409:     FIQ_ARASANSDIO = ARM_IRQ2(0x1E),
 410:     /// @brief AVSPMON interrupt
 411:     FIQ_AVSPMON = ARM_IRQ2(0x1F),
-412: 
+412:
 413:     /// @brief ARM timer interrupt
 414:     FIQ_ARM_TIMER = ARM_IRQ_BASIC(0x00),
 415:     /// @brief ARM mailbox interrupt
@@ -2546,7 +2546,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 426:     FIQ_ILLEGAL_TYPE0 = ARM_IRQ_BASIC(0x06),
 427:     /// @brief Illegal type 1 interrupt
 428:     FIQ_ILLEGAL_TYPE1 = ARM_IRQ_BASIC(0x07),
-429: 
+429:
 430:     /// @brief Secure Physical ARM timer
 431:     FIQ_LOCAL_CNTPS = ARM_IRQ_LOCAL(0x00),
 432:     /// @brief Non secure Physical ARM timer
@@ -2572,9 +2572,9 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 452:     /// @brief Local timer
 453:     FIQ_LOCAL_LOCALTIMER = ARM_IRQ_LOCAL(0x0B),
 454: };
-455: 
+455:
 456: #else
-457: 
+457:
 458: // IRQs
 459: /// @brief Software generated interrupt, per core
 460: #define GIC_SGI(n) (0 + (n))
@@ -2582,10 +2582,10 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 462: #define GIC_PPI(n) (16 + (n))
 463: /// @brief Shared peripheral interrupt, shared between cores
 464: #define GIC_SPI(n) (32 + (n))
-465: 
+465:
 466: /// @brief Total number of IRQ lines Raspberry Pi 4 and 5
 467: #define IRQ_LINES  256
-468: 
+468:
 469: /// <summary>
 470: /// @brief IRQ interrupt numbers
 471: /// </summary>
@@ -2599,7 +2599,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 479:     IRQ_LOCAL_CNTPS = GIC_PPI(0x0D),
 480:     /// @brief Non secure Physical ARM timer
 481:     IRQ_LOCAL_CNTPNS = GIC_PPI(0x0E),
-482: 
+482:
 483:     /// @brief ARM core mailbox 0, core 0
 484:     IRQ_LOCAL_MAILBOX_0_0 = GIC_SPI(0x00),
 485:     /// @brief ARM core mailbox 1, core 0
@@ -2632,7 +2632,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 512:     IRQ_LOCAL_MAILBOX_2_3 = GIC_SPI(0x0E),
 513:     /// @brief ARM core mailbox 3, core 3
 514:     IRQ_LOCAL_MAILBOX_3_3 = GIC_SPI(0x0F),
-515: 
+515:
 516:     /// @brief PMU (performance monitoring unit) core 0 interrupt
 517:     IRQ_PMU0 = GIC_SPI(0x10),
 518:     /// @brief PMU (performance monitoring unit) core 1 interrupt
@@ -2659,7 +2659,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 539:     IRQ_ILLEGAL_TYPE1 = GIC_SPI(0x27),
 540:     /// @brief USB Host port interrupt
 541:     IRQ_HOSTPORT = GIC_SPI(0x28),
-542: 
+542:
 543:     /// @brief BCM system timer 0 interrupt, when compare value is hit
 544:     IRQ_TIMER0 = GIC_SPI(0x40),
 545:     /// @brief BCM system timer 1 interrupt, when compare value is hit
@@ -2813,7 +2813,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 693:     /// @brief USB XHCI interrupt
 694:     IRQ_XHCI_INTERNAL = GIC_SPI(0xB0),
 695: };
-696: 
+696:
 697: /// <summary>
 698: /// @brief IRQ interrupt numbers
 699: /// </summary>
@@ -2827,7 +2827,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 707:     FIQ_LOCAL_CNTPS = GIC_PPI(0x0D),
 708:     /// @brief Non secure Physical ARM timer
 709:     FIQ_LOCAL_CNTPNS = GIC_PPI(0x0E),
-710: 
+710:
 711:     /// @brief ARM core mailbox 0, core 0
 712:     FIQ_LOCAL_MAILBOX_0_0 = GIC_SPI(0x00),
 713:     /// @brief ARM core mailbox 1, core 0
@@ -2860,7 +2860,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 740:     FIQ_LOCAL_MAILBOX_2_3 = GIC_SPI(0x0E),
 741:     /// @brief ARM core mailbox 3, core 3
 742:     FIQ_LOCAL_MAILBOX_3_3 = GIC_SPI(0x0F),
-743: 
+743:
 744:     /// @brief PMU (performance monitoring unit) core 0 interrupt
 745:     FIQ_PMU0 = GIC_SPI(0x10),
 746:     /// @brief PMU (performance monitoring unit) core 1 interrupt
@@ -2887,7 +2887,7 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 767:     FIQ_ILLEGAL_TYPE1 = GIC_SPI(0x27),
 768:     /// @brief USB Host port interrupt
 769:     FIQ_HOSTPORT = GIC_SPI(0x28),
-770: 
+770:
 771:     /// @brief BCM system timer 0 interrupt, when compare value is hit
 772:     FIQ_TIMER0 = GIC_SPI(0x40),
 773:     /// @brief BCM system timer 1 interrupt, when compare value is hit
@@ -3041,21 +3041,21 @@ File: code/libraries/baremetal/include/baremetal/Interrupts.h
 921:     /// @brief USB XHCI interrupt
 922:     FIQ_XHCI_INTERNAL = GIC_SPI(0xB0),
 923: };
-924: 
+924:
 925: #endif
-926: 
+926:
 927: void EnableIRQ(IRQ_ID irqID);
 928: void DisableIRQ(IRQ_ID irqID);
-929: 
+929:
 930: void EnableFIQ(FIQ_ID fiqID);
 931: void DisableFIQ(FIQ_ID fiqID);
-932: 
+932:
 933: } // namespace baremetal
 ```
 
 We'll not get into each and every IRQ or FIQ id, but give some descriptions on macros used
 
-- Line 48-454: We define IRQ related macros for Raspberry PI 3
+- Line 48-454: We define IRQ related macros for Raspberry Pi 3
   - Line 49-54: We define the number of IRQ supported by IRQ 1/2, IRQ basic and ARM local IRQ
   - Line 56-57: We define the number of BCM interrupt registers
   - Line 59-60: We define the total count of IRQ interrupts supported by the system for Raspberry 3
@@ -3066,7 +3066,7 @@ We'll not get into each and every IRQ or FIQ id, but give some descriptions on m
   - Line 85-86: We define a macro to determine the mask for the selected IRQ id to access the IRQ pending / enable / disable register
   - Line 88-270: We define all currently supported IRQ for Raspberry 3
   - Line 272-454: We define all currently supported FIQ for Raspberry 3
-- Line 459-923: We define IRQ related macros for Raspberry PI 4
+- Line 459-923: We define IRQ related macros for Raspberry Pi 4
   - Line 459-464: We define macros to access software generated interrupts, private per core interrupts and interrupts shared by all cores for Raspberry 4
   - Line 466-467: We define the total count of IRQ interrupts supported by the system for Raspberry 4
   - Line 469-695: We define all currently supported IRQ for Raspberry 4 / 5

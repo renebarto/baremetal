@@ -1,8 +1,8 @@
-# Raspberry Pi baremetal development {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT}
+# Raspberry Pi bare metal development {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT}
 
 \todo Sort out and redistribute over other documents
 
-## Reference material {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_REFERENCE_MATERIAL}
+## Reference material {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_REFERENCE_MATERIAL}
 
  - [Raspberry Pi documentation](https://github.com/raspberrypi/documentation/tree/develop/documentation/asciidoc/computers/raspberry-pi)
  - [Raspberry Pi 3B schematics](pdf/rpi-3b-v1_2-schematics-reduced.pdf)
@@ -21,7 +21,7 @@
  - [RP1 peripherals specification](pdf/rp1-peripherals.pdf)
  - [VideoCore IV specification](pdf/videocore-iv-3d-architecture-reference-guide.pdf)
 
-## SoC for each board {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD}
+## SoC for each board {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_SOC_FOR_EACH_BOARD}
 
 The Raspberry Pi boards uses different types and versions of SoC (System-on-Chip)
 
@@ -46,7 +46,7 @@ The Raspberry Pi boards uses different types and versions of SoC (System-on-Chip
 | Raspberry Pi Compute Module 4  | BCM2711   | ARM Cortex A72 (ARMv8) | 4 |
 | Raspberry Pi 5B                | BCM2712   | ARM Cortex A76 (ARMv8) | 4 |
 
-## CPU <-> GPU communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION}
+## CPU <-> GPU communication {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION}
 
 CPU and GPU communicate through a mailbox interface:
  - CPU writes data
@@ -57,7 +57,7 @@ CPU and GPU communicate through a mailbox interface:
 
 The mailbox interface is just another peripheral.
 
-### CPU <-> Peripheral communication {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_CPU___PERIPHERAL_COMMUNICATION}
+### CPU <-> Peripheral communication {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_CPU___PERIPHERAL_COMMUNICATION}
 
 Every peripheral has a slot of memory mapped I/O (MMIO). The start address depends on the SoC:
 
@@ -78,7 +78,7 @@ Next to BCM peripherals, there are also ARM based peripherals:
 | BCM2837       | 0xFF840000               |
 | BCM2711       | 0xFF840000               |
 | BCM2712       | 0x107C000000             |
- 
+
 
 Peripheral data is written in 32 bit words, aligned on 4 bytes.
 Every peripheral has control/status and data words.
@@ -87,11 +87,11 @@ Peripheral MMIO slots for BCM2837:
 
 | Start address | Peripheral |
 |---------------|------------|
-| 0x3F003000    | System Timer 
+| 0x3F003000    | System Timer
 | 0x3F007000    | DMA controller
 | 0x3F00B000    | Interrupt controller
-| 0x3F00B880    | VideoCore mailbox 
-| 0x3F100000    | Power management 
+| 0x3F00B880    | VideoCore mailbox
+| 0x3F100000    | Power management
 | 0x3F101000    | GPIO clocks
 | 0x3F104000    | Random Number Generator
 | 0x3F200000    | General Purpose IO controller
@@ -108,11 +108,11 @@ Peripheral MMIO slots for BCM2837:
 | 0x107FFF9000  | Interrupt controller (GIC) distributor (RPI5)
 | 0x107FFFA000  | Interrupt controller (GIC) control (RPI5)
 
-### Memory Management Unit (MMU) {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MANAGEMENT_UNIT_MMU}
+### Memory Management Unit (MMU) {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MANAGEMENT_UNIT_MMU}
 
 The CPU also has a MMU, which can be used to map addresses to virtual addresses.
 
-### Code execution {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_CODE_EXECUTION}
+### Code execution {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_CODE_EXECUTION}
 
 After the GPU initializes, all cores are started, however depending on whether the core is core 0 or a secondary core:
 
@@ -129,7 +129,7 @@ To determine which core is currently running, use the MPIDR_EL1 system register,
 asm volatile ("mrs %0, mpidr_el1" : "=r" (nMPIDR));
 ```
 
-### Memory mapping {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING}
+### Memory mapping {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING}
 
 Memory is mapping in ranges, with different address mapping for each range:
 
@@ -150,7 +150,7 @@ Linux uses a virtual address mapping, however that is not relevant here.
 
 Circle uses the following layout of the ARM memory:
 
-#### RPI 1 {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_1}
+#### RPI 1 {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_1}
 
 | Base     | Size         | Contents               | Remarks                      |
 |----------|--------------|------------------------|------------------------------|
@@ -181,7 +181,7 @@ Circle uses the following layout of the ARM memory:
 | 20000000 |              | Peripherals            |                              |
 | ...      |              |                        |                              |
 
-#### RPI 2/3 32 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_23_32_BIT}
+#### RPI 2/3 32 bit {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_23_32_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -227,7 +227,7 @@ Circle uses the following layout of the ARM memory:
 | 40000000 |              | Local peripherals            |                              |
 | ...      |              |                              |                              |
 
-#### RPI 2/3 64 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_23_64_BIT}
+#### RPI 2/3 64 bit {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_23_64_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -258,7 +258,7 @@ Circle uses the following layout of the ARM memory:
 | 40000000 |              | Local peripherals            |                              |
 | ...      |              |                              |                              |
 
-#### RPI 4 32 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_4_32_BIT}
+#### RPI 4 32 bit {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_4_32_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -305,7 +305,7 @@ Circle uses the following layout of the ARM memory:
 | ...      |              |                              |                              |
 | FE000000 | 64 MByte     | Peripherals                  |                              |
 
-#### RPI 4 64 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_4_64_BIT}
+#### RPI 4 64 bit {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_4_64_BIT}
 
 | Base     | Size         | Contents                     | Remarks                      |
 |----------|--------------|------------------------------|------------------------------|
@@ -348,6 +348,6 @@ Circle uses the following layout of the ARM memory:
 | ...      |              |                              |                              |
 | 600000000 | 64 MByte    | xHCI controller              |                              |
 
-#### RPI 5 64 bit {#RASPBERRY_PI_BAREMETAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_5_64_BIT}
+#### RPI 5 64 bit {#RASPBERRY_PI_BARE_METAL_DEVELOPMENT_CPU___GPU_COMMUNICATION_MEMORY_MAPPING_RPI_5_64_BIT}
 
 \todo Add memory mapping for RPI 5

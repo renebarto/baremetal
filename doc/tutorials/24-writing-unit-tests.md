@@ -70,12 +70,12 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: /// @file
 43: /// Test macros
-44: 
+44:
 45: /// @brief Register test
 46: ///
 47: /// Register the test named TestName with the registry Registry. This will declare a test class Test[TestName] and instantiate it as test[TestName]Instance.
@@ -91,12 +91,12 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 57: static unittest::TestRegistrar registrar##TestName(Registry, &test##TestName##Instance, unittest::TestDetails(baremetal::string(#TestName), baremetal::string(""), baremetal::string(GetSuiteName()), baremetal::string(__FILE__), __LINE__)); \
 58:                                                                                                             \
 59: void Test##TestName::RunImpl() const
-60: 
+60:
 61: /// @brief Register test
 62: ///
 63: /// Register the test named TestName with the singleton test registry. This will use the TEST_EX macro to do the actual test registration
 64: #define TEST(TestName) TEST_EX(TestName, unittest::TestRegistry::GetTestRegistry())
-65: 
+65:
 66: /// @brief Register test inside test fixture
 67: ///
 68: /// Register the test inside a test fixture named FixtureClass for the test named TestName with the registry Registry.
@@ -138,12 +138,12 @@ File: code/libraries/unittest/include/unittest/TestMacros.h
 104:     fixtureHelper.RunImpl();                                                                                \
 105: }                                                                                                           \
 106: void FixtureClass##TestName##Helper::RunImpl() const
-107: 
+107:
 108: /// @brief Register test inside test fixture
 109: ///
 110: /// Register the test named TestName inside a test fixture class named Fixture with the singleton test registry. This will use the TEST_FIXTURE_EX macro to do the actual test registration
 111: #define TEST_FIXTURE(FixtureClass,TestName) TEST_FIXTURE_EX(FixtureClass,TestName,unittest::TestRegistry::GetTestRegistry())
-112: 
+112:
 113: /// @brief Create test suite
 114: ///
 115: /// Creates a test suite named SuiteName. This simply creates a namespace inside which tests and test fixtures are placed
@@ -173,9 +173,9 @@ File: code/applications/demo/src/main.cpp
 188: public:
 189:     void RunImpl() const override;
 190: } myTest;
-191: 
+191:
 192: TestRegistrar registrarMyTest(TestRegistry::GetTestRegistry(), &myTest, TestDetails("MyTest", "", "", __FILE__, __LINE__));
-193: 
+193:
 194: void MyTest::RunImpl() const
 195: {
 196:     LOG_DEBUG("Running test");
@@ -226,7 +226,7 @@ File: code/applications/demo/src/main.cpp
 144:         LOG_DEBUG("FixtureMyTest3 TearDown");
 145:     }
 146: };
-147: 
+147:
 148: class FixtureMyTest3Helper
 149:     : public FixtureMyTest3
 150: {
@@ -248,15 +248,15 @@ File: code/applications/demo/src/main.cpp
 166: {
 167:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 3");
 168: }
-169: 
+169:
 170: class MyTest3
 171:     : public Test
 172: {
 173:     void RunImpl() const override;
 174: } myTest3;
-175: 
+175:
 176: TestRegistrar registrarFixtureMyTest3(TestRegistry::GetTestRegistry(), &myTest3, TestDetails("MyTest3", "FixtureMyTest3", GetSuiteName(), __FILE__, __LINE__));
-177: 
+177:
 178: void MyTest3::RunImpl() const
 179: {
 180:     LOG_DEBUG("Test 3");
@@ -308,7 +308,7 @@ Compare the defintion of this macro to the application code we wrote before:
 ```cpp
 File: code/applications/demo/src/main.cpp
 14: namespace Suite1 {
-15: 
+15:
 16: inline char const* GetSuiteName()
 17: {
 18:     return baremetal::string("Suite1");
@@ -347,22 +347,22 @@ Update the file `code/libraries/unittest/include/unittest/unittest.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/unittest.h
 ...
-45: #include <unittest/TestFixture.h>
-46: #include <unittest/TestSuite.h>
-47: 
-48: #include <unittest/ITestReporter.h>
-49: #include <unittest/ConsoleTestReporter.h>
-50: #include <unittest/CurrentTest.h>
-51: #include <unittest/DeferredTestReporter.h>
-52: #include <unittest/Test.h>
-53: #include <unittest/TestDetails.h>
-54: #include <unittest/TestFixtureInfo.h>
-55: #include <unittest/TestInfo.h>
-56: #include <unittest/TestMacros.h>
-57: #include <unittest/TestRegistry.h>
-58: #include <unittest/TestResults.h>
-59: #include <unittest/TestRunner.h>
-60: #include <unittest/TestSuiteInfo.h>
+45: #include "unittest/TestFixture.h"
+46: #include "unittest/TestSuite.h"
+47:
+48: #include "unittest/ITestReporter.h"
+49: #include "unittest/ConsoleTestReporter.h"
+50: #include "unittest/CurrentTest.h"
+51: #include "unittest/DeferredTestReporter.h"
+52: #include "unittest/Test.h"
+53: #include "unittest/TestDetails.h"
+54: #include "unittest/TestFixtureInfo.h"
+55: #include "unittest/TestInfo.h"
+56: #include "unittest/TestMacros.h"
+57: #include "unittest/TestRegistry.h"
+58: #include "unittest/TestResults.h"
+59: #include "unittest/TestRunner.h"
+60: #include "unittest/TestSuiteInfo.h"
 ```
 
 ### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_ADDING_MACROS_FOR_CREATING_TESTS_FIXTURES_AND_SUITES___STEP_1_UPDATE_PROJECT_CONFIGURATION}
@@ -387,7 +387,7 @@ File: code/libraries/unittest/CMakeLists.txt
 41:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
 43:     )
-44: 
+44:
 45: set(PROJECT_INCLUDES_PUBLIC
 46:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/ConsoleTestReporter.h
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/CurrentTest.h
@@ -416,22 +416,22 @@ Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
 File: code\applications\demo\src\main.cpp
-1: #include <baremetal/Assert.h>
-2: #include <baremetal/Console.h>
-3: #include <baremetal/Logger.h>
-4: #include <baremetal/System.h>
-5: #include <baremetal/Timer.h>
-6: 
-7: #include <unittest/unittest.h>
-8: 
+1: #include "baremetal/Assert.h"
+2: #include "baremetal/Console.h"
+3: #include "baremetal/Logger.h"
+4: #include "baremetal/System.h"
+5: #include "baremetal/Timer.h"
+6:
+7: #include "unittest/unittest.h"
+8:
 9: LOG_MODULE("main");
-10: 
+10:
 11: using namespace baremetal;
 12: using namespace unittest;
-13: 
+13:
 14: TEST_SUITE(Suite1)
 15: {
-16: 
+16:
 17: class FixtureMyTest1
 18:     : public TestFixture
 19: {
@@ -445,17 +445,17 @@ File: code\applications\demo\src\main.cpp
 27:         LOG_DEBUG("MyTest TearDown");
 28:     }
 29: };
-30: 
+30:
 31: TEST_FIXTURE(FixtureMyTest1, MyTest1)
 32: {
 33:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 1");
 34: }
-35: 
+35:
 36: } // Suite1
-37: 
+37:
 38: TEST_SUITE(Suite2)
 39: {
-40: 
+40:
 41: class FixtureMyTest2
 42:     : public TestFixture
 43: {
@@ -469,14 +469,14 @@ File: code\applications\demo\src\main.cpp
 51:         LOG_DEBUG("FixtureMyTest2 TearDown");
 52:     }
 53: };
-54: 
+54:
 55: TEST_FIXTURE(FixtureMyTest2, MyTest2)
 56: {
 57:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 2");
 58: }
-59: 
+59:
 60: } // Suite2
-61: 
+61:
 62: class FixtureMyTest3
 63:     : public TestFixture
 64: {
@@ -490,28 +490,28 @@ File: code\applications\demo\src\main.cpp
 72:         LOG_DEBUG("FixtureMyTest3 TearDown");
 73:     }
 74: };
-75: 
+75:
 76: TEST_FIXTURE(FixtureMyTest3, MyTest3)
 77: {
 78:     LOG_DEBUG(m_details.QualifiedTestName() + "MyTestHelper 3");
 79: }
-80: 
+80:
 81: TEST(MyTest)
 82: {
 83:     LOG_DEBUG("Running test");
 84:     CurrentTest::Results()->OnTestFailure(*CurrentTest::Details(), "Failure");
 85: }
-86: 
+86:
 87: int main()
 88: {
 89:     auto& console = GetConsole();
-90: 
+90:
 91:     ConsoleTestReporter reporter;
 92:     RunAllTests(&reporter);
-93: 
+93:
 94:     LOG_INFO("Wait 5 seconds");
 95:     Timer::WaitMilliSeconds(5000);
-96: 
+96:
 97:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 98:     char ch{};
 99:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -521,7 +521,7 @@ File: code\applications\demo\src\main.cpp
 103:     }
 104:     if (ch == 'p')
 105:         assert(false);
-106: 
+106:
 107:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 108: }
 ```
@@ -604,7 +604,7 @@ TEST(MyTest)
 }
 ```
 
-Let's create macros to perform these checks, and and a mechanism to trace back the reason for a failure, for example when we expect to have a certain value, what the expected and actual values were.
+Let's create macros to perform these checks, and and a mechanism to trace back the reason for a failure, e.g. when we expect to have a certain value, what the expected and actual values were.
 
 We'll define a set of macros, and we'll need to do some trickery to get it all to work well. So bare with me.
 
@@ -619,7 +619,7 @@ Create the file `code/libraries/unittest/include/unittest/Checks.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/Checks.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Checks.h
 5: //
@@ -656,22 +656,22 @@ File: code/libraries/unittest/include/unittest/Checks.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: 
-44: #include <unittest/PrintValue.h>
-45: 
+41:
+42: #include "baremetal/String.h"
+43:
+44: #include "unittest/PrintValue.h"
+45:
 46: /// @file
 47: /// Assertion checks
-48: 
+48:
 49: namespace unittest
 50: {
-51: 
+51:
 52: class TestResults;
 53: class TestDetails;
-54: 
+54:
 55: /// <summary>
 56: /// Assertion result
 57: ///
@@ -697,7 +697,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 77:     /// @return true, if the assertion failed, false if the assertion was successful
 78:     operator bool() const { return failed; }
 79: };
-80: 
+80:
 81: extern AssertionResult AssertionSuccess();
 82: extern AssertionResult GenericFailure(const baremetal::string& message);
 83: extern AssertionResult BooleanFailure(const baremetal::string& valueExpression,
@@ -711,7 +711,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 91:                                    const baremetal::string& actualExpression,
 92:                                    const baremetal::string& expectedValue,
 93:                                    const baremetal::string& actualValue);
-94: 
+94:
 95: /// <summary>
 96: /// Check whether argument is evaluated as true
 97: /// </summary>
@@ -723,7 +723,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 103: {
 104:     return !!value;
 105: }
-106: 
+106:
 107: /// <summary>
 108: /// Check whether argument is evaluated as false
 109: /// </summary>
@@ -735,7 +735,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 115: {
 116:     return !value;
 117: }
-118: 
+118:
 119: /// <summary>
 120: /// Utility class to convert a value to a string for comparison
 121: /// </summary>
@@ -754,7 +754,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 134:         return PrintToString(value);
 135:     }
 136: };
-137: 
+137:
 138: /// <summary>
 139: /// Format a value for a failure message
 140: /// </summary>
@@ -766,7 +766,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 146: {
 147:     return FormatForComparison<T1>::Format(value);
 148: }
-149: 
+149:
 150: /// <summary>
 151: /// Evaluate whether a value can be evaluated as true, generate a success object if successful, otherwise a failure object
 152: /// </summary>
@@ -785,7 +785,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 165:     }
 166:     return AssertionSuccess();
 167: }
-168: 
+168:
 169: /// <summary>
 170: /// Evaluate whether a value can be evaluated as false, generate a success object if successful, otherwise a failure object
 171: /// </summary>
@@ -804,7 +804,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 184:     }
 185:     return AssertionSuccess();
 186: }
-187: 
+187:
 188: /// <summary>
 189: /// Compare an expected and actual value
 190: /// </summary>
@@ -818,7 +818,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 198: {
 199:     return (expected == actual);
 200: }
-201: 
+201:
 202: /// <summary>
 203: /// Evaluate whether an expected value is equal to an actual value, generate a success object if successful, otherwise a failure object
 204: /// </summary>
@@ -841,7 +841,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 221:     }
 222:     return AssertionSuccess();
 223: }
-224: 
+224:
 225: /// <summary>
 226: /// Evaluate whether an expected value is not equal to an actual value, generate a success object if successful, otherwise a failure object
 227: /// </summary>
@@ -864,7 +864,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 244:     }
 245:     return AssertionSuccess();
 246: }
-247: 
+247:
 248: /// <summary>
 249: /// Helper class for {ASSERT|EXPECT}_EQ/NE
 250: ///
@@ -892,7 +892,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 272:     {
 273:         return CheckEqualInternal(expectedExpression, actualExpression, expected, actual);
 274:     }
-275: 
+275:
 276:     /// <summary>
 277:     /// Evaluate whether an expected value is not equal to an actual value, generate a success object if successful, otherwise a failure object
 278:     /// </summary>
@@ -910,7 +910,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 290:         return CheckNotEqualInternal(expectedExpression, actualExpression, expected, actual);
 291:     }
 292: };
-293: 
+293:
 294: } // namespace unittest
 ```
 
@@ -950,7 +950,7 @@ Create the file `code/libraries/unittest/src/Checks.cpp`
 ```cpp
 File: code/libraries/unittest/src/Checks.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : Checks.cpp
 5: //
@@ -987,16 +987,16 @@ File: code/libraries/unittest/src/Checks.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "unittest/Checks.h"
-41: 
-42: #include <baremetal/Format.h>
-43: #include <baremetal/Util.h>
-44: 
+41:
+42: #include "baremetal/Format.h"
+43: #include "baremetal/Util.h"
+44:
 45: using namespace baremetal;
-46: 
+46:
 47: namespace unittest {
-48: 
+48:
 49: /// <summary>
 50: /// Create a success object
 51: /// </summary>
@@ -1005,7 +1005,7 @@ File: code/libraries/unittest/src/Checks.cpp
 54: {
 55:     return AssertionResult(false, string());
 56: }
-57: 
+57:
 58: /// <summary>
 59: /// Create a generic failure object with the provided message
 60: /// </summary>
@@ -1015,7 +1015,7 @@ File: code/libraries/unittest/src/Checks.cpp
 64: {
 65:     return AssertionResult(true, message);
 66: }
-67: 
+67:
 68: /// <summary>
 69: /// Create a boolean failure object
 70: /// </summary>
@@ -1030,12 +1030,12 @@ File: code/libraries/unittest/src/Checks.cpp
 79:     {
 80:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 81:     }
-82: 
+82:
 83:     result.append(Format("\n  Expected: %s\n", expectedValue.c_str()));
-84: 
+84:
 85:     return AssertionResult(true, result);
 86: }
-87: 
+87:
 88: /// <summary>
 89: /// Create a equality comparison failure object
 90: /// </summary>
@@ -1051,17 +1051,17 @@ File: code/libraries/unittest/src/Checks.cpp
 100:     {
 101:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 102:     }
-103: 
+103:
 104:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
 105:     if (expectedValue != expectedExpression)
 106:     {
 107:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
 108:     }
 109:     result.append("\n");
-110: 
+110:
 111:     return AssertionResult(true, result);
 112: }
-113: 
+113:
 114: /// <summary>
 115: /// Create a inequality comparison failure object
 116: /// </summary>
@@ -1077,17 +1077,17 @@ File: code/libraries/unittest/src/Checks.cpp
 126:     {
 127:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 128:     }
-129: 
+129:
 130:     result.append(Format("\n  Expected not equal to: %s", expectedExpression.c_str()));
 131:     if (expectedValue != expectedExpression)
 132:     {
 133:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
 134:     }
 135:     result.append("\n");
-136: 
+136:
 137:     return AssertionResult(true, result);
 138: }
-139: 
+139:
 140: } // namespace unittest
 ```
 
@@ -1144,15 +1144,15 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
-42: #include <baremetal/String.h>
-43: #include <baremetal/Serialization.h>
-44: 
+41:
+42: #include "baremetal/String.h"
+43: #include "baremetal/Serialization.h"
+44:
 45: /// @file
 46: /// Print values to string
-47: 
+47:
 48: /// <summary>
 49: /// Print a value to string using a serializer
 50: /// </summary>
@@ -1164,7 +1164,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 56: {
 57:     s = baremetal::Serialize(value);
 58: }
-59: 
+59:
 60: /// <summary>
 61: /// Print a boolean value to string
 62: /// </summary>
@@ -1174,7 +1174,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 66: {
 67:     s = (x ? "true" : "false");
 68: }
-69: 
+69:
 70: /// <summary>
 71: /// Universal printer class, using PrintTo()
 72: /// </summary>
@@ -1201,7 +1201,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 93:         PrintTo(value, s);
 94:     }
 95: };
-96: 
+96:
 97: /// <summary>
 98: /// Universal print to string function, uses UniversalPrinter
 99: /// </summary>
@@ -1214,7 +1214,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 106:     typedef T T1;
 107:     UniversalPrinter<T1>::Print(value, s);
 108: }
-109: 
+109:
 110: /// <summary>
 111: /// Universal terse printer class, uses UniversalPrint
 112: /// </summary>
@@ -1251,7 +1251,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 143:         UniversalPrint(value, s);
 144:     }
 145: };
-146: 
+146:
 147: /// <summary>
 148: /// String print, uses UniversalPrinter
 149: /// </summary>
@@ -1321,47 +1321,47 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #pragma once
-41: 
+41:
 42: #include "unittest/Checks.h"
 43: #include "unittest/CurrentTest.h"
-44: 
+44:
 45: /// @file
 46: /// Assertion macros
-47: 
+47:
 48: #ifdef ASSERT_TRUE
 49:     #error unittest redefines ASSERT_TRUE
 50: #endif
-51: 
+51:
 52: #ifdef ASSERT_FALSE
 53:     #error unittest redefines ASSERT_FALSE
 54: #endif
-55: 
+55:
 56: #ifdef ASSERT_EQ
 57:     #error unittest redefines ASSERT_EQ
 58: #endif
-59: 
+59:
 60: #ifdef ASSERT_NE
 61:     #error unittest redefines ASSERT_NE
 62: #endif
-63: 
+63:
 64: #ifdef EXPECT_TRUE
 65:     #error unittest redefines EXPECT_TRUE
 66: #endif
-67: 
+67:
 68: #ifdef EXPECT_FALSE
 69:     #error unittest redefines EXPECT_FALSE
 70: #endif
-71: 
+71:
 72: #ifdef EXPECT_EQ
 73:     #error unittest redefines EXPECT_EQ
 74: #endif
-75: 
+75:
 76: #ifdef EXPECT_NE
 77:     #error unittest redefines EXPECT_NE
 78: #endif
-79: 
+79:
 80: /// @brief Generic expect macro. Checks if the argument is true, generates a failure if the check fails
 81: #define UT_EXPECT_RESULT(value) \
 82:     do \
@@ -1379,21 +1379,21 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 94:             /*throw ::unittest::AssertionFailedException(__FILE__, __LINE__);*/ \
 95:         } \
 96:     } while (0)
-97: 
+97:
 98: /// @brief Expect predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_EXPECT_RESULT if predicate function returns false
 99: #define EXPECT_PRED_FORMAT1(pred_format, v1) \
 100:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), v1))
 101: /// @brief Assert predicate function with one parameter (CheckTrue, CheckFalse), generates a failure using UT_ASSERT_RESULT if predicate function returns false
 102: #define ASSERT_PRED_FORMAT1(pred_format, v1) \
 103:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), v1))
-104: 
+104:
 105: /// @brief Expect predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_EXPECT_RESULT if predicate function returns false
 106: #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
 107:   UT_EXPECT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
 108: /// @brief Assert predicate function with two parameters (CheckEqual(IgnoreCase), CheckNotEqual(IgnoreCase)), generates a failure using UT_ASSERT_RESULT if predicate function returns false
 109: #define ASSERT_PRED_FORMAT2(pred_format, v1, v2) \
 110:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), v1, v2))
-111: 
+111:
 112: /// @brief Force failure with message
 113: #define FAIL(message) UT_EXPECT_RESULT(GenericFailure(message))
 114: /// @brief Assert that value is true
@@ -1408,7 +1408,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 123:     { \
 124:         EXPECT_PRED_FORMAT1(::unittest::CheckTrue, value); \
 125:     } while (0)
-126: 
+126:
 127: /// @brief Assert that value is false
 128: #define ASSERT_FALSE(value) \
 129:     do \
@@ -1421,7 +1421,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 136:     { \
 137:         EXPECT_PRED_FORMAT1(::unittest::CheckFalse, value); \
 138:     } while (0)
-139: 
+139:
 140: /// @brief Assert that actual value is equal to expected value
 141: #define ASSERT_EQ(expected, actual) \
 142:     do \
@@ -1434,7 +1434,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 149:     { \
 150:         EXPECT_PRED_FORMAT2(::unittest::EqHelper::CheckEqual, expected, actual); \
 151:     } while (0)
-152: 
+152:
 153: /// @brief Assert that actual value is not equal to expected value
 154: #define ASSERT_NE(expected, actual) \
 155:     do \
@@ -1485,23 +1485,23 @@ Update the file `code/libraries/unittest/include/unittest/unittest.h`
 ```cpp
 File: code/libraries/unittest/include/unittest/unittest.h
 ...
-45: #include <unittest/TestFixture.h>
-46: #include <unittest/TestSuite.h>
-47: 
-48: #include <unittest/ITestReporter.h>
-49: #include <unittest/AssertMacros.h>
-50: #include <unittest/ConsoleTestReporter.h>
-51: #include <unittest/CurrentTest.h>
-52: #include <unittest/DeferredTestReporter.h>
-53: #include <unittest/Test.h>
-54: #include <unittest/TestDetails.h>
-55: #include <unittest/TestFixtureInfo.h>
-56: #include <unittest/TestInfo.h>
-57: #include <unittest/TestMacros.h>
-58: #include <unittest/TestRegistry.h>
-59: #include <unittest/TestResults.h>
-60: #include <unittest/TestRunner.h>
-61: #include <unittest/TestSuiteInfo.h>
+45: #include "unittest/TestFixture.h"
+46: #include "unittest/TestSuite.h"
+47:
+48: #include "unittest/ITestReporter.h"
+49: #include "unittest/AssertMacros.h"
+50: #include "unittest/ConsoleTestReporter.h"
+51: #include "unittest/CurrentTest.h"
+52: #include "unittest/DeferredTestReporter.h"
+53: #include "unittest/Test.h"
+54: #include "unittest/TestDetails.h"
+55: #include "unittest/TestFixtureInfo.h"
+56: #include "unittest/TestInfo.h"
+57: #include "unittest/TestMacros.h"
+58: #include "unittest/TestRegistry.h"
+59: #include "unittest/TestResults.h"
+60: #include "unittest/TestRunner.h"
+61: #include "unittest/TestSuiteInfo.h"
 ```
 
 ### Update project configuration {#TUTORIAL_18_WRITING_UNIT_TESTS_CREATING_TEST_CASES___STEP_2_UPDATE_PROJECT_CONFIGURATION}
@@ -1527,7 +1527,7 @@ File: code/libraries/unittest/CMakeLists.txt
 42:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
 44:     )
-45: 
+45:
 46: set(PROJECT_INCLUDES_PUBLIC
 47:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
@@ -1559,22 +1559,22 @@ Update the file `code\applications\demo\src\main.cpp`
 
 ```cpp
 File: code\applications\demo\src\main.cpp
-1: #include <baremetal/Assert.h>
-2: #include <baremetal/Console.h>
-3: #include <baremetal/Logger.h>
-4: #include <baremetal/System.h>
-5: #include <baremetal/Timer.h>
-6: 
-7: #include <unittest/unittest.h>
-8: 
+1: #include "baremetal/Assert.h"
+2: #include "baremetal/Console.h"
+3: #include "baremetal/Logger.h"
+4: #include "baremetal/System.h"
+5: #include "baremetal/Timer.h"
+6:
+7: #include "unittest/unittest.h"
+8:
 9: LOG_MODULE("main");
-10: 
+10:
 11: using namespace baremetal;
 12: using namespace unittest;
-13: 
+13:
 14: TEST_SUITE(Suite1)
 15: {
-16: 
+16:
 17: class FixtureMyTest1
 18:     : public TestFixture
 19: {
@@ -1588,17 +1588,17 @@ File: code\applications\demo\src\main.cpp
 27:         LOG_DEBUG("MyTest TearDown");
 28:     }
 29: };
-30: 
+30:
 31: TEST_FIXTURE(FixtureMyTest1, MyTest1)
 32: {
 33:     FAIL("For some reason");
 34: }
-35: 
+35:
 36: } // Suite1
-37: 
+37:
 38: TEST_SUITE(Suite2)
 39: {
-40: 
+40:
 41: class FixtureMyTest2
 42:     : public TestFixture
 43: {
@@ -1612,7 +1612,7 @@ File: code\applications\demo\src\main.cpp
 51:         LOG_DEBUG("FixtureMyTest2 TearDown");
 52:     }
 53: };
-54: 
+54:
 55: TEST_FIXTURE(FixtureMyTest2, MyTest2)
 56: {
 57:     EXPECT_TRUE(true);
@@ -1620,9 +1620,9 @@ File: code\applications\demo\src\main.cpp
 59:     EXPECT_TRUE(false);
 60:     EXPECT_FALSE(true);
 61: }
-62: 
+62:
 63: } // Suite2
-64: 
+64:
 65: class FixtureMyTest3
 66:     : public TestFixture
 67: {
@@ -1636,7 +1636,7 @@ File: code\applications\demo\src\main.cpp
 75:         LOG_DEBUG("FixtureMyTest3 TearDown");
 76:     }
 77: };
-78: 
+78:
 79: TEST_FIXTURE(FixtureMyTest3, MyTest3)
 80: {
 81:     int x = 0;
@@ -1647,22 +1647,22 @@ File: code\applications\demo\src\main.cpp
 86:     EXPECT_NE(x, y);
 87:     EXPECT_NE(y, z);
 88: }
-89: 
+89:
 90: TEST(MyTest)
 91: {
 92:     ASSERT_TRUE(false);
 93: }
-94: 
+94:
 95: int main()
 96: {
 97:     auto& console = GetConsole();
-98: 
+98:
 99:     ConsoleTestReporter reporter;
 100:     RunAllTests(&reporter);
-101: 
+101:
 102:     LOG_INFO("Wait 5 seconds");
 103:     Timer::WaitMilliSeconds(5000);
-104: 
+104:
 105:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
 106:     char ch{};
 107:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
@@ -1672,7 +1672,7 @@ File: code\applications\demo\src\main.cpp
 111:     }
 112:     if (ch == 'p')
 113:         assert(false);
-114: 
+114:
 115:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 116: }
 ```
@@ -1760,117 +1760,117 @@ File: code/libraries/unittest/include/unittest/Checks.h
 97:                                     const baremetal::string& expectedValue,
 98:                                     const baremetal::string& actualValue,
 99:                                     const baremetal::string& toleranceValue);
-100: 
+100:
 ...
 254: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 255:                                    char const* expected, char const* actual);
-256: 
+256:
 257: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 258:                                    char* expected, char* actual);
-259: 
+259:
 260: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 261:                                    char* expected, char const* actual);
-262: 
+262:
 263: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 264:                                    char const* expected, char* actual);
-265: 
+265:
 266: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 267:                                       char const* expected, char const* actual);
-268: 
+268:
 269: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 270:                                       char* expected, char* actual);
-271: 
+271:
 272: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 273:                                       char* expected, char const* actual);
-274: 
+274:
 275: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 276:                                       char const* expected, char* actual);
-277: 
+277:
 278: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
 279:                                    const baremetal::string& actualExpression,
 280:                                    const baremetal::string& expected,
 281:                                    const baremetal::string& actual);
-282: 
+282:
 283: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
 284:                                    const baremetal::string& actualExpression,
 285:                                    const baremetal::string& expected,
 286:                                    const char* actual);
-287: 
+287:
 288: AssertionResult CheckEqualInternal(const baremetal::string& expectedExpression,
 289:                                    const baremetal::string& actualExpression,
 290:                                    const char* expected,
 291:                                    const baremetal::string& actual);
-292: 
+292:
 293: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
 294:                                       const baremetal::string& actualExpression,
 295:                                       const baremetal::string& expected,
 296:                                       const baremetal::string& actual);
-297: 
+297:
 298: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
 299:                                       const baremetal::string& actualExpression,
 300:                                       const baremetal::string& expected,
 301:                                       const char* actual);
-302: 
+302:
 303: AssertionResult CheckNotEqualInternal(const baremetal::string& expectedExpression,
 304:                                       const baremetal::string& actualExpression,
 305:                                       const char* expected,
 306:                                       const baremetal::string& actual);
-307: 
+307:
 308: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 309:                                              char const* expected, char const* actual);
-310: 
+310:
 311: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 312:                                              char* expected, char* actual);
-313: 
+313:
 314: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 315:                                              char* expected, char const* actual);
-316: 
+316:
 317: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 318:                                              char const* expected, char* actual);
-319: 
+319:
 320: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 321:                                                 char const* expected, char const* actual);
-322: 
+322:
 323: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 324:                                                 char* expected, char* actual);
-325: 
+325:
 326: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 327:                                                 char* expected, char const* actual);
-328: 
+328:
 329: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression, const baremetal::string& actualExpression,
 330:                                                 char const* expected, char* actual);
-331: 
+331:
 332: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 333:                                              const baremetal::string& actualExpression,
 334:                                              const baremetal::string& expected,
 335:                                              const baremetal::string& actual);
-336: 
+336:
 337: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 338:                                              const baremetal::string& actualExpression,
 339:                                              const baremetal::string& expected,
 340:                                              const char* actual);
-341: 
+341:
 342: AssertionResult CheckEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 343:                                              const baremetal::string& actualExpression,
 344:                                              const char* expected,
 345:                                              const baremetal::string& actual);
-346: 
+346:
 347: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 348:                                                 const baremetal::string& actualExpression,
 349:                                                 const baremetal::string& expected,
 350:                                                 const baremetal::string& actual);
-351: 
+351:
 352: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 353:                                                 const baremetal::string& actualExpression,
 354:                                                 const baremetal::string& expected,
 355:                                                 const char* actual);
-356: 
+356:
 357: AssertionResult CheckNotEqualInternalIgnoreCase(const baremetal::string& expectedExpression,
 358:                                                 const baremetal::string& actualExpression,
 359:                                                 const char* expected,
 360:                                                 const baremetal::string& actual);
-361: 
-362: 
+361:
+362:
 363: /// <summary>
 364: /// Helper class for {ASSERT|EXPECT}_EQ/NE
 365: ///
@@ -1899,7 +1899,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 388:     {
 389:         return CheckEqualInternal(expectedExpression, actualExpression, expected, actual);
 390:     }
-391: 
+391:
 392:     /// <summary>
 393:     /// Evaluate whether an expected value is not equal to an actual value, generate a success object if successful, otherwise a failure object
 394:     /// </summary>
@@ -1917,10 +1917,10 @@ File: code/libraries/unittest/include/unittest/Checks.h
 406:         return CheckNotEqualInternal(expectedExpression, actualExpression, expected, actual);
 407:     }
 408: };
-409: 
+409:
 410: /// <summary>
 411: /// Helper class for {ASSERT|EXPECT}_EQ/NE_IGNORE_CASE
-412: /// 
+412: ///
 413: /// Forms generalized mechanism for calling polymorphic check functions for string comparisons ignoring case.
 414: /// </summary>
 415: class EqHelperStringCaseInsensitive
@@ -1942,7 +1942,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 431:     {
 432:         return CheckEqualInternalIgnoreCase(expectedExpression, actualExpression, expected, actual);
 433:     }
-434: 
+434:
 435:     /// <summary>
 436:     /// Evaluate whether an expected value is not equal to an actual value, ignoring case, generate a success object if successful, otherwise a failure object
 437:     /// </summary>
@@ -1960,10 +1960,10 @@ File: code/libraries/unittest/include/unittest/Checks.h
 449:         return CheckNotEqualInternalIgnoreCase(expectedExpression, actualExpression, expected, actual);
 450:     }
 451: };
-452: 
+452:
 453: /// <summary>
 454: /// Compare an expected and actual value, with tolerance
-455: /// 
+455: ///
 456: /// Compares two floating point values, and returns true if the absolute difference is within tolerance
 457: /// </summary>
 458: /// <typeparam name="Expected">Type of expected value</typeparam>
@@ -1978,7 +1978,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 467: {
 468:     return (actual >= (expected - tolerance)) && (actual <= (expected + tolerance));
 469: }
-470: 
+470:
 471: /// <summary>
 472: /// Evaluate whether an expected value is equal to an actual value within tolerance, generate a success object if successful, otherwise a failure object
 473: /// </summary>
@@ -2006,7 +2006,7 @@ File: code/libraries/unittest/include/unittest/Checks.h
 495:     }
 496:     return AssertionSuccess();
 497: }
-498: 
+498:
 499: } // namespace unittest
 ```
 
@@ -2113,11 +2113,11 @@ File: code/libraries/unittest/src/Checks.cpp
 ...
 45: /// @file
 46: /// Assertion checks implementation
-47: 
+47:
 48: using namespace baremetal;
-49: 
+49:
 50: namespace unittest {
-51: 
+51:
 52: /// <summary>
 53: /// Compare two strings ignoring case
 54: /// </summary>
@@ -2130,7 +2130,7 @@ File: code/libraries/unittest/src/Checks.cpp
 61:         return false;
 62:     return strcasecmp(a.data(), b.data()) == 0;
 63: }
-64: 
+64:
 ...
 84: /// <summary>
 85: /// Create a boolean failure object
@@ -2146,12 +2146,12 @@ File: code/libraries/unittest/src/Checks.cpp
 95:     {
 96:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 97:     }
-98: 
+98:
 99:     result.append(Format("\n  Expected: %s\n", expectedValue.c_str()));
-100: 
+100:
 101:     return AssertionResult(true, result);
 102: }
-103: 
+103:
 104: /// <summary>
 105: /// Create a equality comparison failure object
 106: /// </summary>
@@ -2171,17 +2171,17 @@ File: code/libraries/unittest/src/Checks.cpp
 120:     {
 121:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 122:     }
-123: 
+123:
 124:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
 125:     if (expectedValue != expectedExpression)
 126:     {
 127:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
 128:     }
 129:     result.append("\n");
-130: 
+130:
 131:     return AssertionResult(true, result);
 132: }
-133: 
+133:
 134: /// <summary>
 135: /// Create a inequality comparison failure object
 136: /// </summary>
@@ -2201,17 +2201,17 @@ File: code/libraries/unittest/src/Checks.cpp
 150:     {
 151:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 152:     }
-153: 
+153:
 154:     result.append(Format("\n  Expected not equal to: %s", expectedExpression.c_str()));
 155:     if (expectedValue != expectedExpression)
 156:     {
 157:         result.append(Format("\n  Which is: %s", expectedValue.c_str()));
 158:     }
 159:     result.append("\n");
-160: 
+160:
 161:     return AssertionResult(true, result);
 162: }
-163: 
+163:
 164: /// <summary>
 165: /// Create a comparison with tolerance failure object
 166: /// </summary>
@@ -2235,7 +2235,7 @@ File: code/libraries/unittest/src/Checks.cpp
 184:     {
 185:         result.append(Format("\n  Actual: %s", actualValue.c_str()));
 186:     }
-187: 
+187:
 188:     result.append(Format("\n  Expected: %s", expectedExpression.c_str()));
 189:     if (expectedValue != expectedExpression)
 190:     {
@@ -2246,12 +2246,12 @@ File: code/libraries/unittest/src/Checks.cpp
 195:     {
 196:         result.append(Format("\n  (+/-) %s", toleranceValue.c_str()));
 197:     }
-198: 
+198:
 199:     return AssertionResult(true, result);
 200: }
-201: 
+201:
 202: namespace internal {
-203: 
+203:
 204: /// <summary>
 205: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 206: /// </summary>
@@ -2264,14 +2264,14 @@ File: code/libraries/unittest/src/Checks.cpp
 213: {
 214:     if (expected == actual)
 215:         return AssertionSuccess();
-216: 
+216:
 217:     if (strcmp(expected, actual))
 218:     {
 219:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
 220:     }
 221:     return AssertionSuccess();
 222: }
-223: 
+223:
 224: /// <summary>
 225: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 226: /// </summary>
@@ -2284,14 +2284,14 @@ File: code/libraries/unittest/src/Checks.cpp
 233: {
 234:     if (expected == actual)
 235:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-236: 
+236:
 237:     if (!strcmp(expected, actual))
 238:     {
 239:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
 240:     }
 241:     return AssertionSuccess();
 242: }
-243: 
+243:
 244: /// <summary>
 245: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 246: /// </summary>
@@ -2304,14 +2304,14 @@ File: code/libraries/unittest/src/Checks.cpp
 253: {
 254:     if (expected == actual)
 255:         return AssertionSuccess();
-256: 
+256:
 257:     if (!EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
 258:     {
 259:         return EqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
 260:     }
 261:     return AssertionSuccess();
 262: }
-263: 
+263:
 264: /// <summary>
 265: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 266: /// </summary>
@@ -2324,16 +2324,16 @@ File: code/libraries/unittest/src/Checks.cpp
 273: {
 274:     if (expected == actual)
 275:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
-276: 
+276:
 277:     if (EqualCaseInsensitive(baremetal::string(expected), baremetal::string(actual)))
 278:     {
 279:         return InEqFailure(expectedExpression, actualExpression, baremetal::string(expected), baremetal::string(actual));
 280:     }
 281:     return AssertionSuccess();
 282: }
-283: 
+283:
 284: } // namespace internal
-285: 
+285:
 286: /// <summary>
 287: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 288: /// </summary>
@@ -2346,7 +2346,7 @@ File: code/libraries/unittest/src/Checks.cpp
 295: {
 296:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 297: }
-298: 
+298:
 299: /// <summary>
 300: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 301: /// </summary>
@@ -2360,7 +2360,7 @@ File: code/libraries/unittest/src/Checks.cpp
 309: {
 310:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 311: }
-312: 
+312:
 313: /// <summary>
 314: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 315: /// </summary>
@@ -2374,7 +2374,7 @@ File: code/libraries/unittest/src/Checks.cpp
 323: {
 324:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 325: }
-326: 
+326:
 327: /// <summary>
 328: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 329: /// </summary>
@@ -2388,7 +2388,7 @@ File: code/libraries/unittest/src/Checks.cpp
 337: {
 338:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 339: }
-340: 
+340:
 341: /// <summary>
 342: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 343: /// </summary>
@@ -2401,7 +2401,7 @@ File: code/libraries/unittest/src/Checks.cpp
 350: {
 351:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 352: }
-353: 
+353:
 354: /// <summary>
 355: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 356: /// </summary>
@@ -2415,7 +2415,7 @@ File: code/libraries/unittest/src/Checks.cpp
 364: {
 365:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 366: }
-367: 
+367:
 368: /// <summary>
 369: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 370: /// </summary>
@@ -2429,7 +2429,7 @@ File: code/libraries/unittest/src/Checks.cpp
 378: {
 379:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 380: }
-381: 
+381:
 382: /// <summary>
 383: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 384: /// </summary>
@@ -2443,7 +2443,7 @@ File: code/libraries/unittest/src/Checks.cpp
 392: {
 393:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 394: }
-395: 
+395:
 396: /// <summary>
 397: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 398: /// </summary>
@@ -2459,7 +2459,7 @@ File: code/libraries/unittest/src/Checks.cpp
 408: {
 409:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 410: }
-411: 
+411:
 412: /// <summary>
 413: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 414: /// </summary>
@@ -2475,7 +2475,7 @@ File: code/libraries/unittest/src/Checks.cpp
 424: {
 425:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 426: }
-427: 
+427:
 428: /// <summary>
 429: /// Check that strings are equal, generate a success object if successful, otherwise a failure object
 430: /// </summary>
@@ -2491,7 +2491,7 @@ File: code/libraries/unittest/src/Checks.cpp
 440: {
 441:     return internal::CheckStringsEqual(expectedExpression, actualExpression, expected, actual);
 442: }
-443: 
+443:
 444: /// <summary>
 445: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 446: /// </summary>
@@ -2507,7 +2507,7 @@ File: code/libraries/unittest/src/Checks.cpp
 456: {
 457:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 458: }
-459: 
+459:
 460: /// <summary>
 461: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 462: /// </summary>
@@ -2523,7 +2523,7 @@ File: code/libraries/unittest/src/Checks.cpp
 472: {
 473:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 474: }
-475: 
+475:
 476: /// <summary>
 477: /// Check that strings are not equal, generate a success object if successful, otherwise a failure object
 478: /// </summary>
@@ -2539,7 +2539,7 @@ File: code/libraries/unittest/src/Checks.cpp
 488: {
 489:     return internal::CheckStringsNotEqual(expectedExpression, actualExpression, expected, actual);
 490: }
-491: 
+491:
 492: /// <summary>
 493: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 494: /// </summary>
@@ -2553,7 +2553,7 @@ File: code/libraries/unittest/src/Checks.cpp
 502: {
 503:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 504: }
-505: 
+505:
 506: /// <summary>
 507: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 508: /// </summary>
@@ -2567,7 +2567,7 @@ File: code/libraries/unittest/src/Checks.cpp
 516: {
 517:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 518: }
-519: 
+519:
 520: /// <summary>
 521: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 522: /// </summary>
@@ -2581,7 +2581,7 @@ File: code/libraries/unittest/src/Checks.cpp
 530: {
 531:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 532: }
-533: 
+533:
 534: /// <summary>
 535: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 536: /// </summary>
@@ -2595,7 +2595,7 @@ File: code/libraries/unittest/src/Checks.cpp
 544: {
 545:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 546: }
-547: 
+547:
 548: /// <summary>
 549: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 550: /// </summary>
@@ -2609,7 +2609,7 @@ File: code/libraries/unittest/src/Checks.cpp
 558: {
 559:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 560: }
-561: 
+561:
 562: /// <summary>
 563: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 564: /// </summary>
@@ -2623,7 +2623,7 @@ File: code/libraries/unittest/src/Checks.cpp
 572: {
 573:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 574: }
-575: 
+575:
 576: /// <summary>
 577: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 578: /// </summary>
@@ -2637,7 +2637,7 @@ File: code/libraries/unittest/src/Checks.cpp
 586: {
 587:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 588: }
-589: 
+589:
 590: /// <summary>
 591: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 592: /// </summary>
@@ -2651,7 +2651,7 @@ File: code/libraries/unittest/src/Checks.cpp
 600: {
 601:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 602: }
-603: 
+603:
 604: /// <summary>
 605: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 606: /// </summary>
@@ -2667,7 +2667,7 @@ File: code/libraries/unittest/src/Checks.cpp
 616: {
 617:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 618: }
-619: 
+619:
 620: /// <summary>
 621: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 622: /// </summary>
@@ -2683,7 +2683,7 @@ File: code/libraries/unittest/src/Checks.cpp
 632: {
 633:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 634: }
-635: 
+635:
 636: /// <summary>
 637: /// Check that strings are equal ignoring case, generate a success object if successful, otherwise a failure object
 638: /// </summary>
@@ -2699,7 +2699,7 @@ File: code/libraries/unittest/src/Checks.cpp
 648: {
 649:     return internal::CheckStringsEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 650: }
-651: 
+651:
 652: /// <summary>
 653: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 654: /// </summary>
@@ -2715,7 +2715,7 @@ File: code/libraries/unittest/src/Checks.cpp
 664: {
 665:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 666: }
-667: 
+667:
 668: /// <summary>
 669: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 670: /// </summary>
@@ -2731,7 +2731,7 @@ File: code/libraries/unittest/src/Checks.cpp
 680: {
 681:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 682: }
-683: 
+683:
 684: /// <summary>
 685: /// Check that strings are not equal ignoring case, generate a success object if successful, otherwise a failure object
 686: /// </summary>
@@ -2747,7 +2747,7 @@ File: code/libraries/unittest/src/Checks.cpp
 696: {
 697:     return internal::CheckStringsNotEqualIgnoreCase(expectedExpression, actualExpression, expected, actual);
 698: }
-699: 
+699:
 700: } // namespace unittest
 ```
 
@@ -2831,7 +2831,7 @@ Update the file `code/libraries/unittest/include/unittest/PrintValue.h`
 File: code/libraries/unittest/include/unittest/PrintValue.h
 ...
 49: using nullptr_t = decltype(nullptr);
-50: 
+50:
 51: /// <summary>
 52: /// Direct cast to another type
 53: /// </summary>
@@ -2840,7 +2840,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 56: /// <returns>Casted value</returns>
 57: template<typename To>
 58: inline To ImplicitCast_(To x) { return x; }
-59: 
+59:
 60: /// <summary>
 61: /// Print a value to string using a serializer
 62: /// </summary>
@@ -2873,7 +2873,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 89: {
 90:     PrintTo(static_cast<unsigned char>(c), s);
 91: }
-92: 
+92:
 93: /// <summary>
 94: /// Print a boolean value to string
 95: /// </summary>
@@ -2883,7 +2883,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 99: {
 100:     s = (x ? "true" : "false");
 101: }
-102: 
+102:
 103: /// <summary>
 104: /// Print a const char* to string
 105: /// </summary>
@@ -2899,7 +2899,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 115: {
 116:     PrintTo(ImplicitCast_<const char*>(str), s);
 117: }
-118: 
+118:
 119: /// <summary>
 120: /// Print a signed char* to string
 121: ///
@@ -2944,7 +2944,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 160: {
 161:     PrintTo(ImplicitCast_<const void*>(str), s);
 162: }
-163: 
+163:
 164: /// <summary>
 165: /// Print a string to string
 166: /// </summary>
@@ -2960,7 +2960,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 176: {
 177:     PrintStringTo(str, s);
 178: }
-179: 
+179:
 180: /// <summary>
 181: /// Print a nullptr to string
 182: /// </summary>
@@ -2990,12 +2990,12 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 233:         s = "@";
 234:         s.append(baremetal::Serialize(reinterpret_cast<const void*>(&value)));
 235:         s.append(" ");
-236: 
+236:
 237:         // Then prints the value itself.
 238:         PrintTo(value, s);
 239:     }
 240: };
-241: 
+241:
 242: /// <summary>
 243: /// Universal print to string function, uses UniversalPrinter
 244: /// </summary>
@@ -3008,7 +3008,7 @@ File: code/libraries/unittest/include/unittest/PrintValue.h
 251:     typedef T T1;
 252:     UniversalPrinter<T1>::Print(value, s);
 253: }
-254: 
+254:
 255: /// <summary>
 256: /// Universal terse printer class, uses UniversalPrint
 257: /// </summary>
@@ -3118,7 +3118,7 @@ Create the file `code/libraries/unittest/src/PrintValue.cpp`
 ```cpp
 File: code/libraries/unittest/src/PrintValue.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : PrintValue.cpp
 5: //
@@ -3154,16 +3154,16 @@ File: code/libraries/unittest/src/PrintValue.cpp
 35: // DEALINGS IN THE SOFTWARE.
 36: //
 37: //------------------------------------------------------------------------------
-38: 
-39: #include <unittest/PrintValue.h>
-40: 
+38:
+39: #include "unittest/PrintValue.h"
+40:
 41: using namespace baremetal;
-42: 
+42:
 43: void PrintStringTo(const baremetal::string& str, baremetal::string& s)
 44: {
 45:     s = str;
 46: }
-47: 
+47:
 48: void PrintTo(unsigned char ch, baremetal::string &s)
 49: {
 50:     s += ch;
@@ -3184,18 +3184,18 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 64: #ifdef ASSERT_NEAR
 65:     #error unittest redefines ASSERT_NEAR
 66: #endif
-67: 
+67:
 ...
 84: #ifdef EXPECT_NEAR
 85:     #error unittest redefines EXPECT_NEAR
 86: #endif
-87: 
+87:
 88: namespace unittest
 89: {
-90: 
+90:
 91: namespace internal
 92: {
-93: 
+93:
 94: // Two overloaded helpers for checking at compile time whether an
 95: // expression is a null pointer literal (i.e. nullptr or any 0-valued
 96: // compile-time integral constant).  Their return values have
@@ -3213,7 +3213,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 108: class Secret;
 109: /// <summary>
 110: /// Conversion check function to check whether argument is a pointer
-111: /// 
+111: ///
 112: /// Not implemented, never called, only declared for return type size
 113: /// </summary>
 114: /// <param name="p">Argument</param>
@@ -3221,17 +3221,17 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 116: char IsNullLiteralHelper(Secret* p);
 117: /// <summary>
 118: /// Conversion check function to check whether argument is not a pointer
-119: /// 
+119: ///
 120: /// Not implemented, never called, only declared for return type size
 121: /// </summary>
 122: /// <returns>Unused</returns>
 123: char (&IsNullLiteralHelper(...))[2];
-124: 
+124:
 125: } // namespace internal
-126: 
+126:
 127: } // namespace unittest
-128: 
-129: 
+128:
+129:
 130: /// @brief Boolean expression to check whether the argument is a null literal. Returns true if the argument is nullptr, false otherwise
 131: #define IS_NULL_LITERAL(x) \
 132:      (sizeof(::unittest::internal::IsNullLiteralHelper(x)) == 1)
@@ -3242,7 +3242,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 169: /// @brief Expect predicate function with three parameters (CheckClose), generates a failure using UT_ASSERT_RESULT if predicate function returns false
 170: #define ASSERT_PRED_FORMAT3(pred_format, v1, v2, v3) \
 171:   UT_ASSERT_RESULT(pred_format(baremetal::string(#v1), baremetal::string(#v2), baremetal::string(#v3), v1, v2, v3))
-172: 
+172:
 ...
 201: /// @brief Assert that actual value is equal to expected value
 202: #define ASSERT_EQ(expected, actual) \
@@ -3256,7 +3256,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 210:     { \
 211:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckEqual, expected, actual); \
 212:     } while (0)
-213: 
+213:
 214: /// @brief Assert that actual value is not equal to expected value
 215: #define ASSERT_NE(expected, actual) \
 216:     do \
@@ -3269,7 +3269,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 223:     { \
 224:         EXPECT_PRED_FORMAT2(::unittest::EqHelper<IS_NULL_LITERAL(expected)>::CheckNotEqual, expected, actual); \
 225:     } while (0)
-226: 
+226:
 227: /// @brief Assert that actual value is equal to expected value ignoring case
 228: #define ASSERT_EQ_IGNORE_CASE(expected, actual) \
 229:     do \
@@ -3282,7 +3282,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 236:     { \
 237:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckEqualIgnoreCase, expected, actual); \
 238:     } while (0)
-239: 
+239:
 240: /// @brief Assert that actual value is not equal to expected value ignoring case
 241: #define ASSERT_NE_IGNORE_CASE(expected, actual) \
 242:     do \
@@ -3295,7 +3295,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 249:     { \
 250:         EXPECT_PRED_FORMAT2(::unittest::EqHelperStringCaseInsensitive::CheckNotEqualIgnoreCase, expected, actual); \
 251:     } while (0)
-252: 
+252:
 253: /// @brief Assert that actual value is equal to expected value within tolerance (for floating point comparison)
 254: #define ASSERT_NEAR(expected, actual, tolerance) \
 255:     do \
@@ -3308,7 +3308,7 @@ File: code/libraries/unittest/include/unittest/AssertMacros.h
 262:     { \
 263:         EXPECT_PRED_FORMAT3(::unittest::CheckClose, expected, actual, tolerance); \
 264:     } while (0)
-265: 
+265:
 266: /// @brief Assert that value is nullptr
 267: #define ASSERT_NULL(value) ASSERT_EQ(nullptr, value)
 268: /// @brief Expect that value is nullptr
@@ -3357,7 +3357,7 @@ File: code/libraries/unittest/CMakeLists.txt
 26:     ${LINKER_LIBRARIES}
 27:     ${PROJECT_DEPENDENCIES}
 28:     )
-29: 
+29:
 30:     set(PROJECT_SOURCES
 31:     ${CMAKE_CURRENT_SOURCE_DIR}/src/Checks.cpp
 32:     ${CMAKE_CURRENT_SOURCE_DIR}/src/ConsoleTestReporter.cpp
@@ -3374,7 +3374,7 @@ File: code/libraries/unittest/CMakeLists.txt
 43:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestRunner.cpp
 44:     ${CMAKE_CURRENT_SOURCE_DIR}/src/TestSuiteInfo.cpp
 45:     )
-46: 
+46:
 47: set(PROJECT_INCLUDES_PUBLIC
 48:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/AssertMacros.h
 49:     ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/Checks.h
@@ -3501,7 +3501,7 @@ File: code\applications\demo\src\main.cpp
 181:    EXPECT_NE_IGNORE_CASE(t, wC);
 182:    ASSERT_NE_IGNORE_CASE(uC, w);
 183:    EXPECT_NE_IGNORE_CASE(uC, wC);
-184: 
+184:
 185:    double a = 0.123;
 186:    double b = 0.122;
 187:    ASSERT_EQ(a, b);
@@ -3796,20 +3796,20 @@ Create the file `code\libraries\baremetal\test\main.cpp`
 
 ```cpp
 File: code\libraries\baremetal\test\main.cpp
-1: #include <baremetal/System.h>
-2: #include <unittest/unittest.h>
-3: 
+1: #include "baremetal/System.h"
+2: #include "unittest/unittest.h"
+3:
 4: using namespace baremetal;
 5: using namespace unittest;
-6: 
+6:
 7: int main()
 8: {
 9:     ConsoleTestReporter reporter;
 10:     RunAllTests(&reporter);
-11: 
+11:
 12:     return static_cast<int>(ReturnCode::ExitHalt);
 13: }
-14: 
+14:
 ```
 
 ### StringTest.cpp {#TUTORIAL_18_WRITING_UNIT_TESTS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_STRINGTESTCPP}
@@ -3823,18 +3823,18 @@ Create the file `code\libraries\baremetal\test\StringTest.cpp`
 ```cpp
 File: code\libraries\baremetal\test\StringTest.cpp
 40: #include "unittest/unittest.h"
-41: 
+41:
 42: #include "baremetal/String.h"
 43: #include "baremetal/Util.h"
-44: 
+44:
 45: using namespace unittest;
-46: 
+46:
 47: namespace baremetal {
 48: namespace test {
-49: 
+49:
 50: TEST_SUITE(Baremetal)
 51: {
-52: 
+52:
 53: class StringTest
 54:     : public TestFixture
 55: {
@@ -3849,7 +3849,7 @@ File: code\libraries\baremetal\test\StringTest.cpp
 64:     {
 65:     }
 66: };
-67: 
+67:
 68: TEST_FIXTURE(StringTest, ConstructDefault)
 69: {
 70:     string s;
@@ -3861,16 +3861,16 @@ File: code\libraries\baremetal\test\StringTest.cpp
 76:     EXPECT_EQ(size_t{ 0 }, s.length());
 77:     EXPECT_EQ(size_t{ 0 }, s.capacity());
 78: }
-79: 
+79:
 80: TEST_FIXTURE(StringTest, ConstructConstCharPtr)
 81: {
 82:     const char* text = otherText;
 83:     const char* expected = otherText;
 84:     size_t expectedLength = strlen(expected);
 85:     size_t length = strlen(expected);
-86: 
+86:
 87:     string s(text);
-88: 
+88:
 89:     EXPECT_FALSE(s.empty());
 90:     ASSERT_NOT_NULL(s.data());
 91:     ASSERT_NOT_NULL(s.c_str());
@@ -3883,15 +3883,15 @@ File: code\libraries\baremetal\test\StringTest.cpp
 98:     EXPECT_EQ(expected, s);
 99:     EXPECT_EQ(s, expected);
 100: }
-101: 
+101:
 102: TEST_FIXTURE(StringTest, ConstructConstCharPtrEmpty)
 103: {
 104:     const char* text = "";
 105:     const char* expected = "";
 106:     size_t expectedLength = strlen(expected);
-107: 
+107:
 108:     string s(text);
-109: 
+109:
 110:     EXPECT_TRUE(s.empty());
 111:     ASSERT_NOT_NULL(s.data());
 112:     ASSERT_NOT_NULL(s.c_str());
@@ -3904,14 +3904,14 @@ File: code\libraries\baremetal\test\StringTest.cpp
 119:     EXPECT_EQ(expected, s);
 120:     EXPECT_EQ(s, expected);
 121: }
-122: 
+122:
 123: TEST_FIXTURE(StringTest, ConstructNullPtr)
 124: {
 125:     const char* expected = "";
 126:     size_t expectedLength = strlen(expected);
-127: 
+127:
 128:     string s(nullptr);
-129: 
+129:
 130:     EXPECT_TRUE(s.empty());
 131:     ASSERT_NOT_NULL(s.data());
 132:     ASSERT_NOT_NULL(s.c_str());
@@ -3944,16 +3944,16 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 1: project(baremetal-test
 2:     DESCRIPTION "Baremetal test application"
 3:     LANGUAGES CXX)
-4: 
+4:
 5: message(STATUS "\n**********************************************************************************\n")
 6: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-7: 
+7:
 8: message("\n** Setting up ${PROJECT_NAME} **\n")
-9: 
+9:
 10: include(functions)
-11: 
+11:
 12: set(PROJECT_TARGET_NAME ${PROJECT_NAME}.elf)
-13: 
+13:
 14: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 15: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 16: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
@@ -3962,27 +3962,27 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 19: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
 20: set(PROJECT_INCLUDE_DIRS_PRIVATE )
 21: set(PROJECT_INCLUDE_DIRS_PUBLIC )
-22: 
+22:
 23: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-24: 
+24:
 25: set(PROJECT_DEPENDENCIES
 26:     baremetal
 27:     unittest
 28:     )
-29: 
+29:
 30: set(PROJECT_LIBS
 31:     ${LINKER_LIBRARIES}
 32:     ${PROJECT_DEPENDENCIES}
 33:     )
-34: 
+34:
 35: set(PROJECT_SOURCES
 36:     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/StringTest.cpp
 38:     )
-39: 
+39:
 40: set(PROJECT_INCLUDES_PUBLIC )
 41: set(PROJECT_INCLUDES_PRIVATE )
-42: 
+42:
 43: if (CMAKE_VERBOSE_MAKEFILE)
 44:     display_list("Package                           : " ${PROJECT_NAME} )
 45:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
@@ -4005,14 +4005,14 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 62:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
 63:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
 64: endif()
-65: 
+65:
 66: if (PLATFORM_BAREMETAL)
 67:     set(START_GROUP -Wl,--start-group)
 68:     set(END_GROUP -Wl,--end-group)
 69: endif()
-70: 
+70:
 71: add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-72: 
+72:
 73: target_link_libraries(${PROJECT_NAME} ${START_GROUP} ${PROJECT_LIBS} ${END_GROUP})
 74: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
 75: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
@@ -4036,21 +4036,21 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 93:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
 94:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
 95:     )
-96: 
+96:
 97: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-98: 
+98:
 99: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
 100: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
 101:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
 102: endif()
-103: 
+103:
 104: link_directories(${LINK_DIRECTORIES})
 105: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
 106: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
 107: set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
-108: 
+108:
 109: show_target_properties(${PROJECT_NAME})
-110: 
+110:
 111: add_subdirectory(create-image)
 ```
 
@@ -4064,15 +4064,15 @@ Create the file `code/libraries/baremetal/test/create-image/CMakeLists.txt`
 File: code/libraries/baremetal/test/create-image/CMakeLists.txt
 1: project(baremetal-test-image
 2:     DESCRIPTION "Kernel image for baremetal test")
-3: 
+3:
 4: message(STATUS "\n**********************************************************************************\n")
 5: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-6: 
+6:
 7: message("\n** Setting up ${PROJECT_NAME} **\n")
-8: 
+8:
 9: set(DEPENDENCY baremetal-test)
 10: set(IMAGE_NAME ${BAREMETAL_TARGET_KERNEL}.img)
-11: 
+11:
 12: create_image(${PROJECT_NAME} ${IMAGE_NAME} ${DEPENDENCY})
 ```
 
@@ -4085,7 +4085,7 @@ Update the file `code/libraries/baremetal/CMakeLists.txt`
 ```cmake
 File: code/libraries/baremetal/test/CMakeLists.txt
 150: show_target_properties(${PROJECT_NAME})
-151: 
+151:
 152: add_subdirectory(test)
 ```
 
@@ -4281,7 +4281,7 @@ Create the file `code\libraries\baremetal\test\SerializationTest.cpp`
 ```cpp
 File: code\libraries\baremetal\test\SerializationTest.cpp
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2024 Rene Barto
+2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
 4: // File        : SerializationTest.cpp
 5: //
@@ -4318,19 +4318,19 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39: 
+39:
 40: #include "unittest/unittest.h"
-41: 
+41:
 42: #include "baremetal/Serialization.h"
-43: 
+43:
 44: using namespace unittest;
-45: 
+45:
 46: namespace baremetal {
 47: namespace test {
-48: 
+48:
 49: TEST_SUITE(Baremetal)
 50: {
-51: 
+51:
 52: class SerializationTest
 53:     : public TestFixture
 54: {
@@ -4342,7 +4342,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 60:     {
 61:     }
 62: };
-63: 
+63:
 64: TEST_FIXTURE(SerializationTest, SerializeChar)
 65: {
 66:     char c = 'A';
@@ -4350,7 +4350,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 68:     EXPECT_EQ("  65", Serialize(c, 4));
 69:     EXPECT_EQ("65  ", Serialize(c, -4));
 70: }
-71: 
+71:
 72: TEST_FIXTURE(SerializationTest, SerializeIntegerWithPrefix)
 73: {
 74:     int32 i32 = 1234567890l;
@@ -4359,7 +4359,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 77:     EXPECT_EQ("1234567890", Serialize(i32, 0, 10, true));
 78:     EXPECT_EQ("0x499602D2", Serialize(i32, 0, 16, true));
 79: }
-80: 
+80:
 81: TEST_FIXTURE(SerializationTest, SerializeIntegerWithPrefixAndLeadingZeros)
 82: {
 83:     int32 i32 = 1234567890l;
@@ -4368,7 +4368,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 86:     EXPECT_EQ("0000001234567890", Serialize(i32, 16, 10, true, true));
 87:     EXPECT_EQ("0x0000499602D2", Serialize(i32, 12, 16, true, true));
 88: }
-89: 
+89:
 90: TEST_FIXTURE(SerializationTest, SerializeIntegerWithoutPrefixWithLeadingZeros)
 91: {
 92:     int32 i32 = 1234567890l;
@@ -4377,7 +4377,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 95:     EXPECT_EQ("0000001234567890", Serialize(i32, 16, 10, false, true));
 96:     EXPECT_EQ("0000499602D2", Serialize(i32, 12, 16, false, true));
 97: }
-98: 
+98:
 99: TEST_FIXTURE(SerializationTest, SerializeInt8)
 100: {
 101:     int8 i8 = 123;
@@ -4392,7 +4392,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 110:     EXPECT_EQ("0x0000007B", Serialize(i8, 8, 16, true, true));
 111:     EXPECT_EQ("0000007B", Serialize(i8, 8, 16, false, true));
 112: }
-113: 
+113:
 114: TEST_FIXTURE(SerializationTest, SerializeUInt8)
 115: {
 116:     uint8 u8 = 234;
@@ -4407,7 +4407,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 125:     EXPECT_EQ("0x000000EA", Serialize(u8, 8, 16, true, true));
 126:     EXPECT_EQ("000000EA", Serialize(u8, 8, 16, false, true));
 127: }
-128: 
+128:
 129: TEST_FIXTURE(SerializationTest, SerializeInt16)
 130: {
 131:     int16 i16 = 12345;
@@ -4422,7 +4422,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 140:     EXPECT_EQ("0x00003039", Serialize(i16, 8, 16, true, true));
 141:     EXPECT_EQ("00003039", Serialize(i16, 8, 16, false, true));
 142: }
-143: 
+143:
 144: TEST_FIXTURE(SerializationTest, SerializeUInt16)
 145: {
 146:     uint16 u16 = 34567;
@@ -4437,7 +4437,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 155:     EXPECT_EQ("0x00008707", Serialize(u16, 8, 16, true, true));
 156:     EXPECT_EQ("00008707", Serialize(u16, 8, 16, false, true));
 157: }
-158: 
+158:
 159: TEST_FIXTURE(SerializationTest, SerializeInt32)
 160: {
 161:     int32 i32 = 1234567890l;
@@ -4452,7 +4452,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 170:     EXPECT_EQ("0x0000499602D2", Serialize(i32, 12, 16, true, true));
 171:     EXPECT_EQ("0000499602D2", Serialize(i32, 12, 16, false, true));
 172: }
-173: 
+173:
 174: TEST_FIXTURE(SerializationTest, SerializeUInt32)
 175: {
 176:     uint32 u32 = 2345678900ul;
@@ -4467,7 +4467,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 185:     EXPECT_EQ("0x00008BD03834", Serialize(u32, 12, 16, true, true));
 186:     EXPECT_EQ("00008BD03834", Serialize(u32, 12, 16, false, true));
 187: }
-188: 
+188:
 189: TEST_FIXTURE(SerializationTest, SerializeInt64)
 190: {
 191:     int64 i64 = 9223372036854775807ll;
@@ -4482,7 +4482,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 200:     EXPECT_EQ("0x000000007FFFFFFFFFFFFFFF", Serialize(i64, 24, 16, true, true));
 201:     EXPECT_EQ("000000007FFFFFFFFFFFFFFF", Serialize(i64, 24, 16, false, true));
 202: }
-203: 
+203:
 204: TEST_FIXTURE(SerializationTest, SerializeUInt64)
 205: {
 206:     uint64 u64 = 9223372036854775808ull;
@@ -4497,7 +4497,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 215:     EXPECT_EQ("0x000000008000000000000000", Serialize(u64, 24, 16, true, true));
 216:     EXPECT_EQ("000000008000000000000000", Serialize(u64, 24, 16, false, true));
 217: }
-218: 
+218:
 219: TEST_FIXTURE(SerializationTest, SerializeFloat)
 220: {
 221:     float f = 1.23456789F;
@@ -4508,7 +4508,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 226:     EXPECT_EQ("   1.2345679", Serialize(f, 12, 7));
 227:     EXPECT_EQ("   1.2345679", Serialize(f, 12, 8));
 228: }
-229: 
+229:
 230: TEST_FIXTURE(SerializationTest, SerializeDouble)
 231: {
 232:     double d = 1.234567890123456;
@@ -4519,7 +4519,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 237:     EXPECT_EQ("         1.2345679", Serialize(d, 18, 7));
 238:     EXPECT_EQ("    1.234567890123", Serialize(d, 18, 12));
 239: }
-240: 
+240:
 241: TEST_FIXTURE(SerializationTest, SerializeString)
 242: {
 243:     string s = "hello world";
@@ -4528,7 +4528,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 246:     EXPECT_EQ("hello world    ", Serialize(s, -15));
 247:     EXPECT_EQ("  \"hello world\"", Serialize(s, 15, true));
 248: }
-249: 
+249:
 250: TEST_FIXTURE(SerializationTest, SerializeConstCharPtr)
 251: {
 252:     const char* s = "hello world";
@@ -4537,7 +4537,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 255:     EXPECT_EQ("hello world    ", Serialize(s, -15));
 256:     EXPECT_EQ("  \"hello world\"", Serialize(s, 15, true));
 257: }
-258: 
+258:
 259: TEST_FIXTURE(SerializationTest, SerializeConstVoidPtr)
 260: {
 261:     const void* pvc = reinterpret_cast<const void*>(0x0123456789ABCDEF);
@@ -4545,7 +4545,7 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 263:     EXPECT_EQ("  0x0123456789ABCDEF", Serialize(pvc, 20));
 264:     EXPECT_EQ("0x0123456789ABCDEF  ", Serialize(pvc, -20));
 265: }
-266: 
+266:
 267: TEST_FIXTURE(SerializationTest, SerializeVoidPtr)
 268: {
 269:     void* pv = reinterpret_cast<void*>(0x0123456789ABCDEF);
@@ -4553,9 +4553,9 @@ File: code\libraries\baremetal\test\SerializationTest.cpp
 271:     EXPECT_EQ("  0x0123456789ABCDEF", Serialize(pv, 20));
 272:     EXPECT_EQ("0x0123456789ABCDEF  ", Serialize(pv, -20));
 273: }
-274: 
+274:
 275: } // suite Baremetal
-276: 
+276:
 277: } // namespace test
 278: } // namespace baremetal
 ```
@@ -4575,7 +4575,7 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 37:     ${CMAKE_CURRENT_SOURCE_DIR}/src/SerializationTest.cpp
 38:     ${CMAKE_CURRENT_SOURCE_DIR}/src/StringTest.cpp
 39:     )
-40: 
+40:
 41: set(PROJECT_INCLUDES_PUBLIC )
 42: set(PROJECT_INCLUDES_PRIVATE )
 ```
@@ -4777,4 +4777,4 @@ No failures
 Info   Halt (System:122)
 ```
 
-Next: [19-exceptions](19-exceptions.md)
+Next: [25-lcd](25-lcd.md)

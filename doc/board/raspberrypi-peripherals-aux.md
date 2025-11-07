@@ -1,4 +1,4 @@
-# Raspberry PI auxiliary peripheral {#RASPBERRY_PI_AUXILIARY_PERIPHERAL}
+# Raspberry Pi auxiliary peripheral {#RASPBERRY_PI_AUXILIARY_PERIPHERAL}
 
 For Raspberry Pi 3 see [documentation](pdf/bcm2837-peripherals.pdf), section 2, page 8.
 

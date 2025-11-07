@@ -63,22 +63,22 @@
 #define GPU_TO_ARM(addr)  ((addr) & ~0xC0000000)
 
 #if BAREMETAL_RPI_TARGET == 3
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 3
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 3
 #define RPI_BCM_IO_BASE 0x3F000000
 #elif BAREMETAL_RPI_TARGET == 4
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 4
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 4
 #define RPI_BCM_IO_BASE 0xFE000000
 #define ARM_IO_BASE     0xFF840000
 #else
-/// @brief Base address for Raspberry PI BCM I/O for Raspberry Pi 5
+/// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 5
 #define RPI_BCM_IO_BASE 0x107C000000UL
 #define ARM_IO_BASE     0x107C000000UL
 #endif
 #if BAREMETAL_RPI_TARGET <= 4
-/// @brief End address for Raspberry PI 3 / 4 BCM I/O
+/// @brief End address for Raspberry Pi 3 / 4 BCM I/O
 #define RPI_BCM_IO_END (RPI_BCM_IO_BASE + 0xFFFFFF)
 #else
-/// @brief End address for Raspberry PI 5 BCM I/O
+/// @brief End address for Raspberry Pi 5 BCM I/O
 #define RPI_BCM_IO_END (RPI_BCM_IO_BASE + 0x3FFFFFF)
 #endif
 

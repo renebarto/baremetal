@@ -65,7 +65,7 @@ For RPI 5, the GPU firmware is embedded into the kernel image, so the kernel ima
 
 ## config.txt {#SYSTEM_STARTUP_CONFIGTXT}
 
-For 64 bit systems, the mimimal contents of config.txt are similar to:
+For 64 bit systems, the minimal contents of config.txt are similar to:
 
 ```text
 #
@@ -106,7 +106,7 @@ This does not yet contain the entries for RPI 5 (which would use `kernel__2712.i
 
 kernel8.img is the default kernel to start for normal 64 bit Linux distributions.
 
-For baremetal, the defaults are as follows:
+For bare metal, the defaults are as follows:
 
 | Board  | Architecture     | Image            |
 |--------|------------------|------------------|

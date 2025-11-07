@@ -40,7 +40,7 @@
 #pragma once
 
 /// @file
-/// Standard variable argument list handling using builtin functionality in GCC
+/// Standard variable argument list handling using built-in functionality in GCC
 
 // prevent warning, if <stdarg.h> from toolchain is included too
 #ifndef _STDARG_H

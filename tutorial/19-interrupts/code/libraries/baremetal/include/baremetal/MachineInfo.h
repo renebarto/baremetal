@@ -49,7 +49,7 @@ namespace baremetal {
 class IMemoryAccess;
 
 /// <summary>
-/// Type of SoC used. See @ref RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
+/// Type of SoC used. See @ref RASPBERRY_PI_BARE_METAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
 /// </summary>
 enum class SoCType
 {

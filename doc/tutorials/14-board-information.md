@@ -590,7 +590,7 @@ File: code/libraries/baremetal/include/baremetal/MachineInfo.h
 49: class IMemoryAccess;
 50: 
 51: /// <summary>
-52: /// Type of SoC used. See @ref RASPBERRY_PI_BAREMETAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
+52: /// Type of SoC used. See @ref RASPBERRY_PI_BARE_METAL_DEVELOPMENT_SOC_FOR_EACH_BOARD for more information
 53: /// </summary>
 54: enum class SoCType
 55: {

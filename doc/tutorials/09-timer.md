@@ -36,9 +36,9 @@ Update the file `code/libraries/baremetal/include/baremetal/Timer.h`.
 File: code/libraries/baremetal/include/baremetal/Timer.h
 ...
 47: namespace baremetal {
-48: 
+48:
 49: class IMemoryAccess;
-50: 
+50:
 51: /// <summary>
 52: /// Timer class. For now only contains busy waiting methods
 53: ///
@@ -51,28 +51,28 @@ File: code/libraries/baremetal/include/baremetal/Timer.h
 60:     /// </summary>
 61:     /// <returns>A reference to the singleton Timer</returns>
 62:     friend Timer& GetTimer();
-63: 
+63:
 64: private:
 65:     /// <summary>
 66:     /// Reference to a IMemoryAccess instantiation, injected at construction time, for e.g. testing purposes.
 67:     /// </summary>
 68:     IMemoryAccess& m_memoryAccess;
-69: 
+69:
 70:     Timer();
-71: 
+71:
 72: public:
 73:     Timer(IMemoryAccess& memoryAccess);
-74: 
+74:
 75:     static void WaitCycles(uint32 numCycles);
-76: 
+76:
 77:     uint64 GetSystemTimer();
-78: 
+78:
 79:     static void WaitMilliSeconds(uint64 msec);
 80:     static void WaitMicroSeconds(uint64 usec);
 81: };
-82: 
+82:
 83: Timer& GetTimer();
-84: 
+84:
 85: } // namespace baremetal
 ```
 
@@ -99,23 +99,23 @@ Update the file `code/libraries/baremetal/src/Timer.cpp`.
 File: code/libraries/baremetal/src/Timer.cpp
 ...
 40: #include "baremetal/Timer.h"
-41: 
+41:
 42: #include "baremetal/ARMInstructions.h"
 43: #include "baremetal/BCMRegisters.h"
 44: #include "baremetal/MemoryAccess.h"
-45: 
+45:
 46: /// @file
 47: /// Raspberry Pi Timer implementation
-48: 
+48:
 49: /// @brief Number of milliseconds in a second
 50: #define MSEC_PER_SEC  1000
 51: /// @brief Number of microseconds in a second
 52: #define USEC_PER_SEC  1000000
 53: /// @brief Number of microseconds in a millisecond
 54: #define USEC_PER_MSEC USEC_PER_SEC / MSEC_PER_SEC
-55: 
+55:
 56: using namespace baremetal;
-57: 
+57:
 58: /// <summary>
 59: /// Constructs a default Timer instance (a singleton). Note that the constructor is private, so GetTimer() is needed to instantiate the Timer.
 60: /// </summary>
@@ -123,7 +123,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 62:     : m_memoryAccess{GetMemoryAccess()}
 63: {
 64: }
-65: 
+65:
 66: /// <summary>
 67: /// Constructs a specialized Timer instance which injects a custom IMemoryAccess instance. This is intended for testing.
 68: /// </summary>
@@ -132,7 +132,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 71:     : m_memoryAccess{memoryAccess}
 72: {
 73: }
-74: 
+74:
 75: /// <summary>
 76: /// Wait for specified number of NOP statements. Busy wait
 77: /// </summary>
@@ -147,23 +147,23 @@ File: code/libraries/baremetal/src/Timer.cpp
 86:         }
 87:     }
 88: }
-89: 
+89:
 90: /// <summary>
 91: /// Wait for msec milliseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical counter). Busy wait
 92: ///
-93: /// The timer used for the delays is the ARM builtin timer.
+93: /// The timer used for the delays is the ARM built-in timer.
 94: /// </summary>
 95: /// <param name="msec">Wait time in milliseconds</param>
 96: void Timer::WaitMilliSeconds(uint64 msec)
 97: {
 98:     WaitMicroSeconds(msec * USEC_PER_MSEC);
 99: }
-100: 
+100:
 101: /// <summary>
 102: /// Wait for usec microseconds using ARM timer registers (when not using physical counter) or BCM2835 system timer peripheral (when using physical
 103: /// counter). Busy wait
 104: ///
-105: /// The timer used is the ARM builtin timer.
+105: /// The timer used is the ARM built-in timer.
 106: /// </summary>
 107: /// <param name="usec">Wait time in microseconds</param>
 108: void Timer::WaitMicroSeconds(uint64 usec)
@@ -184,7 +184,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 123:         GetTimerCounter(current);
 124:     } while (current - start < wait);
 125: }
-126: 
+126:
 127: /// <summary>
 128: /// Reads the BCM2835 System Timer counter value. See @ref RASPBERRY_PI_SYSTEM_TIMER
 129: /// </summary>
@@ -205,7 +205,7 @@ File: code/libraries/baremetal/src/Timer.cpp
 144:     // compose long int value
 145:     return (static_cast<uint64>(highWord) << 32 | lowWord);
 146: }
-147: 
+147:
 148: /// <summary>
 149: /// Retrieves the singleton Timer instance. It is created in the first call to this function.
 150: /// </summary>
@@ -254,19 +254,19 @@ File: code/libraries/baremetal/include/baremetal/ARMInstructions.h
 66: #define GetTimerFrequency(freq)     asm volatile("mrs %0, CNTFRQ_EL0" : "=r"(freq))
 67: /// @brief Get counter timer value. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTPCT_EL0_REGISTER
 68: #define GetTimerCounter(count)      asm volatile("mrs %0, CNTPCT_EL0" : "=r"(count))
-69: 
+69:
 70: /// @brief Get Physical counter-timer control register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 71: #define GetTimerControl(value)      asm volatile("mrs %0, CNTP_CTL_EL0" : "=r"(value))
 72: /// @brief Set Physical counter-timer control register. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 73: #define SetTimerControl(value)      asm volatile("msr CNTP_CTL_EL0, %0" ::"r"(value))
-74: 
+74:
 75: /// @brief IStatus bit, flags if Physical counter-timer condition is met. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 76: #define CNTP_CTL_EL0_STATUS         BIT1(2)
 77: /// @brief IMask bit, flags if interrupts for Physical counter-timer are masked. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 78: #define CNTP_CTL_EL0_IMASK          BIT1(1)
 79: /// @brief Enable bit, flags if Physical counter-timer is enabled. See @ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CTL_EL0_REGISTER
 80: #define CNTP_CTL_EL0_ENABLE         BIT1(0)
-81: 
+81:
 82: /// @brief Get Physical counter-timer comparison value. See \ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER
 83: #define GetTimerCompareValue(value) asm volatile("mrs %0, CNTP_CVAL_EL0" : "=r"(value))
 84: /// @brief Set Physical counter-timer comparison value. See \ref ARM_REGISTERS_REGISTER_OVERVIEW_CNTP_CVAL_EL0_REGISTER
@@ -302,7 +302,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 70: //---------------------------------------------
 71: // Raspberry Pi System Timer
 72: //---------------------------------------------
-73: 
+73:
 74: /// @brief Raspberry Pi System Timer Registers base address. See @ref RASPBERRY_PI_SYSTEM_TIMER
 75: #define RPI_SYSTMR_BASE                 RPI_BCM_IO_BASE + 0x00003000
 76: /// @brief System Timer Control / Status register. See @ref RASPBERRY_PI_SYSTEM_TIMER
@@ -319,7 +319,7 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 87: #define RPI_SYSTMR_CMP2                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000014)
 88: /// @brief System Timer Compare 3 register. See @ref RASPBERRY_PI_SYSTEM_TIMER
 89: #define RPI_SYSTMR_CMP3                 reinterpret_cast<regaddr>(RPI_SYSTMR_BASE + 0x00000018)
-90: 
+90:
 ...
 ```
 
@@ -375,12 +375,12 @@ File: code/applications/demo/src/main.cpp
 2: #include "baremetal/System.h"
 3: #include "baremetal/Timer.h"
 4: #include "baremetal/UART1.h"
-5: 
+5:
 6: /// @file
 7: /// Demo application main code
-8: 
+8:
 9: using namespace baremetal;
-10: 
+10:
 11: /// <summary>
 12: /// Demo application main code
 13: /// </summary>
@@ -389,10 +389,10 @@ File: code/applications/demo/src/main.cpp
 16: {
 17:     auto& uart = GetUART1();
 18:     uart.WriteString("Hello World!\n");
-19: 
+19:
 20:     uart.WriteString("Wait 5 seconds\n");
 21:     Timer::WaitMilliSeconds(5000);
-22: 
+22:
 23:     uart.WriteString("Press r to reboot, h to halt\n");
 24:     char ch{};
 25:     while ((ch != 'r') && (ch != 'h'))
@@ -400,7 +400,7 @@ File: code/applications/demo/src/main.cpp
 27:         ch = uart.Read();
 28:         uart.Write(ch);
 29:     }
-30: 
+30:
 31:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 32: }
 ```

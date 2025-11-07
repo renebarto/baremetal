@@ -25,6 +25,7 @@ set(PROJECT_INCLUDE_DIRS_PUBLIC )
 set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
 
 set(PROJECT_DEPENDENCIES
+    unittest
     device
     baremetal
     )

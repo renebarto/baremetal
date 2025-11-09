@@ -2,7 +2,7 @@ message(STATUS "\n**************************************************************
 message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 project(unittest
-    DESCRIPTION "UNit test library"
+    DESCRIPTION "Unit test library"
     LANGUAGES CXX ASM)
 
 set(PROJECT_TARGET_NAME ${PROJECT_NAME})

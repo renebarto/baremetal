@@ -88,6 +88,7 @@ TEST(MyTest4)
     int* p = nullptr;
     int dd = 123;
     int* q = &dd;
+    int* r = &dd;
     ASSERT_NULL(p);
     EXPECT_NULL(p);
     ASSERT_NULL(q);
@@ -124,6 +125,7 @@ TEST(MyTest4)
     char u[] = {'B', '\0'};
     char v[] = {'B', '\0'};
     char w[] = {'b', '\0'};
+    const char* tC = "A";
     const char* uC = "B";
     const char* vC = "B";
     const char* wC = "b";

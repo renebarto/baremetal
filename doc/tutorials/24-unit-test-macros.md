@@ -1584,101 +1584,104 @@ File: code\applications\demo\src\main.cpp
 13: TEST_SUITE(Suite1)
 14: {
 15: 
-16:     class FixtureMyTest1 : public TestFixture
-17:     {
-18:     public:
-19:         void SetUp() override
-20:         {
-21:             LOG_DEBUG("MyTest SetUp");
-22:         }
-23:         void TearDown() override
-24:         {
-25:             LOG_DEBUG("MyTest TearDown");
-26:         }
-27:     };
-28: 
-29:     TEST_FIXTURE(FixtureMyTest1, MyTest1)
-30:     {
-31:         FAIL("For some reason");
-32:     }
-33: 
-34: } // Suite1
-35: 
-36: TEST_SUITE(Suite2)
-37: {
-38: 
-39:     class FixtureMyTest2 : public TestFixture
-40:     {
-41:     public:
-42:         void SetUp() override
-43:         {
-44:             LOG_DEBUG("FixtureMyTest2 SetUp");
-45:         }
-46:         void TearDown() override
-47:         {
-48:             LOG_DEBUG("FixtureMyTest2 TearDown");
-49:         }
-50:     };
-51: 
-52:     TEST_FIXTURE(FixtureMyTest2, MyTest2)
-53:     {
-54:         EXPECT_TRUE(true);
-55:         EXPECT_FALSE(false);
-56:         EXPECT_TRUE(false);
-57:         EXPECT_FALSE(true);
-58:     }
-59: 
-60: } // Suite2
+16: class FixtureMyTest1
+17:     : public TestFixture
+18: {
+19: public:
+20:     void SetUp() override
+21:     {
+22:         LOG_DEBUG("MyTest SetUp");
+23:     }
+24:     void TearDown() override
+25:     {
+26:         LOG_DEBUG("MyTest TearDown");
+27:     }
+28: };
+29: 
+30: TEST_FIXTURE(FixtureMyTest1, MyTest1)
+31: {
+32:     FAIL("For some reason");
+33: }
+34: 
+35: } // Suite1
+36: 
+37: TEST_SUITE(Suite2)
+38: {
+39: 
+40: class FixtureMyTest2
+41:     : public TestFixture
+42: {
+43: public:
+44:     void SetUp() override
+45:     {
+46:         LOG_DEBUG("FixtureMyTest2 SetUp");
+47:     }
+48:     void TearDown() override
+49:     {
+50:         LOG_DEBUG("FixtureMyTest2 TearDown");
+51:     }
+52: };
+53: 
+54: TEST_FIXTURE(FixtureMyTest2, MyTest2)
+55: {
+56:     EXPECT_TRUE(true);
+57:     EXPECT_FALSE(false);
+58:     EXPECT_TRUE(false);
+59:     EXPECT_FALSE(true);
+60: }
 61: 
-62: class FixtureMyTest3 : public TestFixture
-63: {
-64: public:
-65:     void SetUp() override
-66:     {
-67:         LOG_DEBUG("FixtureMyTest3 SetUp");
-68:     }
-69:     void TearDown() override
-70:     {
-71:         LOG_DEBUG("FixtureMyTest3 TearDown");
-72:     }
-73: };
-74: 
-75: TEST_FIXTURE(FixtureMyTest3, MyTest3)
-76: {
-77:     int x = 0;
-78:     int y = 1;
-79:     int z = 1;
-80:     EXPECT_EQ(x, y);
-81:     EXPECT_EQ(y, z);
-82:     EXPECT_NE(x, y);
-83:     EXPECT_NE(y, z);
-84: }
-85: 
-86: TEST(MyTest4)
-87: {
-88:     ASSERT_TRUE(false);
-89: }
-90: 
-91: int main()
-92: {
-93:     auto& console = GetConsole();
-94: 
-95:     ConsoleTestReporter reporter;
-96:     RunAllTests(&reporter);
+62: } // Suite2
+63: 
+64: class FixtureMyTest3
+65:     : public TestFixture
+66: {
+67: public:
+68:     void SetUp() override
+69:     {
+70:         LOG_DEBUG("FixtureMyTest3 SetUp");
+71:     }
+72:     void TearDown() override
+73:     {
+74:         LOG_DEBUG("FixtureMyTest3 TearDown");
+75:     }
+76: };
+77: 
+78: TEST_FIXTURE(FixtureMyTest3, MyTest3)
+79: {
+80:     int x = 0;
+81:     int y = 1;
+82:     int z = 1;
+83:     EXPECT_EQ(x, y);
+84:     EXPECT_EQ(y, z);
+85:     EXPECT_NE(x, y);
+86:     EXPECT_NE(y, z);
+87: }
+88: 
+89: TEST(MyTest)
+90: {
+91:     ASSERT_TRUE(false);
+92: }
+93: 
+94: int main()
+95: {
+96:     auto& console = GetConsole();
 97: 
-98:     LOG_INFO("Wait 5 seconds");
-99:     Timer::WaitMilliSeconds(5000);
+98:     ConsoleTestReporter reporter;
+99:     RunAllTests(&reporter);
 100: 
-101:     console.Write("Press r to reboot, h to halt\n");
-102:     char ch{};
-103:     while ((ch != 'r') && (ch != 'h'))
-104:     {
-105:         ch = console.ReadChar();
-106:         console.WriteChar(ch);
-107:     }
-108: 
-109:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
-110: }
+101:     LOG_INFO("Wait 5 seconds");
+102:     Timer::WaitMilliSeconds(5000);
+103: 
+104:     console.Write("Press r to reboot, h to halt\n");
+105:     char ch{};
+106:     while ((ch != 'r') && (ch != 'h'))
+107:     {
+108:         ch = console.ReadChar();
+109:         console.WriteChar(ch);
+110:     }
+111: 
+112:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+113: }
 ```
 
 - Line 30-33: We change the `MyTest1` function to a call to `FAIL()`, this will generate a simple failure
@@ -3290,108 +3293,110 @@ Update the file `code\applications\demo\src\main.cpp`
 ```cpp
 File: code\applications\demo\src\main.cpp
 ...
-86: TEST(MyTest4)
-87: {
-88:     int* p = nullptr;
-89:     int dd = 123;
-90:     int* q = &dd;
-91:     ASSERT_NULL(p);
-92:     EXPECT_NULL(p);
-93:     ASSERT_NULL(q);
-94:     EXPECT_NULL(q);
-95:     ASSERT_NOT_NULL(p);
-96:     EXPECT_NOT_NULL(p);
-97:     ASSERT_NOT_NULL(q);
-98:     EXPECT_NOT_NULL(q);
-99:     baremetal::String s1 = "A";
-100:     baremetal::String s2 = "B";
-101:     baremetal::String s3 = "B";
-102:     baremetal::String s4 = "b";
-103:     ASSERT_EQ(s1, s2);
-104:     EXPECT_EQ(s1, s2);
-105:     ASSERT_EQ(s2, s3);
-106:     EXPECT_EQ(s2, s3);
-107:     ASSERT_NE(s1, s2);
-108:     EXPECT_NE(s1, s2);
-109:     ASSERT_NE(s2, s3);
-110:     EXPECT_NE(s2, s3);
-111:     ASSERT_EQ_IGNORE_CASE(s1, s2);
-112:     EXPECT_EQ_IGNORE_CASE(s1, s2);
-113:     ASSERT_EQ_IGNORE_CASE(s2, s3);
-114:     EXPECT_EQ_IGNORE_CASE(s2, s3);
-115:     ASSERT_NE_IGNORE_CASE(s1, s2);
-116:     EXPECT_NE_IGNORE_CASE(s1, s2);
-117:     ASSERT_NE_IGNORE_CASE(s2, s3);
-118:     EXPECT_NE_IGNORE_CASE(s2, s3);
-119:     ASSERT_EQ_IGNORE_CASE(s2, s4);
-120:     EXPECT_EQ_IGNORE_CASE(s2, s4);
-121:     ASSERT_NE_IGNORE_CASE(s2, s4);
-122:     EXPECT_NE_IGNORE_CASE(s2, s4);
-123:     char t[] = {'A', '\0'};
-124:     char u[] = {'B', '\0'};
-125:     char v[] = {'B', '\0'};
-126:     char w[] = {'b', '\0'};
-127:     const char* uC = "B";
-128:     const char* vC = "B";
-129:     const char* wC = "b";
-130:     ASSERT_EQ(t, u);
-131:     EXPECT_EQ(t, u);
-132:     ASSERT_EQ(u, v);
-133:     EXPECT_EQ(u, v);
-134:     ASSERT_EQ(t, u);
-135:     EXPECT_EQ(t, uC);
-136:     ASSERT_EQ(uC, v);
-137:     EXPECT_EQ(uC, vC);
-138:     ASSERT_EQ(t, w);
-139:     EXPECT_EQ(t, wC);
-140:     ASSERT_EQ(uC, w);
-141:     EXPECT_EQ(uC, wC);
-142:     ASSERT_NE(t, u);
-143:     EXPECT_NE(t, u);
-144:     ASSERT_NE(u, v);
-145:     EXPECT_NE(u, v);
-146:     ASSERT_NE(t, u);
-147:     EXPECT_NE(t, uC);
-148:     ASSERT_NE(uC, v);
-149:     EXPECT_NE(uC, vC);
-150:     ASSERT_NE(t, w);
-151:     EXPECT_NE(t, wC);
-152:     ASSERT_NE(uC, w);
-153:     EXPECT_NE(uC, wC);
-154:     ASSERT_EQ_IGNORE_CASE(t, u);
-155:     EXPECT_EQ_IGNORE_CASE(t, u);
-156:     ASSERT_EQ_IGNORE_CASE(u, v);
-157:     EXPECT_EQ_IGNORE_CASE(u, v);
-158:     ASSERT_EQ_IGNORE_CASE(t, u);
-159:     EXPECT_EQ_IGNORE_CASE(t, uC);
-160:     ASSERT_EQ_IGNORE_CASE(uC, v);
-161:     EXPECT_EQ_IGNORE_CASE(uC, vC);
-162:     ASSERT_EQ_IGNORE_CASE(t, w);
-163:     EXPECT_EQ_IGNORE_CASE(t, wC);
-164:     ASSERT_EQ_IGNORE_CASE(uC, w);
-165:     EXPECT_EQ_IGNORE_CASE(uC, wC);
-166:     ASSERT_NE_IGNORE_CASE(t, u);
-167:     EXPECT_NE_IGNORE_CASE(t, u);
-168:     ASSERT_NE_IGNORE_CASE(u, v);
-169:     EXPECT_NE_IGNORE_CASE(u, v);
-170:     ASSERT_NE_IGNORE_CASE(t, u);
-171:     EXPECT_NE_IGNORE_CASE(t, uC);
-172:     ASSERT_NE_IGNORE_CASE(uC, v);
-173:     EXPECT_NE_IGNORE_CASE(uC, vC);
-174:     ASSERT_NE_IGNORE_CASE(t, w);
-175:     EXPECT_NE_IGNORE_CASE(t, wC);
-176:     ASSERT_NE_IGNORE_CASE(uC, w);
-177:     EXPECT_NE_IGNORE_CASE(uC, wC);
-178: 
-179:     double a = 0.123;
-180:     double b = 0.122;
-181:     ASSERT_EQ(a, b);
-182:     EXPECT_EQ(a, b);
-183:     ASSERT_NEAR(a, b, 0.0001);
-184:     EXPECT_NEAR(a, b, 0.0001);
-185:     ASSERT_NEAR(a, b, 0.001);
-186:     EXPECT_NEAR(a, b, 0.001);
-187: }
+90: TEST(Test4)
+91: {
+92:    int* p = nullptr;
+93:    int dd = 123;
+94:    int* q = &dd;
+95:    int* r = &dd;
+96:    ASSERT_NULL(p);
+97:    EXPECT_NULL(p);
+98:    ASSERT_NULL(q);
+99:    EXPECT_NULL(q);
+100:    ASSERT_NOT_NULL(p);
+101:    EXPECT_NOT_NULL(p);
+102:    ASSERT_NOT_NULL(q);
+103:    EXPECT_NOT_NULL(q);
+104:    baremetal::string s1 = "A";
+105:    baremetal::string s2 = "B";
+106:    baremetal::string s3 = "B";
+107:    baremetal::string s4 = "b";
+108:    ASSERT_EQ(s1, s2);
+109:    EXPECT_EQ(s1, s2);
+110:    ASSERT_EQ(s2, s3);
+111:    EXPECT_EQ(s2, s3);
+112:    ASSERT_NE(s1, s2);
+113:    EXPECT_NE(s1, s2);
+114:    ASSERT_NE(s2, s3);
+115:    EXPECT_NE(s2, s3);
+116:    ASSERT_EQ_IGNORE_CASE(s1, s2);
+117:    EXPECT_EQ_IGNORE_CASE(s1, s2);
+118:    ASSERT_EQ_IGNORE_CASE(s2, s3);
+119:    EXPECT_EQ_IGNORE_CASE(s2, s3);
+120:    ASSERT_NE_IGNORE_CASE(s1, s2);
+121:    EXPECT_NE_IGNORE_CASE(s1, s2);
+122:    ASSERT_NE_IGNORE_CASE(s2, s3);
+123:    EXPECT_NE_IGNORE_CASE(s2, s3);
+124:    ASSERT_EQ_IGNORE_CASE(s2, s4);
+125:    EXPECT_EQ_IGNORE_CASE(s2, s4);
+126:    ASSERT_NE_IGNORE_CASE(s2, s4);
+127:    EXPECT_NE_IGNORE_CASE(s2, s4);
+128:    char t[] = { 'A', '\0' };
+129:    char u[] = { 'B', '\0' };
+130:    char v[] = { 'B', '\0' };
+131:    char w[] = { 'b', '\0' };
+132:    const char* tC = "A";
+133:    const char* uC = "B";
+134:    const char* vC = "B";
+135:    const char* wC = "b";
+136:    ASSERT_EQ(t, u);
+137:    EXPECT_EQ(t, u);
+138:    ASSERT_EQ(u, v);
+139:    EXPECT_EQ(u, v);
+140:    ASSERT_EQ(t, u);
+141:    EXPECT_EQ(t, uC);
+142:    ASSERT_EQ(uC, v);
+143:    EXPECT_EQ(uC, vC);
+144:    ASSERT_EQ(t, w);
+145:    EXPECT_EQ(t, wC);
+146:    ASSERT_EQ(uC, w);
+147:    EXPECT_EQ(uC, wC);
+148:    ASSERT_NE(t, u);
+149:    EXPECT_NE(t, u);
+150:    ASSERT_NE(u, v);
+151:    EXPECT_NE(u, v);
+152:    ASSERT_NE(t, u);
+153:    EXPECT_NE(t, uC);
+154:    ASSERT_NE(uC, v);
+155:    EXPECT_NE(uC, vC);
+156:    ASSERT_NE(t, w);
+157:    EXPECT_NE(t, wC);
+158:    ASSERT_NE(uC, w);
+159:    EXPECT_NE(uC, wC);
+160:    ASSERT_EQ_IGNORE_CASE(t, u);
+161:    EXPECT_EQ_IGNORE_CASE(t, u);
+162:    ASSERT_EQ_IGNORE_CASE(u, v);
+163:    EXPECT_EQ_IGNORE_CASE(u, v);
+164:    ASSERT_EQ_IGNORE_CASE(t, u);
+165:    EXPECT_EQ_IGNORE_CASE(t, uC);
+166:    ASSERT_EQ_IGNORE_CASE(uC, v);
+167:    EXPECT_EQ_IGNORE_CASE(uC, vC);
+168:    ASSERT_EQ_IGNORE_CASE(t, w);
+169:    EXPECT_EQ_IGNORE_CASE(t, wC);
+170:    ASSERT_EQ_IGNORE_CASE(uC, w);
+171:    EXPECT_EQ_IGNORE_CASE(uC, wC);
+172:    ASSERT_NE_IGNORE_CASE(t, u);
+173:    EXPECT_NE_IGNORE_CASE(t, u);
+174:    ASSERT_NE_IGNORE_CASE(u, v);
+175:    EXPECT_NE_IGNORE_CASE(u, v);
+176:    ASSERT_NE_IGNORE_CASE(t, u);
+177:    EXPECT_NE_IGNORE_CASE(t, uC);
+178:    ASSERT_NE_IGNORE_CASE(uC, v);
+179:    EXPECT_NE_IGNORE_CASE(uC, vC);
+180:    ASSERT_NE_IGNORE_CASE(t, w);
+181:    EXPECT_NE_IGNORE_CASE(t, wC);
+182:    ASSERT_NE_IGNORE_CASE(uC, w);
+183:    EXPECT_NE_IGNORE_CASE(uC, wC);
+184:
+185:    double a = 0.123;
+186:    double b = 0.122;
+187:    ASSERT_EQ(a, b);
+188:    EXPECT_EQ(a, b);
+189:    ASSERT_NEAR(a, b, 0.0001);
+190:    EXPECT_NEAR(a, b, 0.0001);
+191:    ASSERT_NEAR(a, b, 0.001);
+192:    EXPECT_NEAR(a, b, 0.001);
+193: }
 ...
 ```
 

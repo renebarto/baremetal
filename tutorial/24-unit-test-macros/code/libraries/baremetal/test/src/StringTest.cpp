@@ -85,6 +85,7 @@ TEST_SUITE(Baremetal)
         const char* text = otherText;
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(expected);
 
         String s(text);
 
@@ -249,6 +250,7 @@ TEST_SUITE(Baremetal)
         const char* text = otherText;
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String other(text);
 
         String s(other);
@@ -271,6 +273,7 @@ TEST_SUITE(Baremetal)
         const char* text = "";
         const char* expected = "";
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String other(text);
 
         String s(other);
@@ -403,6 +406,7 @@ TEST_SUITE(Baremetal)
     TEST_FIXTURE(StringTest, ConstCharPtrCastOperator)
     {
         const char* text = otherText;
+        const char* expected = otherText;
 
         String s(text);
 
@@ -415,6 +419,7 @@ TEST_SUITE(Baremetal)
         const char* text = otherText;
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
 
         String s;
 
@@ -438,6 +443,7 @@ TEST_SUITE(Baremetal)
         String other(text);
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String s;
 
         s = other;
@@ -508,6 +514,7 @@ TEST_SUITE(Baremetal)
         const char* text = otherText;
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String s;
 
         s.assign(text);
@@ -530,6 +537,7 @@ TEST_SUITE(Baremetal)
         const char* text = "";
         const char* expected = "";
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String s;
 
         s.assign(text);
@@ -681,6 +689,7 @@ TEST_SUITE(Baremetal)
         String other(text);
         const char* expected = otherText;
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String s;
 
         s.assign(other);
@@ -704,6 +713,7 @@ TEST_SUITE(Baremetal)
         String other(text);
         const char* expected = "";
         size_t expectedLength = strlen(expected);
+        size_t length = strlen(text);
         String s;
 
         s.assign(other);
@@ -749,6 +759,7 @@ TEST_SUITE(Baremetal)
         const char* expected = "";
         size_t expectedLength = strlen(expected);
         size_t pos = 6;
+        size_t length = 0;
         String s;
 
         s.assign(str, pos);
@@ -772,6 +783,7 @@ TEST_SUITE(Baremetal)
         const char* expected = "";
         size_t expectedLength = strlen(expected);
         size_t pos = String::npos;
+        size_t length = 0;
         String s;
 
         s.assign(str, pos);
@@ -1895,6 +1907,8 @@ TEST_SUITE(Baremetal)
         String s3{"abcdefg"};
         String s4{"bcdefg"};
         String s5{""};
+        const char* s6 = "abcdefg";
+        const char* s7 = "abcdefG";
 
         EXPECT_EQ(1, s1.compare(s2));
         EXPECT_EQ(-1, s2.compare(s1));

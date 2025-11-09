@@ -41,7 +41,7 @@ This concept is similar although not exactly the same as the one used by Google 
 
 For an overview, see the image below.
 
-In the next chapter we will use the example of the MCP23017 device to test logic functionality, using something similar to the stubs.
+In the next chapter we will cover using macros to make our lives easier.
 
 <img src="images/unittest-class-structure.png" alt="Tree view" width="800"/>
 
@@ -7430,8 +7430,7 @@ Press r to reboot, h to halt
 ```
 
 In the next tutorial we'll start replacing the very verbose code for setting up tests, test fixtures and test suites with macros.
-We'll also introduce macros for the actual test cases, and use the example of the `MemoryAccessStubMCP23017LEDs` see [the tutorial](#TUTORIAL_22_I2C_FAKING_MCP23017___STEP_3) to show how tests can be written.
 
-Next: [24-writing-unit-tests](24-writing-unit-tests.md)
+Next: [24-unit-test-macros](24-unit-test-macros.md)
 
 

@@ -794,11 +794,22 @@ Raspberry Pi 3 has 54 GPIO, Raspberry Pi 4 and later have 57. Most however are n
 
 Details GPIO pin pull up/down mode
 
+Raspberry Pi 3:
+
 | Value | Mode                       |
 |-------|----------------------------|
 | 00    | Off (disable pull up/down) |
 | 01    | Enable pull down control   |
 | 10    | Enable pull up control     |
+| 11    | Reserved                   |
+
+Raspberry Pi 4 and later:
+
+| Value | Mode                       |
+|-------|----------------------------|
+| 00    | Off (disable pull up/down) |
+| 01    | Enable pull up control     |
+| 10    | Enable pull down control   |
 | 11    | Reserved                   |
 
 ## Alternative functions for GPIO {#RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO}

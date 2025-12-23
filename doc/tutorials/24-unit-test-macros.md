@@ -3676,10 +3676,10 @@ We'll also be creating a CMake file for the tests, as well as the structure for 
 
 First we'll create the main source file that will run the tests.
 
-Create the file `code\libraries\baremetal\test\main.cpp`
+Create the file `code\libraries\baremetal\test\src\main.cpp`
 
 ```cpp
-File: code\libraries\baremetal\test\main.cpp
+File: code\libraries\baremetal\test\src\main.cpp
 1: #include "baremetal/System.h"
 2: #include "unittest/unittest.h"
 3:
@@ -3702,10 +3702,10 @@ We'll add the source file containing the string tests.
 
 As this file is quite sizeable, we'll not repeat the full source here, just an excerpt.
 
-Create the file `code\libraries\baremetal\test\StringTest.cpp`
+Create the file `code\libraries\baremetal\test\src\StringTest.cpp`
 
 ```cpp
-File: code\libraries\baremetal\test\StringTest.cpp
+File: code\libraries\baremetal\test\src\StringTest.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //

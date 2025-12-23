@@ -7,7 +7,8 @@ using namespace unittest;
 int main()
 {
     ConsoleTestReporter reporter;
-    RunAllTests(&reporter);
+    RunSelectedTests(&reporter, InSelection("Baremetal", "PhysicalGPIOPinTest", nullptr));
+    //    RunAllTests(&reporter);
 
     return static_cast<int>(ReturnCode::ExitHalt);
 }

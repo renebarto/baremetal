@@ -48,10 +48,40 @@
 namespace baremetal {
 
 /// @brief GPIO function
-enum class GPIOFunction;
+enum class GPIOFunction
+{
+    /// @brief GPIO used as input
+    Input,
+    /// @brief GPIO used as output
+    Output,
+    /// @brief GPIO used as Alternate Function 0. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction0,
+    /// @brief GPIO used as Alternate Function 1. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction1,
+    /// @brief GPIO used as Alternate Function 2. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction2,
+    /// @brief GPIO used as Alternate Function 3. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction3,
+    /// @brief GPIO used as Alternate Function 4. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction4,
+    /// @brief GPIO used as Alternate Function 5. See \ref RASPBERRY_PI_GPIO_ALTERNATIVE_FUNCTIONS_FOR_GPIO
+    AlternateFunction5,
+    /// @brief GPIO function unknown / not set / invalid
+    Unknown,
+};
 
 /// @brief GPIO pull mode
-enum class GPIOPullMode;
+enum class GPIOPullMode
+{
+    /// @brief GPIO pull mode off (no pull-up or pull-down)
+    Off,
+    /// @brief GPIO pull mode pull-down
+    PullDown,
+    /// @brief GPIO pull mode pull-up
+    PullUp,
+    /// @brief GPIO pull mode unknown / not set / invalid
+    Unknown,
+};
 
 #if BAREMETAL_RPI_TARGET == 3
 /// @brief Total count of GPIO pins, numbered from 0 through 53

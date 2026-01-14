@@ -3675,16 +3675,16 @@ Now that our unit test framework is complete, let's reimplement the tests we cre
 First we'll create a folder `test` underneath `code/libraries/baremetal`, and underneath it a folder `src`.
 We'll also be creating a CMake file for the tests, as well as the structure for the main application to create a kernel image.
 
-<img src="images/unittest-add-test-project.png" alt="Tree view" width="400"/>
+<img src="images/unittest-add-test-project.png" alt="Tree view" width="300"/>
 
 ### main.cpp {#TUTORIAL_24_UNIT_TEST_MACROS_WRITING_CLASS_TESTS_FOR_STRING___STEP_4_MAINCPP}
 
 First we'll create the main source file that will run the tests.
 
-Create the file `code\libraries\baremetal\test\main.cpp`
+Create the file `code\libraries\baremetal\test\src\main.cpp`
 
 ```cpp
-File: code\libraries\baremetal\test\main.cpp
+File: code\libraries\baremetal\test\src\main.cpp
 1: #include "baremetal/System.h"
 2: #include "unittest/unittest.h"
 3:
@@ -3707,10 +3707,10 @@ We'll add the source file containing the string tests.
 
 As this file is quite sizeable, we'll not repeat the full source here, just an excerpt.
 
-Create the file `code\libraries\baremetal\test\StringTest.cpp`
+Create the file `code\libraries\baremetal\test\src\StringTest.cpp`
 
 ```cpp
-File: code\libraries\baremetal\test\StringTest.cpp
+File: code\libraries\baremetal\test\src\StringTest.cpp
 1: //------------------------------------------------------------------------------
 2: // Copyright   : Copyright(c) 2025 Rene Barto
 3: //
@@ -3910,8 +3910,8 @@ File: code/libraries/baremetal/test/CMakeLists.txt
 32:     ${PROJECT_DEPENDENCIES}
 33:     )
 34: 
-35: file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp src/*.S)
-36: set(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/baremetal/*.h)
+35: file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+36: file(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 37: set(PROJECT_INCLUDES_PRIVATE )
 38: 
 39: set(PROJECT_INCLUDES_PRIVATE )
@@ -3995,7 +3995,7 @@ We need to add the test project CMake file to the baremetal project CMake file i
 Update the file `code/libraries/baremetal/CMakeLists.txt`
 
 ```cmake
-File: code/libraries/baremetal/test/CMakeLists.txt
+File: code/libraries/baremetal/CMakeLists.txt
 95: show_target_properties(${PROJECT_NAME})
 96: 
 97: add_subdirectory(test)

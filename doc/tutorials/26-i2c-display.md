@@ -4603,4 +4603,4 @@ Info   0.00:00:06.920 Reboot (System:154)
 Info   0.00:00:06.940 InterruptSystem::Shutdown (InterruptHandler:153)
 ```
 
-Next: [26-i2s](26-i2s.md)
+Next: [27-i2s](27-i2s.md)

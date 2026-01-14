@@ -1,13 +1,13 @@
-# Tutorial 23: LCD display {#TUTORIAL_23_LCD_DISPLAY}
+# Tutorial 26: I2C display {#TUTORIAL_26_I2C_DISPLAY}
 
 @tableofcontents
 
-## Tutorial setup {#TUTORIAL_23_LCD_DISPLAY_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_26_I2C_DISPLAY_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/22-i2c-lcd`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_23_LCD_DISPLAY_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_26_I2C_DISPLAY_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-22.a`
@@ -16,7 +16,7 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/22-i2c-lcd.elf`
 - an image in `deploy/Debug/22-i2c-lcd-image`
 
-## Controlling a I2C LCD display {#TUTORIAL_23_LCD_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY}
+## Controlling a I2C LCD display {#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY}
 
 I'd like to dive into using a I2C based LCD display module, for a couple of reasons.
 
@@ -68,7 +68,7 @@ Even though we have a RW signal, the hardware is not set up to support reading f
 The LCD controller is a [Hitachi HD44780 device](pdf/HD44780.pdf).
 This supports a 4 bit interaction, if initialized correctly.
 
-### Initialization sequence {#TUTORIAL_23_LCD_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_INITIALIZATION_SEQUENCE}
+### Initialization sequence {#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_INITIALIZATION_SEQUENCE}
 
 The initialization sequence is as follows for a 4 bit interface (see [Hitachi HD44780 device](pdf/HD44780.pdf) Figure 24, Page 46).
 These are all 4-bit transfers, the E signal is used as a clock:
@@ -84,7 +84,7 @@ These are all 4-bit transfers, the E signal is used as a clock:
 - Write RS=0, RW=0, E=0, D7-D4=0010
 - Write RS=0, RW=0, E=1, D7-D4=0010
 
-### Mode setting {#TUTORIAL_23_LCD_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_MODE_SETTING}
+### Mode setting {#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_MODE_SETTING}
 
 Setting the correct mode, these are all 8-bit transfers, with MSB 4 bits first, then LSB 4 bits:
 - Send command `Function set`: 0010NF** (N = 0 for single line display, 1 for multi line, F = 0 fpr 5x8 pixel characters, 1 for 5x10 pixel characters)
@@ -117,9 +117,9 @@ So let's start simple. We'll first abstract the I2CMaster class to an interface,
 Then well start with controlling the backlight, after which we will implement sending data to the display.
 We'll start with the initialization sequences, as this is required to do anything useful with the display.
 
-## Fake I2C implementation {#TUTORIAL_23_LCD_DISPLAY_FAKE_I2C_IMPLEMENTATION}
+## Fake I2C implementation {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION}
 
-### Abstracting I2CMaster - II2CMaster.h {#TUTORIAL_23_LCD_DISPLAY_FAKE_I2C_IMPLEMENTATION_ABSTRACTING_I2CMASTER___II2CMASTERH}
+### Abstracting I2CMaster - II2CMaster.h {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION_ABSTRACTING_I2CMASTER___II2CMASTERH}
 
 First, we'll abstract the I2CMaster class to an interface.
 
@@ -276,7 +276,7 @@ File: code/libraries/baremetal/include/baremetal/II2CMaster.h
   - Line 112-119: We declare the virtual `Write()` method to write multiple bytes
   - Line 120-129: We declare the virtual `WriteReadRepeatedStart()` method to perform a write - read cycle
 
-### Update I2CMaster - I2CMaster.h {#TUTORIAL_23_LCD_DISPLAY_FAKE_I2C_IMPLEMENTATION_UPDATE_I2CMASTER___I2CMASTERH}
+### Update I2CMaster - I2CMaster.h {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION_UPDATE_I2CMASTER___I2CMASTERH}
 
 We'll derive I2CMaster from the newly created interface.
 
@@ -393,9 +393,9 @@ File: code/libraries/baremetal/include/baremetal/I2CMaster.h
 - Line 115: We now override the `Write()` method for multiple bytes
 - Line 116: We now override the `WriteReadRepeatedStart()` method for a write - read cycle
 
-## LCD display interface and basic functionality {#TUTORIAL_23_LCD_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY}
+## LCD display interface and basic functionality {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY}
 
-### ILCDDevice.h {#TUTORIAL_23_LCD_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_ILCDDEVICEH}
+### ILCDDevice.h {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_ILCDDEVICEH}
 
 We'll first declare a generic interface for a LCD controller.
 
@@ -638,7 +638,7 @@ File: code/libraries/device/include/device/display/ILCDDevice.h
   - Line 193-198: We declare a method `SetCursorPosition()` to move the cursor to the specific location
   - Line 199-206: We declare a method `DefineCharFont()` to define one of 8 user defined characters (0x80-0x87)
 
-### HD44780Device.h {#TUTORIAL_23_LCD_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_HD44780DEVICEH}
+### HD44780Device.h {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_HD44780DEVICEH}
 
 We declare the LCD controller HD44780 based on the interface just defined.
 
@@ -881,7 +881,7 @@ This is needed for setting user defined characters
 This will determine the current location for a new character
   - Line 185: We declare a private method `ConvertCursorMode()` to convert the current cursor mode to the correct bit pattern
 
-### HD44780Device.cpp {#TUTORIAL_23_LCD_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_HD44780DEVICECPP}
+### HD44780Device.cpp {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_HD44780DEVICECPP}
 
 We will now implement the `HD44780Device` class.
 
@@ -1509,8 +1509,8 @@ The order is quite peculiar.
 - Line 230-237: We implement the method GetNumRows()
 - Line 239-285: We implement the method Initialize()
   - Line 245-247: We determine the display configuration value from the value passed to the constructor
-  - Line 249-268: We perform initialization as described in [Initialization sequence](#TUTORIAL_23_LCD_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_INITIALIZATION_SEQUENCE)
-  - Line 270-275: We perform the initial mode settings as described in [Mode settings](#TUTORIAL_23_LCD_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_MODE_SETTING)
+  - Line 249-268: We perform initialization as described in [Initialization sequence](#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_INITIALIZATION_SEQUENCE)
+  - Line 270-275: We perform the initial mode settings as described in [Mode settings](#TUTORIAL_TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY_MODE_SETTING)
 - Line 278-286: We implement the method SetBacklight().
 As not all devices support this, the default implementation does nothing
 - Line 288-296: We implement the method IsBacklightOn().
@@ -1571,11 +1571,11 @@ This writes a command Set DDRAM Address specifying the new start offset for DDRA
 - Line 568-576: We implement the method ConvertCursorMode().
 This converts the cursor mode to the correct Display Control bit pattern
 
-## GPIO operation {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION}
+## GPIO operation {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION}
 
 For displays that do not have a piggyback board, we will need to control the different signals using GPIO.
 
-### HD44780DeviceRaw.h {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_HD44780DEVICERAWH}
+### HD44780DeviceRaw.h {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_HD44780DEVICERAWH}
 
 We'll declare a new class `HD44780DeviceRaw` which derives from `HD44780Device` for implementation using GPIO pins.
 As this is GPIO related functionality, we'll place the header and source file under the `gpio` folder.
@@ -1681,7 +1681,7 @@ File: code/libraries/device/include/device/gpio/HD44780DeviceRaw.h
   - Line 76: We remove the assignment operator
   - Line 79: We override the method `WriteHalfByte()`
 
-### HD44780DeviceRaw.cpp {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_HD44780DEVICERAWCPP}
+### HD44780DeviceRaw.cpp {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_HD44780DEVICERAWCPP}
 
 We'll implement the class `HD44780DeviceRaw`.
 
@@ -1836,7 +1836,7 @@ Then it switches the E pin on, and after some time off again.
 This will clock the data into the display controller (falling edge of E).
 Finally we switch the RS back to off
 
-### MemoryAccessStubGPIO.cpp {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_MEMORYACCESSSTUBGPIOCPP}
+### MemoryAccessStubGPIO.cpp {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_MEMORYACCESSSTUBGPIOCPP}
 
 As we don't have an actual GPIO controlled display, we'll use the GPIO MemoryAccess stub.
 However, we'd like to be able to configure at build time whether or not to log output.
@@ -2450,7 +2450,7 @@ File: d:\Projects\RaspberryPi\baremetal.test\code\libraries\baremetal\src\stubs\
 - Line 432: We replace usage of `TRACE` by `BAREMETAL_MEMORY_ACCESS_TRACING`
 - Line 433-435: We surround the register write logging with a `BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL` definition, to limit the logging output a little
 
-### Main CMake File {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_MAIN_CMAKE_FILE}
+### Main CMake File {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_MAIN_CMAKE_FILE}
 
 Now let's update the main CMake file to define `BAREMETAL_MEMORY_ACCESS_TRACING` and `BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL` when desired.
 
@@ -2531,7 +2531,7 @@ File: CMakeLists.txt
 - Line 137: We add the compiler definition `BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL` as the value of the CMake variable `BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL`
 - Line 317-318: We print the actual values for `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS` and `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL`
 
-### Update build configuration {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_UPDATE_BUILD_CONFIGURATION}
+### Update build configuration {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_UPDATE_BUILD_CONFIGURATION}
 
 We'll now make sure to set the value of `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS` to `ON` when building.
 
@@ -2557,7 +2557,7 @@ File: CMakeSettings.json
 
 - Line 10: We set the value of variable `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS` to `ON` and `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL` to `OFF`.
 
-### Update application code {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_UPDATE_APPLICATION_CODE}
 
 Let's try working with a GPIO display, as we don't have a real display with GPIO pins, we'll use a stub.
 
@@ -2615,7 +2615,7 @@ We define the display as 16x2 characters, and assign GPIO pins 8-11 for D4-D7, 1
 - Line 29: We write the text "Hello World"
 - Line 33: We switch the display off again
 
-### Update CMake file for device library {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_UPDATE_CMAKE_FILE_FOR_DEVICE_LIBRARY}
+### Update CMake file for device library {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_UPDATE_CMAKE_FILE_FOR_DEVICE_LIBRARY}
 
 We need to add the newly added files to the `device` library.
 
@@ -2643,7 +2643,7 @@ File: code/libraries/device/CMakeLists.txt
 47:
 ```
 
-### Configuring, building and debugging {#TUTORIAL_23_LCD_DISPLAY_GPIO_OPERATION_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 Notice that the setup of the GPIO pins is logged by the stub.
@@ -3111,11 +3111,11 @@ This is caused the line in the application code switching the display on
 This is caused by the destructor of `HD44780DeviceRaw`
 - Line 404-427: The GPIO pins are switched back to input mode
 
-## I2C operation {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION}
+## I2C operation {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION}
 
 For displays with a I2C piggyback board, we will be using the I2C interface.
 
-### HD44780DeviceI2C.h {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_HD44780DEVICEI2CH}
+### HD44780DeviceI2C.h {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_HD44780DEVICEI2CH}
 
 We'll declare a new class `HD44780DeviceI2C` which derives from `HD44780Device` for implementation using I2C control.
 As this is I2C related functionality, we'll place the header and source file under the `i2c` folder.
@@ -3218,7 +3218,7 @@ File: code/libraries/device/include/device/i2c/HD44780DeviceI2C.h
   - Line 76: We override the method `IsBacklightOn()`
   - Line 79: We override the method `WriteHalfByte()`
 
-### HD44780DeviceI2C.cpp {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_HD44780DEVICEI2CCPP}
+### HD44780DeviceI2C.cpp {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_HD44780DEVICEI2CCPP}
 
 We'll implement the class `HD44780DeviceI2C`.
 
@@ -3406,7 +3406,7 @@ This writes the value of the backlight bit (BK). As we do not change the value o
 - Line 142-159: We implement `WriteHalfByte()`.
 This sets the backlight bit if backlight should be on, and then sets the E/EN bit to 1, then back to 0
 
-### MemoryAccessStubI2C.cpp {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_MEMORYACCESSSTUBI2CCPP}
+### MemoryAccessStubI2C.cpp {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_MEMORYACCESSSTUBI2CCPP}
 
 Similar to what we did in the GPIO MemoryAccess stub, we will use externally set definitions to control logging.
 
@@ -3753,7 +3753,7 @@ File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\stub
 - Line 441: We replace usage of `TRACE` by `BAREMETAL_MEMORY_ACCESS_TRACING`
 - Line 457: We replace usage of `TRACE` by `BAREMETAL_MEMORY_ACCESS_TRACING`
 
-### I2CMaster.cpp {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_I2CMASTERCPP}
+### I2CMaster.cpp {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_I2CMASTERCPP}
 
 Similar to what we just did in the I2C MemoryAccess stub, we will use a define to control tracing in `I2CMaster`.
 
@@ -4094,7 +4094,7 @@ File: d:\Projects\RaspberryPi\baremetal.github\code\libraries\baremetal\src\I2CM
 848: }
 ```
 
-### Main CMake File {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_MAIN_CMAKE_FILE}
+### Main CMake File {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_MAIN_CMAKE_FILE}
 
 Now let's update the main CMake file to define `BAREMETAL_I2C_TRACING` and `BAREMETAL_I2C_TRACING_DETAIL` when desired.
 
@@ -4180,7 +4180,7 @@ File: CMakeLists.txt
 - Line 152: We add the compiler definition `BAREMETAL_I2C_TRACING_DETAIL` as the value of the CMake variable `BAREMETAL_MEMORY_ACCESS_TRACING_DETAIL`
 - Line 317-318: We print the actual values for `BAREMETAL_TRACE_I2C` and `BAREMETAL_TRACE_I2C_DETAIL`
 
-### Update build configuration {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_UPDATE_BUILD_CONFIGURATION}
+### Update build configuration {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_UPDATE_BUILD_CONFIGURATION}
 
 We'll now make sure to set the value of `BAREMETAL_TRACE_I2C` to `ON` when building.
 Meanwhile we will also switch off tracing memory access to keep the amount of logging limited.
@@ -4207,7 +4207,7 @@ File: CMakeSettings.json
 
 - Line 10: We set the value of variable `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS` to `ON` and `BAREMETAL_TRACE_MEMORY_ACCESS_STUBS_DETAIL` to `OFF`.
 
-### Update application code {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_UPDATE_APPLICATION_CODE}
 
 Let's try working with a I2C display, for now using a stub.
 
@@ -4268,7 +4268,7 @@ File: code/applications/demo/src/main.cpp
 - Line 28: We initialize the I2CMaster
 - Line 29: We set up the LCD display controller with I2C, and inject the I2CMaster
 
-### Update CMake file for device library {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_UPDATE_CMAKE_FILE_FOR_DEVICE_LIBRARY}
+### Update CMake file for device library {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_UPDATE_CMAKE_FILE_FOR_DEVICE_LIBRARY}
 
 We need to add the newly added files to the `device` library.
 
@@ -4297,7 +4297,7 @@ File: code/libraries/device/CMakeLists.txt
 48: set(PROJECT_INCLUDES_PRIVATE )
 ```
 
-### Configuring, building and debugging {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 
@@ -4432,11 +4432,11 @@ This is caused the line in the application code switching the display on
 - Line 97-100: The 8 bits 0x08 are written, meaning Display On/Off Control with the display set to OFF.
 This is caused by the destructor of `HD44780DeviceI2C`
 
-## I2C operation with real device {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE}
+## I2C operation with real device {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE}
 
 After seeing the interaction with the stub, let's attach actual hardware and see how the display behaves.
 
-### Update application code {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE_UPDATE_APPLICATION_CODE}
+### Update application code {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE_UPDATE_APPLICATION_CODE}
 
 Now let's use the actual device.
 We'll make the example slightly more entertaining.
@@ -4576,7 +4576,7 @@ We only update the second line of the display
 - Line 99: Then we call `ShowOption()` to show the initial option value on the second line
 - Line 101-104: While no interrupts occur we wait, looping until the `select` variable is set to true
 
-### Configuring, building and debugging {#TUTORIAL_23_LCD_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 

@@ -6371,8 +6371,8 @@ File: code\libraries\baremetal\test\src\MCP23017Test.cpp
 238:     EXPECT_EQ((I2CMasterOperation{ I2CMasterOperationCode::StartTransfer, busIndex }), memoryAccess.GetI2CMasterOperation(indexI2COps++));
 239:     EXPECT_EQ((I2CMasterOperation{ I2CMasterOperationCode::ResetDone, busIndex }), memoryAccess.GetI2CMasterOperation(indexI2COps++));
 240: 
-241:     size_t indexMCP23017Ops{};
-242:     EXPECT_EQ(memoryAccess.GetNumI2CMasterOperations(), indexI2COps);
+241:     EXPECT_EQ(memoryAccess.GetNumI2CMasterOperations(), indexI2COps);
+242:     size_t indexMCP23017Ops{};
 243: 
 244:     EXPECT_EQ(size_t{12}, memoryAccess.GetNumMCP23017Operations());
 245: 

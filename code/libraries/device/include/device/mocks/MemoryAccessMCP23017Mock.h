@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : MemoryAccessMCP23017Mock.h
 //
-// Namespace   : baremetal
+// Namespace   : device
 //
 // Class       : MemoryAccessMCP23017Mock
 //

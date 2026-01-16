@@ -4,17 +4,18 @@
 
 ## Tutorial setup {#TUTORIAL_26_I2C_DISPLAY_TUTORIAL_SETUP}
 
-As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/22-i2c-lcd`.
+As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/26-i2c-display`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
 ### Tutorial results {#TUTORIAL_26_I2C_DISPLAY_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
-- a library `output/Debug/lib/baremetal-22.a`
-- a library `output/Debug/lib/device-22.a`
-- a library `output/Debug/lib/stdlib-22.a`
-- an application `output/Debug/bin/22-i2c-lcd.elf`
-- an image in `deploy/Debug/22-i2c-lcd-image`
+- a library `output/Debug/lib/baremetal-26.a`
+- a library `output/Debug/lib/device-26.a`
+- a library `output/Debug/lib/stdlib-26.a`
+- a library `output/Debug/lib/unittest-26.a`
+- an application `output/Debug/bin/26-i2c-display.elf`
+- an image in `deploy/Debug/26-i2c-display-image`
 
 ## Controlling a I2C LCD display {#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY}
 
@@ -111,32 +112,29 @@ Setting the correct mode, these are all 8-bit transfers, with MSB 4 bits first, 
 As you can see, there is quite a bit of work to be done. The main issue is that we use the Enable signal as a clock.
 
 The one thing that is not related to the HD44780 chip is the backlight control.
-Bit 4 of the I/O expander controls the BL signal, which switches the backlight on and off (1 = on, 0 = off).
+Bit 3 of the I/O expander controls the BL signal, which switches the backlight on and off (1 = on, 0 = off).
 
-So let's start simple. We'll first abstract the I2CMaster class to an interface, which we'll then implement for a fake.
-Then well start with controlling the backlight, after which we will implement sending data to the display.
-We'll start with the initialization sequences, as this is required to do anything useful with the display.
+We'll start with controlling the backlight, after which we will implement sending data to the display.
+Here we'll start with the initialization sequences, as this is required to do anything useful with the display.
 
-## Fake I2C implementation {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION}
+## LCD display interface and basic functionality - Step 1 {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY}
 
-### Abstracting I2CMaster - II2CMaster.h {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION_ABSTRACTING_I2CMASTER___II2CMASTERH}
+### ITextDisplay.h
 
-First, we'll abstract the I2CMaster class to an interface.
-
-Create the file `code/libraries/baremetal/include/baremetal/II2CMaster.h`
+Create the file `code/libraries/device/include/device/display/ITextDisplay.h`
 
 ```cpp
-File: code/libraries/baremetal/include/baremetal/II2CMaster.h
+File: code/libraries/device/include/device/display/ITextDisplay.h
 1: //------------------------------------------------------------------------------
-2: // Copyright   : Copyright(c) 2025 Rene Barto
+2: // Copyright   : Copyright(c) 2026 Rene Barto
 3: //
-4: // File        : II2CMaster.h
+4: // File        : ITextDisplay.h
 5: //
-6: // Namespace   : baremetal
+6: // Namespace   : device
 7: //
-8: // Class       : I2CMaster
+8: // Class       : ITextDisplay
 9: //
-10: // Description : I2C Master abstract interface
+10: // Description : Generic LCD text display interface
 11: //
 12: //------------------------------------------------------------------------------
 13: //
@@ -165,236 +163,578 @@ File: code/libraries/baremetal/include/baremetal/II2CMaster.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: #pragma once
-41:
+41: 
 42: #include "stdlib/Types.h"
-43:
-44: /// @file
-45: /// I2C Master abstract interface
-46:
-47: namespace baremetal
-48: {
-49:
-50: #if BAREMETAL_RPI_TARGET <= 4
-51:
-52: // Return codes returned by Read/Write as negative value
-53: /// @brief Invalid parameter
-54: #define I2C_MASTER_INVALID_PARM  1
-55: /// @brief Received a NACK
-56: #define I2C_MASTER_ERROR_NACK   2
-57: /// @brief Received clock stretch timeout
-58: #define I2C_MASTER_ERROR_CLKT   3
-59: /// @brief Not all data has been sent/received
-60: #define I2C_MASTER_DATA_LEFT    4
-61: /// @brief Transfer timed out
-62: #define I2C_MASTER_TIMEOUT      5
-63: /// @brief Bus did not become ready
-64: #define I2C_MASTER_BUS_NOT_BUSY 6
-65:
-66: /// <summary>
-67: /// I2C speed selection
-68: /// </summary>
-69: enum class I2CClockMode
-70: {
-71:     /// @brief I2C @ 100 KHz
-72:     Normal,
-73:     /// @brief I2C @ 400 KHz
-74:     Fast,
-75:     /// @brief I2C @ 1 MHz
-76:     FastPlus,
-77: };
-78:
-79: /// <summary>
-80: /// I2CMaster abstract interface. Can be inherited for creating a mock
-81: /// </summary>
-82: class II2CMaster
-83: {
-84: public:
-85:     /// <summary>
-86:     /// Default destructor needed for abstract class
-87:     /// </summary>
-88:     virtual ~II2CMaster() = default;
-89:
-90:     /// <summary>
-91:     /// Read a single byte
-92:     /// </summary>
-93:     /// <param name="address">I2C address</param>
-94:     /// <param name="data">Data read</param>
-95:     /// <returns>Number of bytes actually read. Should be 1 for successful read, 0 if failed, negative if an error occurs</returns>
-96:     virtual size_t Read(uint16 address, uint8 &data) = 0;
-97:     /// <summary>
-98:     /// Read multiple bytes into buffer
-99:     /// </summary>
-100:     /// <param name="address">I2C address</param>
-101:     /// <param name="buffer">Pointer to buffer to store data received</param>
-102:     /// <param name="count">Requested byte count for read</param>
-103:     /// <returns>Number of bytes actually read, or negative if an error occurs</returns>
-104:     virtual size_t Read(uint16 address, void *buffer, size_t count) = 0;
-105:     /// <summary>
-106:     /// Write a single byte
-107:     /// </summary>
-108:     /// <param name="address">I2C address</param>
-109:     /// <param name="data">Data byte to write</param>
-110:     /// <returns>Number of bytes actually written. Should be 1 for successful write, 0 if failed, negative if an error occurs</returns>
-111:     virtual size_t Write(uint16 address, uint8 data) = 0;
-112:     /// <summary>
-113:     /// Write multiple bytes to device
-114:     /// </summary>
-115:     /// <param name="address">I2C address</param>
-116:     /// <param name="buffer">Pointer to buffer containing data to be sent</param>
-117:     /// <param name="count">Requested byte count for write</param>
-118:     /// <returns>Number of bytes actually written, or negative if an error occurs</returns>
-119:     virtual size_t Write(uint16 address, const void *buffer, size_t count) = 0;
-120:     /// <summary>
-121:     /// Write then read from device
-122:     /// </summary>
-123:     /// <param name="address">I2C address</param>
-124:     /// <param name="writeBuffer">Pointer to buffer containing data to be sent</param>
-125:     /// <param name="writeCount">Requested byte count for write</param>
-126:     /// <param name="readBuffer">Pointer to buffer to store data received</param>
-127:     /// <param name="readCount">Requested byte count for read</param>
-128:     /// <returns>Number of bytes actually written and read (cumulated), or negative if an error occurs</returns>
-129:     virtual size_t WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount) = 0;
-130: };
-131:
-132: #else
-133:
-134: #error RPI 5 not supported yet
-135:
-136: #endif
-137:
-138: } // namespace baremetal
+43: 
+44: namespace device
+45: {
+46: 
+47: /// <summary>
+48: /// Generic character matrix LCD display interface
+49: /// </summary>
+50: class ITextDisplay
+51: {
+52:   public:
+53:     /// <summary>
+54:     /// Destructor
+55:     /// </summary>
+56:     virtual ~ITextDisplay() = default;
+57: 
+58:     /// <summary>
+59:     /// Set backlight on or off
+60:     /// </summary>
+61:     /// <param name="on">If true backlight is switched on, if false it is switched off</param>
+62:     virtual void SetBacklight(bool on) = 0;
+63:     /// <summary>
+64:     /// Returns the current backlight status
+65:     /// </summary>
+66:     /// <returns>True if backlight is on, false otherwise</returns>
+67:     virtual bool IsBacklightOn() const = 0;
+68: };
+69: 
+70: } // namespace device
 ```
 
-- Line 50-77: This is directly copied from `I2CMaster.h`
-- Line 79-130: We declare the abstract class `II2CMaster`
-  - Line 85-88: As needed by any abstract class, we need a virtual destructor, which is the default in this case
-  - Line 90-96: We declare the virtual `Read()` method to read a single byte
-  - Line 97-104: We declare the virtual `Read()` method to read multiple bytes
-  - Line 105-111: We declare the virtual `Write()` method to write a single byte
-  - Line 112-119: We declare the virtual `Write()` method to write multiple bytes
-  - Line 120-129: We declare the virtual `WriteReadRepeatedStart()` method to perform a write - read cycle
+- Line 47-68: We create an abstract class `ITextDisplay`
+  - Line 58-62: We add a method `SetBacklight()` to switch the backlight on and off
+  - Line 63-67: We add a method `IsBacklightOn()` to retrieve the backlight status
 
-### Update I2CMaster - I2CMaster.h {#TUTORIAL_26_I2C_DISPLAY_FAKE_I2C_IMPLEMENTATION_UPDATE_I2CMASTER___I2CMASTERH}
+### HD44780Display.h
 
-We'll derive I2CMaster from the newly created interface.
+Now we'll create a class `HD44780Display` which implements the `ITextDisplay` interface.
 
-Update the file `code/libraries/baremetal/include/baremetal/I2CMaster.h`
+Create the file `code/libraries/device/include/device/display/HD44780Display.h`
 
 ```cpp
-File: code/libraries/baremetal/include/baremetal/I2CMaster.h
-50: namespace baremetal {
-51:
-52: /// <summary>
-53: /// Driver for I2C master devices
-54: ///
-55: /// GPIO pin mapping (Raspberry Pi 3-4)
-56: /// bus       | config 0      | config 1      | config 2      | Boards
-57: /// :-------: | :-----------: | :-----------: | :-----------: | :-----
-58: /// ^         | SDA    SCL    | SDA    SCL    | SDA    SCL    | ^
-59: /// 0         | GPIO0  GPIO1  | GPIO28 GPIO29 | GPIO44 GPIO45 | Raspberry Pi 3 / 4
-60: /// 1         | GPIO2  GPIO3  |               |               | Raspberry Pi 3 only
-61: /// 2         |               |               |               | None
-62: /// 3         | GPIO2  GPIO3  | GPIO4  GPIO5  |               | Raspberry Pi 4 only
-63: /// 4         | GPIO6  GPIO7  | GPIO8  GPIO9  |               | Raspberry Pi 4 only
-64: /// 5         | GPIO10 GPIO11 | GPIO12 GPIO13 |               | Raspberry Pi 4 only
-65: /// 6         | GPIO22 GPIO23 |               |               | Raspberry Pi 4 only
-66: ///
-67: /// GPIO pin mapping (Raspberry Pi 5)
-68: /// bus       | config 0      | config 1      | config 2      | Boards
-69: /// :-------: | :-----------: | :-----------: | :-----------: | :-----
-70: /// ^         | SDA    SCL    | SDA    SCL    | SDA    SCL    | ^
-71: /// 0         | GPIO0  GPIO1  | GPIO8  GPIO9  |               | Raspberry Pi 5 only
-72: /// 1         | GPIO2  GPIO3  | GPIO10 GPIO11 |               | Raspberry Pi 5 only
-73: /// 2         | GPIO4  GPIO5  | GPIO12 GPIO13 |               | Raspberry Pi 5 only
-74: /// 3         | GPIO6  GPIO7  | GPIO14 GPIO15 | GPIO22 GPIO23 | Raspberry Pi 5 only
-75: /// </summary>
-76: class I2CMaster
-77:     : public II2CMaster
-78: {
-79: private:
-80:     /// @brief Memory access interface reference for accessing registers.
-81:     IMemoryAccess&  m_memoryAccess;
-82:     /// @brief I2C bus index
-83:     uint8           m_bus;
-84:     /// @brief I2C bus base register address
-85:     regaddr         m_baseAddress;
-86:     /// @brief I2C bus clock rate
-87:     I2CClockMode    m_clockMode;
-88:     /// @brief I2C bus GPIO configuration index used
-89:     uint32          m_config;
-90:     /// @brief True if class is already initialized
-91:     bool            m_isInitialized;
-92:
-93:     /// @brief GPIO pin for SDA wire
-94:     PhysicalGPIOPin m_sdaPin;
-95:     /// @brief GPIO pin for SCL wire
-96:     PhysicalGPIOPin m_sclPin;
-97:
-98:     /// @brief Core clock rate used to determine I2C clock rate in Hz
-99:     unsigned        m_coreClockRate;
-100:     /// @brief I2C clock rate in Hz
-101:     unsigned        m_clockSpeed;
-102:
-103: public:
-104:     I2CMaster(IMemoryAccess &memoryAccess = GetMemoryAccess());
-105:
-106:     virtual ~I2CMaster();
-107:
-108:     bool Initialize(uint8 bus, I2CClockMode mode = I2CClockMode::Normal, uint32 config = 0);
-109:
-110:     void SetClock(unsigned clockRate);
-111:     bool Scan(uint16 address);
-112:     size_t Read(uint16 address, uint8 &data) override;
-113:     size_t Read(uint16 address, void *buffer, size_t count) override;
-114:     size_t Write(uint16 address, uint8 data) override;
-115:     size_t Write(uint16 address, const void *buffer, size_t count) override;
-116:     size_t WriteReadRepeatedStart(uint16 address, const void *writeBuffer, size_t writeCount, void *readBuffer, size_t readCount) override;
-117:
-118: private:
-119:     uint32 ReadControlRegister();
-120:     void WriteControlRegister(uint32 data);
-121:     void StartReadTransfer();
-122:     void StartWriteTransfer();
-123:     void ClearFIFO();
-124:     void WriteAddressRegister(uint8 data);
-125:     void WriteDataLengthRegister(uint8 data);
-126:     uint32 ReadStatusRegister();
-127:     void WriteStatusRegister(uint32 data);
-128:     bool HasClockStretchTimeout();
-129:     bool HasAck();
-130:     bool HasNAck();
-131:     bool ReceiveFIFOFull();
-132:     bool ReceiveFIFOHasData();
-133:     bool ReceiveFIFONeedsReading();
-134:     bool TransmitFIFOEmpty();
-135:     bool TransmitFIFOHasSpace();
-136:     bool TransmitFIFONeedsWriting();
-137:     bool TransferDone();
-138:     bool TransferActive();
-139:     void ClearClockStretchTimeout();
-140:     void ClearNAck();
-141:     void ClearDone();
-142:     void ClearAllStatus();
-143:     uint8 ReadFIFORegister();
-144:     void WriteFIFORegister(uint8 data);
-145: };
-146:
-147: } // namespace baremetal
+File: code/libraries/device/include/device/display/HD44780Display.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2026 Rene Barto
+3: //
+4: // File        : HD44780Display.h
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : HD44780Display
+9: //
+10: // Description : HD44780 based LCD generic display (max 40x4)
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: #include "device/display/ITextDisplay.h"
+43: 
+44: /// @file
+45: /// HD44780 based I2C LCD character display (max 40x4 characters)
+46: 
+47: namespace device {
+48: 
+49: /// <summary>
+50: /// Hitachi HD44780 based LCD text display controller
+51: /// </summary>
+52: class HD44780Display : public ITextDisplay
+53: {
+54: public:
+55:     HD44780Display();
+56: 
+57:     virtual ~HD44780Display();
+58: 
+59:     void SetBacklight(bool on) override;
+60:     bool IsBacklightOn() const override;
+61: };
+62: 
+63: } // namespace device
 ```
 
-- Line 42: We include the header for `II2CMaster`
-- Line 52-79: We remove these as there are now part of `II2CMaster.h`
-- Line 76-77: We now derive from `II2CMaster`
-- Line 112: We now override the `Read()` method for a single byte
-- Line 113: We now override the `Read()` method for multiple bytes
-- Line 114: We now override the `Write()` method for a single byte
-- Line 115: We now override the `Write()` method for multiple bytes
-- Line 116: We now override the `WriteReadRepeatedStart()` method for a write - read cycle
+This should speak for itself.
+The class is relatively still abstract, as it does not use the I2C interface. We'll create a derived class for this later on.
+This way we can concentrate the logic in the `HD44780Display` class, without the need to handle interface specifics.
+The display could be connected by I2C, SPI, GPIO, etc.
 
-## LCD display interface and basic functionality {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY}
+### HD44780Display.cpp
 
+Next we implement the `HD44780Display` class.
+
+Create the file `code/libraries/device/src/display/HD44780Display.cpp`
+
+```cpp
+File: code/libraries/device/src/display/HD44780Display.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2026 Rene Barto
+3: //
+4: // File        : HD44780Display.cpp
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : HD44780Display
+9: //
+10: // Description : HD44780 based LCD generic display (max 40x4)
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include "device/display/HD44780Display.h"
+41: 
+42: #include "baremetal/Logger.h"
+43: #include "baremetal/Timer.h"
+44: #include "stdlib/Util.h"
+45: 
+46: using namespace baremetal;
+47: 
+48: /// @file
+49: /// HD44780 based I2C LCD character display (max 40x4 characters)
+50: 
+51: /// @brief Define log name
+52: LOG_MODULE("HD44780Display");
+53: 
+54: namespace device {
+55: 
+56: /// <summary>
+57: /// Constructor
+58: /// </summary>
+59: HD44780Display::HD44780Display()
+60: {
+61: }
+62: 
+63: /// <summary>
+64: /// Destructor
+65: /// </summary>
+66: HD44780Display::~HD44780Display()
+67: {
+68:     // Don't write anymore, as derived class is already destroyed
+69: }
+70: 
+71: /// <summary>
+72: /// Switch backlight on or off
+73: /// </summary>
+74: /// <param name="on">If true, switch backlight on, otherwise switch backlight off</param>
+75: void HD44780Display::SetBacklight(bool on)
+76: {
+77:     // Default implementation does not support backlight
+78:     (void)on;
+79: }
+80: 
+81: /// <summary>
+82: /// Return true if backlight is on. By default, this is always false, unless the device actually supports backlight control.
+83: /// </summary>
+84: /// <returns>True if backlight is on, false otherwise</returns>
+85: bool HD44780Display::IsBacklightOn() const
+86: {
+87:     // Default implementation does not support backlight
+88:     return false;
+89: }
+90: 
+91: } // namespace device
+```
+
+- Line 56-61: We implement the constructor, which is trivial
+- Line 63-69: We implement the destructor, which is trivial
+- Line 71-79: We implement `SetBacklight()` which does not do anything by default
+- Line 81-89: We implement `IsBacklightOn()` which simply return false by default
+
+### HD44780Display.h
+
+We'll create a derived version of `HD44780Display` named `HD44780DisplayI2C` which implements the I2C interface of the display.
+
+Create the file `code/libraries/device/include/device/i2c/HD44780DisplayI2C.h`
+
+```cpp
+File: code/libraries/device/include/device/i2c/HD44780DisplayI2C.h
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2026 Rene Barto
+3: //
+4: // File        : HD44780DisplayI2C.h
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : HD44780DisplayI2C
+9: //
+10: // Description : HD44780 based LCD generic display (max 40x4) with I2C piggyback
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #pragma once
+41: 
+42: #include "device/display/HD44780Display.h"
+43: 
+44: /// @file
+45: /// HD44780 based I2C LCD character display (max 40x4 characters) with I2C piggyback
+46: 
+47: namespace baremetal {
+48: 
+49: class II2CMaster;
+50: 
+51: } // namespace baremetal
+52: 
+53: namespace device {
+54: 
+55: /// <summary>
+56: /// I2C controlled HD44780 based LCD character display
+57: /// </summary>
+58: class HD44780DisplayI2C : public HD44780Display
+59: {
+60: private:
+61:     /// @brief I2C master interface
+62:     baremetal::II2CMaster& m_i2cMaster;
+63:     /// @brief I2C address of the LCD controller
+64:     uint8                  m_address;
+65:     /// @brief Backlight status
+66:     bool                   m_backlightOn;
+67: 
+68: public:
+69:     HD44780DisplayI2C(baremetal::II2CMaster& i2cMaster, uint8 address);
+70: 
+71:     ~HD44780DisplayI2C();
+72: 
+73:     void SetBacklight(bool on) override;
+74:     bool IsBacklightOn() const override;
+75: };
+76: 
+77: } // namespace device
+```
+
+- Line 55-75: We declare the class `HD44780DisplayI2C`
+    - Line 61-62: We declare a member variable `m_i2cMaster` to hold a reference to the `II2CMaster` interface (an abstract interface)
+    - Line 63-64: We declare a member variable `m_address` to hold the I2C address of the display
+    - Line 65-66: We declare a member variable `m_backlightOn` to hold the backlight status of the display
+    - Line 69: We declare the constructor, which takes the I2C interface reference as well as the I2C address
+    - Line 71: We declare the destructor
+    - Line 73-74: We override both `SetBacklight()` and `IsBacklightOn()`
+
+### HD44780DisplayI2C.cpp
+
+Next we implement the `HD44780DisplayI2C` class.
+
+Create the file `code/libraries/device/src/i2c/HD44780DisplayI2C.cpp`
+
+```cpp
+File: code/libraries/device/src/i2c/HD44780DisplayI2C.cpp
+1: //------------------------------------------------------------------------------
+2: // Copyright   : Copyright(c) 2026 Rene Barto
+3: //
+4: // File        : HD44780DisplayI2C.cpp
+5: //
+6: // Namespace   : device
+7: //
+8: // Class       : HD44780DisplayI2C
+9: //
+10: // Description : HD44780 based LCD generic display (max 40x4) with I2C piggyback
+11: //
+12: //------------------------------------------------------------------------------
+13: //
+14: // Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+15: //
+16: // Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+17: //
+18: // Permission is hereby granted, free of charge, to any person
+19: // obtaining a copy of this software and associated documentation
+20: // files(the "Software"), to deal in the Software without
+21: // restriction, including without limitation the rights to use, copy,
+22: // modify, merge, publish, distribute, sublicense, and /or sell copies
+23: // of the Software, and to permit persons to whom the Software is
+24: // furnished to do so, subject to the following conditions :
+25: //
+26: // The above copyright notice and this permission notice shall be
+27: // included in all copies or substantial portions of the Software.
+28: //
+29: // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+30: // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+31: // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+32: // NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+33: // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+34: // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+35: // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+36: // DEALINGS IN THE SOFTWARE.
+37: //
+38: //------------------------------------------------------------------------------
+39: 
+40: #include "device/i2c/HD44780DisplayI2C.h"
+41: 
+42: #include "baremetal/I2CMaster.h"
+43: 
+44: using namespace baremetal;
+45: 
+46: /// @file
+47: /// HD44780 based I2C 16x2 LCD display
+48: 
+49: namespace device {
+50: 
+51: // HD44780Display via PCF8574 I2C port expander (for 16X2 LCD display
+52: //  Pin mapping::
+53: //  7  | 6  | 5  | 4  | 3  | 2  | 1  | 0
+54: //  D3 | D2 | D1 | D0 | BK | EN | RW | RS
+55: //
+56: //  D3 : D7 (first write) and D3 (second write)
+57: //  D2 : D6 (first write) and D2 (second write)
+58: //  D1 : D5 (first write) and D1 (second write)
+59: //  D0 : D4 (first write) and D0 (second write)
+60: //  BK : Backlight off (0) or on (1)
+61: //  EN : Enable. Needs to be strobed high to write
+62: //  RW : Read (0) or Write (1)
+63: //  RS : Instruction (0) or Data (1)
+64: 
+65: // PCF8574 I2C multiplexer signal mapping to HD44780 display
+66: /// @brief RS pin is bit 0
+67: static const uint8 PCF_RS = BIT1(0); // RS pin
+68: /// @brief RW pin is bit 1
+69: static const uint8 PCF_RW = BIT1(1); // RW pin
+70: /// @brief EN pin is bit 2
+71: static const uint8 PCF_EN = BIT1(2); // EN pin
+72: /// @brief Backlight pin is bit 3
+73: static const uint8 PCF_BK = BIT1(3); // Backlight pin
+74: 
+75: // Flags for RS pin modes
+76: /// @brief Instruction register select (RS pin low)
+77: static const uint8 RS_INSTRUCTION = (0x00);
+78: /// @brief Data register select (RS pin high)
+79: static const uint8 RS_DATA        = PCF_RS;
+80: 
+81: // Flags for backlight control
+82: /// @brief Backlight on
+83: const uint8 LCD_BACKLIGHT   = PCF_BK;
+84: /// @brief Backlight off
+85: const uint8 LCD_NOBACKLIGHT = 0x00;
+86: 
+87: /// <summary>
+88: /// Constructor
+89: ///
+90: /// \note Driver uses 4-bit mode, pins D0-D3 are not used.
+91: /// </summary>
+92: /// <param name="i2cMaster">     I2C master interface</param>
+93: /// <param name="address">       I2C device address</param>
+94: HD44780DisplayI2C::HD44780DisplayI2C(II2CMaster& i2cMaster, uint8 address)
+95:     : HD44780Display()
+96:     , m_i2cMaster(i2cMaster)
+97:     , m_address(address)
+98:     , m_backlightOn{}
+99: {
+100: }
+101: 
+102: /// <summary>
+103: /// Destructor
+104: ///
+105: /// Resets device back to 8 bit interface
+106: /// </summary>
+107: HD44780DisplayI2C::~HD44780DisplayI2C()
+108: {
+109:     SetBacklight(false);
+110: }
+111: 
+112: /// <summary>
+113: /// Switch backlight on or off
+114: /// </summary>
+115: /// <param name="on">If true, backlight is switched on, otherwise it is off</param>
+116: void HD44780DisplayI2C::SetBacklight(bool on)
+117: {
+118:     if (on != m_backlightOn)
+119:     {
+120:         uint8 byte = (on ? LCD_BACKLIGHT : LCD_NOBACKLIGHT);
+121:         // We write a single byte with all other bits off. This will have no effect to the controller state, except for the backlight
+122:         m_i2cMaster.Write(m_address, &byte, 1);
+123:         m_backlightOn = on;
+124:     }
+125: }
+126: 
+127: /// <summary>
+128: /// Returns backlight on / off status
+129: /// </summary>
+130: /// <returns>True if backlight is on, false otherwise</returns>
+131: bool HD44780DisplayI2C::IsBacklightOn() const
+132: {
+133:     return m_backlightOn;
+134: }
+135: 
+136: } // namespace device
+```
+
+- Line 66-67: We define a constant `PCF_RS` which is the RS pin of the display as seen from the PCF8574 port expander
+- Line 68-69: We define a constant `PCF_RW` which is the RW pin of the display as seen from the PCF8574 port expander
+- Line 70-71: We define a constant `PCF_EN` which is the E or EN pin of the display as seen from the PCF8574 port expander
+- Line 72-73: We define a constant `PCF_BK` which is the backlight pin of the display as seen from the PCF8574 port expander.
+As can be seen from the schematics in [Controlling a I2C LCD display](#TUTORIAL_26_I2C_DISPLAY_CONTROLLING_A_I2C_LCD_DISPLAY), this actual controls the current through the K pin
+- Line 76-77: We define a constant `RS_INSTRUCTION` to denote that we send an instruction to the display (setting the RS pin to 0)
+- Line 78-79: We define a constant `RS_DATA` to denote that we send data to the display (setting the RS pin to 1)
+- Line 82-83: We define a constant `LCD_BACKLIGHT` to set the backlight on (setting the backlight pin to 1)
+- Line 84-85: We define a constant `LCD_NOBACKLIGHT` to set the backlight off (setting the backlight pin to 0)
+- Line 87-100: We implement the constructor
+- Line 102-110: We implement the destructor, which switches the backlight off
+- Line 112-125: We implement `SetBacklight()` which simple writes the value for the backlight bit depending on the desired state of the backlight.
+We can do this without disrupting the display interface state, as this uses the EN pin to write to the display
+- Line 127-134: We implement `IsBacklightOn()`, which simply returns the saved backlight state
+
+### Update application code {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_UPDATE_APPLICATION_CODE}
+
+Let's try switching the backlight on and the off again.
+
+Update the file code/applications/demo/src/main.cpp.
+
+```cpp
+File: code/applications/demo/src/main.cpp
+1: #include "baremetal/Console.h"
+2: #include "baremetal/I2CMaster.h"
+3: #include "baremetal/Logger.h"
+4: #include "baremetal/System.h"
+5: #include "baremetal/Timer.h"
+6: #include "device/i2c/HD44780DisplayI2C.h"
+7: #include "device/mocks/MemoryAccessHD44780DisplayI2CMock.h"
+8: 
+9: LOG_MODULE("main");
+10: 
+11: using namespace baremetal;
+12: using namespace device;
+13: 
+14: int main()
+15: {
+16:     auto& console = GetConsole();
+17: 
+18:     uint8 busIndex = 1;
+19:     uint8 address{0x27};
+20:     I2CMaster i2cMaster;
+21:     i2cMaster.Initialize(busIndex);
+22:     HD44780DisplayI2C display(i2cMaster, address);
+23:     display.SetBacklight(true);
+24: 
+25:     LOG_INFO("Wait 5 seconds");
+26:     Timer::WaitMilliSeconds(5000);
+27: 
+28:     display.SetBacklight(false);
+29: 
+30:     console.Write("Press r to reboot, h to halt\n");
+31:     char ch{};
+32:     while ((ch != 'r') && (ch != 'h'))
+33:     {
+34:         ch = console.ReadChar();
+35:         console.WriteChar(ch);
+36:     }
+37: 
+38:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+39: }
+```
+
+- Line 18: We have the display connected to the I2C bus 1
+- Line 19: As can be seen from the circuit diagram, lower 3 bits are all 1 by default.
+The default address for PCF8574 is 0x20-0x27, which in our case is 0x27
+- Line 20-21: We instantiate a `I2CMaster` abd initialize it to bus 1
+- Line 22: We instantiate a `HD44780DisplayI2C` and inject the `I2CMaster` instance, and set the I2C address
+- Line 23: We switch the backlight on
+- Line 28: We switch the backlight off again
+
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_GPIO_OPERATION_CONFIGURING_BUILDING_AND_DEBUGGING}
+
+We can now configure and build our code, and test.
+You should see the display backlight turn on and then off again after 5 seconds.
+As the backlight is on after power on, you will need to run the application twice to see it turn on and off.
+
+```text
+Setting up UART0
+Info   0.00:00:00.020 Baremetal 0.0.1 started on Raspberry Pi 3 Model B (AArch64) using BCM2837 SoC (Logger:93)
+Info   0.00:00:00.050 Starting up (System:213)
+Info   0.00:00:00.070 Initialize bus 1, mode 0, config 0 (I2CMaster:166)
+Info   0.00:00:00.090 Set clock 100000 (I2CMaster:207)
+Info   0.00:00:00.110 Set up bus 1, config 0, base address 3F804000 (I2CMaster:190)
+Info   0.00:00:00.130 Wait 5 seconds (main:25)
+Press r to reboot, h to halt
+rInfo   0.00:00:13.310 Reboot (System:144)
+```
+
+## LCD display interface and basic functionality - Step 2 {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY}
+
+Now let's extend the functionality to also initialize the display and write some text to it.
+This included the following steps:
+- Sending the initialization sequence
+- Configuring the display
+- Writing text
+
+### ITextDisplay.h
+
+We'll extend the interface to start with.
+
+Update the file `code/libraries/device/include/device/display/ITextDisplay.h`
+
+```cpp
+File: code/libraries/device/include/device/display/ITextDisplay.h
+```
+
+-----------------------------------------------------------------
 ### ILCDDevice.h {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY_ILCDDEVICEH}
 
 We'll first declare a generic interface for a LCD controller.

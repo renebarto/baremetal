@@ -238,8 +238,8 @@ TEST_FIXTURE(MCP23017Test, SetLEDSOn)
     EXPECT_EQ((I2CMasterOperation{ I2CMasterOperationCode::StartTransfer, busIndex }), memoryAccess.GetI2CMasterOperation(indexI2COps++));
     EXPECT_EQ((I2CMasterOperation{ I2CMasterOperationCode::ResetDone, busIndex }), memoryAccess.GetI2CMasterOperation(indexI2COps++));
 
-    size_t indexMCP23017Ops{};
     EXPECT_EQ(memoryAccess.GetNumI2CMasterOperations(), indexI2COps);
+    size_t indexMCP23017Ops{};
 
     EXPECT_EQ(size_t{12}, memoryAccess.GetNumMCP23017Operations());
 

@@ -181,7 +181,7 @@ set(FLAGS_CXX
 # -g is added by CMake
 set(FLAGS_CXX_DEBUG -O0 -Wno-unused-variable -Wno-unused-parameter)
 # -O3 is added by CMake
-set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES -Wno-unused-parameter)
+set(FLAGS_CXX_RELEASE -D__USE_STRING_INLINES -Wno-unused-parameter -Wno-stringop-overflow)
 # -Os is added by CMake
 set(FLAGS_CXX_MINSIZEREL -O3 -Wno-unused-parameter)
 # -O2 -g is added by CMake

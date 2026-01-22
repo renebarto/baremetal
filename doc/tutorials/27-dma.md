@@ -1,13 +1,13 @@
-# Tutorial 27: DMA
+# Tutorial 27: DMA {#TUTORIAL_27_DMA}
 
 @tableofcontents
 
-## Tutorial setup {#TUTORIAL_27_I2S_TUTORIAL_SETUP}
+## Tutorial setup {#TUTORIAL_27_DMA_TUTORIAL_SETUP}
 
 As in the previous tutorial, you will find the code integrated into the CMake structure, in `tutorial/18-timer-extension`.
 In the same way, the project names are adapted to make sure there are no conflicts.
 
-### Tutorial results {#TUTORIAL_27_I2S_TUTORIAL_SETUP_TUTORIAL_RESULTS}
+### Tutorial results {#TUTORIAL_27_DMA_TUTORIAL_SETUP_TUTORIAL_RESULTS}
 
 This tutorial will result in (next to the main project structure):
 - a library `output/Debug/lib/baremetal-19.a`
@@ -15,13 +15,13 @@ This tutorial will result in (next to the main project structure):
 - an application `output/Debug/bin/19-timer-extension.elf`
 - an image in `deploy/Debug/19-timer-extension-image`
 
-## Extending the timer {#TUTORIAL_27_I2S_EXTENDING_THE_TIMER}
+## Extending the timer {#TUTORIAL_27_DMA_EXTENDING_THE_TIMER}
 
-## Adding interrupts to the timer - Step 1 {#TUTORIAL_27_I2S_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1}
+## Adding interrupts to the timer - Step 1 {#TUTORIAL_27_DMA_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1}
 
 We'll add some functionality to the `Timer` class for enabling, handling and disabling interrupts on the timer.
 
-### Timer.h {#TUTORIAL_27_I2S_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TIMERH}
+### Timer.h {#TUTORIAL_27_DMA_ADDING_INTERRUPTS_TO_THE_TIMER___STEP_1_TIMERH}
 
 Update the file `code/libraries/baremetal/include/baremetal/Timer.h`
 

@@ -2477,7 +2477,7 @@ This is used by `SetDisplayEnabled()` and `SetCursorMode()`
 - Line 562-575: We implement the method `SetCGRAM_Address()` to set the character generator RAM address
 - Line 577-590: We implement the method `SetDDRAM_Address()` to set the display data RAM address
 
-### Application code {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY___STEP_2___INITIALIZATION_APPLICATION_CODE}
+### Application code {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_COMPLETE_FUNCTIONALITY_APPLICATION_CODE}
 
 Let's now write some text, with user defined characters, and try some settings.
 
@@ -2588,7 +2588,7 @@ File: code/applications/demo/src/main.cpp
 - Line 65-67: We switch the backlight off and wait 2 seconds
 - Line 69-72: We wait another 5 seconds and switch the display off
 
-### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_INTERFACE_AND_BASIC_FUNCTIONALITY___STEP_2___INITIALIZATION_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_LCD_DISPLAY_COMPLETE_FUNCTIONALITY_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 You should see the display backlight turn on and then off again after 5 seconds.
@@ -2618,9 +2618,9 @@ The text will completely disappear when off.
 
 <img src="images/HD44780-display-text-off.png" alt="16 x 2 character display text with user characters off" width="400"/>
 
-## Display in a real world example
+## Display in a real world example {#TUTORIAL_26_I2C_DISPLAY_DISPLAY_IN_A_REAL_WORLD_EXAMPLE}
 
-### Update application code
+### Update application code {#TUTORIAL_26_I2C_DISPLAY_DISPLAY_IN_A_REAL_WORLD_EXAMPLE_UPDATE_APPLICATION_CODE}
 
 We'll make the example slightly more entertaining.
 
@@ -2753,7 +2753,7 @@ We only update the second line of the display
 - Line 97-98: We switch off the backlight and the display
 - Line 100-105: We log whether we are rebooting or halting, and return the appropriate return code
 
-### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_I2C_OPERATION_WITH_REAL_DEVICE_CONFIGURING_BUILDING_AND_DEBUGGING}
+### Configuring, building and debugging {#TUTORIAL_26_I2C_DISPLAY_DISPLAY_IN_A_REAL_WORLD_EXAMPLE_CONFIGURING_BUILDING_AND_DEBUGGING}
 
 We can now configure and build our code, and test.
 

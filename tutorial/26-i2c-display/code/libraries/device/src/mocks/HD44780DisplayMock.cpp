@@ -171,7 +171,9 @@ const HD44780DisplayOperation &HD44780DisplayMock::GetOperation(size_t index) co
     return m_ops[index];
 }
 
+/// @brief Static variables to track half byte writes
 static bool s_firstHalfByte = true;
+/// @brief Current byte being assembled from half byte writes
 static uint8 s_currentByte = 0;
 
 void HD44780DisplayMock::WriteHalfByte(uint8 data)

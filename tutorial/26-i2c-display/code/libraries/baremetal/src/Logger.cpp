@@ -1,0 +1,611 @@
+//------------------------------------------------------------------------------
+// Copyright   : Copyright(c) 2025 Rene Barto
+//
+// File        : Logger.cpp
+//
+// Namespace   : baremetal
+//
+// Class       : Logger
+//
+// Description : Basic logging to a device
+//
+//------------------------------------------------------------------------------
+//
+// Baremetal - A C++ bare metal environment for embedded 64 bit ARM devices
+//
+// Intended support is for 64 bit code only, running on Raspberry Pi (3 or later)
+//
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files(the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use, copy,
+// modify, merge, publish, distribute, sublicense, and /or sell copies
+// of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+#include "baremetal/Logger.h"
+
+#include "baremetal/Console.h"
+#include "baremetal/Format.h"
+#include "baremetal/MachineInfo.h"
+#include "baremetal/String.h"
+#include "baremetal/System.h"
+#include "baremetal/Timer.h"
+#include "baremetal/Version.h"
+#include "stdlib/Util.h"
+
+/// @file
+/// Logger functionality implementation
+
+using namespace baremetal;
+
+/// @brief Define log name
+LOG_MODULE("Logger");
+
+Console Logger::s_console(nullptr);
+Logger* Logger::s_logger{};
+
+/// <summary>
+/// Construct a logger
+/// </summary>
+/// <param name="logLevel">Only messages with (severity <= m_level) will be logged</param>
+/// <param name="timer">Pointer to system timer object (time is not logged, if this is nullptr). Defaults to nullptr</param>
+Logger::Logger(LogSeverity logLevel, Timer* timer /*= nullptr*/)
+    : m_isInitialized{}
+    , m_timer{timer}
+    , m_level{logLevel}
+{
+}
+
+/// <summary>
+/// Check whether the singleton logger was instantiated and initialized
+/// </summary>
+/// <returns>Returns true if the singleton logger instance is created and initialized, false otherwise</returns>
+bool Logger::HaveLogger()
+{
+    return (s_logger != nullptr) && (s_logger->m_isInitialized);
+}
+
+/// <summary>
+/// Initialize logger
+/// </summary>
+/// <returns>true on succes, false on failure</returns>
+bool Logger::Initialize()
+{
+    if (m_isInitialized)
+        return true;
+    SetupVersion();
+    m_isInitialized = true; // Stop reentrant calls from happening
+    LOG_NO_ALLOC_INFO(BAREMETAL_NAME " %s started on %s (AArch64) using %s SoC", BAREMETAL_VERSION_STRING, GetMachineInfo().GetName(), GetMachineInfo().GetSoCName());
+
+    return true;
+}
+
+/// <summary>
+/// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
+/// </summary>
+/// <param name="logLevel">Maximum log level</param>
+void Logger::SetLogLevel(LogSeverity logLevel)
+{
+    m_level = logLevel;
+}
+
+/// <summary>
+/// Check if the log level will result in output
+/// </summary>
+/// <param name="severity">True if the log level is enabled, false otherwise</param>
+/// <returns>True is the severity level is enabled, false if not</returns>
+bool Logger::IsLogSeverityEnabled(LogSeverity severity)
+{
+    return (static_cast<int>(severity) <= static_cast<int>(m_level));
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger
+/// </summary>
+/// <param name="source">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::Log(const char* source, int line, LogSeverity severity, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    LogV(source, line, severity, message, args);
+    va_end(args);
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger
+/// </summary>
+/// <param name="source">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string</param>
+/// <param name="args">Variable argument list</param>
+void Logger::LogV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+{
+    if (!IsLogSeverityEnabled(severity))
+        return;
+
+    String lineBuffer;
+
+    auto sourceString = Format(" (%s:%d)", source, line);
+
+    auto messageBuffer = FormatV(message, args);
+
+    switch (severity)
+    {
+    case LogSeverity::Panic:
+        lineBuffer += "!Panic!";
+        break;
+    case LogSeverity::Error:
+        lineBuffer += "Error  ";
+        break;
+    case LogSeverity::Warning:
+        lineBuffer += "Warning";
+        break;
+    case LogSeverity::Info:
+        lineBuffer += "Info   ";
+        break;
+    case LogSeverity::Debug:
+        lineBuffer += "Debug  ";
+        break;
+    case LogSeverity::Data:
+        lineBuffer += "Data   ";
+        break;
+    }
+
+    if (m_timer != nullptr)
+    {
+        const size_t TimeBufferSize = 32;
+        char timeBuffer[TimeBufferSize]{};
+        m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+        if (strlen(timeBuffer) > 0)
+        {
+            lineBuffer += timeBuffer;
+            lineBuffer += ' ';
+        }
+    }
+
+    lineBuffer += messageBuffer;
+    lineBuffer += sourceString;
+    lineBuffer += "\n";
+
+#if BAREMETAL_COLOR_OUTPUT
+    switch (severity)
+    {
+    case LogSeverity::Panic:
+        s_console.Write(lineBuffer, ConsoleColor::BrightRed);
+        break;
+    case LogSeverity::Error:
+        s_console.Write(lineBuffer, ConsoleColor::Red);
+        break;
+    case LogSeverity::Warning:
+        s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+        break;
+    case LogSeverity::Info:
+        s_console.Write(lineBuffer, ConsoleColor::Cyan);
+        break;
+    case LogSeverity::Debug:
+        s_console.Write(lineBuffer, ConsoleColor::Yellow);
+        break;
+    case LogSeverity::Data:
+        s_console.Write(lineBuffer, ConsoleColor::Magenta);
+        break;
+    default:
+        s_console.Write(lineBuffer, ConsoleColor::White);
+        break;
+    }
+#else
+    s_console.Write(lineBuffer);
+#endif
+
+    if (severity == LogSeverity::Panic)
+    {
+        GetSystem().Halt();
+    }
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger, not using memory allocation
+/// </summary>
+/// <param name="source">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::LogNoAlloc(const char* source, int line, LogSeverity severity, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    LogNoAllocV(source, line, severity, message, args);
+    va_end(args);
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger, not using memory allocation
+/// </summary>
+/// <param name="source">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string</param>
+/// <param name="args">Variable argument list</param>
+void Logger::LogNoAllocV(const char* source, int line, LogSeverity severity, const char* message, va_list args)
+{
+    if (!IsLogSeverityEnabled(severity))
+        return;
+
+    static const size_t BufferSize = 1024;
+    char buffer[BufferSize]{};
+
+    char sourceString[BufferSize]{};
+    FormatNoAlloc(sourceString, BufferSize, " (%s:%d)", source, line);
+
+    char messageBuffer[BufferSize]{};
+    FormatNoAllocV(messageBuffer, BufferSize, message, args);
+
+    switch (severity)
+    {
+    case LogSeverity::Panic:
+        strncat(buffer, "!Panic!", BufferSize);
+        break;
+    case LogSeverity::Error:
+        strncat(buffer, "Error  ", BufferSize);
+        break;
+    case LogSeverity::Warning:
+        strncat(buffer, "Warning", BufferSize);
+        break;
+    case LogSeverity::Info:
+        strncat(buffer, "Info   ", BufferSize);
+        break;
+    case LogSeverity::Debug:
+        strncat(buffer, "Debug  ", BufferSize);
+        break;
+    case LogSeverity::Data:
+        strncat(buffer, "Data   ", BufferSize);
+        break;
+    }
+
+    if (m_timer != nullptr)
+    {
+        const size_t TimeBufferSize = 32;
+        char timeBuffer[TimeBufferSize]{};
+        m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+        if (strlen(timeBuffer) > 0)
+        {
+            strncat(buffer, timeBuffer, BufferSize);
+            strncat(buffer, " ", BufferSize);
+        }
+    }
+
+    strncat(buffer, messageBuffer, BufferSize);
+    strncat(buffer, sourceString, BufferSize);
+    strncat(buffer, "\n", BufferSize);
+
+#if BAREMETAL_COLOR_OUTPUT
+    switch (severity)
+    {
+    case LogSeverity::Panic:
+        s_console.Write(buffer, ConsoleColor::BrightRed);
+        break;
+    case LogSeverity::Error:
+        s_console.Write(buffer, ConsoleColor::Red);
+        break;
+    case LogSeverity::Warning:
+        s_console.Write(buffer, ConsoleColor::BrightYellow);
+        break;
+    case LogSeverity::Info:
+        s_console.Write(buffer, ConsoleColor::Cyan);
+        break;
+    case LogSeverity::Debug:
+        s_console.Write(buffer, ConsoleColor::Yellow);
+        break;
+    case LogSeverity::Data:
+        s_console.Write(buffer, ConsoleColor::Magenta);
+        break;
+    default:
+        s_console.Write(buffer, ConsoleColor::White);
+        break;
+    }
+#else
+    s_console.Write(buffer);
+#endif
+
+    if (severity == LogSeverity::Panic)
+    {
+        GetSystem().Halt();
+    }
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::Trace(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    TraceV(filename, line, function, severity, message, args);
+    va_end(args);
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string</param>
+/// <param name="args">Variable argument list</param>
+void Logger::TraceV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+{
+    if (!IsLogSeverityEnabled(severity))
+        return;
+
+    String lineBuffer;
+
+    auto sourceString = Format(" (%s:%d)", filename, line);
+
+    auto messageBuffer = FormatV(message, args);
+
+    switch (severity)
+    {
+    case LogSeverity::Warning:
+        lineBuffer += "Warning";
+        break;
+    case LogSeverity::Info:
+        lineBuffer += "Info   ";
+        break;
+    case LogSeverity::Debug:
+        lineBuffer += "Debug  ";
+        break;
+    case LogSeverity::Data:
+        lineBuffer += "Data   ";
+        break;
+    default:
+        break;
+    }
+
+    if (m_timer != nullptr)
+    {
+        const size_t TimeBufferSize = 32;
+        char timeBuffer[TimeBufferSize]{};
+        m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+        if (strlen(timeBuffer) > 0)
+        {
+            lineBuffer += timeBuffer;
+            lineBuffer += ' ';
+        }
+    }
+
+    lineBuffer += messageBuffer;
+    lineBuffer += sourceString;
+    lineBuffer += "\n";
+
+#if BAREMETAL_COLOR_OUTPUT
+    switch (severity)
+    {
+    case LogSeverity::Warning:
+        s_console.Write(lineBuffer, ConsoleColor::BrightYellow);
+        break;
+    case LogSeverity::Info:
+        s_console.Write(lineBuffer, ConsoleColor::Cyan);
+        break;
+    case LogSeverity::Debug:
+        s_console.Write(lineBuffer, ConsoleColor::Yellow);
+        break;
+    case LogSeverity::Data:
+        s_console.Write(lineBuffer, ConsoleColor::Magenta);
+        break;
+    default:
+        s_console.Write(lineBuffer, ConsoleColor::White);
+        break;
+    }
+#else
+    s_console.Write(lineBuffer);
+#endif
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger, not using memory allocation
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::TraceNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    TraceNoAllocV(filename, line, function, severity, message, args);
+    va_end(args);
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger, not using memory allocation
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string</param>
+/// <param name="args">Variable argument list</param>
+void Logger::TraceNoAllocV(const char* filename, int line, const char* function, LogSeverity severity, const char* message, va_list args)
+{
+    if (!IsLogSeverityEnabled(severity))
+        return;
+
+    static const size_t BufferSize = 1024;
+    char buffer[BufferSize]{};
+
+    char sourceString[BufferSize]{};
+    FormatNoAlloc(sourceString, BufferSize, "%s (%s:%d) ", function, filename, line);
+
+    char messageBuffer[BufferSize]{};
+    FormatNoAllocV(messageBuffer, BufferSize, message, args);
+
+    switch (severity)
+    {
+    case LogSeverity::Warning:
+        strncat(buffer, "Warning", BufferSize);
+        break;
+    case LogSeverity::Info:
+        strncat(buffer, "Info   ", BufferSize);
+        break;
+    case LogSeverity::Debug:
+        strncat(buffer, "Debug  ", BufferSize);
+        break;
+    case LogSeverity::Data:
+        strncat(buffer, "Data   ", BufferSize);
+        break;
+    default:
+        break;
+    }
+
+    if (m_timer != nullptr)
+    {
+        const size_t TimeBufferSize = 32;
+        char timeBuffer[TimeBufferSize]{};
+        m_timer->GetTimeString(timeBuffer, TimeBufferSize);
+        if (strlen(timeBuffer) > 0)
+        {
+            strncat(buffer, timeBuffer, BufferSize);
+            strncat(buffer, " ", BufferSize);
+        }
+    }
+
+    strncat(buffer, sourceString, BufferSize);
+    strncat(buffer, messageBuffer, BufferSize);
+    strncat(buffer, "\n", BufferSize);
+
+#if BAREMETAL_COLOR_OUTPUT
+    switch (severity)
+    {
+    case LogSeverity::Warning:
+        s_console.Write(buffer, ConsoleColor::BrightYellow);
+        break;
+    case LogSeverity::Info:
+        s_console.Write(buffer, ConsoleColor::Cyan);
+        break;
+    case LogSeverity::Debug:
+        s_console.Write(buffer, ConsoleColor::Yellow);
+        break;
+    case LogSeverity::Data:
+        s_console.Write(buffer, ConsoleColor::Magenta);
+        break;
+    default:
+        s_console.Write(buffer, ConsoleColor::White);
+        break;
+    }
+#else
+    s_console.Write(buffer);
+#endif
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger. Static entry point for Log() method
+/// </summary>
+/// <param name="from">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::LogEntry(const char* from, int line, LogSeverity severity, const char* message, ...)
+{
+    if (HaveLogger())
+    {
+        va_list args;
+        va_start(args, message);
+        GetLogger().LogV(from, line, severity, message, args);
+        va_end(args);
+    }
+}
+
+/// <summary>
+/// Write a string with variable arguments to the logger, not using memory allocation. Static entry point for LogNoAlloc() method
+/// </summary>
+/// <param name="from">Source name or file name</param>
+/// <param name="line">Source line number</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::LogEntryNoAlloc(const char* from, int line, LogSeverity severity, const char* message, ...)
+{
+    if (HaveLogger())
+    {
+        va_list args;
+        va_start(args, message);
+        GetLogger().LogNoAllocV(from, line, severity, message, args);
+        va_end(args);
+    }
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger. Static entry point for Trace() method
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::TraceEntry(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+{
+    if (HaveLogger())
+    {
+        va_list args;
+        va_start(args, message);
+        GetLogger().TraceV(filename, line, function, severity, message, args);
+        va_end(args);
+    }
+}
+
+/// <summary>
+/// Write a trace string with variable arguments to the logger, not using memory allocation. Static entry point for TraceNoAlloc() method
+/// </summary>
+/// <param name="filename">File name</param>
+/// <param name="line">Source line number</param>
+/// <param name="function">Function name</param>
+/// <param name="severity">Severity to log with (log severity levels greater than the current set log level wil be ignored</param>
+/// <param name="message">Formatted message string, with variable arguments</param>
+void Logger::TraceEntryNoAlloc(const char* filename, int line, const char* function, LogSeverity severity, const char* message, ...)
+{
+    if (HaveLogger())
+    {
+        va_list args;
+        va_start(args, message);
+        GetLogger().TraceNoAllocV(filename, line, function, severity, message, args);
+        va_end(args);
+    }
+}
+
+/// <summary>
+/// Construct the singleton logger and initializat it if needed, and return a reference to the instance
+/// </summary>
+/// <returns>Reference to the singleton logger instance</returns>
+Logger& baremetal::GetLogger()
+{
+    if (Logger::s_logger == nullptr)
+    {
+        Logger::s_logger = new Logger(LogSeverity::Info, &GetTimer());
+        Logger::s_logger->Initialize();
+    }
+    return *Logger::s_logger;
+}

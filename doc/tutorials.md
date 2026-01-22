@@ -27,6 +27,5 @@
 - @subpage TUTORIAL_24_UNIT_TEST_MACROS
 - @subpage TUTORIAL_25_WRITING_UNIT_TESTS
 - @subpage TUTORIAL_26_I2C_DISPLAY
-<!--
-- @subpage TUTORIAL_24_I2S
--->
+- @subpage TUTORIAL_27_DMA
+- @subpage TUTORIAL_28_I2S

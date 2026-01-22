@@ -36,8 +36,6 @@ file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 set(PROJECT_INCLUDES_PRIVATE )
 
-set(PROJECT_INCLUDES_PRIVATE )
-
 if (CMAKE_VERBOSE_MAKEFILE)
     display_list("Package                           : " ${PROJECT_NAME} )
     display_list("Package description               : " ${PROJECT_DESCRIPTION} )

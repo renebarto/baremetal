@@ -64,13 +64,13 @@ Create the file `code/libraries/unittest/CMakeLists.txt`.
 File: code/libraries/unittest/CMakeLists.txt
 1: message(STATUS "\n**********************************************************************************\n")
 2: message(STATUS "\n## In directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-3:
+3: 
 4: project(unittest
-5:     DESCRIPTION "UNit test library"
+5:     DESCRIPTION "Unit test library"
 6:     LANGUAGES CXX ASM)
-7:
+7: 
 8: set(PROJECT_TARGET_NAME ${PROJECT_NAME})
-9:
+9: 
 10: set(PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE ${COMPILE_DEFINITIONS_C})
 11: set(PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC )
 12: set(PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE ${COMPILE_DEFINITIONS_ASM})
@@ -79,84 +79,82 @@ File: code/libraries/unittest/CMakeLists.txt
 15: set(PROJECT_COMPILE_OPTIONS_ASM_PRIVATE ${COMPILE_OPTIONS_ASM})
 16: set(PROJECT_INCLUDE_DIRS_PRIVATE )
 17: set(PROJECT_INCLUDE_DIRS_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-18:
+18: 
 19: set(PROJECT_LINK_OPTIONS ${LINKER_OPTIONS})
-20:
+20: 
 21: set(PROJECT_DEPENDENCIES
 22:     baremetal
 23:     )
-24:
+24: 
 25: set(PROJECT_LIBS
 26:     ${LINKER_LIBRARIES}
 27:     ${PROJECT_DEPENDENCIES}
 28:     )
-29:
+29: 
 30: file(GLOB_RECURSE PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp src/*.S)
 31: set(GLOB_RECURSE PROJECT_INCLUDES_PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/unittest/*.h)
 32: set(PROJECT_INCLUDES_PRIVATE )
-33:
-34: set(PROJECT_INCLUDES_PRIVATE )
-35:
-36: if (CMAKE_VERBOSE_MAKEFILE)
-37:     display_list("Package                           : " ${PROJECT_NAME} )
-38:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
-39:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
-40:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
-41:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
-42:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
-43:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
-44:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
-45:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
-46:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
-47:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
-48:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
-49:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
-50:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
-51:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
-52:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
-53:     display_list("Link libs                         : " ${PROJECT_LIBS} )
-54:     display_list("Source files                      : " ${PROJECT_SOURCES} )
-55:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
-56:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
-57: endif()
-58:
-59: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
-60: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
-61: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
-62: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
-63: target_compile_definitions(${PROJECT_NAME} PRIVATE
-64:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
-65:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
-66:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
-67:     )
-68: target_compile_definitions(${PROJECT_NAME} PUBLIC
-69:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
-70:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
-71:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
-72:     )
-73: target_compile_options(${PROJECT_NAME} PRIVATE
-74:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
-75:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
-76:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
-77:     )
-78: target_compile_options(${PROJECT_NAME} PUBLIC
-79:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
-80:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
-81:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
-82:     )
-83:
-84: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
-85:
-86: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
-87: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
-88:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
-89: endif()
-90:
-91: link_directories(${LINK_DIRECTORIES})
-92: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
-93: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
-94:
-95: show_target_properties(${PROJECT_NAME})
+33: 
+34: if (CMAKE_VERBOSE_MAKEFILE)
+35:     display_list("Package                           : " ${PROJECT_NAME} )
+36:     display_list("Package description               : " ${PROJECT_DESCRIPTION} )
+37:     display_list("Defines C - public                : " ${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC} )
+38:     display_list("Defines C - private               : " ${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE} )
+39:     display_list("Defines C++ - public              : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC} )
+40:     display_list("Defines C++ - private             : " ${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE} )
+41:     display_list("Defines ASM - private             : " ${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE} )
+42:     display_list("Compiler options C - public       : " ${PROJECT_COMPILE_OPTIONS_C_PUBLIC} )
+43:     display_list("Compiler options C - private      : " ${PROJECT_COMPILE_OPTIONS_C_PRIVATE} )
+44:     display_list("Compiler options C++ - public     : " ${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC} )
+45:     display_list("Compiler options C++ - private    : " ${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE} )
+46:     display_list("Compiler options ASM - private    : " ${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE} )
+47:     display_list("Include dirs - public             : " ${PROJECT_INCLUDE_DIRS_PUBLIC} )
+48:     display_list("Include dirs - private            : " ${PROJECT_INCLUDE_DIRS_PRIVATE} )
+49:     display_list("Linker options                    : " ${PROJECT_LINK_OPTIONS} )
+50:     display_list("Dependencies                      : " ${PROJECT_DEPENDENCIES} )
+51:     display_list("Link libs                         : " ${PROJECT_LIBS} )
+52:     display_list("Source files                      : " ${PROJECT_SOURCES} )
+53:     display_list("Include files - public            : " ${PROJECT_INCLUDES_PUBLIC} )
+54:     display_list("Include files - private           : " ${PROJECT_INCLUDES_PRIVATE} )
+55: endif()
+56: 
+57: add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES} ${PROJECT_INCLUDES_PUBLIC} ${PROJECT_INCLUDES_PRIVATE})
+58: target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
+59: target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE_DIRS_PRIVATE})
+60: target_include_directories(${PROJECT_NAME} PUBLIC  ${PROJECT_INCLUDE_DIRS_PUBLIC})
+61: target_compile_definitions(${PROJECT_NAME} PRIVATE
+62:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PRIVATE}>
+63:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PRIVATE}>
+64:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PRIVATE}>
+65:     )
+66: target_compile_definitions(${PROJECT_NAME} PUBLIC
+67:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_DEFINITIONS_C_PUBLIC}>
+68:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_DEFINITIONS_CXX_PUBLIC}>
+69:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_DEFINITIONS_ASM_PUBLIC}>
+70:     )
+71: target_compile_options(${PROJECT_NAME} PRIVATE
+72:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PRIVATE}>
+73:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PRIVATE}>
+74:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PRIVATE}>
+75:     )
+76: target_compile_options(${PROJECT_NAME} PUBLIC
+77:     $<$<COMPILE_LANGUAGE:C>:${PROJECT_COMPILE_OPTIONS_C_PUBLIC}>
+78:     $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_COMPILE_OPTIONS_CXX_PUBLIC}>
+79:     $<$<COMPILE_LANGUAGE:ASM>:${PROJECT_COMPILE_OPTIONS_ASM_PUBLIC}>
+80:     )
+81: 
+82: set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${SUPPORTED_CPP_STANDARD})
+83: 
+84: list_to_string(PROJECT_LINK_OPTIONS PROJECT_LINK_OPTIONS_STRING)
+85: if (NOT "${PROJECT_LINK_OPTIONS_STRING}" STREQUAL "")
+86:     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PROJECT_LINK_OPTIONS_STRING}")
+87: endif()
+88: 
+89: link_directories(${LINK_DIRECTORIES})
+90: set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_TARGET_NAME})
+91: set_target_properties(${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIB_DIR})
+92: 
+93: show_target_properties(${PROJECT_NAME})
 ```
 
 As no source files are added yet, configuring will fail, but we'll get to that in a while.

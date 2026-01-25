@@ -73,7 +73,7 @@ char* strncat(char* dest, const char* src, size_t maxLen);
 /// <returns>Number of bits used for value</returns>
 inline constexpr unsigned NextPowerOf2Bits(size_t value)
 {
-    unsigned bitCount{0};
+    unsigned bitCount{ 0 };
     size_t temp = value;
     while (temp >= 1)
     {

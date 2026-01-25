@@ -105,7 +105,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 71:     String();
 72:     String(const ValueType* str);
 73:     String(const ValueType* str, size_t count);
-74:     String(size_t count, ValueType ch);
+74:     String(size_t count, ValueType c);
 75:     String(const String& other);
 76:     String(String&& other);
 77:     String(const String& other, size_t pos, size_t count = npos);
@@ -123,7 +123,7 @@ File: code/libraries/baremetal/include/baremetal/String.h
 89: 
 90:     String& assign(const ValueType* str);
 91:     String& assign(const ValueType* str, size_t count);
-92:     String& assign(size_t count, ValueType ch);
+92:     String& assign(size_t count, ValueType c);
 93:     String& assign(const String& str);
 94:     String& assign(const String& str, size_t pos, size_t count = npos);
 95: 
@@ -145,10 +145,10 @@ File: code/libraries/baremetal/include/baremetal/String.h
 111:     size_t capacity() const;
 112:     size_t reserve(size_t newCapacity);
 113: 
-114:     String& operator+=(ValueType ch);
+114:     String& operator+=(ValueType c);
 115:     String& operator+=(const String& str);
 116:     String& operator+=(const ValueType* str);
-117:     void append(size_t count, ValueType ch);
+117:     void append(size_t count, ValueType c);
 118:     void append(const String& str);
 119:     void append(const String& str, size_t pos, size_t count = npos);
 120:     void append(const ValueType* str);
@@ -158,14 +158,14 @@ File: code/libraries/baremetal/include/baremetal/String.h
 124:     size_t find(const String& str, size_t pos = 0) const;
 125:     size_t find(const ValueType* str, size_t pos = 0) const;
 126:     size_t find(const ValueType* str, size_t pos, size_t count) const;
-127:     size_t find(ValueType ch, size_t pos = 0) const;
-128:     bool starts_with(ValueType ch) const;
+127:     size_t find(ValueType c, size_t pos = 0) const;
+128:     bool starts_with(ValueType c) const;
 129:     bool starts_with(const String& str) const;
 130:     bool starts_with(const ValueType* str) const;
-131:     bool ends_with(ValueType ch) const;
+131:     bool ends_with(ValueType c) const;
 132:     bool ends_with(const String& str) const;
 133:     bool ends_with(const ValueType* str) const;
-134:     bool contains(ValueType ch) const;
+134:     bool contains(ValueType c) const;
 135:     bool contains(const String& str) const;
 136:     bool contains(const ValueType* str) const;
 137:     String substr(size_t pos = 0, size_t count = npos) const;
@@ -185,8 +185,8 @@ File: code/libraries/baremetal/include/baremetal/String.h
 151:     String& replace(size_t pos, size_t count, const String& str, size_t strPos, size_t strCount = npos);
 152:     String& replace(size_t pos, size_t count, const ValueType* str);
 153:     String& replace(size_t pos, size_t count, const ValueType* str, size_t strCount);
-154:     String& replace(size_t pos, size_t count, ValueType ch);
-155:     String& replace(size_t pos, size_t count, ValueType ch, size_t chCount);
+154:     String& replace(size_t pos, size_t count, ValueType c);
+155:     String& replace(size_t pos, size_t count, ValueType c, size_t chCount);
 156:     int replace(const String& oldStr, const String& newStr);       // returns number of occurrences
 157:     int replace(const ValueType* oldStr, const ValueType* newStr); // returns number of occurrences
 158: 
@@ -506,9 +506,9 @@ File: code/libraries/baremetal/src/String.cpp
 138: ///
 139: /// Initializes the string with the specified count times the specified character. A null character is always added.
 140: /// </summary>
-141: /// <param name="count">Number of characters of value ch to initialized with</param>
-142: /// <param name="ch">Character to initialize with</param>
-143: String::String(size_t count, ValueType ch)
+141: /// <param name="count">Number of characters of value c to initialized with</param>
+142: /// <param name="c">Character to initialize with</param>
+143: String::String(size_t count, ValueType c)
 144:     : m_buffer{}
 145:     , m_end{}
 146:     , m_allocatedSize{}
@@ -518,7 +518,7 @@ File: code/libraries/baremetal/src/String.cpp
 150:         size = MaximumStringSize;
 151:     if (reallocate(size + 1))
 152:     {
-153:         memset(m_buffer, ch, size);
+153:         memset(m_buffer, c, size);
 154:     }
 155:     m_end = m_buffer + size;
 156:     m_buffer[size] = NullCharConst;
@@ -750,10 +750,10 @@ File: code/libraries/baremetal/src/String.cpp
 382: ///
 383: /// Assigns a string containing the specified count times the specified characters to the string
 384: /// </summary>
-385: /// <param name="count">Number copies of ch to copy to the string</param>
-386: /// <param name="ch">Character to initialize with</param>
+385: /// <param name="count">Number copies of c to copy to the string</param>
+386: /// <param name="c">Character to initialize with</param>
 387: /// <returns>A reference to the string</returns>
-388: String& String::assign(size_t count, ValueType ch)
+388: String& String::assign(size_t count, ValueType c)
 389: {
 390:     auto size = count;
 391:     if (size > MaximumStringSize)
@@ -763,7 +763,7 @@ File: code/libraries/baremetal/src/String.cpp
 395:         if (!reallocate(size + 1))
 396:             return *this;
 397:     }
-398:     memset(m_buffer, ch, size);
+398:     memset(m_buffer, c, size);
 399:     m_end = m_buffer + size;
 400:     m_buffer[size] = NullCharConst;
 401:     return *this;
@@ -1017,11 +1017,11 @@ File: code/libraries/baremetal/src/String.cpp
 649: ///
 650: /// Appends a character to the string
 651: /// </summary>
-652: /// <param name="ch">Character to append</param>
+652: /// <param name="c">Character to append</param>
 653: /// <returns>Returns a reference to the string</returns>
-654: String& String::operator+=(ValueType ch)
+654: String& String::operator+=(ValueType c)
 655: {
-656:     append(1, ch);
+656:     append(1, c);
 657:     return *this;
 658: }
 659: 
@@ -1054,11 +1054,11 @@ File: code/libraries/baremetal/src/String.cpp
 686: /// <summary>
 687: /// append operator
 688: ///
-689: /// Appends a sequence of count times the same character ch to the string
+689: /// Appends a sequence of count times the same character c to the string
 690: /// </summary>
 691: /// <param name="count">Number of characters to append</param>
-692: /// <param name="ch">Character to append</param>
-693: void String::append(size_t count, ValueType ch)
+692: /// <param name="c">Character to append</param>
+693: void String::append(size_t count, ValueType c)
 694: {
 695:     auto len = length();
 696:     auto strLength = count;
@@ -1070,7 +1070,7 @@ File: code/libraries/baremetal/src/String.cpp
 702:         if (!reallocate(size + 1))
 703:             return;
 704:     }
-705:     memset(m_buffer + len, ch, strLength);
+705:     memset(m_buffer + len, c, strLength);
 706:     m_end = m_buffer + size;
 707:     m_buffer[size] = NullCharConst;
 708: }
@@ -1274,17 +1274,17 @@ File: code/libraries/baremetal/src/String.cpp
 906: /// <summary>
 907: /// find a character in the string
 908: /// </summary>
-909: /// <param name="ch">Character to find</param>
+909: /// <param name="c">Character to find</param>
 910: /// <param name="pos">Starting position in string to start searching</param>
 911: /// <returns>Location of first character in string of match if found, String::npos if not found</returns>
-912: size_t String::find(ValueType ch, size_t pos /*= 0*/) const
+912: size_t String::find(ValueType c, size_t pos /*= 0*/) const
 913: {
 914:     auto len = length();
 915:     if (pos >= len)
 916:         return npos;
 917:     for (const ValueType* haystack = data() + pos; haystack <= m_end; ++haystack)
 918:     {
-919:         if (*haystack == ch)
+919:         if (*haystack == c)
 920:             return haystack - m_buffer;
 921:     }
 922:     return npos;
@@ -1293,13 +1293,13 @@ File: code/libraries/baremetal/src/String.cpp
 925: /// <summary>
 926: /// Check whether string starts with character
 927: /// </summary>
-928: /// <param name="ch">Character to find</param>
-929: /// <returns>Returns true if ch is first character in string, false otherwise</returns>
-930: bool String::starts_with(ValueType ch) const
+928: /// <param name="c">Character to find</param>
+929: /// <returns>Returns true if c is first character in string, false otherwise</returns>
+930: bool String::starts_with(ValueType c) const
 931: {
 932:     if (empty())
 933:         return false;
-934:     return m_buffer[0] == ch;
+934:     return m_buffer[0] == c;
 935: }
 936: 
 937: /// <summary>
@@ -1339,13 +1339,13 @@ File: code/libraries/baremetal/src/String.cpp
 971: /// <summary>
 972: /// Check whether string ends with character
 973: /// </summary>
-974: /// <param name="ch">Character to find</param>
-975: /// <returns>Returns true if ch is last character in string, false otherwise</returns>
-976: bool String::ends_with(ValueType ch) const
+974: /// <param name="c">Character to find</param>
+975: /// <returns>Returns true if c is last character in string, false otherwise</returns>
+976: bool String::ends_with(ValueType c) const
 977: {
 978:     if (empty())
 979:         return false;
-980:     return m_buffer[length() - 1] == ch;
+980:     return m_buffer[length() - 1] == c;
 981: }
 982: 
 983: /// <summary>
@@ -1385,18 +1385,18 @@ File: code/libraries/baremetal/src/String.cpp
 1017: /// <summary>
 1018: /// Check whether string contains character
 1019: /// </summary>
-1020: /// <param name="ch">Character to find</param>
-1021: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
-1022: bool String::contains(ValueType ch) const
+1020: /// <param name="c">Character to find</param>
+1021: /// <returns>Returns true if c is contained in string, false otherwise</returns>
+1022: bool String::contains(ValueType c) const
 1023: {
-1024:     return find(ch) != npos;
+1024:     return find(c) != npos;
 1025: }
 1026: 
 1027: /// <summary>
 1028: /// Check whether string contains substring
 1029: /// </summary>
 1030: /// <param name="str">Substring to find</param>
-1031: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
+1031: /// <returns>Returns true if str is contained in string, false otherwise</returns>
 1032: bool String::contains(const String& str) const
 1033: {
 1034:     return find(str) != npos;
@@ -1406,7 +1406,7 @@ File: code/libraries/baremetal/src/String.cpp
 1038: /// Check whether string contains substring
 1039: /// </summary>
 1040: /// <param name="str">Substring to find</param>
-1041: /// <returns>Returns true if ch is contained in string, false otherwise</returns>
+1041: /// <returns>Returns true if str is contained in string, false otherwise</returns>
 1042: bool String::contains(const ValueType* str) const
 1043: {
 1044:     return find(str) != npos;
@@ -1709,30 +1709,30 @@ File: code/libraries/baremetal/src/String.cpp
 1341: /// <summary>
 1342: /// replace substring
 1343: ///
-1344: /// Replaces the substring from pos to pos+count with ch
+1344: /// Replaces the substring from pos to pos+count with c
 1345: /// </summary>
 1346: /// <param name="pos">Starting position of substring to replace</param>
 1347: /// <param name="count">Number of characters in substring to replace</param>
-1348: /// <param name="ch">Characters to replace with</param>
+1348: /// <param name="c">Characters to replace with</param>
 1349: /// <returns>Returns the reference to the resulting string</returns>
-1350: String& String::replace(size_t pos, size_t count, ValueType ch)
+1350: String& String::replace(size_t pos, size_t count, ValueType c)
 1351: {
-1352:     return replace(pos, count, ch, 1);
+1352:     return replace(pos, count, c, 1);
 1353: }
 1354: 
 1355: /// <summary>
 1356: /// replace substring
 1357: ///
-1358: /// Replaces the substring from pos to pos+count with a sequence of chCount copies of ch
+1358: /// Replaces the substring from pos to pos+count with a sequence of chCount copies of c
 1359: /// </summary>
 1360: /// <param name="pos">Starting position of substring to replace</param>
 1361: /// <param name="count">Number of characters in substring to replace</param>
-1362: /// <param name="ch">Characters to replace with</param>
-1363: /// <param name="chCount">Number of copies of ch to replace with</param>
+1362: /// <param name="c">Characters to replace with</param>
+1363: /// <param name="chCount">Number of copies of c to replace with</param>
 1364: /// <returns>Returns the reference to the resulting string</returns>
-1365: String& String::replace(size_t pos, size_t count, ValueType ch, size_t chCount)
+1365: String& String::replace(size_t pos, size_t count, ValueType c, size_t chCount)
 1366: {
-1367:     String result = substr(0, pos) + String(chCount, ch) + substr(pos + count);
+1367:     String result = substr(0, pos) + String(chCount, c) + substr(pos + count);
 1368:     assign(result);
 1369:     return *this;
 1370: }
@@ -2457,9 +2457,9 @@ File: code\applications\demo\src\main.cpp
 42:     String s10{nullptr, 3};
 43: 
 44:     LOG_INFO("s4");
-45:     for (auto ch : s4)
+45:     for (auto c : s4)
 46:     {
-47:         LOG_INFO("%c", ch);
+47:         LOG_INFO("%c", c);
 48:     }
 49:     assert(strcmp(s1, "a") == 0);
 50:     assert(strcmp(s2, "a") == 0);
@@ -2855,13 +2855,13 @@ File: code\applications\demo\src\main.cpp
 440:     Timer::WaitMilliSeconds(5000);
 441: 
 442:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-443:     char ch{};
-444:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+443:     char c{};
+444:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 445:     {
-446:         ch = console.ReadChar();
-447:         console.WriteChar(ch);
+446:         c = console.ReadChar();
+447:         console.WriteChar(c);
 448:     }
-449:     if (ch == 'p')
+449:     if (c == 'p')
 450:         assert(false);
 451: 
 452:     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
@@ -2870,7 +2870,7 @@ File: code\applications\demo\src\main.cpp
 455: 
 456:     memoryManager.DumpStatus();
 457: 
-458:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+458:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 459: }
 ```
 

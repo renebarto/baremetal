@@ -408,10 +408,10 @@ File: code/libraries/baremetal/src/Format.cpp
 208:             {
 209:             case 'c':
 210:                 {
-211:                     char ch = static_cast<char>(va_arg(args, int));
+211:                     char c = static_cast<char>(va_arg(args, int));
 212:                     if (left)
 213:                     {
-214:                         Append(buffer, bufferSize, ch);
+214:                         Append(buffer, bufferSize, c);
 215:                         if (width > 1)
 216:                         {
 217:                             Append(buffer, bufferSize, width - 1, ' ');
@@ -423,7 +423,7 @@ File: code/libraries/baremetal/src/Format.cpp
 223:                         {
 224:                             Append(buffer, bufferSize, width - 1, ' ');
 225:                         }
-226:                         Append(buffer, bufferSize, ch);
+226:                         Append(buffer, bufferSize, c);
 227:                     }
 228:                 }
 229:                 break;
@@ -2313,14 +2313,14 @@ File: code/applications/demo/src/main.cpp
 38:     Timer::WaitMilliSeconds(5000);
 39:
 40:     console.Write("Press r to reboot, h to halt\n");
-41:     char ch{};
-42:     while ((ch != 'r') && (ch != 'h'))
+41:     char c{};
+42:     while ((c != 'r') && (c != 'h'))
 43:     {
-44:         ch = console.ReadChar();
-45:         console.WriteChar(ch);
+44:         c = console.ReadChar();
+45:         console.WriteChar(c);
 46:     }
 47:
-48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+48:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
 
@@ -2649,13 +2649,13 @@ File: code/applications/demo/src/main.cpp
 43:     Timer::WaitMilliSeconds(5000);
 44:
 45:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-46:     char ch{};
-47:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+46:     char c{};
+47:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 48:     {
-49:         ch = console.ReadChar();
-50:         console.WriteChar(ch);
+49:         c = console.ReadChar();
+50:         console.WriteChar(c);
 51:     }
-52:     if (ch == 'p')
+52:     if (c == 'p')
 53:     {
 54:         SetAssertionCallback(MyHandler);
 55:         assert(false);
@@ -2663,7 +2663,7 @@ File: code/applications/demo/src/main.cpp
 57:         assert(false);
 58:     }
 59:
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+60:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 61: }
 ```
 

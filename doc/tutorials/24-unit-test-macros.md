@@ -572,16 +572,16 @@ File: code\applications\demo\src\main.cpp
 95:     Timer::WaitMilliSeconds(5000);
 96:
 97:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-98:     char ch{};
-99:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+98:     char c{};
+99:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 100:     {
-101:         ch = console.ReadChar();
-102:         console.WriteChar(ch);
+101:         c = console.ReadChar();
+102:         console.WriteChar(c);
 103:     }
-104:     if (ch == 'p')
+104:     if (c == 'p')
 105:         assert(false);
 106:
-107:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+107:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 108: }
 ```
 
@@ -1673,14 +1673,14 @@ File: code\applications\demo\src\main.cpp
 102:     Timer::WaitMilliSeconds(5000);
 103: 
 104:     console.Write("Press r to reboot, h to halt\n");
-105:     char ch{};
-106:     while ((ch != 'r') && (ch != 'h'))
+105:     char c{};
+106:     while ((c != 'r') && (c != 'h'))
 107:     {
-108:         ch = console.ReadChar();
-109:         console.WriteChar(ch);
+108:         c = console.ReadChar();
+109:         console.WriteChar(c);
 110:     }
 111: 
-112:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+112:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 113: }
 ```
 
@@ -3102,9 +3102,9 @@ File: code/libraries/unittest/src/PrintValue.cpp
 45:     s = str;
 46: }
 47: 
-48: void PrintTo(unsigned char ch, baremetal::String& s)
+48: void PrintTo(unsigned char c, baremetal::String& s)
 49: {
-50:     s += ch;
+50:     s += c;
 51: }
 ```
 

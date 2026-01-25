@@ -471,14 +471,14 @@ File: code/applications/demo/src/main.cpp
 129:     Timer::WaitMilliSeconds(5000);
 130:
 131:     uart.WriteString("Press r to reboot, h to halt\n");
-132:     char ch{};
-133:     while ((ch != 'r') && (ch != 'h'))
+132:     char c{};
+133:     while ((c != 'r') && (c != 'h'))
 134:     {
-135:         ch = uart.Read();
-136:         uart.Write(ch);
+135:         c = uart.Read();
+136:         uart.Write(c);
 137:     }
 138:
-139:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+139:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 140: }
 ```
 
@@ -1261,14 +1261,14 @@ File: code/applications/demo/src/main.cpp
 70:     Timer::WaitMilliSeconds(5000);
 71:
 72:     uart.WriteString("Press r to reboot, h to halt\n");
-73:     char ch{};
-74:     while ((ch != 'r') && (ch != 'h'))
+73:     char c{};
+74:     while ((c != 'r') && (c != 'h'))
 75:     {
-76:         ch = uart.Read();
-77:         uart.Write(ch);
+76:         c = uart.Read();
+77:         uart.Write(c);
 78:     }
 79:
-80:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+80:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 81: }
 ```
 
@@ -2001,14 +2001,14 @@ File: code/applications/demo/src/main.cpp
 46:     Timer::WaitMilliSeconds(5000);
 47:
 48:     uart.WriteString("Press r to reboot, h to halt\n");
-49:     char ch{};
-50:     while ((ch != 'r') && (ch != 'h'))
+49:     char c{};
+50:     while ((c != 'r') && (c != 'h'))
 51:     {
-52:         ch = uart.Read();
-53:         uart.Write(ch);
+52:         c = uart.Read();
+53:         uart.Write(c);
 54:     }
 55:
-56:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+56:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 57: }
 ```
 
@@ -2458,14 +2458,14 @@ File: code/applications/demo/src/main.cpp
 38:     Timer::WaitMilliSeconds(5000);
 39:
 40:     uart.WriteString("Press r to reboot, h to halt\n");
-41:     char ch{};
-42:     while ((ch != 'r') && (ch != 'h'))
+41:     char c{};
+42:     while ((c != 'r') && (c != 'h'))
 43:     {
-44:         ch = uart.Read();
-45:         uart.Write(ch);
+44:         c = uart.Read();
+45:         uart.Write(c);
 46:     }
 47:
-48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+48:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
 

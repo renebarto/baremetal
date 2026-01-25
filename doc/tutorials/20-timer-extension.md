@@ -466,14 +466,14 @@ File: code/applications/demo/src/main.cpp
 32:     timer.UnregisterPeriodicHandler(PeriodicHandler);
 33: 
 34:     console.Write("Press r to reboot, h to halt\n");
-35:     char ch{};
-36:     while ((ch != 'r') && (ch != 'h'))
+35:     char c{};
+36:     while ((c != 'r') && (c != 'h'))
 37:     {
-38:         ch = console.ReadChar();
-39:         console.WriteChar(ch);
+38:         c = console.ReadChar();
+39:         console.WriteChar(c);
 40:     }
 41: 
-42:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+42:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 43: }
 ```
 
@@ -1517,14 +1517,14 @@ File: code/applications/baremetal/src/main.cpp
 50:     timer.CancelKernelTimer(timer3Handle);
 51: 
 52:     console.Write("Press r to reboot, h to halt\n");
-53:     char ch{};
-54:     while ((ch != 'r') && (ch != 'h'))
+53:     char c{};
+54:     while ((c != 'r') && (c != 'h'))
 55:     {
-56:         ch = console.ReadChar();
-57:         console.WriteChar(ch);
+56:         c = console.ReadChar();
+57:         console.WriteChar(c);
 58:     }
 59: 
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+60:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 61: }
 ```
 

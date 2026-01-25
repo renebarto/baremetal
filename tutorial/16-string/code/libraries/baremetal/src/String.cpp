@@ -83,6 +83,10 @@ String::String()
 /// </summary>
 String::~String()
 {
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    if (m_buffer != nullptr)
+        LOG_NO_ALLOC_DEBUG("Free string %p", m_buffer);
+#endif
     delete[] m_buffer;
 }
 
@@ -138,9 +142,9 @@ String::String(const ValueType* str, size_t count)
 ///
 /// Initializes the string with the specified count times the specified character. A null character is always added.
 /// </summary>
-/// <param name="count">Number of characters of value ch to initialized with</param>
-/// <param name="ch">Character to initialize with</param>
-String::String(size_t count, ValueType ch)
+/// <param name="count">Number of characters of value c to initialized with</param>
+/// <param name="c">Character to initialize with</param>
+String::String(size_t count, ValueType c)
     : m_buffer{}
     , m_end{}
     , m_allocatedSize{}
@@ -150,7 +154,7 @@ String::String(size_t count, ValueType ch)
         size = MaximumStringSize;
     if (reallocate(size + 1))
     {
-        memset(m_buffer, ch, size);
+        memset(m_buffer, c, size);
     }
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
@@ -382,10 +386,10 @@ String& String::assign(const ValueType* str, size_t count)
 ///
 /// Assigns a string containing the specified count times the specified characters to the string
 /// </summary>
-/// <param name="count">Number copies of ch to copy to the string</param>
-/// <param name="ch">Character to initialize with</param>
+/// <param name="count">Number copies of c to copy to the string</param>
+/// <param name="c">Character to initialize with</param>
 /// <returns>A reference to the string</returns>
-String& String::assign(size_t count, ValueType ch)
+String& String::assign(size_t count, ValueType c)
 {
     auto size = count;
     if (size > MaximumStringSize)
@@ -395,7 +399,7 @@ String& String::assign(size_t count, ValueType ch)
         if (!reallocate(size + 1))
             return *this;
     }
-    memset(m_buffer, ch, size);
+    memset(m_buffer, c, size);
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
     return *this;
@@ -649,11 +653,11 @@ size_t String::reserve(size_t newCapacity)
 ///
 /// Appends a character to the string
 /// </summary>
-/// <param name="ch">Character to append</param>
+/// <param name="c">Character to append</param>
 /// <returns>Returns a reference to the string</returns>
-String& String::operator+=(ValueType ch)
+String& String::operator+=(ValueType c)
 {
-    append(1, ch);
+    append(1, c);
     return *this;
 }
 
@@ -686,11 +690,11 @@ String& String::operator+=(const ValueType* str)
 /// <summary>
 /// append operator
 ///
-/// Appends a sequence of count times the same character ch to the string
+/// Appends a sequence of count times the same character c to the string
 /// </summary>
 /// <param name="count">Number of characters to append</param>
-/// <param name="ch">Character to append</param>
-void String::append(size_t count, ValueType ch)
+/// <param name="c">Character to append</param>
+void String::append(size_t count, ValueType c)
 {
     auto len = length();
     auto strLength = count;
@@ -702,7 +706,7 @@ void String::append(size_t count, ValueType ch)
         if (!reallocate(size + 1))
             return;
     }
-    memset(m_buffer + len, ch, strLength);
+    memset(m_buffer + len, c, strLength);
     m_end = m_buffer + size;
     m_buffer[size] = NullCharConst;
 }
@@ -906,17 +910,17 @@ size_t String::find(const ValueType* str, size_t pos, size_t count) const
 /// <summary>
 /// find a character in the string
 /// </summary>
-/// <param name="ch">Character to find</param>
+/// <param name="c">Character to find</param>
 /// <param name="pos">Starting position in string to start searching</param>
 /// <returns>Location of first character in string of match if found, String::npos if not found</returns>
-size_t String::find(ValueType ch, size_t pos /*= 0*/) const
+size_t String::find(ValueType c, size_t pos /*= 0*/) const
 {
     auto len = length();
     if (pos >= len)
         return npos;
     for (const ValueType* haystack = data() + pos; haystack <= m_end; ++haystack)
     {
-        if (*haystack == ch)
+        if (*haystack == c)
             return haystack - m_buffer;
     }
     return npos;
@@ -925,13 +929,13 @@ size_t String::find(ValueType ch, size_t pos /*= 0*/) const
 /// <summary>
 /// Check whether string starts with character
 /// </summary>
-/// <param name="ch">Character to find</param>
-/// <returns>Returns true if ch is first character in string, false otherwise</returns>
-bool String::starts_with(ValueType ch) const
+/// <param name="c">Character to find</param>
+/// <returns>Returns true if c is first character in string, false otherwise</returns>
+bool String::starts_with(ValueType c) const
 {
     if (empty())
         return false;
-    return m_buffer[0] == ch;
+    return m_buffer[0] == c;
 }
 
 /// <summary>
@@ -971,13 +975,13 @@ bool String::starts_with(const ValueType* str) const
 /// <summary>
 /// Check whether string ends with character
 /// </summary>
-/// <param name="ch">Character to find</param>
-/// <returns>Returns true if ch is last character in string, false otherwise</returns>
-bool String::ends_with(ValueType ch) const
+/// <param name="c">Character to find</param>
+/// <returns>Returns true if c is last character in string, false otherwise</returns>
+bool String::ends_with(ValueType c) const
 {
     if (empty())
         return false;
-    return m_buffer[length() - 1] == ch;
+    return m_buffer[length() - 1] == c;
 }
 
 /// <summary>
@@ -1017,18 +1021,18 @@ bool String::ends_with(const ValueType* str) const
 /// <summary>
 /// Check whether string contains character
 /// </summary>
-/// <param name="ch">Character to find</param>
-/// <returns>Returns true if ch is contained in string, false otherwise</returns>
-bool String::contains(ValueType ch) const
+/// <param name="c">Character to find</param>
+/// <returns>Returns true if c is contained in string, false otherwise</returns>
+bool String::contains(ValueType c) const
 {
-    return find(ch) != npos;
+    return find(c) != npos;
 }
 
 /// <summary>
 /// Check whether string contains substring
 /// </summary>
 /// <param name="str">Substring to find</param>
-/// <returns>Returns true if ch is contained in string, false otherwise</returns>
+/// <returns>Returns true if str is contained in string, false otherwise</returns>
 bool String::contains(const String& str) const
 {
     return find(str) != npos;
@@ -1038,7 +1042,7 @@ bool String::contains(const String& str) const
 /// Check whether string contains substring
 /// </summary>
 /// <param name="str">Substring to find</param>
-/// <returns>Returns true if ch is contained in string, false otherwise</returns>
+/// <returns>Returns true if str is contained in string, false otherwise</returns>
 bool String::contains(const ValueType* str) const
 {
     return find(str) != npos;
@@ -1341,30 +1345,30 @@ String& String::replace(size_t pos, size_t count, const ValueType* str, size_t s
 /// <summary>
 /// replace substring
 ///
-/// Replaces the substring from pos to pos+count with ch
+/// Replaces the substring from pos to pos+count with c
 /// </summary>
 /// <param name="pos">Starting position of substring to replace</param>
 /// <param name="count">Number of characters in substring to replace</param>
-/// <param name="ch">Characters to replace with</param>
+/// <param name="c">Characters to replace with</param>
 /// <returns>Returns the reference to the resulting string</returns>
-String& String::replace(size_t pos, size_t count, ValueType ch)
+String& String::replace(size_t pos, size_t count, ValueType c)
 {
-    return replace(pos, count, ch, 1);
+    return replace(pos, count, c, 1);
 }
 
 /// <summary>
 /// replace substring
 ///
-/// Replaces the substring from pos to pos+count with a sequence of chCount copies of ch
+/// Replaces the substring from pos to pos+count with a sequence of chCount copies of c
 /// </summary>
 /// <param name="pos">Starting position of substring to replace</param>
 /// <param name="count">Number of characters in substring to replace</param>
-/// <param name="ch">Characters to replace with</param>
-/// <param name="chCount">Number of copies of ch to replace with</param>
+/// <param name="c">Characters to replace with</param>
+/// <param name="chCount">Number of copies of c to replace with</param>
 /// <returns>Returns the reference to the resulting string</returns>
-String& String::replace(size_t pos, size_t count, ValueType ch, size_t chCount)
+String& String::replace(size_t pos, size_t count, ValueType c, size_t chCount)
 {
-    String result = substr(0, pos) + String(chCount, ch) + substr(pos + count);
+    String result = substr(0, pos) + String(chCount, c) + substr(pos + count);
     assign(result);
     return *this;
 }
@@ -1476,6 +1480,9 @@ bool String::reallocate_allocation_size(size_t allocationSize)
         return false;
     }
     m_buffer = newBuffer;
+#if BAREMETAL_MEMORY_TRACING_DETAIL
+    LOG_NO_ALLOC_DEBUG("Alloc string %p", m_buffer);
+#endif
     if (m_end == nullptr)
         m_end = m_buffer;
     if (m_end > m_buffer + allocationSize)

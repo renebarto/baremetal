@@ -1594,14 +1594,14 @@ File: code/applications/demo/src/main.cpp
 69:     GetInterruptSystem().UnregisterIRQHandler();
 70:
 71:     console.Write("Press r to reboot, h to halt\n");
-72:     char ch{};
-73:     while ((ch != 'r') && (ch != 'h'))
+72:     char c{};
+73:     while ((c != 'r') && (c != 'h'))
 74:     {
-75:         ch = console.ReadChar();
-76:         console.WriteChar(ch);
+75:         c = console.ReadChar();
+76:         console.WriteChar(c);
 77:     }
 78:
-79:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+79:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 80: }
 ```
 
@@ -3156,14 +3156,14 @@ File: code/applications/demo/src/main.cpp
 50:     GetInterruptSystem().UnregisterIRQHandler(IRQ_ID::IRQ_LOCAL_CNTPNS);
 51:
 52:     console.Write("Press r to reboot, h to halt\n");
-53:     char ch{};
-54:     while ((ch != 'r') && (ch != 'h'))
+53:     char c{};
+54:     while ((c != 'r') && (c != 'h'))
 55:     {
-56:         ch = console.ReadChar();
-57:         console.WriteChar(ch);
+56:         c = console.ReadChar();
+57:         console.WriteChar(c);
 58:     }
 59:
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+60:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 61: }
 ```
 

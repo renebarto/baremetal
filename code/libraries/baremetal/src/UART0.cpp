@@ -102,7 +102,7 @@ void UART0::Initialize(unsigned baudrate)
     // initialize UART
     m_memoryAccess.Write32(RPI_UART0_CR, 0); // turn off UART0
 
-    Mailbox mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
+    Mailbox       mailbox(MailboxChannel::ARM_MAILBOX_CH_PROP_OUT, m_memoryAccess);
     RPIProperties properties(mailbox);
     unsigned baudClock = 32000000;
     if (!properties.SetClockRate(ClockID::UART, baudClock, false))
@@ -136,8 +136,8 @@ unsigned UART0::GetBaudRate() const
 /// <summary>
 /// Send a character
 /// </summary>
-/// <param name="ch">Character to be sent</param>
-void UART0::Write(char ch)
+/// <param name="c">Character to be sent</param>
+void UART0::Write(char c)
 {
     // wait until we can send
     // Check Tx FIFO empty
@@ -146,7 +146,7 @@ void UART0::Write(char ch)
         NOP();
     }
     // Write the character to the buffer
-    m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(ch));
+    m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 }
 
 /// <summary>
@@ -178,6 +178,14 @@ void UART0::WriteString(const char* str)
             Write('\r');
         Write(*str++);
     }
+}
+
+/// <summary>
+/// Flush buffers, in this case does nothing
+/// </summary>
+void UART0::Flush()
+{
+    // Do nothing
 }
 
 /// <summary>

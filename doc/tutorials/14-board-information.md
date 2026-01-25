@@ -1302,13 +1302,13 @@ File: code/applications/demo/src/main.cpp
 53:     Timer::WaitMilliSeconds(5000);
 54: 
 55:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-56:     char ch{};
-57:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+56:     char c{};
+57:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 58:     {
-59:         ch = console.ReadChar();
-60:         console.WriteChar(ch);
+59:         c = console.ReadChar();
+60:         console.WriteChar(c);
 61:     }
-62:     if (ch == 'p')
+62:     if (c == 'p')
 63:     {
 64:         SetAssertionCallback(MyHandler);
 65:         assert(false);
@@ -1316,7 +1316,7 @@ File: code/applications/demo/src/main.cpp
 67:         assert(false);
 68:     }
 69: 
-70:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+70:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 71: }
 ```
 

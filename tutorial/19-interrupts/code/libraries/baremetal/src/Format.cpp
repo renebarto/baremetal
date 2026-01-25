@@ -677,10 +677,10 @@ String FormatV(const char* format, va_list args)
             {
             case 'c':
                 {
-                    char ch = static_cast<char>(va_arg(args, int));
+                    char c = static_cast<char>(va_arg(args, int));
                     if (left)
                     {
-                        result += ch;
+                        result += c;
                         if (width > 1)
                         {
                             result.append(width - 1, ' ');
@@ -692,7 +692,7 @@ String FormatV(const char* format, va_list args)
                         {
                             result.append(width - 1, ' ');
                         }
-                        result += ch;
+                        result += c;
                     }
                 }
                 break;
@@ -933,10 +933,10 @@ void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list
             {
             case 'c':
                 {
-                    char ch = static_cast<char>(va_arg(args, int));
+                    char c = static_cast<char>(va_arg(args, int));
                     if (left)
                     {
-                        Append(buffer, bufferSize, ch);
+                        Append(buffer, bufferSize, c);
                         if (width > 1)
                         {
                             Append(buffer, bufferSize, width - 1, ' ');
@@ -948,7 +948,7 @@ void FormatNoAllocV(char* buffer, size_t bufferSize, const char* format, va_list
                         {
                             Append(buffer, bufferSize, width - 1, ' ');
                         }
-                        Append(buffer, bufferSize, ch);
+                        Append(buffer, bufferSize, c);
                     }
                 }
                 break;

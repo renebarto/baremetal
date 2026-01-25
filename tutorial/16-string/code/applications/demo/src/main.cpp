@@ -42,9 +42,9 @@ int main()
     String s10{nullptr, 3};
 
     LOG_INFO("s4");
-    for (auto ch : s4)
+    for (auto c : s4)
     {
-        LOG_INFO("%c", ch);
+        LOG_INFO("%c", c);
     }
     assert(strcmp(s1, "a") == 0);
     assert(strcmp(s2, "a") == 0);
@@ -440,13 +440,13 @@ int main()
     Timer::WaitMilliSeconds(5000);
 
     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+    char c{};
+    while ((c != 'r') && (c != 'h') && (c != 'p'))
     {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
+        c = console.ReadChar();
+        console.WriteChar(c);
     }
-    if (ch == 'p')
+    if (c == 'p')
         assert(false);
 
     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
@@ -455,5 +455,5 @@ int main()
 
     memoryManager.DumpStatus();
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 }

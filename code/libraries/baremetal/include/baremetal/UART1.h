@@ -79,8 +79,9 @@ public:
     void Initialize(unsigned baudrate);
     unsigned GetBaudrate() const;
     char Read() override;
-    void Write(char ch) override;
+    void Write(char c) override;
     void WriteString(const char* str);
+    void Flush() override;
 };
 
 UART1& GetUART1();

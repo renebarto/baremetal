@@ -312,8 +312,8 @@ File: code/libraries/baremetal/include/baremetal/CharDevice.h
 71:     /// <summary>
 72:     /// Write a character
 73:     /// </summary>
-74:     /// <param name="ch">Character to be written</param>
-75:     virtual void Write(char ch) = 0;
+74:     /// <param name="c">Character to be written</param>
+75:     virtual void Write(char c) = 0;
 76: };
 77:
 78: } // namespace baremetal
@@ -485,7 +485,7 @@ File: code/libraries/baremetal/include/baremetal/UART1.h
 79:     void Initialize(unsigned baudrate);
 80:     unsigned GetBaudrate() const;
 81:     char Read() override;
-82:     void Write(char ch) override;
+82:     void Write(char c) override;
 83:     void WriteString(const char* str);
 84: };
 85:
@@ -899,7 +899,7 @@ File: code/libraries/baremetal/include/baremetal/UART0.h
 78:     void Initialize(unsigned baudrate);
 79:     unsigned GetBaudRate() const;
 80:     char Read() override;
-81:     void Write(char ch) override;
+81:     void Write(char c) override;
 82:     void WriteString(const char* str);
 83: };
 84:
@@ -1056,8 +1056,8 @@ File: code/libraries/baremetal/src/UART0.cpp
 136: /// <summary>
 137: /// Send a character
 138: /// </summary>
-139: /// <param name="ch">Character to be sent</param>
-140: void UART0::Write(char ch)
+139: /// <param name="c">Character to be sent</param>
+140: void UART0::Write(char c)
 141: {
 142:     // wait until we can send
 143:     // Check Tx FIFO empty
@@ -1066,7 +1066,7 @@ File: code/libraries/baremetal/src/UART0.cpp
 146:         NOP();
 147:     }
 148:     // Write the character to the buffer
-149:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(ch));
+149:     m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 150: }
 151:
 152: /// <summary>
@@ -1202,14 +1202,14 @@ File: code/applications/demo/src/main.cpp
 38:     Timer::WaitMilliSeconds(5000);
 39:
 40:     uart.WriteString("Press r to reboot, h to halt\n");
-41:     char ch{};
-42:     while ((ch != 'r') && (ch != 'h'))
+41:     char c{};
+42:     while ((c != 'r') && (c != 'h'))
 43:     {
-44:         ch = uart.Read();
-45:         uart.Write(ch);
+44:         c = uart.Read();
+45:         uart.Write(c);
 46:     }
 47:
-48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+48:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
 

@@ -201,12 +201,12 @@ int main()
     Timer::WaitMilliSeconds(5000);
 
     console.Write("Press r to reboot, h to halt\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h'))
+    char c{};
+    while ((c != 'r') && (c != 'h'))
     {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
+        c = console.ReadChar();
+        console.WriteChar(c);
     }
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 }

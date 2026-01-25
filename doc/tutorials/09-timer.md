@@ -394,14 +394,14 @@ File: code/applications/demo/src/main.cpp
 21:     Timer::WaitMilliSeconds(5000);
 22:
 23:     uart.WriteString("Press r to reboot, h to halt\n");
-24:     char ch{};
-25:     while ((ch != 'r') && (ch != 'h'))
+24:     char c{};
+25:     while ((c != 'r') && (c != 'h'))
 26:     {
-27:         ch = uart.Read();
-28:         uart.Write(ch);
+27:         c = uart.Read();
+28:         uart.Write(c);
 29:     }
 30:
-31:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+31:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 32: }
 ```
 

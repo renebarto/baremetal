@@ -947,17 +947,17 @@ File: code/applications/demo/src/main.cpp
 18:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 19:
 20:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
-21:     char ch{};
-22:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+21:     char c{};
+22:     while ((c != 'r') && (c != 'h') && (c != 't') && (c != 'm'))
 23:     {
-24:         ch = console.ReadChar();
-25:         console.WriteChar(ch);
+24:         c = console.ReadChar();
+25:         console.WriteChar(c);
 26:     }
 27:
-28:     if (ch == 't')
+28:     if (c == 't')
 29:         // Trap
 30:         __builtin_trap();
-31:     else if (ch == 'm')
+31:     else if (c == 'm')
 32:     {
 33:         // Memory failure
 34:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
@@ -965,7 +965,7 @@ File: code/applications/demo/src/main.cpp
 36:         r++;
 37:     }
 38:
-39:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+39:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 40: }
 ```
 
@@ -1472,18 +1472,18 @@ File: code/applications/demo/src/main.cpp
 23:     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 24:
 25:     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
-26:     char ch{};
-27:     while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+26:     char c{};
+27:     while ((c != 'r') && (c != 'h') && (c != 't') && (c != 'm'))
 28:     {
-29:         ch = console.ReadChar();
-30:         console.WriteChar(ch);
+29:         c = console.ReadChar();
+30:         console.WriteChar(c);
 31:     }
 32:     RegisterExceptionPanicHandler(RebootOnException);
 33:
-34:     if (ch == 't')
+34:     if (c == 't')
 35:         // Trap
 36:         __builtin_trap();
-37:     else if (ch == 'm')
+37:     else if (c == 'm')
 38:     {
 39:         // Memory failure
 40:         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
@@ -1491,7 +1491,7 @@ File: code/applications/demo/src/main.cpp
 42:         r++;
 43:     }
 44:
-45:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+45:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 46: }
 ```
 

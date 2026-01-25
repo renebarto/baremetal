@@ -45,7 +45,7 @@ void PrintStringTo(const baremetal::String& str, baremetal::String& s)
     s = str;
 }
 
-void PrintTo(unsigned char ch, baremetal::String& s)
+void PrintTo(unsigned char c, baremetal::String& s)
 {
-    s += ch;
+    s += c;
 }

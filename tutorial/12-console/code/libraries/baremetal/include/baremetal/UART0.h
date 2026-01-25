@@ -78,7 +78,7 @@ public:
     void Initialize(unsigned baudrate);
     unsigned GetBaudRate() const;
     char Read() override;
-    void Write(char ch) override;
+    void Write(char c) override;
     void WriteString(const char* str);
 };
 

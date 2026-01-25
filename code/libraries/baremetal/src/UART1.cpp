@@ -58,7 +58,8 @@ namespace baremetal {
 /// </summary>
 UART1::UART1()
     : m_isInitialized{}
-    , m_memoryAccess{GetMemoryAccess()}
+    , m_memoryAccess{ GetMemoryAccess() }
+    , m_baudrate{}
 {
 }
 
@@ -68,7 +69,8 @@ UART1::UART1()
 /// <param name="memoryAccess">Memory access interface</param>
 UART1::UART1(IMemoryAccess& memoryAccess)
     : m_isInitialized{}
-    , m_memoryAccess{memoryAccess}
+    , m_memoryAccess{ memoryAccess }
+    , m_baudrate{}
 {
 }
 
@@ -162,6 +164,14 @@ void UART1::WriteString(const char* str)
             Write('\r');
         Write(*str++);
     }
+}
+
+/// <summary>
+/// Flush buffers, in this case does nothing
+/// </summary>
+void UART1::Flush()
+{
+    // Do nothing
 }
 
 /// <summary>

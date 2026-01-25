@@ -264,7 +264,7 @@ File: code/libraries/baremetal/include/baremetal/Console.h
 118:     void Flush();
 119:
 120:     char ReadChar();
-121:     void WriteChar(char ch);
+121:     void WriteChar(char c);
 122:
 123: private:
 124: };
@@ -516,22 +516,22 @@ File: code/libraries/baremetal/src/Console.cpp
 207: /// <returns>Character received</returns>
 208: char Console::ReadChar()
 209: {
-210:     char ch{};
+210:     char c{};
 211:     if (m_device != nullptr)
 212:     {
-213:         m_device->Read(&ch, 1);
+213:         m_device->Read(&c, 1);
 214:     }
-215:     return ch;
+215:     return c;
 216: }
 217:
 218: /// Write a single character.
 219: /// </summary>
-220: /// <param name="ch">Character to be written</param>
-221: void Console::WriteChar(char ch)
+220: /// <param name="c">Character to be written</param>
+221: void Console::WriteChar(char c)
 222: {
 223:     if (m_device != nullptr)
 224:     {
-225:         m_device->Write(ch);
+225:         m_device->Write(c);
 226:     }
 227: }
 228:
@@ -725,14 +725,14 @@ File: code/applications/demo/src/main.cpp
 38:     Timer::WaitMilliSeconds(5000);
 39:
 40:     console.Write("Press r to reboot, h to halt\n");
-41:     char ch{};
-42:     while ((ch != 'r') && (ch != 'h'))
+41:     char c{};
+42:     while ((c != 'r') && (c != 'h'))
 43:     {
-44:         ch = console.ReadChar();
-45:         console.WriteChar(ch);
+44:         c = console.ReadChar();
+45:         console.WriteChar(c);
 46:     }
 47:
-48:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+48:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 49: }
 ```
 

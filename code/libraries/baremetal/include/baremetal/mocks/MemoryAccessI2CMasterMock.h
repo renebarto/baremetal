@@ -186,7 +186,11 @@ struct I2CMasterOperation
     {
         return !operator==(other);
     }
-} ALIGN(8);
+} 
+/// @cond
+ALIGN(8)
+/// @endcond
+;
 
 String Serialize(const I2CMasterOperation& value);
 
@@ -315,7 +319,11 @@ public:
         m_readIndex = m_writeIndex = 0;
         m_isFull = false;
     }
-} ALIGN(8);
+}
+/// @cond
+ALIGN(8)
+/// @endcond
+;
 
 /// @brief Callback for sending address
 using SendAddressByteCallback = bool(I2CMasterRegisters& registers, uint8 address);
@@ -331,11 +339,23 @@ class MemoryAccessI2CMasterMock : public MemoryAccessGPIOMock
 {
 private:
     /// @brief Saved GPIO register values
-    I2CMasterRegisters m_registers[I2C_BUSES] ALIGN(8);
+    I2CMasterRegisters m_registers[I2C_BUSES]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Receive FIFO
-    FIFO<I2C_FIFO_SIZE> m_rxFifo[I2C_BUSES] ALIGN(8);
+    FIFO<I2C_FIFO_SIZE> m_rxFifo[I2C_BUSES]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Send FIFO
-    FIFO<I2C_FIFO_SIZE> m_txFifo[I2C_BUSES] ALIGN(8);
+    FIFO<I2C_FIFO_SIZE> m_txFifo[I2C_BUSES]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Pointer to send address callback
     SendAddressByteCallback* m_sendAddressByteCallback;
     /// @brief Pointer to receive data callback
@@ -349,7 +369,11 @@ private:
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// List op memory access operations
-    I2CMasterOperation m_ops[BufferSize] ALIGN(8);
+    I2CMasterOperation m_ops[BufferSize]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Number of registered memory access operations
     size_t m_numOps;
 

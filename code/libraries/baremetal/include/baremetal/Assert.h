@@ -45,6 +45,7 @@
 /// @file
 /// Assertion functions
 
+/// @brief Baremetal library namespace
 namespace baremetal {
 
 /// @brief Assertion callback function, which can be installed to handle a failed assertion

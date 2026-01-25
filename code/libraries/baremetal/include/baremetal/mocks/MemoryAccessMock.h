@@ -101,7 +101,11 @@ struct MemoryAccessOperation
     {
         return !operator==(other);
     }
-} ALIGN(8);
+}
+/// @cond
+ALIGN(8)
+/// @endcond
+;
 
 String Serialize(const MemoryAccessOperation& value);
 
@@ -114,7 +118,11 @@ private:
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// @brief List of memory access operations
-    MemoryAccessOperation m_accessOps[BufferSize] ALIGN(8);
+    MemoryAccessOperation m_accessOps[BufferSize]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Number of registered memory access operations
     size_t m_numAccessOps;
 

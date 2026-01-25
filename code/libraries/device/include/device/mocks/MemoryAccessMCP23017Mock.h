@@ -258,7 +258,11 @@ struct MCP23017Operation
     {
         return !operator==(other);
     }
-} ALIGN(8);
+}
+/// @cond
+ALIGN(8)
+/// @endcond
+;
 
 /// @brief MemoryAccess implementation for I2C stub
 class MemoryAccessMCP23017Mock : public baremetal::MemoryAccessI2CMasterMock
@@ -275,7 +279,11 @@ private:
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// List op memory access operations
-    MCP23017Operation m_ops[BufferSize] ALIGN(8);
+    MCP23017Operation m_ops[BufferSize]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Number of registered memory access operations
     size_t m_numOps;
 

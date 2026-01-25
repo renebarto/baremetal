@@ -339,7 +339,11 @@ private:
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// List op memory access operations
-    PhysicalGPIOPinOperation m_accessOps[BufferSize] ALIGN(8);
+    PhysicalGPIOPinOperation m_accessOps[BufferSize] 
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Number of registered memory access operations
     size_t m_numAccessOps;
 

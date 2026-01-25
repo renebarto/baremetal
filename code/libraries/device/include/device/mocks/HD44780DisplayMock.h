@@ -123,7 +123,11 @@ struct HD44780DisplayOperation
     {
         return !operator==(other);
     }
-} ALIGN(8);
+}
+/// @cond
+ALIGN(8)
+/// @endcond
+;
 
 /// @brief MemoryAccess implementation for I2C stub
 class HD44780DisplayMock : public HD44780Display
@@ -132,7 +136,11 @@ private:
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// List op memory access operations
-    HD44780DisplayOperation m_ops[BufferSize] ALIGN(8);
+    HD44780DisplayOperation m_ops[BufferSize]
+    /// @cond
+    ALIGN(8)
+    /// @endcond
+    ;
     /// @brief Number of registered memory access operations
     size_t m_numOps;
 

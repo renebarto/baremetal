@@ -7,7 +7,7 @@
 //
 // Class       : MCP23017
 //
-// Description : I2C Master functionality
+// Description : MCP23017 I2C expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -172,7 +172,7 @@ void MCP23017::SetPinValue(MCP23017Pin pinNumber, bool on)
 }
 
 /// <summary>
-/// Set I/O pin directions for all pin on Port A
+/// Set I/O pin directions for all pins on Port A
 /// </summary>
 /// <param name="direction">Direction for pins</param>
 void MCP23017::SetPortADirections(const MCP23017PinDirection& direction)
@@ -201,7 +201,7 @@ void MCP23017::SetPortAValue(uint8 data)
 }
 
 /// <summary>
-/// Set I/O pin directions for all pin on Port B
+/// Set I/O pin directions for all pins on Port B
 /// </summary>
 /// <param name="direction">Direction for pins</param>
 void MCP23017::SetPortBDirections(const MCP23017PinDirection& direction)

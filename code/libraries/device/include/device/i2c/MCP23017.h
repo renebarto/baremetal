@@ -7,7 +7,7 @@
 //
 // Class       : MCP23017
 //
-// Description : I2C Master functionality
+// Description : MCP23017 I2C expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -221,7 +221,7 @@ enum class MCP23017Pin
 /// Driver for MCP23017 I2C expander device
 ///
 /// This device is normally on I2C address 20-27 depending on how its A0-A2 pins are connected.
-/// The device support two 8 bit ports name port A and B.
+/// The device supports two 8 bit ports name port A and B.
 /// Each pin can be either an input or output.
 /// </summary>
 class MCP23017

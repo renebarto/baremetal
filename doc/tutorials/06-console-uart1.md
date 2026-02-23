@@ -2503,7 +2503,7 @@ File: code/libraries/baremetal/include/baremetal/SysConfig.h
 42: /// @file
 43: /// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 44:
-45: /// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+45: /// @brief Number of cores to use (if BAREMETAL_MULTI_CORE is defined)
 46: #define CORES    4
 47:
 48: /// @brief Size of 1 Megabyte

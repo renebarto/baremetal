@@ -23,18 +23,18 @@ int main()
     LOG_INFO("Current EL: %d", static_cast<int>(exceptionLevel));
 
     console.Write("Press r to reboot, h to halt, t to cause a trap, m to cause a memory violation\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h') && (ch != 't') && (ch != 'm'))
+    char c{};
+    while ((c != 'r') && (c != 'h') && (c != 't') && (c != 'm'))
     {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
+        c = console.ReadChar();
+        console.WriteChar(c);
     }
     RegisterExceptionPanicHandler(RebootOnException);
 
-    if (ch == 't')
+    if (c == 't')
         // Trap
         __builtin_trap();
-    else if (ch == 'm')
+    else if (c == 'm')
     {
         // Memory failure
         auto r = *((volatile unsigned int*)0xFFFFFFFFFF000000);
@@ -42,5 +42,5 @@ int main()
         r++;
     }
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 }

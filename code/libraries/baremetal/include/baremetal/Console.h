@@ -118,7 +118,7 @@ public:
     void Flush();
 
     char ReadChar();
-    void WriteChar(char ch);
+    void WriteChar(char c);
 
 private:
 };

@@ -101,7 +101,7 @@ Peripheral MMIO slots for BCM2837:
 | 0x3F205000    | I2C0/3/4/5/6 (inter IC interface)
 | 0x3F215000    | UART1/SPI1/SPI2 (serial port, AUX mini UART, mini SPI)
 | 0x3F300000    | External Mass Media Controller (SD card reader)
-| 0x3F804000    | I2C1 (inter IC interface)
+| 0x3F804000    | I2C (inter IC interface)
 | 0x3F980000    | Universal Serial Bus controller
 | 0xFF841000    | Interrupt controller (GIC) distributor (RPI4)
 | 0xFF842000    | Interrupt controller (GIC) control (RPI4)

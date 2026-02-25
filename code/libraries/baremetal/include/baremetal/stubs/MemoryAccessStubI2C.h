@@ -186,12 +186,14 @@ public:
     }
 };
 
+#ifndef DOXYGEN_IGNORE
 /// @brief Callback for sending address
 using SendAddressByteCallback = bool(I2CRegisters& registers, uint8 address);
 /// @brief Callback for receiving data
 using RecvDataByteCallback = bool(I2CRegisters& registers, uint8& data);
 /// @brief Callback for sending data
 using SendDataByteCallback = bool(I2CRegisters& registers, uint8 data);
+#endif
 
 /// @brief MemoryAccess implementation for I2C stub
 class MemoryAccessStubI2C : public MemoryAccessStubGPIO

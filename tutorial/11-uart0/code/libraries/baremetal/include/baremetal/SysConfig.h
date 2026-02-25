@@ -42,7 +42,7 @@
 /// @file
 /// System configuration parameters. This file will include MemoryMap.h to set the defaults if not overridden.
 
-/// @brief Number of cores to use (if ARM_ALLOW_MULTI_CORE is defined)
+/// @brief Number of cores to use (if BAREMETAL_MULTI_CORE is defined)
 #define CORES    4
 
 /// @brief Size of 1 Megabyte

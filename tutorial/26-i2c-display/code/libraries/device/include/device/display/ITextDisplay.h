@@ -111,8 +111,8 @@ class ITextDisplay
     /// </summary>
     /// <param name="posX">Horizontal position, 0..NumColumns-1</param>
     /// <param name="posY">Vertical position, 0..NumRows-1</param>
-    /// <param name="ch"></param>
-    virtual void Write(unsigned posX, unsigned posY, char ch) = 0;
+    /// <param name="c"></param>
+    virtual void Write(unsigned posX, unsigned posY, char c) = 0;
     /// <summary>
     /// Write text to display, and update the cursor location
     ///

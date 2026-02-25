@@ -685,14 +685,14 @@ File: code/applications/demo/src/main.cpp
 28:     display.SetBacklight(false);
 29: 
 30:     console.Write("Press r to reboot, h to halt\n");
-31:     char ch{};
-32:     while ((ch != 'r') && (ch != 'h'))
+31:     char c{};
+32:     while ((c != 'r') && (c != 'h'))
 33:     {
-34:         ch = console.ReadChar();
-35:         console.WriteChar(ch);
+34:         c = console.ReadChar();
+35:         console.WriteChar(c);
 36:     }
 37: 
-38:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+38:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 39: }
 ```
 
@@ -1497,14 +1497,14 @@ File: code/applications/demo/src/main.cpp
 28:     display.SetBacklight(false);
 29: 
 30:     console.Write("Press r to reboot, h to halt\n");
-31:     char ch{};
-32:     while ((ch != 'r') && (ch != 'h'))
+31:     char c{};
+32:     while ((c != 'r') && (c != 'h'))
 33:     {
-34:         ch = console.ReadChar();
-35:         console.WriteChar(ch);
+34:         c = console.ReadChar();
+35:         console.WriteChar(c);
 36:     }
 37: 
-38:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+38:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 39: }
 ```
 
@@ -1622,8 +1622,8 @@ File: code/libraries/device/include/device/display/ITextDisplay.h
 111:     /// </summary>
 112:     /// <param name="posX">Horizontal position, 0..NumColumns-1</param>
 113:     /// <param name="posY">Vertical position, 0..NumRows-1</param>
-114:     /// <param name="ch"></param>
-115:     virtual void Write(unsigned posX, unsigned posY, char ch) = 0;
+114:     /// <param name="c"></param>
+115:     virtual void Write(unsigned posX, unsigned posY, char c) = 0;
 116:     /// <summary>
 117:     /// Write text to display, and update the cursor location
 118:     ///
@@ -1821,7 +1821,7 @@ File: code/libraries/device/include/device/display/HD44780Display.h
 158: 
 File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\device\include\device\display\HD44780Display.h
 159:     void Write(char value) override;
-160:     void Write(unsigned posX, unsigned posY, char ch) override;
+160:     void Write(unsigned posX, unsigned posY, char c) override;
 161:     void Write(const char *text, size_t count) override;
 162:     void Write(const char *text) override;
 163:     void Write(unsigned posX, unsigned posY, const char *text) override;
@@ -1835,7 +1835,7 @@ File: d:\Projects\Private\RaspberryPi\baremetal.github\code\libraries\device\inc
 171:     void SetCursorPosition(uint8 cursorX, uint8 cursorY) override;
 172: 
 173:     void DisplayControl(DisplayMode displayMode, CursorMode cursorMode);
-174:     void DefineCharFont(char ch, const uint8 FontData[8]);
+174:     void DefineCharFont(char c, const uint8 FontData[8]);
 175: 
 176:     protected:
 177:     /// <summary>
@@ -2162,11 +2162,11 @@ File: code/libraries/device/src/display/HD44780Display.cpp
 317: /// </summary>
 318: /// <param name="posX"></param>
 319: /// <param name="posY"></param>
-320: /// <param name="ch"></param>
-321: void HD44780Display::Write(unsigned posX, unsigned posY, char ch)
+320: /// <param name="c"></param>
+321: void HD44780Display::Write(unsigned posX, unsigned posY, char c)
 322: {
 323:     SetCursorPosition(posX, posY);
-324:     Write(ch);
+324:     Write(c);
 325: }
 326: 
 327: /// <summary>
@@ -2306,11 +2306,11 @@ File: code/libraries/device/src/display/HD44780Display.cpp
 461: /// Only characters 0x80-0x87 are user defined. The font data is 8 lines, each line is one byte. Only 5x8 pixel
 462: /// characters are supported for now.
 463: /// </summary>
-464: /// <param name="ch">Character to define</param>
+464: /// <param name="c">Character to define</param>
 465: /// <param name="FontData">Font data. For every line there is one byte, only the low order 5 bits are used</param>
-466: void HD44780Display::DefineCharFont(char ch, const uint8 FontData[8])
+466: void HD44780Display::DefineCharFont(char c, const uint8 FontData[8])
 467: {
-468:     uint8 data = static_cast<uint8>(ch);
+468:     uint8 data = static_cast<uint8>(c);
 469:     if (data < 0x08 || data > 0x0F)
 470:     {
 471:         return;
@@ -2559,14 +2559,14 @@ File: code/applications/demo/src/main.cpp
 72:     display.SetDisplayEnabled(false);
 73: 
 74:     console.Write("Press r to reboot, h to halt\n");
-75:     char ch{};
-76:     while ((ch != 'r') && (ch != 'h'))
+75:     char c{};
+76:     while ((c != 'r') && (c != 'h'))
 77:     {
-78:         ch = console.ReadChar();
-79:         console.WriteChar(ch);
+78:         c = console.ReadChar();
+79:         console.WriteChar(c);
 80:     }
 81: 
-82:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+82:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 83: }
 ```
 

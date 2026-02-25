@@ -49,10 +49,10 @@
 typedef __builtin_va_list va_list;
 
 /// @brief define standard va_start macro
-#define va_start(arg, last) __builtin_va_start(arg, last)
+#define va_start(arg, last)     __builtin_va_start (arg, last)
 /// @brief define standard va_end macro
-#define va_end(arg)         __builtin_va_end(arg)
+#define va_end(arg)             __builtin_va_end (arg)
 /// @brief define standard va_arg macro
-#define va_arg(arg, type)   __builtin_va_arg(arg, type)
+#define va_arg(arg, type)       __builtin_va_arg (arg, type)
 
 #endif

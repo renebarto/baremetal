@@ -317,11 +317,11 @@ void HD44780Display::Write(char value)
 /// </summary>
 /// <param name="posX"></param>
 /// <param name="posY"></param>
-/// <param name="ch"></param>
-void HD44780Display::Write(unsigned posX, unsigned posY, char ch)
+/// <param name="c"></param>
+void HD44780Display::Write(unsigned posX, unsigned posY, char c)
 {
     SetCursorPosition(posX, posY);
-    Write(ch);
+    Write(c);
 }
 
 /// <summary>
@@ -461,11 +461,11 @@ void HD44780Display::DisplayControl(DisplayMode displayMode, CursorMode cursorMo
 /// Only characters 0x80-0x87 are user defined. The font data is 8 lines, each line is one byte. Only 5x8 pixel
 /// characters are supported for now.
 /// </summary>
-/// <param name="ch">Character to define</param>
+/// <param name="c">Character to define</param>
 /// <param name="FontData">Font data. For every line there is one byte, only the low order 5 bits are used</param>
-void HD44780Display::DefineCharFont(char ch, const uint8 FontData[8])
+void HD44780Display::DefineCharFont(char c, const uint8 FontData[8])
 {
-    uint8 data = static_cast<uint8>(ch);
+    uint8 data = static_cast<uint8>(c);
     if (data < 0x08 || data > 0x0F)
     {
         return;

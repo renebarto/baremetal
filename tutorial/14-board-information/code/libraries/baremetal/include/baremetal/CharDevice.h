@@ -71,8 +71,8 @@ public:
     /// <summary>
     /// Write a character
     /// </summary>
-    /// <param name="ch">Character to be written</param>
-    virtual void Write(char ch) = 0;
+    /// <param name="c">Character to be written</param>
+    virtual void Write(char c) = 0;
 };
 
 } // namespace baremetal

@@ -385,14 +385,14 @@ File: code/applications/demo/src/main.cpp
 33:     Timer::WaitMilliSeconds(5000);
 34:
 35:     console.Write("Press r to reboot, h to halt\n");
-36:     char ch{};
-37:     while ((ch != 'r') && (ch != 'h'))
+36:     char c{};
+37:     while ((c != 'r') && (c != 'h'))
 38:     {
-39:         ch = console.ReadChar();
-40:         console.WriteChar(ch);
+39:         c = console.ReadChar();
+40:         console.WriteChar(c);
 41:     }
 42:
-43:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+43:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 44: }
 ```
 
@@ -1240,14 +1240,14 @@ File: code/applications/demo/src/main.cpp
 41:     Timer::WaitMilliSeconds(5000);
 42:
 43:     console.Write("Press r to reboot, h to halt\n");
-44:     char ch{};
-45:     while ((ch != 'r') && (ch != 'h'))
+44:     char c{};
+45:     while ((c != 'r') && (c != 'h'))
 46:     {
-47:         ch = console.ReadChar();
-48:         console.WriteChar(ch);
+47:         c = console.ReadChar();
+48:         console.WriteChar(c);
 49:     }
 50:
-51:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+51:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 52: }
 ```
 
@@ -2092,14 +2092,14 @@ File: code/applications/demo/src/main.cpp
 189:     Timer::WaitMilliSeconds(5000);
 190:
 191:     console.Write("Press r to reboot, h to halt\n");
-192:     char ch{};
-193:     while ((ch != 'r') && (ch != 'h'))
+192:     char c{};
+193:     while ((c != 'r') && (c != 'h'))
 194:     {
-195:         ch = console.ReadChar();
-196:         console.WriteChar(ch);
+195:         c = console.ReadChar();
+196:         console.WriteChar(c);
 197:     }
 198:
-199:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+199:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 200: }
 ```
 
@@ -3051,14 +3051,14 @@ File: code/applications/demo/src/main.cpp
 251:     Timer::WaitMilliSeconds(5000);
 252:
 253:     console.Write("Press r to reboot, h to halt\n");
-254:     char ch{};
-255:     while ((ch != 'r') && (ch != 'h'))
+254:     char c{};
+255:     while ((c != 'r') && (c != 'h'))
 256:     {
-257:         ch = console.ReadChar();
-258:         console.WriteChar(ch);
+257:         c = console.ReadChar();
+258:         console.WriteChar(c);
 259:     }
 260:
-261:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+261:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 262: }
 ```
 
@@ -3818,14 +3818,14 @@ File: code/applications/demo/src/main.cpp
 215:     Timer::WaitMilliSeconds(5000);
 216:
 217:     console.Write("Press r to reboot, h to halt\n");
-218:     char ch{};
-219:     while ((ch != 'r') && (ch != 'h'))
+218:     char c{};
+219:     while ((c != 'r') && (c != 'h'))
 220:     {
-221:         ch = console.ReadChar();
-222:         console.WriteChar(ch);
+221:         c = console.ReadChar();
+222:         console.WriteChar(c);
 223:     }
 224:
-225:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+225:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 226: }
 ```
 
@@ -6380,14 +6380,14 @@ File: code\applications\demo\src\main.cpp
 206:     Timer::WaitMilliSeconds(5000);
 207: 
 208:     console.Write("Press r to reboot, h to halt\n");
-209:     char ch{};
-210:     while ((ch != 'r') && (ch != 'h'))
+209:     char c{};
+210:     while ((c != 'r') && (c != 'h'))
 211:     {
-212:         ch = console.ReadChar();
-213:         console.WriteChar(ch);
+212:         c = console.ReadChar();
+213:         console.WriteChar(c);
 214:     }
 215: 
-216:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+216:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 217: }
 ```
 

@@ -71,7 +71,7 @@ public:
     String();
     String(const ValueType* str);
     String(const ValueType* str, size_t count);
-    String(size_t count, ValueType ch);
+    String(size_t count, ValueType c);
     String(const String& other);
     String(String&& other);
     String(const String& other, size_t pos, size_t count = npos);
@@ -89,7 +89,7 @@ public:
 
     String& assign(const ValueType* str);
     String& assign(const ValueType* str, size_t count);
-    String& assign(size_t count, ValueType ch);
+    String& assign(size_t count, ValueType c);
     String& assign(const String& str);
     String& assign(const String& str, size_t pos, size_t count = npos);
 
@@ -111,10 +111,10 @@ public:
     size_t capacity() const;
     size_t reserve(size_t newCapacity);
 
-    String& operator+=(ValueType ch);
+    String& operator+=(ValueType c);
     String& operator+=(const String& str);
     String& operator+=(const ValueType* str);
-    void append(size_t count, ValueType ch);
+    void append(size_t count, ValueType c);
     void append(const String& str);
     void append(const String& str, size_t pos, size_t count = npos);
     void append(const ValueType* str);
@@ -124,14 +124,14 @@ public:
     size_t find(const String& str, size_t pos = 0) const;
     size_t find(const ValueType* str, size_t pos = 0) const;
     size_t find(const ValueType* str, size_t pos, size_t count) const;
-    size_t find(ValueType ch, size_t pos = 0) const;
-    bool starts_with(ValueType ch) const;
+    size_t find(ValueType c, size_t pos = 0) const;
+    bool starts_with(ValueType c) const;
     bool starts_with(const String& str) const;
     bool starts_with(const ValueType* str) const;
-    bool ends_with(ValueType ch) const;
+    bool ends_with(ValueType c) const;
     bool ends_with(const String& str) const;
     bool ends_with(const ValueType* str) const;
-    bool contains(ValueType ch) const;
+    bool contains(ValueType c) const;
     bool contains(const String& str) const;
     bool contains(const ValueType* str) const;
     String substr(size_t pos = 0, size_t count = npos) const;
@@ -151,8 +151,8 @@ public:
     String& replace(size_t pos, size_t count, const String& str, size_t strPos, size_t strCount = npos);
     String& replace(size_t pos, size_t count, const ValueType* str);
     String& replace(size_t pos, size_t count, const ValueType* str, size_t strCount);
-    String& replace(size_t pos, size_t count, ValueType ch);
-    String& replace(size_t pos, size_t count, ValueType ch, size_t chCount);
+    String& replace(size_t pos, size_t count, ValueType c);
+    String& replace(size_t pos, size_t count, ValueType c, size_t chCount);
     int replace(const String& oldStr, const String& newStr);       // returns number of occurrences
     int replace(const ValueType* oldStr, const ValueType* newStr); // returns number of occurrences
 

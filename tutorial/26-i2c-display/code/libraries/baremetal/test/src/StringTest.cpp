@@ -210,12 +210,12 @@ TEST_SUITE(Baremetal)
 
     TEST_FIXTURE(StringTest, ConstructCountAndChar)
     {
-        char ch = 'X';
+        char c = 'X';
         const char* expected = "XXXXX";
         size_t expectedLength = strlen(expected);
         size_t length = expectedLength;
 
-        String s(length, ch);
+        String s(length, c);
 
         EXPECT_FALSE(s.empty());
         ASSERT_NOT_NULL(s.data());
@@ -232,11 +232,11 @@ TEST_SUITE(Baremetal)
 
     TEST_FIXTURE(StringTest, ConstructCountNposAndChar)
     {
-        char ch = 'X';
+        char c = 'X';
         size_t expectedLength = 0x7FFFF;
         size_t length = String::npos;
 
-        String s(length, ch);
+        String s(length, c);
 
         EXPECT_FALSE(s.empty());
         EXPECT_EQ(expectedLength, s.size());
@@ -497,9 +497,9 @@ TEST_SUITE(Baremetal)
         const char* expected = otherText;
         size_t index{};
 
-        for (auto ch : s)
+        for (auto c : s)
         {
-            EXPECT_EQ(expected[index++], ch);
+            EXPECT_EQ(expected[index++], c);
         }
     }
 
@@ -639,13 +639,13 @@ TEST_SUITE(Baremetal)
 
     TEST_FIXTURE(StringTest, AssignCountAndChar)
     {
-        char ch = 'X';
+        char c = 'X';
         const char* expected = "XXXXX";
         size_t expectedLength = strlen(expected);
         size_t length = 5;
         String s;
 
-        s.assign(length, ch);
+        s.assign(length, c);
 
         EXPECT_FALSE(s.empty());
         ASSERT_NOT_NULL(s.data());
@@ -662,12 +662,12 @@ TEST_SUITE(Baremetal)
 
     TEST_FIXTURE(StringTest, AssignCountNposAndChar)
     {
-        char ch = 'X';
+        char c = 'X';
         size_t expectedLength = 0x7FFFF;
         size_t length = String::npos;
         String s;
 
-        s.assign(length, ch);
+        s.assign(length, c);
 
         EXPECT_FALSE(s.empty());
         EXPECT_EQ(expectedLength, s.size());

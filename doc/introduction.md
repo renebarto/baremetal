@@ -220,7 +220,6 @@ Compared to the model 3B+ the differences are:
 - support for Bluetooth 5.0 BLE
 - power connector changed to USB-C
 
-
 <img src="images/rpi4b-board-layout.png" alt="Top view" width="500"/>
 
 Raspberry Pi 4B

@@ -207,22 +207,22 @@ void Console::Flush()
 /// <returns>Character received</returns>
 char Console::ReadChar()
 {
-    char ch{};
+    char c{};
     if (m_device != nullptr)
     {
-        m_device->Read(&ch, 1);
+        m_device->Read(&c, 1);
     }
-    return ch;
+    return c;
 }
 
 /// Write a single character.
 /// </summary>
-/// <param name="ch">Character to be written</param>
-void Console::WriteChar(char ch)
+/// <param name="c">Character to be written</param>
+void Console::WriteChar(char c)
 {
     if (m_device != nullptr)
     {
-        m_device->Write(&ch, 1);
+        m_device->Write(&c, 1);
     }
 }
 

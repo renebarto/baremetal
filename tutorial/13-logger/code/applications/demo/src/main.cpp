@@ -43,13 +43,13 @@ int main()
     Timer::WaitMilliSeconds(5000);
 
     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+    char c{};
+    while ((c != 'r') && (c != 'h') && (c != 'p'))
     {
-        ch = console.ReadChar();
-        console.WriteChar(ch);
+        c = console.ReadChar();
+        console.WriteChar(c);
     }
-    if (ch == 'p')
+    if (c == 'p')
     {
         SetAssertionCallback(MyHandler);
         assert(false);
@@ -57,5 +57,5 @@ int main()
         assert(false);
     }
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 }

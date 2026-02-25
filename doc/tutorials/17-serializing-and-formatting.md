@@ -1124,10 +1124,10 @@ File: code/libraries/baremetal/src/Format.cpp
 677:             {
 678:             case 'c':
 679:                 {
-680:                     char ch = static_cast<char>(va_arg(args, int));
+680:                     char c = static_cast<char>(va_arg(args, int));
 681:                     if (left)
 682:                     {
-683:                         result += ch;
+683:                         result += c;
 684:                         if (width > 1)
 685:                         {
 686:                             result.append(width - 1, ' ');
@@ -1139,7 +1139,7 @@ File: code/libraries/baremetal/src/Format.cpp
 692:                         {
 693:                             result.append(width - 1, ' ');
 694:                         }
-695:                         result += ch;
+695:                         result += c;
 696:                     }
 697:                 }
 698:                 break;
@@ -1380,10 +1380,10 @@ File: code/libraries/baremetal/src/Format.cpp
 933:             {
 934:             case 'c':
 935:                 {
-936:                     char ch = static_cast<char>(va_arg(args, int));
+936:                     char c = static_cast<char>(va_arg(args, int));
 937:                     if (left)
 938:                     {
-939:                         Append(buffer, bufferSize, ch);
+939:                         Append(buffer, bufferSize, c);
 940:                         if (width > 1)
 941:                         {
 942:                             Append(buffer, bufferSize, width - 1, ' ');
@@ -1395,7 +1395,7 @@ File: code/libraries/baremetal/src/Format.cpp
 948:                         {
 949:                             Append(buffer, bufferSize, width - 1, ' ');
 950:                         }
-951:                         Append(buffer, bufferSize, ch);
+951:                         Append(buffer, bufferSize, c);
 952:                     }
 953:                 }
 954:                 break;
@@ -2746,13 +2746,13 @@ File: code\applications\demo\src\main.cpp
 122:     Timer::WaitMilliSeconds(5000);
 123: 
 124:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-125:     char ch{};
-126:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+125:     c = {};
+126:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 127:     {
-128:         ch = console.ReadChar();
-129:         console.WriteChar(ch);
+128:         c = console.ReadChar();
+129:         console.WriteChar(c);
 130:     }
-131:     if (ch == 'p')
+131:     if (c == 'p')
 132:         assert(false);
 133: 
 134:     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
@@ -2761,7 +2761,7 @@ File: code\applications\demo\src\main.cpp
 137: 
 138:     memoryManager.DumpStatus();
 139: 
-140:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+140:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 141: }
 ```
 

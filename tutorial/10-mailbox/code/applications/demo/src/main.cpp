@@ -38,12 +38,12 @@ int main()
     Timer::WaitMilliSeconds(5000);
 
     uart.WriteString("Press r to reboot, h to halt\n");
-    char ch{};
-    while ((ch != 'r') && (ch != 'h'))
+    char c{};
+    while ((c != 'r') && (c != 'h'))
     {
-        ch = uart.Read();
-        uart.Write(ch);
+        c = uart.Read();
+        uart.Write(c);
     }
 
-    return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 }

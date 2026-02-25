@@ -1247,14 +1247,14 @@ File: code/applications/demo/src/main.cpp
 17:     uart.WriteString("Hello World!\n");
 18:
 19:     uart.WriteString("Press r to reboot, h to halt\n");
-20:     char ch{};
-21:     while ((ch != 'r') && (ch != 'h'))
+20:     char c{};
+21:     while ((c != 'r') && (c != 'h'))
 22:     {
-23:         ch = uart.Read();
-24:         uart.Write(ch);
+23:         c = uart.Read();
+24:         uart.Write(c);
 25:     }
 26:
-27:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+27:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 28: }
 ```
 

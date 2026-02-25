@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Assert.h
+// File        : EEPROM24LC08B.h
 //
-// Namespace   : baremetal
+// Namespace   : device
 //
-// Class       : -
+// Class       : EEPROM24LC08B
 //
-// Description : Assertion functions
+// Description : 24LC08B EEPROM functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,34 +39,36 @@
 
 #pragma once
 
-#include "stdlib/Macros.h"
-#include "stdlib/Types.h"
+#include "baremetal/I2CMaster.h"
 
 /// @file
-/// Assertion functions
+/// MCP 23017 I2C expander support declaration
 
-/// @brief Baremetal library namespace
-namespace baremetal {
+namespace device {
 
-/// @brief Assertion callback function, which can be installed to handle a failed assertion
-using AssertionCallback = void(const char* expression, const char* fileName, int lineNumber);
-
-#ifdef NDEBUG
-/// If building for release, assert is replaced by nothing
-#define assert(expr) expr;
-#else
-
-void AssertionFailed(const char* expression, const char* fileName, int lineNumber);
-
-/// @brief Assertion. If the assertion fails, AssertionFailed is called.
+/// <summary>
+/// Driver for EEPROM24LC08B I2C expander device
 ///
-/// <param name="expression">Expression to evaluate.
-/// If true the assertion succeeds and nothing happens, if false the assertion fails, and the assertion failure handler is invoked.</param>
-#define assert(expression) (likely(expression) ? ((void)0) : baremetal::AssertionFailed(#expression, __FILE__, __LINE__))
+/// This device is on I2C address 0x50-51 (low / high block).
+/// The device is a 4K bit EEPROM.
+/// </summary>
+class EEPROM24LC08B
+{
+private:
+    /// @brief I2C base device
+    baremetal::I2CMaster m_device;
+    /// @brief I2C device address
+    uint8 m_address;
 
-#endif
+public:
+    EEPROM24LC08B(baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
+    ~EEPROM24LC08B();
 
-void ResetAssertionCallback();
-void SetAssertionCallback(AssertionCallback* callback);
+    bool Initialize(uint8 bus, uint8 address);
+    bool Scan();
 
-} // namespace baremetal
+    bool ReadData(uint8 address, uint8* data, uint8 numBytes);
+    bool WriteData(uint8 address, const uint8* data, uint8 numBytes);
+};
+
+} // namespace device

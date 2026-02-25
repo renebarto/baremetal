@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MCP23017.cpp
+// File        : MCP23008.cpp
 //
 // Namespace   : device
 //
-// Class       : MCP23017
+// Class       : MCP23008
 //
-// Description : MCP23017 I2C expander functionality
+// Description : MCP23008 I2C expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/i2c/MCP23017.h"
+#include "device/i2c/MCP23008.h"
 
 #include "baremetal/Logger.h"
 
@@ -45,52 +45,51 @@ using namespace device;
 using namespace baremetal;
 
 /// @file
-/// MCP 23017 I2C expander support declaration
+/// MCP 23008 I2C expander support declaration
 
 /// @brief Define log name
-LOG_MODULE("MCP23017");
+LOG_MODULE("MCP23008");
 
 /// <summary>
-/// Constructor for MCP23017 class
+/// Constructor for MCP23008 class
 /// </summary>
 /// <param name="memoryAccess">MemoryAccess instance to be used for register access</param>
-MCP23017::MCP23017(baremetal::IMemoryAccess& memoryAccess /*= baremetal::GetMemoryAccess()*/)
+MCP23008::MCP23008(baremetal::IMemoryAccess& memoryAccess /*= baremetal::GetMemoryAccess()*/)
     : m_device{memoryAccess}
 {
 }
 
 /// <summary>
-/// Destructor for MCP23017 class
+/// Destructor for MCP23008 class
 /// </summary>
-MCP23017::~MCP23017()
+MCP23008::~MCP23008()
 {
-    SetPortADirections(MCP23017PinDirection::In);
-    SetPortBDirections(MCP23017PinDirection::In);
+    SetPortDirections(MCP23008PinDirection::In);
 }
 
 /// <summary>
-/// Initialize the MCP23017 I2C expander
+/// Initialize the MCP23008 I2C expander
 /// </summary>
 /// <param name="bus">I2C bus index</param>
 /// <param name="address">I2C slave address</param>
 /// <returns>True on success, false otherwise</returns>
-bool MCP23017::Initialize(uint8 bus, uint8 address)
+bool MCP23008::Initialize(uint8 bus, uint8 address)
 {
     LOG_INFO("Initialize %02x", address);
     m_address = address;
     if (!m_device.Initialize(bus, I2CClockMode::Normal, 0))
         return false;
 
-    WriteRegister(IOCONA, IOCON_BANK0 | IOCON_SEQOP | IOCON_HAEN | IOCON_ODR);
+    WriteRegister(IOCON, IOCON_SEQOP | IOCON_HAEN | IOCON_ODR);
     return true;
 }
 
 /// <summary>
-/// Read from the specified MCP23017 register
+/// Read from the specified MCP23008 register
 /// </summary>
 /// <param name="registerAddress">Register index</param>
 /// <returns>Value read</returns>
-uint8 MCP23017::ReadRegister(MCP23017RegisterIndex registerAddress)
+uint8 MCP23008::ReadRegister(MCP23008RegisterIndex registerAddress)
 {
     uint8 address = static_cast<uint8>(registerAddress);
     uint8 data{};
@@ -100,11 +99,11 @@ uint8 MCP23017::ReadRegister(MCP23017RegisterIndex registerAddress)
 }
 
 /// <summary>
-/// Write to the specified MCP23017 register
+/// Write to the specified MCP23008 register
 /// </summary>
 /// <param name="registerAddress">Register index</param>
 /// <param name="byte">Value to write</param>
-void MCP23017::WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte)
+void MCP23008::WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte)
 {
     const size_t BufferSize{2};
     uint8 buffer[BufferSize];
@@ -116,115 +115,82 @@ void MCP23017::WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte)
 }
 
 /// <summary>
-/// Get the I/O pin direction for the specified pin on the MCP23017
+/// Get the I/O pin direction for the specified pin on the MCP23008
 /// </summary>
 /// <param name="pinNumber">Pin index (0-7 on Port A, 8-15 on Port B)</param>
 /// <param name="direction">Holds pin direction on return</param>
-void MCP23017::GetPinDirection(MCP23017Pin pinNumber, MCP23017PinDirection& direction)
+void MCP23008::GetPinDirection(MCP23008Pin pinNumber, MCP23008PinDirection& direction)
 {
-    MCP23017RegisterIndex registerAddress = (pinNumber < MCP23017Pin::PinB0) ? IODIRA : IODIRB;
-    uint8 data = ReadRegister(registerAddress);
+    uint8 data = ReadRegister(IODIR);
     uint8 pinShift = static_cast<uint8>(pinNumber) % 8;
-    direction = (data & (1 << pinShift)) ? MCP23017PinDirection::In : MCP23017PinDirection::In;
+    direction = (data & (1 << pinShift)) ? MCP23008PinDirection::In : MCP23008PinDirection::In;
 }
 
 /// <summary>
-/// Set the I/O pin direction for the specified pin on the MCP23017
+/// Set the I/O pin direction for the specified pin on the MCP23008
 /// </summary>
 /// <param name="pinNumber">Pin index (0-7 on Port A, 8-15 on Port B)</param>
 /// <param name="direction">Pin direction to set</param>
-void MCP23017::SetPinDirection(MCP23017Pin pinNumber, const MCP23017PinDirection& direction)
+void MCP23008::SetPinDirection(MCP23008Pin pinNumber, const MCP23008PinDirection& direction)
 {
-    MCP23017RegisterIndex registerAddress = (pinNumber < MCP23017Pin::PinB0) ? IODIRA : IODIRB;
-    uint8 data = ReadRegister(registerAddress);
+    uint8 data = ReadRegister(IODIR);
     uint8 pinShift = static_cast<uint8>(pinNumber) % 8;
     uint8 mask = 1 << pinShift;
-    uint8 pinData = (direction == MCP23017PinDirection::In) ? mask : 0;
-    WriteRegister(registerAddress, (data & ~mask) | pinData);
+    uint8 pinData = (direction == MCP23008PinDirection::In) ? mask : 0;
+    WriteRegister(IODIR, (data & ~mask) | pinData);
 }
 
 /// <summary>
-/// Get the value of an input pin on the MCP23017
+/// Get the value of an input pin on the MCP23008
 /// </summary>
 /// <param name="pinNumber">Pin index (0-7 on Port A, 8-15 on Port B)</param>
 /// <returns>Requested pin value</returns>
-bool MCP23017::GetPinValue(MCP23017Pin pinNumber)
+bool MCP23008::GetPinValue(MCP23008Pin pinNumber)
 {
-    MCP23017RegisterIndex registerAddress = (pinNumber < MCP23017Pin::PinB0) ? GPIOA : GPIOB;
-    uint8 data = ReadRegister(registerAddress);
+    uint8 data = ReadRegister(GPIO);
     uint8 pinShift = static_cast<uint8>(pinNumber) % 8;
     return (data & (1 << pinShift));
 }
 
 /// <summary>
-/// Set the value of an output pin on the MCP23017
+/// Set the value of an output pin on the MCP23008
 /// </summary>
 /// <param name="pinNumber">Pin index (0-7 on Port A, 8-15 on Port B)</param>
 /// <param name="on">Value for output pin</param>
-void MCP23017::SetPinValue(MCP23017Pin pinNumber, bool on)
+void MCP23008::SetPinValue(MCP23008Pin pinNumber, bool on)
 {
-    MCP23017RegisterIndex registerAddress = (pinNumber < MCP23017Pin::PinB0) ? GPIOA : GPIOB;
-    uint8 data = ReadRegister(registerAddress);
+    uint8 data = ReadRegister(GPIO);
     uint8 pinShift = static_cast<uint8>(pinNumber) % 8;
     uint8 mask = 1 << pinShift;
     uint8 pinData = on ? mask : 0;
-    WriteRegister(registerAddress, (data & ~mask) | pinData);
+    WriteRegister(GPIO, (data & ~mask) | pinData);
 }
 
 /// <summary>
-/// Set I/O pin directions for all pins on Port A
+/// Set I/O pin directions for all pins
 /// </summary>
 /// <param name="direction">Direction for pins</param>
-void MCP23017::SetPortADirections(const MCP23017PinDirection& direction)
+void MCP23008::SetPortDirections(const MCP23008PinDirection& direction)
 {
-    WriteRegister(GPPUA, 0x00);
-    WriteRegister(IODIRA, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
+    WriteRegister(GPPU, 0x00);
+    WriteRegister(IODIR, direction == MCP23008PinDirection::In ? 0xFF : 0x00);
 }
 
 /// <summary>
-/// Get value for all pins on Port A.
+/// Get value for all pins.
 /// Bit 0 is the value for pin 0, etc.
 /// </summary>
 /// <returns></returns>
-uint8 MCP23017::GetPortAValue()
+uint8 MCP23008::GetPortValue()
 {
-    return ReadRegister(GPIOA);
+    return ReadRegister(GPIO);
 }
 
 /// <summary>
-/// Set value for all pins on Port A
+/// Set value for all pins
 /// </summary>
 /// <param name="data">Value for pins. Bit 0 is the value for pin 0, etc.</param>
-void MCP23017::SetPortAValue(uint8 data)
+void MCP23008::SetPortValue(uint8 data)
 {
-    WriteRegister(GPIOA, data);
-}
-
-/// <summary>
-/// Set I/O pin directions for all pins on Port B
-/// </summary>
-/// <param name="direction">Direction for pins</param>
-void MCP23017::SetPortBDirections(const MCP23017PinDirection& direction)
-{
-    WriteRegister(GPPUB, 0x00);
-    WriteRegister(IODIRB, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
-}
-
-/// <summary>
-/// Get value for all pins on Port B.
-/// Bit 0 is the value for pin 0, etc.
-/// </summary>
-/// <returns></returns>
-uint8 MCP23017::GetPortBValue()
-{
-    return ReadRegister(GPIOB);
-}
-
-/// <summary>
-/// Set value for all pins on Port B
-/// </summary>
-/// <param name="data">Value for pins. Bit 0 is the value for pin 0, etc.</param>
-void MCP23017::SetPortBValue(uint8 data)
-{
-    WriteRegister(GPIOB, data);
+    WriteRegister(GPIO, data);
 }

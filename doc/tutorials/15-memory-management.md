@@ -1442,20 +1442,20 @@ File: code\applications\demo\src\main.cpp
 36:     Timer::WaitMilliSeconds(5000);
 37:
 38:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-39:     char ch{};
-40:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+39:     char c{};
+40:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 41:     {
-42:         ch = console.ReadChar();
-43:         console.WriteChar(ch);
+42:         c = console.ReadChar();
+43:         console.WriteChar(c);
 44:     }
-45:     if (ch == 'p')
+45:     if (c == 'p')
 46:         assert(false);
 47: 
 48:     LOG_INFO("Heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::LOW));
 49:     LOG_INFO("High heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::HIGH));
 50:     LOG_INFO("DMA heap space available: %llu bytes", memoryManager.GetHeapFreeSpace(HeapType::ANY));
 51: 
-52:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+52:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 53: }
 ```
 
@@ -2119,16 +2119,16 @@ File: code\applications\demo\src\main.cpp
 53:     Timer::WaitMilliSeconds(5000);
 54: 
 55:     console.Write("Press r to reboot, h to halt, p to fail assertion and panic\n");
-56:     char ch{};
-57:     while ((ch != 'r') && (ch != 'h') && (ch != 'p'))
+56:     char c{};
+57:     while ((c != 'r') && (c != 'h') && (c != 'p'))
 58:     {
-59:         ch = console.ReadChar();
-60:         console.WriteChar(ch);
+59:         c = console.ReadChar();
+60:         console.WriteChar(c);
 61:     }
-62:     if (ch == 'p')
+62:     if (c == 'p')
 63:         assert(false);
 64: 
-65:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+65:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 66: }
 ```
 

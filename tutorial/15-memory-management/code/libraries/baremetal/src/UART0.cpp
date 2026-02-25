@@ -136,8 +136,8 @@ unsigned UART0::GetBaudRate() const
 /// <summary>
 /// Send a character
 /// </summary>
-/// <param name="ch">Character to be sent</param>
-void UART0::Write(char ch)
+/// <param name="c">Character to be sent</param>
+void UART0::Write(char c)
 {
     // wait until we can send
     // Check Tx FIFO empty
@@ -146,7 +146,7 @@ void UART0::Write(char ch)
         NOP();
     }
     // Write the character to the buffer
-    m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(ch));
+    m_memoryAccess.Write32(RPI_UART0_DR, static_cast<unsigned int>(c));
 }
 
 /// <summary>

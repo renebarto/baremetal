@@ -157,7 +157,7 @@ public:
     bool IsBacklightOn() const override;
 
     void Write(char value) override;
-    void Write(unsigned posX, unsigned posY, char ch) override;
+    void Write(unsigned posX, unsigned posY, char c) override;
     void Write(const char *text, size_t count) override;
     void Write(const char *text) override;
     void Write(unsigned posX, unsigned posY, const char *text) override;
@@ -171,7 +171,7 @@ public:
     void SetCursorPosition(uint8 cursorX, uint8 cursorY) override;
 
     void DisplayControl(DisplayMode displayMode, CursorMode cursorMode);
-    void DefineCharFont(char ch, const uint8 FontData[8]);
+    void DefineCharFont(char c, const uint8 FontData[8]);
 
     protected:
     /// <summary>

@@ -7,7 +7,7 @@
 //
 // Class       : MCP23017
 //
-// Description : I2C Master functionality
+// Description : MCP23017 I2C expander functionality
 //
 //------------------------------------------------------------------------------
 //

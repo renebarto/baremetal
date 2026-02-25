@@ -2345,14 +2345,14 @@ File: code/applications/demo/src/main.cpp
 50:     }
 51:
 52:     console.Write("Press r to reboot, h to halt\n");
-53:     char ch{};
-54:     while ((ch != 'r') && (ch != 'h'))
+53:     char c{};
+54:     while ((c != 'r') && (c != 'h'))
 55:     {
-56:         ch = console.ReadChar();
-57:         console.WriteChar(ch);
+56:         c = console.ReadChar();
+57:         console.WriteChar(c);
 58:     }
 59:
-60:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+60:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 61: }
 ```
 
@@ -2925,14 +2925,14 @@ File: code/applications/demo/src/main.cpp
 75:     pinSW.DisableAllInterrupts();
 76:
 77:     console.Write("Press r to reboot, h to halt\n");
-78:     char ch{};
-79:     while ((ch != 'r') && (ch != 'h'))
+78:     char c{};
+79:     while ((c != 'r') && (c != 'h'))
 80:     {
-81:         ch = console.ReadChar();
-82:         console.WriteChar(ch);
+81:         c = console.ReadChar();
+82:         console.WriteChar(c);
 83:     }
 84:
-85:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+85:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 86: }
 ```
 
@@ -4559,14 +4559,14 @@ File: code/applications/demo/src/main.cpp
 74:     pinSW.DisconnectInterrupt();
 75:
 76:     console.Write("Press r to reboot, h to halt\n");
-77:     char ch{};
-78:     while ((ch != 'r') && (ch != 'h'))
+77:     char c{};
+78:     while ((c != 'r') && (c != 'h'))
 79:     {
-80:         ch = console.ReadChar();
-81:         console.WriteChar(ch);
+80:         c = console.ReadChar();
+81:         console.WriteChar(c);
 82:     }
 83:
-84:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+84:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 85: }
 ```
 
@@ -5584,14 +5584,14 @@ File: code/applications/demo/src/main.cpp
 34:     rotarySwitch.UnregisterEventHandler(OnEvent);
 35:
 36:     console.Write("Press r to reboot, h to halt\n");
-37:     char ch{};
-38:     while ((ch != 'r') && (ch != 'h'))
+37:     char c{};
+38:     while ((c != 'r') && (c != 'h'))
 39:     {
-40:         ch = console.ReadChar();
-41:         console.WriteChar(ch);
+40:         c = console.ReadChar();
+41:         console.WriteChar(c);
 42:     }
 43:
-44:     return static_cast<int>((ch == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+44:     return static_cast<int>((c == 'r') ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
 45: }
 ```
 

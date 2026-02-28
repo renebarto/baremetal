@@ -569,7 +569,16 @@
 /// @brief Raspberry Pi Auxiliary Enable register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 #define RPI_AUX_ENABLES                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
-/// @brief Raspberry Pi Auxiliary Enable register values
+/// @brief Raspberry Pi Auxiliary Interrupt register values
+/// @brief Raspberry Pi Auxiliary Interrupt register status SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_ENABLES_SPI2                   BIT1(2)
+/// @brief Raspberry Pi Auxiliary Interrupt register status SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_ENABLES_SPI1                   BIT1(1)
+/// @brief Raspberry Pi Auxiliary Interrupt register status UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_ENABLES_UART1                  BIT1(0)
+
+/// @brief Raspberry Pi Auxiliary Enable register values. The corresponding bit will need to be set in order to enable access to the peripheral's
+/// registers and functionality. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 #define RPI_AUX_ENABLES_SPI2                   BIT1(2)
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
@@ -581,28 +590,30 @@
 // Raspberry Pi auxiliary mini UART (UART1)
 //---------------------------------------------
 
+/// @brief Raspberry Pi Mini UART register base address. See @ref RASPBERRY_PI_UART1
+#define RPI_AUX_MU_BASE                        RPI_AUX_BASE + 0x00000040
 /// @brief Raspberry Pi Mini UART (UART1) I/O register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_IO                          reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
+#define RPI_AUX_MU_IO                          reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000000)
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_IER                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
+#define RPI_AUX_MU_IER                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000004)
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_IIR                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
+#define RPI_AUX_MU_IIR                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000008)
 /// @brief Raspberry Pi Mini UART (UART1) Line Control register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_LCR                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
+#define RPI_AUX_MU_LCR                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x0000000C)
 /// @brief Raspberry Pi Mini UART (UART1) Modem Control register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_MCR                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
+#define RPI_AUX_MU_MCR                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000010)
 /// @brief Raspberry Pi Mini UART (UART1) Line Status register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_LSR                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
+#define RPI_AUX_MU_LSR                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000014)
 /// @brief Raspberry Pi Mini UART (UART1) Modem Status register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_MSR                         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
+#define RPI_AUX_MU_MSR                         reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000018)
 /// @brief Raspberry Pi Mini UART (UART1) Scratch register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_SCRATCH                     reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
+#define RPI_AUX_MU_SCRATCH                     reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x0000001C)
 /// @brief Raspberry Pi Mini UART (UART1) Extra Control register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_CNTL                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
+#define RPI_AUX_MU_CNTL                        reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000020)
 /// @brief Raspberry Pi Mini UART (UART1) Extra Status register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_STAT                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
+#define RPI_AUX_MU_STAT                        reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000024)
 /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
-#define RPI_AUX_MU_BAUD                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
+#define RPI_AUX_MU_BAUD                        reinterpret_cast<regaddr>(RPI_AUX_MU_BASE + 0x00000028)
 /// @brief Calculate Raspberry Pi Mini UART (UART1) baud rate value from frequency
 #define RPI_AUX_MU_BAUD_VALUE(clockRate, baud) static_cast<uint32>((clockRate / (baud * 8)) - 1)
 
@@ -621,6 +632,8 @@
 #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR           BIT1(2)
 /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR           BIT1(1)
+/// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
+#define RPI_AUX_MU_IIR_INTERRUPT_PENDING       BIT1(0)
 
 /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
 /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
@@ -653,3 +666,150 @@
 #define RPI_AUX_MU_CNTL_ENABLE_TX              BIT1(1)
 /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive. See @ref RASPBERRY_PI_UART1
 #define RPI_AUX_MU_CNTL_ENABLE_RX              BIT1(0)
+
+/// @todo extend with register values for RPI_AUX_MU_STAT, RPI_AUX_MU_BAUD
+
+//---------------------------------------------
+// Raspberry Pi auxiliary mini SPI (SPI1/2)
+//---------------------------------------------
+
+/// @brief Raspberry Pi Mini SPI1 register base address. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI1_BASE                      RPI_AUX_BASE + 0x00000080
+/// @brief Raspberry Pi Mini SPI1 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI1_CNTL0_REG                     reinterpret_cast<regaddr>(RPI_AUX_SPI1_BASE + 0x00000000)
+/// @brief Raspberry Pi Mini SPI1 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI1_CNTL1_REG                     reinterpret_cast<regaddr>(RPI_AUX_SPI1_BASE + 0x00000004)
+/// @brief Raspberry Pi Mini SPI1 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI1_STAT_REG                      reinterpret_cast<regaddr>(RPI_AUX_SPI1_BASE + 0x00000008)
+/// @brief Raspberry Pi Mini SPI1 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI1_PEEK_REG                      reinterpret_cast<regaddr>(RPI_AUX_SPI1_BASE + 0x0000000C)
+/// @brief Raspberry Pi Mini SPI1 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI1_IO_REG                        reinterpret_cast<regaddr>(RPI_AUX_SPI1_BASE + 0x0000001C)
+
+/// @brief Raspberry Pi Mini UART register base address. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI2_BASE                      RPI_AUX_BASE + 0x000000C0
+/// @brief Raspberry Pi Mini SPI2 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI2_CNTL0_REG                     reinterpret_cast<regaddr>(RPI_AUX_SPI2_BASE + 0x00000000)
+/// @brief Raspberry Pi Mini SPI2 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI2_CNTL1_REG                     reinterpret_cast<regaddr>(RPI_AUX_SPI2_BASE + 0x00000004)
+/// @brief Raspberry Pi Mini SPI2 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI2_STAT_REG                      reinterpret_cast<regaddr>(RPI_AUX_SPI2_BASE + 0x00000008)
+/// @brief Raspberry Pi Mini SPI2 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI2_IO_REG                        reinterpret_cast<regaddr>(RPI_AUX_SPI2_BASE + 0x00000010)
+/// @brief Raspberry Pi Mini SPI2 Control register 0. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define AUX_SPI2_PEEK_REG                      reinterpret_cast<regaddr>(RPI_AUX_SPI2_BASE + 0x00000014)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 values
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SPEED_SHIFT          20
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SPEED_MASK           BITS(RPI_AUX_SPI_CNTL0_SPEED_SHIFT, RPI_AUX_SPI_CNTL0_SPEED_SHIFT + 11)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SPEED_VALUE(x)       ((x & RPI_AUX_SPI_CNTL0_SPEED_MASK) >> RPI_AUX_SPI_CNTL0_SPEED_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip selects bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_CS_SHIFT             17
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip selects bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_CS_MASK              BITS(RPI_AUX_SPI_CNTL0_CS_SHIFT, RPI_AUX_SPI_CNTL0_CS_SHIFT + 2)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip selects bit value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_CS_VALUE(x)          ((x & RPI_AUX_SPI_CNTL0_CS_MASK) >> RPI_AUX_SPI_CNTL0_CS_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 post input mode. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_POST_INPUT_MODE      BIT1(16)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 variable CS. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_VARIABLE_CS          BIT1(15)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 variable width. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_VARIABLE_WIDTH       BIT1(14)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 DOUT hold time bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT 12
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 DOUT hold time bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_MASK  BITS(RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT, RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT + 1)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 DOUT hold time value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_VALUE(x) ((x & RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_MASK) >> RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_ENABLE               BIT1(11)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 in rising. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_IN_RISING            BIT1(10)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 clear FIFO. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_CLEAR_FIFO           BIT1(9)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 out rising. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_OUT_RISING           BIT1(8)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 invert clock. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_INVERT_CLOCK         BIT1(7)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift out MSB first. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SHIFT_OUT_MSB_FIRST  BIT1(6)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift out LSB first. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SHIFT_OUT_LSB_FIRST  BIT0(6)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift length bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT   0
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift length bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_MASK    BITS(RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT, RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT + 1)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift length value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_VALUE(x) ((x & RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_MASK) >> RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 values
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT   8
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_MASK    BITS(RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT, RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT + 2)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_VALUE(x) ((x & RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_MASK) >> RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 TX empty interrupt enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_TX_EMPTY_IRQ         BIT1(7)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 DONE interrupt enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_DONE_IRQ             BIT1(6)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift in MSB first. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_SHIFT_IN_MSB_FIRST   BIT1(1)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift in LSB first. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_SHIFT_IN_LSB_FIRST   BIT0(1)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 keep input. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_CNTL1_KEEP_INPUT           BIT1(0)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register values
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX FIFO level shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT   24
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX FIFO level bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_MASK    BITS(RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT, RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT + 3)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX FIFO level value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_VALUE(x) ((x & RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT   16
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_MASK    BITS(RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT, RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT + 3)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_VALUE(x) ((x & RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX full. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_TX_FULL               BIT1(10)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX empty. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_TX_EMPTY              BIT1(9)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX full. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_RX_FULL               BIT1(8)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX empty. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_RX_EMPTY              BIT1(7)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register busy. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_BUSY                  BIT1(6)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register bit count shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT       0
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register bit count bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_BIT_COUNT_MASK        BITS(RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT, RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT + 5)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Status register bit count value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_STAT_BIT_COUNT_VALUE(x)    ((x & RPI_AUX_SPI_STAT_BIT_COUNT_MASK) >> RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register values
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_PEEK_DATA_SHIFT            0
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_PEEK_DATA_MASK             BITS(RPI_AUX_SPI_PEEK_DATA_SHIFT, RPI_AUX_SPI_PEEK_DATA_SHIFT + 15)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_PEEK_DATA_VALUE(x)         ((x & RPI_AUX_SPI_PEEK_DATA_MASK) >> RPI_AUX_SPI_PEEK_DATA_SHIFT)
+
+/// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register values
+/// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_IO_DATA_SHIFT              0
+/// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_IO_DATA_MASK               BITS(RPI_AUX_SPI_IO_DATA_SHIFT, RPI_AUX_SPI_IO_DATA_SHIFT + 15)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_AUX_SPI_IO_DATA_VALUE(x)           ((x & RPI_AUX_SPI_IO_DATA_MASK) >> RPI_AUX_SPI_IO_DATA_SHIFT)
+

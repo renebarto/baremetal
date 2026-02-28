@@ -471,7 +471,146 @@
 #define RPI_UART0_FR_TX_EMPTY BIT1(5)
 
 //---------------------------------------------
-// Raspberry Pi I2C
+// Raspberry Pi SPI Master
+//---------------------------------------------
+
+#if BAREMETAL_RPI_TARGET == 3
+/// @brief Raspberry Pi SPI bus 0 registers base address.
+#define RPI_SPI0_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00204000)
+#elif BAREMETAL_RPI_TARGET == 4
+/// @brief Raspberry Pi SPI bus 3 registers base address.
+#define RPI_SPI3_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00204600)
+/// @brief Raspberry Pi SPI bus 4 registers base address.
+#define RPI_SPI4_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00204800)
+/// @brief Raspberry Pi SPI bus 5 registers base address.
+#define RPI_SPI5_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00204A00)
+/// @brief Raspberry Pi SPI bus 6 registers base address.
+#define RPI_SPI6_BASE         reinterpret_cast<regaddr>(RPI_BCM_IO_BASE + 0x00204C00)
+#endif
+
+/// @brief Raspberry Pi SPI Master Control and Status register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_CS_OFFSET                      0x00000000
+/// @brief Raspberry Pi SPI Master Control and Status register long data word in LOSSI mode for DMA
+#define RPI_SPI_CS_LEN_LONG                    BIT1(25)
+/// @brief Raspberry Pi SPI Master Control and Status register enable DMA in LOSSI mode
+#define RPI_SPI_CS_DMA_LEN                     BIT1(24)
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select 2 polarity
+#define RPI_SPI_CS_POL2                        BIT1(23)
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select 1 polarity
+#define RPI_SPI_CS_POL1                        BIT1(22)
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select 0 polarity
+#define RPI_SPI_CS_POL0                        BIT1(21)
+/// @brief Raspberry Pi SPI Master Control and Status register RX FIFO full (RO)
+#define RPI_SPI_CS_RXF                         BIT1(20)
+/// @brief Raspberry Pi SPI Master Control and Status register RX FIFO need to read, 3/4 full (RO)
+#define RPI_SPI_CS_RXR                         BIT1(19)
+/// @brief Raspberry Pi SPI Master Control and Status register TX FIFO has space (RO)
+#define RPI_SPI_CS_TXD                         BIT1(18)
+/// @brief Raspberry Pi SPI Master Control and Status register RX FIFO has data (RO)
+#define RPI_SPI_CS_RXD                         BIT1(17)
+/// @brief Raspberry Pi SPI Master Control and Status register Done (RO)
+#define RPI_SPI_CS_DONE                        BIT1(16)
+/// @brief Raspberry Pi SPI Master Control and Status register LOSSI mode enable
+#define RPI_SPI_CS_LEN                         BIT1(13)
+/// @brief Raspberry Pi SPI Master Control and Status register read enable
+#define RPI_SPI_CS_REN                         BIT1(12)
+/// @brief Raspberry Pi SPI Master Control and Status register auto de-assert CS
+#define RPI_SPI_CS_ADCS                        BIT1(11)
+/// @brief Raspberry Pi SPI Master Control and Status register interrupt on RXRenable
+#define RPI_SPI_CS_INTR                        BIT1(10)
+/// @brief Raspberry Pi SPI Master Control and Status register interrupt on Done enable
+#define RPI_SPI_CS_INTD                        BIT1(9)
+/// @brief Raspberry Pi SPI Master Control and Status register DMA enable
+#define RPI_SPI_CS_DMAEN                       BIT1(8)
+/// @brief Raspberry Pi SPI Master Control and Status register transfer activity
+#define RPI_SPI_CS_TA                          BIT1(7)
+/// @brief Raspberry Pi SPI Master Control and Status register CS polarity
+#define RPI_SPI_CS_POL                         BIT1(6)
+/// @brief Raspberry Pi SPI Master Control and Status register clear FIFO
+#define RPI_SPI_CS_CLEAR                       BITS(4, 5)
+/// @brief Raspberry Pi SPI Master Control and Status register clear TX FIFO
+#define RPI_SPI_CS_CLEAR_TX                    BIT1(4)
+/// @brief Raspberry Pi SPI Master Control and Status register clear RX FIFO
+#define RPI_SPI_CS_CLEAR_RX                    BIT1(5)
+/// @brief Raspberry Pi SPI Master Control and Status register Clock polarity
+#define RPI_SPI_CS_CPOL                        BIT1(3)
+/// @brief Raspberry Pi SPI Master Control and Status register Clock phase
+#define RPI_SPI_CS_CPHA                        BIT1(2)
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select activation
+#define RPI_SPI_CS_ACTIVATE_SHIFT              0
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_SPI_CS_ACTIVATE_MASK               BITS(RPI_SPI_CS_ACTIVATE_SHIFT, RPI_SPI_CS_ACTIVATE_SHIFT + 1)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
+#define RPI_SPI_CS_ACTIVATE_VALUE(x)           ((x & RPI_SPI_CS_ACTIVATE_MASK) >> RPI_SPI_CS_ACTIVATE_SHIFT)
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select activate 0
+#define RPI_SPI_CS_ACTIVATE_CS0                0b00
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select activate 1
+#define RPI_SPI_CS_ACTIVATE_CS1                0b01
+/// @brief Raspberry Pi SPI Master Control and Status register Chip select activate 2
+#define RPI_SPI_CS_ACTIVATE_CS2                0b10
+
+/// @brief Raspberry Pi SPI Master RX/TX FIFO register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_FIFO_OFFSET                    0x00000004
+
+/// @brief Raspberry Pi SPI Master Clock Divider register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_CLK_OFFSET                     0x00000008
+/// @brief Raspberry Pi SPI Master Clock Divider register clock divider bit shift
+#define RPI_SPI_CLK_CDIV_SHIFT                 0
+/// @brief Raspberry Pi SPI Master Clock Divider register clock divider bit mask
+#define RPI_SPI_CLK_CDIV_MASK                  BITS(RPI_SPI_CLK_CDIV_SHIFT, RPI_SPI_CLK_CDIV_SHIFT + 15)
+/// @brief Raspberry Pi SPI Master Clock Divider register clock divider value for reading
+#define RPI_SPI_CLK_CDIV_VALUE(x)              ((x & RPI_SPI_CLK_CDIV_MASK) >> RPI_SPI_CLK_CDIV_SHIFT)
+
+/// @brief Raspberry Pi SPI Master Data Length register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_DLEN_OFFSET                    0x0000000C
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes bit shift
+#define RPI_SPI_DLEN_LEN_SHIFT                 0
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes bit mask
+#define RPI_SPI_DLEN_LEN_MASK                  BITS(RPI_SPI_DLEN_LEN_SHIFT, RPI_SPI_DLEN_LEN_SHIFT + 15)
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes value for reading
+#define RPI_SPI_DLEN_LEN_VALUE(x)              ((x & RPI_SPI_DLEN_LEN_MASK) >> RPI_SPI_DLEN_LEN_SHIFT)
+
+/// @brief Raspberry Pi SPI LOSSI mode Time Output Hold (TOH) register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_LTOH_OFFSET                    0x00000010
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes bit shift
+#define RPI_SPI_LTOH_TOH_SHIFT                 0
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes bit mask
+#define RPI_SPI_LTOH_TOH_MASK                  BITS(RPI_SPI_LTOH_TOH_SHIFT, RPI_SPI_LTOH_TOH_SHIFT + 3)
+/// @brief Raspberry Pi SPI Master Data Length register length in bytes value for reading
+#define RPI_SPI_LTOH_TOH_VALUE(x)              ((x & RPI_SPI_LTOH_TOH_MASK) >> RPI_SPI_LTOH_TOH_SHIFT)
+
+/// @brief Raspberry Pi SPI DMA DREQ Control register (R/W) offset relative to RPI_SPIx_BASE
+#define RPI_SPI_DC_OFFSET                      0x00000014
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read panic threshold bit shift
+#define RPI_SPI_DC_RPANIC_SHIFT                24
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read panic threshold bit mask
+#define RPI_SPI_DC_RPANIC_MASK                 BITS(RPI_SPI_DC_RPANIC_SHIFT, RPI_SPI_DC_RPANIC_SHIFT + 7)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read panic threshold value for reading
+#define RPI_SPI_DC_RPANIC_VALUE(x)             ((x & RPI_SPI_DC_RPANIC_MASK) >> RPI_SPI_DC_RPANIC_SHIFT)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold bit shift
+#define RPI_SPI_DC_RDREQ_SHIFT                 16
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold bit mask
+#define RPI_SPI_DC_RDREQ_MASK                  BITS(RPI_SPI_DC_RDREQ_SHIFT, RPI_SPI_DC_RDREQ_SHIFT + 7)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold value for reading
+#define RPI_SPI_DC_RDREQ_VALUE(x)              ((x & RPI_SPI_DC_RDREQ_MASK) >> RPI_SPI_DC_RDREQ_SHIFT)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold bit shift
+#define RPI_SPI_DC_TPANIC_SHIFT                8
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold bit mask
+#define RPI_SPI_DC_TPANIC_MASK                 BITS(RPI_SPI_DC_TPANIC_SHIFT, RPI_SPI_DC_TPANIC_SHIFT + 7)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold value for reading
+#define RPI_SPI_DC_TPANIC_VALUE(x)             ((x & RPI_SPI_DC_TPANIC_MASK) >> RPI_SPI_DC_TPANIC_SHIFT)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold bit shift
+#define RPI_SPI_DC_TDREQ_SHIFT                 0
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold bit mask
+#define RPI_SPI_DC_TDREQ_MASK                  BITS(RPI_SPI_DC_TDREQ_SHIFT, RPI_SPI_DC_TDREQ_SHIFT + 7)
+/// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold value for reading
+#define RPI_SPI_DC_TDREQ_VALUE(x)              ((x & RPI_SPI_DC_TDREQ_MASK) >> RPI_SPI_DC_TDREQ_SHIFT)
+
+/// @brief Raspberry Pi SPI register address from base address and offset
+#define RPI_SPI_REG_ADDRESS(base, offset)      reinterpret_cast<regaddr>((base) + (offset))
+
+//---------------------------------------------
+// Raspberry Pi I2C Master
 //---------------------------------------------
 
 /// @brief Raspberry Pi I2C bus 0 registers base address.

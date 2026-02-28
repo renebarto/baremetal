@@ -48,7 +48,7 @@ Base address of the SPI devices is shown in the table below.
 |          |           | 3     | CPOL     | R/W | Clock Polarity<br/>0 = Rest state of clock = low.<br/>1 = Rest state of clock = high.<br/>Reset level: 0
 |          |           | 2     | CPHA     | R/W | Clock Phase<br/>0 = First SCLK transition at middle of data bit.<br/>1 = First SCLK transition at beginning of data bit.<br/>Reset level: 0
 |          |           | 1:0   | CS       | R/W | Chip Select<br/>00 = Chip select 0<br/>01 = Chip select 1<br/>10 = Chip select 2<br/>11 = Reserved<br/>Reset level: 0
-| FIFO     | Base+0x04 | 31:0  | DATA     | R/W | Sets the SPI clock speed. spi clk freq = system_clock_freq/2*(speed+1).<br/>Reset level: 0
+| FIFO     | Base+0x04 | 31:0  | DATA     | R/W | DMA Mode (DMAEN set)<br/>If TA is clear, the first 32-bit write to this register will control DLEN and CS. Subsequent reads and writes will be taken as four-byte data words to be read/written to the FIFOs<br/>Poll/Interrupt Mode (DMAEN clear, TA set)<br/>Writes to the register write bytes to TX FIFO. Reads from register read bytes from the RX FIFO.<br/>Reset level: 0
 | CLK      | Base+0x08 | 31:16 | -        |     | Reserved. Write 0, read don't care.
 |          |           | 15:0  | CDIV     | R/W | Clock Divider SCLK = Core Clock / CDIV.<br/>If CDIV is set to 0, the divisor is 65536. The divisor must be a multiple of 2. Odd numbers rounded down. The maximum SPI clock rate is of the APB clock.<br/>Reset level: 0
 | DLEN     | Base+0x0C | 31:16 | -        |     | Reserved. Write 0, read don't care.

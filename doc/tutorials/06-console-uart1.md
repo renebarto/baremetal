@@ -1144,17 +1144,17 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 36: // DEALINGS IN THE SOFTWARE.
 37: //
 38: //------------------------------------------------------------------------------
-39:
+39: 
 40: /// @file
 41: /// Register addresses of Raspberry Pi peripheral registers.
 42: ///
 43: /// For specific registers, we also define the fields and their possible values.
-44:
+44: 
 45: #pragma once
-46:
+46: 
 47: #include "baremetal/Macros.h"
 48: #include "baremetal/Types.h"
-49:
+49: 
 50: #if BAREMETAL_RPI_TARGET == 3
 51: /// @brief Base address for Raspberry Pi BCM I/O for Raspberry Pi 3
 52: #define RPI_BCM_IO_BASE                 0x3F000000
@@ -1174,11 +1174,11 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 66: /// @brief End address for Raspberry Pi 5 BCM I/O
 67: #define RPI_BCM_IO_END                  (RPI_BCM_IO_BASE + 0x3FFFFFF)
 68: #endif
-69:
+69: 
 70: //---------------------------------------------
 71: // Raspberry Pi GPIO
 72: //---------------------------------------------
-73:
+73: 
 74: /// @brief Raspberry Pi GPIO registers base address. See @ref RASPBERRY_PI_GPIO
 75: #define RPI_GPIO_BASE    RPI_BCM_IO_BASE + 0x00200000
 76: /// @brief Raspberry Pi GPIO function select register 0 (GPIO 0..9) (3 bits / GPIO) (R/W). See @ref RASPBERRY_PI_GPIO
@@ -1254,111 +1254,120 @@ File: code/libraries/baremetal/include/baremetal/BCMRegisters.h
 146: #else // RPI target 5
 147: // Not supported yet
 148: #endif
-149:
+149: 
 150: //---------------------------------------------
 151: // Raspberry Pi auxiliary (SPI1 / SPI2 / UART1)
 152: //---------------------------------------------
-153:
+153: 
 154: /// @brief Raspberry Pi Auxilary registers base address. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-155: #define RPI_AUX_BASE          RPI_BCM_IO_BASE + 0x00215000
+155: #define RPI_AUX_BASE                           RPI_BCM_IO_BASE + 0x00215000
 156: /// @brief Raspberry Pi Auxiliary IRQ register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-157: #define RPI_AUX_IRQ           reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
+157: #define RPI_AUX_IRQ                            reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000000) // AUXIRQ
 158: /// @brief Raspberry Pi Auxiliary Enable register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-159: #define RPI_AUX_ENABLES       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
-160:
-161: /// @brief Raspberry Pi Auxiliary Enable register values
-162: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-163: #define RPI_AUX_ENABLES_SPI2  BIT1(2)
-164: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-165: #define RPI_AUX_ENABLES_SPI1  BIT1(1)
-166: /// @brief Raspberry Pi Auxiliary Enable register Enable UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-167: #define RPI_AUX_ENABLES_UART1 BIT1(0)
-168:
-169: //---------------------------------------------
-170: // Raspberry Pi auxiliary mini UART (UART1)
-171: //---------------------------------------------
-172:
-173: /// @brief Raspberry Pi Mini UART (UART1) I/O register. See @ref RASPBERRY_PI_UART1
-174: #define RPI_AUX_MU_IO         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
-175: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register. See @ref RASPBERRY_PI_UART1
-176: #define RPI_AUX_MU_IER        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
-177: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register. See @ref RASPBERRY_PI_UART1
-178: #define RPI_AUX_MU_IIR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
-179: /// @brief Raspberry Pi Mini UART (UART1) Line Control register. See @ref RASPBERRY_PI_UART1
-180: #define RPI_AUX_MU_LCR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
-181: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register. See @ref RASPBERRY_PI_UART1
-182: #define RPI_AUX_MU_MCR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
-183: /// @brief Raspberry Pi Mini UART (UART1) Line Status register. See @ref RASPBERRY_PI_UART1
-184: #define RPI_AUX_MU_LSR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
-185: /// @brief Raspberry Pi Mini UART (UART1) Modem Status register. See @ref RASPBERRY_PI_UART1
-186: #define RPI_AUX_MU_MSR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
-187: /// @brief Raspberry Pi Mini UART (UART1) Scratch register. See @ref RASPBERRY_PI_UART1
-188: #define RPI_AUX_MU_SCRATCH    reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
-189: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register. See @ref RASPBERRY_PI_UART1
-190: #define RPI_AUX_MU_CNTL       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
-191: /// @brief Raspberry Pi Mini UART (UART1) Extra Status register. See @ref RASPBERRY_PI_UART1
-192: #define RPI_AUX_MU_STAT       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
-193: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
-194: #define RPI_AUX_MU_BAUD       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
-195: #if BAREMETAL_RPI_TARGET == 3
-196: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 3
-197: #define AUX_UART_CLOCK 250000000
-198: #elif BAREMETAL_RPI_TARGET == 4
-199: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 4
-200: #define AUX_UART_CLOCK 267300000
-201: #else
-202: // Not supported yet
-203: #endif
-204: /// @brief Calculate Raspberry Pi Mini UART (UART1) baud rate value from frequency
-205: #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
-206:
-207: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
-208: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
-209: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
-210: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
-211: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
-212:
-213: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
-214: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
-215: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
-216: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref RASPBERRY_PI_UART1
-217: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT1(6)
-218: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref RASPBERRY_PI_UART1
-219: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
-220: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
-221: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
-222:
-223: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
-224: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
-225: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
-226: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters. See @ref RASPBERRY_PI_UART1
-227: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT1(0) | BIT1(1)
-228:
-229: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
-230: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low. See @ref RASPBERRY_PI_UART1
-231: #define RPI_AUX_MU_MCR_RTS_LOW        BIT1(1)
-232: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high. See @ref RASPBERRY_PI_UART1
-233: #define RPI_AUX_MU_MCR_RTS_HIGH       BIT0(1)
-234:
-235: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
-236: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle. See @ref RASPBERRY_PI_UART1
-237: #define RPI_AUX_MU_LSR_TX_IDLE        BIT1(6)
-238: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty. See @ref RASPBERRY_PI_UART1
-239: #define RPI_AUX_MU_LSR_TX_EMPTY       BIT1(5)
-240: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun. See @ref RASPBERRY_PI_UART1
-241: #define RPI_AUX_MU_LSR_RX_OVERRUN     BIT1(1)
-242: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready. See @ref RASPBERRY_PI_UART1
-243: #define RPI_AUX_MU_LSR_RX_READY       BIT1(0)
-244:
-245: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
-246: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS. See @ref RASPBERRY_PI_UART1
-247: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT1(3)
-248: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS. See @ref RASPBERRY_PI_UART1
-249: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT1(2)
-250: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit. See @ref RASPBERRY_PI_UART1
-251: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT1(1)
-252: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive. See @ref RASPBERRY_PI_UART1
-253: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT1(0)
+159: #define RPI_AUX_ENABLES                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
+160: 
+161: /// @brief Raspberry Pi Auxiliary Interrupt register values
+162: /// @brief Raspberry Pi Auxiliary Interrupt register status SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+163: #define RPI_AUX_INTERRUPT_SPI2                 BIT1(2)
+164: /// @brief Raspberry Pi Auxiliary Interrupt register status SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+165: #define RPI_AUX_INTERRUPT_SPI1                 BIT1(1)
+166: /// @brief Raspberry Pi Auxiliary Interrupt register status UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+167: #define RPI_AUX_INTERRUPT_UART1                BIT1(0)
+168: 
+169: /// @brief Raspberry Pi Auxiliary Enable register values. The corresponding bit will need to be set in order to enable access to the peripheral's
+170: /// registers and functionality. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+171: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+172: #define RPI_AUX_ENABLES_SPI2                   BIT1(2)
+173: /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+174: #define RPI_AUX_ENABLES_SPI1                   BIT1(1)
+175: /// @brief Raspberry Pi Auxiliary Enable register Enable UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+176: #define RPI_AUX_ENABLES_UART1                  BIT1(0)
+177: 
+178: //---------------------------------------------
+179: // Raspberry Pi auxiliary mini UART (UART1)
+180: //---------------------------------------------
+181: 
+182: /// @brief Raspberry Pi Mini UART (UART1) I/O register. See @ref RASPBERRY_PI_UART1
+183: #define RPI_AUX_MU_IO         reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000040)
+184: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register. See @ref RASPBERRY_PI_UART1
+185: #define RPI_AUX_MU_IER        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000044)
+186: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register. See @ref RASPBERRY_PI_UART1
+187: #define RPI_AUX_MU_IIR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000048)
+188: /// @brief Raspberry Pi Mini UART (UART1) Line Control register. See @ref RASPBERRY_PI_UART1
+189: #define RPI_AUX_MU_LCR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000004C)
+190: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register. See @ref RASPBERRY_PI_UART1
+191: #define RPI_AUX_MU_MCR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000050)
+192: /// @brief Raspberry Pi Mini UART (UART1) Line Status register. See @ref RASPBERRY_PI_UART1
+193: #define RPI_AUX_MU_LSR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000054)
+194: /// @brief Raspberry Pi Mini UART (UART1) Modem Status register. See @ref RASPBERRY_PI_UART1
+195: #define RPI_AUX_MU_MSR        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000058)
+196: /// @brief Raspberry Pi Mini UART (UART1) Scratch register. See @ref RASPBERRY_PI_UART1
+197: #define RPI_AUX_MU_SCRATCH    reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x0000005C)
+198: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register. See @ref RASPBERRY_PI_UART1
+199: #define RPI_AUX_MU_CNTL       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000060)
+200: /// @brief Raspberry Pi Mini UART (UART1) Extra Status register. See @ref RASPBERRY_PI_UART1
+201: #define RPI_AUX_MU_STAT       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000064)
+202: /// @brief Raspberry Pi Mini UART (UART1) Baudrate register. See @ref RASPBERRY_PI_UART1
+203: #define RPI_AUX_MU_BAUD       reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000068)
+204: #if BAREMETAL_RPI_TARGET == 3
+205: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 3
+206: #define AUX_UART_CLOCK 250000000
+207: #elif BAREMETAL_RPI_TARGET == 4
+208: /// @brief Raspberry Pi Mini UART (UART1) clock frequency on Raspberry Pi 4
+209: #define AUX_UART_CLOCK 267300000
+210: #else
+211: // Not supported yet
+212: #endif
+213: /// @brief Calculate Raspberry Pi Mini UART (UART1) baud rate value from frequency
+214: #define RPI_AUX_MU_BAUD_VALUE(baud)   static_cast<uint32>((AUX_UART_CLOCK / (baud * 8)) - 1)
+215: 
+216: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register values
+217: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable transmit interrupts. See @ref RASPBERRY_PI_UART1
+218: #define RPI_AUX_MU_IER_TX_IRQ_ENABLE  BIT1(1)
+219: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Enable register enable receive interrupts. See @ref RASPBERRY_PI_UART1
+220: #define RPI_AUX_MU_IER_RX_IRQ_ENABLE  BIT1(0)
+221: 
+222: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register values
+223: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO enabled (R). See @ref RASPBERRY_PI_UART1
+224: #define RPI_AUX_MU_IIR_TX_FIFO_ENABLE BIT1(7)
+225: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO enabled (R). See @ref RASPBERRY_PI_UART1
+226: #define RPI_AUX_MU_IIR_RX_FIFO_ENABLE BIT1(6)
+227: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register transmit FIFO clear (W). See @ref RASPBERRY_PI_UART1
+228: #define RPI_AUX_MU_IIR_TX_FIFO_CLEAR  BIT1(2)
+229: /// @brief Raspberry Pi Mini UART (UART1) Interrupt Identify register receive FIFO clear (W). See @ref RASPBERRY_PI_UART1
+230: #define RPI_AUX_MU_IIR_RX_FIFO_CLEAR  BIT1(1)
+231: 
+232: /// @brief Raspberry Pi Mini UART (UART1) Line Control register values
+233: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 7 bit characters. See @ref RASPBERRY_PI_UART1
+234: #define RPI_AUX_MU_LCR_DATA_SIZE_7    0
+235: /// @brief Raspberry Pi Mini UART (UART1) Line Control register 8 bit characters. See @ref RASPBERRY_PI_UART1
+236: #define RPI_AUX_MU_LCR_DATA_SIZE_8    BIT1(0) | BIT1(1)
+237: 
+238: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register values
+239: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS low. See @ref RASPBERRY_PI_UART1
+240: #define RPI_AUX_MU_MCR_RTS_LOW        BIT1(1)
+241: /// @brief Raspberry Pi Mini UART (UART1) Modem Control register set RTS high. See @ref RASPBERRY_PI_UART1
+242: #define RPI_AUX_MU_MCR_RTS_HIGH       BIT0(1)
+243: 
+244: /// @brief Raspberry Pi Mini UART (UART1) Line Status register values
+245: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit idle. See @ref RASPBERRY_PI_UART1
+246: #define RPI_AUX_MU_LSR_TX_IDLE        BIT1(6)
+247: /// @brief Raspberry Pi Mini UART (UART1) Line Status register transmit empty. See @ref RASPBERRY_PI_UART1
+248: #define RPI_AUX_MU_LSR_TX_EMPTY       BIT1(5)
+249: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive overrun. See @ref RASPBERRY_PI_UART1
+250: #define RPI_AUX_MU_LSR_RX_OVERRUN     BIT1(1)
+251: /// @brief Raspberry Pi Mini UART (UART1) Line Status register receive ready. See @ref RASPBERRY_PI_UART1
+252: #define RPI_AUX_MU_LSR_RX_READY       BIT1(0)
+253: 
+254: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register values
+255: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable CTS. See @ref RASPBERRY_PI_UART1
+256: #define RPI_AUX_MU_CNTL_ENABLE_CTS    BIT1(3)
+257: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable RTS. See @ref RASPBERRY_PI_UART1
+258: #define RPI_AUX_MU_CNTL_ENABLE_RTS    BIT1(2)
+259: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable transmit. See @ref RASPBERRY_PI_UART1
+260: #define RPI_AUX_MU_CNTL_ENABLE_TX     BIT1(1)
+261: /// @brief Raspberry Pi Mini UART (UART1) Extra Control register enable receive. See @ref RASPBERRY_PI_UART1
+262: #define RPI_AUX_MU_CNTL_ENABLE_RX     BIT1(0)
 ```
 
 We will not go into details, as it will be quite clear from what was discussed before what the registers are.

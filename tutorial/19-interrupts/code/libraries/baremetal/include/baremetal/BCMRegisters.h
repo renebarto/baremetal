@@ -411,7 +411,16 @@
 /// @brief Raspberry Pi Auxiliary Enable register. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 #define RPI_AUX_ENABLES                        reinterpret_cast<regaddr>(RPI_AUX_BASE + 0x00000004) // AUXENB
 
-/// @brief Raspberry Pi Auxiliary Enable register values
+/// @brief Raspberry Pi Auxiliary Interrupt register values
+/// @brief Raspberry Pi Auxiliary Interrupt register status SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_INTERRUPT_SPI2                 BIT1(2)
+/// @brief Raspberry Pi Auxiliary Interrupt register status SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_INTERRUPT_SPI1                 BIT1(1)
+/// @brief Raspberry Pi Auxiliary Interrupt register status UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
+#define RPI_AUX_INTERRUPT_UART1                BIT1(0)
+
+/// @brief Raspberry Pi Auxiliary Enable register values. The corresponding bit will need to be set in order to enable access to the peripheral's
+/// registers and functionality. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
 #define RPI_AUX_ENABLES_SPI2                   BIT1(2)
 /// @brief Raspberry Pi Auxiliary Enable register Enable SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL

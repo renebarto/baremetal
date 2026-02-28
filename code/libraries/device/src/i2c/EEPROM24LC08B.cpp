@@ -86,8 +86,6 @@ bool EEPROM24LC08B::Initialize(uint8 bus, uint8 address)
 /// <summary>
 /// Scan for the 24LC08B I2C EEPROM
 /// </summary>
-/// <param name="bus">I2C bus index</param>
-/// <param name="address">I2C slave address</param>
 /// <returns>True on success, false otherwise</returns>
 bool EEPROM24LC08B::Scan()
 {
@@ -105,7 +103,7 @@ bool EEPROM24LC08B::Scan()
 /// Read a block of data from the 24LC08B EEPROM
 /// </summary>
 /// <param name="address">Start address</param>
-/// <param name="buffer">Address of buffer to read data into</param>
+/// <param name="data">Address of buffer to read data into</param>
 /// <param name="numBytes">Number of bytes to read</param>
 /// <returns>True if successful, false otherwise</returns>
 bool EEPROM24LC08B::ReadData(uint8 address, uint8* data, uint8 numBytes)
@@ -125,7 +123,7 @@ bool EEPROM24LC08B::ReadData(uint8 address, uint8* data, uint8 numBytes)
 /// Write to the specified EEPROM24LC08B register
 /// </summary>
 /// <param name="address">Start address</param>
-/// <param name="buffer">Address of buffer to write data from</param>
+/// <param name="data">Address of buffer to write data from</param>
 /// <param name="numBytes">Number of bytes to write</param>
 /// <returns>True if successful, false otherwise</returns>
 bool EEPROM24LC08B::WriteData(uint8 address, const uint8* data, uint8 numBytes)

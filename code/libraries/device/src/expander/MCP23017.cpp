@@ -7,7 +7,7 @@
 //
 // Class       : MCP23017
 //
-// Description : MCP23017 I2C expander functionality
+// Description : MCP23017 expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/i2c/MCP23017.h"
+#include "device/expander/MCP23017.h"
 
 #include "baremetal/Logger.h"
 
@@ -45,7 +45,7 @@ using namespace device;
 using namespace baremetal;
 
 /// @file
-/// MCP 23017 I2C expander support declaration
+/// MCP 23017 expander implementation
 
 /// @brief Define log name
 LOG_MODULE("MCP23017");
@@ -53,9 +53,7 @@ LOG_MODULE("MCP23017");
 /// <summary>
 /// Constructor for MCP23017 class
 /// </summary>
-/// <param name="memoryAccess">MemoryAccess instance to be used for register access</param>
-MCP23017::MCP23017(baremetal::IMemoryAccess& memoryAccess /*= baremetal::GetMemoryAccess()*/)
-    : m_device{memoryAccess}
+MCP23017::MCP23017()
 {
 }
 
@@ -69,50 +67,14 @@ MCP23017::~MCP23017()
 }
 
 /// <summary>
-/// Initialize the MCP23017 I2C expander
+/// Initialize the MCP23017 expander
 /// </summary>
-/// <param name="bus">I2C bus index</param>
-/// <param name="address">I2C slave address</param>
 /// <returns>True on success, false otherwise</returns>
-bool MCP23017::Initialize(uint8 bus, uint8 address)
+bool MCP23017::Initialize()
 {
-    LOG_INFO("Initialize %02x", address);
-    m_address = address;
-    if (!m_device.Initialize(bus, I2CClockMode::Normal, 0))
-        return false;
-
+    LOG_INFO("Initialize");
     WriteRegister(IOCONA, IOCON_BANK0 | IOCON_SEQOP | IOCON_HAEN | IOCON_ODR);
     return true;
-}
-
-/// <summary>
-/// Read from the specified MCP23017 register
-/// </summary>
-/// <param name="registerAddress">Register index</param>
-/// <returns>Value read</returns>
-uint8 MCP23017::ReadRegister(MCP23017RegisterIndex registerAddress)
-{
-    uint8 address = static_cast<uint8>(registerAddress);
-    uint8 data{};
-    auto bytesTransferred = m_device.WriteReadRepeatedStart(m_address, &address, 1, &data, 1);
-    LOG_DEBUG("Read bytes from I2C %02x Register %02x: %02x, %d bytes transferred", m_address, address, data, bytesTransferred);
-    return data;
-}
-
-/// <summary>
-/// Write to the specified MCP23017 register
-/// </summary>
-/// <param name="registerAddress">Register index</param>
-/// <param name="byte">Value to write</param>
-void MCP23017::WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte)
-{
-    const size_t BufferSize{2};
-    uint8 buffer[BufferSize];
-    buffer[0] = static_cast<uint8>(registerAddress);
-    buffer[1] = byte;
-    auto bytesWritten = m_device.Write(m_address, buffer, BufferSize);
-
-    LOG_DEBUG("Write bytes to I2C %02x Register %02x: %02x, %d bytes written", m_address, buffer[0], buffer[1], bytesWritten);
 }
 
 /// <summary>

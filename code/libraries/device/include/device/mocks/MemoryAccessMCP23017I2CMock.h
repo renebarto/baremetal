@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2026 Rene Barto
 //
-// File        : MemoryAccessMCP23017Mock.h
+// File        : MemoryAccessMCP23017I2CMock.h
 //
 // Namespace   : device
 //
-// Class       : MemoryAccessMCP23017Mock
+// Class       : MemoryAccessMCP23017I2CMock
 //
 // Description : MCP23017 memory access stub with LEDs on output pins, and controllable inputs on input pins
 //
@@ -42,10 +42,10 @@
 #include "baremetal/mocks/MemoryAccessI2CMasterMock.h"
 #include "stdlib/Macros.h"
 #include "baremetal/String.h"
-#include "device/i2c/MCP23017.h"
+#include "device/i2c/MCP23017I2C.h"
 
 /// @file
-/// MemoryAccessMCP23017Mock
+/// MemoryAccessMCP23017I2CMock
 
 namespace device {
 
@@ -265,11 +265,11 @@ ALIGN(8)
 ;
 
 /// @brief MemoryAccess implementation for I2C stub
-class MemoryAccessMCP23017Mock : public baremetal::MemoryAccessI2CMasterMock
+class MemoryAccessMCP23017I2CMock : public baremetal::MemoryAccessI2CMasterMock
 {
 private:
     /// @brief Singleton instance
-    static MemoryAccessMCP23017Mock* m_pThis;
+    static MemoryAccessMCP23017I2CMock* m_pThis;
     /// @brief Storage for I2C registers
     MCP23017Registers m_registers;
     /// @brief A read / write register cycle was started
@@ -288,7 +288,7 @@ private:
     size_t m_numOps;
 
 public:
-    MemoryAccessMCP23017Mock();
+    MemoryAccessMCP23017I2CMock();
 
     size_t GetNumMCP23017Operations() const;
     const MCP23017Operation& GetMCP23017Operation(size_t index) const;

@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : Macros.h
+// File        : MCP23017SPI.h
 //
-// Namespace   : -
+// Namespace   : device
 //
-// Class       : -
+// Class       : MCP23017SPI
 //
-// Description : Common defines
+// Description : MCP23017 SPI expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,36 +39,37 @@
 
 #pragma once
 
+#include "baremetal/SPIMaster.h"
+#include "device/expander/MCP23017.h"
+
 /// @file
-/// Generic macros
+/// MCP23017 SPI expander support declaration
 
-/// @brief Make a struct packed (GNU compiler only)
-#define PACKED        __attribute__((packed))
-/// @brief Make a struct have alignment of n bytes (GNU compiler only)
-#define ALIGN(n)      __attribute__((aligned(n)))
+namespace device {
 
-/// @brief Make a variable a weak instance (GCC compiler only)
-#define WEAK          __attribute__((weak))
+/// <summary>
+/// Driver for MCP23017 SPI expander device
+///
+/// The device supports two 8 bit ports named port A and B.
+/// Each pin can be either an input or output.
+/// </summary>
+class MCP23017SPI
+    : public MCP23017
+{
+private:
+    /// @brief I2C base device
+    baremetal::SPIMaster m_device;
+    /// @brief I2C device address
+    baremetal::SPI_CEIndex m_ceIndex;
 
-/// @brief Make branch prediction expect exp to be true (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define likely(exp)   __builtin_expect(!!(exp), 1)
-/// @brief Make branch prediction expect exp to be false (GCC compiler only)
-/// @param exp Expression to be evaluated
-#define unlikely(exp) __builtin_expect(!!(exp), 0)
+public:
+    MCP23017SPI(baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
+    ~MCP23017SPI();
 
-/// @brief Convert bit index into integer with zero bit
-/// @param n Bit index
-#define BIT0(n)       (0)
-/// @brief Convert bit index into integer with one bit
-/// @param n Bit index
-#define BIT1(n)       (1UL << (n))
-/// @brief Convert bit range into integer
-/// @param n Start (low) bit index
-/// @param m End (high) bit index
-#define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+    bool Initialize(uint8 device, baremetal::SPI_CEIndex ceIndex);
 
-/// @brief Determine minimum of two values. Note that the arguments are evaluated multiple times, so they should not have side effects.
-#define MIN(a, b)    ((a) < (b) ? (a) : (b))
-/// @brief Determine maximum of two values. Note that the arguments are evaluated multiple times, so they should not have side effects.
-#define MAX(a, b)    ((a) > (b) ? (a) : (b))
+    uint8 ReadRegister(MCP23017RegisterIndex registerAddress) override;
+    void WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte) override;
+};
+
+} // namespace device

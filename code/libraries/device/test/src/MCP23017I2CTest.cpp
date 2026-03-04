@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MCP23017Test.cpp
+// File        : MCP23017I2CTest.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : MCP23017Test
+// Class       : MCP23017I2CTest
 //
 // Description : MCP23017 tests
 //
@@ -37,17 +37,17 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/mocks/MemoryAccessMCP23017Mock.h"
+#include "device/mocks/MemoryAccessMCP23017I2CMock.h"
 
 #include "baremetal/BCMRegisters.h"
 #include "baremetal/Logger.h"
 #include "baremetal/I2CMaster.h"
-#include "device/i2c/MCP23017.h"
+#include "device/i2c/MCP23017I2C.h"
 
 #include "unittest/unittest.h"
 
 /// @brief Define log name
-LOG_MODULE("MCP23017Test");
+LOG_MODULE("MCP23017I2CTest");
 
 using namespace baremetal;
 using namespace unittest;
@@ -59,7 +59,7 @@ namespace test {
 TEST_SUITE(Baremetal)
 {
 
-class MCP23017Test : public TestFixture
+class MCP23017I2CTest : public TestFixture
 {
 public:
     void SetUp() override
@@ -70,13 +70,13 @@ public:
     }
 };
 
-TEST_FIXTURE(MCP23017Test, SetLEDSOn)
+TEST_FIXTURE(MCP23017I2CTest, SetLEDSOn)
 {
     uint8 busIndex = 1;
     uint8 address{0x20};
-    MemoryAccessMCP23017Mock memoryAccess;
+    MemoryAccessMCP23017I2CMock memoryAccess;
     {
-        MCP23017 expander(memoryAccess);
+        MCP23017I2C expander(memoryAccess);
 
         if (!expander.Initialize(busIndex, address))
         {

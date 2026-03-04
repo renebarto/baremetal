@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccessStubMCP23017LEDs.h
+// File        : MemoryAccessStubMCP23017I2CLEDs.h
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccessStubMCP23017LEDs
+// Class       : MemoryAccessStubMCP23017I2CLEDs
 //
 // Description : MCP23017 memory access stub with LEDs on output pins, and controllable inputs on input pins
 //
@@ -43,7 +43,7 @@
 #include "stdlib/Macros.h"
 
 /// @file
-/// MemoryAccessStubMCP23017LEDs
+/// MemoryAccessStubMCP23017I2CLEDs
 
 namespace device {
 
@@ -127,11 +127,11 @@ public:
 };
 
 /// @brief MemoryAccess implementation for I2C stub
-class MemoryAccessStubMCP23017LEDs : public baremetal::MemoryAccessStubI2C
+class MemoryAccessStubMCP23017I2CLEDs : public baremetal::MemoryAccessStubI2C
 {
 private:
     /// @brief Singleton instance
-    static MemoryAccessStubMCP23017LEDs* m_pThis;
+    static MemoryAccessStubMCP23017I2CLEDs* m_pThis;
     /// @brief Storage for I2C registers
     MCP23017Registers m_registers;
     /// @brief A read / write register cycle was started
@@ -140,7 +140,7 @@ private:
     uint8 m_selectedRegister;
 
 public:
-    MemoryAccessStubMCP23017LEDs();
+    MemoryAccessStubMCP23017I2CLEDs();
 
     void ResetCycle();
     static bool OnSendAddress(baremetal::I2CRegisters& registers, uint8 data);

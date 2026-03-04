@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2026 Rene Barto
 //
-// File        : MemoryAccessMCP23017Mock.cpp
+// File        : MemoryAccessMCP23017I2CMock.cpp
 //
 // Namespace   : device
 //
-// Class       : MemoryAccessMCP23017Mock
+// Class       : MemoryAccessMCP23017I2CMock
 //
 // Description : MCP23017 memory access stub with LEDs on output pins, and controllable inputs on input pins
 //
@@ -37,20 +37,20 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/mocks/MemoryAccessMCP23017Mock.h"
+#include "device/mocks/MemoryAccessMCP23017I2CMock.h"
 
 #include "baremetal/Assert.h"
 #include "baremetal/BCMRegisters.h"
 #include "baremetal/Format.h"
 #include "baremetal/Logger.h"
 #include "baremetal/String.h"
-#include "device/i2c/MCP23017.h"
+#include "device/i2c/MCP23017I2C.h"
 
 /// @file
-/// MemoryAccessMCP23017Mock
+/// MemoryAccessMCP23017I2CMock
 
 /// @brief Define log name
-LOG_MODULE("MemoryAccessMCP23017Mock");
+LOG_MODULE("MemoryAccessMCP23017I2CMock");
 
 using namespace baremetal;
 using namespace device;
@@ -509,12 +509,12 @@ String baremetal::Serialize(const MCP23017Operation &value)
 }
 
 /// @brief Singleton instance
-MemoryAccessMCP23017Mock* MemoryAccessMCP23017Mock::m_pThis{};
+MemoryAccessMCP23017I2CMock* MemoryAccessMCP23017I2CMock::m_pThis{};
 
 /// <summary>
-/// MemoryAccessMCP23017Mock constructor
+/// MemoryAccessMCP23017I2CMock constructor
 /// </summary>
-MemoryAccessMCP23017Mock::MemoryAccessMCP23017Mock()
+MemoryAccessMCP23017I2CMock::MemoryAccessMCP23017I2CMock()
     : m_registers{}
     , m_cycleStarted{}
     , m_selectedRegister{}
@@ -529,7 +529,7 @@ MemoryAccessMCP23017Mock::MemoryAccessMCP23017Mock()
 /// Return number of registered memory access operations
 /// </summary>
 /// <returns>Number of registered memory access operations</returns>
-size_t MemoryAccessMCP23017Mock::GetNumMCP23017Operations() const
+size_t MemoryAccessMCP23017I2CMock::GetNumMCP23017Operations() const
 {
     return m_numOps;
 }
@@ -539,7 +539,7 @@ size_t MemoryAccessMCP23017Mock::GetNumMCP23017Operations() const
 /// </summary>
 /// <param name="index">Index of operation</param>
 /// <returns>Requested memory access operation</returns>
-const MCP23017Operation &MemoryAccessMCP23017Mock::GetMCP23017Operation(size_t index) const
+const MCP23017Operation &MemoryAccessMCP23017I2CMock::GetMCP23017Operation(size_t index) const
 {
     assert(index < m_numOps);
     return m_ops[index];
@@ -548,7 +548,7 @@ const MCP23017Operation &MemoryAccessMCP23017Mock::GetMCP23017Operation(size_t i
 /// <summary>
 /// Reset read or write cycle
 /// </summary>
-void MemoryAccessMCP23017Mock::ResetCycle()
+void MemoryAccessMCP23017I2CMock::ResetCycle()
 {
     m_cycleStarted = false;
 }
@@ -559,7 +559,7 @@ void MemoryAccessMCP23017Mock::ResetCycle()
 /// <param name="registers">I2C register storage, unused</param>
 /// <param name="data">I2C address, unused</param>
 /// <returns>True always</returns>
-bool MemoryAccessMCP23017Mock::OnSendAddress(I2CMasterRegisters& /*registers*/, uint8 /*data*/)
+bool MemoryAccessMCP23017I2CMock::OnSendAddress(I2CMasterRegisters& /*registers*/, uint8 /*data*/)
 {
     return true;
 }
@@ -570,7 +570,7 @@ bool MemoryAccessMCP23017Mock::OnSendAddress(I2CMasterRegisters& /*registers*/, 
 /// <param name="registers">I2C Register storage for stub</param>
 /// <param name="data">Byte requested</param>
 /// <returns>True always</returns>
-bool MemoryAccessMCP23017Mock::OnRecvData(I2CMasterRegisters& registers, uint8& data)
+bool MemoryAccessMCP23017I2CMock::OnRecvData(I2CMasterRegisters& registers, uint8& data)
 {
     auto result = m_pThis->OnReadRegister(m_pThis->m_selectedRegister, data);
     LOG_DEBUG("Read register %02x: %02x", m_pThis->m_selectedRegister, data);
@@ -585,7 +585,7 @@ bool MemoryAccessMCP23017Mock::OnRecvData(I2CMasterRegisters& registers, uint8& 
 /// <param name="registers">I2C Register storage for stub</param>
 /// <param name="data">Byte sent</param>
 /// <returns>True always</returns>
-bool MemoryAccessMCP23017Mock::OnSendData(I2CMasterRegisters& registers, uint8 data)
+bool MemoryAccessMCP23017I2CMock::OnSendData(I2CMasterRegisters& registers, uint8 data)
 {
     if (!m_pThis->m_cycleStarted)
     {
@@ -607,7 +607,7 @@ bool MemoryAccessMCP23017Mock::OnSendData(I2CMasterRegisters& registers, uint8 d
 /// <param name="registerIndex">Index of the register</param>
 /// <param name="data">Data read on return</param>
 /// <returns>True if successful, false otherwise</returns>
-bool MemoryAccessMCP23017Mock::OnReadRegister(uint8 registerIndex, uint8& data)
+bool MemoryAccessMCP23017I2CMock::OnReadRegister(uint8 registerIndex, uint8& data)
 {
     uint8* registerAddress = &m_pThis->m_registers.IODIRA + m_pThis->m_selectedRegister;
     data = *registerAddress;
@@ -687,7 +687,7 @@ bool MemoryAccessMCP23017Mock::OnReadRegister(uint8 registerIndex, uint8& data)
 /// <param name="registerIndex">Index of the register</param>
 /// <param name="data">Data to be written</param>
 /// <returns>True if successful, false otherwise</returns>
-bool MemoryAccessMCP23017Mock::OnWriteRegister(uint8 registerIndex, uint8 data)
+bool MemoryAccessMCP23017I2CMock::OnWriteRegister(uint8 registerIndex, uint8 data)
 {
     uint8* registerAddress = &m_pThis->m_registers.IODIRA + m_pThis->m_selectedRegister;
     *registerAddress = data;
@@ -753,7 +753,7 @@ bool MemoryAccessMCP23017Mock::OnWriteRegister(uint8 registerIndex, uint8 data)
 /// Add a memory access operation to the list
 /// </summary>
 /// <param name="operation">Operation to add</param>
-void MemoryAccessMCP23017Mock::AddOperation(const MCP23017Operation& operation)
+void MemoryAccessMCP23017I2CMock::AddOperation(const MCP23017Operation& operation)
 {
     assert(m_numOps < BufferSize);
     m_ops[m_numOps++] = operation;

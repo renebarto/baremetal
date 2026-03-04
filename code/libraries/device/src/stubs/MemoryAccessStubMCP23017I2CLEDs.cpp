@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2025 Rene Barto
 //
-// File        : MemoryAccessStubMCP23017LEDs.cpp
+// File        : MemoryAccessStubMCP23017I2CLEDs.cpp
 //
 // Namespace   : baremetal
 //
-// Class       : MemoryAccessStubMCP23017LEDs
+// Class       : MemoryAccessStubMCP23017I2CLEDs
 //
 // Description : MCP23017 memory access stub with LEDs on output pins, and controllable inputs on input pins
 //
@@ -37,31 +37,31 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/stubs/MemoryAccessStubMCP23017LEDs.h"
+#include "device/stubs/MemoryAccessStubMCP23017I2CLEDs.h"
 
 #include "baremetal/Assert.h"
 #include "baremetal/BCMRegisters.h"
 #include "baremetal/Format.h"
 #include "baremetal/Logger.h"
 #include "baremetal/String.h"
-#include "device/i2c/MCP23017.h"
+#include "device/i2c/MCP23017I2C.h"
 
 /// @file
-/// MemoryAccessStubMCP23017LEDs
+/// MemoryAccessStubMCP23017I2CLEDs
 
 /// @brief Define log name
-LOG_MODULE("MemoryAccessStubMCP23017LEDs");
+LOG_MODULE("MemoryAccessStubMCP23017I2CLEDs");
 
 using namespace baremetal;
 using namespace device;
 
 /// @brief Singleton instance
-MemoryAccessStubMCP23017LEDs* MemoryAccessStubMCP23017LEDs::m_pThis{};
+MemoryAccessStubMCP23017I2CLEDs* MemoryAccessStubMCP23017I2CLEDs::m_pThis{};
 
 /// <summary>
-/// MemoryAccessStubMCP23017LEDs constructor
+/// MemoryAccessStubMCP23017I2CLEDs constructor
 /// </summary>
-MemoryAccessStubMCP23017LEDs::MemoryAccessStubMCP23017LEDs()
+MemoryAccessStubMCP23017I2CLEDs::MemoryAccessStubMCP23017I2CLEDs()
     : m_registers{}
     , m_cycleStarted{}
     , m_selectedRegister{}
@@ -75,7 +75,7 @@ MemoryAccessStubMCP23017LEDs::MemoryAccessStubMCP23017LEDs()
 /// <summary>
 /// Reset read or write cycle
 /// </summary>
-void MemoryAccessStubMCP23017LEDs::ResetCycle()
+void MemoryAccessStubMCP23017I2CLEDs::ResetCycle()
 {
     m_cycleStarted = false;
 }
@@ -86,7 +86,7 @@ void MemoryAccessStubMCP23017LEDs::ResetCycle()
 /// <param name="registers">I2C register storage, unused</param>
 /// <param name="data">I2C address, unused</param>
 /// <returns>True always</returns>
-bool MemoryAccessStubMCP23017LEDs::OnSendAddress(I2CRegisters& /*registers*/, uint8 /*data*/)
+bool MemoryAccessStubMCP23017I2CLEDs::OnSendAddress(I2CRegisters& /*registers*/, uint8 /*data*/)
 {
     return true;
 }
@@ -97,7 +97,7 @@ bool MemoryAccessStubMCP23017LEDs::OnSendAddress(I2CRegisters& /*registers*/, ui
 /// <param name="registers">I2C Register storage for stub</param>
 /// <param name="data">Byte requested</param>
 /// <returns>True always</returns>
-bool MemoryAccessStubMCP23017LEDs::OnRecvData(I2CRegisters& registers, uint8& data)
+bool MemoryAccessStubMCP23017I2CLEDs::OnRecvData(I2CRegisters& registers, uint8& data)
 {
     uint8* registerAddress = &m_pThis->m_registers.IODIRA + m_pThis->m_selectedRegister;
     data = *registerAddress;
@@ -407,7 +407,7 @@ bool MemoryAccessStubMCP23017LEDs::OnRecvData(I2CRegisters& registers, uint8& da
 /// <param name="registers">I2C Register storage for stub</param>
 /// <param name="data">Byte sent</param>
 /// <returns>True always</returns>
-bool MemoryAccessStubMCP23017LEDs::OnSendData(I2CRegisters& registers, uint8 data)
+bool MemoryAccessStubMCP23017I2CLEDs::OnSendData(I2CRegisters& registers, uint8 data)
 {
     if (!m_pThis->m_cycleStarted)
     {

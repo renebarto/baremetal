@@ -99,9 +99,11 @@ bool Logger::Initialize()
 /// Set maximum log level (minimum log priority). Any log statements with a value below this level will be ignored
 /// </summary>
 /// <param name="logLevel">Maximum log level</param>
-void Logger::SetLogLevel(LogSeverity logLevel)
+LogSeverity Logger::SetLogLevel(LogSeverity logLevel)
 {
+    LogSeverity previousLevel = m_level;
     m_level = logLevel;
+    return previousLevel;
 }
 
 /// <summary>

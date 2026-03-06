@@ -62,8 +62,6 @@ MCP23017::MCP23017()
 /// </summary>
 MCP23017::~MCP23017()
 {
-    SetPortADirections(MCP23017PinDirection::In);
-    SetPortBDirections(MCP23017PinDirection::In);
 }
 
 /// <summary>
@@ -75,6 +73,15 @@ bool MCP23017::Initialize()
     LOG_INFO("Initialize");
     WriteRegister(IOCONA, IOCON_BANK0 | IOCON_SEQOP | IOCON_HAEN | IOCON_ODR);
     return true;
+}
+
+/// <summary>
+/// Uninitialize MCP23008. Set pins to input mode.
+/// </summary>
+void MCP23017::Uninitialize()
+{
+    SetPortADirections(MCP23017PinDirection::In);
+    SetPortBDirections(MCP23017PinDirection::In);
 }
 
 /// <summary>

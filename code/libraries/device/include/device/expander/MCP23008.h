@@ -130,6 +130,7 @@ public:
     ~MCP23008();
 
     bool Initialize();
+    void Uninitialize();
 
     virtual uint8 ReadRegister(MCP23008RegisterIndex registerAddress) = 0;
     virtual void WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte) = 0;

@@ -62,7 +62,6 @@ MCP23008::MCP23008()
 /// </summary>
 MCP23008::~MCP23008()
 {
-    SetPortDirections(MCP23008PinDirection::In);
 }
 
 /// <summary>
@@ -75,6 +74,14 @@ bool MCP23008::Initialize()
 
     WriteRegister(IOCON, IOCON_SEQOP | IOCON_HAEN | IOCON_ODR);
     return true;
+}
+
+/// <summary>
+/// Uninitialize MCP23008. Set pins to input mode.
+/// </summary>
+void MCP23008::Uninitialize()
+{
+    SetPortDirections(MCP23008PinDirection::In);
 }
 
 /// <summary>

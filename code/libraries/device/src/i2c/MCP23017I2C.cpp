@@ -65,6 +65,7 @@ MCP23017I2C::MCP23017I2C(baremetal::IMemoryAccess& memoryAccess /*= baremetal::G
 /// </summary>
 MCP23017I2C::~MCP23017I2C()
 {
+    Uninitialize();
 }
 
 /// <summary>

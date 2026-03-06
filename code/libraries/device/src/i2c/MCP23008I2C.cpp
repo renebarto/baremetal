@@ -65,6 +65,7 @@ MCP23008I2C::MCP23008I2C(baremetal::IMemoryAccess& memoryAccess /*= baremetal::G
 /// </summary>
 MCP23008I2C::~MCP23008I2C()
 {
+    Uninitialize();
 }
 
 /// <summary>

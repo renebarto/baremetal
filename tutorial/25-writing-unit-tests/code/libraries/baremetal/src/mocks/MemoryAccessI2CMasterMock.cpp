@@ -195,7 +195,7 @@ static regaddr I2CMasterBaseAddress[I2C_BUSES] = {
     RPI_I2C6_BASE,
 #endif
 };
-/// @brief Mask used to check whether an address is in the GPIO register range
+/// @brief Mask used to check whether an address is in the I2C master register range
 static uintptr I2CMasterBaseAddressMask{0xFFFFFFFFFFFFFFE0};
 
 /// <summary>

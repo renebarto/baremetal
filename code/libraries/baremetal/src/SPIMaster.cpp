@@ -88,9 +88,9 @@ LOG_MODULE("SPIMaster");
 static unsigned s_gpioConfig[SPI_DEVICES][SPI_WIRES][SPI_VALUES] = {
     // CE1,      CE0,       MISO,      MOSI,      SCLK
     { { 7, 0 },  { 8, 0 },  { 9, 0 },  { 10, 0 }, { 11, 0 } },
-    { NONE,      NONE,      NONE,      NONE,      NONE      }, // unused
-    { NONE,      NONE,      NONE,      NONE,      NONE      }, // unused
 #if BAREMETAL_RPI_TARGET == 4
+    { NONE,      NONE,      NONE,      NONE,      NONE      }, // unused
+    { NONE,      NONE,      NONE,      NONE,      NONE      }, // unused
     { { 24, 5 }, { 0,  3 }, { 1,  3 }, { 2,  3 }, { 3 , 3 } }, // Alt3, Alt5 (CE1)
     { { 25, 5 }, { 4,  3 }, { 5,  3 }, { 6,  3 }, { 7 , 3 } }, // Alt3, Alt5 (CE1)
     { { 26, 5 }, { 12, 3 }, { 13, 3 }, { 14, 3 }, { 15, 3 } }, // Alt3, Alt5 (CE1)
@@ -104,9 +104,9 @@ static unsigned s_gpioConfig[SPI_DEVICES][SPI_WIRES][SPI_VALUES] = {
 /// @brief SPI register bases addresses for each bus, depening on the RPI model
 static regaddr s_baseAddress[SPI_DEVICES] = {
     RPI_SPI0_BASE,
-    0,
-    0,
 #if BAREMETAL_RPI_TARGET == 4
+    0,
+    0,
     RPI_SPI3_BASE,
     RPI_SPI4_BASE,
     RPI_SPI5_BASE,
@@ -129,11 +129,11 @@ SPIMaster::SPIMaster(IMemoryAccess& memoryAccess /* = GetMemoryAccess()*/)
     , m_csHoldTimeMicroSeconds{}
     , m_clockRate{}
     , m_isInitialized{}
-    , m_sclkPin{}
-    , m_mosiPin{}
-    , m_misoPin{}
-    , m_ce0Pin{}
-    , m_ce1Pin{}
+    , m_sclkPin{memoryAccess}
+    , m_mosiPin{memoryAccess}
+    , m_misoPin{memoryAccess}
+    , m_ce0Pin{memoryAccess}
+    , m_ce1Pin{memoryAccess}
     , m_coreClockRate{}
 {
 }
@@ -145,11 +145,11 @@ SPIMaster::~SPIMaster()
 {
     if (m_isInitialized)
     {
-        m_sclkPin.SetMode(GPIOMode::InputPullUp);
-        m_mosiPin.SetMode(GPIOMode::InputPullUp);
-        m_misoPin.SetMode(GPIOMode::InputPullUp);
-        m_ce0Pin.SetMode(GPIOMode::InputPullUp);
         m_ce1Pin.SetMode(GPIOMode::InputPullUp);
+        m_ce0Pin.SetMode(GPIOMode::InputPullUp);
+        m_misoPin.SetMode(GPIOMode::InputPullUp);
+        m_mosiPin.SetMode(GPIOMode::InputPullUp);
+        m_sclkPin.SetMode(GPIOMode::InputPullUp);
     }
     m_isInitialized = false;
     m_baseAddress = nullptr;
@@ -180,12 +180,12 @@ bool SPIMaster::Initialize(uint8 device, uint32 clockRate /*= 500000*/, SPIClock
     m_ce1Pin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_CE1][SPI_VALUE_ALT]));
     m_ce0Pin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_CE0][SPI_VALUE_PIN]);
     m_ce0Pin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_CE0][SPI_VALUE_ALT]));
-    m_sclkPin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_SCLK][SPI_VALUE_PIN]);
-    m_sclkPin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_SCLK][SPI_VALUE_ALT]));
-    m_mosiPin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_MOSI][SPI_VALUE_PIN]);
-    m_mosiPin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_MOSI][SPI_VALUE_ALT]));
     m_misoPin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_MISO][SPI_VALUE_PIN]);
     m_misoPin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_MISO][SPI_VALUE_ALT]));
+    m_mosiPin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_MOSI][SPI_VALUE_PIN]);
+    m_mosiPin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_MOSI][SPI_VALUE_ALT]));
+    m_sclkPin.AssignPin(s_gpioConfig[m_device][SPI_GPIO_SCLK][SPI_VALUE_PIN]);
+    m_sclkPin.SetMode(ALT_FUNC(s_gpioConfig[m_device][SPI_GPIO_SCLK][SPI_VALUE_ALT]));
 
     m_coreClockRate = GetMachineInfo().GetClockRate(ClockID::CORE);
     assert(m_coreClockRate > 0);
@@ -214,7 +214,6 @@ void SPIMaster::SetClock(unsigned clockRate)
     uint32 value = ((divider << RPI_SPI_CLK_CDIV_SHIFT) & RPI_SPI_CLK_CDIV_MASK);
     m_memoryAccess.Write32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CLK_OFFSET), value);
     LOG_INFO("Set clock core %d, divider %d, clockrate %d", m_coreClockRate, divider, clockRate);
-    value = m_memoryAccess.Read32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CLK_OFFSET));
 }
 
 void SPIMaster::SetClockMode(SPIClockPolarity polarity, SPIClockPhase phase)
@@ -225,7 +224,9 @@ void SPIMaster::SetClockMode(SPIClockPolarity polarity, SPIClockPhase phase)
     m_clockPolarity = polarity;
     m_clockPhase = phase;
 
-    uint32 value = ((m_clockPolarity == SPIClockPolarity::IdleHigh) ? RPI_SPI_CS_CPOL_IDLE_HIGH : RPI_SPI_CS_CPOL_IDLE_LOW) | ((m_clockPhase == SPIClockPhase::Beginning) ? RPI_SPI_CS_CPHA_BEGIN_BIT : RPI_SPI_CS_CPHA_MIDDLE_BIT);
+    uint32 value = m_memoryAccess.Read32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CS_OFFSET));
+    value &= ~(RPI_SPI_CS_CPOL | RPI_SPI_CS_CPHA);
+    value |= ((m_clockPolarity == SPIClockPolarity::IdleHigh) ? RPI_SPI_CS_CPOL_IDLE_HIGH : RPI_SPI_CS_CPOL_IDLE_LOW) | ((m_clockPhase == SPIClockPhase::Beginning) ? RPI_SPI_CS_CPHA_BEGIN_BIT : RPI_SPI_CS_CPHA_MIDDLE_BIT);
     m_memoryAccess.Write32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CS_OFFSET), value);
     LOG_INFO("Set clock polarity %d, phase %d", m_clockPolarity, m_clockPhase);
 }
@@ -261,13 +262,12 @@ size_t SPIMaster::WriteRead(SPI_CEIndex ceIndex, const void* writeBuffer, void* 
     TRACE_DEBUG("Set data size %d", count);
     m_memoryAccess.Write32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_DLEN_OFFSET), count);
 
-    TRACE_DEBUG("Start transaction");
+    TRACE_DEBUG("Start transfer");
     assert(ceIndex <= SPI_CEIndex::CE1 || ceIndex == SPI_CEIndex::None);
     uint32 value = (m_memoryAccess.Read32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CS_OFFSET)) & ~RPI_SPI_CS_ACTIVATE_NONE)
                  | (static_cast<uint32>(ceIndex) << RPI_SPI_CS_ACTIVATE_SHIFT)
                  | RPI_SPI_CS_CLEAR | RPI_SPI_CS_TA;
     m_memoryAccess.Write32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CS_OFFSET), value);
-    value = m_memoryAccess.Read32(RPI_SPI_REG_ADDRESS(m_baseAddress, RPI_SPI_CS_OFFSET));
 
     TRACE_DEBUG("Read/Write");
 

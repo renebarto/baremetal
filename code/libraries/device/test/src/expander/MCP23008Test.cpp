@@ -56,18 +56,25 @@ namespace test {
 TEST_SUITE(Baremetal)
 {
 
+/// <summary>
+/// MCP23008 implementation overriding register access for testing
+/// </summary>
 class MCP23008Impl
     : public MCP23008
 {
 private:
+    /// @brief Storage for MCP23008 registers
     uint8 m_registers[static_cast<size_t>(MCP23008RegisterIndex::OLAT) + 1];
 
 public:
+    /// <summary>
+    /// Constructor for MCP23008Impl class
+    /// </summary>
     MCP23008Impl()
         : m_registers{ 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
     {
     }
-    uint8 ReadRegister(MCP23008RegisterIndex registerAddress)
+    uint8 ReadRegister(MCP23008RegisterIndex registerAddress) override
     {
         assert((registerAddress >= MCP23008RegisterIndex::IODIR) && (registerAddress <= MCP23008RegisterIndex::OLAT));
         return m_registers[static_cast<size_t>(registerAddress)];

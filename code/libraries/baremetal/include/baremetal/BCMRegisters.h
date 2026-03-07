@@ -548,7 +548,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_SPI_CS_ACTIVATE_MASK               BITS(RPI_SPI_CS_ACTIVATE_SHIFT, RPI_SPI_CS_ACTIVATE_SHIFT + 1)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_SPI_CS_ACTIVATE_VALUE(x)           ((x & RPI_SPI_CS_ACTIVATE_MASK) >> RPI_SPI_CS_ACTIVATE_SHIFT)
+#define RPI_SPI_CS_ACTIVATE_VALUE(x)           static_cast<uint32>((x & RPI_SPI_CS_ACTIVATE_MASK) >> RPI_SPI_CS_ACTIVATE_SHIFT)
 /// @brief Raspberry Pi SPI Master Control and Status register Chip select activate 0
 #define RPI_SPI_CS_ACTIVATE_CS0                0b00
 /// @brief Raspberry Pi SPI Master Control and Status register Chip select activate 1
@@ -568,7 +568,7 @@
 /// @brief Raspberry Pi SPI Master Clock Divider register clock divider bit mask
 #define RPI_SPI_CLK_CDIV_MASK                  BITS(RPI_SPI_CLK_CDIV_SHIFT, RPI_SPI_CLK_CDIV_SHIFT + 15)
 /// @brief Raspberry Pi SPI Master Clock Divider register clock divider value for reading
-#define RPI_SPI_CLK_CDIV_VALUE(x)              ((x & RPI_SPI_CLK_CDIV_MASK) >> RPI_SPI_CLK_CDIV_SHIFT)
+#define RPI_SPI_CLK_CDIV_VALUE(x)              static_cast<uint32>((x & RPI_SPI_CLK_CDIV_MASK) >> RPI_SPI_CLK_CDIV_SHIFT)
 
 /// @brief Raspberry Pi SPI Master Data Length register (R/W) offset relative to RPI_SPIx_BASE
 #define RPI_SPI_DLEN_OFFSET                    0x0000000C
@@ -577,7 +577,7 @@
 /// @brief Raspberry Pi SPI Master Data Length register length in bytes bit mask
 #define RPI_SPI_DLEN_LEN_MASK                  BITS(RPI_SPI_DLEN_LEN_SHIFT, RPI_SPI_DLEN_LEN_SHIFT + 15)
 /// @brief Raspberry Pi SPI Master Data Length register length in bytes value for reading
-#define RPI_SPI_DLEN_LEN_VALUE(x)              ((x & RPI_SPI_DLEN_LEN_MASK) >> RPI_SPI_DLEN_LEN_SHIFT)
+#define RPI_SPI_DLEN_LEN_VALUE(x)              static_cast<uint32>((x & RPI_SPI_DLEN_LEN_MASK) >> RPI_SPI_DLEN_LEN_SHIFT)
 
 /// @brief Raspberry Pi SPI LOSSI mode Time Output Hold (TOH) register (R/W) offset relative to RPI_SPIx_BASE
 #define RPI_SPI_LTOH_OFFSET                    0x00000010
@@ -586,7 +586,7 @@
 /// @brief Raspberry Pi SPI Master Data Length register length in bytes bit mask
 #define RPI_SPI_LTOH_TOH_MASK                  BITS(RPI_SPI_LTOH_TOH_SHIFT, RPI_SPI_LTOH_TOH_SHIFT + 3)
 /// @brief Raspberry Pi SPI Master Data Length register length in bytes value for reading
-#define RPI_SPI_LTOH_TOH_VALUE(x)              ((x & RPI_SPI_LTOH_TOH_MASK) >> RPI_SPI_LTOH_TOH_SHIFT)
+#define RPI_SPI_LTOH_TOH_VALUE(x)              static_cast<uint32>((x & RPI_SPI_LTOH_TOH_MASK) >> RPI_SPI_LTOH_TOH_SHIFT)
 
 /// @brief Raspberry Pi SPI DMA DREQ Control register (R/W) offset relative to RPI_SPIx_BASE
 #define RPI_SPI_DC_OFFSET                      0x00000014
@@ -595,25 +595,25 @@
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA read panic threshold bit mask
 #define RPI_SPI_DC_RPANIC_MASK                 BITS(RPI_SPI_DC_RPANIC_SHIFT, RPI_SPI_DC_RPANIC_SHIFT + 7)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA read panic threshold value for reading
-#define RPI_SPI_DC_RPANIC_VALUE(x)             ((x & RPI_SPI_DC_RPANIC_MASK) >> RPI_SPI_DC_RPANIC_SHIFT)
+#define RPI_SPI_DC_RPANIC_VALUE(x)             static_cast<uint32>((x & RPI_SPI_DC_RPANIC_MASK) >> RPI_SPI_DC_RPANIC_SHIFT)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold bit shift
 #define RPI_SPI_DC_RDREQ_SHIFT                 16
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold bit mask
 #define RPI_SPI_DC_RDREQ_MASK                  BITS(RPI_SPI_DC_RDREQ_SHIFT, RPI_SPI_DC_RDREQ_SHIFT + 7)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA read request threshold value for reading
-#define RPI_SPI_DC_RDREQ_VALUE(x)              ((x & RPI_SPI_DC_RDREQ_MASK) >> RPI_SPI_DC_RDREQ_SHIFT)
+#define RPI_SPI_DC_RDREQ_VALUE(x)              static_cast<uint32>((x & RPI_SPI_DC_RDREQ_MASK) >> RPI_SPI_DC_RDREQ_SHIFT)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold bit shift
 #define RPI_SPI_DC_TPANIC_SHIFT                8
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold bit mask
 #define RPI_SPI_DC_TPANIC_MASK                 BITS(RPI_SPI_DC_TPANIC_SHIFT, RPI_SPI_DC_TPANIC_SHIFT + 7)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write panic threshold value for reading
-#define RPI_SPI_DC_TPANIC_VALUE(x)             ((x & RPI_SPI_DC_TPANIC_MASK) >> RPI_SPI_DC_TPANIC_SHIFT)
+#define RPI_SPI_DC_TPANIC_VALUE(x)             static_cast<uint32>((x & RPI_SPI_DC_TPANIC_MASK) >> RPI_SPI_DC_TPANIC_SHIFT)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold bit shift
 #define RPI_SPI_DC_TDREQ_SHIFT                 0
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold bit mask
 #define RPI_SPI_DC_TDREQ_MASK                  BITS(RPI_SPI_DC_TDREQ_SHIFT, RPI_SPI_DC_TDREQ_SHIFT + 7)
 /// @brief Raspberry Pi SPI DMA DREQ Control register DMA write request threshold value for reading
-#define RPI_SPI_DC_TDREQ_VALUE(x)              ((x & RPI_SPI_DC_TDREQ_MASK) >> RPI_SPI_DC_TDREQ_SHIFT)
+#define RPI_SPI_DC_TDREQ_VALUE(x)              static_cast<uint32>((x & RPI_SPI_DC_TDREQ_MASK) >> RPI_SPI_DC_TDREQ_SHIFT)
 
 /// @brief Raspberry Pi SPI register address from base address and offset
 #define RPI_SPI_REG_ADDRESS(base, offset)      reinterpret_cast<regaddr>((base) + (offset))
@@ -857,7 +857,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_SPEED_MASK           BITS(RPI_AUX_SPI_CNTL0_SPEED_SHIFT, RPI_AUX_SPI_CNTL0_SPEED_SHIFT + 11)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_CNTL0_SPEED_VALUE(x)       ((x & RPI_AUX_SPI_CNTL0_SPEED_MASK) >> RPI_AUX_SPI_CNTL0_SPEED_SHIFT)
+#define RPI_AUX_SPI_CNTL0_SPEED_VALUE(x)       static_cast<uint32>((x & RPI_AUX_SPI_CNTL0_SPEED_MASK) >> RPI_AUX_SPI_CNTL0_SPEED_SHIFT)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value minimum value. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_SPEED_MIN            0
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 speed value maximum value. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -868,9 +868,12 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip selects bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_CS_MASK              BITS(RPI_AUX_SPI_CNTL0_CS_SHIFT, RPI_AUX_SPI_CNTL0_CS_SHIFT + 2)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip selects bit value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_CNTL0_CS_VALUE(x)          ((x & RPI_AUX_SPI_CNTL0_CS_MASK) >> RPI_AUX_SPI_CNTL0_CS_SHIFT)
+#define RPI_AUX_SPI_CNTL0_CS_VALUE(x)          static_cast<uint32>((x & RPI_AUX_SPI_CNTL0_CS_MASK) >> RPI_AUX_SPI_CNTL0_CS_SHIFT)
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip select 0 low. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_CS0_N                0x000C0000   // CS 0 low
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip select 1 low. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_CS1_N                0x000A0000   // CS 1 low
+/// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 chip select 2 low. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_CS2_N                0x00060000   // CS 2 low
 
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 post input mode. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -885,7 +888,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 DOUT hold time bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_MASK  BITS(RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT, RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT + 1)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 DOUT hold time value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_VALUE(x) ((x & RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_MASK) >> RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT)
+#define RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_VALUE(x) static_cast<uint32>((x & RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_MASK) >> RPI_AUX_SPI_CNTL0_DOUT_HOLD_TIME_SHIFT)
 
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_ENABLE               BIT1(11)
@@ -906,7 +909,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift length bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_MASK    BITS(RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT, RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT + 1)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 0 shift length value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_VALUE(x) ((x & RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_MASK) >> RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT)
+#define RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_VALUE(x) static_cast<uint32>((x & RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_MASK) >> RPI_AUX_SPI_CNTL0_SHIFT_LENGTH_SHIFT)
 
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 values
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time bit shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -914,7 +917,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_MASK    BITS(RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT, RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT + 2)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 CS high time value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_VALUE(x) ((x & RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_MASK) >> RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT)
+#define RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_VALUE(x) static_cast<uint32>((x & RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_MASK) >> RPI_AUX_SPI_CNTL1_CS_HIGH_TIME_SHIFT)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 TX empty interrupt enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_CNTL1_TX_EMPTY_IRQ         BIT1(7)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Control register 1 DONE interrupt enable. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -932,13 +935,13 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX FIFO level bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_MASK    BITS(RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT, RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT + 3)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX FIFO level value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_VALUE(x) ((x & RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT)
+#define RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_VALUE(x) static_cast<uint32>((x & RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_TX_FIFO_LEVEL_SHIFT)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT   16
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_MASK    BITS(RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT, RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT + 3)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register RX FIFO level value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_VALUE(x) ((x & RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT)
+#define RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_VALUE(x) static_cast<uint32>((x & RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_MASK) >> RPI_AUX_SPI_STAT_RX_FIFO_LEVEL_SHIFT)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX full. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_STAT_TX_FULL               BIT1(10)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register TX empty. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -954,7 +957,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register bit count bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_STAT_BIT_COUNT_MASK        BITS(RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT, RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT + 5)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Status register bit count value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_STAT_BIT_COUNT_VALUE(x)    ((x & RPI_AUX_SPI_STAT_BIT_COUNT_MASK) >> RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT)
+#define RPI_AUX_SPI_STAT_BIT_COUNT_VALUE(x)    static_cast<uint32>((x & RPI_AUX_SPI_STAT_BIT_COUNT_MASK) >> RPI_AUX_SPI_STAT_BIT_COUNT_SHIFT)
 
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register values
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -962,7 +965,7 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_PEEK_DATA_MASK             BITS(RPI_AUX_SPI_PEEK_DATA_SHIFT, RPI_AUX_SPI_PEEK_DATA_SHIFT + 15)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) Peek register data value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_PEEK_DATA_VALUE(x)         ((x & RPI_AUX_SPI_PEEK_DATA_MASK) >> RPI_AUX_SPI_PEEK_DATA_SHIFT)
+#define RPI_AUX_SPI_PEEK_DATA_VALUE(x)         static_cast<uint32>((x & RPI_AUX_SPI_PEEK_DATA_MASK) >> RPI_AUX_SPI_PEEK_DATA_SHIFT)
 
 /// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register values
 /// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data shift. See @ref RASPBERRY_PI_MINI_SPI_SPI12
@@ -970,5 +973,5 @@
 /// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data bit mask. See @ref RASPBERRY_PI_MINI_SPI_SPI12
 #define RPI_AUX_SPI_IO_DATA_MASK               BITS(RPI_AUX_SPI_IO_DATA_SHIFT, RPI_AUX_SPI_IO_DATA_SHIFT + 15)
 /// @brief Raspberry Pi Mini SPI (SPI1/2) I/O register data value for reading. See @ref RASPBERRY_PI_MINI_SPI_SPI12
-#define RPI_AUX_SPI_IO_DATA_VALUE(x)           ((x & RPI_AUX_SPI_IO_DATA_MASK) >> RPI_AUX_SPI_IO_DATA_SHIFT)
+#define RPI_AUX_SPI_IO_DATA_VALUE(x)           static_cast<uint32>((x & RPI_AUX_SPI_IO_DATA_MASK) >> RPI_AUX_SPI_IO_DATA_SHIFT)
 

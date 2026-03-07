@@ -53,9 +53,13 @@ namespace baremetal {
 /// </summary>
 enum class SPI_CEIndex : uint8
 {
+    /// @brief CE0 / CS0 signal
     CE0 = 0,
+    /// @brief CE1 / CS1 signal
     CE1 = 1,
+    /// @brief CE2 / CS2 signal
     CE2 = 2,
+    /// @brief None selected
     None = 3
 };
 

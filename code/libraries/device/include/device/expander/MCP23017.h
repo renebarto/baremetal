@@ -235,7 +235,17 @@ public:
     bool Initialize();
     void Uninitialize();
 
+    /// <summary>
+    /// Read MCP23017 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <returns>Value read</returns>
     virtual uint8 ReadRegister(MCP23017RegisterIndex registerAddress) = 0;
+    /// <summary>
+    /// Write MCP23017 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <param name="byte">Value to write</param>
     virtual void WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte) = 0;
     void GetPinDirection(MCP23017Pin pinNumber, MCP23017PinDirection& direction);
     void SetPinDirection(MCP23017Pin pinNumber, const MCP23017PinDirection& direction);

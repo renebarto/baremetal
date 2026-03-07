@@ -130,10 +130,8 @@ SPIMasterAux::~SPIMasterAux()
 /// Initialize the SPIMasterAux for a specific device, setting the clock as specified.
 /// </summary>
 /// <param name="device">SPI device index</param>
-/// <param name="mode">SPI clock rate to be used in Hz</param>
-/// <param name="polarity">SPI clock polarity</param>
-/// <param name="phase">SPI clock phase</param>
-/// <returns></returns>
+/// <param name="clockRate">SPI clock rate to be used in Hz</param>
+/// <returns>True on success, false on failure</returns>
 bool SPIMasterAux::Initialize(uint8 device, uint32 clockRate /*= 500000*/)
 {
     if (m_isInitialized)

@@ -132,7 +132,17 @@ public:
     bool Initialize();
     void Uninitialize();
 
+    /// <summary>
+    /// Read MCP23008 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <returns>Value read</returns>
     virtual uint8 ReadRegister(MCP23008RegisterIndex registerAddress) = 0;
+    /// <summary>
+    /// Write MCP23008 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <param name="byte">Value to write</param>
     virtual void WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte) = 0;
     void GetPinDirection(MCP23008Pin pinNumber, MCP23008PinDirection& direction);
     void SetPinDirection(MCP23008Pin pinNumber, const MCP23008PinDirection& direction);

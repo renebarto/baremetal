@@ -52,13 +52,20 @@ using namespace unittest;
 namespace device {
 namespace test {
 
+/// <summary>
+/// MCP23017 implementation overriding register access for testing
+/// </summary>
 class MCP23017Impl
     : public MCP23017
 {
 private:
+    /// @brief Storage for MCP23017 registers
     uint8 m_registers[static_cast<size_t>(MCP23017RegisterIndex::OLATB) + 1];
 
 public:
+    /// <summary>
+    /// Constructor for MCP23017Impl class
+    /// </summary>
     MCP23017Impl()
         : m_registers{ 
             0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -67,7 +74,7 @@ public:
             }
     {
     }
-    uint8 ReadRegister(MCP23017RegisterIndex registerAddress)
+    uint8 ReadRegister(MCP23017RegisterIndex registerAddress) override
     {
         assert((registerAddress >= MCP23017RegisterIndex::IODIRA) && (registerAddress <= MCP23017RegisterIndex::OLATB));
         return m_registers[static_cast<size_t>(registerAddress)];
@@ -80,6 +87,11 @@ public:
         else
             m_registers[static_cast<size_t>(registerAddress)] = byte;            
     }
+    /// <summary>
+    /// Index operator for reading register values
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <returns>Register value</returns>
     uint8 operator[](MCP23017RegisterIndex registerAddress)
     {
         return ReadRegister(registerAddress);

@@ -66,7 +66,7 @@ public:
     MCP23008SPI(baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
     ~MCP23008SPI();
 
-    bool Initialize(uint8 bus, baremetal::SPI_CEIndex ceIndex);
+    bool Initialize(uint8 device, baremetal::SPI_CEIndex ceIndex);
 
     uint8 ReadRegister(MCP23008RegisterIndex registerAddress) override;
     void WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte) override;

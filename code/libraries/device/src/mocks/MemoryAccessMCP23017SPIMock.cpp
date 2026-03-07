@@ -1,11 +1,11 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2026 Rene Barto
 //
-// File        : MemoryAccessMCP23017I2CMock.cpp
+// File        : MemoryAccessMCP23017SPIMock.cpp
 //
 // Namespace   : device
 //
-// Class       : MemoryAccessMCP23017I2CMock
+// Class       : MemoryAccessMCP23017SPIMock
 //
 // Description : MCP23017 SPI memory access stub
 //
@@ -37,46 +37,44 @@
 //
 //------------------------------------------------------------------------------
 
-#include "device/mocks/MemoryAccessMCP23017I2CMock.h"
+#include "device/mocks/MemoryAccessMCP23017SPIMock.h"
 
 #include "baremetal/Assert.h"
-#include "baremetal/BCMRegisters.h"
-#include "baremetal/Format.h"
 #include "baremetal/Logger.h"
-#include "baremetal/String.h"
-#include "device/i2c/MCP23017I2C.h"
+#include "device/spi/MCP23017SPI.h"
 
 /// @file
-/// MemoryAccessMCP23017I2CMock
+/// MemoryAccessMCP23017SPIMock
 
 /// @brief Define log name
-LOG_MODULE("MemoryAccessMCP23017I2CMock");
+LOG_MODULE("MemoryAccessMCP23017SPIMock");
 
 using namespace baremetal;
 using namespace device;
 
 /// @brief Singleton instance
-MemoryAccessMCP23017I2CMock* MemoryAccessMCP23017I2CMock::m_pThis{};
+MemoryAccessMCP23017SPIMock* MemoryAccessMCP23017SPIMock::m_pThis{};
 
 /// <summary>
-/// MemoryAccessMCP23017I2CMock constructor
+/// MemoryAccessMCP23017SPIMock constructor
 /// </summary>
-MemoryAccessMCP23017I2CMock::MemoryAccessMCP23017I2CMock()
+MemoryAccessMCP23017SPIMock::MemoryAccessMCP23017SPIMock()
     : m_registers{}
     , m_cycleStarted{}
+    , m_readRegister{}
+    , m_writeRegister{}
+    , m_selectedRegisterReceived{}
     , m_selectedRegister{}
 {
     m_pThis = this;
-    SetSendAddressByteCallback(OnSendAddress);
-    SetRecvDataByteCallback(OnRecvData);
-    SetSendDataByteCallback(OnSendData);
+    SetSendRecvDataByteCallback(OnSendRecvData);
 }
 
 /// <summary>
 /// Return number of registered memory access operations
 /// </summary>
 /// <returns>Number of registered memory access operations</returns>
-size_t MemoryAccessMCP23017I2CMock::GetNumMCP23017Operations() const
+size_t MemoryAccessMCP23017SPIMock::GetNumMCP23017Operations() const
 {
     return m_numOps;
 }
@@ -86,7 +84,7 @@ size_t MemoryAccessMCP23017I2CMock::GetNumMCP23017Operations() const
 /// </summary>
 /// <param name="index">Index of operation</param>
 /// <returns>Requested memory access operation</returns>
-const MCP23017Operation &MemoryAccessMCP23017I2CMock::GetMCP23017Operation(size_t index) const
+const MCP23017Operation &MemoryAccessMCP23017SPIMock::GetMCP23017Operation(size_t index) const
 {
     assert(index < m_numOps);
     return m_ops[index];
@@ -95,57 +93,57 @@ const MCP23017Operation &MemoryAccessMCP23017I2CMock::GetMCP23017Operation(size_
 /// <summary>
 /// Reset read or write cycle
 /// </summary>
-void MemoryAccessMCP23017I2CMock::ResetCycle()
+void MemoryAccessMCP23017SPIMock::ResetCycle()
 {
     m_cycleStarted = false;
+    m_selectedRegisterReceived = false;
+    m_readRegister = false;
+    m_writeRegister = false;
 }
 
 /// <summary>
-/// Callback when I2C address is sent
+/// Callback when SPI byte is to be received
 /// </summary>
-/// <param name="registers">I2C register storage, unused</param>
-/// <param name="data">I2C address, unused</param>
-/// <returns>True always</returns>
-bool MemoryAccessMCP23017I2CMock::OnSendAddress(I2CMasterRegisters& /*registers*/, uint8 /*data*/)
+/// <param name="registers">SPI Register storage for stub</param>
+/// <param name="dataOut">Byte sent</param>
+/// <param name="dataIn">Byte requested</param>
+void MemoryAccessMCP23017SPIMock::OnSendRecvData(SPIMasterRegisters& registers, uint8 dataOut, uint8& dataIn)
 {
-    return true;
-}
-
-/// <summary>
-/// Callback when I2C byte is to be received
-/// </summary>
-/// <param name="registers">I2C Register storage for stub</param>
-/// <param name="data">Byte requested</param>
-/// <returns>True always</returns>
-bool MemoryAccessMCP23017I2CMock::OnRecvData(I2CMasterRegisters& registers, uint8& data)
-{
-    auto result = m_pThis->OnReadRegister(m_pThis->m_selectedRegister, data);
-    LOG_DEBUG("Read register %02x: %02x", m_pThis->m_selectedRegister, data);
-    m_pThis->ResetCycle();
-
-    return result;
-}
-
-/// <summary>
-/// Callback when I2C byte is sent
-/// </summary>
-/// <param name="registers">I2C Register storage for stub</param>
-/// <param name="data">Byte sent</param>
-/// <returns>True always</returns>
-bool MemoryAccessMCP23017I2CMock::OnSendData(I2CMasterRegisters& registers, uint8 data)
-{
+    dataIn = 0;
     if (!m_pThis->m_cycleStarted)
     {
-        m_pThis->m_selectedRegister = data;
-        m_pThis->m_cycleStarted = true;
+        if (dataOut == 0b01000000)
+        {
+            m_pThis->m_writeRegister = true;
+            m_pThis->m_cycleStarted = true;
+        }
+        else if (dataOut == 0b01000001)
+        {
+            m_pThis->m_readRegister = true;
+            m_pThis->m_cycleStarted = true;
+        }
+        else
+        {
+            dataIn = 0xFF;
+        }
+    }
+    else if (!m_pThis->m_selectedRegisterReceived)
+    {
+        m_pThis->m_selectedRegister = dataOut;
+        m_pThis->m_selectedRegisterReceived = true;
     }
     else
     {
-        LOG_DEBUG("Write register %02x: %02x", m_pThis->m_selectedRegister, data);
-        m_pThis->OnWriteRegister(m_pThis->m_selectedRegister, data);
+        if (m_pThis->m_writeRegister)
+        {
+            m_pThis->OnWriteRegister(m_pThis->m_selectedRegister, dataOut);
+        }
+        else if (m_pThis->m_readRegister)
+        {
+            m_pThis->OnReadRegister(m_pThis->m_selectedRegister, dataIn);
+        }
         m_pThis->ResetCycle();
     }
-    return true;
 }
 
 /// <summary>
@@ -154,7 +152,7 @@ bool MemoryAccessMCP23017I2CMock::OnSendData(I2CMasterRegisters& registers, uint
 /// <param name="registerIndex">Index of the register</param>
 /// <param name="data">Data read on return</param>
 /// <returns>True if successful, false otherwise</returns>
-bool MemoryAccessMCP23017I2CMock::OnReadRegister(uint8 registerIndex, uint8& data)
+bool MemoryAccessMCP23017SPIMock::OnReadRegister(uint8 registerIndex, uint8& data)
 {
     uint8* registerAddress = &m_pThis->m_registers.IODIRA + m_pThis->m_selectedRegister;
     data = *registerAddress;
@@ -234,7 +232,7 @@ bool MemoryAccessMCP23017I2CMock::OnReadRegister(uint8 registerIndex, uint8& dat
 /// <param name="registerIndex">Index of the register</param>
 /// <param name="data">Data to be written</param>
 /// <returns>True if successful, false otherwise</returns>
-bool MemoryAccessMCP23017I2CMock::OnWriteRegister(uint8 registerIndex, uint8 data)
+bool MemoryAccessMCP23017SPIMock::OnWriteRegister(uint8 registerIndex, uint8 data)
 {
     uint8* registerAddress = &m_pThis->m_registers.IODIRA + m_pThis->m_selectedRegister;
     *registerAddress = data;
@@ -300,7 +298,7 @@ bool MemoryAccessMCP23017I2CMock::OnWriteRegister(uint8 registerIndex, uint8 dat
 /// Add a memory access operation to the list
 /// </summary>
 /// <param name="operation">Operation to add</param>
-void MemoryAccessMCP23017I2CMock::AddOperation(const MCP23017Operation& operation)
+void MemoryAccessMCP23017SPIMock::AddOperation(const MCP23017Operation& operation)
 {
     assert(m_numOps < BufferSize);
     m_ops[m_numOps++] = operation;

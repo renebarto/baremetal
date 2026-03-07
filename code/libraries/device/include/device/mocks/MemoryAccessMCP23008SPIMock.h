@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Copyright   : Copyright(c) 2026 Rene Barto
 //
-// File        : MemoryAccessMCP23017I2CMock.h
+// File        : MemoryAccessMCP23008SPIMock.h
 //
 // Namespace   : device
 //
-// Class       : MemoryAccessMCP23017I2CMock
+// Class       : MemoryAccessMCP23008SPIMock
 //
-// Description : MCP23017 I2C memory access stub
+// Description : MCP23008 SPI memory access stub
 //
 //------------------------------------------------------------------------------
 //
@@ -39,33 +39,39 @@
 
 #pragma once
 
-#include "baremetal/mocks/MemoryAccessI2CMasterMock.h"
+#include "baremetal/mocks/MemoryAccessSPIMasterMock.h"
 #include "stdlib/Macros.h"
 #include "baremetal/String.h"
-#include "device/i2c/MCP23017I2C.h"
-#include "device/mocks/MCP23017Mock.h"
+#include "device/spi/MCP23008SPI.h"
+#include "device/mocks/MCP23008Mock.h"
 
 /// @file
-/// MemoryAccessMCP23017I2CMock
+/// MemoryAccessMCP23008SPIMock
 
 namespace device {
 
-/// @brief MemoryAccess implementation for I2C stub
-class MemoryAccessMCP23017I2CMock : public baremetal::MemoryAccessI2CMasterMock
+/// @brief MemoryAccess implementation for SPI stub
+class MemoryAccessMCP23008SPIMock : public baremetal::MemoryAccessSPIMasterMock
 {
 private:
     /// @brief Singleton instance
-    static MemoryAccessMCP23017I2CMock* m_pThis;
-    /// @brief Storage for I2C registers
-    MCP23017Registers m_registers;
+    static MemoryAccessMCP23008SPIMock* m_pThis;
+    /// @brief Storage for SPI registers
+    MCP23008Registers m_registers;
     /// @brief A read / write register cycle was started
     bool m_cycleStarted;
+    /// @brief Read register 
+    bool m_readRegister;
+    /// @brief Write register 
+    bool m_writeRegister;
+    /// @brief A read / write register cycle was started
+    bool m_selectedRegisterReceived;
     /// @brief Register selected for current read / write register cycle
     uint8 m_selectedRegister;
     /// @brief Size of memory access operation array
     static constexpr size_t BufferSize = 1000;
     /// List op memory access operations
-    MCP23017Operation m_ops[BufferSize]
+    MCP23008Operation m_ops[BufferSize]
     /// @cond
     ALIGN(8)
     /// @endcond
@@ -74,21 +80,19 @@ private:
     size_t m_numOps;
 
 public:
-    MemoryAccessMCP23017I2CMock();
+    MemoryAccessMCP23008SPIMock();
 
-    size_t GetNumMCP23017Operations() const;
-    const MCP23017Operation& GetMCP23017Operation(size_t index) const;
+    size_t GetNumMCP23008Operations() const;
+    const MCP23008Operation& GetMCP23008Operation(size_t index) const;
 
     void ResetCycle();
-    static bool OnSendAddress(baremetal::I2CMasterRegisters& registers, uint8 data);
-    static bool OnRecvData(baremetal::I2CMasterRegisters& registers, uint8& data);
-    static bool OnSendData(baremetal::I2CMasterRegisters& registers, uint8 data);
+    static void OnSendRecvData(baremetal::SPIMasterRegisters& registers, uint8 dataOut, uint8& dataIn);
 
     virtual bool OnReadRegister(uint8 registerIndex, uint8& data);
     virtual bool OnWriteRegister(uint8 registerIndex, uint8 data);
 
 private:
-    void AddOperation(const MCP23017Operation& operation);
+    void AddOperation(const MCP23008Operation& operation);
 };
 
 } // namespace device

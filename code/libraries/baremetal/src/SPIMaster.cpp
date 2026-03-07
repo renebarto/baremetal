@@ -78,7 +78,9 @@ LOG_MODULE("SPIMaster");
 
 /// @brief Total number of different GPIO pin alternative functions
 #define SPI_VALUES            2
+/// @brief Index for pin number in configuration table
 #define SPI_VALUE_PIN         0
+/// @brief Index for alternative function in configuration table
 #define SPI_VALUE_ALT         1
 
 /// @brief Value in configuration table to flag invalid combination
@@ -159,7 +161,7 @@ SPIMaster::~SPIMaster()
 /// Initialize the SPIMaster for a specific device, setting the clock as specified.
 /// </summary>
 /// <param name="device">SPI device index</param>
-/// <param name="mode">SPI clock rate to be used in Hz</param>
+/// <param name="clockRate">SPI clock rate to be used in Hz</param>
 /// <param name="polarity">SPI clock polarity</param>
 /// <param name="phase">SPI clock phase</param>
 /// <returns></returns>
@@ -216,6 +218,11 @@ void SPIMaster::SetClock(unsigned clockRate)
     LOG_INFO("Set clock core %d, divider %d, clockrate %d", m_coreClockRate, divider, clockRate);
 }
 
+/// <summary>
+/// Set SPI clock polarity and phase
+/// </summary>
+/// <param name="polarity">Clock polarity</param>
+/// <param name="phase">Clock phase</param>
 void SPIMaster::SetClockMode(SPIClockPolarity polarity, SPIClockPhase phase)
 {
     assert(m_isInitialized);
@@ -231,6 +238,12 @@ void SPIMaster::SetClockMode(SPIClockPolarity polarity, SPIClockPhase phase)
     LOG_INFO("Set clock polarity %d, phase %d", m_clockPolarity, m_clockPhase);
 }
 
+/// <summary>
+/// Set the time to hold the CS line active after the transfer is completed, in order to allow some devices to complete internal operations before the
+/// line is de-asserted. The time is specified in microseconds. The default value is 0, which means that the CS line will be de-asserted immediately
+/// after the transfer is completed.
+/// </summary>
+/// <param name="csHoldTimeMicroSeconds">CS hold time in microseconds</param>
 void SPIMaster::SetCSHoldTime(uint32 csHoldTimeMicroSeconds)
 {
     assert(m_isInitialized);
@@ -238,16 +251,40 @@ void SPIMaster::SetCSHoldTime(uint32 csHoldTimeMicroSeconds)
     m_csHoldTimeMicroSeconds = csHoldTimeMicroSeconds;
 }
 
+/// <summary>
+/// READ bytes FROM device
+/// </summary>
+/// <param name="ceIndex">CE / CS pin to activate</param>
+/// <param name="buffer">Buffer for data to be received</param>
+/// <param name="count">Number of bytes to receive</param>
+/// <returns>Number of bytes transferred</returns>
 size_t SPIMaster::Read(SPI_CEIndex ceIndex, void* buffer, size_t count)
 {
     return WriteRead(ceIndex, nullptr, buffer, count);
 }
 
+/// <summary>
+/// Write bytes to device
+/// </summary>
+/// <param name="ceIndex">CE / CS pin to activate</param>
+/// <param name="buffer">Buffer containing data to send</param>
+/// <param name="count">Number of bytes to send</param>
+/// <returns>Number of bytes transferred</returns>
 size_t SPIMaster::Write(SPI_CEIndex ceIndex, const void* buffer, size_t count)
 {
     return WriteRead(ceIndex, buffer, nullptr, count);
 }
 
+/// <summary>
+/// Read / Write bytes from / to device
+/// Data on SPI is always transferred in both directions at the same time, so every byte written will also cause a byte to be read. If the caller is
+/// only interested in writing or reading, the other buffer can be set to nullptr. In this case, the bytes read or written will be discarded.
+/// </summary>
+/// <param name="ceIndex">CE / CS pin to activate</param>
+/// <param name="writeBuffer">Buffer containing data to send</param>
+/// <param name="readBuffer">Buffer for data to be received</param>
+/// <param name="count">Number of bytes to send / receive</param>
+/// <returns>Number of bytes transferred</returns>
 size_t SPIMaster::WriteRead(SPI_CEIndex ceIndex, const void* writeBuffer, void* readBuffer, size_t count)
 {
     assert(m_isInitialized);
@@ -327,4 +364,3 @@ size_t SPIMaster::WriteRead(SPI_CEIndex ceIndex, const void* writeBuffer, void* 
 
     return static_cast<size_t>(count);
 }
-

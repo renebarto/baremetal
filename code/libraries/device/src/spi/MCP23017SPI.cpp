@@ -65,13 +65,14 @@ MCP23017SPI::MCP23017SPI(baremetal::IMemoryAccess& memoryAccess /*= baremetal::G
 /// </summary>
 MCP23017SPI::~MCP23017SPI()
 {
+    Uninitialize();
 }
 
 /// <summary>
 /// Initialize the MCP23017 SPI expander
 /// </summary>
-/// <param name="device">I2C device index</param>
-/// <param name="address">I2C slave address</param>
+/// <param name="device">SPI device index</param>
+/// <param name="ceIndex">SPI CE/CS to activate</param>
 /// <returns>True on success, false otherwise</returns>
 bool MCP23017SPI::Initialize(uint8 device, SPI_CEIndex ceIndex)
 {
@@ -86,32 +87,37 @@ bool MCP23017SPI::Initialize(uint8 device, SPI_CEIndex ceIndex)
 }
 
 /// <summary>
-/// Read from the specified MCP23017 register
+/// Read from the specified MCP23008 register
 /// </summary>
 /// <param name="registerAddress">Register index</param>
 /// <returns>Value read</returns>
 uint8 MCP23017SPI::ReadRegister(MCP23017RegisterIndex registerAddress)
 {
-    uint8 address = static_cast<uint8>(registerAddress);
+    const size_t BufferSize{2};
+    uint8 buffer[BufferSize];
+    buffer[0] = 0b01000001;
+    buffer[1] = static_cast<uint8>(registerAddress);
     uint8 data{};
-    auto bytesTransferred = m_device.WriteRead(m_ceIndex, &address, &data, 1);
-    LOG_DEBUG("Read bytes from SPI CE %02x Register %02x: %02x, %d bytes transferred", m_ceIndex, address, data, bytesTransferred);
+    auto bytesTransferred = m_device.Write(m_ceIndex, buffer, BufferSize);
+    bytesTransferred += m_device.Read(m_ceIndex, &data, 1);
+    LOG_DEBUG("Read bytes from SPI CE %02x Register %02x: %02x, %d bytes transferred", m_ceIndex, buffer[1], data, bytesTransferred);
     return data;
 }
 
 /// <summary>
-/// Write to the specified MCP23017 register
+/// Write to the specified MCP23008 register
 /// </summary>
 /// <param name="registerAddress">Register index</param>
 /// <param name="byte">Value to write</param>
 void MCP23017SPI::WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte)
 {
-    const size_t BufferSize{2};
+    const size_t BufferSize{3};
     uint8 buffer[BufferSize];
-    buffer[0] = static_cast<uint8>(registerAddress);
-    buffer[1] = byte;
+    buffer[0] = 0b01000000;
+    buffer[1] = static_cast<uint8>(registerAddress);
+    buffer[2] = byte;
     auto bytesWritten = m_device.Write(m_ceIndex, buffer, BufferSize);
 
-    LOG_DEBUG("Write bytes to SPI CE %02x Register %02x: %02x, %d bytes written", m_ceIndex, buffer[0], buffer[1], bytesWritten);
+    LOG_DEBUG("Write bytes to SPI CE %02x Register %02x: %02x, %d bytes written", m_ceIndex, buffer[1], buffer[2], bytesWritten);
 }
 

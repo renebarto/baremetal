@@ -7,7 +7,7 @@
 //
 // Class       : MemoryAccessMCP23008I2CMock
 //
-// Description : MCP23008 memory access stub with LEDs on output pins, and controllable inputs on input pins
+// Description : MCP23008 I2C memory access stub
 //
 //------------------------------------------------------------------------------
 //
@@ -43,156 +43,12 @@
 #include "stdlib/Macros.h"
 #include "baremetal/String.h"
 #include "device/i2c/MCP23008I2C.h"
+#include "device/mocks/MCP23008Mock.h"
 
 /// @file
 /// MemoryAccessMCP23008I2CMock
 
 namespace device {
-
-/// @brief MCP23008 registers
-class MCP23008Registers
-{
-public:
-    /// @brief I/O Direction Register
-    uint8 IODIR;
-    /// @brief Input Polarity Register
-    uint8 IPOL;
-    /// @brief GPIO Interrupt Enable Register
-    uint8 GPINTEN;
-    /// @brief Default Compare Register
-    uint8 DEFVAL;
-    /// @brief Interrupt Control Register
-    uint8 INTCON;
-    /// @brief I/O Control Register
-    uint8 IOCON;
-    /// @brief GPIO Pull-up Resistor Configuration Register
-    uint8 GPPU;
-    /// @brief Interrupt Flag Register
-    uint8 INTF;
-    /// @brief Interrupt Captured Register
-    uint8 INTCAP;
-    /// @brief GPIO Port Register
-    uint8 GPIO;
-    /// @brief Output Latch Register
-    uint8 OLAT;
-
-    /// <summary>
-    /// Constructor for MCP23008 register storage
-    /// </summary>
-    MCP23008Registers()
-        : IODIR{0xFF}
-        , IPOL{}
-        , GPINTEN{}
-        , DEFVAL{}
-        , INTCON{}
-        , IOCON{}
-        , GPPU{}
-        , INTF{}
-        , INTCAP{}
-        , GPIO{}
-        , OLAT{}
-    {
-    }
-};
-
-/// @brief I2C master operation codes
-enum MCP23008OperationCode
-{
-    /// @brief Write IO Configuration Register
-    WriteIOCON,
-    /// @brief Write IO Direction Register
-    WriteIODIR,
-    /// @brief Write GPIO Register
-    WriteGPIO,
-    /// @brief Write Interrupt Enable Register
-    WriteGPINTEN,
-    /// @brief Write Interrupt Control Register
-    WriteINTCON,
-    /// @brief Write Default Value Register
-    WriteDEFVAL,
-    /// @brief Write Input Polarity Register
-    WriteIPOL,
-    /// @brief Write GPIO Pull-up Register
-    WriteGPPU,
-    /// @brief Write Output Latch Register
-    WriteOLAT,
-    /// @brief Read IO Configuration Register
-    ReadIOCON,
-    /// @brief Read IO Direction Register
-    ReadIODIR,
-    /// @brief Read GPIO Register
-    ReadGPIO,
-    /// @brief Read Interrupt Enable Register
-    ReadGPINTEN,
-    /// @brief Read Interrupt Control Register
-    ReadINTCON,
-    /// @brief Read Default Value Register
-    ReadDEFVAL,
-    /// @brief Read Input Polarity Register
-    ReadIPOL,
-    /// @brief Read GPIO Pull-up Register
-    ReadGPPU,
-    /// @brief Read Interrupt Flag Register
-    ReadINTF,
-    /// @brief Read Interrupt Captured Register
-    ReadINTCAP,
-    /// @brief Read Output Latch Register
-    ReadOLAT,
-};
-
-/// <summary>
-/// Data structure to contain a memory access operation
-/// </summary>
-struct MCP23008Operation
-{
-    /// @brief I2C master operation code
-    MCP23008OperationCode operation; // Size: 4 bytes
-    /// @brief Argument (if any)
-    uint32 argument; // Size: 4 bytes
-
-    /// <summary>
-    /// Default constructor
-    /// </summary>
-    MCP23008Operation()
-        : operation{}
-        , argument{}
-    {
-    }
-
-    /// <summary>
-    /// Constructor for read or write operation concerning pin function
-    /// </summary>
-    /// <param name="theOperation">Operation code</param>
-    /// <param name="theArgument">Argument value</param>
-    MCP23008Operation(MCP23008OperationCode theOperation, uint32 theArgument = 0)
-        : operation{theOperation}
-        , argument{theArgument}
-    {
-    }
-    /// <summary>
-    /// Check memory access operations for equality
-    /// </summary>
-    /// <param name="other">Value to compare to</param>
-    /// <returns>True if equal, false otherwise</returns>
-    bool operator==(const MCP23008Operation& other) const
-    {
-        return (other.operation == operation) &&
-            (other.argument == argument);
-    }
-    /// <summary>
-    /// Check memory access operations for inequality
-    /// </summary>
-    /// <param name="other">Value to compare to</param>
-    /// <returns>True if unequal, false otherwise</returns>
-    bool operator!=(const MCP23008Operation& other) const
-    {
-        return !operator==(other);
-    }
-}
-/// @cond
-ALIGN(8)
-/// @endcond
-;
 
 /// @brief MemoryAccess implementation for I2C stub
 class MemoryAccessMCP23008I2CMock : public baremetal::MemoryAccessI2CMasterMock
@@ -236,9 +92,3 @@ private:
 };
 
 } // namespace device
-
-namespace baremetal {
-
-baremetal::String Serialize(const device::MCP23008Operation& value);
-
-} // namespace baremetal

@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : MCP23008SPITest.cpp
 //

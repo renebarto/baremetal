@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : SPIMasterAux.h
 //
@@ -74,6 +74,8 @@ private:
     uint32 m_clockRate;
     /// @brief SPI clock divider
     uint16 m_clockDivider;
+    /// @brief Core clock rate used to determine SPI clock rate in Hz
+    unsigned m_coreClockRate;
     /// @brief True if class is already initialized
     bool m_isInitialized;
 
@@ -90,13 +92,10 @@ private:
     /// @brief GPIO pin for CE2 wire
     PhysicalGPIOPin m_ce2Pin;
 
-    /// @brief Core clock rate used to determine SPI clock rate in Hz
-    unsigned m_coreClockRate;
-
 public:
     SPIMasterAux(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    virtual ~SPIMasterAux();
+    ~SPIMasterAux();
 
     bool Initialize(uint8 device, uint32 clockRate = 500000);
 

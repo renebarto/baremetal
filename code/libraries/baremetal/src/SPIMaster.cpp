@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : SPIMaster.cpp
 //
@@ -130,13 +130,13 @@ SPIMaster::SPIMaster(IMemoryAccess& memoryAccess /* = GetMemoryAccess()*/)
     , m_clockPhase{}
     , m_csHoldTimeMicroSeconds{}
     , m_clockRate{}
+    , m_coreClockRate{}
     , m_isInitialized{}
     , m_sclkPin{memoryAccess}
     , m_mosiPin{memoryAccess}
     , m_misoPin{memoryAccess}
     , m_ce0Pin{memoryAccess}
     , m_ce1Pin{memoryAccess}
-    , m_coreClockRate{}
 {
 }
 

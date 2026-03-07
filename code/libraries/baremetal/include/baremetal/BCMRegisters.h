@@ -719,11 +719,11 @@
 
 /// @brief Raspberry Pi Auxiliary Interrupt register values
 /// @brief Raspberry Pi Auxiliary Interrupt register status SPI2. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-#define RPI_AUX_ENABLES_SPI2                   BIT1(2)
+#define RPI_AUX_IRQ_SPI2                       BIT1(2)
 /// @brief Raspberry Pi Auxiliary Interrupt register status SPI1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-#define RPI_AUX_ENABLES_SPI1                   BIT1(1)
+#define RPI_AUX_IRQ_SPI1                       BIT1(1)
 /// @brief Raspberry Pi Auxiliary Interrupt register status UART1. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL
-#define RPI_AUX_ENABLES_UART1                  BIT1(0)
+#define RPI_AUX_IRQ_UART1                      BIT1(0)
 
 /// @brief Raspberry Pi Auxiliary Enable register values. The corresponding bit will need to be set in order to enable access to the peripheral's
 /// registers and functionality. See @ref RASPBERRY_PI_AUXILIARY_PERIPHERAL

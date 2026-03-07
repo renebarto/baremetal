@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : SPIMaster.h
 //
@@ -115,6 +115,8 @@ private:
     uint32 m_csHoldTimeMicroSeconds;
     /// @brief SPI clock rate (Hz)
     uint32 m_clockRate;
+    /// @brief Core clock rate used to determine SPI clock rate in Hz
+    unsigned m_coreClockRate;
     /// @brief True if class is already initialized
     bool m_isInitialized;
 
@@ -129,13 +131,10 @@ private:
     /// @brief GPIO pin for CE1 wire
     PhysicalGPIOPin m_ce1Pin;
 
-    /// @brief Core clock rate used to determine SPI clock rate in Hz
-    unsigned m_coreClockRate;
-
 public:
     SPIMaster(IMemoryAccess& memoryAccess = GetMemoryAccess());
 
-    virtual ~SPIMaster();
+    ~SPIMaster();
 
     bool Initialize(uint8 device, uint32 clockRate = 500000, SPIClockPolarity polarity = SPIClockPolarity::IdleLow, SPIClockPhase phase = SPIClockPhase::Middle);
 

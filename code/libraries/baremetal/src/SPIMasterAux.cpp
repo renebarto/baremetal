@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : SPIMasterAux.cpp
 //
@@ -95,6 +95,7 @@ SPIMasterAux::SPIMasterAux(IMemoryAccess& memoryAccess /* = GetMemoryAccess()*/)
     , m_baseAddress{}
     , m_clockRate{}
     , m_clockDivider{}
+    , m_coreClockRate{}
     , m_isInitialized{}
     , m_sclkPin{}
     , m_mosiPin{}
@@ -102,7 +103,6 @@ SPIMasterAux::SPIMasterAux(IMemoryAccess& memoryAccess /* = GetMemoryAccess()*/)
     , m_ce0Pin{}
     , m_ce1Pin{}
     , m_ce2Pin{}
-    , m_coreClockRate{}
 {
 }
 
@@ -320,4 +320,3 @@ size_t SPIMasterAux::WriteRead(SPI_CEIndex ceIndex, const void* writeBuffer, voi
 
     return result;
 }
-

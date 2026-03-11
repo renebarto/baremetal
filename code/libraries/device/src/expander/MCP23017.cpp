@@ -146,7 +146,7 @@ void MCP23017::SetPinValue(MCP23017Pin pinNumber, bool on)
 /// <param name="direction">Direction for pins</param>
 void MCP23017::SetPortADirections(const MCP23017PinDirection& direction)
 {
-    WriteRegister(GPPUA, 0x00);
+    WriteRegister(GPPUA, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
     WriteRegister(IODIRA, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
 }
 
@@ -175,7 +175,7 @@ void MCP23017::SetPortAValue(uint8 data)
 /// <param name="direction">Direction for pins</param>
 void MCP23017::SetPortBDirections(const MCP23017PinDirection& direction)
 {
-    WriteRegister(GPPUB, 0x00);
+    WriteRegister(GPPUB, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
     WriteRegister(IODIRB, direction == MCP23017PinDirection::In ? 0xFF : 0x00);
 }
 

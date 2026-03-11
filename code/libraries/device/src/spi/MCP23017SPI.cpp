@@ -120,4 +120,3 @@ void MCP23017SPI::WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byt
 
     LOG_DEBUG("Write bytes to SPI CE %02x Register %02x: %02x, %d bytes written", m_ceIndex, buffer[1], buffer[2], bytesWritten);
 }
-

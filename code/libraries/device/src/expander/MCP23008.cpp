@@ -142,7 +142,7 @@ void MCP23008::SetPinValue(MCP23008Pin pinNumber, bool on)
 /// <param name="direction">Direction for pins</param>
 void MCP23008::SetPortDirections(const MCP23008PinDirection& direction)
 {
-    WriteRegister(GPPU, 0x00);
+    WriteRegister(GPPU, direction == MCP23008PinDirection::In ? 0xFF : 0x00);
     WriteRegister(IODIR, direction == MCP23008PinDirection::In ? 0xFF : 0x00);
 }
 

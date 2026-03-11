@@ -15,6 +15,8 @@ int main()
 
     uint8 deviceIndex = 0;
     SPI_CEIndex ceIndex{SPI_CEIndex::CE0};
+    const uint16 DisplayWidth = 128;
+    const uint16 DisplayHeight = 64;
 
     MCP23008SPI mcp;
     if (!mcp.Initialize(deviceIndex, ceIndex))

@@ -3671,10 +3671,8 @@ This enables the pull up resistors for the port
 - Line 90-95: We write 0xFF to the MCP23008 IODIR register.
 This sets all pins on the port to input
 
-<img src="images/Tutorial_21-MCP23017-1.jpg"  alt="I2C bus" width="600"/>
+<img src="images/Tutorial_27-MCP23S008-1.jpg"  alt="SPI bus" width="400"/>
 
-<img src="images/Tutorial_21-MCP23017-2.jpg"  alt="I2C bus" width="600"/>
-
-<img src="images/Tutorial_21-MCP23017-3.jpg"  alt="I2C bus" width="600"/>
+<img src="images/Tutorial_27-MCP23S008-2.jpg"  alt="SPI bus" width="400"/>
 
 Next: [28-i2s](28-i2s.md)

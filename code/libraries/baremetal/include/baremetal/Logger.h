@@ -98,7 +98,7 @@ public:
     static bool HaveLogger();
 
     bool Initialize();
-    void SetLogLevel(LogSeverity logLevel);
+    LogSeverity SetLogLevel(LogSeverity logLevel);
     bool IsLogSeverityEnabled(LogSeverity severity);
 
     void Log(const char* from, int line, LogSeverity severity, const char* message, ...);

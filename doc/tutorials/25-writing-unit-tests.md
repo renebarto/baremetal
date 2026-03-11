@@ -3581,7 +3581,7 @@ File: code\libraries\baremetal\src\mocks\MemoryAccessI2CMasterMock.cpp
 195:     RPI_I2C6_BASE,
 196: #endif
 197: };
-198: /// @brief Mask used to check whether an address is in the GPIO register range
+198: /// @brief Mask used to check whether an address is in the I2C master register range
 199: static uintptr I2CMasterBaseAddressMask{0xFFFFFFFFFFFFFFE0};
 200: 
 201: /// <summary>

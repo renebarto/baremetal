@@ -1,106 +1,125 @@
-#include <baremetal/ARMInstructions.h>
-#include <baremetal/Format.h>
-#include <baremetal/I2CMaster.h>
-#include <baremetal/Logger.h>
-#include <baremetal/System.h>
-#include <device/gpio/KY-040.h>
-#include <device/i2c/HD44780DisplayI2C.h>
+#include "baremetal/Format.h"
+#include "baremetal/Logger.h"
+#include "baremetal/PhysicalGPIOPin.h"
+#include "baremetal/String.h"
+#include "baremetal/System.h"
+#include "baremetal/Timer.h"
+#include "device/spi/MCP23008SPI.h"
 
 LOG_MODULE("main");
 
 using namespace baremetal;
 using namespace device;
 
-static int option{};
-static bool select{};
-static HD44780Display* lcdDevice{};
-
-static void ShowOption();
-
-static void OnEvent(KY040::Event event, void *param)
-{
-    LOG_INFO("Event %s", KY040::EventToString(event));
-    switch (event)
-    {
-        case KY040::Event::SwitchDown:
-            LOG_INFO("Value selected");
-            select = true;
-            break;
-        case KY040::Event::RotateClockwise:
-            option++;
-            ShowOption();
-            break;
-        case KY040::Event::RotateCounterclockwise:
-            option--;
-            ShowOption();
-            break;
-        default:
-            break;
-    }
-}
-
-static bool ShouldReboot()
-{
-    return (option % 2 == 0);
-}
-
-static void ShowOption()
-{
-    lcdDevice->Write(0, 1, "      ");
-    if (ShouldReboot())
-    {
-        LOG_INFO("Select Reboot");
-        lcdDevice->Write(0, 1, "Reboot");
-    }
-    else
-    {
-        LOG_INFO("Select Halt");
-        lcdDevice->Write(0, 1, "Halt");
-    }
-}
-
 int main()
 {
-    auto& console = GetConsole();
     GetLogger().SetLogLevel(LogSeverity::Info);
 
-    KY040 rotarySwitch(11, 9, 10);
-    rotarySwitch.Initialize();
-    rotarySwitch.RegisterEventHandler(OnEvent, nullptr);
-
-    uint8 busIndex = 1;
-    uint8 address{ 0x27 };
-    const uint8 NumRows    = 2;
-    const uint8 NumColumns = 16;
-    I2CMaster i2cMaster;
-    i2cMaster.Initialize(busIndex);
-
-    HD44780DisplayI2C device(i2cMaster, address, NumColumns, NumRows);
-    device.Initialize();
-    lcdDevice = &device;
-
-    console.Write("Select from menu by turning rotary switch and pressing to select option\n");
-
-    device.SetBacklight(true);
-    device.SetDisplayEnabled(true);
-    device.SetCursorMode(HD44780Display::CursorMode::Hide);
-
-    device.SetCursorPosition(0, 0);
-    device.Write("Menu", 4);
-    ShowOption();
-
-    while (!select)
+    uint8 spiDevice = 0;
+    SPI_CEIndex spiCE = SPI_CEIndex::CE1;
+    SPIMaster device;
+    if (!device.Initialize(spiDevice))
     {
-        WaitForInterrupt();
+        LOG_INFO("Cannot initialize SPI device");
+    }
+    uint8 readBuffer[3] {};
+    //for (int i = 0; i < 11; i++)
+    //{
+    //    writeBuffer[1] = static_cast<uint8>(i);
+    //    device.WriteRead(spiCE, writeBuffer, readBuffer, 3);
+    //    TRACE_INFO("Write %02x %02x %02x", writeBuffer[0], writeBuffer[1], writeBuffer[2]);
+    //    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+    //}
+
+    TRACE_INFO("Set IODIR 1");
+    uint8 writeSetIODIR[3] {0b01000000, 0x00, 0x00};
+    device.WriteRead(spiCE, writeSetIODIR, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetIODIR[0], writeSetIODIR[1], writeSetIODIR[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    TRACE_INFO("Set GPIO 1");
+    uint8 writeSetGPIO[3] {0b01000000, 0x09, 0xFF};
+    device.WriteRead(spiCE, writeSetGPIO, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetGPIO[0], writeSetGPIO[1], writeSetGPIO[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    Timer::WaitMilliSeconds(500);
+
+    TRACE_INFO("Set IODIR 0");
+    device.WriteRead(SPI_CEIndex::CE0, writeSetIODIR, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetIODIR[0], writeSetIODIR[1], writeSetIODIR[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    TRACE_INFO("Set GPIO 0");
+    device.WriteRead(SPI_CEIndex::CE0, writeSetGPIO, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetGPIO[0], writeSetGPIO[1], writeSetGPIO[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    Timer::WaitMilliSeconds(5000);
+
+    TRACE_INFO("Set IODIR 1");
+    writeSetIODIR[2] = 0xFF;
+    device.WriteRead(spiCE, writeSetIODIR, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetIODIR[0], writeSetIODIR[1], writeSetIODIR[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    TRACE_INFO("Set GPIO 1");
+    writeSetGPIO[2] = 0x00;
+    device.WriteRead(spiCE, writeSetGPIO, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetGPIO[0], writeSetGPIO[1], writeSetGPIO[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    Timer::WaitMilliSeconds(500);
+
+    TRACE_INFO("Set IODIR 0");
+    device.WriteRead(SPI_CEIndex::CE0, writeSetIODIR, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetIODIR[0], writeSetIODIR[1], writeSetIODIR[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    TRACE_INFO("Set GPIO 0");
+    device.WriteRead(SPI_CEIndex::CE0, writeSetGPIO, readBuffer, 3);
+    TRACE_INFO("Write %02x %02x %02x", writeSetGPIO[0], writeSetGPIO[1], writeSetGPIO[2]);
+    TRACE_INFO("Read %02x %02x %02x", readBuffer[0], readBuffer[1], readBuffer[2]);
+
+    uint8 readRegCommand[2] {0b01000001, 0x00};
+    uint8 readRegResponse[1] {};
+    for (int i = 0; i < 11; i++)
+    {
+        readRegCommand[1] = static_cast<uint8>(i);
+        device.Write(spiCE, readRegCommand, 2);
+        TRACE_INFO("Write %02x %02x", readRegCommand[0], readRegCommand[1]);
+        device.Read(spiCE, readRegResponse, 1);
+        TRACE_INFO("Read %02x", readRegResponse[0]);
+    }
+    for (int i = 0; i < 11; i++)
+    {
+        readRegCommand[1] = static_cast<uint8>(i);
+        device.Write(SPI_CEIndex::CE0, readRegCommand, 2);
+        TRACE_INFO("Write %02x %02x", readRegCommand[0], readRegCommand[1]);
+        device.Read(SPI_CEIndex::CE0, readRegResponse, 1);
+        TRACE_INFO("Read %02x", readRegResponse[0]);
     }
 
-    device.SetBacklight(false);
-    device.SetDisplayEnabled(false);
+    //uint8 spiDevice = 0;
+    //MCP23008SPI expander;
 
-    if (ShouldReboot())
-        LOG_INFO("Rebooting");
-    else
-        LOG_INFO("Halting");
+    //if (!expander.Initialize(spiDevice, SPI_CEIndex::CE0))
+    //{
+    //    LOG_INFO("Cannot initialize expander");
+    //}
 
-    return static_cast<int>(ShouldReboot() ? ReturnCode::ExitReboot : ReturnCode::ExitHalt);
+    //expander.GetPortValue();
+    //expander.SetPortDirections(MCP23008PinDirection::Out);
+    //for (int i = 0; i < 10; i++)
+    //{
+    //    expander.SetPortValue(0x55);
+    //    Timer::WaitMilliSeconds(500);
+    //    expander.SetPortValue(0xAA);
+    //    Timer::WaitMilliSeconds(500);
+    //}
+    //expander.SetPortValue(0x00);
+
+    LOG_INFO("Rebooting");
+
+    return static_cast<int>(ReturnCode::ExitReboot);
 }

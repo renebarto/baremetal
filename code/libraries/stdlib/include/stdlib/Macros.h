@@ -67,3 +67,8 @@
 /// @param n Start (low) bit index
 /// @param m End (high) bit index
 #define BITS(n, m)    (((1UL << (m - n + 1)) - 1) << (n))
+
+/// @brief Determine minimum of two values. Note that the arguments are evaluated multiple times, so they should not have side effects.
+#define MIN(a, b)    ((a) < (b) ? (a) : (b))
+/// @brief Determine maximum of two values. Note that the arguments are evaluated multiple times, so they should not have side effects.
+#define MAX(a, b)    ((a) > (b) ? (a) : (b))

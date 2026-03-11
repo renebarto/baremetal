@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : MCP23017.h
 //
@@ -7,7 +7,7 @@
 //
 // Class       : MCP23017
 //
-// Description : MCP23017 I2C expander functionality
+// Description : MCP23017 expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,10 +39,11 @@
 
 #pragma once
 
-#include "baremetal/I2CMaster.h"
+#include "stdlib/Macros.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// MCP 23017 I2C expander support declaration
+/// MCP23017 expander declaration
 
 namespace device {
 
@@ -218,28 +219,34 @@ enum class MCP23017Pin
 };
 
 /// <summary>
-/// Driver for MCP23017 I2C expander device
+/// Driver for MCP23017 expander device
 ///
-/// This device is normally on I2C address 20-27 depending on how its A0-A2 pins are connected.
-/// The device supports two 8 bit ports name port A and B.
+/// This is a common driver for MCP23008 and MCP23S08 devices, which differ in the communication protocol (I2C vs SPI) and the register addresses, but
+/// have the same functionality.
+/// The device supports two 8 bit ports named port A and B.
 /// Each pin can be either an input or output.
 /// </summary>
 class MCP23017
 {
-private:
-    /// @brief I2C base device
-    baremetal::I2CMaster m_device;
-    /// @brief I2C device address
-    uint8 m_address;
-
 public:
-    MCP23017(baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
+    MCP23017();
     ~MCP23017();
 
-    bool Initialize(uint8 bus, uint8 address);
+    bool Initialize();
+    void Uninitialize();
 
-    uint8 ReadRegister(MCP23017RegisterIndex registerAddress);
-    void WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte);
+    /// <summary>
+    /// Read MCP23017 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <returns>Value read</returns>
+    virtual uint8 ReadRegister(MCP23017RegisterIndex registerAddress) = 0;
+    /// <summary>
+    /// Write MCP23017 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <param name="byte">Value to write</param>
+    virtual void WriteRegister(MCP23017RegisterIndex registerAddress, uint8 byte) = 0;
     void GetPinDirection(MCP23017Pin pinNumber, MCP23017PinDirection& direction);
     void SetPinDirection(MCP23017Pin pinNumber, const MCP23017PinDirection& direction);
     bool GetPinValue(MCP23017Pin pinNumber);

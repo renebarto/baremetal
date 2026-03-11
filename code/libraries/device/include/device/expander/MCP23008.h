@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright   : Copyright(c) 2025 Rene Barto
+// Copyright   : Copyright(c) 2026 Rene Barto
 //
 // File        : MCP23008.h
 //
@@ -7,7 +7,7 @@
 //
 // Class       : MCP23008
 //
-// Description : MCP23008 I2C expander functionality
+// Description : MCP23008 expander functionality
 //
 //------------------------------------------------------------------------------
 //
@@ -39,10 +39,11 @@
 
 #pragma once
 
-#include "baremetal/I2CMaster.h"
+#include "stdlib/Macros.h"
+#include "stdlib/Types.h"
 
 /// @file
-/// MCP 23008 I2C expander support declaration
+/// MCP23008 expander declaration
 
 namespace device {
 
@@ -115,28 +116,34 @@ enum class MCP23008Pin
 };
 
 /// <summary>
-/// Driver for MCP23008 I2C expander device
+/// Driver for MCP23008 expander device
 ///
-/// This device is normally on I2C address 20-27 depending on how its A0-A2 pins are connected.
-/// The device supports two 8 bit ports name port A and B.
+/// This is a common driver for MCP23008 and MCP23S08 devices, which differ in the communication protocol (I2C vs SPI) and the register addresses, but
+/// have the same functionality.
+/// The device supports one 8 bit port.
 /// Each pin can be either an input or output.
 /// </summary>
 class MCP23008
 {
-private:
-    /// @brief I2C base device
-    baremetal::I2CMaster m_device;
-    /// @brief I2C device address
-    uint8 m_address;
-
 public:
-    MCP23008(baremetal::IMemoryAccess& memoryAccess = baremetal::GetMemoryAccess());
+    MCP23008();
     ~MCP23008();
 
-    bool Initialize(uint8 bus, uint8 address);
+    bool Initialize();
+    void Uninitialize();
 
-    uint8 ReadRegister(MCP23008RegisterIndex registerAddress);
-    void WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte);
+    /// <summary>
+    /// Read MCP23008 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <returns>Value read</returns>
+    virtual uint8 ReadRegister(MCP23008RegisterIndex registerAddress) = 0;
+    /// <summary>
+    /// Write MCP23008 register
+    /// </summary>
+    /// <param name="registerAddress">Register index</param>
+    /// <param name="byte">Value to write</param>
+    virtual void WriteRegister(MCP23008RegisterIndex registerAddress, uint8 byte) = 0;
     void GetPinDirection(MCP23008Pin pinNumber, MCP23008PinDirection& direction);
     void SetPinDirection(MCP23008Pin pinNumber, const MCP23008PinDirection& direction);
     bool GetPinValue(MCP23008Pin pinNumber);

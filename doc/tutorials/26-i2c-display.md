@@ -2780,4 +2780,4 @@ Info   0.00:00:13.200 Rebooting (main:101)
 Info   0.00:00:13.220 Reboot (System:144)
 ```
 
-Next: [27-dma](27-dma.md)
+Next: [27-spi](27-spi.md)
